@@ -1,0 +1,895 @@
+/* =====================================================
+   TABLA: Usuario
+   Guarda la información principal de cada persona
+   que utiliza la aplicación.
+   ===================================================== */
+CREATE TABLE Usuario (
+    id_usuario BIGINT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100) NOT NULL,
+    email VARCHAR(150) UNIQUE NOT NULL,
+    telefono VARCHAR(20) UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    estado_cuenta VARCHAR(20),
+    fecha_registro TIMESTAMP
+);
+
+
+/* =====================================================
+   TABLA: Perfil_Seguridad
+   Guarda configuraciones de seguridad adicionales
+   del usuario como PIN o palabra clave.
+   Relación 1 a 1 con Usuario.
+   ===================================================== */
+CREATE TABLE Perfil_Seguridad (
+    id_usuario BIGINT PRIMARY KEY,
+    pin_activacion VARCHAR(10),
+    palabra_clave VARCHAR(50),
+    nivel_riesgo VARCHAR(20),
+
+    CONSTRAINT fk_perfil_usuario
+    FOREIGN KEY (id_usuario)
+    REFERENCES Usuario(id_usuario)
+);
+
+
+/* =====================================================
+   TABLA: Contacto_Emergencia
+   Guarda los contactos que serán notificados
+   cuando el usuario active una alerta.
+   ===================================================== */
+CREATE TABLE Contacto_Emergencia (
+    id_contacto BIGINT PRIMARY KEY,
+    id_usuario BIGINT,
+    nombre VARCHAR(100),
+    telefono VARCHAR(20),
+    email VARCHAR(150),
+    parentesco VARCHAR(50),
+    prioridad INT,
+    activo BOOLEAN,
+
+    CONSTRAINT fk_contacto_usuario
+    FOREIGN KEY (id_usuario)
+    REFERENCES Usuario(id_usuario)
+);
+
+
+/* =====================================================
+   TABLA: Alerta
+   Representa una alerta de emergencia activada
+   por el usuario.
+   ===================================================== */
+CREATE TABLE Alerta (
+    id_alerta BIGINT PRIMARY KEY,
+    id_usuario BIGINT,
+    tipo_alerta VARCHAR(50),
+    estado_alerta VARCHAR(30),
+    canal_activacion VARCHAR(30),
+    fecha_activacion TIMESTAMP,
+    fecha_cierre TIMESTAMP,
+
+    CONSTRAINT fk_alerta_usuario
+    FOREIGN KEY (id_usuario)
+    REFERENCES Usuario(id_usuario)
+);
+
+
+/* =====================================================
+   TABLA: Alerta_Destinatario
+   Relación entre alerta y contactos de emergencia.
+   Permite saber a qué contacto se le envió la alerta.
+   ===================================================== */
+CREATE TABLE Alerta_Destinatario (
+    id_alerta BIGINT,
+    id_contacto BIGINT,
+    estado_notificacion VARCHAR(30),
+    fecha_envio TIMESTAMP,
+    fecha_confirmacion TIMESTAMP,
+
+    PRIMARY KEY (id_alerta, id_contacto),
+
+    CONSTRAINT fk_dest_alerta
+    FOREIGN KEY (id_alerta)
+    REFERENCES Alerta(id_alerta),
+
+    CONSTRAINT fk_dest_contacto
+    FOREIGN KEY (id_contacto)
+    REFERENCES Contacto_Emergencia(id_contacto)
+);
+
+
+/* =====================================================
+   TABLA: Ubicacion_Alerta
+   Guarda las coordenadas GPS cuando se activa
+   una alerta.
+   ===================================================== */
+CREATE TABLE Ubicacion_Alerta (
+    id_ubicacion BIGINT PRIMARY KEY,
+    id_alerta BIGINT,
+    latitud DECIMAL(10,8),
+    longitud DECIMAL(11,8),
+    precision_metros DECIMAL(6,2),
+    fecha_registro TIMESTAMP,
+
+    CONSTRAINT fk_ubicacion_alerta
+    FOREIGN KEY (id_alerta)
+    REFERENCES Alerta(id_alerta)
+);
+
+
+/* =====================================================
+   TABLA: Evidencia
+   Guarda archivos relacionados con una alerta
+   como fotos, audios o videos.
+   ===================================================== */
+CREATE TABLE Evidencia (
+    id_evidencia BIGINT PRIMARY KEY,
+    id_alerta BIGINT,
+    tipo_evidencia VARCHAR(30),
+    url_archivo TEXT,
+    hash_integridad VARCHAR(255),
+    fecha_captura TIMESTAMP,
+
+    CONSTRAINT fk_evidencia_alerta
+    FOREIGN KEY (id_alerta)
+    REFERENCES Alerta(id_alerta)
+);
+
+
+/* =====================================================
+   TABLA: Notificacion
+   Guarda el registro del envío de notificaciones
+   SMS, email o push.
+   ===================================================== */
+CREATE TABLE Notificacion (
+    id_notificacion BIGINT PRIMARY KEY,
+    id_alerta BIGINT,
+    canal VARCHAR(30),
+    destinatario VARCHAR(150),
+    estado_envio VARCHAR(30),
+    fecha_envio TIMESTAMP,
+    respuesta_proveedor TEXT,
+
+    CONSTRAINT fk_notificacion_alerta
+    FOREIGN KEY (id_alerta)
+    REFERENCES Alerta(id_alerta)
+);
+
+
+/* =====================================================
+   TABLA: Centro_Ayuda
+   Guarda instituciones de apoyo como policía,
+   hospitales o centros de atención.
+   ===================================================== */
+CREATE TABLE Centro_Ayuda (
+    id_centro BIGINT PRIMARY KEY,
+    nombre VARCHAR(150),
+    tipo VARCHAR(50),
+    telefono VARCHAR(20),
+    email VARCHAR(150),
+    direccion VARCHAR(200),
+    latitud DECIMAL(10,8),
+    longitud DECIMAL(11,8)
+);
+
+
+/* =====================================================
+   TABLA: Guia_Actuacion
+   Contiene información educativa sobre cómo
+   actuar ante diferentes tipos de violencia.
+   ===================================================== */
+CREATE TABLE Guia_Actuacion (
+    id_guia BIGINT PRIMARY KEY,
+    titulo VARCHAR(150),
+    descripcion TEXT,
+    tipo_violencia VARCHAR(50),
+    fecha_publicacion TIMESTAMP
+);
+
+
+/* =====================================================
+   TABLA: Comunidad
+   Representa espacios comunitarios dentro
+   de la aplicación.
+   ===================================================== */
+CREATE TABLE Comunidad (
+    id_comunidad BIGINT PRIMARY KEY,
+    nombre VARCHAR(150),
+    descripcion TEXT,
+    fecha_creacion TIMESTAMP
+);
+
+
+/* =====================================================
+   TABLA: Publicacion
+   Publicaciones realizadas por usuarios
+   dentro de la comunidad.
+   ===================================================== */
+CREATE TABLE Publicacion (
+    id_publicacion BIGINT PRIMARY KEY,
+    id_usuario BIGINT,
+    contenido TEXT,
+    fecha_publicacion TIMESTAMP,
+
+    CONSTRAINT fk_publicacion_usuario
+    FOREIGN KEY (id_usuario)
+    REFERENCES Usuario(id_usuario)
+);
+
+
+/* =====================================================
+   TABLA: Comentario
+   Comentarios que los usuarios hacen
+   en publicaciones.
+   ===================================================== */
+CREATE TABLE Comentario (
+    id_comentario BIGINT PRIMARY KEY,
+    id_publicacion BIGINT,
+    id_usuario BIGINT,
+    contenido TEXT,
+    fecha TIMESTAMP,
+
+    CONSTRAINT fk_comentario_publicacion
+    FOREIGN KEY (id_publicacion)
+    REFERENCES Publicacion(id_publicacion),
+
+    CONSTRAINT fk_comentario_usuario
+    FOREIGN KEY (id_usuario)
+    REFERENCES Usuario(id_usuario)
+);
+
+
+/* =====================================================
+   TABLA: Rol
+   Define los roles del sistema como
+   administrador, moderador o usuario.
+   ===================================================== */
+CREATE TABLE Rol (
+    id_rol BIGINT PRIMARY KEY,
+    nombre VARCHAR(50),
+    descripcion VARCHAR(200)
+);
+
+
+/* =====================================================
+   TABLA: Permiso
+   Define permisos específicos dentro del sistema.
+   ===================================================== */
+CREATE TABLE Permiso (
+    id_permiso BIGINT PRIMARY KEY,
+    nombre VARCHAR(100),
+    descripcion VARCHAR(200)
+);
+
+
+/* =====================================================
+   TABLA: Rol_Permiso
+   Tabla intermedia que relaciona roles
+   con permisos.
+   ===================================================== */
+CREATE TABLE Rol_Permiso (
+    id_rol BIGINT,
+    id_permiso BIGINT,
+
+    PRIMARY KEY (id_rol, id_permiso),
+
+    CONSTRAINT fk_rolpermiso_rol
+    FOREIGN KEY (id_rol)
+    REFERENCES Rol(id_rol),
+
+    CONSTRAINT fk_rolpermiso_permiso
+    FOREIGN KEY (id_permiso)
+    REFERENCES Permiso(id_permiso)
+);
+
+
+/* =====================================================
+   TABLA: Usuario_Rol
+   Relaciona usuarios con roles del sistema.
+   ===================================================== */
+CREATE TABLE Usuario_Rol (
+    id_usuario BIGINT,
+    id_rol BIGINT,
+
+    PRIMARY KEY (id_usuario, id_rol),
+
+    CONSTRAINT fk_usuariorol_usuario
+    FOREIGN KEY (id_usuario)
+    REFERENCES Usuario(id_usuario),
+
+    CONSTRAINT fk_usuariorol_rol
+    FOREIGN KEY (id_rol)
+    REFERENCES Rol(id_rol)
+);
+
+
+/* =====================================================
+   TABLA: Sesion
+   Guarda sesiones activas de los usuarios.
+   ===================================================== */
+CREATE TABLE Sesion (
+    id_sesion BIGINT PRIMARY KEY,
+    id_usuario BIGINT,
+    token VARCHAR(500),
+    ip VARCHAR(50),
+    dispositivo VARCHAR(100),
+    fecha_inicio TIMESTAMP,
+    fecha_expiracion TIMESTAMP,
+
+    CONSTRAINT fk_sesion_usuario
+    FOREIGN KEY (id_usuario)
+    REFERENCES Usuario(id_usuario)
+);
+
+
+/* =====================================================
+   TABLA: Dispositivo
+   Guarda los dispositivos desde donde
+   el usuario accede al sistema.
+   ===================================================== */
+CREATE TABLE Dispositivo (
+    id_dispositivo BIGINT PRIMARY KEY,
+    id_usuario BIGINT,
+    nombre_dispositivo VARCHAR(100),
+    sistema_operativo VARCHAR(50),
+    token_notificacion VARCHAR(255),
+
+    CONSTRAINT fk_dispositivo_usuario
+    FOREIGN KEY (id_usuario)
+    REFERENCES Usuario(id_usuario)
+);
+
+
+/* =====================================================
+   TABLA: Auditoria
+   Guarda registros de acciones importantes
+   realizadas en el sistema.
+   ===================================================== */
+CREATE TABLE Auditoria (
+    id_auditoria BIGINT PRIMARY KEY,
+    tabla_afectada VARCHAR(100),
+    id_registro BIGINT,
+    accion VARCHAR(20),
+    usuario_sistema VARCHAR(100),
+    fecha_evento TIMESTAMP
+);
+
+
+/* =====================================================
+   INSERT: USUARIOS
+   Datos básicos de personas que usan la aplicación
+   ===================================================== */
+
+INSERT INTO Usuario VALUES
+(1,'Ana','Martinez','ana@email.com','3001111111','hash123','ACTIVA','2026-01-10'),
+(2,'Carlos','Ramirez','carlos@email.com','3002222222','hash456','ACTIVA','2026-01-11'),
+(3,'Laura','Gomez','laura@email.com','3003333333','hash789','ACTIVA','2026-01-12');
+
+
+/* =====================================================
+   INSERT: PERFIL SEGURIDAD
+   Configuración adicional de seguridad del usuario
+   ===================================================== */
+
+INSERT INTO Perfil_Seguridad VALUES
+(1,'1234','mascota','MEDIO'),
+(2,'5678','color','BAJO'),
+(3,'4321','ciudad','ALTO');
+
+
+/* =====================================================
+   INSERT: CONTACTOS DE EMERGENCIA
+   Personas que recibirán alertas
+   ===================================================== */
+
+INSERT INTO Contacto_Emergencia VALUES
+(1,1,'Maria Martinez','3100000001','maria@email.com','Madre',1,TRUE),
+(2,1,'Juan Martinez','3100000002','juan@email.com','Hermano',2,TRUE),
+(3,2,'Pedro Ramirez','3100000003','pedro@email.com','Padre',1,TRUE),
+(4,3,'Sofia Gomez','3100000004','sofia@email.com','Amiga',1,TRUE);
+
+
+/* =====================================================
+   INSERT: ALERTAS
+   Alertas activadas por usuarios
+   ===================================================== */
+
+INSERT INTO Alerta VALUES
+(1,1,'PANICO','ACTIVA','BOTON_APP','2026-02-10 10:30:00',NULL),
+(2,2,'EMERGENCIA_MEDICA','CERRADA','BOTON_APP','2026-02-11 12:00:00','2026-02-11 12:20:00'),
+(3,3,'VIOLENCIA','ACTIVA','BOTON_APP','2026-02-12 18:10:00',NULL);
+
+
+/* =====================================================
+   INSERT: ALERTA DESTINATARIOS
+   Contactos que recibieron la alerta
+   ===================================================== */
+
+INSERT INTO Alerta_Destinatario VALUES
+(1,1,'ENVIADO','2026-02-10 10:30:05',NULL),
+(1,2,'ENVIADO','2026-02-10 10:30:06',NULL),
+(2,3,'CONFIRMADO','2026-02-11 12:00:10','2026-02-11 12:01:00'),
+(3,4,'ENVIADO','2026-02-12 18:10:05',NULL);
+
+
+/* =====================================================
+   INSERT: UBICACION ALERTA
+   Coordenadas GPS registradas en la alerta
+   ===================================================== */
+
+INSERT INTO Ubicacion_Alerta VALUES
+(1,1,4.609710,-74.081750,5.2,'2026-02-10 10:30:02'),
+(2,2,4.610000,-74.080000,4.0,'2026-02-11 12:00:02'),
+(3,3,4.612000,-74.079000,3.5,'2026-02-12 18:10:02');
+
+
+/* =====================================================
+   INSERT: EVIDENCIAS
+   Archivos capturados durante una alerta
+   ===================================================== */
+
+INSERT INTO Evidencia VALUES
+(1,1,'FOTO','https://evidencia.com/foto1.jpg','hashimg123','2026-02-10 10:31:00'),
+(2,1,'AUDIO','https://evidencia.com/audio1.mp3','hashaud456','2026-02-10 10:31:10'),
+(3,3,'VIDEO','https://evidencia.com/video1.mp4','hashvid789','2026-02-12 18:11:00');
+
+
+/* =====================================================
+   INSERT: NOTIFICACIONES
+   Registro del envío de notificaciones
+   ===================================================== */
+
+INSERT INTO Notificacion VALUES
+(1,1,'SMS','3100000001','ENVIADO','2026-02-10 10:30:05','OK'),
+(2,1,'SMS','3100000002','ENVIADO','2026-02-10 10:30:06','OK'),
+(3,2,'EMAIL','pedro@email.com','ENVIADO','2026-02-11 12:00:10','OK');
+
+
+/* =====================================================
+   INSERT: CENTROS DE AYUDA
+   Instituciones de apoyo
+   ===================================================== */
+
+INSERT INTO Centro_Ayuda VALUES
+(1,'Policia Nacional','POLICIA','112','policia@colombia.gov','Bogotá Centro',4.609710,-74.081750),
+(2,'Hospital Central','HOSPITAL','6011234567','hospital@email.com','Bogotá Norte',4.650000,-74.070000),
+(3,'Linea Mujer','APOYO','155','lineamujer@email.com','Bogotá',4.620000,-74.090000);
+
+
+/* =====================================================
+   INSERT: GUIAS DE ACTUACION
+   Información educativa
+   ===================================================== */
+
+INSERT INTO Guia_Actuacion VALUES
+(1,'Qué hacer en caso de violencia','Guía básica para actuar ante violencia','VIOLENCIA','2025-10-10'),
+(2,'Cómo pedir ayuda','Pasos para solicitar ayuda','EMERGENCIA','2025-11-10');
+
+
+/* =====================================================
+   INSERT: COMUNIDAD
+   Espacios comunitarios
+   ===================================================== */
+
+INSERT INTO Comunidad VALUES
+(1,'Apoyo entre Mujeres','Espacio para compartir experiencias','2026-01-01'),
+(2,'Seguridad Ciudadana','Consejos de seguridad','2026-01-05');
+
+
+/* =====================================================
+   INSERT: PUBLICACIONES
+   Posts de usuarios
+   ===================================================== */
+
+INSERT INTO Publicacion VALUES
+(1,1,'Hoy aprendí cómo usar la app','2026-02-01'),
+(2,2,'Comparto consejos de seguridad','2026-02-02');
+
+
+/* =====================================================
+   INSERT: COMENTARIOS
+   Comentarios en publicaciones
+   ===================================================== */
+
+INSERT INTO Comentario VALUES
+(1,1,2,'Muy útil la información','2026-02-01'),
+(2,1,3,'Gracias por compartir','2026-02-01'),
+(3,2,1,'Buen consejo','2026-02-02');
+
+
+/* =====================================================
+   INSERT: ROLES DEL SISTEMA
+   ===================================================== */
+
+INSERT INTO Rol VALUES
+(1,'ADMIN','Administrador del sistema'),
+(2,'USUARIO','Usuario normal'),
+(3,'MODERADOR','Moderador de comunidad');
+
+
+/* =====================================================
+   INSERT: PERMISOS
+   ===================================================== */
+
+INSERT INTO Permiso VALUES
+(1,'CREAR_ALERTA','Permite crear alertas'),
+(2,'GESTIONAR_USUARIOS','Administrar usuarios'),
+(3,'MODERAR_COMENTARIOS','Eliminar comentarios');
+
+
+/* =====================================================
+   INSERT: RELACION ROL PERMISO
+   ===================================================== */
+
+INSERT INTO Rol_Permiso VALUES
+(1,1),
+(1,2),
+(1,3),
+(2,1),
+(3,3);
+
+
+/* =====================================================
+   INSERT: RELACION USUARIO ROL
+   ===================================================== */
+
+INSERT INTO Usuario_Rol VALUES
+(1,2),
+(2,2),
+(3,3);
+
+
+/* =====================================================
+   INSERT: SESIONES DE USUARIO
+   ===================================================== */
+
+INSERT INTO Sesion VALUES
+(1,1,'token123','192.168.1.10','Android','2026-02-10 09:00:00','2026-02-10 12:00:00'),
+(2,2,'token456','192.168.1.20','iPhone','2026-02-11 11:00:00','2026-02-11 13:00:00');
+
+
+/* =====================================================
+   INSERT: DISPOSITIVOS
+   ===================================================== */
+
+INSERT INTO Dispositivo VALUES
+(1,1,'Samsung S22','Android','tokenpush123'),
+(2,2,'iPhone 14','iOS','tokenpush456'),
+(3,3,'Xiaomi 12','Android','tokenpush789');
+
+
+/* =====================================================
+   INSERT: AUDITORIA
+   Registros iniciales de auditoría
+   ===================================================== */
+
+INSERT INTO Auditoria VALUES
+(1,'Usuario',1,'INSERT','sistema','2026-01-10'),
+(2,'Usuario',2,'INSERT','sistema','2026-01-11'),
+(3,'Usuario',3,'INSERT','sistema','2026-01-12');
+
+/* =====================================================
+CONSULTA 1
+Mostrar todos los usuarios registrados en el sistema
+===================================================== */
+
+SELECT *
+FROM Usuario;
+
+
+
+/* =====================================================
+CONSULTA 2
+Mostrar usuarios junto con su perfil de seguridad
+Relación 1 a 1
+===================================================== */
+
+SELECT 
+u.nombre,
+u.apellido,
+u.email,
+p.nivel_riesgo,
+p.pin_activacion
+FROM Usuario u
+JOIN Perfil_Seguridad p
+ON u.id_usuario = p.id_usuario;
+
+
+
+/* =====================================================
+CONSULTA 3
+Mostrar los contactos de emergencia de cada usuario
+===================================================== */
+
+SELECT 
+u.nombre AS usuario,
+c.nombre AS contacto,
+c.telefono,
+c.parentesco,
+c.prioridad
+FROM Usuario u
+JOIN Contacto_Emergencia c
+ON u.id_usuario = c.id_usuario;
+
+
+
+/* =====================================================
+CONSULTA 4
+Mostrar las alertas activadas por los usuarios
+===================================================== */
+
+SELECT 
+u.nombre,
+a.tipo_alerta,
+a.estado_alerta,
+a.fecha_activacion
+FROM Alerta a
+JOIN Usuario u
+ON a.id_usuario = u.id_usuario;
+
+
+
+/* =====================================================
+CONSULTA 5
+Mostrar los contactos que recibieron una alerta
+===================================================== */
+
+SELECT 
+a.id_alerta,
+c.nombre AS contacto,
+c.telefono,
+ad.estado_notificacion
+FROM Alerta_Destinatario ad
+JOIN Alerta a
+ON ad.id_alerta = a.id_alerta
+JOIN Contacto_Emergencia c
+ON ad.id_contacto = c.id_contacto;
+
+
+
+/* =====================================================
+CONSULTA 6
+Mostrar la ubicación donde se activó cada alerta
+===================================================== */
+
+SELECT 
+a.id_alerta,
+u.nombre,
+ua.latitud,
+ua.longitud,
+ua.fecha_registro
+FROM Ubicacion_Alerta ua
+JOIN Alerta a
+ON ua.id_alerta = a.id_alerta
+JOIN Usuario u
+ON a.id_usuario = u.id_usuario;
+
+
+
+/* =====================================================
+CONSULTA 7
+Mostrar evidencias registradas en las alertas
+===================================================== */
+
+SELECT 
+a.id_alerta,
+e.tipo_evidencia,
+e.url_archivo,
+e.fecha_captura
+FROM Evidencia e
+JOIN Alerta a
+ON e.id_alerta = a.id_alerta;
+
+
+
+/* =====================================================
+CONSULTA 8
+Mostrar las publicaciones con el usuario que las creó
+===================================================== */
+
+SELECT 
+u.nombre,
+p.contenido,
+p.fecha_publicacion
+FROM Publicacion p
+JOIN Usuario u
+ON p.id_usuario = u.id_usuario;
+
+
+
+/* =====================================================
+CONSULTA 9
+Mostrar comentarios con su publicación y usuario
+===================================================== */
+
+SELECT 
+u.nombre AS usuario,
+p.contenido AS publicacion,
+c.contenido AS comentario
+FROM Comentario c
+JOIN Usuario u
+ON c.id_usuario = u.id_usuario
+JOIN Publicacion p
+ON c.id_publicacion = p.id_publicacion;
+
+
+
+/* =====================================================
+CONSULTA 10
+Mostrar los roles que tiene cada usuario
+===================================================== */
+
+SELECT 
+u.nombre,
+r.nombre AS rol
+FROM Usuario_Rol ur
+JOIN Usuario u
+ON ur.id_usuario = u.id_usuario
+JOIN Rol r
+ON ur.id_rol = r.id_rol;
+
+
+
+/* =====================================================
+CONSULTA 11
+Contar cuántas alertas ha activado cada usuario
+===================================================== */
+
+SELECT 
+u.nombre,
+COUNT(a.id_alerta) AS total_alertas
+FROM Usuario u
+LEFT JOIN Alerta a
+ON u.id_usuario = a.id_usuario
+GROUP BY u.nombre;
+
+
+
+/* =====================================================
+CONSULTA 12
+Mostrar los centros de ayuda cercanos registrados
+===================================================== */
+
+SELECT 
+nombre,
+tipo,
+telefono,
+direccion
+FROM Centro_Ayuda;
+
+
+/* =====================================================
+TRIGGER 1
+Registrar en auditoría cuando se crea un usuario
+===================================================== */
+
+DELIMITER $$
+
+CREATE TRIGGER trg_auditoria_usuario_insert
+AFTER INSERT ON Usuario
+FOR EACH ROW
+BEGIN
+
+INSERT INTO Auditoria (
+    id_auditoria,
+    tabla_afectada,
+    id_registro,
+    accion,
+    usuario_sistema,
+    fecha_evento
+)
+VALUES (
+    NULL,
+    'Usuario',
+    NEW.id_usuario,
+    'INSERT',
+    'SISTEMA',
+    NOW()
+);
+
+END $$
+
+DELIMITER ;
+
+
+/* =====================================================
+TRIGGER 2
+Crear notificación automática al crear una alerta
+===================================================== */
+
+DELIMITER $$
+
+CREATE TRIGGER trg_crear_notificacion_alerta
+AFTER INSERT ON Alerta
+FOR EACH ROW
+BEGIN
+
+INSERT INTO Notificacion (
+    id_notificacion,
+    id_alerta,
+    canal,
+    destinatario,
+    estado_envio,
+    fecha_envio,
+    respuesta_proveedor
+)
+VALUES (
+    NULL,
+    NEW.id_alerta,
+    'SMS',
+    'CONTACTO_EMERGENCIA',
+    'PENDIENTE',
+    NOW(),
+    'EN PROCESO'
+);
+
+END $$
+
+DELIMITER ;
+
+INSERT INTO Alerta ...
+
+/* =====================================================
+PROCEDIMIENTO 1
+Crear una nueva alerta
+===================================================== */
+
+DELIMITER $$
+
+CREATE PROCEDURE Crear_Alerta(
+    IN p_usuario BIGINT,
+    IN p_tipo_alerta VARCHAR(50),
+    IN p_canal VARCHAR(30)
+)
+BEGIN
+
+INSERT INTO Alerta(
+    id_alerta,
+    id_usuario,
+    tipo_alerta,
+    estado_alerta,
+    canal_activacion,
+    fecha_activacion
+)
+VALUES(
+    NULL,
+    p_usuario,
+    p_tipo_alerta,
+    'ACTIVA',
+    p_canal,
+    NOW()
+);
+
+END $$
+
+DELIMITER ;
+
+CALL Crear_Alerta(1,'PANICO','BOTON_APP');
+
+
+/* =====================================================
+PROCEDIMIENTO 2
+Consultar alertas de un usuario
+===================================================== */
+
+DELIMITER $$
+
+CREATE PROCEDURE Consultar_Alertas_Usuario(
+    IN p_usuario BIGINT
+)
+BEGIN
+
+SELECT 
+a.id_alerta,
+a.tipo_alerta,
+a.estado_alerta,
+a.fecha_activacion
+FROM Alerta a
+WHERE a.id_usuario = p_usuario
+ORDER BY a.fecha_activacion DESC;
+
+END $$
+
+DELIMITER ;
+
+CALL Consultar_Alertas_Usuario(1);

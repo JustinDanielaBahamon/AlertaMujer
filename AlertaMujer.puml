@@ -1,0 +1,129 @@
+@startuml
+hide circle
+skinparam linetype ortho
+
+entity Usuario {
+  +id_usuario : BIGINT <<PK>>
+  --
+  nombre : VARCHAR(100)
+  apellido : VARCHAR(100)
+  email : VARCHAR(150) <<UNIQUE>>
+  telefono : VARCHAR(20) <<UNIQUE>>
+  password_hash : VARCHAR(255)
+  estado_cuenta : VARCHAR(20)
+  fecha_registro : TIMESTAMP
+}
+
+entity Perfil_Seguridad {
+  +id_usuario : BIGINT <<PK, FK>>
+  --
+  pin_activacion : VARCHAR(10)
+  palabra_clave : VARCHAR(50)
+  nivel_riesgo : VARCHAR(20)
+}
+
+entity Contacto_Emergencia {
+  +id_contacto : BIGINT <<PK>>
+  --
+  id_usuario : BIGINT <<FK>>
+  nombre : VARCHAR(100)
+  telefono : VARCHAR(20)
+  email : VARCHAR(150)
+  parentesco : VARCHAR(50)
+  prioridad : INT
+  activo : BOOLEAN
+}
+
+entity Alerta {
+  +id_alerta : BIGINT <<PK>>
+  --
+  id_usuario : BIGINT <<FK>>
+  tipo_alerta : VARCHAR(50)
+  estado_alerta : VARCHAR(30)
+  canal_activacion : VARCHAR(30)
+  fecha_activacion : TIMESTAMP
+  fecha_cierre : TIMESTAMP
+}
+
+entity Alerta_Destinatario {
+  +id_alerta : BIGINT <<FK>>
+  +id_contacto : BIGINT <<FK>>
+  --
+  estado_notificacion : VARCHAR(30)
+  fecha_envio : TIMESTAMP
+  fecha_confirmacion : TIMESTAMP
+  PRIMARY KEY (id_alerta, id_contacto)
+}
+
+entity Ubicacion_Alerta {
+  +id_ubicacion : BIGINT <<PK>>
+  --
+  id_alerta : BIGINT <<FK>>
+  latitud : DECIMAL(10,8)
+  longitud : DECIMAL(11,8)
+  precision_metros : DECIMAL(6,2)
+  fecha_registro : TIMESTAMP
+}
+
+entity Evidencia {
+  +id_evidencia : BIGINT <<PK>>
+  --
+  id_alerta : BIGINT <<FK>>
+  tipo_evidencia : VARCHAR(30)
+  url_archivo : TEXT
+  hash_integridad : VARCHAR(255)
+  fecha_captura : TIMESTAMP
+}
+
+entity Notificacion {
+  +id_notificacion : BIGINT <<PK>>
+  --
+  id_alerta : BIGINT <<FK>>
+  canal : VARCHAR(30)
+  destinatario : VARCHAR(150)
+  estado_envio : VARCHAR(30)
+  fecha_envio : TIMESTAMP
+  respuesta_proveedor : TEXT
+}
+
+entity Centro_Ayuda {
+  +id_centro : BIGINT <<PK>>
+  --
+  nombre : VARCHAR(150)
+  tipo : VARCHAR(50)
+  telefono : VARCHAR(20)
+  email : VARCHAR(150)
+  direccion : VARCHAR(200)
+  latitud : DECIMAL(10,8)
+  longitud : DECIMAL(11,8)
+}
+
+entity Guia_Actuacion {
+  +id_guia : BIGINT <<PK>>
+  --
+  titulo : VARCHAR(150)
+  descripcion : TEXT
+  tipo_violencia : VARCHAR(50)
+  fecha_publicacion : TIMESTAMP
+}
+
+entity Auditoria {
+  +id_auditoria : BIGINT <<PK>>
+  --
+  tabla_afectada : VARCHAR(100)
+  id_registro : BIGINT
+  accion : VARCHAR(20)
+  usuario_sistema : VARCHAR(100)
+  fecha_evento : TIMESTAMP
+}
+
+Usuario ||--|| Perfil_Seguridad
+Usuario ||--o{ Contacto_Emergencia
+Usuario ||--o{ Alerta
+Alerta ||--o{ Ubicacion_Alerta
+Alerta ||--o{ Evidencia
+Alerta ||--o{ Notificacion
+Alerta ||--o{ Alerta_Destinatario
+Contacto_Emergencia ||--o{ Alerta_Destinatario
+
+@enduml

@@ -1,0 +1,220 @@
+@startuml
+' ==========================
+' INTERFACES (Observer + Strategy + Command)
+' ==========================
+interface IObserver {
+  + actualizar(): void
+}
+
+interface ISubject {
+  + registrar(): void
+  + eliminar(): void
+  + notificar(): void
+}
+
+interface IEstrategiaEnvio {
+  + enviar(): void
+}
+
+interface IComando { 
+  + ejecutar(): void 
+}
+
+' ==========================
+' USUARIO BASE
+' ==========================
+abstract class Usuario {
+  - id: UUID
+  - nombre: String
+  - correo: String
+  - telefono: String
+  - contraseñaHash: String
+  - estadoCuenta: EstadoCuenta
+  + iniciarSesion(): boolean
+  + cerrarSesion(): void
+  + actualizarDatos(): void
+}
+
+class Usuaria {
+  - identificacion: String
+  - fechaRegistro: DateTime
+  + registrarContacto(): void
+  + activarAlerta(): void
+  + finalizarAlerta(): void
+  + registrarUbicacionFrecuente(): void
+  + publicarContenido(): void
+}
+
+class Administrador {
+  - nivelAcceso: String
+  + visualizarEstadisticas(): void
+  + gestionarUsuarias(): void
+  + supervisarAlertas(): void
+  + eliminarContenido(): void
+}
+
+Usuario <|-- Usuaria
+Usuario <|-- Administrador
+
+' ==========================
+' CONTACTOS Y UBICACIONES
+' ==========================
+class Contacto {
+  - id: UUID
+  - nombre: String
+  - apellido: String
+  - parentesco: String
+  - telefono: String
+  + actualizar(): void
+  + recibirNotificacion(): void
+}
+
+class UbicacionFrecuente {
+  - id: UUID
+  - nombreLugar: String
+  - latitud: Double
+  - longitud: Double
+  + editar(): void
+  + eliminar(): void
+}
+
+Usuaria "1" *-- "0..*" Contacto
+Usuaria "1" -- "0..*" UbicacionFrecuente
+
+' ==========================
+' ALERTA Y EVIDENCIAS
+' ==========================
+class Alerta {
+  - id: UUID
+  - fechaHoraInicio: DateTime
+  - fechaHoraFin: DateTime
+  - tipo: TipoAlerta
+  - estado: EstadoAlerta
+  + activar(): void
+  + finalizar(): void
+  + cancelar(): void
+  + generarEvidencia(): void
+  + registrar(): void
+  + eliminar(): void
+  + notificar(): void
+}
+
+abstract class Evidencia {
+  - id: UUID
+  - fechaHora: DateTime
+  - rutaArchivo: String
+  + guardar(): void
+  + subirANube(): void
+}
+
+' CORRECCIÓN AQUÍ: Atributos en líneas separadas para evitar el Syntax Error
+class VideoEvidencia {
+  - duracion: Double
+}
+
+class AudioEvidencia {
+  - duracion: Double
+}
+
+Evidencia <|-- VideoEvidencia
+Evidencia <|-- AudioEvidencia
+
+Usuaria "1" -- "0..*" Alerta
+Alerta "1" *-- "0..*" Evidencia
+
+class Ubicacion {
+  - id: UUID
+  - latitud: Double
+  - longitud: Double
+  - precision: Double
+  - fechaHora: DateTime
+  + actualizar(): void
+}
+
+Alerta "1" *-- "1..*" Ubicacion
+
+' ==========================
+' STRATEGY
+' ==========================
+class EnvioSMS
+class EnvioEmail
+class EnvioPush
+class EnvioWhatsapp
+
+IEstrategiaEnvio <|.. EnvioSMS
+IEstrategiaEnvio <|.. EnvioEmail
+IEstrategiaEnvio <|.. EnvioPush
+IEstrategiaEnvio <|.. EnvioWhatsapp
+
+class Notificacion {
+  - id: UUID
+  - fechaEnvio: DateTime
+  - estadoEnvio: EstadoEnvio
+  - estrategia: IEstrategiaEnvio
+  + enviar(): void
+  + reintentar(): void
+}
+
+Alerta "1" -- "1..*" Notificacion
+Notificacion "1" -- "1" Contacto
+
+' ==========================
+' COMMAND
+' ==========================
+class ActivarAlertaCommand
+class FinalizarAlertaCommand
+class CancelarAlertaCommand
+class EditarPublicacionCommand
+class EliminarPublicacionCommand
+
+IComando <|.. ActivarAlertaCommand
+IComando <|.. FinalizarAlertaCommand
+IComando <|.. CancelarAlertaCommand
+IComando <|.. EditarPublicacionCommand
+IComando <|.. EliminarPublicacionCommand
+
+' ==========================
+' OBSERVER
+' ==========================
+ISubject <|.. Alerta
+IObserver <|.. Contacto
+IObserver <|.. Estadistica
+
+' ==========================
+' PUBLICACIONES Y COMENTARIOS
+' ==========================
+class Publicacion {
+  - id: UUID
+  - contenido: String
+  - fechaPublicacion: DateTime
+  + editar(): void
+  + eliminar(): void
+}
+
+class Comentario {
+  - id: UUID
+  - contenido: String
+  - fecha: DateTime
+  + editar(): void
+  + eliminar(): void
+}
+
+Usuaria "1" -- "0..*" Publicacion
+Publicacion "1" -- "0..*" Comentario
+Usuaria "1" -- "0..*" Comentario
+
+' ==========================
+' ESTADÍSTICAS Y ADMINISTRACIÓN
+' ==========================
+class Estadistica {
+  - totalAlertas: int
+  - alertasActivas: int
+  - alertasFinalizadas: int
+  + generarReporte(): void
+}
+
+Administrador -- Estadistica
+Administrador -- Publicacion
+Administrador -- Alerta
+
+@enduml
