@@ -1,24 +1,42 @@
 @startuml
 ' ==========================
-' INTERFACES (Observer + Strategy + Command)
+' COLORES POR PATRÓN
+!define OBSERVER_COLOR #abe4f7
+!define STRATEGY_COLOR #f7b1f7
+!define SINGLETON_COLOR #fae951
+!define CHAIN_COLOR #ba99fc
+!define ADAPTER_COLOR #eb6c55
 ' ==========================
-interface IObserver {
-  + actualizar(): void
+
+skinparam class {
+  BackgroundColor<<Observer>> OBSERVER_COLOR
+  BackgroundColor<<Strategy>> STRATEGY_COLOR
+  BackgroundColor<<Singleton>> SINGLETON_COLOR
+  BackgroundColor<<Chain>> CHAIN_COLOR
+  BackgroundColor<<Adapter>> ADAPTER_COLOR
 }
 
-interface ISubject {
-  + registrar(): void
-  + eliminar(): void
+' ==========================
+' INTERFACES DE PATRÓN OBSERVER
+' ==========================
+interface IObserver <<Observer>> {
+  + actualizar(a: Alerta): void
+}
+
+interface ISubject <<Observer>> {
+  + registrar(o: IObserver): void
+  + eliminar(o: IObserver): void
   + notificar(): void
 }
 
-interface IEstrategiaEnvio {
-  + enviar(): void
+' ==========================
+' INTERFAZ DE PATRÓN STRATEGY
+' ==========================
+interface IEstrategiaEnvio <<Strategy>> {
+  + enviar(n: Notificacion): void
 }
 
-interface IComando { 
-  + ejecutar(): void 
-}
+
 
 ' ==========================
 ' USUARIO BASE
@@ -59,13 +77,13 @@ Usuario <|-- Administrador
 ' ==========================
 ' CONTACTOS Y UBICACIONES
 ' ==========================
-class Contacto {
+class Contacto <<Observer>> {
   - id: UUID
   - nombre: String
   - apellido: String
   - parentesco: String
   - telefono: String
-  + actualizar(): void
+  + actualizar(a: Alerta): void
   + recibirNotificacion(): void
 }
 
@@ -84,20 +102,24 @@ Usuaria "1" -- "0..*" UbicacionFrecuente
 ' ==========================
 ' ALERTA Y EVIDENCIAS
 ' ==========================
-class Alerta {
+class Alerta <<Observer>> {
   - id: UUID
   - fechaHoraInicio: DateTime
   - fechaHoraFin: DateTime
   - tipo: TipoAlerta
   - estado: EstadoAlerta
+  - observers: List<IObserver>
   + activar(): void
   + finalizar(): void
   + cancelar(): void
-  + generarEvidencia(): void
-  + registrar(): void
-  + eliminar(): void
+  + registrar(o: IObserver): void
+  + eliminar(o: IObserver): void
   + notificar(): void
 }
+
+ISubject <|.. Alerta
+IObserver <|.. Contacto
+IObserver <|.. Estadistica
 
 abstract class Evidencia {
   - id: UUID
@@ -107,14 +129,8 @@ abstract class Evidencia {
   + subirANube(): void
 }
 
-' CORRECCIÓN AQUÍ: Atributos en líneas separadas para evitar el Syntax Error
-class VideoEvidencia {
-  - duracion: Double
-}
-
-class AudioEvidencia {
-  - duracion: Double
-}
+class VideoEvidencia
+class AudioEvidencia
 
 Evidencia <|-- VideoEvidencia
 Evidencia <|-- AudioEvidencia
@@ -134,12 +150,26 @@ class Ubicacion {
 Alerta "1" *-- "1..*" Ubicacion
 
 ' ==========================
-' STRATEGY
+' BUILDER
 ' ==========================
-class EnvioSMS
-class EnvioEmail
-class EnvioPush
-class EnvioWhatsapp
+class AlertaBuilder {
+  - alerta: Alerta
+  + crearNueva(): void
+  + setTipo(tipo: TipoAlerta): AlertaBuilder
+  + agregarUbicacion(u: Ubicacion): AlertaBuilder
+  + agregarEvidencia(e: Evidencia): AlertaBuilder
+  + agregarNotificacion(n: Notificacion): AlertaBuilder
+  + build(): Alerta
+}
+AlertaBuilder --> Alerta
+
+' ==========================
+' STRATEGY (ENVÍO)
+' ==========================
+class EnvioSMS <<Strategy>>
+class EnvioEmail <<Strategy>>
+class EnvioPush <<Strategy>>
+class EnvioWhatsapp <<Strategy>>
 
 IEstrategiaEnvio <|.. EnvioSMS
 IEstrategiaEnvio <|.. EnvioEmail
@@ -154,67 +184,37 @@ class Notificacion {
   + enviar(): void
   + reintentar(): void
 }
-
 Alerta "1" -- "1..*" Notificacion
 Notificacion "1" -- "1" Contacto
 
 ' ==========================
-' COMMAND
+' SINGLETON
 ' ==========================
-class ActivarAlertaCommand
-class FinalizarAlertaCommand
-class CancelarAlertaCommand
-class EditarPublicacionCommand
-class EliminarPublicacionCommand
-
-IComando <|.. ActivarAlertaCommand
-IComando <|.. FinalizarAlertaCommand
-IComando <|.. CancelarAlertaCommand
-IComando <|.. EditarPublicacionCommand
-IComando <|.. EliminarPublicacionCommand
-
-' ==========================
-' OBSERVER
-' ==========================
-ISubject <|.. Alerta
-IObserver <|.. Contacto
-IObserver <|.. Estadistica
-
-' ==========================
-' PUBLICACIONES Y COMENTARIOS
-' ==========================
-class Publicacion {
-  - id: UUID
-  - contenido: String
-  - fechaPublicacion: DateTime
-  + editar(): void
-  + eliminar(): void
+class GestorAlertas <<Singleton>> {
+  - instancia: GestorAlertas
+  - alertas: List<Alerta>
+  - GestorAlertas()
+  + getInstancia(): GestorAlertas
+  + registrarAlerta(a: Alerta): void
+  + obtenerAlertas(): List<Alerta>
 }
-
-class Comentario {
-  - id: UUID
-  - contenido: String
-  - fecha: DateTime
-  + editar(): void
-  + eliminar(): void
-}
-
-Usuaria "1" -- "0..*" Publicacion
-Publicacion "1" -- "0..*" Comentario
-Usuaria "1" -- "0..*" Comentario
+GestorAlertas --> Alerta
 
 ' ==========================
-' ESTADÍSTICAS Y ADMINISTRACIÓN
+' CHAIN OF RESPONSIBILITY
 ' ==========================
-class Estadistica {
-  - totalAlertas: int
-  - alertasActivas: int
-  - alertasFinalizadas: int
-  + generarReporte(): void
-}
+class FallbackFCM <<Chain>>
+class FallbackSMS <<Chain>>
+class FallbackEmail <<Chain>>
 
-Administrador -- Estadistica
-Administrador -- Publicacion
-Administrador -- Alerta
+' ==========================
+' ADAPTER
+' ==========================
+interface INotificador <<Adapter>>
+class TwilioAdapter <<Adapter>>
+class FCMAdapter <<Adapter>>
+
+INotificador <|.. TwilioAdapter
+INotificador <|.. FCMAdapter
 
 @enduml
