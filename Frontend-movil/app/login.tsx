@@ -1,5 +1,5 @@
-import { View , Text , TouchableOpacity,Image} from "react-native";
-import { TextInput } from "react-native-paper";
+import { View , Text , TouchableOpacity,Image , TextInput} from "react-native";
+//import {  } from "react-native-paper";
 import {router} from 'expo-router';
 import {styles} from './login.styles'
 
@@ -14,20 +14,25 @@ export default function Login(){
       </View>
 
       {/*Contenedor del formulario*/}
-      <View>
-         <Text>Bienvenida a tu espacio de seguridad.</Text>
+      <View style={styles.ContenedorFormulario}>
+         <Text style={styles.TituloFormu}>Bienvenida a tu espacio de seguridad.</Text>
 
-         <TextInput style={styles.inputCorreo}  placeholder="Ingresa tu correo" 
-         left ={<TextInput.Icon icon="email" color = "white"/>}/>
+         <View style={styles.contenedorInputCorreo}>
+               <Image style={styles.IconoCorreo} source ={require ('../assets/imagesAlertaMujer/correo.png')}></Image>
+               <TextInput style={styles.inputCorreo}  placeholder="Ingresa tu correo" underlineColorAndroid=''/>
+         </View>
 
-         <TextInput   placeholder="Ingresa tu contraseña"/>
+         <View style={styles.contenedorInputCorreo}>
+            <TextInput style={styles.inputContraseña}  secureTextEntry placeholder="Ingresa tu contraseña" underlineColorAndroid=''/>
+            <Image style={styles.IconoCorreo} source={require('../assets/imagesAlertaMujer/ojoPriv.png')}/>
+         </View>
 
          <TouchableOpacity onPress={() => router.push('/recuperarContraseña')}>
-          <Text> Olvidaste tu contraseña?</Text>
+          <Text style={styles.textoOlivarContra}> Olvidaste tu contraseña?</Text>
          </TouchableOpacity>
 
-         <TouchableOpacity onPress={() => router.replace('/(tabs)/inicio')}>
-            <Text> Iniciar Sesión</Text>
+         <TouchableOpacity style={styles.botonSession} onPress={() => router.replace('/(tabs)/inicio')}>
+            <Text style ={styles.textoSession}> Iniciar Sesión</Text>
          </TouchableOpacity>
       </View>
 
@@ -51,6 +56,9 @@ export default function Login(){
       <View>
           <Text> Si continúas,confirmas que aceptas nuestras Condiciones de Servicios y nuestro Aviso de privacidad</Text>
       </View>
+
+    
+
 
     </View>
 
