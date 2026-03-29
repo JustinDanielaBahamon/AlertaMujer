@@ -1,24 +1,19 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import { Stack } from "expo-router"; 
+/* Este archivo servira para navegar entre pantallas 
+ que crearemos gracias a React navegation*/
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+/*¿Qué hace?
+Cada Stack.Screen registra una pantalla dentro del navegador. El name debe coincidir exactamente con el nombre del archivo en la carpeta app/. Si el archivo se llama login.tsx, el name es "login".*/
+export default function RootLayout(){ 
+    return(
+        
+        <Stack screenOptions={{headerShown: false}}>
+            <Stack.Screen name="index" />
+            <Stack.Screen name="login" />
+            <Stack.Screen name="registro" />
+            <Stack.Screen name="(tabs)" />
 
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
-
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
-  return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
-  );
+        </Stack>
+    );
 }
+
