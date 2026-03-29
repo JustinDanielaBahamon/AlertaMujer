@@ -1,7 +1,8 @@
 /*aqui le indicamos con el componente Tabs que genere
  una barra tipo nav en la parte inferior con las pantallas que le indicamos abajo*/
- 
+
 import { Tabs } from "expo-router";
+
 
 export default function TabsLayout() {
   return(

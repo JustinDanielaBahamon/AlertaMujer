@@ -7,3 +7,6 @@ El export defaulto es como un psvm en java , lo del main
 -Cuando se trabaja en React Native se suele trabajar con componentes es decir hagan de cuenta 2que es hacer una aplicacion bloque por bloque como si fuer aun lego se arma una figura con cada bloque aqui es igual cada bloque tiene una responsabilidad unica y demas a ello tendremos claro que hace cada uno. 
 
 - cuando trabaja con componentes siempre se deben de nombrar con Mayusculas , si no se hace asi react native no lo tomara como componente si no como etiqueta
+
+-- 28 MARZO : Trabajaremos con una libreria que se usara casi parecida a boostrap llamada React Native Paper , recomiendo que vayan a la pagina -> ( https://oss.callstack.com/react-native-paper/docs/guides/icons ) para que se informen mas de lo que tiene es muy partecida a bootstrap 
+
