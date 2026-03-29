@@ -15,7 +15,13 @@ export default function Index(){
    
         <TouchableOpacity onPress={()=> router.replace("/(tabs)/inicio")}>
       
-          <Text style={{color : 'white', marginTop: 30 , borderRadius: 20 , borderColor:'white', borderWidth:3 , padding : 10, backgroundColor:'purple'}}>Presiona para ir</Text>
+          <Text style={{color : 'white', marginTop: 30 , borderRadius: 20 , borderColor:'white', borderWidth:3 , padding : 10, backgroundColor:'purple'}}>Presiona para ir menu</Text>
+
+        </TouchableOpacity> 
+
+        <TouchableOpacity onPress={()=> router.replace("/login")}>
+      
+          <Text style={{color : 'white', marginTop: 30 , borderRadius: 20 , borderColor:'white', borderWidth:3 , padding : 10, backgroundColor:'purple'}}>Presiona para ir login</Text>
 
         </TouchableOpacity> 
 
