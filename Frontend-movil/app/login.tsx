@@ -2,12 +2,19 @@ import React, { useState } from "react";
 import { View, Text, TouchableOpacity, Image, TextInput } from "react-native";
 import { router } from 'expo-router';
 import { styles } from './login.styles';
+import { ScrollView } from "react-native";
+
 
 export default function Login() {
   const [mostrarPassword, setMostrarPassword] = useState(false);
 
   return (
-    <View style={styles.ContenedorPrincipal}>
+     <ScrollView 
+                style={styles.ContenedorPrincipal}
+                contentContainerStyle={{ flexGrow: 1 }}
+                showsVerticalScrollIndicator={false}
+                
+          >
       
       <View style={styles.ContenedorLogo}>
         <Image source={require('../assets/imagesAlertaMujer/logoAlertaMujer.png')} style={styles.ImagenLogo} />
@@ -70,6 +77,6 @@ export default function Login() {
         </Text>
       </View>
 
-    </View>
+    </ScrollView>
   );
 }
