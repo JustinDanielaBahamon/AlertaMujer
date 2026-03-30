@@ -8,8 +8,10 @@ export const styles = StyleSheet.create ({
     },
 
     topSection: {
-        alignItems: 'center',
-        marginTop: 20,
+        position: 'absolute',  // 🔥 lo saca del flujo normal
+        top: 50,               // distancia desde arriba
+        alignSelf: 'center',  
+        zIndex: 10,  
     },
 
     botonLogin: {
