@@ -25,7 +25,7 @@ export const styles = StyleSheet.create ({
    
     // esto es del header
     ContenedorLogo: {
-        backgroundColor: '#CEAFDC', // El color morado claro de tu imagen
+        backgroundColor: 'rgb(202 171 222)', // El color morado claro de tu imagen
         height: 120,
         flexDirection: 'row',
         alignItems: 'center',
