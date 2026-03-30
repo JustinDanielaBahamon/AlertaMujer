@@ -1,66 +1,75 @@
-import { View , Text , TouchableOpacity,Image , TextInput} from "react-native";
-//import {  } from "react-native-paper";
-import {router} from 'expo-router';
-import {styles} from './login.styles'
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity, Image, TextInput } from "react-native";
+import { router } from 'expo-router';
+import { styles } from './login.styles';
 
-export default function Login(){
-  return(
-    //Contenedor Principal del LOGIN
-    <View style ={styles.ContenedorPrincipal}>
+export default function Login() {
+  const [mostrarPassword, setMostrarPassword] = useState(false);
 
-      {/*Contenedor Del logo*/}
-      <View style={styles.ContenedorLogo}>
-         <Image source={require('../assets/imagesAlertaMujer/logoAlertaMujer.png')} style={styles.ImagenLogo}/>
-      </View>
-
-      {/*Contenedor del formulario*/}
-      <View style={styles.ContenedorFormulario}>
-         <Text style={styles.TituloFormu}>Bienvenida a tu espacio de seguridad.</Text>
-
-         <View style={styles.contenedorInputCorreo}>
-               <Image style={styles.IconoCorreo} source ={require ('../assets/imagesAlertaMujer/correo.png')}></Image>
-               <TextInput style={styles.inputCorreo}  placeholder="Ingresa tu correo" underlineColorAndroid=''/>
-         </View>
-
-         <View style={styles.contenedorInputCorreo}>
-            <TextInput style={styles.inputContraseña}  secureTextEntry placeholder="Ingresa tu contraseña" underlineColorAndroid=''/>
-            <Image style={styles.IconoCorreo} source={require('../assets/imagesAlertaMujer/ojoPriv.png')}/>
-         </View>
-
-         <TouchableOpacity onPress={() => router.push('/recuperarContraseña')}>
-          <Text style={styles.textoOlivarContra}> Olvidaste tu contraseña?</Text>
-         </TouchableOpacity>
-
-         <TouchableOpacity style={styles.botonSession} onPress={() => router.replace('/(tabs)/inicio')}>
-            <Text style ={styles.textoSession}> Iniciar Sesión</Text>
-         </TouchableOpacity>
-      </View>
-
-      {/*Contenedor de las distintas maneras de inciar con otras plataformas*/}
-      <View>           
-          <TouchableOpacity >
-            <Text> Continuar con Google </Text>
-          </TouchableOpacity>
-      </View>
-
-      {/*Contenedor del boton para Registrarse*/} 
-      <View>
-          <Text> ¿No tienes cuenta? </Text>
+  return (
+    <View style={styles.ContenedorPrincipal}>
       
-         <TouchableOpacity onPress={() => router.push('/recuperarContraseña')}>
-            <Text> Registrate</Text>
-         </TouchableOpacity>
+      <View style={styles.ContenedorLogo}>
+        <Image source={require('../assets/imagesAlertaMujer/logoAlertaMujer.png')} style={styles.ImagenLogo} />
       </View>
 
-      {/*Contenedor del Footer del login */}
-      <View>
-          <Text> Si continúas,confirmas que aceptas nuestras Condiciones de Servicios y nuestro Aviso de privacidad</Text>
+      <View style={styles.ContenedorFormulario}>
+        <Text style={styles.TituloFormu}>Bienvenida a tu espacio de seguridad.</Text>
+
+        {/* Input Correo */}
+        <View style={styles.contenedorInput}>
+          <Image style={styles.IconoCorreo} source={require('../assets/imagesAlertaMujer/ScLogin/correo.png')} />
+          <TextInput 
+            style={styles.inputCorreo} 
+            placeholder="Ingresa tu correo" 
+            placeholderTextColor={'#666'} 
+          />
+        </View>
+
+        {/* Input Contraseña */}
+        <View style={styles.contenedorInput}>
+          {/* Opcional: Podrías poner un icono de candado aquí */}
+          <TextInput 
+            style={styles.inputContraseña} 
+            secureTextEntry={!mostrarPassword}
+            placeholder="Ingresa tu contraseña"
+            placeholderTextColor={'#666'}
+          />
+          <TouchableOpacity onPress={() => setMostrarPassword(!mostrarPassword)}>
+            <Image 
+              style={styles.IconoCorreo} 
+              source={require('../assets/imagesAlertaMujer/ScLogin/ojoPriv.png')} 
+            />
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity onPress={() => router.push('/recuperarContraseña')}>
+          <Text style={styles.textoOlivarContra}>¿Olvidaste tu contraseña?</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.botonSession} onPress={() => router.replace('/(tabs)/inicio')}>
+          <Text style={styles.textoSession}>Iniciar Sesión</Text>
+        </TouchableOpacity>
       </View>
 
-    
+      <TouchableOpacity style={styles.BotonGoogle}>
+        <Image style={styles.logoGoogle} source={require('../assets/imagesAlertaMujer/ScLogin/google.png')} />
+        <Text style={styles.textoGoogle}>Continuar con Google</Text>
+      </TouchableOpacity>
 
+      <View style={styles.ContenedorRegistrarse}>
+        <Text style={styles.TextoTienesCuenta}>¿No tienes cuenta?</Text>
+        <TouchableOpacity style={styles.BotonRegistrar} onPress={() => router.push('/registro')}>
+          <Text style={styles.textoRegistro}>Regístrate</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.ContenedorTermCondi}>
+        <Text style={styles.textoTerminosCondiciones}>
+          Si continúas, confirmas que aceptas nuestras Condiciones de Servicio y nuestro Aviso de privacidad.
+        </Text>
+      </View>
 
     </View>
-
   );
 }

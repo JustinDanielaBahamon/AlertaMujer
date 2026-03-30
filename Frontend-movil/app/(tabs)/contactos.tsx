@@ -18,7 +18,7 @@ export default function Contactos(){
      {/* este el perfil de contacto ya sea la inicial del nombre o la foto*/}
       <View style={styles.PerfilContacto}>
         <Image 
-          source={require('../../assets/imagesAlertaMujer/contacto.png')} 
+          source={require('../../assets/imagesAlertaMujer/ScContacto/contacto.png')} 
           style={{ width: 50, height: 50, borderRadius: 25 }}
         />
 
