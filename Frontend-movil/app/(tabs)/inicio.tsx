@@ -26,7 +26,7 @@ export default function Saludo(){
       <View style={styles.centerSection}>
         <TouchableOpacity style={styles.botonAlerta}>
            <Image
-              source={require('../../assets/imagesAlertaMujer/boton.png')}
+              source={require('../../assets/imagesAlertaMujer/ScInicio/boton.png')}
               style={styles.imagen}
             />
         </TouchableOpacity>
