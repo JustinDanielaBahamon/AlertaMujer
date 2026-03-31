@@ -1,10 +1,13 @@
-import { View , Text , TouchableOpacity,Image , TextInput} from "react-native";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 //import {  } from "react-native-paper";
-import {router} from 'expo-router';
-import {styles} from './diseno.styles'
 import Header from '../../src/components/ui/header';
+import { styles } from './contactos.styles';
+import { MaterialIcons } from '@expo/vector-icons';
+import { useRouter } from "expo-router";
+
 
 export default function Contactos(){
+   const router = useRouter(); 
   return(
    
     <View style={styles.ContenedorPrincipal}>
@@ -41,6 +44,25 @@ export default function Contactos(){
         </TouchableOpacity>
 
       </View>
+
+      <TouchableOpacity
+        style={{
+          backgroundColor: '#9e83cf',
+          width: 50,
+          height: 50,
+          borderRadius: 25,
+          justifyContent: 'center',
+          alignItems: 'center',
+          position: 'absolute',
+          bottom: 200, //cambiar la posicion del boton por si lo quieren ubicar
+          right: 20,
+        }}
+
+          onPress={() => router.push("/contactos/agregarContacto")}
+      
+      >
+        <MaterialIcons name="add" size={30} color="white" />
+      </TouchableOpacity>
 
     </View>
   );
