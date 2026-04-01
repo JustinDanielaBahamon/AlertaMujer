@@ -8,7 +8,7 @@ export const styles = StyleSheet.create ({
     },
 
     topSection: {
-        position: 'absolute',  // 🔥 lo saca del flujo normal
+        position: 'absolute',  // lo saca del flujo normal
         top: 50,               // distancia desde arriba
         alignSelf: 'center',  
         zIndex: 10,  
@@ -38,7 +38,7 @@ export const styles = StyleSheet.create ({
         alignItems: 'center',
         borderWidth: 1,
         borderColor: 'yellow',
-        marginTop: 50,   // 🔼 lo baja
+        marginTop: 50,   //  lo baja
         marginBottom: 100,
 
         
@@ -46,21 +46,60 @@ export const styles = StyleSheet.create ({
 
     
     imagen: {
-    width: 500, // 1. aqui cambio el tamaño de la imagen )
-    height: 500,     
-    resizeMode: 'contain', // 2. Cómo ajustar la imagen dentro del recuadro
-    
-  },
+        width: 300, // 1. aqui cambio el tamaño de la imagen )
+        height: 300,     
+        resizeMode: 'contain', // 2. Cómo ajustar la imagen dentro del recuadro
+    },
 
     textoAlerta: {
 
-        color: 'Black',
+        color: 'black',
         fontSize: 24,
         fontWeight: 'bold',
         textAlign: 'center',
-        letterSpacing: 2,
         textTransform: 'uppercase',
-    }
+        marginTop: 5, // 
+        transform: [{ translateY: -25}], // lo sube un poquito
+        
+    },
+    
+    // container de la ubicación actual 
+
+    containerUbicacion: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: 10,
+
+        marginHorizontal: 20, //  separa de los lados (izq/der)
+        marginTop: 15,        // lo baja un poco del navbar
+
+        borderWidth: 2,
+        borderColor: "#7B2CBF",
+        borderRadius: 10,
+    },
+
+    infoUbicacion: {
+        flex: 1,          //ocupa el espacio central
+        marginLeft: 10,
+    },
+    
+
+    iconoUbicacion: {
+        fontSize: 24,
+        marginRight: 10,
+    },
+
+    tituloUbicacion: {
+        fontSize: 12,
+        color: "#888",
+    },
+
+    textoUbicacion: {
+        fontSize: 14,
+        fontWeight: "bold",
+        color: "#000",
+    },
 
 });
 
