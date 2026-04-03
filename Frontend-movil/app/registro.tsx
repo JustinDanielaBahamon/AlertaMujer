@@ -2,6 +2,7 @@ import{router} from 'expo-router'
 import { View , Text , TouchableOpacity,Image , TextInput, ScrollView } from "react-native";
 import { useState } from 'react';
 import {styles} from './registro.styles';
+import { Ionicons } from '@expo/vector-icons';
 
 // 🔥 TIPADO DE ERRORES
 type ErroresType = {
@@ -21,6 +22,7 @@ export default function Registro(){
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [mostrarConfirmPassword, setMostrarConfirmPassword] = useState(false);
+  const [fechaNacimiento, setFechaNacimiento] = useState('');
 
   // 🔥 checks
   const [aceptaTerminos, setAceptaTerminos] = useState(false);
@@ -101,6 +103,19 @@ export default function Registro(){
           /> 
         </View>
 
+
+        {/* CORREO */}
+        <View style={styles.contenedorInput}>
+          <Image style={styles.IconoCorreo} source={require('../assets/imagesAlertaMujer/ScRegistro/Documento.png')}/>
+          <TextInput 
+            style={styles.inputCorreo}
+            placeholder="Numero de Documento"
+            placeholderTextColor="#000"
+            value={correo}
+            onChangeText={setCorreo}
+          />
+        </View>
+
         {/* Dropdown */}
         <TouchableOpacity 
           style={styles.contenedorInput}
@@ -126,6 +141,21 @@ export default function Registro(){
             </TouchableOpacity>
           </View>
         )}
+
+        {/* FECHA DE NACIMIENTO */}
+        <View style={styles.contenedorInput}>
+        <Ionicons name="calendar-outline" size={20} color="#000" />
+          <TextInput 
+            style={styles.inputCorreo}
+            placeholder="DD/MM/AAAA"
+            placeholderTextColor="#000"
+            value={fechaNacimiento}
+            onChangeText={setFechaNacimiento}
+            keyboardType="numeric"
+            maxLength={10}
+          />
+        </View>
+    
 
         {/* CORREO */}
         <View style={styles.contenedorInput}>
@@ -247,7 +277,7 @@ export default function Registro(){
          <View>
                {/* BOTÓN */}
         <TouchableOpacity 
-          style={styles.botonContinuar}
+          style={[styles.botonContinuar , {margin : 20}]}
           onPress={() => {
 
             if (!aceptaTerminos || !aceptaPrivacidad) {
