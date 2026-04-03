@@ -1,6 +1,6 @@
 import { View, Text, FlatList, Image } from "react-native";
-import Header from "../../src/components/ui/header";
-import { styles } from "./historial.style";
+import Header from "../../../src/components/ui/header";
+import { styles } from "../historialAlerta/historial.style";
 
 
 

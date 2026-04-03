@@ -1,6 +1,6 @@
 import { Image, Text, TouchableOpacity, View } from "react-native";
 //import {  } from "react-native-paper";
-import Header from '../../src/components/ui/header';
+import Header from '../../../src/components/ui/header';
 import { styles } from './contactos.styles';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
