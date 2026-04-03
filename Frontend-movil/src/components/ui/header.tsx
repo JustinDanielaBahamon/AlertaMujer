@@ -1,6 +1,6 @@
   
 import { Image, Text, TouchableOpacity, View } from "react-native";
-import { styles } from "../../../app/(tabs)/contactos.styles";
+import { styles } from "../../../app/(tabs)/contactos/contactos.styles";
 
 export default function Header() {
   return (

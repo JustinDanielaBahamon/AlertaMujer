@@ -66,7 +66,7 @@ export default function Login() {
 
       <View style={styles.ContenedorRegistrarse}>
         <Text style={styles.TextoTienesCuenta}>¿No tienes cuenta?</Text>
-        <TouchableOpacity style={styles.BotonRegistrar} onPress={() => router.push('/registro')}>
+        <TouchableOpacity style={styles.BotonRegistrar} onPress={() => router.push('./registro')}>
           <Text style={styles.textoRegistro}>Regístrate</Text>
         </TouchableOpacity>
       </View>

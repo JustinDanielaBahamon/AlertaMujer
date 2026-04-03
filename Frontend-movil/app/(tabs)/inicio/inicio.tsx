@@ -1,6 +1,6 @@
 import { View , Text, TouchableOpacity, Vibration} from "react-native";
 import { router } from "expo-router";
-import Header from '../../src/components/ui/header';
+import Header from '../../../src/components/ui/header';
 import {styles} from './inicio.styles'
 import { Image } from "react-native";
 import { useState } from "react";
@@ -24,7 +24,7 @@ export default function Saludo(){
 
        {/* este el boton que hizo desde un principio Maicol aun asi lo deje por ahora */}
        <View style={styles.topSection}>
-          <TouchableOpacity onPress={()=> router.replace("/login")}>
+          <TouchableOpacity onPress={()=> router.replace("../login")}>
               
             <Text style={styles.botonLogin}>Presiona para ir login</Text>
         
