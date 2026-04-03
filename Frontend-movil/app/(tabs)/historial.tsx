@@ -40,7 +40,8 @@ export default function Historial() {
       </View>
 
       <View style={styles.columnaDerecha}>
-        <Text style={styles.tipo}>{item.tipo}</Text> {/*Este bloque muestra la informacion de cada alerta usando los "item" que vienen del array{*/}
+        <Text style={styles.tipo}>{item.tipo}</Text> 
+        {/*Este bloque muestra la informacion de cada alerta usando los "item" que vienen del array{*/}
 
         <Text style={styles.texto}>
           {item.fecha} - {item.hora}
