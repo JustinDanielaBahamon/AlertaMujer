@@ -15,7 +15,7 @@ export default function Bienvenido() {
       {/* 1. EL LOGO */}
       <View style={styles.header}>
         <Image 
-          source={require('../assets/images/logo-alerta.png')} 
+          source={require('../../assets/imagesAlertaMujer/logoAlertaMujer.png')} 
           style={styles.logo}
           resizeMode="contain"
         />
