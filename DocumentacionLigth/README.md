@@ -49,7 +49,10 @@ el expected--> es la version compatible con el SDK de Expo mientras q el found--
 El problema era que se tenían versiones más nuevas de las librerías, lo cual generaba incompatibilidad con Expo
 
 entonces para poder descargas las versiones compatibles se coloca este comando npx expo install --check y luego npx expo start -c para limpiar la cache del bundler,eliminar referencias a versiones anteriores
-recompilar el proyecto correctamente.
+recompilar el proyecto correctamente.ya con eso ya sirve lo que hizo jose el modulo de mapa 
+
+
+- otra cosa se van a preguntar porque en tabs tengo en la carpeta contacto contanto.ts y index.tsx pues pasa que en Expo Router, cada carpeta que representa una ruta debe contener un index.tsx como punto de entrada. Otros archivos como contacto.tsx funcionan como subrutas dentro del mismo módulo.
 
 
 
