@@ -17,7 +17,7 @@ export default function Login() {
           >
       
       <View style={styles.ContenedorLogo}>
-        <Image source={require('../assets/imagesAlertaMujer/logoAlertaMujer.png')} style={styles.ImagenLogo} />
+        <Image source={require('../../assets/imagesAlertaMujer/logoAlertaMujer.png')} style={styles.ImagenLogo} />
       </View>
 
       <View style={styles.ContenedorFormulario}>
@@ -25,7 +25,7 @@ export default function Login() {
 
         {/* Input Correo */}
         <View style={styles.contenedorInput}>
-          <Image style={styles.IconoCorreo} source={require('../assets/imagesAlertaMujer/ScLogin/correo.png')} />
+          <Image style={styles.IconoCorreo} source={require('../../assets/imagesAlertaMujer/ScLogin/correo.png')} />
           <TextInput 
             style={styles.inputCorreo} 
             placeholder="Ingresa tu correo" 
@@ -45,12 +45,12 @@ export default function Login() {
           <TouchableOpacity onPress={() => setMostrarPassword(!mostrarPassword)}>
             <Image 
               style={styles.IconoCorreo} 
-              source={require('../assets/imagesAlertaMujer/ScLogin/ojoPriv.png')} 
+              source={require('../../assets/imagesAlertaMujer/ScLogin/ojoPriv.png')} 
             />
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity onPress={() => router.push('/recuperarContraseña')}>
+        <TouchableOpacity onPress={() => router.push('./recuperarContraseña')}>
           <Text style={styles.textoOlivarContra}>¿Olvidaste tu contraseña?</Text>
         </TouchableOpacity>
 
@@ -60,13 +60,13 @@ export default function Login() {
       </View>
 
       <TouchableOpacity style={styles.BotonGoogle}>
-        <Image style={styles.logoGoogle} source={require('../assets/imagesAlertaMujer/ScLogin/google.png')} />
+        <Image style={styles.logoGoogle} source={require('../../assets/imagesAlertaMujer/ScLogin/google.png')} />
         <Text style={styles.textoGoogle}>Continuar con Google</Text>
       </TouchableOpacity>
 
       <View style={styles.ContenedorRegistrarse}>
         <Text style={styles.TextoTienesCuenta}>¿No tienes cuenta?</Text>
-        <TouchableOpacity style={styles.BotonRegistrar} onPress={() => router.push('./registro')}>
+        <TouchableOpacity style={styles.BotonRegistrar} onPress={() => router.push('../registro/registro')}>
           <Text style={styles.textoRegistro}>Regístrate</Text>
         </TouchableOpacity>
       </View>

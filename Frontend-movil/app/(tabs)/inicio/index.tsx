@@ -24,7 +24,7 @@ export default function Saludo(){
 
        {/* este el boton que hizo desde un principio Maicol aun asi lo deje por ahora */}
        <View style={styles.topSection}>
-          <TouchableOpacity onPress={()=> router.replace("../login")}>
+          <TouchableOpacity onPress={()=> router.replace("../login/login")}>
               
             <Text style={styles.botonLogin}>Presiona para ir login</Text>
         
@@ -67,7 +67,7 @@ export default function Saludo(){
           ]}
         >
           <Image
-            source={require('../../assets/imagesAlertaMujer/ScInicio/boton2.png')}
+            source={require('../../../assets/imagesAlertaMujer/ScInicio/boton2.png')}
             style={styles.imagen}
           />
         </TouchableOpacity>

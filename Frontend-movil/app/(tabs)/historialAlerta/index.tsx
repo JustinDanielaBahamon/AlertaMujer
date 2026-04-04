@@ -1,6 +1,6 @@
 import { View, Text, FlatList, Image } from "react-native";
 import Header from "../../../src/components/ui/header";
-import { styles } from "../historialAlerta/historial.style";
+import { styles } from "./historial.style";
 
 
 
@@ -34,7 +34,7 @@ export default function Historial() {
 
       <View style={styles.columnaIzquierda}>
         <Image
-          source={require("../../assets/imagesAlertaMujer/ScHistorial/ubicacion.png")}
+          source={require("../../../assets/imagesAlertaMujer/ScHistorial/ubicacion.png")}
           style={styles.icono}
         />
       </View>
