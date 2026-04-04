@@ -29,3 +29,28 @@ No necesariamente rompe tu app
 Ejecuta:
 
 npm audit fix -- ejecuten este comando para evitar futuros daños 
+
+-03 abril: en el dia de hoy inicialmente se presento errores de relacionados con las rutas de archivos despues de corregir esas rutas, aparecio un nuevo error critico:
+Server Error:
+(0 , _reactNativeWebDistIndex.codegenNativeComponent) is not a function
+
+este error no esta relacionado con el codigo, sino con un conflicto de versiones entre dependecias descargadas anteriormente. en proyectos con Expo, todas las librerias deben ser compatibles con el SDK instalado porque si no lo esta se genera estos conflitos entonces como se soluciono esto:
+
+npx expo-doctor con este comando se oermite identifcar las inconsistencias en las vesriones de los paquetes 
+
+package                         expected  found
+react-native-maps               1.20.1    1.27.2
+@react-navigation/bottom-tabs   ^7.4.0    ^7.15.8
+@react-navigation/native        ^7.1.8    ^7.2.1
+@react-navigation/native-stack  ^7.3.16   ^7.14.9
+
+el expected--> es la version compatible con el SDK de Expo mientras q el found---> es la version instalada en el proyecto.
+
+El problema era que se tenían versiones más nuevas de las librerías, lo cual generaba incompatibilidad con Expo
+
+entonces para poder descargas las versiones compatibles se coloca este comando npx expo install --check y luego npx expo start -c para limpiar la cache del bundler,eliminar referencias a versiones anteriores
+recompilar el proyecto correctamente.
+
+
+
+
