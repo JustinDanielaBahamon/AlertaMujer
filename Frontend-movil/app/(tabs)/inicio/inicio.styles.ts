@@ -82,6 +82,7 @@ export const styles = StyleSheet.create ({
     infoUbicacion: {
         flex: 1,          //ocupa el espacio central
         marginLeft: 10,
+        
     },
     
 
@@ -100,6 +101,7 @@ export const styles = StyleSheet.create ({
         fontWeight: "bold",
         color: "#000",
     },
+
 
 });
 

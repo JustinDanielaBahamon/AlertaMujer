@@ -5,12 +5,12 @@ import {styles} from './inicio.styles'
 import { Image } from "react-native";
 import { useState } from "react";
 import { MaterialIcons } from '@expo/vector-icons';
-
+import { useRouter } from "expo-router";
 
 export default function Saludo(){
 
   const [pressed, setPressed] = useState(false);
-
+  const router = useRouter();
   const activarAlerta = () => {
     Vibration.vibrate(200);
     router.push("/BotonActivacion/activacion"); //  esto te manda a la pantalla 
@@ -18,6 +18,7 @@ export default function Saludo(){
 
   return(
 
+    
     
     <View style={styles.container}>
       <Header />
@@ -35,7 +36,7 @@ export default function Saludo(){
       <View style={styles.containerUbicacion}>
         <MaterialIcons name="location-on" size={24} color="#7B2CBF" />
         <Text style={styles.iconoUbicacion}></Text>
-
+        
         <View style={styles.infoUbicacion}>
           <Text style={styles.tituloUbicacion}>Ubicación actual</Text>
           <Text style={styles.textoUbicacion}>Obteniendo ubicación...</Text>
@@ -78,6 +79,7 @@ export default function Saludo(){
 
     </View>
   );
+  
   
 }
 

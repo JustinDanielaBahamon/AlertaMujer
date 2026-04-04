@@ -2,7 +2,7 @@
  una barra tipo nav en la parte inferior con las pantallas que le indicamos abajo*/
 
 import { Tabs } from "expo-router";
-
+import { Image } from "react-native";
 
 export default function TabsLayout() {
   return(
@@ -12,6 +12,7 @@ export default function TabsLayout() {
       <Tabs.Screen name ="historial"/>
       <Tabs.Screen name = "inicio"/>
       <Tabs.Screen name = "mapa"/>
+      
     </Tabs>
   );
 }
