@@ -54,6 +54,9 @@ recompilar el proyecto correctamente.ya con eso ya sirve lo que hizo jose el mod
 
 - otra cosa se van a preguntar porque en tabs tengo en la carpeta contacto contanto.ts y index.tsx pues pasa que en Expo Router, cada carpeta que representa una ruta debe contener un index.tsx como punto de entrada. Otros archivos como contacto.tsx funcionan como subrutas dentro del mismo módulo.
 
+-- 5 de abriñ: me descague otra libreria npm install react-native-safe-area-context
+esto sirve para que no quede tan pegados de área de sistema como son los gestos, barra inferior de móvil asi que por eso el Safe Area 
+
 
 
 
