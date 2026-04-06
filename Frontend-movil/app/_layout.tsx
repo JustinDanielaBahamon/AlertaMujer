@@ -1,5 +1,6 @@
 import { Provider as PaperProvider } from 'react-native-paper';
 import { Stack } from "expo-router"; 
+
 /* Este archivo servira para navegar entre pantallas 
  que crearemos gracias a React navegation*/
 

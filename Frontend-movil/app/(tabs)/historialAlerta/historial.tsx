@@ -1,5 +1,5 @@
 import { View, Text, FlatList, Image } from "react-native";
-import Header from "../../../src/components/ui/Header/header";
+
 import { styles } from "./historial.style";
 
 
@@ -67,7 +67,6 @@ export default function Historial() {
   return (
     <View style={styles.ContenedorPrincipal}>
 
-      <Header />
 
       <Text style={styles.titulo}>Historial de Alertas</Text>
        
