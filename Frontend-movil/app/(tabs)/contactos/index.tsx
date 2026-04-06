@@ -58,7 +58,7 @@ export default function Contactos(){
           right: 20,
         }}
 
-          onPress={() => router.push("/contactos/agregarContacto")}
+          onPress={() => router.push("../../contacto")}
       
       >
         <MaterialIcons name="add" size={30} color="white" />

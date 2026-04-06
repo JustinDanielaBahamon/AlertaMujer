@@ -13,7 +13,7 @@ export default function Saludo(){
   const router = useRouter();
   const activarAlerta = () => {
     Vibration.vibrate(200);
-    router.push("/BotonActivacion/activacion"); //  esto te manda a la pantalla 
+    router.push("../../activacion"); //  esto te manda a la pantalla 
   };
 
   return(
@@ -25,7 +25,7 @@ export default function Saludo(){
 
        {/* este el boton que hizo desde un principio Maicol aun asi lo deje por ahora */}
        <View style={styles.topSection}>
-          <TouchableOpacity onPress={()=> router.replace("../login/login")}>
+          <TouchableOpacity onPress={()=> router.replace("../../login")}>
               
             <Text style={styles.botonLogin}>Presiona para ir login</Text>
         
