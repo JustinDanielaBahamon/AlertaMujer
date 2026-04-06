@@ -12,7 +12,7 @@ export default function Contactos(){
     <View style={styles.ContenedorPrincipal}>
       
       {/* el header importado desde la carpeta UI */}
-
+      
 
      {/* titulo de contacto*/}
       <Text style={styles.TituloPagina}>Contacto</Text>

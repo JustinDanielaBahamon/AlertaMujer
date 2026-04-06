@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
-import Header from '../../src/components/ui/header';
+import Header from '../../src/components/ui/Header/header';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from './agregarConstyle';
 import { useRouter } from 'expo-router'; // 🔹 useRouter dentro del componente
