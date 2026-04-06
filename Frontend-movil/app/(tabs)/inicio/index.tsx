@@ -1,13 +1,12 @@
 import { View , Text, TouchableOpacity, Vibration} from "react-native";
 import { router } from "expo-router";
-import Header from '../../../src/components/ui/header';
 import {styles} from './inicio.styles'
 import { Image } from "react-native";
 import { useState } from "react";
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
 
-export default function Saludo(){
+export default function inicio(){
 
   const [pressed, setPressed] = useState(false);
   const router = useRouter();
