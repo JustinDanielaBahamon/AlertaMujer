@@ -32,7 +32,7 @@ export default function ActivacionTutorial() {
 
           {/* TÍTULO */}
           <Text style={styles.titulo}>
-            Sistema de mensajes y llamadas{"\n"}
+            Camara y microfono {"\n"}
           </Text>
 
           {/* CARD */}
@@ -41,26 +41,26 @@ export default function ActivacionTutorial() {
                 <Text style={styles.textoInfo}>
                     
                     <Text style={{ fontWeight: 'bold' }}>
-                    Cuando activas una alerta, el sistema contacta a tus personas de confianza de forma automática:{"\n"}
+                    Al activar una alerta, la app utiliza la cámara y el micrófono para registrar lo que sucede a tu alrededor:{"\n"}
                     </Text>
 
                     <Text style={{ fontWeight: 'bold' }}>
-                    Mensaje automático.
-                    </Text> Se envía un SMS con tu ubicación exacta a todos tus contactos de emergencia registrados.{"\n"}
+                    Grabación automática.
+                    </Text> Se inicia la captura de audio y video en tiempo real como evidencia de la situación.{"\n"}
 
                     <Text style={{ fontWeight: 'bold' }}>
-                    Llamada de emergencia.
-                    </Text> La app realiza una llamada automática a tus contactos para notificarles que necesitas ayuda.
+                    Mayor protección.
+                    </Text> Esta información puede ser útil para documentar lo ocurrido y brindarte respaldo en caso de emergencia.
 
                 </Text>
-            </Card>
+           </Card>
           
 
           {/* BOTONES */}
           <View style={styles.footer}>
             <CustomButton 
               title="Continuar" 
-              onPress={() => router.push('/tutorial/permisosmensajes')}
+              onPress={() => router.push('/tutorial/mensaje')}
             />
 
             <View style={{ marginTop: 2, width: '100%', alignItems: 'center' }}>
