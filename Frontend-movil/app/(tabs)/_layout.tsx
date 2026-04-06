@@ -11,8 +11,13 @@ export default function TabsLayout() {
       <Tabs.Screen name ="contactos"/>
       <Tabs.Screen name ="historial"/>
       <Tabs.Screen name = "inicio"/>
-  <Tabs.Screen 
-  name="mapa"
+      <Tabs.Screen name = "mapa"/>
+    </Tabs>
+  );
+}
+
+/* ESTO ES PARA PONERLE UN ICONO AL MODULO DE UBICACION
+  name="Mapa"
   options={{
     title: "Mapa",
     tabBarLabelStyle: { color: "white" }, // sirve para que el texto blanco, asi cuando se presione y cuando no, para que siemrpe este blanco
@@ -28,6 +33,4 @@ export default function TabsLayout() {
     ),
   }}
 />
-    </Tabs>
-  );
-}
+*/
