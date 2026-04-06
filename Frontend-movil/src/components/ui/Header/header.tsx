@@ -4,7 +4,7 @@ import { Image, Text, TouchableOpacity, View } from "react-native";
 
 export default function Header() {
   return (
-    <View >//styles.ContenedorLogo
+    <View >{/*styles.ContenedorLogo*/}
       
       {/* Botón menú */}
       <TouchableOpacity>
@@ -13,7 +13,7 @@ export default function Header() {
 
       {/* Logo */}
       <Image 
-        source={require('../../../assets/imagesAlertaMujer/logoAlertaMujer.png')} 
+        source={require('../../../../assets/imagesAlertaMujer/logoAlertaMujer.png')} 
       />
       
     </View>
