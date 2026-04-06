@@ -3,7 +3,7 @@ import { View, Text, Image,  } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router'
 import CustomButton from '../../src/components/ui/button/aceptar'; 
-import Card from '../../src/components/ui/card';
+ import Card from '../../src/components/ui/card/card';
 import {styles} from "./universalStyle"
 
 export default function Bienvenido() {
