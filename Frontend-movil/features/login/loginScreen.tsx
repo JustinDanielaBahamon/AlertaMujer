@@ -5,6 +5,7 @@ import { styles } from './login.styles';
 import { ScrollView } from "react-native";
 
 
+
 export default function Login() {
   const [mostrarPassword, setMostrarPassword] = useState(false);
 
@@ -66,7 +67,7 @@ export default function Login() {
 
       <View style={styles.ContenedorRegistrarse}>
         <Text style={styles.TextoTienesCuenta}>¿No tienes cuenta?</Text>
-        <TouchableOpacity style={styles.BotonRegistrar} onPress={() => router.push('../registro/registro')}>
+        <TouchableOpacity style={styles.BotonRegistrar} onPress={() => router.push('/registro')}>
           <Text style={styles.textoRegistro}>Regístrate</Text>
         </TouchableOpacity>
       </View>
