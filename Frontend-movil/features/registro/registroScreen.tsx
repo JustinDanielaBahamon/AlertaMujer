@@ -2,7 +2,7 @@ import { router } from 'expo-router'
 import { View, Text, TouchableOpacity, Image, TextInput, ScrollView, KeyboardAvoidingView, Platform 
 } from "react-native";
 import { useState } from 'react';
-import { styles } from '../registro/registro.styles';
+import { styles } from './registro.styles';
 import { Ionicons } from '@expo/vector-icons';
 
 // 🔥 TIPADO DE ERRORES
@@ -291,7 +291,7 @@ export default function Registro(){
 
               console.log("Registro completo 🔥");
               
-              router.push('../tutorial/bienvenido'); 
+              router.push('/tutorial/bienvenida'); 
             }}
           >
             <Text style={styles.textoContinuar}>Continuar</Text>

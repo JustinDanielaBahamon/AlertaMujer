@@ -32,35 +32,35 @@ export default function ActivacionTutorial() {
 
           {/* TÍTULO */}
           <Text style={styles.titulo}>
-            Contactos de Emergencia{"\n"}
+            Sistema de Notificación {"\n"}
           </Text>
 
           {/* CARD */}
           
-           <Card style={styles.cardPersonalizada}>
+          <Card style={styles.cardPersonalizada}>
                 <Text style={styles.textoInfo}>
                     
                     <Text style={{ fontWeight: 'bold' }}>
-                    Agrega contactos de emergencia para que reciban tus alertas cuando más lo necesites:{"\n"}
+                    Activa las notificaciones para recibir alertas importantes y mantenerte informada en todo momento:{"\n"}
                     </Text>
 
                     <Text style={{ fontWeight: 'bold' }}>
-                    Notificación inmediata.
-                    </Text> Tus contactos serán avisados automáticamente cuando actives una alerta, permitiéndoles reaccionar rápidamente.{"\n"}
+                    Avisos en tiempo real.
+                    </Text> Recibirás notificaciones cuando se envíe una alerta o cuando tus contactos necesiten tu ayuda.{"\n"}
 
                     <Text style={{ fontWeight: 'bold' }}>
-                    Apoyo en situaciones de riesgo.
-                    </Text> Ellos podrán ayudarte, comunicarse contigo o acudir a tu ubicación en caso de emergencia.
+                    Mayor seguridad.
+                    </Text> Las notificaciones te permiten reaccionar rápidamente ante cualquier situación de riesgo.
 
                 </Text>
-            </Card>
-            
+          </Card>
+                        
 
           {/* BOTONES */}
           <View style={styles.footer}>
             <CustomButton 
               title="Continuar" 
-              onPress={() => router.push('/tutorial/mensajes')}
+              onPress={() => router.push('/tutorial/boton')}
             />
 
             <View style={{ marginTop: 2, width: '100%', alignItems: 'center' }}>
