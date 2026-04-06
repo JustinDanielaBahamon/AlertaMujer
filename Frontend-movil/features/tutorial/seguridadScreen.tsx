@@ -6,7 +6,7 @@ import { styles } from './universalStyle';
 
 import CustomButton from '../../src/components/ui/button/aceptar'; 
 import CustomButton2 from '../../src/components/ui/button/cancelar'; 
-import Card from '../../src/components/ui/card';
+ import Card from '../../src/components/ui/card/card';
 
 export default function ActivacionTutorial() {
   const router = useRouter();
