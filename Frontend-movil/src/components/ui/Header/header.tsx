@@ -1,21 +1,38 @@
-  
-import { Image, Text, TouchableOpacity, View } from "react-native";
-
+import { View, Image, TouchableOpacity, Text } from "react-native";
+import { styles } from "./header.style";
 
 export default function Header() {
+
+  const cambiarIdioma = () => {
+    console.log("Idioma 🌐");
+  };
+
+  const cambiarTema = () => {
+    console.log("Tema 🎨");
+  };
+
   return (
-    <View >{/*styles.ContenedorLogo*/}
-      
-      {/* Botón menú */}
-      <TouchableOpacity>
-        <Text style={{ fontSize: 30 }}>≡</Text>
-      </TouchableOpacity>
+    <View style={styles.container}>
 
       {/* Logo */}
-      <Image 
-        source={require('../../../../assets/imagesAlertaMujer/logoAlertaMujer.png')} 
+      <Image
+        source={require("../../../../assets/imagesAlertaMujer/logoAlertaMujer.png")}
+        style={styles.logo}
       />
-      
+
+      {/* Acciones */}
+      <View style={styles.actions}>
+
+        <TouchableOpacity onPress={cambiarIdioma}>
+          <Text style={styles.icono}>🌐</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={cambiarTema}>
+          <Text style={styles.icono}>🎨</Text>
+        </TouchableOpacity>
+
+      </View>
+
     </View>
   );
 }
