@@ -1,6 +1,5 @@
 import { Image, Text, TouchableOpacity, View } from "react-native";
 //import {  } from "react-native-paper";
-import Header from '../../../src/components/ui/header';
 import { styles } from './contactos.styles';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
@@ -13,7 +12,7 @@ export default function Contactos(){
     <View style={styles.ContenedorPrincipal}>
       
       {/* el header importado desde la carpeta UI */}
-      <Header />
+
 
      {/* titulo de contacto*/}
       <Text style={styles.TituloPagina}>Contacto</Text>

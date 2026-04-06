@@ -20,7 +20,6 @@ export default function inicio(){
     
     
     <View style={styles.container}>
-      <Header />
 
        {/* este el boton que hizo desde un principio Maicol aun asi lo deje por ahora */}
        <View style={styles.topSection}>
