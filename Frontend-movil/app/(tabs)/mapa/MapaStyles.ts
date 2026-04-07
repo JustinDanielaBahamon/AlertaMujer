@@ -35,4 +35,6 @@ export const styles = StyleSheet.create({
     fontWeight: "600",
     letterSpacing: 1,
   },
-});
+
+  },
+);
