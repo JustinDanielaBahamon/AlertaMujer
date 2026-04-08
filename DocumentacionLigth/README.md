@@ -57,6 +57,8 @@ recompilar el proyecto correctamente.ya con eso ya sirve lo que hizo jose el mod
 -- 5 de abriñ: me descague otra libreria npm install react-native-safe-area-context
 esto sirve para que no quede tan pegados de área de sistema como son los gestos, barra inferior de móvil asi que por eso el Safe Area 
 
+-- 7 de abril: con el trascurso de hoy me instalado dos librerias la primera es la npx expo install expo-sms y la otra es de npx expo install expo-contacts
+
 
 
 
