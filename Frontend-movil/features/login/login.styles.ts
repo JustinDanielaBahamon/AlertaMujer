@@ -12,12 +12,12 @@ export const styles = StyleSheet.create({
     ContenedorLogo:{
         justifyContent : 'center',
         alignItems:'center',
-        marginTop : 10, // 🔽 baja esto un poco
-        marginBottom: 10, // 🔥 agrega separación con el form
+        marginTop : 10, // baja esto un poco
+        marginBottom: 10, //  agrega separación con el form
     },
      ImagenLogo :{
-        width: 200,
-        height: 200,
+        width: 155,
+        height: 155,
         maxWidth: '90%',
         resizeMode: 'contain',
     },

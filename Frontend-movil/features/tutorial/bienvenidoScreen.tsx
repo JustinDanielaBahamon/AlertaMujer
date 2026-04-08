@@ -1,19 +1,20 @@
 import React from 'react';
-import { View, Text, Image,  } from 'react-native';
+import { View, Text, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router'
+import { useRouter } from 'expo-router';
 import CustomButton from '../../src/components/ui/button/aceptar'; 
- import Card from '../../src/components/ui/card/card';
-import {styles} from "./universalStyle"
+import Card from '../../src/components/ui/card/card';
+
+import { styles } from "./universalStyle";
+import { styles as cardStyles } from "../../src/components/ui/card/cardStyle";
 
 export default function Bienvenido() {
   const router = useRouter();
 
   return (
-    <SafeAreaView style={styles.container}> {/* para que sirve el SafeAreaVie Asegura que
-       el contenido se renderice dentro de los límites seguros del dispositivo */}
+    <SafeAreaView style={styles.container}>
       
-      {/* EL LOGO */}
+      {/* 1. EL LOGO */}
       <View style={styles.header}>
         <Image 
           source={require('../../assets/imagesAlertaMujer/logoAlertaMujer.png')} 
@@ -22,30 +23,32 @@ export default function Bienvenido() {
         />
       </View>
 
-      {/* 2. EL TÍTULO */}
-      <Text style={styles.titulo}>
-        Conoce más sobre{"\n"}Alerta Mujer
-      </Text>
-
-      {/* 3. EL CUADRO DE TEXTO (Usando el  componente Card) */}
-      
-        <Card style={styles.cardPersonalizada}>
-        <Text style={styles.textoInfo}>
-          Esta app está diseñada para acompañarte y ayudarte a sentirte más segura en tu día a día. 
-          Ofrece herramientas para pedir ayuda, compartir tu ubicación y acceder a información útil, 
-          para que nunca te sientas sola.
+      {/* 2. EL CUADRO DE TEXTO (Siguiendo el diseño de tu imagen) */}
+      <Card style={cardStyles.card}>
+        
+        {/* Título: queda fuera del cuadro oscuro, sobre el fondo claro de la Card */}
+        <Text style={cardStyles.title}>
+          Conoce más sobre{"\n"}Alerta Mujer
         </Text>
+
+        {/* Cuadro Oscuro: envuelve el texto informativo */}
+        <View style={cardStyles.innerContainer}>
+          <Text style={cardStyles.description}>
+            <Text style={{ fontWeight: 'bold' }}>Tu seguridad es nuestra prioridad.{"\n\n"}</Text>
+            Esta aplicación nace para ser tu red de apoyo digital, diseñada para cuidarte y darte tranquilidad en cada paso que des. {"\n\n"}
+            Con Alerta Mujer, tienes a tu alcance herramientas inmediatas para <Text style={{ fontWeight: 'bold' }}>pedir ayuda, difundir tu ubicación en tiempo real</Text> y conectar con tus seres queridos ante cualquier situación de riesgo. 
+          </Text>
+        </View>
+        
       </Card>
 
-      {/* 4. EL BOTÓN (Usando tu componente Button) */}
-      <View style={styles.footer}>
+      {/* 3. EL BOTÓN */}
+      <View style={[styles.footer, { marginTop: 2 }]}> {/* Cambia el 50 para bajarlo más o menos */}
         <CustomButton 
           title="Continuar" 
           onPress={() => router.push('/tutorial/boton')} 
         />
       </View>
-
     </SafeAreaView>
-);
+  );
 }
-

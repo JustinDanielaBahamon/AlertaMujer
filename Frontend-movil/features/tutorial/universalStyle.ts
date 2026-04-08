@@ -49,6 +49,9 @@ export const styles = StyleSheet.create({
     paddingBottom: 25, // 🔥 ESTE es el fix real
     paddingTop: 10,
   }
+
+
+  
   
  
 });
