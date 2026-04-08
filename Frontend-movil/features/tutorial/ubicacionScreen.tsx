@@ -1,24 +1,38 @@
-import React from 'react';
-import { View, Text, Image, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Image, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { Picker } from '@react-native-picker/picker'; // Asegúrate de instalarlo o usar un modal
+
 import { styles } from './universalStyle';
+import { styles as cardStyles } from "../../src/components/ui/card/cardStyle";
+import ModalConfirmacion from '@/src/components/ui/modalConfirmacion/confirmacion';
 
 import CustomButton from '../../src/components/ui/button/aceptar'; 
 import CustomButton2 from '../../src/components/ui/button/cancelar'; 
- import Card from '../../src/components/ui/card/card';
+import Card from '../../src/components/ui/card/card';
 
-export default function ActivacionTutorial() {
+export default function UbicacionScreen() {
   const router = useRouter();
+  
+  // Datos del Huila
+  const [departamento, setDepartamento] = useState('Huila'); 
+  const [municipio, setMunicipio] = useState('Neiva'); 
+  const [modalConfirmacionVisible, setModalConfirmacionVisible] = useState(false);
+
+  // Lista simplificada de municipios del Huila
+  const municipiosHuila = [
+    "Neiva", "Pitalito", "Garzón", "San Agustín", "Gigante", 
+    "Campoalegre", "Rivera", "La Plata", "Palermo", "Isnos"
+  ];
+
+  const handleContinuarPantalla = () => {
+    setModalConfirmacionVisible(true);
+  };
 
   return (
     <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
-
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        showsVerticalScrollIndicator={false}
-      >
-
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
         <View style={styles.container}>
           
           {/* LOGO */}
@@ -30,52 +44,66 @@ export default function ActivacionTutorial() {
             />
           </View>
 
-          {/* TÍTULO */}
-          <Text style={styles.titulo}>
-            Ubicación Automatica{"\n"}
-          </Text>
+          {/* CARD CON DISEÑO UNIFICADO */}
+          <Card style={cardStyles.card}>
+            <Text style={cardStyles.title}>Tu Ubicación</Text>
 
-          {/* CARD */}
-          
-          <Card style={styles.cardPersonalizada}>
-                <Text style={styles.textoInfo}>
-                    
-                    <Text style={{ fontWeight: 'bold' }}>
-                    Cuando activas una alerta, la app comparte tu ubicación automáticamente en tiempo real para que tus contactos de emergencia sepan dónde estás en todo momento:{"\n"}
-                    </Text>
+            <View style={cardStyles.innerContainer}>
+              <Text style={[cardStyles.description, { marginBottom: 15 }]}>
+                📍 Selecciona tu ubicación para recibir ayuda local:
+              </Text>
 
-                    <Text style={{ fontWeight: 'bold' }}>
-                    Ubicación en tiempo real.
-                    </Text> Tus contactos podrán ver tu ubicación exacta y seguir tus movimientos mientras la alerta esté activa, facilitando que puedan encontrarte rápidamente.{"\n"}
+              {/* Selector de Departamento */}
+              <Text style={{ color: '#fff', fontSize: 12, marginBottom: 5, marginLeft: 10 }}>Departamento</Text>
+              <View style={{ backgroundColor: '#fff', borderRadius: 15, marginBottom: 15, overflow: 'hidden' }}>
+                <Picker
+                  selectedValue={departamento}
+                  onValueChange={(itemValue) => setDepartamento(itemValue)}
+                  style={{ height: 50, width: '100%' }}
+                >
+                  <Picker.Item label="Huila" value="Huila" />
+                </Picker>
+              </View>
 
-                    <Text style={{ fontWeight: 'bold' }}>
-                    Acceso inmediato.
-                    </Text> La ubicación se envía de forma automática, sin que tengas que hacer nada más, incluso en situaciones de riesgo o presión.
+              {/* Selector de Municipio */}
+              <Text style={{ color: '#fff', fontSize: 12, marginBottom: 5, marginLeft: 10 }}>Municipio</Text>
+              <View style={{ backgroundColor: '#fff', borderRadius: 15, overflow: 'hidden' }}>
+                <Picker
+                  selectedValue={municipio}
+                  onValueChange={(itemValue) => setMunicipio(itemValue)}
+                  style={{ height: 50, width: '100%' }}
+                >
+                  {municipiosHuila.map((muni) => (
+                    <Picker.Item key={muni} label={muni} value={muni} />
+                  ))}
+                </Picker>
+              </View>
+            </View>
+          </Card>
 
-                </Text>
-            </Card>
-            
+          <View style={{ flex: 1 }} />
 
           {/* BOTONES */}
-          <View style={styles.footer}>
-            <CustomButton 
-              title="Continuar" 
-              onPress={() => router.push('/tutorial/contacto')}
-            />
-
-            <View style={{ marginTop: 2, width: '100%', alignItems: 'center' }}>
-              <CustomButton2 
-              title="Regresar" 
-             
-              onPress={() => router.push('/tutorial/ubicacion')} 
-            />
+          <View style={[styles.footer, { paddingBottom: 40 }]}>
+            <CustomButton title="Continuar" onPress={handleContinuarPantalla} />
+            <View style={{ marginTop: 10, width: '100%', alignItems: 'center' }}>
+              <CustomButton2 title="Regresar" onPress={() => router.back()} />
             </View>
           </View>
 
         </View>
-
       </ScrollView>
 
+      <ModalConfirmacion 
+        visible={modalConfirmacionVisible}
+        departamento={departamento}
+        municipio={municipio}
+        onConfirmar={() => {
+            setModalConfirmacionVisible(false);
+            router.push('/tutorial/contactos');
+        }}
+        onRegresar={() => setModalConfirmacionVisible(false)}
+      />
     </SafeAreaView>
   );
 }

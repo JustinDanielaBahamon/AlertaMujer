@@ -1,6 +1,7 @@
 import { router } from 'expo-router'
 import { View, Text, TouchableOpacity, Image, TextInput, ScrollView, KeyboardAvoidingView, Platform 
 } from "react-native";
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import { styles } from './registro.styles';
 import { Ionicons } from '@expo/vector-icons';
@@ -62,6 +63,7 @@ export default function Registro(){
   };
 
   return(
+    <SafeAreaView style={{ flex: 1 }}>
     <KeyboardAvoidingView 
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -301,5 +303,6 @@ export default function Registro(){
          
       </ScrollView>
     </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }

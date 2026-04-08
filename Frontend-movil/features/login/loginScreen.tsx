@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, Image, TextInput } from "react-native";
 import { router } from 'expo-router';
+import { SafeAreaView } from "react-native-safe-area-context";
 import { styles } from './login.styles';
 import { ScrollView } from "react-native";
 
@@ -10,6 +11,7 @@ export default function Login() {
   const [mostrarPassword, setMostrarPassword] = useState(false);
 
   return (
+    <SafeAreaView style={{ flex: 1 }}>
      <ScrollView 
                 style={styles.ContenedorPrincipal}
                 contentContainerStyle={{ flexGrow: 1 }}
@@ -79,5 +81,7 @@ export default function Login() {
       </View>
 
     </ScrollView>
+    </SafeAreaView>
+    
   );
 }

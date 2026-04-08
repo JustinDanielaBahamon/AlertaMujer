@@ -3,22 +3,21 @@ import { View, Text, Image, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { styles } from './universalStyle';
+import { styles as cardStyles } from "../../src/components/ui/card/cardStyle"; // Importante
 
 import CustomButton from '../../src/components/ui/button/aceptar'; 
 import CustomButton2 from '../../src/components/ui/button/cancelar'; 
- import Card from '../../src/components/ui/card/card';
+import Card from '../../src/components/ui/card/card';
 
 export default function ActivacionTutorial() {
   const router = useRouter();
 
   return (
     <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
-
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
       >
-
         <View style={styles.container}>
           
           {/* LOGO */}
@@ -30,52 +29,52 @@ export default function ActivacionTutorial() {
             />
           </View>
 
-          {/* TÍTULO */}
-          <Text style={styles.titulo}>
-            Como funciona el{"\n"}boton
-          </Text>
-
-          {/* CARD */}
-          <Card style={styles.cardPersonalizada}>
-            <Text style={styles.textoInfo}>
-              <Text style={{ fontWeight: 'bold' }}>
-                El botón de emergencia tiene 3 formas de activarse según tu nivel de peligro:{"\n"}
-              </Text>
-
-              <Text style={{ fontWeight: 'bold' }}>
-                Toque corto Alerta discreta.
-              </Text> Envía un SMS silencioso con tu ubicación a tus contactos.{"\n"}
-
-              <Text style={{ fontWeight: 'bold' }}>
-                Doble toque Alerta urgente.
-              </Text> Tus contactos reciben notificación y llamada automática.{"\n"}
-
-              <Text style={{ fontWeight: 'bold' }}>
-                Mantener presionado Alerta máxima.
-              </Text> Inicia grabación, activa sirena y comparte tu ubicación en tiempo real.
+          {/* CARD CON DISEÑO MEJORADO */}
+          <Card style={cardStyles.card}>
+            {/* Título arriba, fuera del cuadro oscuro */}
+            <Text style={cardStyles.title}>
+              Cómo funciona el{"\n"}botón
             </Text>
+
+            {/* Cuadro Morado Oscuro */}
+            <View style={cardStyles.innerContainer}>
+              <Text style={cardStyles.description}>
+                <Text style={{ fontWeight: 'bold' }}>
+                  El botón de emergencia tiene 3 formas de activarse:{"\n\n"}
+                </Text>
+
+                <Text style={{ fontWeight: 'bold', color: '#fffb00' }}>● Toque corto: </Text>
+                <Text style={{ fontWeight: 'bold' }}>Alerta discreta.</Text> Envía un SMS silencioso con tu ubicación.{"\n\n"}
+
+                <Text style={{ fontWeight: 'bold', color: '#FFD700' }}>● Doble toque: </Text>
+                <Text style={{ fontWeight: 'bold' }}>Alerta urgente.</Text> Tus contactos reciben notificación y llamada.{"\n\n"}
+
+                <Text style={{ fontWeight: 'bold', color: '#FFD700' }}>● Mantener: </Text>
+                <Text style={{ fontWeight: 'bold' }}>Alerta máxima.</Text> Inicia grabación, sirena y ubicación en tiempo real.
+              </Text>
+            </View>
           </Card>
 
-          {/* BOTONES */}
-          <View style={styles.footer}>
+          {/* ESPACIADOR FLEXIBLE */}
+          <View style={{ flex: 1 }} />
+
+          {/* BOTONES CON MARGEN INFERIOR CONTROLADO */}
+          <View style={[styles.footer, { paddingBottom: 40 }]}>
             <CustomButton 
               title="Continuar" 
               onPress={() => router.push('/tutorial/mensaje')}
             />
 
-            <View style={{ marginTop: 2, width: '100%', alignItems: 'center' }}>
+            <View style={{ marginTop: 5, width: '100%', alignItems: 'center' }}>
               <CustomButton2 
-              title="Regresar" 
-             
-              onPress={() => router.push('/tutorial/bienvenida')} 
-            />
+                title="Regresar" 
+                onPress={() => router.push('/tutorial/bienvenida')} 
+              />
             </View>
           </View>
 
         </View>
-
       </ScrollView>
-
     </SafeAreaView>
   );
 }

@@ -1,84 +1,129 @@
-import { View, Text, FlatList, Image } from "react-native";
-
+import React, { useState, useCallback } from "react"; 
+import { View, Text, FlatList, Image, TextInput, RefreshControl, TouchableOpacity, ActivityIndicator } from "react-native";
 import { styles } from "./historial.style";
+import { MaterialIcons } from '@expo/vector-icons';
 
-
-
- {/* esto son datos falsos para ver como queda en el historial de alerta- en si es un array*/}
 const alertasMock = [
-  {
-    id: "1",
-    tipo: "Emergencia",
-    fecha: "2026-03-30",
-    hora: "14:32",
-    ubicacion: "Neiva",
-    estado: "Enviada",
-  },
-  {
-    id: "2",
-    tipo: "Emergencia",
-    fecha: "2026-03-29",
-    hora: "20:10",
-    ubicacion: "Campoalegre",
-    estado: "Cancelada",
-  },
+  { id: "1", tipo: "Emergencia", fecha: "30 Mar, 2026", hora: "14:32", ubicacion: "Neiva, Huila", estado: "Enviada" },
+  { id: "2", tipo: "Asistencia", fecha: "29 Mar, 2026", hora: "20:10", ubicacion: "Campoalegre", estado: "Cancelada" },
 ];
 
-
 export default function Historial() {
+  const [busqueda, setBusqueda] = useState("");
+  const [alertasFiltradas, setAlertasFiltradas] = useState(alertasMock);
+  const [refrescando, setRefrescando] = useState(false);
 
-  // Función que renderiza cada alerta dentro del FlatList
-  // Recibe un objeto "item" que representa una alerta del array alertasMock
+  // --- FUNCIÓN DE RECARGA (Sirve para el gesto y para el botón) ---
+  const onRefresh = useCallback(async () => {
+    setRefrescando(true); 
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      setAlertasFiltradas(alertasMock); 
+      setBusqueda(""); 
+    } catch (error) {
+      console.error("Error al refrescar:", error);
+    } finally {
+      setRefrescando(false); 
+    }
+  }, []);
+
+  const handleSearch = (text: string) => {
+    setBusqueda(text);
+    const filtrados = alertasMock.filter((item) => {
+      const itemData = `${item.fecha} ${item.hora} ${item.ubicacion} ${item.estado} ${item.tipo}`.toLowerCase();
+      const textData = text.toLowerCase();
+      return itemData.includes(textData);
+    });
+    setAlertasFiltradas(filtrados);
+  };
+
   const renderItem = ({ item }: any) => (
     <View style={styles.card}>
-
       <View style={styles.columnaIzquierda}>
-        <Image
-          source={require("../../../assets/imagesAlertaMujer/ScHistorial/ubicacion.png")}
-          style={styles.icono}
-        />
+        <View style={styles.contenedorIcono}>
+            <Image
+              source={require("../../../assets/imagesAlertaMujer/ScHistorial/ubicacion.png")}
+              style={styles.icono}
+            />
+        </View>
+        <View style={styles.lineaDecorativa} />
       </View>
 
       <View style={styles.columnaDerecha}>
-        <Text style={styles.tipo}>{item.tipo}</Text> 
-        {/*Este bloque muestra la informacion de cada alerta usando los "item" que vienen del array{*/}
-
-        <Text style={styles.texto}>
-          {item.fecha} - {item.hora}
+        <View style={styles.filaEncabezado}>
+            <Text style={styles.tipo}>{item.tipo}</Text>
+            <Text style={styles.horaAbajo}>{item.hora}</Text>
+        </View>
+        <Text style={styles.textoFecha}>
+          <MaterialIcons name="event" size={12} color="#757575" /> {item.fecha}
         </Text>
-
-        <Text style={styles.texto}>{item.ubicacion}</Text>
-
-        <Text
-          style={[
-            styles.estado,
-            item.estado === "Cancelada"
-              ? { color: "red" }
-              : { color: "#6A1B9A" },
-          ]}
-        >
-          Estado: {item.estado}
+        <Text style={styles.textoUbicacion}>
+            <MaterialIcons name="place" size={12} color="#757575" /> {item.ubicacion}
         </Text>
+        <View style={[
+            styles.badgeEstado,
+            item.estado === "Cancelada" ? styles.bgCancelado : styles.bgEnviado
+        ]}>
+            <Text style={[
+                styles.estado,
+                item.estado === "Cancelada" ? { color: "#D32F2F" } : { color: "#6A1B9A" },
+            ]}>
+                {item.estado.toUpperCase()}
+            </Text>
+        </View>
       </View>
-
     </View>
   );
 
   return (
     <View style={styles.ContenedorPrincipal}>
+      
+      {/* --- ENCABEZADO CON TÍTULO Y BOTÓN DE REFRESCAR --- */}
+      <View style={styles.filaTitulo}>
+        <Text style={styles.titulo}>Historial de Alertas</Text>
+        
+        <TouchableOpacity 
+          onPress={onRefresh} 
+          disabled={refrescando}
+          style={styles.botonRefrescarHeader}
+        >
+          {refrescando ? (
+            <ActivityIndicator size="small" color="#9e83cf" />
+          ) : (
+            <MaterialIcons name="refresh" size={30} color="#9e83cf" />
+          )}
+        </TouchableOpacity>
+      </View>
 
-
-      <Text style={styles.titulo}>Historial de Alertas</Text>
-       
-      {/*// FlatList se usa para renderizar listas de forma eficiente,
-        mostrando solo los elementos visibles y cargando más al hacer scroll.*/}
+      {/* BARRA DE BÚSQUEDA */}
+      <View style={styles.contenedorBusqueda}>
+        <MaterialIcons name="search" size={20} color="#9e83cf" style={styles.iconoBusqueda} />
+        <TextInput
+          style={styles.inputBusqueda}
+          placeholder="Buscar por fecha, lugar o estado..."
+          placeholderTextColor="#999"
+          value={busqueda}
+          onChangeText={handleSearch}
+        />
+      </View>
+        
       <FlatList
-        data={alertasMock}
-        keyExtractor={(item) => item.id} // es la encargada de obtener una clave unica por cada elemento
-        renderItem={renderItem} //es la funcion que define como se muestra cada alerta en la lista 
-        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 10 }}// esto agrega un espacio interno a toda la lista 
+        data={alertasFiltradas}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: 100 }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refrescando}
+            onRefresh={onRefresh}
+            colors={["#500092"]} 
+          />
+        }
+        ListEmptyComponent={
+          <Text style={styles.textoNoResultados}>No se encontraron alertas.</Text>
+        }
       />
-
     </View>
   );
 }

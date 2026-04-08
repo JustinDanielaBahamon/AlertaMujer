@@ -10,7 +10,7 @@ interface Props {
 export default function PrimaryButton({ title, onPress, color }: Props) {
   return (
     <TouchableOpacity
-      style={[styles.button, { backgroundColor: color || "#462c75" }]}
+      style={[styles.button, { backgroundColor: color || "#331753" }]}
       onPress={onPress}
     >
       <Text style={styles.text}>{title}</Text>

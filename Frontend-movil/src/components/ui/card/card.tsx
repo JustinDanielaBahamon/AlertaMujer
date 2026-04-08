@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text,  } from "react-native";
+import {styles} from "./cardStyle";
 
 interface Props {
   title?: string;
@@ -20,26 +21,3 @@ export default function CardBase({ title, description, children, style }: Props)
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    width: "90%",
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    padding: 20,
-    marginVertical: 10,
-    elevation: 5,
-
-    alignSelf: "center", // 🔥 se centra sola
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 5,
-  },
-  description: {
-    fontSize: 14,
-    color: "#555",
-    flexWrap: "wrap",   // 🔥 permite que el texto baje de línea
-    lineHeight: 20,     // 🔥 mejora lectura
-  },
-});
