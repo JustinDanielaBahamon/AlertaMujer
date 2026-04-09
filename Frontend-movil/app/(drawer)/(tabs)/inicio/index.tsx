@@ -1,47 +1,44 @@
-import { View , Text, TouchableOpacity, Vibration, ActivityIndicator} from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Vibration,
+  ActivityIndicator,
+  Image,
+} from "react-native";
+import { styles } from "./inicio.styles";
+import { useState, useEffect } from "react";
+import { MaterialIcons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import * as Location from "expo-location";
 
-import {styles} from './inicio.styles'
-import { Image } from "react-native";
-import { useState, useEffect } from "react"; // Añadimos useEffect para la carga inicial
-import { MaterialIcons } from '@expo/vector-icons';
-import { useRouter } from "expo-router";
-import * as Location from 'expo-location'; // Importamos la librería para el GPS
-
-export default function inicio(){
-
+export default function Inicio() {
+  const navigation = useNavigation<any>();
   const [pressed, setPressed] = useState(false);
-  const router = useRouter();
 
-  // --- NUEVOS ESTADOS PARA LA UBICACIÓN ---
   const [ubicacionNombre, setUbicacionNombre] = useState("Obteniendo ubicación...");
   const [cargando, setCargando] = useState(false);
 
-  // --- FUNCIÓN PARA OBTENER LA UBICACIÓN REAL ---
   const obtenerUbicacion = async () => {
     try {
       setCargando(true);
-      
-      // 1. Pedir permisos al celular
+
       let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
+      if (status !== "granted") {
         setUbicacionNombre("Permiso denegado");
         setCargando(false);
         return;
       }
 
-      // con esto obtengo las coordenadas actuales
       let location = await Location.getCurrentPositionAsync({});
-      
-      // se Convierte las  coordenadas a nombre de lugar (Geocoding)
+
       let direccion = await Location.reverseGeocodeAsync({
         latitude: location.coords.latitude,
-        longitude: location.coords.longitude
+        longitude: location.coords.longitude,
       });
 
-      //  Mostrar el nombre del lugar (ej: SENA Industrial)
       if (direccion.length > 0) {
         let lugar = direccion[0];
-        // Priorizamos nombre del lugar o calle y ciudad
         const nombreFinal = lugar.name || lugar.street || "Ubicación desconocida";
         setUbicacionNombre(`${nombreFinal}, ${lugar.city}`);
       }
@@ -52,14 +49,13 @@ export default function inicio(){
     }
   };
 
-  // Se ejecuta la primera vez que entras a la pantalla
   useEffect(() => {
     obtenerUbicacion();
   }, []);
 
   const activarAlerta = () => {
     Vibration.vibrate(200);
-    router.push("../../activacion"); //  esto te manda a la pantalla 
+    navigation.navigate("Activacion");
   };
 
   return(
@@ -67,7 +63,7 @@ export default function inicio(){
 
        {/* este el boton que hizo desde un principio Maicol aun asi lo deje por ahora */}
        <View style={styles.topSection}>
-          <TouchableOpacity onPress={()=> router.replace("../../login")}>
+          <TouchableOpacity onPress={() => navigation.navigate("Login")}>
               
             <Text style={styles.botonLogin}>Presiona para ir login</Text>
         
@@ -120,7 +116,7 @@ export default function inicio(){
           ]}
         >
           <Image
-            source={require('../../../assets/imagesAlertaMujer/ScInicio/boton2.png')}
+            source={require('../../../../assets/imagesAlertaMujer/ScInicio/boton2.png')}
             style={styles.imagen}
           />
         </TouchableOpacity>

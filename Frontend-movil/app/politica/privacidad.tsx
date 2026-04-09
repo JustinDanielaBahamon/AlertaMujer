@@ -1,7 +1,8 @@
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
-import { router } from 'expo-router';
+import { Text, ScrollView, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 export default function Privacidad(){
+  const navigation = useNavigation<any>();
   return(
     <ScrollView style={{ padding: 20 }}>
       <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
@@ -12,7 +13,7 @@ export default function Privacidad(){
         Aquí va la política de privacidad...
       </Text>
 
-      <TouchableOpacity onPress={() => router.back()}>
+      <TouchableOpacity onPress={() => navigation.goBack()}>
         <Text style={{ color: 'blue', marginTop: 20 }}>Volver</Text>
       </TouchableOpacity>
     </ScrollView>

@@ -244,12 +244,12 @@ export default function MapaView() {
         ))}
       </View>
 
-      {/*modo pantalla completa*/}
-
+      {/* modo pantalla completa */}
       <Modal visible={fullscreen} animationType="slide">
         <View style={{ flex: 1 }}>
           {mapComponent}
 
+          {/* boton de cerrar animado */}
           {showClose && (
             <Animated.View
               style={{

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, Image, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
 import { styles } from './universalStyle';
 import { styles as cardStyles } from "../../src/components/ui/card/cardStyle"; // Importante
 
@@ -10,7 +10,7 @@ import CustomButton2 from '../../src/components/ui/button/cancelar';
 import Card from '../../src/components/ui/card/card';
 
 export default function ActivacionTutorial() {
-  const router = useRouter();
+  const navigation = useNavigation<any>();
 
   return (
     <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
@@ -62,13 +62,13 @@ export default function ActivacionTutorial() {
           <View style={[styles.footer, { paddingBottom: 40 }]}>
             <CustomButton 
               title="Continuar" 
-              onPress={() => router.push('/tutorial/mensaje')}
+              onPress={() => navigation.navigate("TutorialMensaje")}
             />
 
             <View style={{ marginTop: 5, width: '100%', alignItems: 'center' }}>
               <CustomButton2 
                 title="Regresar" 
-                onPress={() => router.push('/tutorial/bienvenida')} 
+                onPress={() => navigation.navigate("TutorialBienvenida")}
               />
             </View>
           </View>

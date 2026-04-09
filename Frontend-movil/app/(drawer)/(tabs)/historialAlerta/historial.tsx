@@ -41,10 +41,10 @@ export default function Historial() {
     <View style={styles.card}>
       <View style={styles.columnaIzquierda}>
         <View style={styles.contenedorIcono}>
-            <Image
-              source={require("../../../assets/imagesAlertaMujer/ScHistorial/ubicacion.png")}
-              style={styles.icono}
-            />
+          <Image
+            source={require("../../../../assets/imagesAlertaMujer/ScHistorial/ubicacion.png")}
+            style={styles.icono}
+          />
         </View>
         <View style={styles.lineaDecorativa} />
       </View>
