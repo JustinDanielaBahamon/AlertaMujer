@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
 import CustomButton from '../../src/components/ui/button/aceptar'; 
 import Card from '../../src/components/ui/card/card';
 
@@ -9,7 +9,7 @@ import { styles } from "./universalStyle";
 import { styles as cardStyles } from "../../src/components/ui/card/cardStyle";
 
 export default function Bienvenido() {
-  const router = useRouter();
+  const navigation = useNavigation<any>();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -46,7 +46,7 @@ export default function Bienvenido() {
       <View style={[styles.footer, { marginTop: 2 }]}> {/* Cambia el 50 para bajarlo más o menos */}
         <CustomButton 
           title="Continuar" 
-          onPress={() => router.push('/tutorial/boton')} 
+          onPress={() => navigation.navigate("TutorialBoton")}
         />
       </View>
     </SafeAreaView>

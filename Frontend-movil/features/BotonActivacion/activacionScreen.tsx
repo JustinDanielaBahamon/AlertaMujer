@@ -1,11 +1,11 @@
 import { View, Text, TouchableOpacity ,Image} from "react-native";
-import { useRouter } from "expo-router";
+import { useNavigation } from "@react-navigation/native";
 import { styles } from "./activacionStyle";
 import { useEffect, useState } from "react";
 import { MaterialIcons } from '@expo/vector-icons';
 
 export default function Activacion() {
-  const router = useRouter();
+  const navigation = useNavigation<any>();
   const [contador, setContador] = useState(3);
 
   useEffect(() => {
@@ -58,7 +58,7 @@ export default function Activacion() {
 
         <TouchableOpacity 
           style={styles.botonCancelar} 
-          onPress={() => router.back()}
+          onPress={() => navigation.goBack()}
         >
           <Text style={styles.textoCancelar}>Cancelar Alerta</Text>
         </TouchableOpacity>

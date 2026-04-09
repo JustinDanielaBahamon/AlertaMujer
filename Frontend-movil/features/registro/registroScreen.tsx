@@ -1,4 +1,4 @@
-import { router } from 'expo-router'
+import { useNavigation } from "@react-navigation/native";
 import { View, Text, TouchableOpacity, Image, TextInput, ScrollView, KeyboardAvoidingView, Platform 
 } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -14,6 +14,7 @@ type ErroresType = {
 };
 
 export default function Registro(){
+  const navigation = useNavigation<any>();
 
   const [mostrarPassword, setMostrarPassword] = useState(false);
   const [mostrarLista, setMostrarLista] = useState(false);
@@ -236,7 +237,7 @@ export default function Registro(){
                 onPress={() => {
                   setErrorTerminos('');
                   setLeyoTerminos(true);
-                  router.push('../politica/terminos'); 
+                  navigation.navigate("PoliticaTerminos");
                 }}
               >
                 Términos y condiciones
@@ -265,7 +266,7 @@ export default function Registro(){
                 onPress={() => {
                   setErrorTerminos('');
                   setLeyoPrivacidad(true);
-                  router.push('../politica/privacidad'); 
+                  navigation.navigate("PoliticaPrivacidad");
                 }}
               >
                 Política de privacidad
@@ -293,7 +294,7 @@ export default function Registro(){
 
               console.log("Registro completo 🔥");
               
-              router.push('/tutorial/bienvenida'); 
+              navigation.navigate("TutorialBienvenida");
             }}
           >
             <Text style={styles.textoContinuar}>Continuar</Text>

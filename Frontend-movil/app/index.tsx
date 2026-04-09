@@ -1,7 +1,8 @@
 import { View , Text, TouchableOpacity } from "react-native";
-import { router } from "expo-router";
+import { useNavigation } from "@react-navigation/native";
 
 export default function Index(){
+  const navigation = useNavigation<any>();
   return(
    <View style={{
       backgroundColor : "black" , 
@@ -13,13 +14,13 @@ export default function Index(){
 
     <Text style={{color : 'white'}}>Bienvenido</Text>
    
-        <TouchableOpacity onPress={()=> router.replace("/(tabs)/inicio")}>
+        <TouchableOpacity onPress={() => navigation.replace("DrawerHome")}>
       
           <Text style={{color : 'white', marginTop: 30 , borderRadius: 20 , borderColor:'white', borderWidth:3 , padding : 10, backgroundColor:'purple'}}>Presiona para ir menu</Text>
 
         </TouchableOpacity> 
 
-        <TouchableOpacity onPress={()=> router.replace("../login ")}>
+        <TouchableOpacity onPress={() => navigation.replace("Login")}>
       
           <Text style={{color : 'white', marginTop: 30 , borderRadius: 20 , borderColor:'white', borderWidth:3 , padding : 10, backgroundColor:'purple'}}>Presiona para ir login</Text>
 

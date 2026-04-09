@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, Image, TextInput } from "react-native";
-import { router } from 'expo-router';
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useNavigation } from "@react-navigation/native";
 import { styles } from './login.styles';
 import { ScrollView } from "react-native";
 
@@ -9,6 +9,7 @@ import { ScrollView } from "react-native";
 
 export default function Login() {
   const [mostrarPassword, setMostrarPassword] = useState(false);
+  const navigation = useNavigation<any>();
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -53,11 +54,11 @@ export default function Login() {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity onPress={() => router.push('./recuperarContraseña')}>
+        <TouchableOpacity onPress={() => navigation.navigate("RecuperarContrasena")}>
           <Text style={styles.textoOlivarContra}>¿Olvidaste tu contraseña?</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.botonSession} onPress={() => router.replace('/(tabs)/inicio')}>
+        <TouchableOpacity style={styles.botonSession} onPress={() => navigation.replace("DrawerHome")}>
           <Text style={styles.textoSession}>Iniciar Sesión</Text>
         </TouchableOpacity>
       </View>
@@ -69,7 +70,7 @@ export default function Login() {
 
       <View style={styles.ContenedorRegistrarse}>
         <Text style={styles.TextoTienesCuenta}>¿No tienes cuenta?</Text>
-        <TouchableOpacity style={styles.BotonRegistrar} onPress={() => router.push('/registro')}>
+        <TouchableOpacity style={styles.BotonRegistrar} onPress={() => navigation.navigate("Registro")}>
           <Text style={styles.textoRegistro}>Regístrate</Text>
         </TouchableOpacity>
       </View>
