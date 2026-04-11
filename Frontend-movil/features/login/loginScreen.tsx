@@ -1,15 +1,11 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, Image, TextInput } from "react-native";
+import React from "react";
+import { View, Text, TouchableOpacity, Image, TextInput, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
-import { styles } from './login.styles';
-import { ScrollView } from "react-native";
-
-
+import { styles } from "./login.styles";
+import { useLoginViewModel } from "./useLoginViewModel";
 
 export default function Login() {
-  const [mostrarPassword, setMostrarPassword] = useState(false);
-  const navigation = useNavigation<any>();
+  const vm = useLoginViewModel();
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -33,7 +29,11 @@ export default function Login() {
           <TextInput 
             style={styles.inputCorreo} 
             placeholder="Ingresa tu correo" 
-            placeholderTextColor={'#666'} 
+            placeholderTextColor={'#666'}
+            value={vm.correo}
+            onChangeText={vm.setCorreo}
+            autoCapitalize="none"
+            keyboardType="email-address"
           />
         </View>
 
@@ -42,11 +42,13 @@ export default function Login() {
           {/* Opcional: Podrías poner un icono de candado aquí */}
           <TextInput 
             style={styles.inputContraseña} 
-            secureTextEntry={!mostrarPassword}
+            secureTextEntry={!vm.mostrarPassword}
             placeholder="Ingresa tu contraseña"
             placeholderTextColor={'#666'}
+            value={vm.password}
+            onChangeText={vm.setPassword}
           />
-          <TouchableOpacity onPress={() => setMostrarPassword(!mostrarPassword)}>
+          <TouchableOpacity onPress={vm.toggleMostrarPassword}>
             <Image 
               style={styles.IconoCorreo} 
               source={require('../../assets/imagesAlertaMujer/ScLogin/ojoPriv.png')} 
@@ -54,23 +56,23 @@ export default function Login() {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity onPress={() => navigation.navigate("RecuperarContrasena")}>
+        <TouchableOpacity onPress={vm.irARecuperarContrasena}>
           <Text style={styles.textoOlivarContra}>¿Olvidaste tu contraseña?</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.botonSession} onPress={() => navigation.replace("DrawerHome")}>
+        <TouchableOpacity style={styles.botonSession} onPress={vm.iniciarSesion}>
           <Text style={styles.textoSession}>Iniciar Sesión</Text>
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.BotonGoogle}>
+      <TouchableOpacity style={styles.BotonGoogle} onPress={vm.continuarConGoogle}>
         <Image style={styles.logoGoogle} source={require('../../assets/imagesAlertaMujer/ScLogin/google.png')} />
         <Text style={styles.textoGoogle}>Continuar con Google</Text>
       </TouchableOpacity>
 
       <View style={styles.ContenedorRegistrarse}>
         <Text style={styles.TextoTienesCuenta}>¿No tienes cuenta?</Text>
-        <TouchableOpacity style={styles.BotonRegistrar} onPress={() => navigation.navigate("Registro")}>
+        <TouchableOpacity style={styles.BotonRegistrar} onPress={vm.irARegistro}>
           <Text style={styles.textoRegistro}>Regístrate</Text>
         </TouchableOpacity>
       </View>

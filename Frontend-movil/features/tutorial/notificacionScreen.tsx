@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, Image, ScrollView, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
-import * as Notifications from "expo-notifications";
+//import * as Notifications from "expo-notifications";
 
 import { styles } from "./universalStyle";
 import { styles as cardStyles } from "../../src/components/ui/card/cardStyle";
@@ -15,32 +15,18 @@ export default function NotificacionTutorial() {
   const navigation = useNavigation<any>();
 
   const handlePermisoNotificaciones = async () => {
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
-
-    if (existingStatus !== "granted") {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
-    }
-
-    if (finalStatus === "granted") {
-      navigation.replace("DrawerHome");
-    } else {
-      Alert.alert(
-        "Avisos Desactivados",
-        "Si no activas las notificaciones, no podrás recibir alertas de tus contactos en peligro. ¿Deseas continuar de todos modos?",
-        [
-          { text: "Activar", onPress: () => void handlePermisoNotificaciones() },
-          {
-            text: "Continuar sin avisos",
-            style: "destructive",
-            onPress: () => navigation.replace("DrawerHome"),
-          },
-        ]
-      );
-    }
+    // TODO: Descomentar cuando usen development build (Sprint con backend)
+    Alert.alert(
+      "Modo Demo",
+      "En la versión final, aquí se solicitarán permisos de notificación. Por ahora continuamos al home.",
+      [
+        {
+          text: "Continuar",
+          onPress: () => navigation.replace("DrawerHome"),
+        },
+      ]
+    );
   };
-
   return (
     <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
