@@ -1,8 +1,6 @@
 import React from "react";
-import { View, Text, Image, ScrollView, Alert } from "react-native";
+import { View, Text, Image, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
-//import * as Notifications from "expo-notifications";
 
 import { styles } from "./universalStyle";
 import { styles as cardStyles } from "../../src/components/ui/card/cardStyle";
@@ -10,23 +8,11 @@ import { styles as cardStyles } from "../../src/components/ui/card/cardStyle";
 import CustomButton from "../../src/components/ui/button/aceptar";
 import CustomButton2 from "../../src/components/ui/button/cancelar";
 import Card from "../../src/components/ui/card/card";
+import { useNotificacionTutorialViewModel } from "./useNotificacionTutorialViewModel";
 
 export default function NotificacionTutorial() {
-  const navigation = useNavigation<any>();
+  const vm = useNotificacionTutorialViewModel();
 
-  const handlePermisoNotificaciones = async () => {
-    // TODO: Descomentar cuando usen development build (Sprint con backend)
-    Alert.alert(
-      "Modo Demo",
-      "En la versión final, aquí se solicitarán permisos de notificación. Por ahora continuamos al home.",
-      [
-        {
-          text: "Continuar",
-          onPress: () => navigation.replace("DrawerHome"),
-        },
-      ]
-    );
-  };
   return (
     <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
@@ -63,13 +49,10 @@ export default function NotificacionTutorial() {
           <View style={{ flex: 1 }} />
 
           <View style={[styles.footer, { paddingBottom: 40 }]}>
-            <CustomButton title="Finalizar y Activar" onPress={handlePermisoNotificaciones} />
+            <CustomButton title="Finalizar y Activar" onPress={vm.finalizarDemo} />
 
             <View style={{ marginTop: 10, width: "100%", alignItems: "center" }}>
-              <CustomButton2
-                title="Regresar"
-                onPress={() => navigation.navigate("TutorialSeguridad")}
-              />
+              <CustomButton2 title="Regresar" onPress={vm.regresar} />
             </View>
           </View>
         </View>

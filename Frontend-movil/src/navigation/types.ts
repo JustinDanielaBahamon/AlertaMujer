@@ -1,10 +1,15 @@
-export type RootStackParamList = {
+export type AuthStackParamList = {
   Index: undefined;
   Login: undefined;
   Registro: undefined;
   RecuperarContrasena: undefined;
-  Activacion: undefined;
+  PoliticaTerminos: undefined;
+  PoliticaPrivacidad: undefined;
+};
+
+export type MainStackParamList = {
   DrawerHome: undefined;
+  Activacion: undefined;
   TutorialBienvenida: undefined;
   TutorialBoton: undefined;
   TutorialMensaje: undefined;
@@ -12,7 +17,8 @@ export type RootStackParamList = {
   TutorialContacto: undefined;
   TutorialSeguridad: undefined;
   TutorialNotificacion: undefined;
-  PoliticaTerminos: undefined;
-  PoliticaPrivacidad: undefined;
   AgregarContacto: undefined;
 };
+
+/** @deprecated Usar AuthStackParamList o MainStackParamList según el flujo */
+export type RootStackParamList = AuthStackParamList & MainStackParamList;

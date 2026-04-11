@@ -1,10 +1,10 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
-import Inicio from "../../app/(drawer)/(tabs)/inicio";
-import Mapa from "../../app/(drawer)/(tabs)/mapa/MapaView";
-import Contactos from "../../app/(drawer)/(tabs)/contactos/contactos";
-import Historial from "../../app/(drawer)/(tabs)/historialAlerta/historial";
-import Alerta from "../../app/(drawer)/(tabs)/alerta";
+import Inicio from "../screens/tabs/inicio";
+import Mapa from "../screens/tabs/mapa/MapaView";
+import Contactos from "../screens/tabs/contactos/contactos";
+import Historial from "../screens/tabs/historialAlerta/historial";
+import Alerta from "../screens/tabs/alerta";
 
 const Tab = createBottomTabNavigator();
 

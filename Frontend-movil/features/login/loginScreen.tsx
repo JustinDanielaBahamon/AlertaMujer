@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, Image, TextInput, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, Image, TextInput, ScrollView, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { styles } from "./login.styles";
 import { useLoginViewModel } from "./useLoginViewModel";
@@ -60,8 +60,16 @@ export default function Login() {
           <Text style={styles.textoOlivarContra}>¿Olvidaste tu contraseña?</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.botonSession} onPress={vm.iniciarSesion}>
-          <Text style={styles.textoSession}>Iniciar Sesión</Text>
+        <TouchableOpacity
+          style={styles.botonSession}
+          onPress={() => void vm.iniciarSesion()}
+          disabled={vm.cargando}
+        >
+          {vm.cargando ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.textoSession}>Iniciar Sesión</Text>
+          )}
         </TouchableOpacity>
       </View>
 

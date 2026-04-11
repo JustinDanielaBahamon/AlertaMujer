@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, Text, Image, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
 import { Picker } from "@react-native-picker/picker";
 
 import { styles } from "./universalStyle";
@@ -11,30 +10,10 @@ import ModalConfirmacion from "@/src/components/ui/modalConfirmacion/confirmacio
 import CustomButton from "../../src/components/ui/button/aceptar";
 import CustomButton2 from "../../src/components/ui/button/cancelar";
 import Card from "../../src/components/ui/card/card";
+import { useUbicacionTutorialViewModel } from "./useUbicacionTutorialViewModel";
 
 export default function UbicacionScreen() {
-  const navigation = useNavigation<any>();
-
-  const [departamento, setDepartamento] = useState("Huila");
-  const [municipio, setMunicipio] = useState("Neiva");
-  const [modalConfirmacionVisible, setModalConfirmacionVisible] = useState(false);
-
-  const municipiosHuila = [
-    "Neiva",
-    "Pitalito",
-    "Garzón",
-    "San Agustín",
-    "Gigante",
-    "Campoalegre",
-    "Rivera",
-    "La Plata",
-    "Palermo",
-    "Isnos",
-  ];
-
-  const handleContinuarPantalla = () => {
-    setModalConfirmacionVisible(true);
-  };
+  const vm = useUbicacionTutorialViewModel();
 
   return (
     <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
@@ -61,8 +40,8 @@ export default function UbicacionScreen() {
               </Text>
               <View style={{ backgroundColor: "#fff", borderRadius: 15, marginBottom: 15, overflow: "hidden" }}>
                 <Picker
-                  selectedValue={departamento}
-                  onValueChange={(itemValue) => setDepartamento(itemValue)}
+                  selectedValue={vm.departamento}
+                  onValueChange={(itemValue) => vm.setDepartamento(itemValue)}
                   style={{ height: 50, width: "100%" }}
                 >
                   <Picker.Item label="Huila" value="Huila" />
@@ -72,11 +51,11 @@ export default function UbicacionScreen() {
               <Text style={{ color: "#fff", fontSize: 12, marginBottom: 5, marginLeft: 10 }}>Municipio</Text>
               <View style={{ backgroundColor: "#fff", borderRadius: 15, overflow: "hidden" }}>
                 <Picker
-                  selectedValue={municipio}
-                  onValueChange={(itemValue) => setMunicipio(itemValue)}
+                  selectedValue={vm.municipio}
+                  onValueChange={(itemValue) => vm.setMunicipio(itemValue)}
                   style={{ height: 50, width: "100%" }}
                 >
-                  {municipiosHuila.map((muni) => (
+                  {vm.municipiosHuila.map((muni) => (
                     <Picker.Item key={muni} label={muni} value={muni} />
                   ))}
                 </Picker>
@@ -87,23 +66,20 @@ export default function UbicacionScreen() {
           <View style={{ flex: 1 }} />
 
           <View style={[styles.footer, { paddingBottom: 40 }]}>
-            <CustomButton title="Continuar" onPress={handleContinuarPantalla} />
+            <CustomButton title="Continuar" onPress={vm.abrirConfirmacion} />
             <View style={{ marginTop: 10, width: "100%", alignItems: "center" }}>
-              <CustomButton2 title="Regresar" onPress={() => navigation.navigate("TutorialMensaje")} />
+              <CustomButton2 title="Regresar" onPress={vm.regresar} />
             </View>
           </View>
         </View>
       </ScrollView>
 
       <ModalConfirmacion
-        visible={modalConfirmacionVisible}
-        departamento={departamento}
-        municipio={municipio}
-        onConfirmar={() => {
-          setModalConfirmacionVisible(false);
-          navigation.navigate("TutorialContacto");
-        }}
-        onRegresar={() => setModalConfirmacionVisible(false)}
+        visible={vm.modalConfirmacionVisible}
+        departamento={vm.departamento}
+        municipio={vm.municipio}
+        onConfirmar={vm.confirmarUbicacion}
+        onRegresar={vm.cerrarConfirmacion}
       />
     </SafeAreaView>
   );
