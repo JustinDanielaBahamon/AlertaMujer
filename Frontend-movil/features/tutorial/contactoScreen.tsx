@@ -1,8 +1,6 @@
 import React from "react";
-import { View, Text, Image, ScrollView, Alert } from "react-native";
+import { View, Text, Image, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
-import * as Contacts from "expo-contacts";
 
 import { styles } from "./universalStyle";
 import { styles as cardStyles } from "../../src/components/ui/card/cardStyle";
@@ -10,23 +8,10 @@ import { styles as cardStyles } from "../../src/components/ui/card/cardStyle";
 import CustomButton from "../../src/components/ui/button/aceptar";
 import CustomButton2 from "../../src/components/ui/button/cancelar";
 import Card from "../../src/components/ui/card/card";
+import { useContactoTutorialViewModel } from "./useContactoTutorialViewModel";
 
 export default function ContactosTutorial() {
-  const navigation = useNavigation<any>();
-
-  const handlePermisosContactos = async () => {
-    const { status } = await Contacts.requestPermissionsAsync();
-
-    if (status === "granted") {
-      navigation.navigate("TutorialSeguridad");
-    } else {
-      Alert.alert(
-        "Permiso necesario",
-        "Necesitamos acceso a tus contactos para que puedas elegirlos como personas de confianza en caso de emergencia.",
-        [{ text: "Entendido" }]
-      );
-    }
-  };
+  const vm = useContactoTutorialViewModel();
 
   return (
     <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
@@ -66,13 +51,10 @@ export default function ContactosTutorial() {
           <View style={{ flex: 1 }} />
 
           <View style={[styles.footer, { paddingBottom: 40 }]}>
-            <CustomButton title="Permitir acceso" onPress={handlePermisosContactos} />
+            <CustomButton title="Permitir acceso" onPress={vm.solicitarPermisoContactos} />
 
             <View style={{ marginTop: 10, width: "100%", alignItems: "center" }}>
-              <CustomButton2
-                title="Regresar"
-                onPress={() => navigation.navigate("TutorialUbicacion")}
-              />
+              <CustomButton2 title="Regresar" onPress={vm.regresar} />
             </View>
           </View>
         </View>

@@ -1,16 +1,20 @@
 import { useCallback, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import type { RootStackParamList } from "../../src/navigation/types";
+import type { AuthStackParamList } from "../../src/navigation/types";
+import { useAuth } from "../../src/contexts/AuthContext";
+import { loginWithEmail } from "./login.service";
 
-type LoginNavigation = NativeStackNavigationProp<RootStackParamList, "Login">;
+type LoginNavigation = NativeStackNavigationProp<AuthStackParamList, "Login">;
 
 export function useLoginViewModel() {
   const navigation = useNavigation<LoginNavigation>();
+  const { signIn } = useAuth();
 
   const [correo, setCorreo] = useState("");
   const [password, setPassword] = useState("");
   const [mostrarPassword, setMostrarPassword] = useState(false);
+  const [cargando, setCargando] = useState(false);
 
   const toggleMostrarPassword = useCallback(() => {
     setMostrarPassword((v) => !v);
@@ -24,13 +28,18 @@ export function useLoginViewModel() {
     navigation.navigate("Registro");
   }, [navigation]);
 
-  const iniciarSesion = useCallback(() => {
-    // Aquí irá la llamada al servicio de auth (Model); por ahora solo navega.
-    navigation.replace("DrawerHome");
-  }, [navigation]);
+  const iniciarSesion = useCallback(async () => {
+    setCargando(true);
+    try {
+      const user = await loginWithEmail(correo.trim(), password);
+      signIn(user);
+    } finally {
+      setCargando(false);
+    }
+  }, [correo, password, signIn]);
 
   const continuarConGoogle = useCallback(() => {
-    // Placeholder: integrar OAuth cuando exista endpoint.
+    // Placeholder: OAuth + signIn(user) cuando exista endpoint.
   }, []);
 
   return {
@@ -44,5 +53,6 @@ export function useLoginViewModel() {
     irARegistro,
     iniciarSesion,
     continuarConGoogle,
+    cargando,
   };
 }

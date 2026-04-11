@@ -1,8 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, Text, Image, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
-import * as SMS from "expo-sms";
 
 import CustomePermisos from "../../src/components/ui/modalMesanje/permisosMLL";
 import { styles } from "./universalStyle";
@@ -10,40 +8,10 @@ import { styles as cardStyles } from "../../src/components/ui/card/cardStyle";
 import CustomButton from "../../src/components/ui/button/aceptar";
 import CustomButton2 from "../../src/components/ui/button/cancelar";
 import Card from "../../src/components/ui/card/card";
+import { useMensajesTutorialViewModel } from "./useMensajesTutorialViewModel";
 
 export default function ActivacionTutorial() {
-  const navigation = useNavigation<any>();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [tipoPermiso, setTipoPermiso] = useState<"sms" | "llamada">("sms");
-
-  const handleIniciarFlujo = () => {
-    setTipoPermiso("sms");
-    setModalVisible(true);
-  };
-
-  const handleConfirmarModal = async () => {
-    if (tipoPermiso === "sms") {
-      try {
-        const isAvailable = await SMS.isAvailableAsync();
-        if (isAvailable) {
-          await SMS.sendSMSAsync(
-            ["3001234567"],
-            "🚨 ALERTA: Necesito ayuda. Ubicación: https://www.google.com/maps",
-          );
-        }
-      } catch (error) {
-        console.log("Error SMS:", error);
-      }
-      setTipoPermiso("llamada");
-    } else {
-      setModalVisible(false);
-      navigation.navigate("TutorialUbicacion");
-    }
-  };
-
-  const handleCancelarModal = () => {
-    setModalVisible(false);
-  };
+  const vm = useMensajesTutorialViewModel();
 
   return (
     <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
@@ -80,23 +48,20 @@ export default function ActivacionTutorial() {
           <View style={{ flex: 1 }} />
 
           <View style={[styles.footer, { paddingBottom: 40 }]}>
-            <CustomButton title="Continuar" onPress={handleIniciarFlujo} />
+            <CustomButton title="Continuar" onPress={vm.iniciarFlujoPermisos} />
 
             <View style={{ marginTop: 10, width: "100%", alignItems: "center" }}>
-              <CustomButton2
-                title="Regresar"
-                onPress={() => navigation.navigate("TutorialBoton")}
-              />
+              <CustomButton2 title="Regresar" onPress={vm.regresar} />
             </View>
           </View>
         </View>
       </ScrollView>
 
       <CustomePermisos
-        visible={modalVisible}
-        tipo={tipoPermiso}
-        onConfirmar={handleConfirmarModal}
-        onCancelar={handleCancelarModal}
+        visible={vm.modalVisible}
+        tipo={vm.tipoPermiso}
+        onConfirmar={vm.confirmarModal}
+        onCancelar={vm.cancelarModal}
       />
     </SafeAreaView>
   );

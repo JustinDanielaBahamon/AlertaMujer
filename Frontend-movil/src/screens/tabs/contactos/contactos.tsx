@@ -1,10 +1,10 @@
 import { Image, Text, TouchableOpacity, View, ScrollView } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
 import { styles } from "./contactos.styles";
+import { useContactosTabViewModel } from "../../../../features/contactos/useContactosViewModel";
 
 export default function Contactos() {
-  const navigation = useNavigation<any>();
+  const vm = useContactosTabViewModel();
 
   return (
     <View style={styles.ContenedorPrincipal}>
@@ -37,10 +37,7 @@ export default function Contactos() {
         </ScrollView>
       </View>
 
-      <TouchableOpacity
-        style={styles.BotonFlotante}
-        onPress={() => navigation.navigate("AgregarContacto")}
-      >
+      <TouchableOpacity style={styles.BotonFlotante} onPress={vm.irAgregarContacto}>
         <MaterialIcons name="person-add" size={28} color="white" />
       </TouchableOpacity>
     </View>

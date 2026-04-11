@@ -1,9 +1,6 @@
 import React from "react";
-import { View, Text, Image, ScrollView, Alert } from "react-native";
+import { View, Text, Image, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
-import { Camera } from "expo-camera";
-import { Audio } from "expo-av";
 
 import { styles } from "./universalStyle";
 import { styles as cardStyles } from "../../src/components/ui/card/cardStyle";
@@ -11,27 +8,10 @@ import { styles as cardStyles } from "../../src/components/ui/card/cardStyle";
 import CustomButton from "../../src/components/ui/button/aceptar";
 import CustomButton2 from "../../src/components/ui/button/cancelar";
 import Card from "../../src/components/ui/card/card";
+import { useSeguridadTutorialViewModel } from "./useSeguridadTutorialViewModel";
 
 export default function CamaraMicrofonoTutorial() {
-  const navigation = useNavigation<any>();
-
-  const handleSolicitarPermisos = async () => {
-    const { status: cameraStatus } = await Camera.requestCameraPermissionsAsync();
-    const { status: audioStatus } = await Audio.requestPermissionsAsync();
-
-    if (cameraStatus === "granted" && audioStatus === "granted") {
-      navigation.navigate("TutorialNotificacion");
-    } else {
-      Alert.alert(
-        "Permisos necesarios",
-        "Para tu protección, necesitamos acceder a la cámara y micrófono. Esto permite generar evidencia en video si te encuentras en peligro.",
-        [
-          { text: "Reintentar", onPress: () => void handleSolicitarPermisos() },
-          { text: "Cancelar", style: "cancel" },
-        ]
-      );
-    }
-  };
+  const vm = useSeguridadTutorialViewModel();
 
   return (
     <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
@@ -70,13 +50,10 @@ export default function CamaraMicrofonoTutorial() {
           <View style={{ flex: 1 }} />
 
           <View style={[styles.footer, { paddingBottom: 40 }]}>
-            <CustomButton title="Permitir y Continuar" onPress={handleSolicitarPermisos} />
+            <CustomButton title="Permitir y Continuar" onPress={vm.solicitarPermisosCamaraAudio} />
 
             <View style={{ marginTop: 10, width: "100%", alignItems: "center" }}>
-              <CustomButton2
-                title="Regresar"
-                onPress={() => navigation.navigate("TutorialContacto")}
-              />
+              <CustomButton2 title="Regresar" onPress={vm.regresar} />
             </View>
           </View>
         </View>
