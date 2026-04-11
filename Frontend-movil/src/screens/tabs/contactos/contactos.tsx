@@ -7,6 +7,7 @@ export default function Contactos() {
   const vm = useContactosTabViewModel();
 
   return (
+    
     <View style={styles.ContenedorPrincipal}>
       <View style={styles.Cuerpo}>
         <Text style={styles.TituloPagina}>Mis Contactos de Confianza</Text>
