@@ -10,7 +10,10 @@ const Tab = createBottomTabNavigator();
 
 export default function TabNavigator() {
   return (
-    <Tab.Navigator>
+    <Tab.Navigator 
+      // Esta línea quita la barra blanca superior en todas las pestañas
+      screenOptions={{ headerShown: false }} 
+    >
       <Tab.Screen name="Inicio" component={Inicio} />
       <Tab.Screen name="Alerta" component={Alerta} />
       <Tab.Screen name="Mapa" component={Mapa} />
