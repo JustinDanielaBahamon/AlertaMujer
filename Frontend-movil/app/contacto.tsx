@@ -1,1 +1,1 @@
-export { default } from "../features/agregarcontacto/agregarScreen "
+export { default } from "../features/Agregarcontacto/agregarScreen";

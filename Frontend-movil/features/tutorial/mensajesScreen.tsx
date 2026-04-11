@@ -26,10 +26,10 @@ export default function ActivacionTutorial() {
       try {
         const isAvailable = await SMS.isAvailableAsync();
         if (isAvailable) {
-          await SMS.composeAsync({
-            recipients: ["3001234567"],
-            body: "🚨 ALERTA: Necesito ayuda. Ubicación: https://www.google.com/maps",
-          });
+          await SMS.sendSMSAsync(
+            ["3001234567"],
+            "🚨 ALERTA: Necesito ayuda. Ubicación: https://www.google.com/maps",
+          );
         }
       } catch (error) {
         console.log("Error SMS:", error);

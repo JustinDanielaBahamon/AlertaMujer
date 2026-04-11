@@ -1,5 +1,6 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "./types";
 import DrawerNavigator from "./DrawerNavigator";
 import IndexScreen from "../../app/index";
 import LoginScreen from "../../app/login";
@@ -17,7 +18,7 @@ import TerminosScreen from "../../app/politica/terminos";
 import PrivacidadScreen from "../../app/politica/privacidad";
 import AgregarContactoScreen from "../../features/Agregarcontacto/agregarScreen";
 
-const RootStack = createNativeStackNavigator();
+const RootStack = createNativeStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
   return (
