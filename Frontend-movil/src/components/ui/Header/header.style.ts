@@ -20,11 +20,23 @@ export const styles = StyleSheet.create({
 
   actions: {
     flexDirection: "row",
-    gap: 15,
+    alignItems: "center",
+    gap: 8,
   },
 
   icono: {
     fontSize: 20,
-  }
+  },
+  chip: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  chipText: {
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  menuIcon: {
+    fontSize: 24,
+  },
 
 });
