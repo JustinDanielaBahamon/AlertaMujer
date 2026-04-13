@@ -2,7 +2,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useEffect } from "react";
 import type { MainStackParamList } from "./types";
 import { useAuth } from "../contexts/AuthContext";
-import DrawerNavigator from "./DrawerNavigator";
+import DrawerNavigator from "./drawer/DrawerNavigator";
 import ActivacionScreen from "../screens/activacion";
 import BienvenidaTutorialScreen from "../screens/tutorial/bienvenida";
 import BotonTutorialScreen from "../screens/tutorial/boton";
