@@ -2,6 +2,7 @@ import { View, Image, TouchableOpacity, Text, StyleSheet } from "react-native";
 import { DrawerActions, useNavigation } from "@react-navigation/native";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { useLocale } from "../../../contexts/LocaleContext";
+import { styles } from "./header.style";
 
 export default function AppHeader() {
   const navigation = useNavigation();
@@ -23,50 +24,21 @@ export default function AppHeader() {
         style={styles.logo}
       />
 
-      <View style={styles.actions}>
-        <TouchableOpacity onPress={toggleTheme} style={styles.chip}>
-          <Text style={[styles.chipText, { color: theme.headerText }]}>
-            {theme.mode === "dark" ? "🌙" : "☀️"}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={toggleLocale} style={styles.chip}>
-          <Text style={[styles.chipText, { color: theme.headerText }]}>
-            {locale === "es" ? "🌍 ES" : "🌍 EN"}
-          </Text>
-        </TouchableOpacity>
-      </View>
+      {/* <View style={styles.actions}>
+          <TouchableOpacity onPress={toggleTheme} style={styles.chip}>
+            <Text style={[styles.chipText, { color: theme.headerText }]}>
+              {theme.mode === "dark" ? "🌙" : "☀️"}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={toggleLocale} style={styles.chip}>
+            <Text style={[styles.chipText, { color: theme.headerText }]}>
+              {locale === "es" ? "🌍 ES" : "🌍 EN"}
+            </Text>
+          </TouchableOpacity>
+        </View> 
+      */}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    height: 120,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingTop: 36,
-  },
-  menuIcon: {
-    fontSize: 24,
-  },
-  logo: {
-    width: 72,
-    height: 72,
-    resizeMode: "contain",
-  },
-  actions: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  chip: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  chipText: {
-    fontSize: 13,
-    fontWeight: "600",
-  },
-});
+

@@ -1,4 +1,4 @@
-import { View, StyleSheet, Text } from "react-native";
+import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
 import {
   createDrawerNavigator,
   DrawerContentScrollView,
@@ -8,6 +8,9 @@ import {
 import TabNavigator from "./TabNavigator";
 import AppHeader from "../components/ui/Header/header";
 import { useAuth } from "../contexts/AuthContext";
+// IMPORTANTE: Asegúrate de que estas rutas sean correctas
+import { useTheme } from "../contexts/ThemeContext"; 
+import { useLocale } from "../contexts/LocaleContext";
 
 const Drawer = createDrawerNavigator();
 
@@ -22,6 +25,10 @@ function ContenidoConCabecera() {
 
 function ContenidoDrawerPersonalizado(props: DrawerContentComponentProps) {
   const { signOut, user } = useAuth();
+  
+  // SOLUCIÓN AL ERROR: Debemos definir estas variables aquí dentro
+  const { theme, toggleTheme } = useTheme(); 
+  const { locale, toggleLocale } = useLocale();
 
   return (
     <DrawerContentScrollView {...props} contentContainerStyle={{ flexGrow: 1 }}>
@@ -33,10 +40,26 @@ function ContenidoDrawerPersonalizado(props: DrawerContentComponentProps) {
           </Text>
         ) : null}
       </View>
+
       <DrawerItem
         label="Inicio (tabs)"
         onPress={() => props.navigation.navigate("Inicio")}
       />
+
+      {/* CÓDIGO DE LAS ACCIONES RECUPERADO Y FUNCIONAL */}
+      <View style={styles.actions}>
+        <TouchableOpacity onPress={toggleTheme} style={styles.chip}>
+          <Text style={[styles.chipText, { color: theme.headerText }]}>
+            {theme.mode === "dark" ? "🌙" : "☀️"}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={toggleLocale} style={styles.chip}>
+          <Text style={[styles.chipText, { color: theme.headerText }]}>
+            {locale === "es" ? "🌍 ES" : "🌍 EN"}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
       <DrawerItem label="Cerrar sesión" onPress={() => signOut()} />
     </DrawerContentScrollView>
   );
@@ -72,4 +95,18 @@ const styles = StyleSheet.create({
     fontSize: 13,
     opacity: 0.7,
   },
+  // ESTILOS NECESARIOS PARA QUE NO DE ERROR
+  actions: {
+    flexDirection: 'row',
+    padding: 16,
+    gap: 10
+  },
+  chip: {
+    padding: 8,
+    borderRadius: 10,
+    backgroundColor: 'rgba(0,0,0,0.05)'
+  },
+  chipText: {
+    fontSize: 16
+  }
 });
