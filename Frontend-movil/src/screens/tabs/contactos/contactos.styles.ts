@@ -1,105 +1,174 @@
-import {StyleSheet } from 'react-native';
+/**
+ * ESTILOS DE LA PANTALLA DE CONTACTOS
+ * 
+ * Define todos los estilos visuales de la lista de contactos,
+ * incluyendo los nuevos estilos para swipe-to-delete.
+ */
 
-export const styles = StyleSheet.create ({
+import { StyleSheet } from "react-native";
 
-ContenedorPrincipal: {
+export const styles = StyleSheet.create({
+  // Contenedor principal (toda la pantalla)
+  ContenedorPrincipal: {
     flex: 1,
-    backgroundColor: '#FBFBFF', // Un blanco con un toque azul/lavanda muy sutil
+    backgroundColor: "#F5F5F5",
   },
+
+  // Cuerpo con padding
   Cuerpo: {
     flex: 1,
     paddingHorizontal: 20,
+    paddingTop: 20,
   },
+
+  // Título principal "Mis Contactos de Confianza"
   TituloPagina: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    color: '#4A4A4A',
-    marginTop: 25,
-    textAlign: 'left',
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#6B3FA0",
+    marginBottom: 8,
   },
+
+  // Subtítulo explicativo
   Subtitulo: {
     fontSize: 14,
-    color: '#8E8E8E',
+    color: "#666",
     marginBottom: 20,
     lineHeight: 20,
   },
+
+  // Wrapper de la tarjeta (necesario para SwipeListView)
+  TarjetaWrapper: {
+    marginBottom: 12,
+  },
+
+  // Tarjeta individual de contacto
   TarjetaContacto: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    backgroundColor: "#FFF",
+    borderRadius: 15,
     padding: 15,
-    marginBottom: 15,
-    // Sombras para iOS
-    shadowColor: '#9e83cf',
-    shadowOffset: { width: 0, height: 4 },
+    flexDirection: "row",
+    alignItems: "center",
+    elevation: 3, // Sombra en Android
+    shadowColor: "#000", // Sombra en iOS
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 10,
-    // Sombras para Android
-    elevation: 5,
+    shadowRadius: 4,
   },
+
+  // Contenedor de la foto de perfil
   ContenedorFoto: {
-    position: 'relative',
+    position: "relative",
+    marginRight: 15,
   },
+
+  // Imagen de perfil circular
   FotoPerfil: {
-    width: 65,
-    height: 65,
-    borderRadius: 32.5,
-    borderWidth: 2,
-    borderColor: '#E8DEF8',
-  },
-  BadgeRelacion: {
-    position: 'absolute',
-    bottom: -5,
-    backgroundColor: '#9e83cf',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 10,
-    alignSelf: 'center',
-  },
-  TextoBadge: {
-    color: 'white',
-    fontSize: 10,
-    fontWeight: 'bold',
-    textTransform: 'uppercase',
-  },
-  InfoContacto: {
-    flex: 1,
-    marginLeft: 20,
-  },
-  NombreContacto: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#333',
-    marginBottom: 4,
-  },
-  ContenedorTelefono: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  Telefono: {
-    fontSize: 14,
-    color: '#666',
-  },
-  BotonEditar: {
-    backgroundColor: '#F3EFFF',
-    padding: 10,
-    borderRadius: 12,
-  },
-  BotonFlotante: {
-    backgroundColor: '#9e83cf',
     width: 60,
     height: 60,
     borderRadius: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'absolute',
+    backgroundColor: "#E0E0E0",
+  },
+
+  // Badge de parentesco (ej: "Hermana", "Madre")
+  BadgeRelacion: {
+    position: "absolute",
+    bottom: -5,
+    right: -5,
+    backgroundColor: "#6B3FA0",
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+
+  // Texto del badge
+  TextoBadge: {
+    color: "#FFF",
+    fontSize: 10,
+    fontWeight: "600",
+  },
+
+  // Contenedor de nombre y teléfono
+  InfoContacto: {
+    flex: 1,
+  },
+
+  // Nombre del contacto
+  NombreContacto: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 4,
+  },
+
+  // Contenedor de ícono + teléfono
+  ContenedorTelefono: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  // Número de teléfono formateado
+  Telefono: {
+    fontSize: 14,
+    color: "#666",
+  },
+
+  // Ícono de lápiz (editar rápido)
+  IconoEditar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#F3E5F5",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  // ESTILOS PARA SWIPE-TO-DELETE
+
+  // Fondo que aparece al deslizar (rojo)
+  RowBack: {
+    alignItems: "center",
+    backgroundColor: "#E53935",
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    paddingRight: 15,
+    borderRadius: 15,
+    marginBottom: 12,
+  },
+
+  // Botón de borrar que aparece al deslizar
+  BotonBorrarSwipe: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 100,
+    height: "100%",
+  },
+
+  // Texto "Eliminar" del swipe
+  TextoBorrarSwipe: {
+    color: "#FFF",
+    fontSize: 12,
+    fontWeight: "600",
+    marginTop: 4,
+  },
+
+  // BOTÓN FLOTANTE "+"
+
+  BotonFlotante: {
+    position: "absolute",
     bottom: 30,
-    right: 25,
+    right: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "#6B3FA0",
+    justifyContent: "center",
+    alignItems: "center",
     elevation: 8,
-    shadowColor: '#000',
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
   },
 });

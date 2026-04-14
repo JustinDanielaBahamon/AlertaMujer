@@ -8,12 +8,7 @@ export default function Inicio() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.topSection}>
-        <TouchableOpacity onPress={vm.cerrarSesion}>
-          <Text style={styles.botonLogin}>Cerrar sesión</Text>
-        </TouchableOpacity>
-      </View>
-
+      
       <View style={styles.containerUbicacion}>
         <MaterialIcons name="location-on" size={24} color="#7B2CBF" />
         <Text style={styles.iconoUbicacion}></Text>

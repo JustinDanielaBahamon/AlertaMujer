@@ -1,3 +1,5 @@
+import type { Contacto } from "../models/Contacto";
+
 export type AuthStackParamList = {
   Index: undefined;
   Login: undefined;
@@ -17,7 +19,8 @@ export type MainStackParamList = {
   TutorialContacto: undefined;
   TutorialSeguridad: undefined;
   TutorialNotificacion: undefined;
-  AgregarContacto: undefined;
+  /** Sin `contacto` = alta; con `contacto` = edición */
+  AgregarContacto: { contacto?: Contacto } | undefined;
 };
 
 /** @deprecated Usar AuthStackParamList o MainStackParamList según el flujo */
