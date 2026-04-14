@@ -1,31 +1,24 @@
 import React from "react";
-import { View, Text, Image, ScrollView } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { View, Text, ScrollView, Dimensions } from "react-native";
 import { styles } from "./universalStyle";
 import { styles as cardStyles } from "../../src/components/ui/card/cardStyle";
-
-import CustomButton from "../../src/components/ui/button/aceptar";
-import CustomButton2 from "../../src/components/ui/button/cancelar";
 import Card from "../../src/components/ui/card/card";
 import { useBotonTutorialViewModel } from "./useBotonTutorialViewModel";
+
+const { width } = Dimensions.get("window");
+
 
 export default function ActivacionTutorial() {
   const vm = useBotonTutorialViewModel();
 
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
+    <View style={{ width: width }}> 
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.container}>
-          <View style={styles.header}>
-            <Image
-              source={require("../../assets/imagesAlertaMujer/logoAlertaMujer.png")}
-              style={styles.logo}
-              resizeMode="contain"
-            />
-          </View>
+          {/* ELIMINADO EL HEADER DE AQUÍ PORQUE YA ESTÁ EN EL PADRE */}
 
           <Card style={cardStyles.card}>
             <Text style={cardStyles.title}>
@@ -50,17 +43,11 @@ export default function ActivacionTutorial() {
             </View>
           </Card>
 
+          {/* ELIMINADOS LOS PUNTOS DE AQUÍ PORQUE EL PADRE LOS MANEJA DINÁMICAMENTE */}
+
           <View style={{ flex: 1 }} />
-
-          <View style={[styles.footer, { paddingBottom: 40 }]}>
-            <CustomButton title="Continuar" onPress={vm.continuar} />
-
-            <View style={{ marginTop: 5, width: "100%", alignItems: "center" }}>
-              <CustomButton2 title="Regresar" onPress={vm.regresar} />
-            </View>
-          </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }

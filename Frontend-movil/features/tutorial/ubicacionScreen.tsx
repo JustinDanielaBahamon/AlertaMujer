@@ -1,32 +1,33 @@
 import React from "react";
-import { View, Text, Image, ScrollView } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { View, Text, ScrollView, Dimensions } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 
 import { styles } from "./universalStyle";
 import { styles as cardStyles } from "../../src/components/ui/card/cardStyle";
 import ModalConfirmacion from "@/src/components/ui/modalConfirmacion/confirmacion";
 
+// Botones
 import CustomButton from "../../src/components/ui/button/aceptar";
 import CustomButton2 from "../../src/components/ui/button/cancelar";
 import Card from "../../src/components/ui/card/card";
 import { useUbicacionTutorialViewModel } from "./useUbicacionTutorialViewModel";
 
+const { width } = Dimensions.get("window");
+
 export default function UbicacionScreen() {
   const vm = useUbicacionTutorialViewModel();
 
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-        <View style={styles.container}>
-          <View style={styles.header}>
-            <Image
-              source={require("../../assets/imagesAlertaMujer/logoAlertaMujer.png")}
-              style={styles.logo}
-              resizeMode="contain"
-            />
-          </View>
-
+    <View style={{ width: width }}>
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: "center", // 🔥 CENTRA TODO VERTICALMENTE
+        }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={[styles.container]}>
+          
           <Card style={cardStyles.card}>
             <Text style={cardStyles.title}>Tu Ubicación</Text>
 
@@ -48,7 +49,9 @@ export default function UbicacionScreen() {
                 </Picker>
               </View>
 
-              <Text style={{ color: "#fff", fontSize: 12, marginBottom: 5, marginLeft: 10 }}>Municipio</Text>
+              <Text style={{ color: "#fff", fontSize: 12, marginBottom: 5, marginLeft: 10 }}>
+                Municipio
+              </Text>
               <View style={{ backgroundColor: "#fff", borderRadius: 15, overflow: "hidden" }}>
                 <Picker
                   selectedValue={vm.municipio}
@@ -60,20 +63,23 @@ export default function UbicacionScreen() {
                   ))}
                 </Picker>
               </View>
+
+              {/* BOTONES */}
+              <View style={{ marginTop: 20, gap: 5 }}>
+                <CustomButton 
+                  title="Guardar Ubicación" 
+                  onPress={() => vm.abrirConfirmacion()} 
+                />
+                {/* <CustomButton2 title="Regresar" onPress={() => vm.regresar()} /> */}
+              </View>
+
             </View>
           </Card>
 
-          <View style={{ flex: 1 }} />
-
-          <View style={[styles.footer, { paddingBottom: 40 }]}>
-            <CustomButton title="Continuar" onPress={vm.abrirConfirmacion} />
-            <View style={{ marginTop: 10, width: "100%", alignItems: "center" }}>
-              <CustomButton2 title="Regresar" onPress={vm.regresar} />
-            </View>
-          </View>
         </View>
       </ScrollView>
 
+      {/* MODAL */}
       <ModalConfirmacion
         visible={vm.modalConfirmacionVisible}
         departamento={vm.departamento}
@@ -81,6 +87,6 @@ export default function UbicacionScreen() {
         onConfirmar={vm.confirmarUbicacion}
         onRegresar={vm.cerrarConfirmacion}
       />
-    </SafeAreaView>
+    </View>
   );
 }

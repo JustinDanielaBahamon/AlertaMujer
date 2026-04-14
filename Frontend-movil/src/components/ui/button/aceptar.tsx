@@ -10,7 +10,7 @@ interface Props {
 export default function PrimaryButton({ title, onPress, color }: Props) {
   return (
     <TouchableOpacity
-      style={[styles.button, { backgroundColor: color || "#331753" }]}
+      style={[styles.button, { backgroundColor: color || "#d897f1" }]}
       onPress={onPress}
     >
       <Text style={styles.text}>{title}</Text>
@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
     marginVertical: 5,
   },
   text: {
-    color: "#fff",
+    color: "#fffafa",
     fontWeight: "bold",
     fontSize: 16,
   },
