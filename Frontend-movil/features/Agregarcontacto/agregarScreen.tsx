@@ -12,7 +12,7 @@ export default function AgregarContacto() {
     <KeyboardAvoidingView behavior="padding" style={styles.container}>
       <Header />
       <View style={styles.content}>
-        <Text style={styles.titulo}>Agregar Contacto</Text>
+        <Text style={styles.titulo}>{vm.tituloPantalla}</Text>
 
         <View style={styles.card}>
           {/* Input Nombre */}
@@ -55,7 +55,7 @@ export default function AgregarContacto() {
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.btnGuardarPrincipal} onPress={vm.guardar}>
-            <Text style={styles.btnTextWhite}>Guardar Contacto</Text>
+            <Text style={styles.btnTextWhite}>{vm.etiquetaBotonGuardar}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.btnCancelarLink} onPress={vm.cancelar}>

@@ -1,68 +1,67 @@
-import { useCallback, useState } from "react";
-import { useNavigation } from "@react-navigation/native";
-import * as Contacts from 'expo-contacts'; 
+import { useCallback, useEffect, useState } from "react";
+import { useNavigation, useRoute, type RouteProp } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import * as Contacts from "expo-contacts";
 import { Alert } from "react-native";
+import type { MainStackParamList } from "../../src/navigation/types";
+
+type AgregarNav = NativeStackNavigationProp<MainStackParamList, "AgregarContacto">;
+type AgregarRoute = RouteProp<MainStackParamList, "AgregarContacto">;
 
 export function useAgregarContactoViewModel() {
-  const navigation = useNavigation<any>();
-  
-  // Estados para manejar los datos del formulario
+  const navigation = useNavigation<AgregarNav>();
+  const route = useRoute<AgregarRoute>();
+  const contactoParam = route.params?.contacto;
+  const esEdicion = Boolean(contactoParam);
+
   const [nombre, setNombre] = useState("");
   const [parentesco, setParentesco] = useState("");
   const [telefono, setTelefono] = useState("");
 
-  /**
-   * Solicita permisos y abre la agenda nativa del dispositivo.
-   * Al seleccionar un contacto, rellena automáticamente los campos del formulario.
-   */
+  useEffect(() => {
+    if (contactoParam) {
+      setNombre(contactoParam.nombre);
+      setParentesco(contactoParam.parentesco ?? "");
+      setTelefono(contactoParam.telefono);
+    } else {
+      setNombre("");
+      setParentesco("");
+      setTelefono("");
+    }
+  }, [contactoParam?.id, contactoParam?.nombre, contactoParam?.telefono, contactoParam?.parentesco]);
+
   const abrirAgenda = async () => {
-    // 1. Solicitar permisos al sistema operativo
     const { status } = await Contacts.requestPermissionsAsync();
-    
-    if (status === 'granted') {
+
+    if (status === "granted") {
       try {
-        /**
-         * CORRECCIÓN: presentContactPickerAsync devuelve el contacto directamente, 
-         * no un objeto desestructurado { contact }.
-         */
         const contactoSeleccionado = await Contacts.presentContactPickerAsync();
-        
+
         if (contactoSeleccionado) {
-          // 2. Extraer nombre (prioriza el nombre completo 'name')
-          const nombreDesdeAgenda = contactoSeleccionado.name || 
+          const nombreDesdeAgenda =
+            contactoSeleccionado.name ||
             `${contactoSeleccionado.firstName || ""} ${contactoSeleccionado.lastName || ""}`.trim();
-          
+
           setNombre(nombreDesdeAgenda);
-          
-          // 3. Extraer primer número de teléfono disponible
+
           if (contactoSeleccionado.phoneNumbers && contactoSeleccionado.phoneNumbers.length > 0) {
-            /**
-             * Usamos una expresión regular para limpiar el número:
-             * [^\d+] -> Quita todo lo que NO sea un número o el signo +
-             */
             const numeroLimpio = contactoSeleccionado.phoneNumbers[0].number?.replace(/[^\d+]/g, "");
             setTelefono(numeroLimpio || "");
           }
-          
-          // Nota para el equipo: Los campos se llenan pero la pantalla NO se cierra 
-          // para permitir que la usuaria edite el nombre o agregue el parentesco.
         }
       } catch (error) {
         console.error("Error al seleccionar contacto:", error);
       }
     } else {
       Alert.alert(
-        "Permiso denegado", 
-        "Ve a configuración para permitir que la app acceda a tus contactos."
+        "Permiso denegado",
+        "Ve a configuracion para permitir que la app acceda a tus contactos.",
       );
     }
   };
 
-  /**
-   * Finaliza el flujo volviendo a la pantalla anterior.
-   */
   const guardar = useCallback(() => {
-    // TODO: Implementar lógica de persistencia (API/Firebase) aquí
+    // TODO: persistir (API) y devolver lista actualizada al tab Contactos
     navigation.goBack();
   }, [navigation]);
 
@@ -71,11 +70,17 @@ export function useAgregarContactoViewModel() {
   }, [navigation]);
 
   return {
-    nombre, setNombre,
-    parentesco, setParentesco,
-    telefono, setTelefono,
-    abrirAgenda, 
+    nombre,
+    setNombre,
+    parentesco,
+    setParentesco,
+    telefono,
+    setTelefono,
+    abrirAgenda,
     guardar,
     cancelar,
+    esEdicion,
+    tituloPantalla: esEdicion ? "Actualizar contacto" : "Agregar contacto",
+    etiquetaBotonGuardar: esEdicion ? "Guardar cambios" : "Guardar contacto",
   };
 }
