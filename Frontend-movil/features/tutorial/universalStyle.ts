@@ -1,57 +1,35 @@
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
-  
   container: {
     flex: 1,
-    backgroundColor: '#C8B2D6', // El color lila de fondo
+    backgroundColor: '#fdf8ff', // Un lila muy clarito de fondo (como la imagen)
     alignItems: 'center',
-    
   },
   header: {
-    marginTop: 2,
+    marginTop: 10,
+    height: 100,
   },
   logo: {
-    width: 150,
-    height: 150,
+    width: 140,
+    height: 100,
   },
-  titulo: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    color: '#f3f3f3', // Color gris oscuro de la letra
-    textAlign: 'center',
-    marginHorizontal: 20,
-    // Simulación de borde blanco:
-    textShadowColor: '#000000', 
-    textShadowOffset: { width: -1, height: 1 },
-    textShadowRadius: 5, // Un radio alto hace que brille el borde blanco
+  illustrationWrapper: {
+    height: 280, // Aumentamos un poco para que la imagen luzca
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    zIndex: 2, // Asegura que esté por encima de la tarjeta
+    marginBottom: -40, // 👈 ESTO hace que la imagen se solape con la tarjeta
   },
-
-  cardPersonalizada: {
-    backgroundColor: '#EBE0F3', // Lila clarito del recuadro
-    borderRadius: 30,
-    padding: 30,
-    width: '85%',
-    elevation: 5,
-  },
-  textoInfo: {
-    fontSize: 16,
-    lineHeight: 24,
-    textAlign: 'center',
-    color: '#000',
-    fontWeight: '500',
+  mainIllustration: {
+    width: '90%',
+    height: '100%',
   },
   footer: {
+    position: 'absolute',
+    bottom: 30,
     width: '100%',
     alignItems: 'center',
-    marginBottom: 20,
-
-    paddingBottom: 25, // 🔥 ESTE es el fix real
-    paddingTop: 10,
   }
-
-
-  
-  
- 
 });

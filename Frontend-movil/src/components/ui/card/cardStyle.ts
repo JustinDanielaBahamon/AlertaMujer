@@ -1,41 +1,39 @@
-// cardStyle.ts
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
-    card: {
+  card: {
         width: "90%",
-        backgroundColor: "#F3E5F5", // Un lila clarito como el de tu imagen
-        borderRadius: 40, // Bordes bien redondeados según la imagen
-        padding: 25,
-        marginVertical: 10,
-        elevation: 5,
+        backgroundColor: "#FFFFFF", // 👈 Cambia a Blanco para que resalte del fondo lila
+        borderRadius: 40,
+        padding: 20,
+        // marginVertical: 10, // Quita esto para controlar el espacio con el negativo de arriba
+        elevation: 10, 
+        shadowColor: "#550779", // Sombra con tono morado para que sea "más lindo"
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.2,
+        shadowRadius: 10,
         alignSelf: "center",
-        alignItems: 'center', // Para centrar el título
+        alignItems: 'center',
     },
     title: {
-        fontSize: 24, // Más grande según la imagen
+        fontSize: 24,
         fontWeight: "bold",
         marginBottom: 15,
         textAlign: 'center',
-        color: '#000000', // Color grisáceo del título
+        color: '#2D0C44', // Un morado muy oscuro, casi negro
     },
-    // --- ESTO ES LO NUEVO ---
     innerContainer: {
-        backgroundColor: "#471e63", // El color morado oscuro de la imagen
+        backgroundColor: "#5d2585", 
         borderRadius: 30,
-        padding: 20,
+        padding: 25,
         width: '100%',
+        marginTop: 5, // Espacio extra bajo el título
     },
     description: {
         fontSize: 16,
-        color: "#fff", // Texto blanco para que resalte en el fondo oscuro
-        flexWrap: "wrap",
-        lineHeight: 22,
-        textAlign: 'center', // Centrado como en la imagen
+        color: "#FFFFFF", // Blanco puro para máxima legibilidad
+        lineHeight: 24,
+        textAlign: 'center',
         fontWeight: '500',
     },
-
-    
 });
-
-
