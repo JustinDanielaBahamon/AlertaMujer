@@ -1,62 +1,64 @@
 import React from "react";
-import { View, Text, Image, ScrollView } from "react-native";
+import { View, Text, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { styles } from "./universalStyle";
 import { styles as cardStyles } from "../../src/components/ui/card/cardStyle";
-
-import CustomButton from "../../src/components/ui/button/aceptar";
-import CustomButton2 from "../../src/components/ui/button/cancelar";
 import Card from "../../src/components/ui/card/card";
+import CustomButton from "../../src/components/ui/button/aceptar";
 import { useNotificacionTutorialViewModel } from "./useNotificacionTutorialViewModel";
 
 export default function NotificacionTutorial() {
   const vm = useNotificacionTutorialViewModel();
 
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-        <View style={styles.container}>
-          <View style={styles.header}>
-            <Image
-              source={require("../../assets/imagesAlertaMujer/logoAlertaMujer.png")}
-              style={styles.logo}
-              resizeMode="contain"
-            />
-          </View>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+      
+      {/* 1. HEADER CON LA NUEVA IMAGEN DE NOTIFICACIÓN */}
+      <View style={[styles.img, { width: '100%', alignItems: 'center', justifyContent: 'center', marginBottom: -15, marginTop: -34 }]}>
+        <Image
+          source={require("../../assets/imagesAlertaMujer/ScTutorial/Notificacion.png")} 
+          style={{ height: 230, width: 280 }} 
+          resizeMode="contain"
+        />
+      </View>
 
-          <Card style={cardStyles.card}>
-            <Text style={cardStyles.title}>
-              Mantente{"\n"}Informada
-            </Text>
+      {/* 2. TARJETA DE INFORMACIÓN */}
+      <Card 
+        title={`Mantente\nInformada`}
+        style={cardStyles.card}
+      >
+        <View style={{ gap: 5 }}>
+          
+          <Text style={cardStyles.description}>
+            <Text style={{ fontWeight: "bold", color: "#f5caef" }}>● Alertas SOS: </Text>
+            <Text style={{ fontWeight: "bold" }}>Tiempo real.</Text> Recibirás avisos críticos incluso si la aplicación no está abierta.
+          </Text>
 
-            <View style={cardStyles.innerContainer}>
-              <Text style={cardStyles.description}>
-                <Text style={{ fontWeight: "bold" }}>La comunicación rápida salva vidas.{"\n\n"}</Text>
+          <Text style={cardStyles.description}>
+            <Text style={{ fontWeight: "bold", color: "#f5caef" }}>● Red de Apoyo: </Text>
+            <Text style={{ fontWeight: "bold" }}>Seguridad activa.</Text> Mantente siempre conectada para ayudar o ser ayudada sin demora.
+          </Text>
 
-                Activa las notificaciones para que Alerta Mujer pueda avisarte en el{" "}
-                <Text style={{ fontWeight: "bold" }}>segundo exacto</Text> en que alguien necesite tu ayuda.{"\n\n"}
+          <Text style={cardStyles.description}>
+            <Text style={{ fontWeight: "bold", color: "#f5caef" }}>● Rapidez: </Text>
+            <Text style={{ fontWeight: "bold" }}>Comunicación.</Text> La notificación inmediata es la herramienta más poderosa para tu protección.
+          </Text>
 
-                <Text style={{ fontWeight: "bold" }}>🔔 Alertas en tiempo real:</Text>
-                {"\n"}Recibirás avisos críticos incluso si la aplicación no está abierta.{"\n\n"}
-
-                <Text style={{ fontWeight: "bold" }}>🛡️ Seguridad Activa:</Text>
-                {"\n"}Te permite estar siempre conectada con tu red de confianza y reaccionar sin demora.
-              </Text>
-            </View>
-          </Card>
-
-          <View style={{ flex: 1 }} />
-
-          <View style={[styles.footer, { paddingBottom: 40 }]}>
-            <CustomButton title="Finalizar y Activar" onPress={vm.finalizarDemo} />
-
-            <View style={{ marginTop: 10, width: "100%", alignItems: "center" }}>
-              <CustomButton2 title="Regresar" onPress={vm.regresar} />
-            </View>
-          </View>
         </View>
-      </ScrollView>
+      </Card>
+
+      {/* 3. BOTÓN FINALIZADOR (Lleva al Dashboard) */}
+      <View style={{ width: '100%', alignItems: 'center', marginTop: 15 }}>
+        <CustomButton 
+            title="Finalizar y Activar" 
+            onPress={vm.finalizarDemo} 
+        />
+      </View>
+
+      {/* Espaciador para la paginación del final */}
+      <View style={{ flex: 1 }} />
+      
     </SafeAreaView>
   );
 }
