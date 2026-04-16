@@ -21,6 +21,7 @@ export const styles = StyleSheet.create({
     width: '100%',
     zIndex: 2, // Asegura que esté por encima de la tarjeta
     marginBottom: -40, // 👈 ESTO hace que la imagen se solape con la tarjeta
+     marginTop: 60,
   },
   mainIllustration: {
     width: '90%',
