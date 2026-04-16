@@ -46,7 +46,7 @@ export const TutorialPager = ({ children }: TutorialPagerProps) => {
               width: activeIndex === i ? 22 : 8,
               height: 8,
               borderRadius: 4,
-              backgroundColor: activeIndex === i ? '#4A148C' : '#d212f8',
+              backgroundColor: activeIndex === i ? '#4A148C' : '#c412e7',
               marginHorizontal: 4,
               opacity: activeIndex === i ? 1 : 0.6
             }}

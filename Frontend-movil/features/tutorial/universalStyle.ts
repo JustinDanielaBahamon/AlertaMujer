@@ -7,12 +7,13 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   header: {
-    marginTop: 10,
+    marginTop: 2,
     height: 100,
   },
-  logo: {
-    width: 140,
-    height: 100,
+  img: {
+    width: 215,
+    height: 215,
+    
   },
   illustrationWrapper: {
     height: 280, // Aumentamos un poco para que la imagen luzca
