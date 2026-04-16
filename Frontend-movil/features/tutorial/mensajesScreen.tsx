@@ -1,68 +1,64 @@
 import React from "react";
-import { View, Text, Image, ScrollView } from "react-native";
+import { View, Text, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import CustomePermisos from "../../src/components/ui/modalMesanje/permisosMLL";
 import { styles } from "./universalStyle";
 import { styles as cardStyles } from "../../src/components/ui/card/cardStyle";
-import CustomButton from "../../src/components/ui/button/aceptar";
-import CustomButton2 from "../../src/components/ui/button/cancelar";
 import Card from "../../src/components/ui/card/card";
 import { useMensajesTutorialViewModel } from "./useMensajesTutorialViewModel";
 
-export default function ActivacionTutorial() {
+export default function MensajesScreen() {
   const vm = useMensajesTutorialViewModel();
 
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-        <View style={styles.container}>
-          <View style={styles.header}>
-            <Image
-              source={require("../../assets/imagesAlertaMujer/logoAlertaMujer.png")}
-              style={styles.logo}
-              resizeMode="contain"
-            />
-          </View>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+      
+      {/* 1. HEADER CON IMAGEN MANUAL (Centrada y con tamaño controlado) */}
+      <View style={[styles.img, { width: '100%', alignItems: 'center', justifyContent: 'center', marginBottom: -1 }]}>
+        <Image
+          source={require("../../assets/imagesAlertaMujer/ScTutorial/mensaje.png")} 
+          style={{ height: 210, width: 225 }} 
+          resizeMode="contain"
+        />
+      </View>
 
-          <Card style={cardStyles.card}>
-            <Text style={cardStyles.title}>
-              Sistema de mensajes{"\n"}y llamadas
-            </Text>
+      {/* 2. TARJETA DE SISTEMA DE MENSAJES */}
+      <Card 
+        title={`Mensajes y\nLlamadas`}
+        style={cardStyles.card}
+      >
+        <View style={{ gap: 1 }}>
+          
+          <Text style={cardStyles.description}>
+            <Text style={{ fontWeight: "bold", color: "#f5caef" }}>● SMS Automático: </Text>
+            <Text style={{ fontWeight: "bold" }}>Aviso rápido.</Text> Se envía un mensaje de texto con tu ubicación exacta a tus contactos.
+          </Text>
 
-            <View style={cardStyles.innerContainer}>
-              <Text style={cardStyles.description}>
-                <Text style={{ fontWeight: "bold" }}>
-                  Cuando activas una alerta, el sistema contacta a tus personas de confianza automáticamente:{"\n\n"}
-                </Text>
+          <Text style={cardStyles.description}>
+            <Text style={{ fontWeight: "bold", color: "#f5caef" }}>● Llamada SOS: </Text>
+            <Text style={{ fontWeight: "bold" }}>Auxilio directo.</Text> El sistema inicia una llamada de emergencia a tus personas de confianza.
+          </Text>
 
-                <Text style={{ fontWeight: "bold" }}>📩 Mensaje automático:</Text>
-                {"\n"}Se envía un SMS con tu ubicación exacta.{"\n\n"}
+          <Text style={cardStyles.description}>
+            <Text style={{ fontWeight: "bold", color: "#f5caef" }}>● Confirmación: </Text>
+            <Text style={{ fontWeight: "bold" }}>Seguridad total.</Text> Recibirás una notificación cuando la ayuda esté en camino.
+          </Text>
 
-                <Text style={{ fontWeight: "bold" }}>📞 Llamada de emergencia:</Text>
-                {"\n"}Se realiza una llamada de auxilio a tus contactos.
-              </Text>
-            </View>
-          </Card>
-
-          <View style={{ flex: 1 }} />
-
-          <View style={[styles.footer, { paddingBottom: 40 }]}>
-            <CustomButton title="Continuar" onPress={vm.iniciarFlujoPermisos} />
-
-            <View style={{ marginTop: 10, width: "100%", alignItems: "center" }}>
-              <CustomButton2 title="Regresar" onPress={vm.regresar} />
-            </View>
-          </View>
         </View>
-      </ScrollView>
+      </Card>
 
+      {/* Espaciador para la paginación del TutorialPager */}
+      <View style={{ flex: 1 }} />
+
+      {/* El ViewModel sigue manejando los permisos en segundo plano si es necesario */}
       <CustomePermisos
         visible={vm.modalVisible}
         tipo={vm.tipoPermiso}
         onConfirmar={vm.confirmarModal}
         onCancelar={vm.cancelarModal}
       />
+      
     </SafeAreaView>
   );
 }
