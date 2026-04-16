@@ -1,4 +1,4 @@
-import type { Usuario } from "../../src/models/Usuario";
+import type { Usuario } from "../../models/Usuario";
 
 /**
  * Capa de acceso a datos / API para autenticación.
