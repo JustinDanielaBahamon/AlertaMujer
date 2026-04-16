@@ -3,7 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { AuthStackParamList } from "../../src/navigation/types";
 import { useAuth } from "../../src/contexts/AuthContext";
-import { loginWithEmail } from "./login.service";
+import { loginWithEmail } from "../../src/services/login/login.service";
 
 type LoginNavigation = NativeStackNavigationProp<AuthStackParamList, "Login">;
 

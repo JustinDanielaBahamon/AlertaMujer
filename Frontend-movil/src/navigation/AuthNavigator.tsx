@@ -3,7 +3,7 @@ import type { AuthStackParamList } from "./types";
 import IndexScreen from "../screens/index";
 import LoginScreen from "../screens/login";
 import RegistroScreen from "../screens/registro";
-import RecuperarContrasenaScreen from "../../features/login/recuperarContraseña";
+import RecuperarContrasenaScreen from "../../features/recuperarContraseña/recuperarContraseñaScreen";
 import TerminosScreen from "../screens/politica/terminos";
 import PrivacidadScreen from "../screens/politica/privacidad";
 
