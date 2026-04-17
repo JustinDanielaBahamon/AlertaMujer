@@ -1,19 +1,18 @@
-import React, { useState } from "react"; // 1. Agregamos useState
-import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
 import {
   createDrawerNavigator,
   DrawerContentScrollView,
-  DrawerItem,
   type DrawerContentComponentProps,
 } from "@react-navigation/drawer";
-import TabNavigator from "../TabNavigator";
+import { LinearGradient } from "expo-linear-gradient";
+import React, { useState } from "react";
+import { Image, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 import AppHeader from "../../components/ui/Header/header";
 import { useAuth } from "../../contexts/AuthContext";
-import { useTheme } from "../../contexts/ThemeContext"; 
-import { useLocale } from "../../contexts/LocaleContext";
 import { styles } from "../drawer/drawer.style";
+import TabNavigator from "../TabNavigator";
 
-// 2. Importamos el componente desde features (siguiendo tu patrón)
 import AjustesSubmenu from "../../../features/settings/ajustesComponent";
 
 const Drawer = createDrawerNavigator();
@@ -29,42 +28,87 @@ function ContenidoConCabecera() {
 
 function ContenidoDrawerPersonalizado(props: DrawerContentComponentProps) {
   const { signOut, user } = useAuth();
-  const { theme } = useTheme(); 
-  
-  // 3. Estado para controlar el menú tipo Facebook
   const [estaAbiertoAjustes, setEstaAbiertoAjustes] = useState(false);
 
+  const irA = (ruta: string) => {
+    setEstaAbiertoAjustes(false);
+    props.navigation.navigate(ruta as never);
+  };
+
+  const handleLogout = () => {
+    signOut();
+  };
+
   return (
-    <DrawerContentScrollView {...props} contentContainerStyle={{ flexGrow: 1 }}>
-      <View style={styles.drawerHeader}>
-        <Text style={styles.drawerTitle}>Alerta Mujer</Text>
-        {user ? (
-          <Text style={styles.drawerSubtitle} numberOfLines={1}>
-            {user.correo}
-          </Text>
-        ) : null}
-      </View>
+    <LinearGradient colors={["#f97575c2", "#b45cfc"]} style={{ flex: 1 }}>
+      <SafeAreaView style={{ flex: 1 }}>
+        {/* TARJETA PRINCIPAL */}
+        <View style={styles.cardContainer}>
+          <DrawerContentScrollView
+            {...props}
+            contentContainerStyle={{ flexGrow: 1 }}
+          >
+            {/* HEADER */}
+            <View style={styles.header}>
+              <Image
+                source={{
+                  uri: "https://wallpapers.com/images/hd/edited-ppg-cartoon-pfp-cve126604pe97akw.jpg",
+                }}
+                style={styles.avatar}
+              />
+              <Text style={styles.name}>
+                Isabella Greyrat XD
+              </Text>
+              <Text style={styles.email}>
+                {user?.correo || "Isabella@gmail.com"}
+              </Text>
+            </View>
 
-      <DrawerItem
-        label="Inicio (tabs)"
-        onPress={() => props.navigation.navigate("Inicio")}
-      />
+            {/* MENÚ EN CUADRO */}
+            <View style={styles.innerCard}>
+              <TouchableOpacity onPress={() => irA("Inicio")}>
+                <Text style={styles.item}>🏡 Inicio</Text>
+              </TouchableOpacity>
 
-      {/* 4. BOTÓN DESPLEGABLE TIPO FACEBOOK */}
-      <DrawerItem
-        label={estaAbiertoAjustes ? "🔽 Configuración" : "▶️ Configuración"}
-        onPress={() => setEstaAbiertoAjustes(!estaAbiertoAjustes)}
-      />
+              <TouchableOpacity onPress={() => irA("Contactos")}>
+                <Text style={styles.item}>📲 Contactos</Text>
+              </TouchableOpacity>
 
-      {/* 5. MUESTRA EL SUBMENÚ SI ESTÁ ABIERTO */}
-      {estaAbiertoAjustes && (
-        <AjustesSubmenu navigation={props.navigation} />
-      )}
+              <TouchableOpacity onPress={() => irA("Historial")}>
+                <Text style={styles.item}>📖 Historial</Text>
+              </TouchableOpacity>
 
-      <View style={{ flex: 1 }} /> 
+              <TouchableOpacity
+                onPress={() => setEstaAbiertoAjustes(!estaAbiertoAjustes)}
+              >
+                <Text style={styles.item}>
+                  🔧 Configuración {estaAbiertoAjustes ? "▼" : "▶"}
+                </Text>
+              </TouchableOpacity>
 
-      <DrawerItem label="Cerrar sesión" onPress={() => signOut()} labelStyle={{ color: 'red' }}/>
-    </DrawerContentScrollView>
+              {estaAbiertoAjustes && (
+                <View style={{ paddingLeft: 15 }}>
+                  <AjustesSubmenu navigation={props.navigation} />
+                </View>
+              )}
+            </View>
+
+            <View style={{ flex: 1 }} />
+
+            {/* FOOTER */}
+            <View style={styles.footer}>
+              <TouchableOpacity style={styles.shareBtn}>
+                <Text style={styles.btnText}>➤ Compartir Enlace</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+                <Text style={styles.btnText}>Cerrar sesión</Text>
+              </TouchableOpacity>
+            </View>
+          </DrawerContentScrollView>
+        </View>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
@@ -78,4 +122,3 @@ export default function DrawerNavigator() {
     </Drawer.Navigator>
   );
 }
-
