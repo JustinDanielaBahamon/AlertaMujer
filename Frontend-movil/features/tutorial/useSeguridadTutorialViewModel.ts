@@ -5,12 +5,24 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Camera } from "expo-camera";
 import { Audio } from "expo-av";
 import type { MainStackParamList } from "../../src/navigation/types";
+// Importamos el hook para el video
+import { useVideoPlayer } from 'expo-video';
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
 
 export function useSeguridadTutorialViewModel() {
   const navigation = useNavigation<Nav>();
 
+  // --- LÓGICA DEL VIDEO ---
+  // Asegúrate de que el nombre coincida con el archivo real (ej: seguridad.mp4)
+  const videoSource = require("../../assets/imagesAlertaMujer/ScTutorial/seguridad.mp4");
+  const player = useVideoPlayer(videoSource, (p) => {
+    p.loop = true;
+    p.play();
+    p.muted = true;
+  });
+
+  // --- TU LÓGICA DE PERMISOS (Mantenida intacta) ---
   const solicitarPermisosCamaraAudio = useCallback(async () => {
     const { status: cameraStatus } = await Camera.requestCameraPermissionsAsync();
     const { status: audioStatus } = await Audio.requestPermissionsAsync();
@@ -45,5 +57,5 @@ export function useSeguridadTutorialViewModel() {
     navigation.navigate("TutorialContacto");
   }, [navigation]);
 
-  return { solicitarPermisosCamaraAudio, regresar };
+  return { solicitarPermisosCamaraAudio, regresar, player };
 }
