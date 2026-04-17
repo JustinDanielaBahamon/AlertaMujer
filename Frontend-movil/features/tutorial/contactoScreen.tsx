@@ -3,10 +3,7 @@ import { View, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { VideoView } from 'expo-video';
 import Card from "../../src/components/ui/card/card";
-
-// Importamos el ViewModel corregido
 import { useContactoTutorialViewModel } from "./useContactoTutorialViewModel";
-
 import { styles } from "./universalStyle";
 import { styles as cardStyles } from "../../src/components/ui/card/cardStyle";
 

@@ -1,19 +1,15 @@
-import { useCallback, useState } from "react";
-import { useNavigation } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useCallback, useRef, useState } from "react";
 import * as SMS from "expo-sms";
-import type { MainStackParamList } from "../../src/navigation/types";
-// Importamos el hook para el video
-import { useVideoPlayer } from 'expo-video';
-
-type Nav = NativeStackNavigationProp<MainStackParamList>;
+import { useVideoPlayer } from "expo-video";
 
 export function useMensajesTutorialViewModel() {
-  const navigation = useNavigation<Nav>();
   const [modalVisible, setModalVisible] = useState(false);
   const [tipoPermiso, setTipoPermiso] = useState<"sms" | "llamada">("sms");
+  const [mostrarAdvertencia, setMostrarAdvertencia] = useState(false);
 
-  // --- LÓGICA DEL VIDEO ---
+  // promesa que resuelve cuando el usuario termina con los permisos
+  const resolverPermiso = useRef<(valor: boolean) => void>(() => {});
+
   const videoSource = require("../../assets/imagesAlertaMujer/ScTutorial/mensaje.mp4");
   const player = useVideoPlayer(videoSource, (p) => {
     p.loop = true;
@@ -21,46 +17,53 @@ export function useMensajesTutorialViewModel() {
     p.muted = true;
   });
 
-  const iniciarFlujoPermisos = useCallback(() => {
-    setTipoPermiso("sms");
-    setModalVisible(true);
+  // El pager llama esto cuando detecta deslizamiento desde mensajes
+  const pedirPermisos = useCallback((): Promise<boolean> => {
+    return new Promise((resolve) => {
+      resolverPermiso.current = resolve;
+      setTipoPermiso("sms");
+      setModalVisible(true);
+      setMostrarAdvertencia(false);
+    });
   }, []);
 
   const confirmarModal = useCallback(async () => {
     if (tipoPermiso === "sms") {
-      try {
-        const isAvailable = await SMS.isAvailableAsync();
-        if (isAvailable) {
-          await SMS.sendSMSAsync(
-            ["3001234567"],
-            "🚨 ALERTA: Necesito ayuda. Ubicación: https://www.google.com/maps",
-          );
-        }
-      } catch (e) {
-        console.log("Error SMS:", e);
-      }
+      try { await SMS.isAvailableAsync(); } catch (e) { console.log("Error SMS:", e); }
       setTipoPermiso("llamada");
     } else {
+      // Ambos aceptados → puede pasar
       setModalVisible(false);
-      navigation.navigate("TutorialUbicacion");
+      resolverPermiso.current(true);
     }
-  }, [tipoPermiso, navigation]);
+  }, [tipoPermiso]);
 
   const cancelarModal = useCallback(() => {
     setModalVisible(false);
+    setMostrarAdvertencia(true);
   }, []);
 
-  const regresar = useCallback(() => {
-    navigation.navigate("TutorialBoton");
-  }, [navigation]);
+  const reintentarPermisos = useCallback(() => {
+    setMostrarAdvertencia(false);
+    setTipoPermiso("sms");
+    setModalVisible(true);
+  }, []);
+
+  const continuarSinPermisos = useCallback(() => {
+    // Canceló pero igual puede pasar
+    setMostrarAdvertencia(false);
+    resolverPermiso.current(true);
+  }, []);
 
   return {
+    player,
     modalVisible,
     tipoPermiso,
-    iniciarFlujoPermisos,
+    mostrarAdvertencia,
+    pedirPermisos,
     confirmarModal,
     cancelarModal,
-    regresar,
-    player, // Exportamos el player
+    reintentarPermisos,
+    continuarSinPermisos,
   };
 }

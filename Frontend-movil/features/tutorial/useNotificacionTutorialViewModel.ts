@@ -12,7 +12,7 @@ export function useNotificacionTutorialViewModel() {
   const navigation = useNavigation<Nav>();
 
   // --- LÓGICA DEL VIDEO ---
-  const videoSource = require("../../assets/imagesAlertaMujer/ScTutorial/Notificacion .mp4");
+  const videoSource = require("../../assets/imagesAlertaMujer/ScTutorial/notificacion .mp4");
   const player = useVideoPlayer(videoSource, (p) => {
     p.loop = true;
     p.play();

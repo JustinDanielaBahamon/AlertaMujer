@@ -3,7 +3,6 @@ import { View, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Picker } from "@react-native-picker/picker";
 import { VideoView } from 'expo-video'; // Usamos VideoView
-
 import { styles } from "./universalStyle";
 import { styles as cardStyles } from "../../src/components/ui/card/cardStyle";
 import ModalConfirmacion from "@/src/components/ui/modalConfirmacion/confirmacion";

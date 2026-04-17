@@ -2,7 +2,6 @@ import React from "react";
 import { View, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { VideoView } from 'expo-video'; // Cambio de Image a VideoView
-
 import { styles } from "./universalStyle";
 import { styles as cardStyles } from "../../src/components/ui/card/cardStyle";
 import Card from "../../src/components/ui/card/card";
