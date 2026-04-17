@@ -1,12 +1,14 @@
 import React from "react";
-import { View, Text, Image } from "react-native";
+import { View, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Picker } from "@react-native-picker/picker";
+import { VideoView } from 'expo-video'; // Usamos VideoView
+
 import { styles } from "./universalStyle";
 import { styles as cardStyles } from "../../src/components/ui/card/cardStyle";
 import ModalConfirmacion from "@/src/components/ui/modalConfirmacion/confirmacion";
 import Card from "../../src/components/ui/card/card";
-import CustomButton from "../../src/components/ui/button/aceptar"; // Importamos tu botón de aceptar
+import CustomButton from "../../src/components/ui/button/aceptar";
 import { useUbicacionTutorialViewModel } from "./useUbicacionTutorialViewModel";
 
 export default function UbicacionScreen() {
@@ -15,12 +17,14 @@ export default function UbicacionScreen() {
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       
-      {/* 1. HEADER CON IMAGEN */}
-      <View style={[styles.img, { width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: -40}]}>
-        <Image
-          source={require("../../assets/imagesAlertaMujer/ScTutorial/ubicacion.png")} 
-          style={{ height: 250, width: 270 }} 
-          resizeMode="contain"
+      {/* 1. VIDEO (Subimos el video manualmente con marginTop negativo) */}
+      <View style={[styles.illustrationWrapper, { marginTop: -45, marginBottom: -35 }]}>
+        <VideoView
+          style={{ height: 190, width: 200 }} // Medidas ajustadas para no apretar los Pickers
+          player={vm.player} 
+          nativeControls={false}
+          contentFit="contain"
+          allowsFullscreen={false}
         />
       </View>
 
@@ -63,16 +67,16 @@ export default function UbicacionScreen() {
             </Picker>
           </View>
         </View>
-        {/* 3. BOTÓN DE ACCIÓN (Guardar/Confirmar) */}
-      <View style={{ width: '100%', alignItems: 'center', marginTop: 12 }}>
-        <CustomButton 
-            title="Guardar Ubicación" 
-            onPress={vm.abrirConfirmacion} 
-        />
-      </View>
+
+        {/* 3. BOTÓN DE ACCIÓN */}
+        <View style={{ width: '100%', alignItems: 'center', marginTop: 10 }}>
+          <CustomButton 
+              title="Guardar Ubicación" 
+              onPress={vm.abrirConfirmacion} 
+          />
+        </View>
       </Card>
 
-      {/* Espaciador para la paginación */}
       <View style={{ flex: 1 }} />
 
       <ModalConfirmacion
