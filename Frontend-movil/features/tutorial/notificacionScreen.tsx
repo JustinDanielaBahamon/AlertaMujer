@@ -1,6 +1,7 @@
 import React from "react";
-import { View, Text, Image } from "react-native";
+import { View, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { VideoView } from 'expo-video'; // Cambio de Image a VideoView
 
 import { styles } from "./universalStyle";
 import { styles as cardStyles } from "../../src/components/ui/card/cardStyle";
@@ -14,12 +15,14 @@ export default function NotificacionTutorial() {
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       
-      {/* 1. HEADER CON LA NUEVA IMAGEN DE NOTIFICACIÓN */}
-      <View style={[styles.img, { width: '100%', alignItems: 'center', justifyContent: 'center', marginBottom: -15, marginTop: -34 }]}>
-        <Image
-          source={require("../../assets/imagesAlertaMujer/ScTutorial/Notificacion.png")} 
-          style={{ height: 230, width: 280 }} 
-          resizeMode="contain"
+      {/* 1. VIDEO (Ajusta el marginTop negativo si quieres subirlo más que en las otras pantallas) */}
+      <View style={[styles.illustrationWrapper, { marginTop: -60, marginBottom: -50}]}>
+        <VideoView
+          style={{ height: 150, width: 200 }} // Mantengo tus medidas originales
+          player={vm.player} 
+          nativeControls={false}
+          contentFit="contain"
+          allowsFullscreen={false}
         />
       </View>
 
@@ -29,7 +32,6 @@ export default function NotificacionTutorial() {
         style={cardStyles.card}
       >
         <View style={{ gap: 5 }}>
-          
           <Text style={cardStyles.description}>
             <Text style={{ fontWeight: "bold", color: "#f5caef" }}>● Alertas SOS: </Text>
             <Text style={{ fontWeight: "bold" }}>Tiempo real.</Text> Recibirás avisos críticos incluso si la aplicación no está abierta.
@@ -44,19 +46,17 @@ export default function NotificacionTutorial() {
             <Text style={{ fontWeight: "bold", color: "#f5caef" }}>● Rapidez: </Text>
             <Text style={{ fontWeight: "bold" }}>Comunicación.</Text> La notificación inmediata es la herramienta más poderosa para tu protección.
           </Text>
-
         </View>
       </Card>
 
-      {/* 3. BOTÓN FINALIZADOR (Lleva al Dashboard) */}
-      <View style={{ width: '100%', alignItems: 'center', marginTop: 15 }}>
+      {/* 3. BOTÓN FINALIZADOR */}
+      <View style={{ width: '100%', alignItems: 'center', marginTop: 10 }}>
         <CustomButton 
             title="Finalizar y Activar" 
             onPress={vm.finalizarDemo} 
         />
       </View>
 
-      {/* Espaciador para la paginación del final */}
       <View style={{ flex: 1 }} />
       
     </SafeAreaView>
