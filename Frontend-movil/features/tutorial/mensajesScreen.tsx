@@ -1,6 +1,7 @@
 import React from "react";
-import { View, Text, Image } from "react-native";
+import { View, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { VideoView } from 'expo-video'; // Usamos VideoView
 
 import CustomePermisos from "../../src/components/ui/modalMesanje/permisosMLL";
 import { styles } from "./universalStyle";
@@ -14,12 +15,15 @@ export default function MensajesScreen() {
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       
-      {/* 1. HEADER CON IMAGEN MANUAL (Centrada y con tamaño controlado) */}
-      <View style={[styles.img, { width: '100%', alignItems: 'center', justifyContent: 'center', marginBottom: -1 }]}>
-        <Image
-          source={require("../../assets/imagesAlertaMujer/ScTutorial/mensaje.png")} 
-          style={{ height: 210, width: 225 }} 
-          resizeMode="contain"
+      {/* 1. VIDEO (Reemplaza a la imagen, fuera de la Card) */}
+      {/* Ajusta marginTop para subirlo manualmente */}
+      <View style={[styles.illustrationWrapper, { marginTop: -24, marginBottom: -23 }]}>
+        <VideoView
+          style={{ height: 212, width: 225 }} // Mantengo tus medidas originales
+          player={vm.player} 
+          nativeControls={false}
+          contentFit="contain"
+          allowsFullscreen={false}
         />
       </View>
 
@@ -29,7 +33,6 @@ export default function MensajesScreen() {
         style={cardStyles.card}
       >
         <View style={{ gap: 1 }}>
-          
           <Text style={cardStyles.description}>
             <Text style={{ fontWeight: "bold", color: "#f5caef" }}>● SMS Automático: </Text>
             <Text style={{ fontWeight: "bold" }}>Aviso rápido.</Text> Se envía un mensaje de texto con tu ubicación exacta a tus contactos.
@@ -44,14 +47,11 @@ export default function MensajesScreen() {
             <Text style={{ fontWeight: "bold", color: "#f5caef" }}>● Confirmación: </Text>
             <Text style={{ fontWeight: "bold" }}>Seguridad total.</Text> Recibirás una notificación cuando la ayuda esté en camino.
           </Text>
-
         </View>
       </Card>
 
-      {/* Espaciador para la paginación del TutorialPager */}
       <View style={{ flex: 1 }} />
 
-      {/* El ViewModel sigue manejando los permisos en segundo plano si es necesario */}
       <CustomePermisos
         visible={vm.modalVisible}
         tipo={vm.tipoPermiso}

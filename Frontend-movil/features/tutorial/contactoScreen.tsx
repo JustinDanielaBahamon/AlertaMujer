@@ -1,30 +1,40 @@
 import React from "react";
-import { View, Text, Image } from "react-native";
+import { View, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { styles } from "./universalStyle";
-import { styles as cardStyles } from "../../src/components/ui/card/cardStyle";
+import { VideoView } from 'expo-video';
 import Card from "../../src/components/ui/card/card";
 
+// Importamos el ViewModel corregido
+import { useContactoTutorialViewModel } from "./useContactoTutorialViewModel";
+
+import { styles } from "./universalStyle";
+import { styles as cardStyles } from "../../src/components/ui/card/cardStyle";
+
 export default function ContactosScreen() {
+  // Extraemos el player del ViewModel
+  const { player } = useContactoTutorialViewModel();
+
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       
-      {/* 1. HEADER CON LA IMAGEN (Estructura idéntica al botón) */}
-       <View style={[styles.img, { width: '100%', alignItems: 'center', justifyContent: 'center',marginBottom: -30 }]}>
-          <Image
-            source={require("../../assets/imagesAlertaMujer/ScTutorial/Contacto.png")} 
-            style={{ height: 350, width: 350}} // Tus medidas manuales
-            resizeMode="contain"
-          />
-        </View>
+      {/* 1. CONTENEDOR DEL VIDEO */}
+      {/* Ajusta el marginTop para subir o bajar el video manualmente */}
+      <View style={[styles.illustrationWrapper, { marginTop:-34, marginBottom: -31 }]}>
+        <VideoView
+          style={{ height: 200, width: 250}} // Mantengo tus medidas manuales de 350
+          player={player} 
+          nativeControls={false}
+          contentFit="contain"
+          allowsFullscreen={false}
+        />
+      </View>
 
       {/* 2. TARJETA DE RED DE APOYO */}
       <Card 
         title={`Tu Red de\nApoyo`}
         style={cardStyles.card}
       >
-        <View style={{ gap: 10 }}>
-          
+        <View style={{ gap: 6 }}>
           <Text style={cardStyles.description}>
             <Text style={{ fontWeight: "bold", color: "#f5caef" }}>● Confianza: </Text>
             <Text style={{ fontWeight: "bold" }}>Red segura.</Text> Agrega a tus familiares y amigos cercanos para que te cuiden.
@@ -39,11 +49,9 @@ export default function ContactosScreen() {
             <Text style={{ fontWeight: "bold", color: "#f5caef" }}>● Gestión: </Text>
             <Text style={{ fontWeight: "bold" }}>Siempre conectada.</Text> Puedes gestionar tus contactos en cualquier momento desde tu perfil.
           </Text>
-
         </View>
       </Card>
 
-      {/* Espaciador para mantener la simetría con la paginación */}
       <View style={{ flex: 1 }} />
       
     </SafeAreaView>
