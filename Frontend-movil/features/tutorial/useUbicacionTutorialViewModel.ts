@@ -1,24 +1,15 @@
-import { useCallback, useState } from "react";
-import { useNavigation } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import type { MainStackParamList } from "../../src/navigation/types";
-// Importamos la lógica del video
+// useUbicacionTutorialViewModel.ts
+import { useCallback, useRef, useState } from "react";
 import { useVideoPlayer } from 'expo-video';
 
-type Nav = NativeStackNavigationProp<MainStackParamList>;
-
-export const MUNICIPIOS_HUILA = [
-  "Neiva", "Pitalito", "Garzón", "San Agustín", "Gigante",
-  "Campoalegre", "Rivera", "La Plata", "Palermo", "Isnos",
-];
-
 export function useUbicacionTutorialViewModel() {
-  const navigation = useNavigation<Nav>();
   const [departamento, setDepartamento] = useState("Huila");
   const [municipio, setMunicipio] = useState("Neiva");
   const [modalConfirmacionVisible, setModalConfirmacionVisible] = useState(false);
 
-  // --- LÓGICA DEL VIDEO ---
+  // 🆕 Referencia para avisar al Pager que ya confirmamos (Igual que en Mensajes)
+  const resolverPaso = useRef<(valor: boolean) => void>(() => {});
+
   const videoSource = require("../../assets/imagesAlertaMujer/ScTutorial/ubicacion.mp4");
   const player = useVideoPlayer(videoSource, (p) => {
     p.loop = true;
@@ -26,22 +17,29 @@ export function useUbicacionTutorialViewModel() {
     p.muted = true;
   });
 
+  // 🆕 Esta función la llamará el Pager cuando el usuario intente deslizar
+  const pedirConfirmacionUbicacion = useCallback((): Promise<boolean> => {
+    return new Promise((resolve) => {
+      resolverPaso.current = resolve;
+      setModalConfirmacionVisible(true);
+    });
+  }, []);
+
   const abrirConfirmacion = useCallback(() => {
     setModalConfirmacionVisible(true);
   }, []);
 
   const cerrarConfirmacion = useCallback(() => {
     setModalConfirmacionVisible(false);
+    // Si cancela, resolvemos con false para que el Pager no avance
+    resolverPaso.current(false);
   }, []);
 
   const confirmarUbicacion = useCallback(() => {
     setModalConfirmacionVisible(false);
-    navigation.navigate("TutorialContacto");
-  }, [navigation]);
-
-  const regresar = useCallback(() => {
-    navigation.navigate("TutorialMensaje");
-  }, [navigation]);
+    // ✅ ÉXITO: Ahora el Pager sabe que puede avanzar a Contactos
+    resolverPaso.current(true);
+  }, []);
 
   return {
     departamento,
@@ -52,8 +50,11 @@ export function useUbicacionTutorialViewModel() {
     abrirConfirmacion,
     cerrarConfirmacion,
     confirmarUbicacion,
-    regresar,
-    player, // Exportamos el player
-    municipiosHuila: MUNICIPIOS_HUILA,
+    pedirConfirmacionUbicacion, // 👈 Importante exportar esto
+    player,
+    municipiosHuila: [
+      "Neiva", "Pitalito", "Garzón", "San Agustín", "Gigante",
+      "Campoalegre", "Rivera", "La Plata", "Palermo", "Isnos",
+    ],
   };
 }

@@ -1,44 +1,64 @@
-import React, { useState } from "react";
-import { View, ScrollView, Dimensions, NativeSyntheticEvent, NativeScrollEvent } from "react-native";
+import React, { useState, useRef } from "react";
+import {
+  View, ScrollView, Dimensions,
+  NativeSyntheticEvent, NativeScrollEvent
+} from "react-native";
 
 const { width } = Dimensions.get("window");
 
 interface TutorialPagerProps {
-  // Cambiamos a ReactNode para aceptar cualquier combinación de elementos
-  children: React.ReactNode; 
+  children: React.ReactNode;
+  // índice de página que requiere acción antes de avanzar
+  paginasConBloqueo?: { [indice: number]: () => Promise<boolean> };
 }
 
-export const TutorialPager = ({ children }: TutorialPagerProps) => {
+export const TutorialPager = ({ children, paginasConBloqueo = {} }: TutorialPagerProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
-
-  // Esto convierte los hijos en un array limpio, eliminando errores de tipado
+  const scrollRef = useRef<ScrollView>(null);
   const pages = React.Children.toArray(children);
 
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const xOffset = event.nativeEvent.contentOffset.x;
-    const index = Math.round(xOffset / width);
+  const goToIndex = (index: number) => {
+    scrollRef.current?.scrollTo({ x: index * width, animated: true });
     setActiveIndex(index);
+  };
+
+  const handleScrollEnd = async (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const xOffset = event.nativeEvent.contentOffset.x;
+    const intentIndex = Math.round(xOffset / width);
+
+    // Si intenta avanzar (no retroceder) y hay bloqueo en página actual
+    if (intentIndex > activeIndex && paginasConBloqueo[activeIndex]) {
+      // Regresa a la página actual mientras ejecuta el bloqueo
+      goToIndex(activeIndex);
+      // Ejecuta la acción (ej: mostrar permisos), espera resultado
+      const puedePasar = await paginasConBloqueo[activeIndex]();
+      if (puedePasar) {
+        goToIndex(intentIndex);
+      }
+    } else {
+      setActiveIndex(intentIndex);
+    }
   };
 
   return (
     <View style={{ flex: 1 }}>
       <ScrollView
+        ref={scrollRef}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        onScroll={handleScroll}
+        onMomentumScrollEnd={handleScrollEnd}
         scrollEventThrottle={16}
         style={{ flex: 1 }}
       >
         {pages.map((child, index) => (
-    <View key={index} style={{ width: width, flex: 1 }}> {/* Asegúrate de que tenga flex: 1 */}
-        {child}
-    </View>
-    ))}
+          <View key={index} style={{ width, flex: 1 }}>
+            {child}
+          </View>
+        ))}
       </ScrollView>
 
-      {/* INDICADORES (PUNTOS) */}
-      <View style={{ flexDirection: 'row', justifyContent: 'center', marginBottom: 30 }}>
+      <View style={{ flexDirection: "row", justifyContent: "center", marginBottom: 30 }}>
         {pages.map((_, i) => (
           <View
             key={i}
@@ -46,11 +66,10 @@ export const TutorialPager = ({ children }: TutorialPagerProps) => {
               width: activeIndex === i ? 22 : 8,
               height: 8,
               borderRadius: 4,
-              backgroundColor: activeIndex === i ? '#4A148C' : '#c412e7',
+              backgroundColor: activeIndex === i ? "#4A148C" : "#c412e7",
               marginHorizontal: 4,
-              opacity: activeIndex === i ? 1 : 0.6
+              opacity: activeIndex === i ? 1 : 0.6,
             }}
-            
           />
         ))}
       </View>

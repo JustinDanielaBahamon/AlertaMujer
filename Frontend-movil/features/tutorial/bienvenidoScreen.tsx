@@ -1,10 +1,9 @@
-import React from "react";
+import React, { useRef } from "react";
 import { View, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { VideoView } from 'expo-video'; 
 import Card from "../../src/components/ui/card/card";
-import { TutorialPager } from "../../src/components/ui/TutorialPager"; // Importación de pantallas del tutorial (Paginación)
-// Importamos el ViewModel
+import { TutorialPager } from "../../src/components/ui/TutorialPager";
 import { useBienvenidaTutorialViewModel } from "./useBienvenidaTutorialViewModel";
 import ActivacionTutorial from "./botonScreen"; 
 import MensajesScreen from "./mensajesScreen"; 
@@ -12,22 +11,26 @@ import UbicacionScreen from "./ubicacionScreen";
 import ContactosScreen from "./contactoScreen";
 import SeguridadScreen from "./seguridadScreen";
 import NotificacionScreen from "./notificacionScreen";
-
 import { styles } from "./universalStyle";
 import { styles as cardStyles } from "../../src/components/ui/card/cardStyle";
+import { useMensajesTutorialViewModel } from "./useMensajesTutorialViewModel";
 
 export default function Bienvenido() {
-  // Conectamos con el ViewModel para obtener el player
   const { player } = useBienvenidaTutorialViewModel();
+
+  // 🆕 ViewModel de mensajes instanciado aquí para pasar pedirPermisos al pager
+  const mensajesVM = useMensajesTutorialViewModel();
 
   return (
     <SafeAreaView style={styles.container}>
-      <TutorialPager>
+      <TutorialPager
+        paginasConBloqueo={{
+          2: mensajesVM.pedirPermisos, // índice 2 = MensajesScreen
+        }}
+      >
         
-        {/* PÁGINA 1: BIENVENIDA */}
+        {/* PÁGINA 0: BIENVENIDA */}
         <View style={{ flex: 1, alignItems: 'center' }}> 
-          
-          {/* El video ahora está fuera de la Card, usando su propio wrapper */}
           <View style={styles.illustrationWrapper}>
             <VideoView
               style={styles.mainIllustration}
@@ -37,7 +40,6 @@ export default function Bienvenido() {
               allowsFullscreen={false}
             />
           </View>
-
           <Card 
             title={`¡Tu seguridad es\nnuestra prioridad!`}
             style={cardStyles.card} 
@@ -53,12 +55,20 @@ export default function Bienvenido() {
           </Card>
         </View>
 
-        {/* PÁGINAS RESTANTES (Mantenemos la paginación intacta) */}
+        {/* PÁGINA 1: BOTÓN SOS */}
         <ActivacionTutorial />
-        <MensajesScreen />
+        {/* PÁGINA 2: MENSAJES — al deslizar muestra permisos */}
+        <MensajesScreen vmExterno={mensajesVM} />
+        {/* PÁGINA 3: UBICACIÓN */}
         <UbicacionScreen />
+
+        {/* PÁGINA 4: CONTACTOS */}
         <ContactosScreen />
+
+        {/* PÁGINA 5: SEGURIDAD */}
         <SeguridadScreen />
+
+        {/* PÁGINA 6: NOTIFICACIONES */}
         <NotificacionScreen />
         
       </TutorialPager>
