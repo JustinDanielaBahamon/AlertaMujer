@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fffeffda', // Un lila muy clarito de fondo (como la imagen)
+    backgroundColor: 'rgb(255, 255, 255)', // Un lila muy clarito de fondo (como la imagen)
     alignItems: 'center',
   },
   header: {
