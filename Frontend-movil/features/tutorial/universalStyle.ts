@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fdf8ff', // Un lila muy clarito de fondo (como la imagen)
+    backgroundColor: '#fffeffda', // Un lila muy clarito de fondo (como la imagen)
     alignItems: 'center',
   },
   header: {
@@ -21,8 +21,8 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     zIndex: 2, // Asegura que esté por encima de la tarjeta
-    marginBottom: -40, // 👈 ESTO hace que la imagen se solape con la tarjeta
-     marginTop: 60,
+    marginBottom: 1, // 👈 ESTO hace que la imagen se solape con la tarjeta
+    marginTop: 30,
   },
   mainIllustration: {
     width: '90%',

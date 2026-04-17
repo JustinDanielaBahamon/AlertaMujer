@@ -38,7 +38,9 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      "react-native-video",
+      "expo-video"
     ],
     "experiments": {
       "reactCompiler": true

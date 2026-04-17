@@ -1,16 +1,15 @@
-import { useCallback } from "react";
-import { useNavigation } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import type { MainStackParamList } from "../../src/navigation/types";
-
-type Nav = NativeStackNavigationProp<MainStackParamList>;
+import { useVideoPlayer } from 'expo-video';
 
 export function useBienvenidaTutorialViewModel() {
-  const navigation = useNavigation<Nav>();
+  const videoSource = require("../../assets/imagesAlertaMujer/ScTutorial/bienvenida.mp4");
 
-  const continuar = useCallback(() => {
-    navigation.navigate("TutorialBoton");
-  }, [navigation]);
+  const player = useVideoPlayer(videoSource, (p) => {
+    p.loop = true;      
+    p.play();          
+    p.muted = true;    
+  });
 
-  return { continuar };
+  return { 
+    player 
+  };
 }
