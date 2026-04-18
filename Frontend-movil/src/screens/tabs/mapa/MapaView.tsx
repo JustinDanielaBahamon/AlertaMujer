@@ -3,23 +3,26 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Button,
-  Linking,
   Modal,
   Text,
   TouchableWithoutFeedback,
   View,
+  ScrollView,
+  Linking
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
+import { LinearGradient } from "expo-linear-gradient";
 import { styles } from "./MapaStyles";
 
 /*
  este modulo muestra un mapa con la ubicacion del usuario en tiempo real,
- permite verlo en pantalla completa con boton que aparece al tocar el mapa
- y registra automaticamente la ubicacion en el historial cada 10 minutos (ahora un minuto de prueba)
+ permite verlo en pantalla completa con boton,
+ registra la ubicacion evitando duplicados y controla el historial
 */
 export default function MapaView() {
+
   /*
-   estado donde se guarda la latitud y longitud del usuario
+   estado donde se guarda la ubicacion actual
   */
   const [location, setLocation] = useState<{
     latitude: number;
@@ -27,31 +30,48 @@ export default function MapaView() {
   } | null>(null);
 
   /*
-    pantalla completa
+   pantalla completa
   */
   const [fullscreen, setFullscreen] = useState(false);
 
   /*
-   controlar si el boton de cerrar se muestra
+   controla si se muestra el boton cerrar
   */
   const [showClose, setShowClose] = useState(false);
 
   /*
-   guardar el historial de ubicaciones
+   historial de ubicaciones
   */
   const [historial, setHistorial] = useState<
     { latitude: number; longitude: number }[]
   >([]);
 
   /*
-   opacidad para el boton
+   contador de intentos de permiso
   */
-  const closeOpacity = useRef(new Animated.Value(0)).current;
-
   const [intentosPermiso, setIntentosPermiso] = useState(0);
 
   /*
-   funcion para calcular distancia entre dos puntos en metros
+   opacidad del boton cerrar
+  */
+  const closeOpacity = useRef(new Animated.Value(0)).current;
+
+  /*
+   referencias para evitar renders innecesarios
+  */
+  const locationRef = useRef(location);
+  const historialRef = useRef(historial);
+
+  useEffect(() => {
+    locationRef.current = location;
+  }, [location]);
+
+  useEffect(() => {
+    historialRef.current = historial;
+  }, [historial]);
+
+  /*
+   calcula la distancia entre dos puntos en metros
   */
   const getDistanceFromLatLonInMeters = (
     lat1: number,
@@ -59,22 +79,24 @@ export default function MapaView() {
     lat2: number,
     lon2: number,
   ) => {
-    const R = 6371000; // radio de la tierra en metros
+    const R = 6371000;
     const dLat = ((lat2 - lat1) * Math.PI) / 180;
     const dLon = ((lon2 - lon1) * Math.PI) / 180;
+
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos((lat1 * Math.PI) / 180) *
         Math.cos((lat2 * Math.PI) / 180) *
         Math.sin(dLon / 2) *
         Math.sin(dLon / 2);
+
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   };
 
   /*
-   se ejecuta al iniciar el modulo
-   pide permiso, ademas registra la ubicacion en el historial cada 10 minutos
+   se ejecuta al iniciar
+   pide permisos y activa el seguimiento de ubicacion
   */
   useEffect(() => {
     let subscription: Location.LocationSubscription;
@@ -82,29 +104,31 @@ export default function MapaView() {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
 
+      /*
+       control de permisos
+      */
       if (status !== "granted") {
+
         if (intentosPermiso === 0) {
-          alert(
-            "Permiso denegado. Para uso correcto de nuestra app, es recomendable que nos concedas el permiso a tu ubicacion",
-          );
+          alert("Permiso denegado. Se recomienda activarlo para el perfecto funcionamiento de nuestra app.");
           return;
         }
 
         if (intentosPermiso === 1) {
-          alert(
-            "Permiso denegado nuevamente. Debes activar el permiso en configuracion",
-          );
+          alert("Permiso denegado nuevamente.");
           return;
         }
 
         if (intentosPermiso >= 2) {
-          alert("Activa el permiso desde configuracion");
+          alert("Si desea tener toda la experiencia de nuestra app, por favor, activa el permiso desde configuracion.");
           Linking.openSettings();
           return;
         }
       }
 
-      // aqui sigue tu codigo normal si acepta
+      /*
+       seguimiento en tiempo real
+      */
       subscription = await Location.watchPositionAsync(
         {
           accuracy: Location.Accuracy.High,
@@ -119,70 +143,107 @@ export default function MapaView() {
 
           setLocation(newLoc);
 
-          // solo agregamos al historial si historial vacio o se movio mas de 20 metros
-          if (historial.length === 0) {
+          const currentHistorial = historialRef.current;
+
+          /*
+           guardar solo si hay cambio real
+          */
+          if (currentHistorial.length === 0) {
             setHistorial([newLoc]);
-          } else {
-            const lastLoc = historial[historial.length - 1];
-            const distance = getDistanceFromLatLonInMeters(
-              lastLoc.latitude,
-              lastLoc.longitude,
-              newLoc.latitude,
-              newLoc.longitude,
-            );
-            if (distance >= 30) {
-              setHistorial((prev) => [...prev, newLoc]);
-            }
+            return;
           }
-        },
+
+          const lastLoc = currentHistorial[currentHistorial.length - 1];
+
+          const distance = getDistanceFromLatLonInMeters(
+            lastLoc.latitude,
+            lastLoc.longitude,
+            newLoc.latitude,
+            newLoc.longitude,
+          );
+
+          if (distance >= 30) {
+            setHistorial((prev) => [...prev, newLoc]);
+          }
+        }
       );
 
+      /*
+        registrar ubicacion cada cierto tiempo
+      */
       const historialInterval = setInterval(() => {
-        if (location) {
-          setHistorial((prev) => [...prev, location]);
+
+        const loc = locationRef.current;
+        const currentHistorial = historialRef.current;
+
+        if (!loc) return;
+
+        if (currentHistorial.length === 0) {
+          setHistorial([loc]);
+          return;
         }
-      }, 300000); // 300000 = 5 minutos
-      // 1000 = 1 segundo
 
-      // limpia subscripcion e intervalo al salir
+        const lastLoc = currentHistorial[currentHistorial.length - 1];
 
+        const distance = getDistanceFromLatLonInMeters(
+          lastLoc.latitude,
+          lastLoc.longitude,
+          loc.latitude,
+          loc.longitude,
+        );
+
+        /*
+         evita guardar ubicaciones iguales
+        */
+        if (distance >= 30) {
+          setHistorial((prev) => [...prev, loc]);
+        }
+
+      }, 300000);
+
+      /*
+       limpieza al salir
+      */
       return () => {
         if (subscription) subscription.remove();
         clearInterval(historialInterval);
       };
-    })();
-  }, [location, intentosPermiso]); // <-- cambio clave
 
-  // mensaje mientras se obtiene la ubicacion
+    })();
+
+  }, [intentosPermiso]);
+
+  /*
+   pantalla de carga
+  */
   if (!location) {
     return (
-      <View style={styles.container}>
-        <Text>Obteniendo Ubicacion...</Text>
+      <LinearGradient colors={["#6356d7b9", "#ff00009a"]} style={styles.container}>
+        <View style={styles.center}>
+          <Text style={styles.loading}>Obteniendo ubicacion...</Text>
 
-        {/* boton para reintentar permisos */}
-        <Button
-          title="Intentar de nuevo"
-          onPress={() => setIntentosPermiso((prev) => prev + 1)}
-          color="purple"
-        />
-      </View>
+          <Button
+            title="Intentar de nuevo"
+            onPress={() => setIntentosPermiso((prev) => prev + 1)}
+          />
+        </View>
+      </LinearGradient>
     );
   }
 
   /*
    abrir o cerrar pantalla completa
   */
-  const toggleFullscreen = () => {
-    setFullscreen(!fullscreen);
-  };
+  const toggleFullscreen = () => setFullscreen(!fullscreen);
 
   /*
-   funcion para mostrar el boton de cerrar con animacion
+   mostrar boton cerrar con animacion
   */
   const handleMapPress = () => {
     if (showClose) return;
 
     setShowClose(true);
+
     Animated.timing(closeOpacity, {
       toValue: 1,
       duration: 300,
@@ -195,9 +256,12 @@ export default function MapaView() {
         duration: 300,
         useNativeDriver: true,
       }).start(() => setShowClose(false));
-    }, 15000); // aqui puedes cambiar el tiempo de desaparicion del boton
+    }, 15000);
   };
-  // componente del mapa
+
+  /*
+   componente del mapa
+  */
   const mapComponent = (
     <MapView
       style={styles.map}
@@ -207,13 +271,10 @@ export default function MapaView() {
         latitudeDelta: 0.01,
         longitudeDelta: 0.01,
       }}
-      onPress={fullscreen ? handleMapPress : toggleFullscreen} // un click abre pantalla completa, en fullscreen muestra boton
+      onPress={fullscreen ? handleMapPress : toggleFullscreen}
     >
-      {/* marcador en la posicion actual */}
+      <Marker coordinate={location} title="Tu ubicacion" pinColor="red" />
 
-      <Marker coordinate={location} title="Aca te encuentras" pinColor="red" />
-
-      {/* marcadores del historial */}
       {historial.map((pos, index) => (
         <Marker
           key={index}
@@ -224,39 +285,56 @@ export default function MapaView() {
       ))}
     </MapView>
   );
-  {
-    /* pantalla principal */
-  }
+
+  /*
+   pantalla principal
+  */
   return (
-    <View style={styles.container}>
-      <View style={styles.topContainer}>
-        <Text style={styles.title}>Tu Ubicacion Actual</Text>
+    <LinearGradient colors={["#6356d7b9", "#ff00009a"]} style={styles.container}>
+      <View style={styles.card}>
+
+        <View style={styles.topContainer}>
+          <Text style={styles.title}>Tu ubicacion</Text>
+        </View>
+
+        <View style={styles.mapContainer}>{mapComponent}</View>
+
+        <View style={styles.bottomContainer}>
+          <Text style={styles.subtitle}>Historial de ubicacion</Text>
+
+          <ScrollView style={{ width: "100%" }}>
+            <View style={styles.table}>
+
+              <View style={styles.rowHeader}>
+                <Text style={styles.cellHeader}>Orden</Text>
+                <Text style={styles.cellHeader}>Latitud</Text>
+                <Text style={styles.cellHeader}>Longitud</Text>
+              </View>
+
+              {historial.map((pos, index) => (
+                <View key={index} style={styles.row}>
+                  <Text style={styles.cell}>{index + 1}</Text>
+                  <Text style={styles.cell}>{pos.latitude.toFixed(5)}</Text>
+                  <Text style={styles.cell}>{pos.longitude.toFixed(5)}</Text>
+                </View>
+              ))}
+
+            </View>
+          </ScrollView>
+        </View>
       </View>
-
-      <View style={styles.mapContainer}>{mapComponent}</View>
-
-      <View style={styles.bottomContainer}>
-        <Text style={styles.historialText}>Historial De Ubicaciones</Text>
-        {historial.map((pos, index) => (
-          <Text key={index} style={styles.historialText}>
-            {index + 1}: {pos.latitude.toFixed(5)}, {pos.longitude.toFixed(5)}
-          </Text>
-        ))}
-      </View>
-
-      {/* modo pantalla completa */}
+     {/* Boton de cerrar mapa en pantalla completa */}
       <Modal visible={fullscreen} animationType="slide">
         <View style={{ flex: 1 }}>
           {mapComponent}
 
-          {/* boton de cerrar animado */}
           {showClose && (
             <Animated.View
               style={{
                 position: "absolute",
                 top: 20,
                 right: 10,
-                backgroundColor: "rgb(133, 64, 197)",
+                backgroundColor: "#6a11cb",
                 padding: 15,
                 borderRadius: 50,
                 opacity: closeOpacity,
@@ -264,13 +342,13 @@ export default function MapaView() {
             >
               <TouchableWithoutFeedback onPress={toggleFullscreen}>
                 <Text style={{ color: "white", fontWeight: "bold" }}>
-                  Cerrar Mapa
+                  Cerrar mapa
                 </Text>
               </TouchableWithoutFeedback>
             </Animated.View>
           )}
         </View>
       </Modal>
-    </View>
+    </LinearGradient>
   );
 }
