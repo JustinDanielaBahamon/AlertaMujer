@@ -14,18 +14,21 @@ import NotificacionScreen from "./notificacionScreen";
 import { styles } from "./universalStyle";
 import { styles as cardStyles } from "../../src/components/ui/card/cardStyle";
 import { useMensajesTutorialViewModel } from "./useMensajesTutorialViewModel";
+import { useContactoTutorialViewModel } from "./useContactoTutorialViewModel"; // 🆕
 
 export default function Bienvenido() {
   const { player } = useBienvenidaTutorialViewModel();
 
   // 🆕 ViewModel de mensajes instanciado aquí para pasar pedirPermisos al pager
   const mensajesVM = useMensajesTutorialViewModel();
+  const contactosVM = useContactoTutorialViewModel(); // 🆕
 
   return (
     <SafeAreaView style={styles.container}>
       <TutorialPager
         paginasConBloqueo={{
           2: mensajesVM.pedirPermisos, // índice 2 = MensajesScreen
+          4: contactosVM.pedirPermisos,
         }}
       >
         
@@ -63,7 +66,7 @@ export default function Bienvenido() {
         <UbicacionScreen />
 
         {/* PÁGINA 4: CONTACTOS */}
-        <ContactosScreen />
+        <ContactosScreen vmExterno={contactosVM} />
 
         {/* PÁGINA 5: SEGURIDAD */}
         <SeguridadScreen />
