@@ -40,7 +40,8 @@
         }
       ],
       "react-native-video",
-      "expo-video"
+      "expo-video",
+      "expo-audio"
     ],
     "experiments": {
       "reactCompiler": true

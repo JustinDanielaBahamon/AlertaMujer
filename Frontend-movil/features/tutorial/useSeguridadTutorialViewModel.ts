@@ -1,20 +1,20 @@
-import { useCallback } from "react";
-import { Alert } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useCallback, useRef, useState } from "react";
 import { Camera } from "expo-camera";
-import { Audio } from "expo-av";
-import type { MainStackParamList } from "../../src/navigation/types";
-// Importamos el hook para el video
-import { useVideoPlayer } from 'expo-video';
-
-type Nav = NativeStackNavigationProp<MainStackParamList>;
+import { Audio } from "expo-av";// por ahora utilizamos esta no me deja con la otra 
+import { useVideoPlayer } from "expo-video";
 
 export function useSeguridadTutorialViewModel() {
-  const navigation = useNavigation<Nav>();
 
-  // --- LÓGICA DEL VIDEO ---
-  // Asegúrate de que el nombre coincida con el archivo real (ej: seguridad.mp4)
+  // Controla qué modal se muestra: primero cámara, luego audio
+  const [modalVisible, setModalVisible] = useState(false);
+  const [tipoPermiso, setTipoPermiso] = useState<"camara" | "audio">("camara");
+
+  // Banner amarillo si negó algún permiso
+  const [mostrarAdvertencia, setMostrarAdvertencia] = useState(false);
+
+  // Guarda el resolve de la Promise para resolverla cuando el usuario decida
+  const resolverPermiso = useRef<(valor: boolean) => void>(() => {});
+
   const videoSource = require("../../assets/imagesAlertaMujer/ScTutorial/seguridad.mp4");
   const player = useVideoPlayer(videoSource, (p) => {
     p.loop = true;
@@ -22,40 +22,60 @@ export function useSeguridadTutorialViewModel() {
     p.muted = true;
   });
 
-  // --- TU LÓGICA DE PERMISOS (Mantenida intacta) ---
-  const solicitarPermisosCamaraAudio = useCallback(async () => {
-    const { status: cameraStatus } = await Camera.requestCameraPermissionsAsync();
-    const { status: audioStatus } = await Audio.requestPermissionsAsync();
+  // El pager llama esto al deslizar desde SeguridadScreen
+  const pedirPermisos = useCallback((): Promise<boolean> => {
+    return new Promise((resolve) => {
+      resolverPermiso.current = resolve;
+      // Empieza siempre por cámara
+      setTipoPermiso("camara");
+      setModalVisible(true);
+      setMostrarAdvertencia(false);
+    });
+  }, []);
 
-    if (cameraStatus === "granted" && audioStatus === "granted") {
-      navigation.navigate("TutorialNotificacion");
-      return;
+  const confirmarModal = useCallback(async () => {
+    if (tipoPermiso === "camara") {
+      // Pide permiso de cámara al sistema y pasa al modal de audio
+      await Camera.requestCameraPermissionsAsync();
+      setTipoPermiso("audio");
+    } else {
+      // Pide permiso de audio al sistema
+      const { status } = await Audio.requestPermissionsAsync();
+      setModalVisible(false);
+      if (status === "granted") {
+        resolverPermiso.current(true); // ambos listos → avanza
+      } else {
+        setMostrarAdvertencia(true); // negó audio → banner
+      }
     }
+  }, [tipoPermiso]);
 
-    Alert.alert(
-      "Permisos necesarios",
-      "Para tu protección, necesitamos acceder a la cámara y micrófono. Esto permite generar evidencia en video si te encuentras en peligro.",
-      [
-        {
-          text: "Reintentar",
-          onPress: () => {
-            void (async () => {
-              const { status: c } = await Camera.requestCameraPermissionsAsync();
-              const { status: a } = await Audio.requestPermissionsAsync();
-              if (c === "granted" && a === "granted") {
-                navigation.navigate("TutorialNotificacion");
-              }
-            })();
-          },
-        },
-        { text: "Cancelar", style: "cancel" },
-      ],
-    );
-  }, [navigation]);
+  const cancelarModal = useCallback(() => {
+    setModalVisible(false);
+    setMostrarAdvertencia(true); // negó → muestra banner
+  }, []);
 
-  const regresar = useCallback(() => {
-    navigation.navigate("TutorialContacto");
-  }, [navigation]);
+  const reintentarPermisos = useCallback(() => {
+    setMostrarAdvertencia(false);
+    // Vuelve desde el inicio: primero cámara
+    setTipoPermiso("camara");
+    setModalVisible(true);
+  }, []);
 
-  return { solicitarPermisosCamaraAudio, regresar, player };
+  const continuarSinPermisos = useCallback(() => {
+    setMostrarAdvertencia(false);
+    resolverPermiso.current(true); // avanza igual sin permisos
+  }, []);
+
+  return {
+    player,
+    modalVisible,
+    tipoPermiso,
+    mostrarAdvertencia,
+    pedirPermisos,
+    confirmarModal,
+    cancelarModal,
+    reintentarPermisos,
+    continuarSinPermisos,
+  };
 }
