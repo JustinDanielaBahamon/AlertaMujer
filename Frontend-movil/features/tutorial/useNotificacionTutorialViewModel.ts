@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import * as Notifications from "expo-notifications";
+import { useCallback, useRef, useState } from "react";
+import { Platform, PermissionsAndroid } from "react-native";
 import { useVideoPlayer } from "expo-video";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -20,15 +20,6 @@ export function useNotificacionTutorialViewModel() {
     p.muted = true;
   });
 
-  // Abre el modal automáticamente al llegar a esta pantalla
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setModalVisible(true);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // El pager también puede llamar esto al deslizar
   const pedirPermisos = useCallback((): Promise<boolean> => {
     return new Promise((resolve) => {
       resolverPermiso.current = resolve;
@@ -37,7 +28,6 @@ export function useNotificacionTutorialViewModel() {
     });
   }, []);
 
-  // Función simple para el botón "Finalizar y Activar"
   const abrirModal = useCallback(() => {
     setMostrarAdvertencia(false);
     setModalVisible(true);
@@ -45,7 +35,16 @@ export function useNotificacionTutorialViewModel() {
 
   const confirmarModal = useCallback(async () => {
     setModalVisible(false);
-    await Notifications.requestPermissionsAsync();
+
+    // ✅ Pide permisos nativos sin usar expo-notifications
+    if (Platform.OS === "android" && Platform.Version >= 33) {
+      await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+      );
+    }
+    // En iOS los permisos de notificación se manejan al registrar el dispositivo
+    // No se necesita llamada extra aquí
+
     navigation.replace("DrawerHome");
   }, [navigation]);
 
@@ -69,7 +68,7 @@ export function useNotificacionTutorialViewModel() {
     modalVisible,
     mostrarAdvertencia,
     pedirPermisos,
-    abrirModal,       // 🆕 para el botón
+    abrirModal,
     confirmarModal,
     cancelarModal,
     reintentarPermisos,
