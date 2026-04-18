@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React from "react";
 import { View, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { VideoView } from 'expo-video'; 
@@ -14,21 +14,26 @@ import NotificacionScreen from "./notificacionScreen";
 import { styles } from "./universalStyle";
 import { styles as cardStyles } from "../../src/components/ui/card/cardStyle";
 import { useMensajesTutorialViewModel } from "./useMensajesTutorialViewModel";
-import { useContactoTutorialViewModel } from "./useContactoTutorialViewModel"; // 🆕
+import { useContactoTutorialViewModel } from "./useContactoTutorialViewModel";
+import { useSeguridadTutorialViewModel } from "./useSeguridadTutorialViewModel";
+import { useNotificacionTutorialViewModel } from "./useNotificacionTutorialViewModel"; // 🆕
 
 export default function Bienvenido() {
   const { player } = useBienvenidaTutorialViewModel();
 
-  // 🆕 ViewModel de mensajes instanciado aquí para pasar pedirPermisos al pager
   const mensajesVM = useMensajesTutorialViewModel();
-  const contactosVM = useContactoTutorialViewModel(); // 🆕
+  const contactosVM = useContactoTutorialViewModel();
+  const seguridadVM = useSeguridadTutorialViewModel();          // 🆕
+  const notificacionVM = useNotificacionTutorialViewModel();    // 🆕
 
   return (
     <SafeAreaView style={styles.container}>
       <TutorialPager
         paginasConBloqueo={{
-          2: mensajesVM.pedirPermisos, // índice 2 = MensajesScreen
-          4: contactosVM.pedirPermisos,
+          2: mensajesVM.pedirPermisos,     // MensajesScreen
+          4: contactosVM.pedirPermisos,    // ContactosScreen
+          5: seguridadVM.pedirPermisos,    // 🆕 SeguridadScreen
+          6: notificacionVM.pedirPermisos, // 🆕 NotificacionScreen
         }}
       >
         
@@ -60,19 +65,21 @@ export default function Bienvenido() {
 
         {/* PÁGINA 1: BOTÓN SOS */}
         <ActivacionTutorial />
-        {/* PÁGINA 2: MENSAJES — al deslizar muestra permisos */}
+
+        {/* PÁGINA 2: MENSAJES — al deslizar muestra permisos sms y llamada */}
         <MensajesScreen vmExterno={mensajesVM} />
+
         {/* PÁGINA 3: UBICACIÓN */}
         <UbicacionScreen />
 
-        {/* PÁGINA 4: CONTACTOS */}
+        {/* PÁGINA 4: CONTACTOS — al deslizar muestra permiso contactos */}
         <ContactosScreen vmExterno={contactosVM} />
 
-        {/* PÁGINA 5: SEGURIDAD */}
-        <SeguridadScreen />
+        {/* PÁGINA 5: SEGURIDAD — al deslizar muestra permisos cámara y audio */}
+        <SeguridadScreen vmExterno={seguridadVM} />
 
-        {/* PÁGINA 6: NOTIFICACIONES */}
-        <NotificacionScreen />
+        {/* PÁGINA 6: NOTIFICACIONES — al deslizar muestra permiso notificaciones */}
+        <NotificacionScreen vmExterno={notificacionVM} />
         
       </TutorialPager>
     </SafeAreaView>
