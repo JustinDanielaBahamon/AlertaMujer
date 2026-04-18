@@ -1,19 +1,18 @@
-import { useCallback } from "react";
-import { Alert } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useCallback, useRef, useState } from "react";
 import * as Contacts from "expo-contacts";
-import type { MainStackParamList } from "../../src/navigation/types";
-// Inyectamos la lógica del video
-import { useVideoPlayer } from 'expo-video';
-
-type Nav = NativeStackNavigationProp<MainStackParamList>;
+import { useVideoPlayer } from "expo-video";
 
 export function useContactoTutorialViewModel() {
-  const navigation = useNavigation<Nav>();
+  // Controla el banner amarillo de advertencia cuando niega permisos
+  const [mostrarAdvertencia, setMostrarAdvertencia] = useState(false);
 
-  // --- LÓGICA DEL VIDEO (Añadida) ---
-  
+  // Controla si nuestro modal explicativo está visible
+  const [modalVisible, setModalVisible] = useState(false);
+
+  // Guarda la función resolve de la Promise para resolverla después
+  // cuando el usuario tome una decisión (aceptar/cancelar)
+  const resolverPermiso = useRef<(valor: boolean) => void>(() => {});
+
   const videoSource = require("../../assets/imagesAlertaMujer/ScTutorial/contactos.mp4");
   const player = useVideoPlayer(videoSource, (p) => {
     p.loop = true;
@@ -21,28 +20,53 @@ export function useContactoTutorialViewModel() {
     p.muted = true;
   });
 
-  // --- TU LÓGICA DE PERMISOS (Mantenida intacta) ---
-  const solicitarPermisoContactos = useCallback(async () => {
+  // El pager llama esto al detectar deslizamiento desde contactos.
+  // Primero muestra nuestro modal explicativo antes del diálogo del sistema
+  const pedirPermisos = useCallback((): Promise<boolean> => {
+    return new Promise((resolve) => {
+      resolverPermiso.current = resolve;
+      setModalVisible(true); // muestra nuestro modal primero
+    });
+  }, []);
+
+  // Usuario tocó "Permitir acceso" en nuestro modal →
+  // ahora sí lanzamos el diálogo nativo del sistema
+  const confirmarModal = useCallback(async () => {
+    setModalVisible(false);
     const { status } = await Contacts.requestPermissionsAsync();
-
     if (status === "granted") {
-      navigation.navigate("TutorialSeguridad");
+      resolverPermiso.current(true); // permiso concedido → avanza
     } else {
-      Alert.alert(
-        "Permiso necesario",
-        "Necesitamos acceso a tus contactos para que puedas elegirlos como personas de confianza en caso de emergencia.",
-        [{ text: "Entendido" }],
-      );
+      setMostrarAdvertencia(true); // permiso negado → banner amarillo
     }
-  }, [navigation]);
+  }, []);
 
-  const regresar = useCallback(() => {
-    navigation.navigate("TutorialUbicacion");
-  }, [navigation]);
+  // Usuario tocó "Regresar" en nuestro modal → muestra banner
+  const cancelarModal = useCallback(() => {
+    setModalVisible(false);
+    setMostrarAdvertencia(true);
+  }, []);
 
-  return { 
-    solicitarPermisoContactos, 
-    regresar, 
-    player // Retornamos el player para la vista
+  // Usuario tocó "Activar permisos" en el banner → vuelve al modal
+  const reintentarPermisos = useCallback(() => {
+    setMostrarAdvertencia(false);
+    setModalVisible(true);
+  }, []);
+
+  // Usuario tocó "Continuar sin permisos" → avanza igual
+  const continuarSinPermisos = useCallback(() => {
+    setMostrarAdvertencia(false);
+    resolverPermiso.current(true);
+  }, []);
+
+  return {
+    player,
+    modalVisible,
+    mostrarAdvertencia,
+    pedirPermisos,
+    confirmarModal,
+    cancelarModal,
+    reintentarPermisos,
+    continuarSinPermisos,
   };
 }

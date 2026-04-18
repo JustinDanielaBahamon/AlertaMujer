@@ -8,12 +8,15 @@ const { width } = Dimensions.get("window");
 
 interface TutorialPagerProps {
   children: React.ReactNode;
-  // índice de página que requiere acción antes de avanzar
   paginasConBloqueo?: { [indice: number]: () => Promise<boolean> };
 }
 
 export const TutorialPager = ({ children, paginasConBloqueo = {} }: TutorialPagerProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
+
+  // true mientras se resuelven permisos — bloquea cualquier nuevo deslizamiento
+  const [scrollBloqueado, setScrollBloqueado] = useState(false);
+
   const scrollRef = useRef<ScrollView>(null);
   const pages = React.Children.toArray(children);
 
@@ -23,18 +26,32 @@ export const TutorialPager = ({ children, paginasConBloqueo = {} }: TutorialPage
   };
 
   const handleScrollEnd = async (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    // Si ya hay un permiso en proceso, ignora el evento completamente
+    if (scrollBloqueado) return;
+
     const xOffset = event.nativeEvent.contentOffset.x;
     const intentIndex = Math.round(xOffset / width);
 
-    // Si intenta avanzar (no retroceder) y hay bloqueo en página actual
     if (intentIndex > activeIndex && paginasConBloqueo[activeIndex]) {
-      // Regresa a la página actual mientras ejecuta el bloqueo
+
+      // 1. Bloquea el scroll para que no se pueda deslizar durante los permisos
+      setScrollBloqueado(true);
+
+      // 2. Regresa visualmente a la página actual
       goToIndex(activeIndex);
-      // Ejecuta la acción (ej: mostrar permisos), espera resultado
+
+      // 3. Muestra el modal/permiso y espera la decisión del usuario
       const puedePasar = await paginasConBloqueo[activeIndex]();
+
       if (puedePasar) {
-        goToIndex(intentIndex);
+        // 4. Avanza a la siguiente página
+        goToIndex(activeIndex + 1);
       }
+
+      // 5. Desbloquea con delay para que el ScrollView termine
+      // de procesar eventos pendientes antes de aceptar nuevos gestos
+      setTimeout(() => setScrollBloqueado(false), 400);
+
     } else {
       setActiveIndex(intentIndex);
     }
@@ -47,6 +64,8 @@ export const TutorialPager = ({ children, paginasConBloqueo = {} }: TutorialPage
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
+        // Bloquea físicamente el deslizamiento mientras hay permisos pendientes
+        scrollEnabled={!scrollBloqueado}
         onMomentumScrollEnd={handleScrollEnd}
         scrollEventThrottle={16}
         style={{ flex: 1 }}
@@ -58,6 +77,7 @@ export const TutorialPager = ({ children, paginasConBloqueo = {} }: TutorialPage
         ))}
       </ScrollView>
 
+      {/* Indicadores de página */}
       <View style={{ flexDirection: "row", justifyContent: "center", marginBottom: 30 }}>
         {pages.map((_, i) => (
           <View
