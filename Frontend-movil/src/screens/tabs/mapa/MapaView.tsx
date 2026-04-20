@@ -218,7 +218,7 @@ export default function MapaView() {
   */
   if (!location) {
     return (
-      <LinearGradient colors={["#b890e2b9", "#b890e2b9"]} style={styles.container}>
+      <LinearGradient colors={["#6356d7b9", "#ff00009a"]} style={styles.container}>
         <View style={styles.center}>
           <Text style={styles.loading}>Obteniendo ubicacion...</Text>
 
@@ -290,7 +290,7 @@ export default function MapaView() {
    pantalla principal
   */
   return (
-    <LinearGradient colors={["#b890e2b9", "#b890e2b9"]} style={styles.container}>
+    <LinearGradient colors={["#6356d7b9", "#ff00009a"]} style={styles.container}>
       <View style={styles.card}>
 
         <View style={styles.topContainer}>
