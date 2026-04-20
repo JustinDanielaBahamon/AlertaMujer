@@ -9,7 +9,7 @@ export const styles = StyleSheet.create({
   card: {
     flex: 1,
     borderRadius: 25,
-    backgroundColor: "rgba(153, 133, 133, 0.1)",
+    backgroundColor: "rgba(153, 133, 133, 0.36)",
     overflow: "hidden",
   },
 

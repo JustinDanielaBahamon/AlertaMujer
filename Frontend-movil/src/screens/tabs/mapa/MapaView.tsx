@@ -199,7 +199,7 @@ export default function MapaView() {
           setHistorial((prev) => [...prev, loc]);
         }
 
-      }, 300000);
+      }, 300000); // 5 minutos
 
       /*
        limpieza al salir
@@ -218,7 +218,7 @@ export default function MapaView() {
   */
   if (!location) {
     return (
-      <LinearGradient colors={["#6356d7b9", "#ff00009a"]} style={styles.container}>
+      <LinearGradient colors={["#bc9ce0d2", "#bc9ce0d2"]} style={styles.container}>
         <View style={styles.center}>
           <Text style={styles.loading}>Obteniendo ubicacion...</Text>
 
@@ -290,7 +290,7 @@ export default function MapaView() {
    pantalla principal
   */
   return (
-    <LinearGradient colors={["#6356d7b9", "#ff00009a"]} style={styles.container}>
+    <LinearGradient colors={["#bc9ce0d2", "#bc9ce0d2"]} style={styles.container}>
       <View style={styles.card}>
 
         <View style={styles.topContainer}>
