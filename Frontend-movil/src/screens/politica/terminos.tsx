@@ -35,8 +35,6 @@ export default function Terminos(){
             Términos y Condiciones
           </Text>
 
-          
-
           {/* tarjeta blanca */}
           <View style={{
             backgroundColor: '#fff',
