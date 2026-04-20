@@ -40,7 +40,7 @@ function ContenidoDrawerPersonalizado(props: DrawerContentComponentProps) {
   };
 
   return (
-    <LinearGradient colors={["#f97575c2", "#b45cfc"]} style={{ flex: 1 }}>
+    <LinearGradient colors={["#bc9ce0d2", "#bc9ce0d2"]} style={{ flex: 1 }}>
       <SafeAreaView style={{ flex: 1 }}>
         {/* TARJETA PRINCIPAL */}
         <View style={styles.cardContainer}>
@@ -52,12 +52,12 @@ function ContenidoDrawerPersonalizado(props: DrawerContentComponentProps) {
             <View style={styles.header}>
               <Image
                 source={{
-                  uri: "https://wallpapers.com/images/hd/edited-ppg-cartoon-pfp-cve126604pe97akw.jpg",
+                  uri: "https://i.redd.it/f85dk8outnof1.png",
                 }}
                 style={styles.avatar}
               />
               <Text style={styles.name}>
-                Isabella Greyrat XD
+                Isabella Quintero
               </Text>
               <Text style={styles.email}>
                 {user?.correo || "Isabella@gmail.com"}
