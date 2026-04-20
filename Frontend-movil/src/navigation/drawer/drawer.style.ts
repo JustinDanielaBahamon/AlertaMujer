@@ -46,7 +46,7 @@ export const styles = StyleSheet.create({
     borderRadius: 50,
     marginBottom: 10,
     borderWidth: 2,
-    borderColor: "#ff0000",
+    borderColor: "#778bff",
   },
 
   name: {
@@ -78,14 +78,14 @@ export const styles = StyleSheet.create({
   },
 
   shareBtn: {
-    backgroundColor: "#0088ff",
+    backgroundColor: "#0088ff93",
     padding: 12,
     borderRadius: 12,
     marginBottom: 10,
   },
 
   logoutBtn: {
-    backgroundColor: "#ff0000",
+    backgroundColor: "#ff00009f",
     padding: 12,
     borderRadius: 12,
   },
