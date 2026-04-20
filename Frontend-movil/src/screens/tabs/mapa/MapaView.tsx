@@ -199,7 +199,7 @@ export default function MapaView() {
           setHistorial((prev) => [...prev, loc]);
         }
 
-      }, 300000); // cada 5 minutos
+      }, 300000);
 
       /*
        limpieza al salir
