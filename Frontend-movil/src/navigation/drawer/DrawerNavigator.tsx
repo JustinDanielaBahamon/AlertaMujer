@@ -10,16 +10,16 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import AppHeader from "../../components/ui/Header/header";
 import { useAuth } from "../../contexts/AuthContext";
-import { styles } from "../drawer/drawer.style";
+import { useTheme } from "../../contexts/ThemeContext";        // ← NUEVO
+import { obtenerEstilosDrawer } from "../drawer/drawer.style"; // ← NUEVO
 import TabNavigator from "../TabNavigator";
-
 import AjustesSubmenu from "../../../features/settings/ajustesComponent";
 
 const Drawer = createDrawerNavigator();
 
 function ContenidoConCabecera() {
   return (
-    <View style={styles.drawerBody}>
+    <View style={{ flex: 1 }}>
       <AppHeader />
       <TabNavigator />
     </View>
@@ -28,21 +28,24 @@ function ContenidoConCabecera() {
 
 function ContenidoDrawerPersonalizado(props: DrawerContentComponentProps) {
   const { signOut, user } = useAuth();
+  const { theme } = useTheme();                          // ← leemos el tema
+  const styles = obtenerEstilosDrawer(theme);            // ← estilos dinámicos
   const [estaAbiertoAjustes, setEstaAbiertoAjustes] = useState(false);
+
+  // Colores del gradiente según el tema activo
+  const gradientColors = getGradientColors(theme.headerBackground);
 
   const irA = (ruta: string) => {
     setEstaAbiertoAjustes(false);
     props.navigation.navigate(ruta as never);
   };
 
-  const handleLogout = () => {
-    signOut();
-  };
-
   return (
-    <LinearGradient colors={["#bc9ce0d2", "#bc9ce0d2"]} style={{ flex: 1 }}>
+    <LinearGradient
+      colors={gradientColors}   // ← gradiente dinámico
+      style={{ flex: 1 }}
+    >
       <SafeAreaView style={{ flex: 1 }}>
-        {/* TARJETA PRINCIPAL */}
         <View style={styles.cardContainer}>
           <DrawerContentScrollView
             {...props}
@@ -51,20 +54,16 @@ function ContenidoDrawerPersonalizado(props: DrawerContentComponentProps) {
             {/* HEADER */}
             <View style={styles.header}>
               <Image
-                source={{
-                  uri: "https://i.redd.it/f85dk8outnof1.png",
-                }}
+                source={{ uri: "https://i.redd.it/f85dk8outnof1.png" }}
                 style={styles.avatar}
               />
-              <Text style={styles.name}>
-                Isabella Quintero
-              </Text>
+              <Text style={styles.name}>Isabella Quintero</Text>
               <Text style={styles.email}>
                 {user?.correo || "Isabella@gmail.com"}
               </Text>
             </View>
 
-            {/* MENÚ EN CUADRO */}
+            {/* MENÚ */}
             <View style={styles.innerCard}>
               <TouchableOpacity onPress={() => irA("Inicio")}>
                 <Text style={styles.item}>🏡 Inicio</Text>
@@ -100,16 +99,22 @@ function ContenidoDrawerPersonalizado(props: DrawerContentComponentProps) {
               <TouchableOpacity style={styles.shareBtn}>
                 <Text style={styles.btnText}>➤ Compartir Enlace</Text>
               </TouchableOpacity>
-
-              <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+              <TouchableOpacity style={styles.logoutBtn} onPress={signOut}>
                 <Text style={styles.btnText}>Cerrar sesión</Text>
               </TouchableOpacity>
             </View>
+
           </DrawerContentScrollView>
         </View>
       </SafeAreaView>
     </LinearGradient>
   );
+}
+
+// ─── Genera los colores del gradiente a partir del color primario ─────────────
+function getGradientColors(primary: string): [string, string] {
+  // Oscurece ligeramente el color para el segundo stop del gradiente
+  return [primary, primary + "cc"];
 }
 
 export default function DrawerNavigator() {

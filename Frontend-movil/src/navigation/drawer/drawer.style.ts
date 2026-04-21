@@ -1,30 +1,11 @@
 import { StyleSheet } from "react-native";
+import { AppTheme } from "../../contexts/ThemeContext";
 
-export const styles = StyleSheet.create({
+export const obtenerEstilosDrawer = (theme: AppTheme) => StyleSheet.create({
 
   drawerBody: {
     flex: 1,
   },
-
-  drawerHeader: {
-    paddingHorizontal: 16,
-    paddingVertical: 24,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#ccc",
-  },
-
-  drawerTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-  },
-
-  drawerSubtitle: {
-    marginTop: 6,
-    fontSize: 13,
-    opacity: 0.7,
-  },
-
-  // Nuevos estilos
 
   cardContainer: {
     flex: 1,
@@ -46,18 +27,19 @@ export const styles = StyleSheet.create({
     borderRadius: 50,
     marginBottom: 10,
     borderWidth: 2,
-    borderColor: "#778bff",
+    borderColor: theme.tabActiveColor,   // ← borde del avatar sigue el tema
   },
 
   name: {
-    color: "#ffffff",
+    color: theme.headerText,             // ← contraste automático
     fontSize: 18,
     fontWeight: "bold",
   },
 
   email: {
-    color: "#ffffff",
+    color: theme.headerText,
     fontSize: 12,
+    opacity: 0.8,
   },
 
   innerCard: {
@@ -68,7 +50,7 @@ export const styles = StyleSheet.create({
   },
 
   item: {
-    color: "#ffffff",
+    color: theme.headerText,             // ← texto del menú sigue el tema
     fontSize: 16,
     marginVertical: 12,
   },
@@ -96,4 +78,20 @@ export const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 
+  // Estilos que ya no se usan pero los dejamos por si acaso
+  drawerHeader: {
+    paddingHorizontal: 16,
+    paddingVertical: 24,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "#ccc",
+  },
+  drawerTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  drawerSubtitle: {
+    marginTop: 6,
+    fontSize: 13,
+    opacity: 0.7,
+  },
 });
