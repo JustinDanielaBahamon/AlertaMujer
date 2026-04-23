@@ -1,13 +1,25 @@
-import { View, Image, TouchableOpacity, Text, StyleSheet } from "react-native";
+import { View, Image, TouchableOpacity, Text, ImageSourcePropType } from "react-native";
 import { DrawerActions, useNavigation } from "@react-navigation/native";
 import { useTheme } from "../../../contexts/ThemeContext";
-import { useLocale } from "../../../contexts/LocaleContext";
+import { AppMode } from "../../../contexts/ThemeContext";
 import { styles } from "./header.style";
+
+// ─── Temporal: mismo logo para todos los temas ────────────────────────────────
+// Cuando tengas los logos, reemplaza cada require con su imagen correspondiente
+const logoActual = require("../../../../assets/imagesAlertaMujer/logoAlertaMujer.png");
+
+const LOGOS: Record<AppMode, ImageSourcePropType> = {
+  light:   logoActual,
+  dark:    logoActual,   // → reemplazar por logo-dark.png
+  rosa:    logoActual,   // → reemplazar por logo-rosa.png
+  vino:    logoActual,   // → reemplazar por logo-vino.png
+  fucsia:  logoActual,   // → reemplazar por logo-fucsia.png
+  magenta: logoActual,   // → reemplazar por logo-magenta.png
+};
 
 export default function AppHeader() {
   const navigation = useNavigation();
-  const { theme, toggleTheme } = useTheme();
-  const { locale, toggleLocale } = useLocale();
+  const { theme } = useTheme();
 
   return (
     <View style={[styles.container, { backgroundColor: theme.headerBackground }]}>
@@ -19,26 +31,12 @@ export default function AppHeader() {
         <Text style={[styles.menuIcon, { color: theme.headerText }]}>☰</Text>
       </TouchableOpacity>
 
+      {/* ✅ Logo cambia automáticamente con el tema */}
       <Image
-        source={require("../../../../assets/imagesAlertaMujer/logoAlertaMujer.png")}
+        source={LOGOS[theme.mode]}
         style={styles.logo}
+        resizeMode="contain"
       />
-
-      {/* <View style={styles.actions}>
-          <TouchableOpacity onPress={toggleTheme} style={styles.chip}>
-            <Text style={[styles.chipText, { color: theme.headerText }]}>
-              {theme.mode === "dark" ? "🌙" : "☀️"}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={toggleLocale} style={styles.chip}>
-            <Text style={[styles.chipText, { color: theme.headerText }]}>
-              {locale === "es" ? "🌍 ES" : "🌍 EN"}
-            </Text>
-          </TouchableOpacity>
-        </View> 
-      */}
     </View>
   );
 }
-
-

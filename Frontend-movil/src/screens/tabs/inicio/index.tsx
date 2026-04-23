@@ -1,20 +1,34 @@
-import { View, Text, TouchableOpacity, ActivityIndicator, Image, Animated } from "react-native";
+import { View, Text, TouchableOpacity, ActivityIndicator, Image, Animated, ImageSourcePropType } from "react-native";
 import { styles } from "./inicio.styles";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { useInicioViewModel } from "../../../../features/inicio/useInicioViewModel";
+import { useTheme } from "../../../../src/contexts/ThemeContext";
+import { AppMode } from "../../../../src/contexts/ThemeContext";
 import { useState, useRef } from "react";
 import { Camera } from "expo-camera";
 import { Audio } from "expo-av";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+// ─── Temporal: mismo botón para todos los temas ───────────────────────────────
+// Cuando tengas los botones, reemplaza cada require con su imagen correspondiente
+const botonActual = require("../../../../assets/imagesAlertaMujer/ScInicio/boton2.png");
+
+const BOTONES_ALERTA: Record<AppMode, ImageSourcePropType> = {
+  light:   botonActual,
+  dark:    botonActual,   // → reemplazar por boton-dark.png
+  rosa:    botonActual,   // → reemplazar por boton-rosa.png
+  vino:    botonActual,   // → reemplazar por boton-vino.png
+  fucsia:  botonActual,   // → reemplazar por boton-fucsia.png
+  magenta: botonActual,   // → reemplazar por boton-magenta.png
+};
+
 export default function Inicio() {
   const vm = useInicioViewModel();
+  const { theme } = useTheme(); // ✅ accedemos al tema actual
   const [camaraActiva, setCamaraActiva] = useState(false);
   const [microfonoActivo, setMicrofonoActivo] = useState(false);
-
   const insets = useSafeAreaInsets();
 
-  // Animaciones (no se tocan)
   const scaleInicio    = useRef(new Animated.Value(1)).current;
   const scaleMapa      = useRef(new Animated.Value(1)).current;
   const scaleAlerta    = useRef(new Animated.Value(1)).current;
@@ -40,8 +54,7 @@ export default function Inicio() {
 
   return (
     <View style={[styles.container, { paddingBottom: insets.bottom }]}>
-      
-      {/* CONTENIDO PRINCIPAL */}
+
       <View style={{ flex: 1 }}>
 
         {/* Ubicación */}
@@ -105,16 +118,17 @@ export default function Inicio() {
               },
             ]}
           >
+            {/* ✅ Botón cambia automáticamente con el tema */}
             <Image
-              source={require("../../../../assets/imagesAlertaMujer/ScInicio/boton2.png")}
+              source={BOTONES_ALERTA[theme.mode]}
               style={styles.imagen}
+              resizeMode="contain"
             />
           </TouchableOpacity>
         </View>
 
       </View>
 
-      {/* TEXTO INFERIOR (PROTEGIDO DEL SISTEMA) */}
       <Text style={[styles.texto, { marginBottom: insets.bottom + 20 }]}>
         Presiona en caso de{"\n"}Emergencia
       </Text>
