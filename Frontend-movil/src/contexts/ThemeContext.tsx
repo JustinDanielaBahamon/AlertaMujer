@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { ImageSourcePropType } from "react-native";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -14,6 +15,8 @@ export type AppTheme = {
   tabBackground: string;
   tabActiveColor: string;
   tabInactiveColor: string;
+  logo: ImageSourcePropType;         // ✅ nuevo
+  imagenBoton: ImageSourcePropType;  // ✅ nuevo
 };
 
 // ─── Utilidad de contraste automático ────────────────────────────────────────
@@ -33,7 +36,12 @@ function getContrastText(bg: string): string {
   return luminance > 0.5 ? "#1a1a1a" : "#ffffff";
 }
 
-// ─── Definición de los 5 temas completos ─────────────────────────────────────
+// ─── Assets temporales (reemplazar cuando tengas los logos) ──────────────────
+
+const logoActual = require("../../assets/imagesAlertaMujer/logoAlertaMujer.png");
+const botonActual = require("../../assets/imagesAlertaMujer/ScInicio/boton2.png");
+
+// ─── Definición de los temas ──────────────────────────────────────────────────
 
 const THEMES: Record<AppMode, AppTheme> = {
   light: {
@@ -46,6 +54,8 @@ const THEMES: Record<AppMode, AppTheme> = {
     tabBackground: "rgb(202,171,222)",
     tabActiveColor: "#45046b",
     tabInactiveColor: "rgba(255,255,255,0.7)",
+    logo: logoActual,        // → reemplazar por logo-light.png
+    imagenBoton: botonActual, // → reemplazar por boton-light.png
   },
   dark: {
     mode: "dark",
@@ -57,6 +67,8 @@ const THEMES: Record<AppMode, AppTheme> = {
     tabBackground: "#1a1525",
     tabActiveColor: "#f0e6ff",
     tabInactiveColor: "rgba(240,230,255,0.4)",
+    logo: logoActual,        // → reemplazar por logo-dark.png
+    imagenBoton: botonActual, // → reemplazar por boton-dark.png
   },
   rosa: {
     mode: "rosa",
@@ -68,6 +80,8 @@ const THEMES: Record<AppMode, AppTheme> = {
     tabBackground: "#ee108a",
     tabActiveColor: getContrastText("#ee108a"),
     tabInactiveColor: "rgba(255,255,255,0.5)",
+    logo: logoActual,        // → reemplazar por logo-rosa.png
+    imagenBoton: botonActual, // → reemplazar por boton-rosa.png
   },
   vino: {
     mode: "vino",
@@ -79,6 +93,8 @@ const THEMES: Record<AppMode, AppTheme> = {
     tabBackground: "#680808",
     tabActiveColor: getContrastText("#680808"),
     tabInactiveColor: "rgba(255,255,255,0.5)",
+    logo: logoActual,        // → reemplazar por logo-vino.png
+    imagenBoton: botonActual, // → reemplazar por boton-vino.png
   },
   fucsia: {
     mode: "fucsia",
@@ -90,6 +106,8 @@ const THEMES: Record<AppMode, AppTheme> = {
     tabBackground: "#0b013b",
     tabActiveColor: getContrastText("#0b013b"),
     tabInactiveColor: "rgba(255,255,255,0.4)",
+    logo: logoActual,        // → reemplazar por logo-fucsia.png
+    imagenBoton: botonActual, // → reemplazar por boton-fucsia.png
   },
   magenta: {
     mode: "magenta",
@@ -101,6 +119,8 @@ const THEMES: Record<AppMode, AppTheme> = {
     tabBackground: "#490449",
     tabActiveColor: getContrastText("#490449"),
     tabInactiveColor: "rgba(255,255,255,0.5)",
+    logo: logoActual,        // → reemplazar por logo-magenta.png
+    imagenBoton: botonActual, // → reemplazar por boton-magenta.png
   },
 };
 
@@ -108,7 +128,7 @@ const THEMES: Record<AppMode, AppTheme> = {
 
 type ThemeContextValue = {
   theme: AppTheme;
-  toggleTheme: () => void;   // alterna solo entre light ↔ dark
+  toggleTheme: () => void;
   setMode: (m: AppMode) => void;
 };
 
