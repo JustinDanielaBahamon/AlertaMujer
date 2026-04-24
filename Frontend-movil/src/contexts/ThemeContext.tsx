@@ -3,20 +3,22 @@ import { ImageSourcePropType } from "react-native";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
-export type AppMode = "light" | "dark" | "rosa" | "vino" | "fucsia" | "magenta";
+export type AppMode = "light" | "dark" | "rosa" | "vino" | "Azul" | "magenta";
 
 export type AppTheme = {
   mode: AppMode;
   headerBackground: string;
   headerText: string;
   background: string;
+  containerBackground: string;
   text: string;
   card: string;
   tabBackground: string;
   tabActiveColor: string;
   tabInactiveColor: string;
   logo: ImageSourcePropType;         // ✅ nuevo
-  imagenBoton: ImageSourcePropType;  // ✅ nuevo
+  imagenBoton: ImageSourcePropType; 
+  icono:string; // ✅ nuevo
 };
 
 // ─── Utilidad de contraste automático ────────────────────────────────────────
@@ -38,8 +40,19 @@ function getContrastText(bg: string): string {
 
 // ─── Assets temporales (reemplazar cuando tengas los logos) ──────────────────
 
-const logoActual = require("../../assets/imagesAlertaMujer/logoAlertaMujer.png");
-const botonActual = require("../../assets/imagesAlertaMujer/ScInicio/boton2.png");
+const logoActual = require("../../assets/imagesAlertaMujer/logos/logoAlertaMujer.png");
+const logoMorado= require("../../assets/imagesAlertaMujer/logos/logo-morado.png");
+const logoAzul = require("../../assets/imagesAlertaMujer/logos/logo-Azul.png");
+const logorosa = require("../../assets/imagesAlertaMujer/logos/logo-rosa.png");
+const logovino = require("../../assets/imagesAlertaMujer/logos/logo-vino.png");
+const logonegro = require("../../assets/imagesAlertaMujer/logos/logo-negro.png");
+
+const botonmorado = require("../../assets/imagesAlertaMujer/ScInicio/boton-morado.png");
+const botonAzul = require("../../assets/imagesAlertaMujer/ScInicio/boton-azul.png");
+const botonrosa = require("../../assets/imagesAlertaMujer/ScInicio/boton-rosa.png");
+const botonvino = require("../../assets/imagesAlertaMujer/ScInicio/boton-vino.png");
+const botondorado = require("../../assets/imagesAlertaMujer/ScInicio/boton-dorado.png");
+
 
 // ─── Definición de los temas ──────────────────────────────────────────────────
 
@@ -49,78 +62,90 @@ const THEMES: Record<AppMode, AppTheme> = {
     headerBackground: "rgb(202,171,222)",
     headerText: "#1a1a1a",
     background: "#f5f0fa",
+    containerBackground: "#ffffff",  
     text: "#1a1a1a",
     card: "#ffffff",
     tabBackground: "rgb(202,171,222)",
     tabActiveColor: "#45046b",
-    tabInactiveColor: "rgba(255,255,255,0.7)",
+    tabInactiveColor: "rgba(255, 241, 241, 0.7)",
     logo: logoActual,        // → reemplazar por logo-light.png
-    imagenBoton: botonActual, // → reemplazar por boton-light.png
+    imagenBoton: botonmorado, // → reemplazar por boton-light.
+    icono: "#9b009b",
   },
   dark: {
     mode: "dark",
-    headerBackground: "#1a1525",
-    headerText: "#f0e6ff",
-    background: "#121018",
+    headerBackground: "#000000",
+    headerText: "#fefeff",
+    background: "#2e2e31",
+    containerBackground: "#665d5d",  
     text: "#f0e6ff",
-    card: "#1e1a2e",
-    tabBackground: "#1a1525",
-    tabActiveColor: "#f0e6ff",
-    tabInactiveColor: "rgba(240,230,255,0.4)",
-    logo: logoActual,        // → reemplazar por logo-dark.png
-    imagenBoton: botonActual, // → reemplazar por boton-dark.png
+    card: "#605f64",
+    tabBackground: "#000000",
+    tabActiveColor: "#fcfcfc",
+    tabInactiveColor: "rgba(133, 128, 139, 0.4)",
+    logo: logonegro,        // → reemplazar por logo-dark.png
+    imagenBoton: botondorado, // → reemplazar por boton-dark.
+    icono: "#f0e2ea",
   },
   rosa: {
     mode: "rosa",
-    headerBackground: "#ee108a",
+    headerBackground: "#cf3389",
     headerText: getContrastText("#ee108a"),
-    background: "#fff0f8",
+    background: "#dfc2d1",
+    containerBackground: "#fffbfe",  
     text: "#3a0020",
-    card: "#ffe0f2",
-    tabBackground: "#ee108a",
+    card: "#d69dbf",
+    tabBackground: "#cf3389",
     tabActiveColor: getContrastText("#ee108a"),
-    tabInactiveColor: "rgba(255,255,255,0.5)",
-    logo: logoActual,        // → reemplazar por logo-rosa.png
-    imagenBoton: botonActual, // → reemplazar por boton-rosa.png
+    tabInactiveColor: "rgba(255, 255, 255, 0.95)",
+    logo: logonegro,        // → reemplazar por logo-rosa.png
+    imagenBoton: botonrosa, // → reemplazar por boton-rosa.png
+    icono: "#eb0a86",
   },
   vino: {
     mode: "vino",
-    headerBackground: "#680808",
-    headerText: getContrastText("#680808"),
+    headerBackground: "#770736",
+    headerText: getContrastText("#920505"),
     background: "#fff5f5",
+    containerBackground: "#ffffff",  
     text: "#2a0000",
     card: "#ffe8e8",
-    tabBackground: "#680808",
-    tabActiveColor: getContrastText("#680808"),
-    tabInactiveColor: "rgba(255,255,255,0.5)",
-    logo: logoActual,        // → reemplazar por logo-vino.png
-    imagenBoton: botonActual, // → reemplazar por boton-vino.png
+    tabBackground: "#770736",
+    tabActiveColor: getContrastText("#920505"),
+    tabInactiveColor: "rgb(255, 247, 247)",
+    logo: logovino,        // → reemplazar por logo-vino.png
+    imagenBoton: botonvino, // → reemplazar por boton-vino.png
+    icono: "#3a0020",
   },
-  fucsia: {
-    mode: "fucsia",
+  Azul: {
+    mode: "Azul",
     headerBackground: "#0b013b",
     headerText: getContrastText("#0b013b"),
     background: "#f0f0ff",
+    containerBackground: "#ffffff",  
     text: "#0b013b",
     card: "#e8e6ff",
     tabBackground: "#0b013b",
     tabActiveColor: getContrastText("#0b013b"),
     tabInactiveColor: "rgba(255,255,255,0.4)",
-    logo: logoActual,        // → reemplazar por logo-fucsia.png
-    imagenBoton: botonActual, // → reemplazar por boton-fucsia.png
+    logo: logoAzul,        // → reemplazar por logo-fucsia.png
+    imagenBoton: botonAzul, // → reemplazar por boton-fucsia.png
+    icono: "#3a0020",
   },
   magenta: {
     mode: "magenta",
     headerBackground: "#490449",
     headerText: getContrastText("#490449"),
     background: "#fdf0fd",
+    containerBackground: "#ffffff",  
     text: "#2a002a",
     card: "#f5e0f5",
     tabBackground: "#490449",
     tabActiveColor: getContrastText("#490449"),
     tabInactiveColor: "rgba(255,255,255,0.5)",
-    logo: logoActual,        // → reemplazar por logo-magenta.png
-    imagenBoton: botonActual, // → reemplazar por boton-magenta.png
+    logo: logoMorado,        // → reemplazar por logo-magenta.png
+    imagenBoton: botonmorado, // → reemplazar por boton-magenta.png
+    icono: "#3a0020",
   },
 };
 

@@ -30,7 +30,7 @@ export default function Registro() {
         >
           <View style={styles.ContenedorLogo}>
             <Image
-              source={require("../../assets/imagesAlertaMujer/logoAlertaMujer.png")}
+              source={require("../../assets/imagesAlertaMujer/logos/logoAlertaMujer.png")}
               style={styles.ImagenLogo}
             />
           </View>

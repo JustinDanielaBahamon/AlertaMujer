@@ -1,11 +1,16 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
+
+const { width, height } = Dimensions.get('window');
+
+// ✅ Tamaño del botón proporcional a la pantalla
+const BOTON_SIZE = width * 0.75;  // 62% del ancho de pantalla
 
 export const styles = StyleSheet.create({
 
   container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
+  flex: 1,
+  justifyContent: 'flex-start',  // ✅ todo sube arriba, sin espacio extra
+},
 
   // Ubicación
   containerUbicacion: {
@@ -16,7 +21,6 @@ export const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginTop: 15,
     borderWidth: 2,
-    borderColor: "#7B2CBF",
     borderRadius: 10,
   },
 
@@ -27,13 +31,11 @@ export const styles = StyleSheet.create({
 
   tituloUbicacion: {
     fontSize: 12,
-    color: "#888",
   },
 
   textoUbicacion: {
     fontSize: 14,
     fontWeight: "bold",
-    color: "#000",
   },
 
   iconoUbicacion: {
@@ -108,60 +110,38 @@ export const styles = StyleSheet.create({
     color: '#e74c3c',
   },
 
-  // Botón central
+  // ✅ Botón central adaptable
+  // ✅ Botón central adaptable
   centerSection: {
-    flex: 1,
-    justifyContent: 'center',   // ← centrado en el espacio disponible
-    alignItems: 'center',
-    paddingTop: 30,              // ← baja el botón de los indicadores
-    paddingBottom: 0,
-  },
+  alignItems: 'center',
+  paddingTop: height * 0.03,
+},
 
-  botonAlerta: {
-    width: 250,
-    height: 250,
-    borderRadius: 125,
-    backgroundColor: 'red',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'yellow',
-  },
+botonAlerta: {
+  width: BOTON_SIZE,
+  height: BOTON_SIZE,
+  borderRadius: BOTON_SIZE / 2,
+  justifyContent: 'center',
+  alignItems: 'center',
+},
 
-  imagen: {
-    width: 300,
-    height: 300,
-    resizeMode: 'contain',
-  },
+imagen: {
+  width: BOTON_SIZE * 1.1,
+  height: BOTON_SIZE * 1.1,
+  resizeMode: 'contain',
+},
 
-  // Texto justo debajo del botón
-  textoAlerta: {
-    color: '#1a0030',
-    fontSize: 20,
-    fontWeight: '800',
-    textAlign: 'center',
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    lineHeight: 28,
-    marginTop: 20,               // - cerca del botón pero no pegado
-    marginBottom: 100,            // - espacio antes del tab bar
-    paddingHorizontal: 20,
-  },
-  
-  texto: {
-    color: '#1a0030',
-    fontSize: 20,
-    fontWeight: '800',
-    textAlign: 'center',
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    lineHeight: 28,
-    marginTop: 30,               // - cerca del botón pero no pegado
-    marginBottom: 150,            // - espacio antes del tab bar
-    paddingHorizontal: 10,
-  },
+texto: {
+  fontSize: width * 0.045,
+  fontWeight: '800',
+  textAlign: 'center',
+  textTransform: 'uppercase',
+  letterSpacing: 0.8,
+  lineHeight: 28,
+  marginTop: height * 0.040,
+  paddingHorizontal: 10,
+},
 
-  // legacy
   topSection: {
     position: 'absolute',
     top: 50,

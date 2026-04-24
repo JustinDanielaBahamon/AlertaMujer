@@ -12,8 +12,8 @@ export default function AjustesComponent({ navigation }: any) {
 
   const temasExtra: { id: AppMode; color: string; label: string }[] = [
     { id: 'rosa',    color: '#ee108a', label: 'Rosa' },
-    { id: 'vino',    color: '#680808', label: 'Vino' },
-    { id: 'fucsia',  color: '#0b013b', label: 'Fucsia' },
+    { id: 'vino',    color: '#770736', label: 'Vino' },
+    { id: 'Azul',  color: '#0b013b', label: 'Azul' },
     { id: 'magenta', color: '#490449', label: 'Magenta' },
   ];
 
