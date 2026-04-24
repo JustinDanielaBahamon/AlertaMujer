@@ -17,7 +17,7 @@ export default function Login() {
           >
       
       <View style={styles.ContenedorLogo}>
-        <Image source={require('../../assets/imagesAlertaMujer/logoAlertaMujer.png')} style={styles.ImagenLogo} />
+        <Image source={require('../../assets/imagesAlertaMujer/logos/logoAlertaMujer.png')} style={styles.ImagenLogo} />
       </View>
 
       <View style={styles.ContenedorFormulario}>
