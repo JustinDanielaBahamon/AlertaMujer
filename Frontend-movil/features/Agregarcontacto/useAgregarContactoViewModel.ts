@@ -5,6 +5,7 @@ import * as Contacts from "expo-contacts";
 import { Alert } from "react-native";
 import type { MainStackParamList } from "../../src/navigation/types";
 import { useContactosContext } from "../../src/contexts/ContactosContext";
+import { useLocale } from "../../src/contexts/LocaleContext";
 
 type AgregarNav = NativeStackNavigationProp<MainStackParamList, "AgregarContacto">;
 type AgregarRoute = RouteProp<MainStackParamList, "AgregarContacto">;
@@ -13,6 +14,7 @@ export function useAgregarContactoViewModel() {
   const navigation = useNavigation<AgregarNav>();
   const route = useRoute<AgregarRoute>();
   const { agregarContacto, actualizarContacto } = useContactosContext();
+  const { t } = useLocale();
   const contactoParam = route.params?.contacto;
   const esEdicion = Boolean(contactoParam);
 
@@ -56,8 +58,8 @@ export function useAgregarContactoViewModel() {
       }
     } else {
       Alert.alert(
-        "Permiso denegado",
-        "Ve a configuracion para permitir que la app acceda a tus contactos.",
+        t.agregar.permiso_denegado_titulo,
+        t.agregar.permiso_denegado_desc,
       );
     }
   };
@@ -68,12 +70,12 @@ export function useAgregarContactoViewModel() {
     const telefonoNormalizado = telefono.replace(/\D/g, "");
 
     if (!nombreNormalizado || !telefonoNormalizado) {
-      Alert.alert("Campos incompletos", "Ingresa nombre y teléfono para continuar.");
+      Alert.alert(t.agregar.campos_incompletos, t.agregar.campos_incompletos_desc);
       return;
     }
 
     if (telefonoNormalizado.length < 10) {
-      Alert.alert("Teléfono inválido", "Ingresa un número de teléfono válido.");
+      Alert.alert(t.agregar.telefono_invalido, t.agregar.telefono_invalido_desc);
       return;
     }
 
@@ -99,6 +101,7 @@ export function useAgregarContactoViewModel() {
     nombre,
     parentesco,
     telefono,
+    t,
   ]);
 
   const cancelar = useCallback(() => {
@@ -116,7 +119,7 @@ export function useAgregarContactoViewModel() {
     guardar,
     cancelar,
     esEdicion,
-    tituloPantalla: esEdicion ? "Actualizar contacto" : "Agregar contacto",
-    etiquetaBotonGuardar: esEdicion ? "Guardar cambios" : "Guardar contacto",
+    tituloPantalla: esEdicion ? t.agregar.titulo_editar : t.agregar.titulo_agregar,
+    etiquetaBotonGuardar: esEdicion ? t.agregar.boton_guardar_edicion : t.agregar.boton_guardar_nuevo,
   };
 }

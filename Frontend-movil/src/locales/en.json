@@ -37,7 +37,7 @@
   "boton_alerta": "Send alert",
   "estado_segura": "You are safe"
   },
-  "contactos": {
+ "contactos": {
   "titulo": "My Trusted Contacts",
   "subtitulo": "These people will receive your location in case of emergency.",
   "agregar": "Add contact",
@@ -46,8 +46,15 @@
   "eliminar_contacto": "Delete Contact",
   "actualizar": "Update Info",
   "que_deseas": "What would you like to do?",
-  "editar": "Edit"
-  },
+  "editar": "Edit",
+  "tus_contactos": "Your contacts",
+  "disponible": "Available",
+  "llamar": "Call",
+  "whatsapp": "WhatsApp",
+  "ubicacion_boton": "Location",
+  "agregar_mas": "Want to add more?",
+  "agregar_desc": "Add trusted people."
+},
  "mapa": {
   "titulo": "Your location",
   "cargando": "Getting location...",
@@ -118,6 +125,34 @@
     "eliminar_contacto": "Delete this contact?",
     "alerta_enviada": "Alert sent successfully"
   },
+  "asistencia": {
+  "titulo": "Assistance",
+  "emergencia_titulo": "Immediate emergency",
+  "emergencia_desc": "Police · Ambulance · Fire department",
+  "llamar_ahora": "Call now",
+  "llamar": "Call",
+  "violencia": "VIOLENCE",
+  "violencia_desc": "Legal and psychological support",
+  "salud_mental": "MENTAL HEALTH",
+  "salud_desc": "Emotional crisis line",
+  "defensoria": "Public Defender"
+},
+"agregar": {
+  "titulo_agregar": "Add contact",
+  "titulo_editar": "Update contact",
+  "placeholder_nombre": "Trusted name",
+  "placeholder_parentesco": "Relationship",
+  "placeholder_telefono": "Phone number",
+  "boton_guardar_nuevo": "Save contact",
+  "boton_guardar_edicion": "Save changes",
+  "cancelar": "Cancel",
+  "permiso_denegado_titulo": "Permission denied",
+  "permiso_denegado_desc": "Go to settings to allow the app to access your contacts.",
+  "campos_incompletos": "Incomplete fields",
+  "campos_incompletos_desc": "Enter name and phone to continue.",
+  "telefono_invalido": "Invalid phone",
+  "telefono_invalido_desc": "Enter a valid phone number."
+},
   "general": {
     "cargando": "Loading...",
     "error": "An error occurred",

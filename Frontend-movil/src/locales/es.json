@@ -46,7 +46,14 @@
   "eliminar_contacto": "Eliminar Contacto",
   "actualizar": "Actualizar Datos",
   "que_deseas": "¿Qué deseas hacer?",
-  "editar": "Editar"
+  "editar": "Editar",
+  "tus_contactos": "Tus contactos",
+  "disponible": "Disponible",
+  "llamar": "Llamar",
+  "whatsapp": "WhatsApp",
+  "ubicacion_boton": "Ubicación",
+  "agregar_mas": "¿Quieres agregar más?",
+  "agregar_desc": "Añade personas de confianza."
   },
   "mapa": {
   "titulo": "Tu ubicacion",
@@ -118,6 +125,34 @@
     "eliminar_contacto": "¿Eliminar este contacto?",
     "alerta_enviada": "Alerta enviada exitosamente"
   },
+  "asistencia": {
+  "titulo": "Asistencia",
+  "emergencia_titulo": "Emergencia inmediata",
+  "emergencia_desc": "Policía · Ambulancia · Bomberos",
+  "llamar_ahora": "Llamar ahora",
+  "llamar": "Llamar",
+  "violencia": "VIOLENCIA",
+  "violencia_desc": "Orientación jurídica y psicológica",
+  "salud_mental": "SALUD MENTAL",
+  "salud_desc": "Línea de crisis emocional",
+  "defensoria": "Defensoría del Pueblo"
+},
+"agregar": {
+  "titulo_agregar": "Agregar contacto",
+  "titulo_editar": "Actualizar contacto",
+  "placeholder_nombre": "Nombre de confianza",
+  "placeholder_parentesco": "Parentesco",
+  "placeholder_telefono": "Número de celular",
+  "boton_guardar_nuevo": "Guardar contacto",
+  "boton_guardar_edicion": "Guardar cambios",
+  "cancelar": "Cancelar",
+  "permiso_denegado_titulo": "Permiso denegado",
+  "permiso_denegado_desc": "Ve a configuracion para permitir que la app acceda a tus contactos.",
+  "campos_incompletos": "Campos incompletos",
+  "campos_incompletos_desc": "Ingresa nombre y teléfono para continuar.",
+  "telefono_invalido": "Teléfono inválido",
+  "telefono_invalido_desc": "Ingresa un número de teléfono válido."
+},
   "general": {
     "cargando": "Cargando...",
     "error": "Ocurrió un error",

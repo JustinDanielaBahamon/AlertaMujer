@@ -4,9 +4,11 @@ import Header from "../../src/components/ui/Header/header";
 import { Ionicons } from "@expo/vector-icons";
 import { styles } from "./agregarConstyle";
 import { useAgregarContactoViewModel } from "./useAgregarContactoViewModel";
+import { useLocale } from "../../src/contexts/LocaleContext";
 
 export default function AgregarContacto() {
   const vm = useAgregarContactoViewModel();
+  const { t } = useLocale();
 
   return (
     <KeyboardAvoidingView behavior="padding" style={styles.container}>
@@ -20,7 +22,7 @@ export default function AgregarContacto() {
             <Ionicons name="person-outline" size={24} color="#A020F0" style={styles.inputIcon} />
             <TextInput
               style={styles.inputCustom}
-              placeholder="Nombre de confianza"
+              placeholder={t.agregar.placeholder_nombre}
               value={vm.nombre}
               onChangeText={vm.setNombre}
             />
@@ -31,18 +33,18 @@ export default function AgregarContacto() {
             <Ionicons name="people-outline" size={24} color="#A020F0" style={styles.inputIcon} />
             <TextInput
               style={styles.inputCustom}
-              placeholder="Parentesco"
+              placeholder={t.agregar.placeholder_parentesco}
               value={vm.parentesco}
               onChangeText={vm.setParentesco}
             />
           </View>
 
-          {/* Input Teléfono + Icono de Agenda */}
+          {/* Input Telefono + Icono de Agenda */}
           <View style={styles.inputWrapper}>
             <Ionicons name="call-outline" size={24} color="#A020F0" style={styles.inputIcon} />
             <TextInput
               style={[styles.inputCustom, { flex: 1 }]}
-              placeholder="Número de celular"
+              placeholder={t.agregar.placeholder_telefono}
               keyboardType="phone-pad"
               value={vm.telefono}
               onChangeText={vm.setTelefono}
@@ -59,7 +61,7 @@ export default function AgregarContacto() {
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.btnCancelarLink} onPress={vm.cancelar}>
-            <Text style={styles.btnTextGray}>Cancelar</Text>
+            <Text style={styles.btnTextGray}>{t.agregar.cancelar}</Text>
           </TouchableOpacity>
         </View>
       </View>
