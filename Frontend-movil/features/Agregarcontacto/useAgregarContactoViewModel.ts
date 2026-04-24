@@ -4,6 +4,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import * as Contacts from "expo-contacts";
 import { Alert } from "react-native";
 import type { MainStackParamList } from "../../src/navigation/types";
+import { useContactosContext } from "../../src/contexts/ContactosContext";
 
 type AgregarNav = NativeStackNavigationProp<MainStackParamList, "AgregarContacto">;
 type AgregarRoute = RouteProp<MainStackParamList, "AgregarContacto">;
@@ -11,6 +12,7 @@ type AgregarRoute = RouteProp<MainStackParamList, "AgregarContacto">;
 export function useAgregarContactoViewModel() {
   const navigation = useNavigation<AgregarNav>();
   const route = useRoute<AgregarRoute>();
+  const { agregarContacto, actualizarContacto } = useContactosContext();
   const contactoParam = route.params?.contacto;
   const esEdicion = Boolean(contactoParam);
 
@@ -61,9 +63,43 @@ export function useAgregarContactoViewModel() {
   };
 
   const guardar = useCallback(() => {
-    // TODO: persistir (API) y devolver lista actualizada al tab Contactos
+    const nombreNormalizado = nombre.trim();
+    const parentescoNormalizado = parentesco.trim();
+    const telefonoNormalizado = telefono.replace(/\D/g, "");
+
+    if (!nombreNormalizado || !telefonoNormalizado) {
+      Alert.alert("Campos incompletos", "Ingresa nombre y teléfono para continuar.");
+      return;
+    }
+
+    if (telefonoNormalizado.length < 10) {
+      Alert.alert("Teléfono inválido", "Ingresa un número de teléfono válido.");
+      return;
+    }
+
+    const payload = {
+      nombre: nombreNormalizado,
+      parentesco: parentescoNormalizado || undefined,
+      telefono: telefonoNormalizado,
+    };
+
+    if (esEdicion && contactoParam) {
+      actualizarContacto(contactoParam.id, payload);
+    } else {
+      agregarContacto(payload);
+    }
+
     navigation.goBack();
-  }, [navigation]);
+  }, [
+    actualizarContacto,
+    agregarContacto,
+    contactoParam,
+    esEdicion,
+    navigation,
+    nombre,
+    parentesco,
+    telefono,
+  ]);
 
   const cancelar = useCallback(() => {
     navigation.goBack();

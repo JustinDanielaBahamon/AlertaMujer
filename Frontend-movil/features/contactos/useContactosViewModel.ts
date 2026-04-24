@@ -16,16 +16,7 @@ import type { NavigationProp, ParamListBase } from "@react-navigation/native";
 import { Alert } from "react-native";
 import type { Contacto } from "../../src/models/Contacto";
 import { getMainStackNavigation } from "../../src/navigation/navigationHelpers";
-
-// Datos de ejemplo (luego vendrán del backend)
-const CONTACTOS_MOCK_INICIAL: Contacto[] = [
-  {
-    id: "1",
-    nombre: "Tatiana Montero",
-    parentesco: "Hermana",
-    telefono: "3176866754",
-  },
-];
+import { useContactosContext } from "../../src/contexts/ContactosContext";
 
 /**
  * Formatea un teléfono de 10 dígitos a formato: 317 686 6754
@@ -40,9 +31,7 @@ function formatearTelefonoMostrar(telefono: string): string {
 
 export function useContactosTabViewModel() {
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
-  
-  // Estado: Lista de contactos
-  const [contactos, setContactos] = useState<Contacto[]>(CONTACTOS_MOCK_INICIAL);
+  const { contactos, eliminarContacto } = useContactosContext();
   
   // Estado: ¿Está abierto el modal de acciones?
   const [modalVisible, setModalVisible] = useState(false);
@@ -112,13 +101,12 @@ export function useContactosTabViewModel() {
           text: "Eliminar",
           style: "destructive",
           onPress: () => {
-            // Eliminar del estado (filtrar todos excepto este)
-            setContactos((prev) => prev.filter((c) => c.id !== contacto.id));
+            eliminarContacto(contacto.id);
           },
         },
       ],
     );
-  }, []);
+  }, [eliminarContacto]);
 
   /**
    * ACCIÓN: ACTUALIZAR

@@ -1,174 +1,247 @@
-/**
- * ESTILOS DE LA PANTALLA DE CONTACTOS
- * 
- * Define todos los estilos visuales de la lista de contactos,
- * incluyendo los nuevos estilos para swipe-to-delete.
- */
-
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
-  // Contenedor principal (toda la pantalla)
+  // --- CONTENEDORES PRINCIPALES ---
   ContenedorPrincipal: {
     flex: 1,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: "#F8F9FE", // Un gris muy claro tirando a azulado para resaltar las cards blancas
   },
-
-  // Cuerpo con padding
+  Header: {
+    marginBottom: 0,
+  },
+  Gradiente: {
+    paddingTop: 0,
+    paddingHorizontal: 25,
+    paddingBottom: 25,
+    borderBottomLeftRadius: 45,
+    borderBottomRightRadius: 45,
+  },
+  HeaderContenido: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  TituloHeader: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#FFFFFF",
+    width: 220,
+  },
+  SubtituloHeader: {
+    fontSize: 14,
+    color: "rgba(255, 255, 255, 0.8)",
+    marginTop: 8,
+    lineHeight: 20,
+    width: 220,
+  },
   Cuerpo: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 20,
+    marginTop: 10,
   },
 
-  // Título principal "Mis Contactos de Confianza"
-  TituloPagina: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#6B3FA0",
-    marginBottom: 8,
-  },
-
-  // Subtítulo explicativo
-  Subtitulo: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 20,
-    lineHeight: 20,
-  },
-
-  // Wrapper de la tarjeta (necesario para SwipeListView)
-  TarjetaWrapper: {
-    marginBottom: 12,
-  },
-
-  // Tarjeta individual de contacto
-  TarjetaContacto: {
-    backgroundColor: "#FFF",
-    borderRadius: 15,
-    padding: 15,
+  // --- FILA DE CONTEO (Tus contactos) ---
+  Conteo: {
     flexDirection: "row",
     alignItems: "center",
-    elevation: 3, // Sombra en Android
-    shadowColor: "#000", // Sombra en iOS
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    marginBottom: 10,
+  },
+  Cousser: {
+    backgroundColor: "#F3E5F5",
+    borderRadius: 12,
+    padding: 8,
+    marginRight: 10,
   },
 
-  // Contenedor de la foto de perfil
+  // --- TARJETA DE CONTACTO (CARD PRINCIPAL) ---
+  TarjetaWrapper: {
+    marginBottom: 16,
+  },
+  TarjetaContacto: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 25,
+    padding: 16,
+    // Sombras
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    marginBottom:20
+  },
+
+  // SECCIÓN SUPERIOR: Foto, Info y Editar
+  SeccionSuperior: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 15,
+  },
   ContenedorFoto: {
     position: "relative",
-    marginRight: 15,
   },
-
-  // Imagen de perfil circular
   FotoPerfil: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "#E0E0E0",
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 2,
+    borderColor: "#7B1FA2", // El aro morado
   },
-
-  // Badge de parentesco (ej: "Hermana", "Madre")
-  BadgeRelacion: {
+  PuntoEstado: {
     position: "absolute",
-    bottom: -5,
-    right: -5,
-    backgroundColor: "#6B3FA0",
-    borderRadius: 10,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    bottom: 5,
+    right: 2,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: "#28a745", // Verde disponible
+    borderWidth: 3,
+    borderColor: "#FFFFFF",
   },
-
-  // Texto del badge
-  TextoBadge: {
-    color: "#FFF",
-    fontSize: 10,
-    fontWeight: "600",
-  },
-
-  // Contenedor de nombre y teléfono
   InfoContacto: {
     flex: 1,
+    paddingLeft: 15,
   },
-
-  // Nombre del contacto
   NombreContacto: {
-    fontSize: 18,
-    fontWeight: "600",
+    fontSize: 19,
+    fontWeight: "bold",
     color: "#333",
-    marginBottom: 4,
   },
-
-  // Contenedor de ícono + teléfono
+  BadgeRelacion: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F3E5F5",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginVertical: 5,
+    alignSelf: "flex-start",
+  },
+  TextoBadge: {
+    color: "#7B1FA2",
+    fontSize: 12,
+    fontWeight: "bold",
+    marginLeft: 4,
+  },
   ContenedorTelefono: {
     flexDirection: "row",
     alignItems: "center",
+    marginTop: 2,
   },
-
-  // Número de teléfono formateado
   Telefono: {
     fontSize: 14,
-    color: "#666",
+    color: "#777",
   },
-
-  // Ícono de lápiz (editar rápido)
-  IconoEditar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#F3E5F5",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  // ESTILOS PARA SWIPE-TO-DELETE
-
-  // Fondo que aparece al deslizar (rojo)
-  RowBack: {
-    alignItems: "center",
-    backgroundColor: "#E53935",
-    flex: 1,
+  IconosSuperiores: {
     flexDirection: "row",
-    justifyContent: "flex-end",
-    paddingRight: 15,
-    borderRadius: 15,
-    marginBottom: 12,
+  },
+  BotonIconoSmall: {
+    backgroundColor: "#F5F5F5",
+    padding: 8,
+    borderRadius: 10,
+    marginLeft: 8,
   },
 
-  // Botón de borrar que aparece al deslizar
-  BotonBorrarSwipe: {
+  // SECCIÓN ACCIONES: Llamar, WhatsApp, Ubicación
+  SeccionAcciones: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    borderTopWidth: 1,
+    borderTopColor: "#F0F0F0",
+    paddingTop: 15,
+    paddingHorizontal: 10,
+  },
+  ItemAccion: {
     alignItems: "center",
+    flex: 1,
+  },
+  CirculoIcono: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
     justifyContent: "center",
-    width: 100,
-    height: "100%",
+    alignItems: "center",
+    marginBottom: 5,
+  },
+  TextoAccion: {
+    fontSize: 11,
+    color: "#666",
+    fontWeight: "500",
   },
 
-  // Texto "Eliminar" del swipe
-  TextoBorrarSwipe: {
-    color: "#FFF",
-    fontSize: 12,
-    fontWeight: "600",
-    marginTop: 4,
+  // --- FOOTER: ¿QUIERES AGREGAR MÁS? ---
+  TarjetaSugerencia: {
+    backgroundColor: "#F9F7FF",
+    borderRadius: 20,
+    padding: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    borderStyle: "dashed", // Borde punteado
+    borderWidth: 1.5,
+    borderColor: "#D1C4E9",
+    marginTop: 10,
+    marginBottom: 100, // Espacio para que el botón flotante no tape nada
   },
-
-  // BOTÓN FLOTANTE "+"
-
-  BotonFlotante: {
-    position: "absolute",
-    bottom: 30,
-    right: 20,
+  CirculoDashed: {
     width: 60,
     height: 60,
     borderRadius: 30,
+    borderWidth: 1.5,
+    borderStyle: "dashed",
+    borderColor: "#B39DDB",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 15,
+  },
+  BotonAgregarSmall: {
+    backgroundColor: "#7B1FA2",
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderRadius: 12,
+    elevation: 2,
+  },
+
+  // --- BOTÓN FLOTANTE Y SWIPE ---
+  BotonFlotante: {
+    position: "absolute",
+    bottom: 30,
+    right: 13,
+    width: 65,
+    height: 65,
+    borderRadius: 32.5,
     backgroundColor: "#6B3FA0",
     justifyContent: "center",
     alignItems: "center",
     elevation: 8,
-    shadowColor: "#000",
+    shadowColor: "#6B3FA0",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+  },
+
+
+
+  RowBack: {
+    alignItems: "center",
+    backgroundColor: "#FF5252",
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    paddingRight: 20,
+    borderRadius: 25,
+    marginBottom: 40,
+  },
+  BotonBorrarSwipe: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 80,
+    height: "100%",
+  },
+  // ESTA ES LA QUE FALTABA PARA EL ERROR TS(2551)
+  TextoBorrarSwipe: {
+    color: "#FFF",
+    fontSize: 12,
+    fontWeight: "bold",
+    marginTop: 4,
   },
 });
