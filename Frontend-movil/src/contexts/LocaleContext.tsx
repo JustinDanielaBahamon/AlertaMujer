@@ -1,51 +1,27 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
 
+// Importamos los archivos con los textos en cada idioma
+import es from "../locales/es.json";
+import en from "../locales/en.json";
+
+// Los idiomas disponibles en la app
 export type AppLocale = "es" | "en";
 
-type Strings = {
-  appTitle: string;
-  menu: string;
-  theme: string;
-  language: string;
-  languageEs: string;
-  languageEn: string;
-  themeLight: string;
-  themeDark: string;
-};
+// Juntamos los textos en un objeto para buscar por idioma facil
+const STRINGS = { es, en };
 
-const STRINGS: Record<AppLocale, Strings> = {
-  es: {
-    appTitle: "Alerta Mujer",
-    menu: "Menú",
-    theme: "Tema",
-    language: "Idioma",
-    languageEs: "Español",
-    languageEn: "English",
-    themeLight: "Claro",
-    themeDark: "Oscuro",
-  },
-  en: {
-    appTitle: "Alerta Mujer",
-    menu: "Menu",
-    theme: "Theme",
-    language: "Language",
-    languageEs: "Spanish",
-    languageEn: "English",
-    themeLight: "Light",
-    themeDark: "Dark",
-  },
-};
-
+// Esto define que cosas puede darte el contexto
 type LocaleContextValue = {
-  locale: AppLocale;
-  t: Strings;
-  setLocale: (l: AppLocale) => void;
-  toggleLocale: () => void;
+  locale: AppLocale;        // idioma activo: "es" o "en"
+  t: typeof es;             // todos los textos del idioma activo
+  setLocale: (l: AppLocale) => void;  // para cambiar a un idioma especifico
+  toggleLocale: () => void; // para alternar entre español e ingles
 };
 
 const LocaleContext = createContext<LocaleContextValue | null>(null);
 
 export function LocaleProvider({ children }: { children: React.ReactNode }) {
+  // El idioma por defecto es español
   const [locale, setLocaleState] = useState<AppLocale>("es");
 
   const setLocale = useCallback((l: AppLocale) => {
@@ -56,6 +32,8 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
     setLocaleState((l) => (l === "es" ? "en" : "es"));
   }, []);
 
+  // "t" tiene todos los textos del idioma activo
+  // Si locale es "es", t = es.json. Si es "en", t = en.json
   const t = STRINGS[locale];
 
   const value = useMemo(
@@ -66,6 +44,8 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
 }
 
+// Hook para usar el idioma en cualquier pantalla
+// Ejemplo de uso: const { t, locale, setLocale } = useLocale();
 export function useLocale() {
   const ctx = useContext(LocaleContext);
   if (!ctx) {
