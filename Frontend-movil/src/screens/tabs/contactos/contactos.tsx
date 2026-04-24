@@ -20,19 +20,20 @@ import { LinearGradient } from "expo-linear-gradient";
 import { styles } from "./contactos.styles";
 import { useContactosTabViewModel } from "../../../../features/contactos/useContactosViewModel";
 import ModalAccionesContacto from "../../../components/ui/modalAccionesContacto/modalAccionesContacto";
+import { useLocale } from "../../../contexts/LocaleContext";
 
 export default function Contactos() {
   const vm = useContactosTabViewModel();
+  const { t } = useLocale();
 
-  // Función para abrir el marcador telefónico
-  const hacerLlamada = (telefono:String) => {
+  // Funcion para abrir el marcador telefonico
+  const hacerLlamada = (telefono: String) => {
     const url = Platform.OS === 'android' ? `tel:${telefono}` : `telprompt:${telefono}`;
     Linking.openURL(url).catch(err => console.error("Error al llamar", err));
   };
 
-  // Función para abrir WhatsApp
-  const abrirWhatsApp = (telefono:String) => {
-    // Quitamos espacios o caracteres especiales del número
+  // Funcion para abrir WhatsApp
+  const abrirWhatsApp = (telefono: String) => {
     const numeroLimpio = telefono.replace(/[^0-9]/g, '');
     const url = `whatsapp://send?phone=${numeroLimpio}`;
     
@@ -48,19 +49,17 @@ export default function Contactos() {
   return (
     <View style={styles.ContenedorPrincipal}>
       
-     {/* HEADER */}
-        <View style={styles.Header}>
-          <LinearGradient
-            colors={["rgb(202,171,222)", "rgb(123, 29, 178)"]}
-            start={{ x: 1, y: 0 }} end={{ x: 1, y: 1 }}
-            style={styles.Gradiente} // <-- Antes decía "Gradierte", cámbialo a "Gradiente"
-          >
+      {/* HEADER */}
+      <View style={styles.Header}>
+        <LinearGradient
+          colors={["rgb(202,171,222)", "rgb(123, 29, 178)"]}
+          start={{ x: 1, y: 0 }} end={{ x: 1, y: 1 }}
+          style={styles.Gradiente}
+        >
           <View style={styles.HeaderContenido}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.TituloHeader}>Mis Contactos de Confianza</Text>
-              <Text style={styles.SubtituloHeader}>
-                Estas personas recibirán tu ubicación en caso de emergencia.
-              </Text>
+              <Text style={styles.TituloHeader}>{t.contactos.titulo}</Text>
+              <Text style={styles.SubtituloHeader}>{t.contactos.subtitulo}</Text>
             </View>
             <Image 
               source={require("../../../../assets/imagesAlertaMujer/ScContacto/H.png")} 
@@ -71,12 +70,12 @@ export default function Contactos() {
       </View>
 
       <View style={styles.Cuerpo}>
-        {/* TITULO DE SECCIÓN Y CONTEO */}
+        {/* TITULO DE SECCION Y CONTEO */}
         <View style={styles.Conteo}>
           <View style={styles.Cousser}>
             <Feather name="users" size={18} color="purple" />
           </View>
-          <Text style={{ fontSize: 17, fontWeight: '800' }}> Tus contactos ({vm.contactos.length})</Text>
+          <Text style={{ fontSize: 17, fontWeight: '800' }}> {t.contactos.tus_contactos} ({vm.contactos.length})</Text>
         </View>
 
         {/* LISTA CON SWIPE */}
@@ -115,11 +114,11 @@ export default function Contactos() {
 
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
                       <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#28a745', marginRight: 5 }} />
-                      <Text style={{ fontSize: 12, color: '#28a745', fontWeight: '500' }}>Disponible</Text>
+                      <Text style={{ fontSize: 12, color: '#28a745', fontWeight: '500' }}>{t.contactos.disponible}</Text>
                     </View>
                   </View>
 
-                  {/* ICONOS DE EDICIÓN Y BORRADO */}
+                  {/* ICONOS DE EDICION Y BORRADO */}
                   <View style={styles.IconosSuperiores}>
                     <TouchableOpacity 
                       style={styles.BotonIconoSmall} 
@@ -137,7 +136,7 @@ export default function Contactos() {
                   </View>
                 </View>
 
-                {/* BOTONES DE ACCIÓN FUNCIONALES */}
+                {/* BOTONES DE ACCION */}
                 <View style={styles.SeccionAcciones}>
                   <TouchableOpacity 
                     style={styles.ItemAccion}
@@ -146,7 +145,7 @@ export default function Contactos() {
                     <View style={[styles.CirculoIcono, { backgroundColor: '#F3E5F5' }]}>
                       <Feather name="phone" size={20} color="#6B3FA0" />
                     </View>
-                    <Text style={styles.TextoAccion}>Llamar</Text>
+                    <Text style={styles.TextoAccion}>{t.contactos.llamar}</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity 
@@ -156,14 +155,14 @@ export default function Contactos() {
                     <View style={[styles.CirculoIcono, { backgroundColor: '#E8F5E9' }]}>
                       <MaterialCommunityIcons name="whatsapp" size={22} color="#2e7d32" />
                     </View>
-                    <Text style={styles.TextoAccion}>WhatsApp</Text>
+                    <Text style={styles.TextoAccion}>{t.contactos.whatsapp}</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity style={styles.ItemAccion}>
                     <View style={[styles.CirculoIcono, { backgroundColor: '#E3F2FD' }]}>
                       <Feather name="map-pin" size={20} color="#1565C0" />
                     </View>
-                    <Text style={styles.TextoAccion}>Ubicación</Text>
+                    <Text style={styles.TextoAccion}>{t.contactos.ubicacion_boton}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -177,7 +176,7 @@ export default function Contactos() {
                 onPress={() => vm.borrarConSwipe(c)}
               >
                 <MaterialIcons name="delete" size={28} color="white" />
-                <Text style={styles.TextoBorrarSwipe}>Eliminar</Text>
+                <Text style={styles.TextoBorrarSwipe}>{t.contactos.eliminar}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -188,11 +187,11 @@ export default function Contactos() {
                 <Feather name="user-plus" size={24} color="#B39DDB" />
               </View>
               <View style={{ flex: 1, marginRight: 10 }}>
-                <Text style={{ fontWeight: 'bold', fontSize: 14 }}>¿Quieres agregar más?</Text>
-                <Text style={{ fontSize: 12, color: '#666' }}>Añade personas de confianza.</Text>
+                <Text style={{ fontWeight: 'bold', fontSize: 14 }}>{t.contactos.agregar_mas}</Text>
+                <Text style={{ fontSize: 12, color: '#666' }}>{t.contactos.agregar_desc}</Text>
               </View>
               <TouchableOpacity style={styles.BotonAgregarSmall} onPress={vm.irAgregarContacto}>
-                <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 12 }}>+ Agregar</Text>
+                <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 12 }}>+ {t.contactos.agregar}</Text>
               </TouchableOpacity>
             </View>
           )}

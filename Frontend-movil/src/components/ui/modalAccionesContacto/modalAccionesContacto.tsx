@@ -14,14 +14,11 @@
  * />
  */
 
-/**
- * MODAL DE ACCIONES DE CONTACTO ACTUALIZADO
- */
-
 import React from 'react';
 import { View, Text, Modal, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { styles } from './modalAccionesContacto.styles';
+import { useLocale } from '../../../contexts/LocaleContext';
 
 interface ModalAccionesContactoProps {
   visible: boolean;
@@ -38,7 +35,8 @@ export default function ModalAccionesContacto({
   onBorrar,
   onCerrar 
 }: ModalAccionesContactoProps) {
-  
+  const { t } = useLocale();
+
   return (
     <Modal 
       visible={visible}
@@ -54,12 +52,12 @@ export default function ModalAccionesContacto({
       >
         {/* Tarjeta blanca del modal */}
         <TouchableOpacity 
-          activeOpacity={1} // Ajustado a 1 (máximo) para que sea sólido
+          activeOpacity={1}
           onPress={(e) => e.stopPropagation()} 
         >
           <View style={styles.modalCard}>
             
-            {/* ÍCONO CON CÍRCULO MORADO */}
+            {/* ICONO CON CIRCULO MORADO */}
             <View style={styles.iconCircle}>
               <MaterialIcons name="person" size={40} color="#6B3FA0" />
             </View>
@@ -70,42 +68,42 @@ export default function ModalAccionesContacto({
             </Text>
             
             <Text style={styles.modalSubtitle}>
-              ¿Qué deseas hacer?
+              {t.contactos.que_deseas}
             </Text>
 
-            {/* BOTÓN ACTUALIZAR (con opacidad corregida) */}
+            {/* BOTON ACTUALIZAR */}
             <TouchableOpacity 
               style={styles.btnActualizar} 
-              activeOpacity={0.9} // Evita que se vea lo de atrás al presionar
+              activeOpacity={0.9}
               onPress={() => {
                 onCerrar();
                 onActualizar();
               }}
             >
               <MaterialIcons name="edit" size={22} color="#FFF" />
-              <Text style={styles.btnTextActualizar}>Actualizar Datos</Text>
+              <Text style={styles.btnTextActualizar}>{t.contactos.actualizar}</Text>
             </TouchableOpacity>
 
-            {/* BOTÓN BORRAR (con opacidad corregida) */}
+            {/* BOTON BORRAR */}
             <TouchableOpacity 
               style={styles.btnBorrar} 
-              activeOpacity={0.1} // Evita que se vea lo de atrás al presionar
+              activeOpacity={0.1}
               onPress={() => {
                 onCerrar();
                 onBorrar();
               }}
             >
               <MaterialIcons name="delete" size={22} color="#E53935" />
-              <Text style={styles.btnTextBorrar}>Eliminar Contacto</Text>
+              <Text style={styles.btnTextBorrar}>{t.contactos.eliminar_contacto}</Text>
             </TouchableOpacity>
 
-            {/* BOTÓN CANCELAR */}
+            {/* BOTON CANCELAR */}
             <TouchableOpacity 
               style={styles.btnCancelar} 
-              activeOpacity={0.7} // Este puede ser más suave al ser solo texto
+              activeOpacity={0.7}
               onPress={onCerrar}
             >
-              <Text style={styles.btnTextCancelar}>Cancelar</Text>
+              <Text style={styles.btnTextCancelar}>{t.modal.cancelar}</Text>
             </TouchableOpacity>
 
           </View>
