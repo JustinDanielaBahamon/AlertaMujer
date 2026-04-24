@@ -1,0 +1,128 @@
+{
+  "login": {
+    "titulo": "Bienvenida a tu espacio de seguridad",
+    "correo": "Correo electrónico",
+    "contrasena": "Contraseña",
+    "ingresar": "Iniciar sesión",
+    "olvidaste": "¿Olvidaste tu contraseña?",
+    "registrate": "Regístrate",
+    "continuar_google": "Continuar con Google",
+    "no_cuenta": "¿No tienes cuenta?",
+    "terminos": "Si continúas, confirmas que aceptas nuestras Condiciones de Servicio y nuestro Aviso de privacidad."
+  },
+  "registro": {
+  "titulo": "Únete a nosotros, crea tu cuenta",
+  "nombre": "Nombre completo",
+  "telefono": "Teléfono",
+  "num_documento": "Número de documento",
+  "tipo_documento": "Tipo de documento",
+  "doc_extranjero": "Documento extranjero",
+  "fecha": "DD/MM/AAAA",
+  "correo": "Ingresa tu correo",
+  "contrasena": "Ingresa tu contraseña",
+  "confirmar_contrasena": "Confirmar contraseña",
+  "acepto": "Acepto los",
+  "terminos": "Términos y condiciones",
+  "acepto_la": "Acepto la",
+  "privacidad": "Política de privacidad",
+  "continuar": "Continuar",
+  "ya_cuenta": "¿Ya tienes cuenta? Inicia sesión"
+  },
+  "inicio": {
+  "bienvenida": "Bienvenida",
+  "ubicacion_actual": "Ubicación actual",
+  "camara": "Cámara",
+  "microfono": "Micrófono",
+  "presiona_emergencia": "Presiona en caso de\nEmergencia",
+  "boton_alerta": "Enviar alerta",
+  "estado_segura": "Estás segura"
+  },
+  "contactos": {
+  "titulo": "Mis Contactos de Confianza",
+  "subtitulo": "Estas personas recibirán tu ubicación en caso de emergencia.",
+  "agregar": "Agregar contacto",
+  "sin_contactos": "No tienes contactos de emergencia",
+  "eliminar": "Eliminar",
+  "eliminar_contacto": "Eliminar Contacto",
+  "actualizar": "Actualizar Datos",
+  "que_deseas": "¿Qué deseas hacer?",
+  "editar": "Editar"
+  },
+  "mapa": {
+  "titulo": "Tu ubicacion",
+  "cargando": "Obteniendo ubicacion...",
+  "intentar_nuevo": "Intentar de nuevo",
+  "permiso_denegado": "Permiso denegado. Se recomienda activarlo para el perfecto funcionamiento de nuestra app.",
+  "permiso_denegado2": "Permiso denegado nuevamente.",
+  "permiso_configuracion": "Si desea tener toda la experiencia de nuestra app, por favor, activa el permiso desde configuracion.",
+  "tu_ubicacion": "Tu ubicacion",
+  "historial": "Historial",
+  "historial_ubicacion": "Historial de ubicacion",
+  "orden": "Orden",
+  "latitud": "Latitud",
+  "longitud": "Longitud",
+  "cerrar_mapa": "Cerrar mapa",
+  "sin_permiso": "Sin permiso de ubicacion"
+  },
+  "historial": {
+  "titulo": "Historial de Alertas",
+  "buscar": "Buscar por fecha, lugar o estado...",
+  "sin_alertas": "No se encontraron alertas.",
+  "fecha": "Fecha",
+  "estado": "Estado",
+  "tipo_emergencia": "Emergencia",
+  "tipo_asistencia": "Asistencia",
+  "estado_enviada": "Enviada",
+  "estado_cancelada": "Cancelada"
+  },
+  "ajustes": {
+  "titulo": "Ajustes",
+  "idioma": "Idioma",
+  "temas": "Temas Predeterminados",
+  "ver_tutoriales": "Ver Tutoriales",
+  "tema": "Tema",
+  "oscuro": "Modo oscuro",
+  "claro": "Modo claro",
+  "cerrar_sesion": "Cerrar sesión",
+  "terminos": "Términos y condiciones",
+  "privacidad": "Política de privacidad"
+
+  },
+  "recuperar": {
+  "titulo_paso1": "¿Olvidaste tu contraseña?",
+  "titulo_paso2": "Verifica tu identidad",
+  "subtitulo_paso1": "Ingresa tu correo registrado para recibir un código de seguridad.",
+  "subtitulo_paso2": "Ingresa el código de 4 dígitos que enviamos a tu bandeja de entrada.",
+  "placeholder_correo": "correo@ejemplo.com",
+  "boton_paso1": "Enviar Código",
+  "boton_paso2": "Confirmar Código",
+  "volver": "Volver al inicio de sesión",
+  "nuevo_codigo": "Solicitar un nuevo código"
+  },
+  "tutorial": {
+    "bienvenida": "Bienvenida a AlertaMujer",
+    "boton": "Cómo usar el botón de alerta",
+    "contacto": "Tus contactos de emergencia",
+    "mensaje": "Mensajes de alerta",
+    "notificacion": "Notificaciones",
+    "seguridad": "Tu seguridad es primero",
+    "ubicacion": "Comparte tu ubicación",
+    "siguiente": "Siguiente",
+    "omitir": "Omitir"
+  },
+  "modal": {
+    "confirmar": "Confirmar",
+    "cancelar": "Cancelar",
+    "aceptar": "Aceptar",
+    "cerrar": "Cerrar",
+    "eliminar_contacto": "¿Eliminar este contacto?",
+    "alerta_enviada": "Alerta enviada exitosamente"
+  },
+  "general": {
+    "cargando": "Cargando...",
+    "error": "Ocurrió un error",
+    "reintentar": "Reintentar",
+    "guardar": "Guardar",
+    "editar": "Editar"
+  }
+}

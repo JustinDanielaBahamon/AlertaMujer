@@ -3,9 +3,12 @@ import { View, Text, TouchableOpacity, Image, TextInput, ScrollView, ActivityInd
 import { SafeAreaView } from "react-native-safe-area-context";
 import { styles } from "./login.styles";
 import { useLoginViewModel } from "./useLoginViewModel";
+// Traemos el hook del idioma para usar los textos del JSON
+import { useLocale } from "../../src/contexts/LocaleContext";
 
 export default function Login() {
   const vm = useLoginViewModel();
+  const { t } = useLocale(); // "t" tiene todos los textos del idioma activo
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -13,7 +16,6 @@ export default function Login() {
                 style={styles.ContenedorPrincipal}
                 contentContainerStyle={{ flexGrow: 1 }}
                 showsVerticalScrollIndicator={false}
-                
           >
       
       <View style={styles.ContenedorLogo}>
@@ -21,14 +23,14 @@ export default function Login() {
       </View>
 
       <View style={styles.ContenedorFormulario}>
-        <Text style={styles.TituloFormu}>Bienvenida a tu espacio de seguridad.</Text>
+        <Text style={styles.TituloFormu}>{t.login.titulo}</Text>
 
         {/* Input Correo */}
         <View style={styles.contenedorInput}>
           <Image style={styles.IconoCorreo} source={require('../../assets/imagesAlertaMujer/ScLogin/correo.png')} />
           <TextInput 
             style={styles.inputCorreo} 
-            placeholder="Ingresa tu correo" 
+            placeholder={t.login.correo}
             placeholderTextColor={'#666'}
             value={vm.correo}
             onChangeText={vm.setCorreo}
@@ -39,11 +41,10 @@ export default function Login() {
 
         {/* Input Contraseña */}
         <View style={styles.contenedorInput}>
-          {/* Opcional: Podrías poner un icono de candado aquí */}
           <TextInput 
             style={styles.inputContraseña} 
             secureTextEntry={!vm.mostrarPassword}
-            placeholder="Ingresa tu contraseña"
+            placeholder={t.login.contrasena}
             placeholderTextColor={'#666'}
             value={vm.password}
             onChangeText={vm.setPassword}
@@ -57,7 +58,7 @@ export default function Login() {
         </View>
 
         <TouchableOpacity onPress={vm.irARecuperarContrasena}>
-          <Text style={styles.textoOlivarContra}>¿Olvidaste tu contraseña?</Text>
+          <Text style={styles.textoOlivarContra}>{t.login.olvidaste}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -68,31 +69,28 @@ export default function Login() {
           {vm.cargando ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.textoSession}>Iniciar Sesión</Text>
+            <Text style={styles.textoSession}>{t.login.ingresar}</Text>
           )}
         </TouchableOpacity>
       </View>
 
       <TouchableOpacity style={styles.BotonGoogle} onPress={vm.continuarConGoogle}>
         <Image style={styles.logoGoogle} source={require('../../assets/imagesAlertaMujer/ScLogin/google.png')} />
-        <Text style={styles.textoGoogle}>Continuar con Google</Text>
+        <Text style={styles.textoGoogle}>{t.login.continuar_google}</Text>
       </TouchableOpacity>
 
       <View style={styles.ContenedorRegistrarse}>
-        <Text style={styles.TextoTienesCuenta}>¿No tienes cuenta?</Text>
+        <Text style={styles.TextoTienesCuenta}>{t.login.no_cuenta}</Text>
         <TouchableOpacity style={styles.BotonRegistrar} onPress={vm.irARegistro}>
-          <Text style={styles.textoRegistro}>Regístrate</Text>
+          <Text style={styles.textoRegistro}>{t.login.registrate}</Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.ContenedorTermCondi}>
-        <Text style={styles.textoTerminosCondiciones}>
-          Si continúas, confirmas que aceptas nuestras Condiciones de Servicio y nuestro Aviso de privacidad.
-        </Text>
+        <Text style={styles.textoTerminosCondiciones}>{t.login.terminos}</Text>
       </View>
 
     </ScrollView>
     </SafeAreaView>
-    
   );
 }

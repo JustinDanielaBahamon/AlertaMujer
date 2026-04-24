@@ -1,0 +1,128 @@
+{
+  "login": {
+    "titulo": "Welcome to your safe space",
+    "correo": "Email",
+    "contrasena": "Password",
+    "ingresar": "Sign in",
+    "olvidaste": "Forgot your password?",
+    "registrate": "Sign up",
+    "continuar_google": "Continue with Google",
+    "no_cuenta": "Don't have an account?",
+    "terminos": "By continuing, you confirm that you accept our Terms of Service and Privacy Notice."
+  },
+  "registro": {
+  "titulo": "Join us, create your account",
+  "nombre": "Full name",
+  "telefono": "Phone",
+  "num_documento": "ID number",
+  "tipo_documento": "Document type",
+  "doc_extranjero": "Foreign document",
+  "fecha": "DD/MM/YYYY",
+  "correo": "Enter your email",
+  "contrasena": "Enter your password",
+  "confirmar_contrasena": "Confirm password",
+  "acepto": "I accept the",
+  "terminos": "Terms and conditions",
+  "acepto_la": "I accept the",
+  "privacidad": "Privacy policy",
+  "continuar": "Continue",
+  "ya_cuenta": "Already have an account? Sign in"
+  },
+  "inicio": {
+  "bienvenida": "Welcome to Alerta Mujer",
+  "ubicacion_actual": "Current location",
+  "camara": "Camera",
+  "microfono": "Microphone",
+  "presiona_emergencia": "Press in case of\nEmergency",
+  "boton_alerta": "Send alert",
+  "estado_segura": "You are safe"
+  },
+  "contactos": {
+  "titulo": "My Trusted Contacts",
+  "subtitulo": "These people will receive your location in case of emergency.",
+  "agregar": "Add contact",
+  "sin_contactos": "You have no emergency contacts",
+  "eliminar": "Delete",
+  "eliminar_contacto": "Delete Contact",
+  "actualizar": "Update Info",
+  "que_deseas": "What would you like to do?",
+  "editar": "Edit"
+  },
+ "mapa": {
+  "titulo": "Your location",
+  "cargando": "Getting location...",
+  "intentar_nuevo": "Try again",
+  "permiso_denegado": "Permission denied. We recommend enabling it for the best experience in our app.",
+  "permiso_denegado2": "Permission denied again.",
+  "permiso_configuracion": "To enjoy the full experience of our app, please enable the permission from settings.",
+  "tu_ubicacion": "Your location",
+  "historial": "History",
+  "historial_ubicacion": "Location history",
+  "orden": "Order",
+  "latitud": "Latitude",
+  "longitud": "Longitude",
+  "cerrar_mapa": "Close map",
+  "sin_permiso": "No location permission"
+  },
+  "historial": {
+  "titulo": "Alert History",
+  "buscar": "Search by date, place or status...",
+  "sin_alertas": "No alerts found.",
+  "fecha": "Date",
+  "estado": "Status",
+  "tipo_emergencia": "Emergency",
+  "tipo_asistencia": "Assistance",
+  "estado_enviada": "Sent",
+  "estado_cancelada": "Cancelled"
+  },
+  "ajustes": {
+  "titulo": "Settings",
+  "idioma": "Language",
+  "temas": "Default Themes",
+  "ver_tutoriales": "View Tutorials",
+  "tema": "Theme",
+  "oscuro": "Dark mode",
+  "claro": "Light mode",
+  "cerrar_sesion": "Sign out",
+  "terminos": "Terms and conditions",
+  "privacidad": "Privacy policy"
+
+  },
+  "recuperar": {
+  "titulo_paso1": "Forgot your password?",
+  "titulo_paso2": "Verify your identity",
+  "subtitulo_paso1": "Enter your registered email to receive a security code.",
+  "subtitulo_paso2": "Enter the 4-digit code we sent to your inbox.",
+  "placeholder_correo": "email@example.com",
+  "boton_paso1": "Send Code",
+  "boton_paso2": "Confirm Code",
+  "volver": "Back to sign in",
+  "nuevo_codigo": "Request a new code"
+  },
+  "tutorial": {
+    "bienvenida": "Welcome to AlertaMujer",
+    "boton": "How to use the alert button",
+    "contacto": "Your emergency contacts",
+    "mensaje": "Alert messages",
+    "notificacion": "Notifications",
+    "seguridad": "Your safety comes first",
+    "ubicacion": "Share your location",
+    "siguiente": "Next",
+    "omitir": "Skip"
+  },
+  "modal": {
+    "confirmar": "Confirm",
+    "cancelar": "Cancel",
+    "aceptar": "Accept",
+    "cerrar": "Close",
+    "eliminar_contacto": "Delete this contact?",
+    "alerta_enviada": "Alert sent successfully"
+  },
+  "general": {
+    "cargando": "Loading...",
+    "error": "An error occurred",
+    "reintentar": "Retry",
+    "guardar": "Save",
+    "editar": "Edit"
+  }
+}
