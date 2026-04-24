@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getTabScreenOptions } from "../components/ui/Tabs/TabsNavegationStyle";
 import { useTheme } from "../contexts/ThemeContext";
 
-import Alerta from "../screens/tabs/alerta";
+import Asistencia from "../screens/tabs/Asistencia/Asistencia";
 import Contactos from "../screens/tabs/contactos/contactos";
 import Historial from "../screens/tabs/historialAlerta/historial";
 import Inicio from "../screens/tabs/inicio";
@@ -17,7 +17,7 @@ const Tab = createBottomTabNavigator();
 const TABS = [
   { name: "Inicio",    icono: "home",    iconoOff: "home-outline"    },
   { name: "Mapa",      icono: "map",     iconoOff: "map-outline"     },
-  { name: "Alerta",    icono: "warning", iconoOff: "warning-outline" },
+  { name: "Asistencia",    icono: "medical", iconoOff: "medical-outline" },
   { name: "Contactos", icono: "people",  iconoOff: "people-outline"  },
   { name: "Historial", icono: "time",    iconoOff: "time-outline"    },
 ];
@@ -111,7 +111,7 @@ export default function TabNavigator() {
     >
       <Tab.Screen name="Inicio"    component={Inicio} />
       <Tab.Screen name="Mapa"      component={Mapa} />
-      <Tab.Screen name="Alerta"    component={Alerta} />
+      <Tab.Screen name="Asistencia"    component={Asistencia} />
       <Tab.Screen name="Contactos" component={Contactos} />
       <Tab.Screen name="Historial" component={Historial} />
     </Tab.Navigator>
