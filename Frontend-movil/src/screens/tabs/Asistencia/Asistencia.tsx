@@ -21,7 +21,7 @@ export default function Asistencia(){
         >
             <View style={styles.ContenedorPrincipal}>
                 <View style={styles.ContenedorCabezera}>
-                    <MaterialIcons style={{marginRight:8}} name="medical-services" size={24} color="black" />
+                    <MaterialIcons style={{marginRight:8}} name="medical-services" size={24} color="purple" />
                     <Text style={styles.TextoCabezera}>Asistencia</Text>
                 </View>
 
