@@ -13,7 +13,8 @@ export const styles = StyleSheet.create({
     },
     TextoCabezera: {
         fontSize: 28,
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        color:'purple'
     },
     ContenedorCuadros: {
         padding: 15, // Aumentado ligeramente para mejor respiro en bordes
