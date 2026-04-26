@@ -13,47 +13,47 @@ interface TutorialPagerProps {
 
 export const TutorialPager = ({ children, paginasConBloqueo = {} }: TutorialPagerProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
-
-  // true mientras se resuelven permisos — bloquea cualquier nuevo deslizamiento
   const [scrollBloqueado, setScrollBloqueado] = useState(false);
 
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef    = useRef<ScrollView>(null);
+  // ✅ Ref que siempre tiene el índice real, no se congela en closures async
+  const activeIndexRef = useRef(0);
+
   const pages = React.Children.toArray(children);
 
   const goToIndex = (index: number) => {
     scrollRef.current?.scrollTo({ x: index * width, animated: true });
+    activeIndexRef.current = index; // ✅ actualizamos la ref inmediatamente
     setActiveIndex(index);
   };
 
   const handleScrollEnd = async (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    // Si ya hay un permiso en proceso, ignora el evento completamente
     if (scrollBloqueado) return;
 
-    const xOffset = event.nativeEvent.contentOffset.x;
+    const xOffset     = event.nativeEvent.contentOffset.x;
     const intentIndex = Math.round(xOffset / width);
+    // ✅ Usamos la ref, no el estado (que puede estar desactualizado en async)
+    const currentIndex = activeIndexRef.current;
 
-    if (intentIndex > activeIndex && paginasConBloqueo[activeIndex]) {
+    if (intentIndex > currentIndex && paginasConBloqueo[currentIndex]) {
 
-      // 1. Bloquea el scroll para que no se pueda deslizar durante los permisos
       setScrollBloqueado(true);
 
-      // 2. Regresa visualmente a la página actual
-      goToIndex(activeIndex);
+      // Regresa visualmente a la página actual
+      goToIndex(currentIndex);
 
-      // 3. Muestra el modal/permiso y espera la decisión del usuario
-      const puedePasar = await paginasConBloqueo[activeIndex]();
+      // Espera la decisión del usuario
+      const puedePasar = await paginasConBloqueo[currentIndex]();
 
       if (puedePasar) {
-        // 4. Avanza a la siguiente página
-        goToIndex(activeIndex + 1);
+        // ✅ Usamos activeIndexRef.current que siempre está actualizado
+        goToIndex(activeIndexRef.current + 1);
       }
 
-      // 5. Desbloquea con delay para que el ScrollView termine
-      // de procesar eventos pendientes antes de aceptar nuevos gestos
       setTimeout(() => setScrollBloqueado(false), 400);
 
     } else {
-      setActiveIndex(intentIndex);
+      goToIndex(intentIndex);
     }
   };
 
@@ -64,7 +64,6 @@ export const TutorialPager = ({ children, paginasConBloqueo = {} }: TutorialPage
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        // Bloquea físicamente el deslizamiento mientras hay permisos pendientes
         scrollEnabled={!scrollBloqueado}
         onMomentumScrollEnd={handleScrollEnd}
         scrollEventThrottle={16}
@@ -86,7 +85,7 @@ export const TutorialPager = ({ children, paginasConBloqueo = {} }: TutorialPage
               width: activeIndex === i ? 22 : 8,
               height: 8,
               borderRadius: 4,
-              backgroundColor: activeIndex === i ? "#4A148C" : "#c412e7",
+              backgroundColor: activeIndex === i ? "#4A148C" : "#12bce7",
               marginHorizontal: 4,
               opacity: activeIndex === i ? 1 : 0.6,
             }}
