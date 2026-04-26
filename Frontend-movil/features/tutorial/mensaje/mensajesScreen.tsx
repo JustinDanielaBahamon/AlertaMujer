@@ -1,11 +1,12 @@
 import LottieView from "lottie-react-native";
 import React, { useEffect, useRef } from "react";
-import { Animated, ScrollView, Text, TouchableOpacity, View, } from "react-native";
+import { Animated, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Card from "../../../src/components/ui/card/card";
 import CustomePermisos from "../../../src/components/ui/modalMesanje/permisosMLL";
 import { mensajeStyle, MSG_COLORS } from "./mensajeStyle";
-import { useMensajesTutorialViewModel, type FeatureItem, } from "./useMensajesTutorialViewModel";
+import { useMensajesTutorialViewModel, type FeatureItem } from "./useMensajesTutorialViewModel";
+import { LinearGradient } from 'expo-linear-gradient';
 
 // ─── Círculos decorativos de fondo ───────────────────────────────────────────
 function BackgroundCircles() {
@@ -69,10 +70,7 @@ function FeatureRow({ item, enterDelay }: { item: FeatureItem; enterDelay: numbe
         borderColor:     item.colorBorder,
         shadowColor:     item.color,
       }]}>
-        {/* Acento superior */}
         <View style={[mensajeStyle.featureRowAccent, { backgroundColor: item.color }]} />
-
-        {/* Ícono */}
         <View style={[mensajeStyle.rowIconWrap, {
           backgroundColor: item.color + "25",
           borderWidth: 1.5,
@@ -80,14 +78,10 @@ function FeatureRow({ item, enterDelay }: { item: FeatureItem; enterDelay: numbe
         }]}>
           <Text style={mensajeStyle.rowIcon}>{item.emoji}</Text>
         </View>
-
-        {/* Texto */}
         <View style={mensajeStyle.rowTextContainer}>
           <Text style={[mensajeStyle.rowTitle, { color: item.color }]}>{item.title}</Text>
           <Text style={mensajeStyle.rowDesc}>{item.desc}</Text>
         </View>
-
-        {/* Badge */}
         <View style={[mensajeStyle.badge, { backgroundColor: item.color + "20" }]}>
           <Text style={[mensajeStyle.badgeText, { color: item.color }]}>{item.badge}</Text>
         </View>
@@ -105,7 +99,6 @@ export default function MensajesScreen({ vmExterno }: Props) {
   const vmInterno = useMensajesTutorialViewModel();
   const vm = vmExterno ?? vmInterno;
 
-  // ── Animación card de entrada (spring) ───────────────────────────────────
   const cardAnim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.spring(cardAnim, {
@@ -124,121 +117,132 @@ export default function MensajesScreen({ vmExterno }: Props) {
   };
 
   return (
+    // 1️⃣ View exterior — igual que antes
     <View style={mensajeStyle.screenBg}>
-      <BackgroundCircles />
 
-      <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
+      {/* 2️⃣ LinearGradient cubre todo el interior */}
+      <LinearGradient
+        colors={["#f1d0de", "#FCE7F3", "#b026bd"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ flex: 1 }}
+      >
+        {/* 3️⃣ Círculos van DENTRO del gradiente */}
+        <BackgroundCircles />
 
-        {/* Lottie — mismo patrón que ActivacionTutorial */}
-        <View style={mensajeStyle.lottieSection}>
-          <LottieView
-            source={require("../../../assets/imagesAlertaMujer/ScTutorial/Message.json")}
-            autoPlay
-            loop
-            resizeMode="contain"
-            style={mensajeStyle.lottie}
-          />
-        </View>
+        <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
 
-        {/* Card animada */}
-        <Animated.View style={[{ flex: 1 }, cardAnimStyle]}>
-          <Card title={`Mensajes y\n`} titleHighlight="Llamadas">
-            <ScrollView
-              style={mensajeStyle.cardScroll}
-              contentContainerStyle={mensajeStyle.cardScrollContent}
-              showsVerticalScrollIndicator={false}
-              scrollEventThrottle={16}
-              nestedScrollEnabled={true}
-            >
-              {/* Sección características */}
-              <View style={mensajeStyle.sectionRow}>
-                <Text style={mensajeStyle.sectionLabel}>CÓMO TE PROTEGEMOS</Text>
-                <View style={mensajeStyle.sectionLine} />
-              </View>
+          {/* Lottie */}
+          <View style={mensajeStyle.lottieSection}>
+            <LottieView
+              source={require("../../../assets/imagesAlertaMujer/ScTutorial/Message.json")}
+              autoPlay
+              loop
+              resizeMode="contain"
+              style={mensajeStyle.lottie}
+            />
+          </View>
 
-              {vm.featureRows.map((item, index) => (
-                <FeatureRow
-                  key={item.id}
-                  item={item}
-                  enterDelay={200 + index * 110}
-                />
-              ))}
+          {/* Card animada */}
+          <Animated.View style={[{ flex: 1 }, cardAnimStyle]}>
+            <Card title={`Mensajes y\n`} titleHighlight="Llamadas">
+              <ScrollView
+                style={mensajeStyle.cardScroll}
+                contentContainerStyle={mensajeStyle.cardScrollContent}
+                showsVerticalScrollIndicator={false}
+                scrollEventThrottle={16}
+                nestedScrollEnabled={true}
+              >
+                <View style={mensajeStyle.sectionRow}>
+                  <Text style={mensajeStyle.sectionLabel}>CÓMO TE PROTEGEMOS</Text>
+                  <View style={mensajeStyle.sectionLine} />
+                </View>
 
-              <View style={mensajeStyle.divider} />
+                {vm.featureRows.map((item, index) => (
+                  <FeatureRow
+                    key={item.id}
+                    item={item}
+                    enterDelay={200 + index * 110}
+                  />
+                ))}
 
-              {/* Detalle descriptivo */}
-              <View style={{ gap: 4 }}>
-                {vm.featureRows.map((item) => (
-                  <View key={`desc-${item.id}`} style={mensajeStyle.descRow}>
-                    <View style={[mensajeStyle.descDot, { backgroundColor: item.color }]} />
-                    <View style={mensajeStyle.descTextWrap}>
-                      <Text>
-                        <Text style={[mensajeStyle.descHighlight, { color: item.color }]}>
-                          {item.highlightLabel}
+                <View style={mensajeStyle.divider} />
+
+                <View style={{ gap: 4 }}>
+                  {vm.featureRows.map((item) => (
+                    <View key={`desc-${item.id}`} style={mensajeStyle.descRow}>
+                      <View style={[mensajeStyle.descDot, { backgroundColor: item.color }]} />
+                      <View style={mensajeStyle.descTextWrap}>
+                        <Text>
+                          <Text style={[mensajeStyle.descHighlight, { color: item.color }]}>
+                            {item.highlightLabel}
+                          </Text>
+                          <Text style={mensajeStyle.descBold}>{item.boldLabel} </Text>
+                          <Text style={mensajeStyle.descNormal}>{item.detailDesc}</Text>
                         </Text>
-                        <Text style={mensajeStyle.descBold}>{item.boldLabel} </Text>
-                        <Text style={mensajeStyle.descNormal}>{item.detailDesc}</Text>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+
+                <View style={mensajeStyle.divider} />
+
+                <View style={mensajeStyle.sectionRow}>
+                  <Text style={mensajeStyle.sectionLabel}>PERMISOS NECESARIOS</Text>
+                  <View style={mensajeStyle.sectionLine} />
+                </View>
+
+                <View style={mensajeStyle.permisosCard}>
+                  <View style={mensajeStyle.permisosRow}>
+                    <Text style={mensajeStyle.permisosEmoji}>🔐</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={mensajeStyle.permisosTitle}>Activa los permisos</Text>
+                      <Text style={mensajeStyle.permisosDesc}>
+                        SMS y llamadas son necesarios para que las alertas funcionen correctamente.
                       </Text>
                     </View>
                   </View>
-                ))}
-              </View>
-
-              <View style={mensajeStyle.divider} />
-
-              {/* Sección permisos */}
-              <View style={mensajeStyle.sectionRow}>
-                <Text style={mensajeStyle.sectionLabel}>PERMISOS NECESARIOS</Text>
-                <View style={mensajeStyle.sectionLine} />
-              </View>
-
-              <View style={mensajeStyle.permisosCard}>
-                <View style={mensajeStyle.permisosRow}>
-                  <Text style={mensajeStyle.permisosEmoji}>🔐</Text>
-                  <View style={{ flex: 1 }}>
-                    <Text style={mensajeStyle.permisosTitle}>Activa los permisos</Text>
-                    <Text style={mensajeStyle.permisosDesc}>
-                      SMS y llamadas son necesarios para que las alertas funcionen correctamente.
-                    </Text>
-                  </View>
                 </View>
-              </View>
 
-              {/* Badge inferior */}
-              <View style={mensajeStyle.bottomBadge}>
-                <Text style={{ fontSize: 16 }}>📡</Text>
-                <Text style={mensajeStyle.bottomBadgeText}>Alerta en segundos</Text>
-              </View>
+                <View style={mensajeStyle.bottomBadge}>
+                  <Text style={{ fontSize: 16 }}>📡</Text>
+                  <Text style={mensajeStyle.bottomBadgeText}>Alerta en segundos</Text>
+                </View>
 
-            </ScrollView>
-          </Card>
-        </Animated.View>
+              </ScrollView>
+            </Card>
+          </Animated.View>
 
-      </SafeAreaView>
+        </SafeAreaView>
 
-      {/* Overlay advertencia — lógica original intacta */}
-      {vm.mostrarAdvertencia && (
-        <View style={mensajeStyle.overlayBg}>
-          <View style={mensajeStyle.warningBox}>
-            <Text style={mensajeStyle.warningText}>
-              ⚠️ Sin estos permisos las alertas de emergencia no funcionarán correctamente.
-            </Text>
-            <TouchableOpacity onPress={vm.reintentarPermisos} style={mensajeStyle.btnPrimary}>
-              <Text style={mensajeStyle.btnPrimaryText}>Activar permisos</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={vm.continuarSinPermisos} style={mensajeStyle.btnSecondary}>
-              <Text style={mensajeStyle.btnSecondaryText}>Continuar sin permisos</Text>
-            </TouchableOpacity>
+        {/* 4️⃣ Overlay advertencia también va DENTRO del gradiente */}
+        {vm.mostrarAdvertencia && (
+          <View style={mensajeStyle.overlayBg}>
+            <View style={mensajeStyle.warningBox}>
+              <Text style={mensajeStyle.warningText}>
+                ⚠️ Sin estos permisos las alertas de emergencia no funcionarán correctamente.
+              </Text>
+              <TouchableOpacity onPress={vm.reintentarPermisos} style={mensajeStyle.btnPrimary}>
+                <Text style={mensajeStyle.btnPrimaryText}>Activar permisos</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={vm.continuarSinPermisos} style={mensajeStyle.btnSecondary}>
+                <Text style={mensajeStyle.btnSecondaryText}>Continuar sin permisos</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      )}
+        )}
 
-      <CustomePermisos
-        visible={vm.modalVisible}
-        tipo={vm.tipoPermiso}
-        onConfirmar={vm.confirmarModal}
-        onCancelar={vm.cancelarModal}
-      />
+        <CustomePermisos
+          visible={vm.modalVisible}
+          tipo={vm.tipoPermiso}
+          onConfirmar={vm.confirmarModal}
+          onCancelar={vm.cancelarModal}
+        />
+
+      {/* 5️⃣ Cierre del LinearGradient */}
+      </LinearGradient>
+
+    {/* 6️⃣ Cierre del View exterior */}
     </View>
   );
 }

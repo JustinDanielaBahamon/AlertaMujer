@@ -7,6 +7,7 @@ import Card from "../../../src/components/ui/card/card";
 import ModalConfirmacion from "@/src/components/ui/modalConfirmacion/confirmacion";
 import { useUbicacionTutorialViewModel, PLACEHOLDER_MUNICIPIO } from "./useUbicacionTutorialViewModel";
 import { ubicacionStyle, UBIC_COLORS } from "./ubicacionStyle";
+import { LinearGradient } from 'expo-linear-gradient';
 
 // ─── Círculos decorativos de fondo ───────────────────────────────────────────
 function BackgroundCircles() {
@@ -99,6 +100,14 @@ export default function UbicacionScreen({ vmExterno }: UbicacionScreenProps) {
 
   return (
     <View style={ubicacionStyle.screenBg}>
+
+      <LinearGradient
+        colors={["#FFF0F6", "#FCE7F3", "#b026bd"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ flex: 1 }}
+      >
+
       <BackgroundCircles />
 
       <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
@@ -283,7 +292,10 @@ export default function UbicacionScreen({ vmExterno }: UbicacionScreenProps) {
         municipio={vm.municipio}
         onConfirmar={vm.confirmarUbicacion}
         onRegresar={vm.cerrarConfirmacion}
+        soloConfirmar={vm.yaConfirmado} // ← nuevo prop
       />
+      </LinearGradient>
+
     </View>
   );
 }

@@ -6,6 +6,7 @@ import Card from "../../../src/components/ui/card/card";
 import PermisosModal from "../../../src/components/ui/modalMesanje/permisosMLL";
 import { useSeguridadTutorialViewModel, type SeguridadFeatureItem, } from "./useSeguridadTutorialViewModel";
 import { SEGURIDAD_COLORS, seguridadStyle } from "./seguridadStyle";
+import { LinearGradient } from 'expo-linear-gradient';
 
 // ─── Círculos decorativos de fondo ───────────────────────────────────────────
 function BackgroundCircles() {
@@ -119,6 +120,12 @@ export default function CamaraMicrofonoTutorial({ vmExterno }: Props) {
 
   return (
     <View style={seguridadStyle.screenBg}>
+      <LinearGradient
+        colors={["#FFF0F6", "#FCE7F3", "#b026bd"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ flex: 1 }}
+      >
       <BackgroundCircles />
 
       <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
@@ -246,6 +253,7 @@ export default function CamaraMicrofonoTutorial({ vmExterno }: Props) {
         onConfirmar={vm.confirmarModal}
         onCancelar={vm.cancelarModal}
       />
+      </LinearGradient>
     </View>
   );
 }

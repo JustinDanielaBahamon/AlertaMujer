@@ -8,6 +8,7 @@ interface ModalConfirmacionProps {
   municipio: string;
   onConfirmar: () => void;
   onRegresar: () => void;
+  soloConfirmar?: React.MutableRefObject<boolean>; // ← agregar esto
 }
 
 export default function ModalConfirmacion({ 
@@ -15,7 +16,8 @@ export default function ModalConfirmacion({
   departamento, 
   municipio, 
   onConfirmar, 
-  onRegresar 
+  onRegresar,
+  soloConfirmar, // ← agregar esto
 }: ModalConfirmacionProps) {
   
   return (
@@ -23,20 +25,16 @@ export default function ModalConfirmacion({
       <View style={localStyles.overlay}>
         <View style={localStyles.modalCard}>
           
-          {/* ICONO CON CÍRCULO MORADO */}
           <View style={localStyles.iconCircle}>
             <Text style={localStyles.iconText}>⚠️</Text>
           </View>
 
-          <Text style={localStyles.modalTitle}>
-            ¡Casi listos!
-          </Text>
+          <Text style={localStyles.modalTitle}>¡Casi listos!</Text>
           
           <Text style={localStyles.modalSubtitle}>
             Confirma que tu ubicación sea correcta para poder asistirte mejor:
           </Text>
 
-          {/* CONTENEDOR DE DATOS (CUADRO MORADO CLARO) */}
           <View style={localStyles.infoBox}>
             <View style={localStyles.dataRow}>
               <Text style={localStyles.dataLabel}>Departamento:</Text>
@@ -48,15 +46,17 @@ export default function ModalConfirmacion({
             </View>
           </View>
 
-          {/* BOTONES DEL MISMO TAMAÑO */}
           <View style={localStyles.buttonContainer}>
             <TouchableOpacity style={localStyles.btnConfirmar} onPress={onConfirmar}>
               <Text style={localStyles.btnTextConfirmar}>Sí, confirmar</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={localStyles.btnRegresar} onPress={onRegresar}>
-              <Text style={localStyles.btnTextRegresar}>Cambiar datos</Text>
-            </TouchableOpacity>
+            {/* ← Solo muestra "Cambiar datos" si NO ha confirmado aún */}
+            {!soloConfirmar?.current && (
+              <TouchableOpacity style={localStyles.btnRegresar} onPress={onRegresar}>
+                <Text style={localStyles.btnTextRegresar}>Cambiar datos</Text>
+              </TouchableOpacity>
+            )}
           </View>
 
         </View>

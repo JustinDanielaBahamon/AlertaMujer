@@ -6,7 +6,7 @@ import Card from "../../../src/components/ui/card/card";
 import PermisosModal from "../../../src/components/ui/modalMesanje/permisosMLL";
 import {useContactoTutorialViewModel,type ContactoFeatureItem,} from "./useContactoTutorialViewModel";
 import { contactoStyle, CONTACTO_COLORS } from "./contactoStyle";
-
+import { LinearGradient } from 'expo-linear-gradient';
 // ─── Círculos decorativos de fondo ───────────────────────────────────────────
 function BackgroundCircles() {
   const f1 = useRef(new Animated.Value(0)).current;
@@ -118,8 +118,16 @@ export default function ContactosScreen({ vmExterno }: Props) {
   };
 
   return (
-    <View style={contactoStyle.screenBg}>
-      <BackgroundCircles />
+     <View style={contactoStyle.screenBg}>
+
+      <LinearGradient
+        colors={["#FFF0F6", "#FCE7F3", "#b026bd"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ flex: 1 }}
+      >
+         <BackgroundCircles />
+    
 
       <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
 
@@ -233,6 +241,7 @@ export default function ContactosScreen({ vmExterno }: Props) {
         onConfirmar={vm.confirmarModal}
         onCancelar={vm.cancelarModal}
       />
+      </LinearGradient>
     </View>
   );
 }

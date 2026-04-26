@@ -6,9 +6,9 @@ export const UBIC_COLORS = {
   accentLight: "#ECFDF5",
   accentDark:  "#047857",
 
-  circle1: "#059669",
-  circle2: "#0891B2",
-  circle3: "#7C3AED",
+  circle1: "#a939c0",
+  circle2: "#7c3fc2",
+  circle3: "#035317",
   circle4: "#34D399",
 
   screenBg:     "#EDFAF4",
@@ -30,7 +30,7 @@ export const ubicacionStyle = StyleSheet.create({
   // ── Fondo ──────────────────────────────────────────────────────────────────
   screenBg: {
     flex: 1,
-    backgroundColor: UBIC_COLORS.screenBg,
+    
   },
 
   // ── Círculos de fondo ──────────────────────────────────────────────────────

@@ -1,19 +1,19 @@
 import { StyleSheet } from "react-native";
 
 export const COLORS = {
-  purpleMain:  '#7C3AED',
-  purpleLight: '#EDE9FE',
-  purpleMid:   '#A78BFA',
+  purpleMain:  '#6006aa',
+  purpleLight: '#fdfdfd',
+  purpleMid:   '#300c9e',
   purpleDark:  '#5B21B6',
-  purpleSoft:  '#DDD6FE',
-  purplePale:  '#C4B5FD',
-  bgPage:      '#F5F3FF',
+  purpleSoft:  '#3b288fce',
+  purplePale:  '#8f17be',
+  bgPage:      '#ddd9f5',
   bgCard:      '#FFFFFF',
   textTitle:   '#1E1B4B',
   textBody:    '#4B5563',
-  sosPrimary:  '#DC2626',
+  sosPrimary:  'rgb(255, 189, 65)',
   sosLight:    '#FEE2E2',
-  sosDark:     '#991B1B',
+  sosDark:     '#c01d1d',
 };
 
 export const styles = StyleSheet.create({
@@ -43,9 +43,9 @@ export const styles = StyleSheet.create({
 
   // Card — versión grande (Bienvenida y pantallas con más contenido)
   cardLarge: {
-    marginHorizontal: 14,
+    marginHorizontal: 20,
     marginTop: 24,
-    marginBottom: 20,
+    marginBottom: 18,
     flex: 1,
     backgroundColor: COLORS.bgCard,
     borderRadius: 28,
@@ -88,7 +88,7 @@ export const styles = StyleSheet.create({
   divider: {
     height: 1,
     backgroundColor: COLORS.purpleLight,
-    marginBottom: 20,
+    marginBottom: 12,
   },
 
   // Bloques de descripción simples
@@ -206,3 +206,6 @@ export const styles = StyleSheet.create({
     letterSpacing: 2,
   },
 });
+
+
+

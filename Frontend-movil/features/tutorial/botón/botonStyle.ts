@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { COLORS } from "../universalStyle";
+
 
 // ─── Paleta mejorada: rojo · morado · verde ───────────────────────────────────
 export const BOTON_COLORS = {
@@ -12,7 +12,7 @@ export const BOTON_COLORS = {
   row1Border:   "#DDD6FE",
   row1Gradient: ["#7C3AED", "#9F67FF"],
 
-  row2Color:    "#059669",
+  row2Color:    "#07573d",
   row2Light:    "#ECFDF5",
   row2Border:   "#A7F3D0",
   row2Gradient: ["#059669", "#10B981"],
@@ -20,13 +20,13 @@ export const BOTON_COLORS = {
   row3Color:    "#DC2626",
   row3Light:    "#FEF2F2",
   row3Border:   "#FECDD3",
-  row3Gradient: ["#DC2626", "#EF4444"],
+  row3Gradient: ["#f72f2f", "#EF4444"],
 
-  circle1: "#7C3AED",
-  circle2: "#DC2626",
-  circle3: "#059669",
-  circle4: "#9F67FF",
-  circle5: "#EF4444",
+  circle1: "#be0bf5",
+  circle2: "#5b0881",
+  circle3: "#f70bf7",
+  circle4: "#fdfdfd",
+  circle5: "#a010f3",
 
   sectionLabel: "#7C3AED",
   sectionLine:  "#EDE9FE",
@@ -38,7 +38,7 @@ export const botonStyle = StyleSheet.create({
   // ── Fondo ────────────────────────────────────────────────────────────────────
   screenBg: {
     flex: 1,
-    backgroundColor: "#F0EBFF",
+    backgroundColor: "#ffffff",
   },
 
   // ── Círculos de fondo — base genérica usada en BackgroundCircles ─────────────

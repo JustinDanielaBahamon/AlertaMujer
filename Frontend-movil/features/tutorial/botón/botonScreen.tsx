@@ -5,6 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Card from "../../../src/components/ui/card/card";
 import { BOTON_COLORS, botonStyle } from "./botonStyle";
 import { useBotonTutorialViewModel, type TapOption, } from "./useBotonTutorialViewModel";
+import { LinearGradient } from 'expo-linear-gradient';
 
 // ─── Círculos decorativos de fondo ───────────────────────────────────────────
 function BackgroundCircles() {
@@ -92,7 +93,7 @@ function TapRow({item,isActive,onPress,enterDelay,}: {
         accessibilityLabel={`${item.title}: ${item.desc}`}
       >
         <Animated.View style={[botonStyle.tapRow, {
-          backgroundColor: isActive ? item.colorLight : "#FAFAFA",
+          backgroundColor: isActive ? item.colorLight : "#ffffff",
           borderColor: animatedBorderColor,
           borderWidth: isActive ? 2 : 1.5,
           shadowColor: item.color,
@@ -176,19 +177,20 @@ function SOSButton({ onTap }: { onTap: (msg: string) => void }) {
 
 // ─── Pantalla principal ────────────────────────────────────────────────────────
 export default function ActivacionTutorial() {
-  const {
-    activeRow,
-    feedback,
-    cardAnimStyle,
-    feedbackOpacity,
-    tapOptions,
-    handleTapRow,
-    handleSOSTap,
-  } = useBotonTutorialViewModel();
+  const {activeRow,feedback,cardAnimStyle,feedbackOpacity,tapOptions,handleTapRow,handleSOSTap,
+   } = useBotonTutorialViewModel();
 
   return (
     <View style={botonStyle.screenBg}>
+
+      <LinearGradient
+        colors={["#f3e4fff1", "#fff7f7", "#b026bd"]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={{ flex: 1 }}
+    >
       <BackgroundCircles />
+
 
       <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
 
@@ -274,6 +276,7 @@ export default function ActivacionTutorial() {
         </Animated.View>
 
       </SafeAreaView>
+       </LinearGradient>
     </View>
   );
 }

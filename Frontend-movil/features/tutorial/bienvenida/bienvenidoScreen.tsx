@@ -2,6 +2,7 @@ import LottieView from 'lottie-react-native';
 import React, { useEffect, useRef } from "react";
 import { Animated, StatusBar, StyleSheet, Text, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { LinearGradient } from 'expo-linear-gradient';
 import { TutorialPager } from "../../../src/components/ui/TutorialPager";
 import ActivacionTutorial from "../botón/botonScreen";
 import ContactosScreen from "../contacto/contactoScreen";
@@ -16,10 +17,11 @@ import { useNotificacionTutorialViewModel } from "../notificación/useNotificaci
 import { useSeguridadTutorialViewModel } from "../seguridad/useSeguridadTutorialViewModel";
 import { useUbicacionTutorialViewModel } from "../ubicación/useUbicacionTutorialViewModel";
 
+
 export default function Bienvenido() {
   const mensajesVM     = useMensajesTutorialViewModel();
   const contactosVM    = useContactoTutorialViewModel();
-  const ubicacionVM    = useUbicacionTutorialViewModel(); 
+  const ubicacionVM    = useUbicacionTutorialViewModel();
   const seguridadVM    = useSeguridadTutorialViewModel();
   const notificacionVM = useNotificacionTutorialViewModel();
 
@@ -32,113 +34,130 @@ export default function Bienvenido() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.bgPage} translucent={false} />
+     <StatusBar barStyle="light-content" translucent={false} />
 
-      <SafeAreaView style={localStyles.safeArea} edges={['top', 'bottom']}>
-        <TutorialPager
-          paginasConBloqueo={{
-            2: mensajesVM.pedirPermisos,
-            3: ubicacionVM.pedirConfirmacionUbicacion,
-            4: contactosVM.pedirPermisos,
-            5: seguridadVM.pedirPermisos,
-            6: notificacionVM.pedirPermisos,
-          }}
-        >
-          {/* ── PÁGINA 0: BIENVENIDA ── */}
-          <View style={localStyles.page}>
+      {/* ── Gradiente ocupa TODA la pantalla, SafeAreaView va DENTRO ── */}
+      <LinearGradient
+        colors={["#a031e0", "#f7f7f7e7", "#b026bd"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ flex: 1 }}
+      >
+        <SafeAreaView style={localStyles.safeArea} edges={['top', 'bottom']}>
+          <TutorialPager
+            paginasConBloqueo={{
+              2: mensajesVM.pedirPermisos,
+              3: ubicacionVM.pedirConfirmacionUbicacion,
+              4: contactosVM.pedirPermisos,
+              5: seguridadVM.pedirPermisos,
+              6: notificacionVM.pedirPermisos,
+            }}
+          >
+            {/* ── PÁGINA 0: BIENVENIDA ── */}
+            <View style={localStyles.page}>
 
-            {/* Fondo decorativo estático */}
-            <View style={localStyles.bgGradient}>
-              <View style={localStyles.bgCircle1} />
-              <View style={localStyles.bgCircle2} />
-              <View style={localStyles.bgCircle3} />
+              {/* Círculos decorativos */}
+              <View style={localStyles.bgGradient}>
+                <View style={localStyles.bgCircle1} />
+                <View style={localStyles.bgCircle2} />
+                <View style={localStyles.bgCircle3} />
+              </View>
+
+              {/* Lottie */}
+              <View style={localStyles.lottieSection}>
+                <LottieView
+                  source={require('../../../assets/imagesAlertaMujer/ScTutorial/forwomensday.json')}
+                  autoPlay
+                  loop
+                  resizeMode="cover"
+                  style={localStyles.lottie}
+                />
+              </View>
+
+              {/* Card con gradiente interno */}
+              <Animated.View style={[
+                universalStyles.cardLarge,
+                {
+                  opacity: cardAnim,
+                  transform: [{
+                    translateY: cardAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [40, 0],
+                    }),
+                  }],
+                  padding: 0,
+                  overflow: 'hidden',
+                },
+              ]}>
+                <LinearGradient
+                  colors={["#ffffff", "#f8f8f8", "#e3aee7"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={{ flex: 1, padding: 24, borderRadius: 28 }}
+                >
+                  <View style={universalStyles.cardAccent} />
+
+                  <Text style={universalStyles.cardTitle}>
+                    ¡Tu seguridad es{'\n'}
+                    <Text style={universalStyles.cardTitleHighlight}>nuestra prioridad!</Text>
+                  </Text>
+
+                  <View style={universalStyles.divider} />
+
+                  <View style={universalStyles.row}>
+                    <Text style={universalStyles.rowIcon}>🤝</Text>
+                    <View style={universalStyles.rowTextContainer}>
+                      <Text style={universalStyles.rowTitle}>Red de apoyo digital</Text>
+                      <Text style={universalStyles.rowDesc}>Conecta con las personas de confianza en segundos.</Text>
+                    </View>
+                  </View>
+
+                  <View style={universalStyles.row}>
+                    <Text style={universalStyles.rowIcon}>📍</Text>
+                    <View style={universalStyles.rowTextContainer}>
+                      <Text style={universalStyles.rowTitle}>Ubicación en tiempo real</Text>
+                      <Text style={universalStyles.rowDesc}>Comparte dónde estás con un solo toque.</Text>
+                    </View>
+                  </View>
+
+                  <View style={universalStyles.row}>
+                    <Text style={universalStyles.rowIcon}>🚨</Text>
+                    <View style={universalStyles.rowTextContainer}>
+                      <Text style={universalStyles.rowTitle}>Alerta inmediata</Text>
+                      <Text style={universalStyles.rowDesc}>Pide ayuda rápido ante cualquier situación de riesgo.</Text>
+                    </View>
+                  </View>
+
+                </LinearGradient>
+              </Animated.View>
+
             </View>
 
-            {/* ── LOTTIE ── */}
-            <View style={localStyles.lottieSection}>
-              <LottieView
-                source={require('../../../assets/imagesAlertaMujer/ScTutorial/forwomensday.json')}
-                autoPlay
-                loop
-                resizeMode="cover"
-                style={localStyles.lottie}
-              />
-            </View>
+            {/* ── OTRAS PÁGINAS ── */}
+            <ActivacionTutorial />
+            <MensajesScreen vmExterno={mensajesVM} />
+            <UbicacionScreen vmExterno={ubicacionVM} />
+            <ContactosScreen vmExterno={contactosVM} />
+            <SeguridadScreen vmExterno={seguridadVM} />
+            <NotificacionScreen vmExterno={notificacionVM} />
 
-            {/* ── CARD — usa universalStyles ── */}
-            <Animated.View style={[
-              universalStyles.cardLarge,
-              {
-                opacity: cardAnim,
-                transform: [{
-                  translateY: cardAnim.interpolate({ inputRange: [0, 1], outputRange: [40, 0] }),
-                }],
-              },
-            ]}>
-              <View style={universalStyles.cardAccent} />
+          </TutorialPager>
+        </SafeAreaView>
+      </LinearGradient>
 
-              <Text style={universalStyles.cardTitle}>
-                ¡Tu seguridad es{'\n'}
-                <Text style={universalStyles.cardTitleHighlight}>nuestra prioridad!</Text>
-              </Text>
-
-              <View style={universalStyles.divider} />
-
-              <View style={universalStyles.row}>
-                <Text style={universalStyles.rowIcon}>🤝</Text>
-                <View style={universalStyles.rowTextContainer}>
-                  <Text style={universalStyles.rowTitle}>Red de apoyo digital</Text>
-                  <Text style={universalStyles.rowDesc}>Conecta con las personas de confianza en segundos.</Text>
-                </View>
-              </View>
-
-              <View style={universalStyles.row}>
-                <Text style={universalStyles.rowIcon}>📍</Text>
-                <View style={universalStyles.rowTextContainer}>
-                  <Text style={universalStyles.rowTitle}>Ubicación en tiempo real</Text>
-                  <Text style={universalStyles.rowDesc}>Comparte dónde estás con un solo toque.</Text>
-                </View>
-              </View>
-
-              <View style={universalStyles.row}>
-                <Text style={universalStyles.rowIcon}>🚨</Text>
-                <View style={universalStyles.rowTextContainer}>
-                  <Text style={universalStyles.rowTitle}>Alerta inmediata</Text>
-                  <Text style={universalStyles.rowDesc}>Pide ayuda rápido ante cualquier situación de riesgo.</Text>
-                </View>
-              </View>
-
-              <View style={universalStyles.badge}>
-                <Text style={universalStyles.badgeText}>🛡️ Protección inmediata</Text>
-              </View>
-            </Animated.View>
-
-          </View>
-
-          {/* ── OTRAS PÁGINAS ── */}
-          <ActivacionTutorial />
-          <MensajesScreen vmExterno={mensajesVM} />
-          <UbicacionScreen vmExterno={ubicacionVM} /> 
-          <ContactosScreen vmExterno={contactosVM} />
-          <SeguridadScreen vmExterno={seguridadVM} />
-          <NotificacionScreen vmExterno={notificacionVM} />
-
-        </TutorialPager>
-      </SafeAreaView>
     </SafeAreaProvider>
   );
 }
 
-// Solo estilos exclusivos de esta pantalla
 const localStyles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.bgPage,
+    // ← sin backgroundColor, el gradiente se ve
   },
   page: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: COLORS.bgPage,
+    // ← sin backgroundColor, el gradiente se ve
   },
   bgGradient: { ...StyleSheet.absoluteFillObject, overflow: 'hidden' },
   bgCircle1: {

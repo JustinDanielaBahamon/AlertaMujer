@@ -33,7 +33,6 @@ export const mensajeStyle = StyleSheet.create({
   // ── Fondo ──────────────────────────────────────────────────────────────────
   screenBg: {
     flex: 1,
-    backgroundColor: MSG_COLORS.screenBg,
   },
 
   // ── Círculos de fondo ──────────────────────────────────────────────────────
