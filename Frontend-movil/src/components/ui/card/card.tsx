@@ -1,25 +1,80 @@
 import React from "react";
-import { View, Text } from "react-native";
-import { styles } from "./cardStyle";
+import { View, Text, StyleSheet } from "react-native";
+import { COLORS } from "../../../../features/tutorial/universalStyle";
 
 interface Props {
   title?: string;
-  description?: string;
+  titleHighlight?: string;  // parte del título en morado
   children?: React.ReactNode;
   style?: any;
 }
 
-export default function CardBase({ title, description, children, style }: Props) {
+export default function CardBase({ title, titleHighlight, children, style }: Props) {
   return (
-    <View style={[styles.card, style]}>
-      {/* Título por fuera del contenedor oscuro para que resalte */}
-      {title && <Text style={styles.title}>{title}</Text>}
+    <View style={[localStyles.card, style]}>
+      {/* Acento superior morado */}
+      <View style={localStyles.cardAccent} />
 
-      {/* Contenedor oscuro interno */}
-      <View style={styles.innerContainer}>
-        {description && <Text style={styles.description}>{description}</Text>}
-        {children}
-      </View>
+      {/* Título */}
+      {title && (
+        <Text style={localStyles.cardTitle}>
+          {title}
+          {titleHighlight && (
+            <Text style={localStyles.cardTitleHighlight}>{titleHighlight}</Text>
+          )}
+        </Text>
+      )}
+
+      {/* Divisor */}
+      {title && <View style={localStyles.divider} />}
+
+      {/* Contenido */}
+      {children}
     </View>
   );
 }
+
+const localStyles = StyleSheet.create({
+  card: {
+    marginHorizontal: 14,
+    marginTop: 24,
+    marginBottom: 20,
+    flex: 1,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: 28,
+    padding: 24,
+    shadowColor: COLORS.purpleDark,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 24,
+    elevation: 10,
+    borderWidth: 1,
+    borderColor: COLORS.purpleLight,
+    overflow: 'hidden',
+  },
+  cardAccent: {
+    position: 'absolute',
+    top: 0, left: 0, right: 0,
+    height: 5,
+    backgroundColor: COLORS.purpleMain,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+  },
+  cardTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: COLORS.textTitle,
+    textAlign: 'center',
+    lineHeight: 32,
+    marginTop: 8,
+    marginBottom: 16,
+  },
+  cardTitleHighlight: {
+    color: COLORS.purpleMain,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: COLORS.purpleLight,
+    marginBottom: 20,
+  },
+});

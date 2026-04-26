@@ -1,1 +1,1 @@
-export { default } from "../../../features/tutorial/notificacionScreen";
+export { default } from "../../../features/tutorial/notificación/notificacionScreen";

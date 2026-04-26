@@ -1,1 +1,1 @@
-export { default } from "../../../features/tutorial/seguridadScreen";
+export { default } from "../../../features/tutorial/seguridad/seguridadScreen";
