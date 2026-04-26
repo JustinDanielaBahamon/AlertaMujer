@@ -64,11 +64,10 @@ export function useSeguridadTutorialViewModel() {
   const [tipoPermiso, setTipoPermiso]               = useState<"camara" | "audio">("camara");
   const [mostrarAdvertencia, setMostrarAdvertencia] = useState(false);
 
-  const resolverPermiso  = useRef<(valor: boolean) => void>(() => {});
-  const tipoPermisoRef   = useRef<"camara" | "audio">("camara");
-  // Usamos un número simple: 0=idle, 1=requesting, 2=user_cancelled
-  // Evita cualquier problema de inferencia de tipos con strings literales
-  const flowStateRef = useRef<number>(0);
+  const resolverPermiso = useRef<(valor: boolean) => void>(() => {});
+  const tipoPermisoRef  = useRef<"camara" | "audio">("camara");
+  // 0=idle, 1=requesting, 2=user_cancelled
+  const flowStateRef    = useRef<number>(0);
 
   const actualizarTipo = (tipo: "camara" | "audio") => {
     tipoPermisoRef.current = tipo;
@@ -78,7 +77,7 @@ export function useSeguridadTutorialViewModel() {
   const pedirPermisos = useCallback((): Promise<boolean> => {
     return new Promise((resolve) => {
       resolverPermiso.current = resolve;
-      flowStateRef.current = 0; // idle
+      flowStateRef.current = 0;
       actualizarTipo("camara");
       setMostrarAdvertencia(false);
       setModalVisible(true);
@@ -94,54 +93,53 @@ export function useSeguridadTutorialViewModel() {
         const resultado = await Camera.requestCameraPermissionsAsync();
         const camaraOk  = resultado.granted || resultado.status === "granted";
 
-        // 2 = user_cancelled
         if (flowStateRef.current === 2) return;
 
         if (camaraOk) {
-          flowStateRef.current = 0; // idle, listo para siguiente diálogo
+          // ← Cámara concedida → pide audio
+          flowStateRef.current = 0;
           actualizarTipo("audio");
         } else {
+          // ← Cámara denegada por el sistema → advertencia
           flowStateRef.current = 0;
           setModalVisible(false);
           setMostrarAdvertencia(true);
         }
 
       } else {
+        // ── Audio ──────────────────────────────────────────────────────────
         const resultado = await Audio.requestPermissionsAsync();
-        const audioOk   = resultado.granted || resultado.status === "granted";
+        // audioOk queda disponible por si en el futuro lo necesitas
+        const _audioOk  = resultado.granted || resultado.status === "granted";
 
-        // 2 = user_cancelled
         if (flowStateRef.current === 2) return;
 
-        if (audioOk) {
-          // ✅ Éxito total — nunca mostrar advertencia
-          flowStateRef.current = 0;
-          setMostrarAdvertencia(false);
-          setModalVisible(false);
-          resolverPermiso.current(true);
-        } else {
-          flowStateRef.current = 0;
-          setModalVisible(false);
-          setMostrarAdvertencia(true);
-        }
+        // ← Confirmar audio siempre avanza al tutorial
+        // La advertencia SOLO sale si el usuario presiona "Cancelar"
+        flowStateRef.current = 0;
+        setMostrarAdvertencia(false);
+        setModalVisible(false);
+        resolverPermiso.current(true);
       }
+
     } catch (e) {
       console.error("[Seguridad] Error en flujo de permisos:", e);
       flowStateRef.current = 0;
       setModalVisible(false);
-      setMostrarAdvertencia(true);
+      // ← Error técnico → avanza sin advertencia
+      resolverPermiso.current(true);
     }
   }, []);
 
+  // ← Advertencia SOLO cuando el usuario cancela manualmente
   const cancelarModal = useCallback(() => {
-    // Si el sistema nativo está procesando (1=requesting), ignorar cierre automático
     if (flowStateRef.current === 1) {
       console.log("[Seguridad] Ignorando cancelación durante diálogo nativo");
       return;
     }
     flowStateRef.current = 2; // user_cancelled
     setModalVisible(false);
-    setMostrarAdvertencia(true);
+    setMostrarAdvertencia(true); // ← aquí sí se muestra
   }, []);
 
   const reintentarPermisos = useCallback(() => {

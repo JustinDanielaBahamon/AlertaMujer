@@ -15,44 +15,48 @@ export const TutorialPager = ({ children, paginasConBloqueo = {} }: TutorialPage
   const [activeIndex, setActiveIndex] = useState(0);
   const [scrollBloqueado, setScrollBloqueado] = useState(false);
 
-  const scrollRef    = useRef<ScrollView>(null);
-  // ✅ Ref que siempre tiene el índice real, no se congela en closures async
+  const scrollRef      = useRef<ScrollView>(null);
   const activeIndexRef = useRef(0);
+  // ← Set de páginas que ya fueron aprobadas en esta sesión
+  const paginasAprobadas = useRef<Set<number>>(new Set());
 
   const pages = React.Children.toArray(children);
 
   const goToIndex = (index: number) => {
     scrollRef.current?.scrollTo({ x: index * width, animated: true });
-    activeIndexRef.current = index; // ✅ actualizamos la ref inmediatamente
+    activeIndexRef.current = index;
     setActiveIndex(index);
   };
 
   const handleScrollEnd = async (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     if (scrollBloqueado) return;
 
-    const xOffset     = event.nativeEvent.contentOffset.x;
-    const intentIndex = Math.round(xOffset / width);
-    // ✅ Usamos la ref, no el estado (que puede estar desactualizado en async)
+    const xOffset      = event.nativeEvent.contentOffset.x;
+    const intentIndex  = Math.round(xOffset / width);
     const currentIndex = activeIndexRef.current;
 
-    if (intentIndex > currentIndex && paginasConBloqueo[currentIndex]) {
+    const avanzando = intentIndex > currentIndex;
+    const tieneBloqueo = !!paginasConBloqueo[currentIndex];
+    // ← Si ya fue aprobada antes, no pide nada
+    const yaAprobada = paginasAprobadas.current.has(currentIndex);
+
+    if (avanzando && tieneBloqueo && !yaAprobada) {
 
       setScrollBloqueado(true);
-
-      // Regresa visualmente a la página actual
       goToIndex(currentIndex);
 
-      // Espera la decisión del usuario
       const puedePasar = await paginasConBloqueo[currentIndex]();
 
       if (puedePasar) {
-        // ✅ Usamos activeIndexRef.current que siempre está actualizado
+        // ← Marca esta página como aprobada para el resto de la sesión
+        paginasAprobadas.current.add(currentIndex);
         goToIndex(activeIndexRef.current + 1);
       }
 
       setTimeout(() => setScrollBloqueado(false), 400);
 
     } else {
+      // Avanza, regresa o ya estaba aprobada → sin bloqueo
       goToIndex(intentIndex);
     }
   };
@@ -76,7 +80,6 @@ export const TutorialPager = ({ children, paginasConBloqueo = {} }: TutorialPage
         ))}
       </ScrollView>
 
-      {/* Indicadores de página */}
       <View style={{ flexDirection: "row", justifyContent: "center", marginBottom: 30 }}>
         {pages.map((_, i) => (
           <View
@@ -85,7 +88,7 @@ export const TutorialPager = ({ children, paginasConBloqueo = {} }: TutorialPage
               width: activeIndex === i ? 22 : 8,
               height: 8,
               borderRadius: 4,
-              backgroundColor: activeIndex === i ? "#4A148C" : "#12bce7",
+              backgroundColor: activeIndex === i ? "#4A148C" : "#ffffff",
               marginHorizontal: 4,
               opacity: activeIndex === i ? 1 : 0.6,
             }}
