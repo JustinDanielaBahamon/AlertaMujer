@@ -2,7 +2,6 @@ import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
     ContenedorPrincipal: {
-        backgroundColor: "rgb(255, 255, 255)",
         flex: 1
     },
     ContenedorCabezera: {
@@ -17,7 +16,7 @@ export const styles = StyleSheet.create({
         color:'purple'
     },
     ContenedorCuadros: {
-        padding: 15, // Aumentado ligeramente para mejor respiro en bordes
+        padding: 10, // Aumentado ligeramente para mejor respiro en bordes
     },
     // --- MEJORA RESPONSIVE: Botón de emergencia ---
     BotonPolicia: {
@@ -43,7 +42,7 @@ export const styles = StyleSheet.create({
     SegundaSeccion: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginTop: 15,
+        marginTop: 0,
     },
     // --- MEJORA RESPONSIVE: Cuadros laterales ---
     ContenedorViolencia: {
@@ -113,5 +112,39 @@ export const styles = StyleSheet.create({
     llamadaSegundaSeccion: {
         color: 'white',
         fontWeight: '700',
-    }
+    },
+  Header: {
+    marginBottom: 0, 
+
+  },
+  Gradiente: {
+    paddingTop: 0.1,
+    paddingHorizontal: 15,
+    paddingBottom: 25,
+    borderBottomLeftRadius: 14,
+    borderBottomRightRadius: 14,
+  },
+  HeaderContenido: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  TituloHeader: {
+    fontSize: 24.3,
+    fontWeight: "bold",
+    color: "#FFFFFF",
+    width: 220,
+  },
+  SubtituloHeader: {
+    fontSize: 14,
+    color: "rgba(255, 255, 255, 0.8)",
+    marginTop: 8,
+    lineHeight: 20,
+    width: 220,
+  },Cuerpo: {
+    flex: 1,  // ← sin esto, el ScrollView hijo no tiene espacio para expandirse
+},Scroll: {
+    flex: 1,
+},
+  
 });
