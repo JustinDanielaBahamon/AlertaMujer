@@ -10,7 +10,7 @@
  * La vista (contactos.tsx) solo consume este ViewModel.
  */
 
-import { useCallback, useState } from "react";
+import { useCallback, useState ,useMemo} from "react";
 import { useNavigation } from "@react-navigation/native";
 import type { NavigationProp, ParamListBase } from "@react-navigation/native";
 import { Alert } from "react-native";
@@ -32,9 +32,18 @@ function formatearTelefonoMostrar(telefono: string): string {
 export function useContactosTabViewModel() {
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const { contactos, eliminarContacto } = useContactosContext();
-  
+  const [busqueda, setBusqueda] = useState('');
+
+  const contactosFiltrados = useMemo(() =>
+    contactos.filter(c =>
+      c.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+      c.telefono.includes(busqueda)
+    ),
+    [contactos, busqueda]  // ← solo recalcula cuando estos dos cambian
+  );
   // Estado: ¿Está abierto el modal de acciones?
-  const [modalVisible, setModalVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false); 
+
   
   // Estado: ¿Qué contacto se seleccionó?
   const [contactoSeleccionado, setContactoSeleccionado] = useState<Contacto | null>(null);
@@ -142,10 +151,11 @@ export function useContactosTabViewModel() {
     contactos,
     modalVisible,
     contactoSeleccionado,
+    busqueda,
     
     // Funciones de utilidad
     formatearTelefonoMostrar,
-    
+    contactosFiltrados,
     // Acciones
     abrirModalAcciones,
     cerrarModalAcciones,
@@ -153,5 +163,6 @@ export function useContactosTabViewModel() {
     handleBorrar,
     irAgregarContacto,
     borrarConSwipe,
+    setBusqueda
   };
 }
