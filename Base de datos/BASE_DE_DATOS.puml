@@ -1,0 +1,243 @@
+@startuml AlertaMujer_ModeloRelacional
+
+' ─────────────────────────────────────────────
+'  Proyecto : Alerta Mujer
+'  Diagrama : Modelo Relacional – Notación UML
+'  Ficha    : 3145556 – SENA
+'  Año      : 2025
+' ─────────────────────────────────────────────
+
+skinparam classAttributeIconSize 0
+skinparam classFontSize 12
+skinparam classFontName Arial
+skinparam classHeaderBackgroundColor #6B2D8B
+skinparam classFontColor White
+skinparam classAttributeFontSize 11
+skinparam classAttributeFontColor #333333
+skinparam classBackgroundColor #F9F5FD
+skinparam classBorderColor #6B2D8B
+skinparam classBorderThickness 1.5
+skinparam arrowColor #444444
+skinparam arrowFontSize 10
+skinparam arrowFontColor #555555
+skinparam noteBackgroundColor #FFF8E1
+skinparam noteBorderColor #F9A825
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 80
+
+' ══════════════════════════════════════════════
+'  ENTIDADES PRINCIPALES
+' ══════════════════════════════════════════════
+
+class Usuaria <<entity>> {
+  + id_usuaria       : INT          <<PK>>
+  + nombre           : VARCHAR(80)
+  + apellido         : VARCHAR(80)
+  + correo           : VARCHAR(150) <<UNIQUE>>
+  + telefono         : VARCHAR(20)
+  + contrasena_hash  : VARCHAR(255)
+  + foto_perfil_url  : VARCHAR(255)
+  + fecha_registro   : DATETIME
+  + activa           : BOOLEAN
+}
+
+class Sesion <<entity>> {
+  + id_sesion         : INT          <<PK>>
+  + id_usuaria        : INT          <<FK>>
+  + token_sesion      : VARCHAR(512) <<UNIQUE>>
+  + fecha_inicio      : DATETIME
+  + fecha_expiracion  : DATETIME
+  + ip_dispositivo    : VARCHAR(45)
+  + activa            : BOOLEAN
+}
+
+class Configuracion <<entity>> {
+  + id_config                 : INT          <<PK>>
+  + id_usuaria                : INT          <<FK>> <<UNIQUE>>
+  + idioma                    : VARCHAR(10)
+  + tema_visual               : VARCHAR(20)
+  + frecuencia_notif_min      : INT
+  + sensibilidad_acelerometro : DECIMAL(4,2)
+  + modo_offline_activado     : BOOLEAN
+}
+
+class Contacto_Emergencia <<entity>> {
+  + id_contacto : INT          <<PK>>
+  + id_usuaria  : INT          <<FK>>
+  + nombre      : VARCHAR(100)
+  + telefono    : VARCHAR(20)
+  + correo      : VARCHAR(150)
+  + relacion    : VARCHAR(50)
+  + activo      : BOOLEAN
+}
+
+class Alerta <<entity>> {
+  + id_alerta          : INT           <<PK>>
+  + id_usuaria         : INT           <<FK>>
+  + tipo_alerta        : ENUM
+  + metodo_activacion  : VARCHAR(50)
+  + estado             : ENUM
+  + fecha_inicio       : DATETIME
+  + fecha_fin          : DATETIME
+  + mensaje_pregrabado : TEXT
+  + latitud_inicial    : DECIMAL(10,7)
+  + longitud_inicial   : DECIMAL(10,7)
+}
+
+class Historial_Alerta <<entity>> {
+  + id_historial  : INT      <<PK>>
+  + id_alerta     : INT      <<FK>> <<UNIQUE>>
+  + resultado     : ENUM
+  + observaciones : TEXT
+  + fecha_cierre  : DATETIME
+}
+
+class Ubicacion <<entity>> {
+  + id_ubicacion : INT            <<PK>>
+  + id_alerta    : INT            <<FK>>
+  + latitud      : DECIMAL(10,7)
+  + longitud     : DECIMAL(10,7)
+  + precision_m  : DECIMAL(6,2)
+  + timestamp    : DATETIME
+}
+
+class Evidencia <<entity>> {
+  + id_evidencia   : INT          <<PK>>
+  + id_alerta      : INT          <<FK>>
+  + tipo_archivo   : ENUM
+  + url_archivo    : VARCHAR(500)
+  + duracion_seg   : INT
+  + fecha_creacion : DATETIME
+  + sincronizado   : BOOLEAN
+}
+
+class Canal_Envio <<entity>> {
+  + id_canal    : INT          <<PK>>
+  + nombre      : VARCHAR(50)  <<UNIQUE>>
+  + descripcion : VARCHAR(255)
+  + activo      : BOOLEAN
+}
+
+class Zona <<entity>> {
+  + id_zona        : INT            <<PK>>
+  + nombre         : VARCHAR(150)
+  + nivel_riesgo   : ENUM
+  + latitud        : DECIMAL(10,7)
+  + longitud       : DECIMAL(10,7)
+  + radio_m        : INT
+  + descripcion    : TEXT
+  + anonimo        : BOOLEAN
+  + fecha_registro : DATETIME
+}
+
+class Centro_Ayuda <<entity>> {
+  + id_centro  : INT            <<PK>>
+  + nombre     : VARCHAR(150)
+  + tipo       : ENUM
+  + direccion  : VARCHAR(255)
+  + latitud    : DECIMAL(10,7)
+  + longitud   : DECIMAL(10,7)
+  + telefono   : VARCHAR(20)
+  + id_zona    : INT            <<FK>>
+}
+
+class Recurso_Educativo <<entity>> {
+  + id_recurso        : INT          <<PK>>
+  + titulo            : VARCHAR(200)
+  + tipo              : ENUM
+  + url_contenido     : VARCHAR(500)
+  + descripcion       : TEXT
+  + categoria         : VARCHAR(80)
+  + descargable       : BOOLEAN
+  + fecha_publicacion : DATE
+}
+
+class Numero_Emergencia <<entity>> {
+  + id_numero          : INT          <<PK>>
+  + nombre             : VARCHAR(150)
+  + numero             : VARCHAR(30)
+  + tipo               : ENUM
+  + departamento       : VARCHAR(80)
+  + disponible_offline : BOOLEAN
+}
+
+' ══════════════════════════════════════════════
+'  CLASES DE ASOCIACIÓN (tablas intermedias M:N)
+' ══════════════════════════════════════════════
+
+class Alerta_Canal <<association>> {
+  + id_alerta    : INT      <<FK>>
+  + id_canal     : INT      <<FK>>
+  + estado_envio : ENUM
+  + fecha_envio  : DATETIME
+  + intentos     : TINYINT
+}
+
+class Usuaria_Zona <<association>> {
+  + id_usuaria    : INT      <<FK>>
+  + id_zona       : INT      <<FK>>
+  + fecha_reporte : DATETIME
+  + es_frecuente  : BOOLEAN
+}
+
+' ══════════════════════════════════════════════
+'  RELACIONES
+' ══════════════════════════════════════════════
+
+Usuaria       "1" --o{ Sesion               : "inicia >"
+Usuaria       "1" --||  Configuracion       : "tiene >"
+Usuaria       "1" --o{ Contacto_Emergencia  : "registra >"
+Usuaria       "1" --o{ Alerta               : "activa >"
+Alerta        "1" --||  Historial_Alerta    : "genera >"
+Alerta        "1" --o{ Ubicacion            : "registra GPS >"
+Alerta        "1" --o{ Evidencia            : "captura >"
+Alerta        "1" --o{ Alerta_Canal         : "enviada por >"
+Canal_Envio   "1" --o{ Alerta_Canal         : "< recibe"
+Usuaria       "1" --o{ Usuaria_Zona         : "reporta >"
+Zona          "1" --o{ Usuaria_Zona         : "< referenciada en"
+Zona          "1" --o{ Centro_Ayuda         : "contiene >"
+
+' ══════════════════════════════════════════════
+'  NOTAS ACLARATORIAS
+' ══════════════════════════════════════════════
+
+note top of Alerta
+  tipo_alerta:
+  · DISCRETA → toque corto
+  · URGENTE  → doble toque
+  · MAXIMA   → mantener presionado
+  estado:
+  · ACTIVA | FINALIZADA | CANCELADA
+end note
+
+note right of Alerta_Canal
+  Tabla intermedia M:N
+  PK compuesta: (id_alerta, id_canal)
+  Canales: SMS | CORREO | PUSH | MESSENGER
+end note
+
+note right of Usuaria_Zona
+  Tabla intermedia M:N
+  PK compuesta: (id_usuaria, id_zona)
+end note
+
+note bottom of Zona
+  nivel_riesgo:
+  · ALTO  → zona roja
+  · MEDIO → zona amarilla
+  · BAJO  → zona verde (segura)
+end note
+
+note bottom of Recurso_Educativo
+  Entidad independiente.
+  Sin FK directa a Usuaria.
+  Consultada libremente.
+end note
+
+note bottom of Numero_Emergencia
+  Catalogo independiente.
+  Disponible sin internet.
+end note
+
+@enduml
