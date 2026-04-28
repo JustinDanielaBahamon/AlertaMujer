@@ -4,13 +4,14 @@ export const styles = StyleSheet.create({
   // --- CONTENEDORES PRINCIPALES ---
   ContenedorPrincipal: {
     flex: 1,
-    backgroundColor: "#F8F9FE", // Un gris muy claro tirando a azulado para resaltar las cards blancas
+    backgroundColor: "#F8F9FE", 
+    // Un gris muy claro tirando a azulado para resaltar las cards blancas
   },
   Header: {
     marginBottom: 0,
   },
   Gradiente: {
-    paddingTop: 0,
+    paddingTop: 0.1,
     paddingHorizontal: 25,
     paddingBottom: 25,
     borderBottomLeftRadius: 45,
@@ -22,7 +23,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
   TituloHeader: {
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: "bold",
     color: "#FFFFFF",
     width: 220,
@@ -45,6 +46,8 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 10,
+    marginLeft:20,
+    marginTop:10
   },
   Cousser: {
     backgroundColor: "#F3E5F5",
@@ -55,8 +58,7 @@ export const styles = StyleSheet.create({
 
   // --- TARJETA DE CONTACTO (CARD PRINCIPAL) ---
   TarjetaWrapper: {
-    marginBottom: 16,
-  },
+    marginBottom: 16,marginLeft:8 ,marginRight:8  },
   TarjetaContacto: {
     backgroundColor: "#FFFFFF",
     borderRadius: 25,
@@ -181,6 +183,7 @@ export const styles = StyleSheet.create({
     borderColor: "#D1C4E9",
     marginTop: 10,
     marginBottom: 100, // Espacio para que el botón flotante no tape nada
+    margin:10
   },
   CirculoDashed: {
     width: 60,
@@ -218,9 +221,6 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 8,
   },
-
-
-
   RowBack: {
     alignItems: "center",
     backgroundColor: "#FF5252",
@@ -230,6 +230,8 @@ export const styles = StyleSheet.create({
     paddingRight: 20,
     borderRadius: 25,
     marginBottom: 40,
+    marginLeft:8,
+    marginRight:8
   },
   BotonBorrarSwipe: {
     alignItems: "center",
@@ -243,5 +245,26 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "bold",
     marginTop: 4,
+  },ContenedorCuadros: {
+    padding: 15,
+    gap: 15,
   },
+  ContenedorBuscador: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F5F5F5',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginHorizontal: 15,
+    marginTop: 0 ,
+    marginBottom: 7,
+    gap: 8,
+},
+InputBuscador: {
+    flex: 1,
+    fontSize: 14,
+    color: '#333',
+    padding: 0,  // reset del padding por defecto en Android
+},
 });
