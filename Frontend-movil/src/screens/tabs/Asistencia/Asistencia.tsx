@@ -3,16 +3,17 @@ import { View, Text, TouchableOpacity, ScrollView, Image, Linking, Platform } fr
 import { styles } from './Asistencia.style';
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTheme } from "../../../../src/contexts/ThemeContext";
 
 export default function Asistencia() {
-    
+     const { theme } = useTheme();
     const llamar = (numero: string) => {
         const url = Platform.OS === 'android' ? `tel:${numero}` : `telprompt:${numero}`;
         Linking.openURL(url).catch(err => console.error("Error al llamar", err));
     };
 
-    return (
-        <View style={styles.ContenedorPrincipal}>
+    return (  
+        <View style={[styles.ContenedorPrincipal, { backgroundColor: theme.containerBackground }]}>
             {/* HEADER - Estructura idéntica a Contactos */}
             <View style={styles.Header}>
                 <LinearGradient

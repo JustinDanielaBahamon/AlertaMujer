@@ -1,21 +1,22 @@
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
-  // --- CONTENEDORES PRINCIPALES ---
+
+  // ── CONTENEDOR PRINCIPAL ─────────────────────────────────────────────────
   ContenedorPrincipal: {
     flex: 1,
-    backgroundColor: "#F8F9FE", 
-    // Un gris muy claro tirando a azulado para resaltar las cards blancas
   },
+
+  // ── HEADER ──────────────────────────────────────────────────────────────
   Header: {
     marginBottom: 0,
   },
   Gradiente: {
-    paddingTop: 0.1,
+    paddingTop: 48,           // espacio para el status bar
     paddingHorizontal: 25,
-    paddingBottom: 25,
-    borderBottomLeftRadius: 45,
-    borderBottomRightRadius: 45,
+    paddingBottom: 28,
+    borderBottomLeftRadius: 40,
+    borderBottomRightRadius: 40,
   },
   HeaderContenido: {
     flexDirection: "row",
@@ -29,90 +30,103 @@ export const styles = StyleSheet.create({
     width: 220,
   },
   SubtituloHeader: {
-    fontSize: 14,
-    color: "rgba(255, 255, 255, 0.8)",
-    marginTop: 8,
+    fontSize: 13,
+    color: "rgba(255, 255, 255, 0.85)",
+    marginTop: 6,
     lineHeight: 20,
     width: 220,
   },
-  Cuerpo: {
-    flex: 1,
-    paddingHorizontal: 20,
-    marginTop: 10,
-  },
 
-  // --- FILA DE CONTEO (Tus contactos) ---
+  // ── CONTEO ───────────────────────────────────────────────────────────────
   Conteo: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
-    marginLeft:20,
-    marginTop:10
+    marginTop: 14,
+    marginBottom: 8,
+    marginLeft: 18,
   },
+  // El color de fondo del Cousser lo pone el theme (contactCousserBg)
   Cousser: {
-    backgroundColor: "#F3E5F5",
     borderRadius: 12,
     padding: 8,
     marginRight: 10,
   },
 
-  // --- TARJETA DE CONTACTO (CARD PRINCIPAL) ---
-  TarjetaWrapper: {
-    marginBottom: 16,marginLeft:8 ,marginRight:8  },
-  TarjetaContacto: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 25,
-    padding: 16,
-    // Sombras
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    marginBottom:20
+  // ── BUSCADOR ─────────────────────────────────────────────────────────────
+  ContenedorBuscador: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginHorizontal: 14,
+    marginBottom: 10,
+    gap: 8,
+  },
+  InputBuscador: {
+    flex: 1,
+    fontSize: 14,
+    padding: 0,
   },
 
-  // SECCIÓN SUPERIOR: Foto, Info y Editar
+  // ── TARJETA DE CONTACTO ───────────────────────────────────────────────────
+  // El backgroundColor, borderWidth y borderColor los pone el TSX con el theme
+  TarjetaWrapper: {
+    marginBottom: 4,
+    marginLeft: 10,
+    marginRight: 10,
+  },
+  TarjetaContacto: {
+    borderRadius: 24,
+    padding: 16,
+    elevation: 3,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.10,
+    shadowRadius: 8,
+    marginBottom: 16,
+  },
+
+  // Sección superior
   SeccionSuperior: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: 15,
+    marginBottom: 14,
   },
   ContenedorFoto: {
     position: "relative",
   },
   FotoPerfil: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 2,
-    borderColor: "#7B1FA2", // El aro morado
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+    borderWidth: 2.5,
+    // borderColor lo pone el TSX con theme.contactAvatarBorder
   },
   PuntoEstado: {
     position: "absolute",
-    bottom: 5,
+    bottom: 4,
     right: 2,
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: "#28a745", // Verde disponible
-    borderWidth: 3,
-    borderColor: "#FFFFFF",
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: "#28a745",
+    borderWidth: 2.5,
+    // borderColor lo pone el TSX para que combine con el fondo de la card
   },
   InfoContacto: {
     flex: 1,
-    paddingLeft: 15,
+    paddingLeft: 14,
   },
   NombreContacto: {
-    fontSize: 19,
+    fontSize: 18,
     fontWeight: "bold",
-    color: "#333",
+    // color lo pone el TSX con theme.contactNombre
   },
   BadgeRelacion: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F3E5F5",
+    // backgroundColor y borderColor los pone el TSX
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
@@ -120,10 +134,10 @@ export const styles = StyleSheet.create({
     alignSelf: "flex-start",
   },
   TextoBadge: {
-    color: "#7B1FA2",
     fontSize: 12,
     fontWeight: "bold",
     marginLeft: 4,
+    // color lo pone el TSX con theme.contactBadgeText
   },
   ContenedorTelefono: {
     flexDirection: "row",
@@ -131,27 +145,27 @@ export const styles = StyleSheet.create({
     marginTop: 2,
   },
   Telefono: {
-    fontSize: 14,
-    color: "#777",
+    fontSize: 13,
+    // color lo pone el TSX con theme.contactSubtext
   },
   IconosSuperiores: {
     flexDirection: "row",
   },
   BotonIconoSmall: {
-    backgroundColor: "#F5F5F5",
+    // backgroundColor lo pone el TSX
     padding: 8,
     borderRadius: 10,
     marginLeft: 8,
   },
 
-  // SECCIÓN ACCIONES: Llamar, WhatsApp, Ubicación
+  // Sección acciones
   SeccionAcciones: {
     flexDirection: "row",
     justifyContent: "space-between",
     borderTopWidth: 1,
-    borderTopColor: "#F0F0F0",
-    paddingTop: 15,
-    paddingHorizontal: 10,
+    // borderTopColor lo pone el TSX con theme.contactDivider
+    paddingTop: 14,
+    paddingHorizontal: 6,
   },
   ItemAccion: {
     alignItems: "center",
@@ -164,63 +178,47 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 5,
+    // backgroundColor lo pone el TSX
   },
   TextoAccion: {
     fontSize: 11,
-    color: "#666",
     fontWeight: "500",
+    // color lo pone el TSX con theme.contactSubtext
   },
 
-  // --- FOOTER: ¿QUIERES AGREGAR MÁS? ---
+  // ── FOOTER — TARJETA SUGERENCIA ──────────────────────────────────────────
   TarjetaSugerencia: {
-    backgroundColor: "#F9F7FF",
+    // backgroundColor y borderColor los pone el TSX
     borderRadius: 20,
-    padding: 20,
+    padding: 18,
     flexDirection: "row",
     alignItems: "center",
-    borderStyle: "dashed", // Borde punteado
+    borderStyle: "dashed",
     borderWidth: 1.5,
-    borderColor: "#D1C4E9",
-    marginTop: 10,
-    marginBottom: 100, // Espacio para que el botón flotante no tape nada
-    margin:10
+    marginTop: 6,
+    marginBottom: 100,
+    marginHorizontal: 10,
   },
   CirculoDashed: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     borderWidth: 1.5,
     borderStyle: "dashed",
-    borderColor: "#B39DDB",
+    // borderColor lo pone el TSX
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 15,
+    marginRight: 14,
   },
   BotonAgregarSmall: {
-    backgroundColor: "#7B1FA2",
-    paddingHorizontal: 15,
+    // backgroundColor lo pone el TSX
+    paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 12,
     elevation: 2,
   },
 
-  // --- BOTÓN FLOTANTE Y SWIPE ---
-  BotonFlotante: {
-    position: "absolute",
-    bottom: 30,
-    right: 13,
-    width: 65,
-    height: 65,
-    borderRadius: 32.5,
-    backgroundColor: "#6B3FA0",
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 8,
-    shadowColor: "#6B3FA0",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-  },
+  // ── SWIPE BORRAR ─────────────────────────────────────────────────────────
   RowBack: {
     alignItems: "center",
     backgroundColor: "#FF5252",
@@ -228,10 +226,9 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "flex-end",
     paddingRight: 20,
-    borderRadius: 25,
-    marginBottom: 40,
-    marginLeft:8,
-    marginRight:8
+    borderRadius: 24,
+    marginBottom: 16,
+    marginHorizontal: 10,
   },
   BotonBorrarSwipe: {
     alignItems: "center",
@@ -239,32 +236,33 @@ export const styles = StyleSheet.create({
     width: 80,
     height: "100%",
   },
-  // ESTA ES LA QUE FALTABA PARA EL ERROR TS(2551)
   TextoBorrarSwipe: {
     color: "#FFF",
     fontSize: 12,
     fontWeight: "bold",
     marginTop: 4,
-  },ContenedorCuadros: {
+  },
+
+  // ── BOTÓN FLOTANTE ────────────────────────────────────────────────────────
+  BotonFlotante: {
+    position: "absolute",
+    bottom: 30,
+    right: 14,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    // backgroundColor y shadowColor los pone el TSX
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+  },
+
+  // ── MISC ──────────────────────────────────────────────────────────────────
+  ContenedorCuadros: {
     padding: 15,
     gap: 15,
   },
-  ContenedorBuscador: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F5F5F5',
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    marginHorizontal: 15,
-    marginTop: 0 ,
-    marginBottom: 7,
-    gap: 8,
-},
-InputBuscador: {
-    flex: 1,
-    fontSize: 14,
-    color: '#333',
-    padding: 0,  // reset del padding por defecto en Android
-},
 });
