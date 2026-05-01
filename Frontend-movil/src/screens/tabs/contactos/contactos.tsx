@@ -34,8 +34,8 @@ export default function Contactos() {
       {/* ── HEADER ── */}
       <View style={styles.Header}>
         <LinearGradient
-          colors={[theme.headercolor1, theme.headercolor2]}
-          start={{ x: 1, y: 0 }}
+          colors={["rgb(202,171,222)", "rgb(123, 29, 178)"]}         
+           start={{ x: 1, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.Gradiente}
         >

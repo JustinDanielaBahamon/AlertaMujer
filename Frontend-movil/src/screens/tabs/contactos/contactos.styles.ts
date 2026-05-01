@@ -12,7 +12,7 @@ export const styles = StyleSheet.create({
     marginBottom: 0,
   },
   Gradiente: {
-    paddingTop: 48,           // espacio para el status bar
+    paddingTop: 0.9,           // espacio para el status bar
     paddingHorizontal: 25,
     paddingBottom: 28,
     borderBottomLeftRadius: 40,
