@@ -4,15 +4,25 @@ import { Animated, Button, Modal, Text, TouchableWithoutFeedback, View, ScrollVi
 import MapView, { Marker } from "react-native-maps";
 import { styles } from "./MapaStyles";
 import { useTheme } from "../../../contexts/ThemeContext";
+import { useRoute } from "@react-navigation/native";
+
+type Coordenada = { latitude: number; longitude: number };
+
+type MapaRouteParams = {
+  direccionObjetivo?: string;
+};
 
 export default function MapaView() {
   const { theme } = useTheme(); // colores del tema activo
+  const route = useRoute();
+  const params = (route.params ?? {}) as MapaRouteParams;
 
-  const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null); // ubicación actual
+  const [location, setLocation] = useState<Coordenada | null>(null); // ubicación actual
   const [fullscreen, setFullscreen] = useState(false);   // modo pantalla completa
   const [showClose, setShowClose] = useState(false);     // mostrar botón cerrar
-  const [historial, setHistorial] = useState<{ latitude: number; longitude: number }[]>([]); // posiciones guardadas
+  const [historial, setHistorial] = useState<Coordenada[]>([]); // posiciones guardadas
   const [intentosPermiso, setIntentosPermiso] = useState(0); // intentos de permiso GPS
+  const [destinoAlerta, setDestinoAlerta] = useState<{ direccion: string; coordenada: Coordenada } | null>(null);
 
   const closeOpacity = useRef(new Animated.Value(0)).current; // animación botón cerrar
   const locationRef = useRef(location);   // referencia para usar en intervals
@@ -20,6 +30,39 @@ export default function MapaView() {
 
   useEffect(() => { locationRef.current = location; }, [location]);
   useEffect(() => { historialRef.current = historial; }, [historial]);
+
+  useEffect(() => {
+    const direccion = params.direccionObjetivo?.trim();
+
+    if (!direccion) {
+      setDestinoAlerta(null);
+      return;
+    }
+
+    let mounted = true;
+    (async () => {
+      try {
+        const resultados = await Location.geocodeAsync(`${direccion}, Colombia`);
+        if (!mounted) return;
+
+        if (resultados.length > 0) {
+          const { latitude, longitude } = resultados[0];
+          setDestinoAlerta({
+            direccion,
+            coordenada: { latitude, longitude },
+          });
+        } else {
+          setDestinoAlerta(null);
+        }
+      } catch {
+        if (mounted) setDestinoAlerta(null);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [params.direccionObjetivo]);
 
   // Calcula distancia en metros entre dos coordenadas (fórmula Haversine)
   const getDistanceFromLatLonInMeters = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -97,20 +140,38 @@ export default function MapaView() {
     }, 15000);
   };
 
+  const coordenadaCentro = destinoAlerta?.coordenada ?? location;
+  const tituloMapa = destinoAlerta ? "Ubicacion de la alerta" : "Tu ubicacion";
+
   // Mapa reutilizable en vista normal y pantalla completa
+  
   const mapComponent = (
     <MapView
       style={styles.map}
-      region={{ latitude: location.latitude, longitude: location.longitude, latitudeDelta: 0.01, longitudeDelta: 0.01 }}
+      region={{
+        latitude: coordenadaCentro.latitude,
+        longitude: coordenadaCentro.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      }}
       onPress={fullscreen ? handleMapPress : toggleFullscreen}
     >
       <Marker coordinate={location} title="Tu ubicacion" pinColor="red" />
+      {destinoAlerta && (
+        <Marker
+          coordinate={destinoAlerta.coordenada}
+          title="Direccion de alerta"
+          description={destinoAlerta.direccion}
+          pinColor="#7B1DB2"
+        />
+      )}
       {historial.map((pos, index) => (
         <Marker key={index} coordinate={pos} title={`Historial ${index + 1}`}
           pinColor={`hsl(${(index * 50) % 360}, 20%, 50%)`} />
       ))}
     </MapView>
   );
+ 
 
   // Pantalla principal
   return (
@@ -118,7 +179,7 @@ export default function MapaView() {
       <View style={[styles.card, { backgroundColor: theme.card }]}>
 
         <View style={styles.topContainer}>
-          <Text style={[styles.title, { color: theme.text }]}>Tu ubicacion</Text>
+          <Text style={[styles.title, { color: theme.text }]}>{tituloMapa}</Text>
         </View>
 
         <View style={styles.mapContainer}>{mapComponent}</View>
