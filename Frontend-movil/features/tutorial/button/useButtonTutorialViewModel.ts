@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Animated } from "react-native";
-import { BOTON_COLORS } from "./botonStyle";
+import { BUTTON_COLORS } from "./buttonStyle";
 
 // ─── Tipos públicos ───────────────────────────────────────────────────────────
 export type TapType = "short" | "double" | "hold" | null;
@@ -30,9 +30,9 @@ export const TAP_OPTIONS: TapOption[] = [
     boldLabel: "Alerta discreta.",
     desc: "Envía un SMS silencioso con tu ubicación exacta.",
     detailDesc: "Envía un SMS silencioso con tu ubicación.",
-    color: BOTON_COLORS.row1Color,
-    colorLight: BOTON_COLORS.row1Light,
-    colorBorder: BOTON_COLORS.row1Border,
+    color: BUTTON_COLORS.row1Color,
+    colorLight: BUTTON_COLORS.row1Light,
+    colorBorder: BUTTON_COLORS.row1Border,
   },
   {
     id: "double",
@@ -43,9 +43,9 @@ export const TAP_OPTIONS: TapOption[] = [
     boldLabel: "Alerta urgente.",
     desc: "Tus contactos reciben notificación y llamada.",
     detailDesc: "Tus contactos reciben notificación y llamada automática.",
-    color: BOTON_COLORS.row2Color,
-    colorLight: BOTON_COLORS.row2Light,
-    colorBorder: BOTON_COLORS.row2Border,
+    color: BUTTON_COLORS.row2Color,
+    colorLight: BUTTON_COLORS.row2Light,
+    colorBorder: BUTTON_COLORS.row2Border,
   },
   {
     id: "hold",
@@ -56,21 +56,21 @@ export const TAP_OPTIONS: TapOption[] = [
     boldLabel: "Alerta máxima.",
     desc: "Inicia grabación, sirena y ubicación en tiempo real.",
     detailDesc: "Inicia grabación, sirena y ubicación en tiempo real.",
-    color: BOTON_COLORS.row3Color,
-    colorLight: BOTON_COLORS.row3Light,
-    colorBorder: BOTON_COLORS.row3Border,
+    color: BUTTON_COLORS.row3Color,
+    colorLight: BUTTON_COLORS.row3Light,
+    colorBorder: BUTTON_COLORS.row3Border,
   },
 ];
 
 // ─── ViewModel ────────────────────────────────────────────────────────────────
-export function useBotonTutorialViewModel() {
+export function useButtonTutorialViewModel() {
   // ── Estado ──────────────────────────────────────────────────────────────────
-  const [activeRow, setActiveRow] = useState<TapType>(null);
-  const [tapCount, setTapCount] = useState(0);
-  const [feedback, setFeedback] = useState("");
+  const [activeRow, setActiveRow]   = useState<TapType>(null);
+  const [tapCount, setTapCount]     = useState(0);
+  const [feedback, setFeedback]     = useState("");
 
   // ── Animaciones de la pantalla principal ────────────────────────────────────
-  const cardAnim = useRef(new Animated.Value(0)).current;
+  const cardAnim        = useRef(new Animated.Value(0)).current;
   const feedbackOpacity = useRef(new Animated.Value(0)).current;
 
   // Entrada de card con spring al montar

@@ -8,7 +8,7 @@ interface ModalConfirmacionProps {
   municipio: string;
   onConfirmar: () => void;
   onRegresar: () => void;
-  soloConfirmar?: React.MutableRefObject<boolean>; // ← agregar esto
+  soloConfirmar: boolean; // ← agregar esto
 }
 
 export default function ModalConfirmacion({ 
@@ -52,7 +52,7 @@ export default function ModalConfirmacion({
             </TouchableOpacity>
 
             {/* ← Solo muestra "Cambiar datos" si NO ha confirmado aún */}
-            {!soloConfirmar?.current && (
+            {!soloConfirmar && (
               <TouchableOpacity style={localStyles.btnRegresar} onPress={onRegresar}>
                 <Text style={localStyles.btnTextRegresar}>Cambiar datos</Text>
               </TouchableOpacity>

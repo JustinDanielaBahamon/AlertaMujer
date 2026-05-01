@@ -1,9 +1,9 @@
-import { useCallback, useRef, useState } from "react";
 import * as Contacts from "expo-contacts";
-import { CONTACTO_COLORS } from "./contactoStyle";
+import { useCallback, useRef, useState } from "react";
+import { CONTACT_COLORS } from "./contactStyle";
 
 // ─── Tipos públicos ───────────────────────────────────────────────────────────
-export interface ContactoFeatureItem {
+export interface ContactFeatureItem {
   id: string;
   emoji: string;
   title: string;
@@ -18,7 +18,7 @@ export interface ContactoFeatureItem {
 }
 
 // ─── Datos estáticos ──────────────────────────────────────────────────────────
-export const CONTACTO_FEATURE_ROWS: ContactoFeatureItem[] = [
+export const CONTACT_FEATURE_ROWS: ContactFeatureItem[] = [
   {
     id: "confianza",
     emoji: "🤝",
@@ -28,9 +28,9 @@ export const CONTACTO_FEATURE_ROWS: ContactoFeatureItem[] = [
     highlightLabel: "Confianza: ",
     boldLabel: "Red segura.",
     detailDesc: "Agrega a tus familiares y amigos cercanos para que te cuiden en cualquier momento.",
-    color: CONTACTO_COLORS.row1Color,
-    colorLight: CONTACTO_COLORS.row1Light,
-    colorBorder: CONTACTO_COLORS.row1Border,
+    color: CONTACT_COLORS.row1Color,
+    colorLight: CONTACT_COLORS.row1Light,
+    colorBorder: CONTACT_COLORS.row1Border,
   },
   {
     id: "notificaciones",
@@ -41,9 +41,9 @@ export const CONTACTO_FEATURE_ROWS: ContactoFeatureItem[] = [
     highlightLabel: "Notificaciones: ",
     boldLabel: "Aviso inmediato.",
     detailDesc: "Ellos recibirán tu ubicación exacta cuando actives una alerta de emergencia.",
-    color: CONTACTO_COLORS.row2Color,
-    colorLight: CONTACTO_COLORS.row2Light,
-    colorBorder: CONTACTO_COLORS.row2Border,
+    color: CONTACT_COLORS.row2Color,
+    colorLight: CONTACT_COLORS.row2Light,
+    colorBorder: CONTACT_COLORS.row2Border,
   },
   {
     id: "gestion",
@@ -54,62 +54,60 @@ export const CONTACTO_FEATURE_ROWS: ContactoFeatureItem[] = [
     highlightLabel: "Gestión: ",
     boldLabel: "Siempre conectada.",
     detailDesc: "Puedes gestionar tus contactos en cualquier momento desde tu perfil.",
-    color: CONTACTO_COLORS.row3Color,
-    colorLight: CONTACTO_COLORS.row3Light,
-    colorBorder: CONTACTO_COLORS.row3Border,
+    color: CONTACT_COLORS.row3Color,
+    colorLight: CONTACT_COLORS.row3Light,
+    colorBorder: CONTACT_COLORS.row3Border,
   },
 ];
 
 // ─── ViewModel — lógica original 100% intacta ─────────────────────────────────
-export function useContactoTutorialViewModel() {
-  const [mostrarAdvertencia, setMostrarAdvertencia] = useState(false);
-  const [modalVisible, setModalVisible]             = useState(false);
+export function useContactTutorialViewModel() {
+  const [showWarning, setShowWarning] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
 
-  const resolverPermiso = useRef<(valor: boolean) => void>(() => {});
+  const permissionResolver = useRef<(value: boolean) => void>(() => {});
 
   // ── Permisos (lógica original sin cambios) ───────────────────────────────
-  const pedirPermisos = useCallback((): Promise<boolean> => {
+  const requestPermissions = useCallback((): Promise<boolean> => {
     return new Promise((resolve) => {
-      resolverPermiso.current = resolve;
+      permissionResolver.current = resolve;
       setModalVisible(true);
     });
   }, []);
 
-  const confirmarModal = useCallback(async () => {
+  const confirmModal = useCallback(async () => {
     setModalVisible(false);
     const { status } = await Contacts.requestPermissionsAsync();
     if (status === "granted") {
-      resolverPermiso.current(true);
+      permissionResolver.current(true);
     } else {
-      setMostrarAdvertencia(true);
+      setShowWarning(true);
     }
   }, []);
 
-  const cancelarModal = useCallback(() => {
+  const cancelModal = useCallback(() => {
     setModalVisible(false);
-    setMostrarAdvertencia(true);
+    setShowWarning(true);
   }, []);
 
-  const reintentarPermisos = useCallback(() => {
-    setMostrarAdvertencia(false);
+  const retryPermissions = useCallback(() => {
+    setShowWarning(false);
     setModalVisible(true);
   }, []);
 
-  const continuarSinPermisos = useCallback(() => {
-    setMostrarAdvertencia(false);
-    resolverPermiso.current(true);
+  const continueWithoutPermissions = useCallback(() => {
+    setShowWarning(false);
+    permissionResolver.current(true);
   }, []);
 
   return {
-    // datos
-    featureRows: CONTACTO_FEATURE_ROWS,
-    // permisos
+    featureRows: CONTACT_FEATURE_ROWS,
     modalVisible,
-    mostrarAdvertencia,
-    pedirPermisos,
-    confirmarModal,
-    cancelarModal,
-    reintentarPermisos,
-    continuarSinPermisos,
+    showWarning,
+    requestPermissions,
+    confirmModal,
+    cancelModal,
+    retryPermissions,
+    continueWithoutPermissions,
   };
 }

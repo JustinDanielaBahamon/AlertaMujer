@@ -2,25 +2,25 @@ import { StyleSheet } from "react-native";
 
 
 // ─── Paleta mejorada: rojo · morado · verde ───────────────────────────────────
-export const BOTON_COLORS = {
-  accent:       "#DC2626",
+export const BUTTON_COLORS = {
+  accent:       "#b826dc",
   accentLight:  "#FEE2E2",
-  accentDark:   "#991B1B",
+  accentDark:   "#8e1b99",
 
-  row1Color:    "#7C3AED",
-  row1Light:    "#F5F3FF",
-  row1Border:   "#DDD6FE",
-  row1Gradient: ["#7C3AED", "#9F67FF"],
+  row1Color:    "#5e03a8",
+  row1Light:    "#fdfdff",
+  row1Border:   "#d78cfa",
+  row1Gradient: ["#7C3AED", "#9e17c0"],
 
-  row2Color:    "#07573d",
-  row2Light:    "#ECFDF5",
-  row2Border:   "#A7F3D0",
-  row2Gradient: ["#059669", "#10B981"],
+  row2Color:    "#590a7e",
+  row2Light:    "#f7fffb",
+  row2Border:   "#e00abd",
+  row2Gradient: ["#6f0385", "#9710b9"],
 
-  row3Color:    "#DC2626",
-  row3Light:    "#FEF2F2",
+  row3Color:    "#9326dc",
+  row3Light:    "#f6eef7",
   row3Border:   "#FECDD3",
-  row3Gradient: ["#f72f2f", "#EF4444"],
+  row3Gradient: ["#be60e4", "#9c44ef"],
 
   circle1: "#be0bf5",
   circle2: "#5b0881",
@@ -29,12 +29,12 @@ export const BOTON_COLORS = {
   circle5: "#a010f3",
 
   sectionLabel: "#7C3AED",
-  sectionLine:  "#EDE9FE",
+  sectionLine:  "#8e25b8",
   divider:      "#F3F0FF",
   badgeBg:      "#F5F3FF",
 };
 
-export const botonStyle = StyleSheet.create({
+export const buttonStyle = StyleSheet.create({
   // ── Fondo ────────────────────────────────────────────────────────────────────
   screenBg: {
     flex: 1,
@@ -83,13 +83,13 @@ export const botonStyle = StyleSheet.create({
   sectionLabel: {
     fontSize: 10,
     fontWeight: "700",
-    color: BOTON_COLORS.sectionLabel,
+    color: BUTTON_COLORS.sectionLabel,
     letterSpacing: 1.4,
   },
   sectionLine: {
     flex: 1,
     height: 1,
-    backgroundColor: BOTON_COLORS.sectionLine,
+    backgroundColor: BUTTON_COLORS.sectionLine,
   },
 
   // ── Fila tipo "tap" ──────────────────────────────────────────────────────────
@@ -140,7 +140,7 @@ export const botonStyle = StyleSheet.create({
   rowTitle: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#1E1B4B",
+    color: "#140c83",
     marginBottom: 2,
   },
   rowDesc: {
@@ -166,7 +166,7 @@ export const botonStyle = StyleSheet.create({
   // ── Divisor ──────────────────────────────────────────────────────────────────
   divider: {
     height: 1,
-    backgroundColor: BOTON_COLORS.divider,
+    backgroundColor: BUTTON_COLORS.divider,
     marginVertical: 14,
   },
 
@@ -225,7 +225,7 @@ export const botonStyle = StyleSheet.create({
   feedbackText: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#991B1B",
+    color: "#991b99",
   },
 
   // ── Badge inferior ───────────────────────────────────────────────────────────
@@ -245,7 +245,7 @@ export const botonStyle = StyleSheet.create({
   bottomBadgeText: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#991B1B",
+    color: "#5f038a",
     letterSpacing: 0.2,
   },
 
@@ -263,16 +263,16 @@ export const botonStyle = StyleSheet.create({
     height: 100,
     borderRadius: 50,
     borderWidth: 2,
-    borderColor: "#DC2626",
+    borderColor: "#750775",
   },
   sosBtn: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: "#DC2626",
+    backgroundColor: "#f30808",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#991B1B",
+    shadowColor: "#c07dd4",
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.40,
     shadowRadius: 14,

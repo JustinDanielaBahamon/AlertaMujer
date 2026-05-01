@@ -1,38 +1,39 @@
 import { StyleSheet } from "react-native";
 
-// ─── Paleta del módulo Mensajes ───────────────────────────────────────────────
-export const MSG_COLORS = {
-  accent:      "#7C3AED",
-  accentLight: "#F5F3FF",
-  accentDark:  "#5B21B6",
+// ─── Paleta del módulo Seguridad — protección & confianza ─────────────────────
+export const SECURITY_COLORS = {
+  accent:      "#1D4ED8",   // azul seguridad
+  accentLight: "#EFF6FF",
+  accentDark:  "#1E3A8A",
 
-  row1Color:  "#7C3AED",   // SMS – morado
-  row1Light:  "#F5F3FF",
-  row1Border: "#DDD6FE",
+  row1Color:  "#1D4ED8",   // Registro – azul
+  row1Light:  "#EFF6FF",
+  row1Border: "#BFDBFE",
 
-  row2Color:  "#DB2777",   // Llamada – rosa
-  row2Light:  "#FDF2F8",
-  row2Border: "#FBCFE8",
+  row2Color:  "#6D28D9",   // Respaldo – violeta
+  row2Light:  "#F5F3FF",
+  row2Border: "#DDD6FE",
 
-  row3Color:  "#0891B2",   // Confirmación – azul
-  row3Light:  "#ECFEFF",
-  row3Border: "#A5F3FC",
+  row3Color:  "#0F766E",   // Privacidad – teal
+  row3Light:  "#F0FDFA",
+  row3Border: "#99F6E4",
 
-  circle1: "#7C3AED",
-  circle2: "#DB2777",
-  circle3: "#0891B2",
-  circle4: "#A78BFA",
+  circle1: "#1D4ED8",
+  circle2: "#6D28D9",
+  circle3: "#0F766E",
+  circle4: "#3B82F6",
 
-  screenBg:     "#F5F0FF",
-  sectionLabel: "#7C3AED",
-  sectionLine:  "#EDE9FE",
-  divider:      "#F3F0FF",
+  screenBg:     "#F0F4FF",
+  sectionLabel: "#1D4ED8",
+  sectionLine:  "#BFDBFE",
+  divider:      "#DBEAFE",
 };
 
-export const mensajeStyle = StyleSheet.create({
+export const securityStyle  = StyleSheet.create({
   // ── Fondo ──────────────────────────────────────────────────────────────────
   screenBg: {
     flex: 1,
+    backgroundColor: SECURITY_COLORS.screenBg,
   },
 
   // ── Círculos de fondo ──────────────────────────────────────────────────────
@@ -59,7 +60,7 @@ export const mensajeStyle = StyleSheet.create({
     height: 200,
   },
 
-  // ── ScrollView dentro de la card ───────────────────────────────────────────
+  // ── ScrollView ─────────────────────────────────────────────────────────────
   cardScroll: {
     flex: 1,
   },
@@ -77,13 +78,13 @@ export const mensajeStyle = StyleSheet.create({
   sectionLabel: {
     fontSize: 10,
     fontWeight: "700",
-    color: MSG_COLORS.sectionLabel,
+    color: SECURITY_COLORS.sectionLabel,
     letterSpacing: 1.4,
   },
   sectionLine: {
     flex: 1,
     height: 1,
-    backgroundColor: MSG_COLORS.sectionLine,
+    backgroundColor: SECURITY_COLORS.sectionLine,
   },
 
   // ── Fila de característica ─────────────────────────────────────────────────
@@ -105,9 +106,7 @@ export const mensajeStyle = StyleSheet.create({
   },
   featureRowAccent: {
     position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
+    top: 0, left: 0, right: 0,
     height: 3,
     borderTopLeftRadius: 18,
     borderTopRightRadius: 18,
@@ -159,7 +158,7 @@ export const mensajeStyle = StyleSheet.create({
   // ── Divisor ────────────────────────────────────────────────────────────────
   divider: {
     height: 1,
-    backgroundColor: MSG_COLORS.divider,
+    backgroundColor: SECURITY_COLORS.divider,
     marginVertical: 14,
   },
 
@@ -200,23 +199,30 @@ export const mensajeStyle = StyleSheet.create({
   permisosCard: {
     borderRadius: 18,
     padding: 16,
-    gap: 10,
-    backgroundColor: "#F5F3FF",
+    gap: 12,
+    backgroundColor: SECURITY_COLORS.accentLight,
     borderWidth: 1.5,
-    borderColor: "#DDD6FE",
+    borderColor: SECURITY_COLORS.row1Border,
   },
   permisosRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
   },
+  permisosSeparator: {
+    height: 1,
+    backgroundColor: SECURITY_COLORS.sectionLine,
+  },
   permisosEmoji: {
     fontSize: 22,
+  },
+  permisosTitleWrap: {
+    flex: 1,
   },
   permisosTitle: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#1E1B4B",
+    color: "#1E3A8A",
   },
   permisosDesc: {
     fontSize: 12,
@@ -232,17 +238,17 @@ export const mensajeStyle = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: "#F5F3FF",
+    backgroundColor: SECURITY_COLORS.accentLight,
     paddingHorizontal: 20,
     paddingVertical: 9,
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: "#DDD6FE",
+    borderColor: SECURITY_COLORS.row1Border,
   },
   bottomBadgeText: {
     fontSize: 13,
     fontWeight: "700",
-    color: MSG_COLORS.accent,
+    color: SECURITY_COLORS.accent,
     letterSpacing: 0.2,
   },
 

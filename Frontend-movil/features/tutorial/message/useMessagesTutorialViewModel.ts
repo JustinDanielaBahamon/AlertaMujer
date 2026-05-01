@@ -1,7 +1,6 @@
 import * as SMS from "expo-sms";
-import { useVideoPlayer } from "expo-video";
 import { useCallback, useRef, useState } from "react";
-import { MSG_COLORS } from "./mensajeStyle";
+import { MSG_COLORS } from "./messageStyle";
 
 // ─── Tipos públicos ───────────────────────────────────────────────────────────
 export interface FeatureItem {
@@ -62,61 +61,58 @@ export const FEATURE_ROWS: FeatureItem[] = [
 ];
 
 // ─── ViewModel ────────────────────────────────────────────────────────────────
-export function useMensajesTutorialViewModel() {
-  const [modalVisible, setModalVisible] = useState(false);
-  const [tipoPermiso, setTipoPermiso] = useState<"sms" | "llamada">("sms");
-  const [mostrarAdvertencia, setMostrarAdvertencia] = useState(false);
+export function useMessagesTutorialViewModel() {
+  const [modalVisible, setModalVisible]   = useState(false);
+  const [permissionType, setPermissionType] = useState<"sms" | "llamada">("sms");
+  const [showWarning, setShowWarning]     = useState(false);
 
-  const resolverPermiso = useRef<(valor: boolean) => void>(() => {});
-
-
+  const resolvePermission = useRef<(value: boolean) => void>(() => {});
 
   // ── Handlers permisos (lógica original intacta) ──────────────────────────
-  const pedirPermisos = useCallback((): Promise<boolean> => {
+  const requestPermissions = useCallback((): Promise<boolean> => {
     return new Promise((resolve) => {
-      resolverPermiso.current = resolve;
-      setTipoPermiso("sms");
+      resolvePermission.current = resolve;
+      setPermissionType("sms");
       setModalVisible(true);
-      setMostrarAdvertencia(false);
+      setShowWarning(false);
     });
   }, []);
 
-  const confirmarModal = useCallback(async () => {
-    if (tipoPermiso === "sms") {
+  const confirmModal = useCallback(async () => {
+    if (permissionType === "sms") {
       try { await SMS.isAvailableAsync(); } catch (e) { console.log("Error SMS:", e); }
-      setTipoPermiso("llamada");
+      setPermissionType("llamada");
     } else {
       setModalVisible(false);
-      resolverPermiso.current(true);
+      resolvePermission.current(true);
     }
-  }, [tipoPermiso]);
+  }, [permissionType]);
 
-  const cancelarModal = useCallback(() => {
+  const cancelModal = useCallback(() => {
     setModalVisible(false);
-    setMostrarAdvertencia(true);
+    setShowWarning(true);
   }, []);
 
-  const reintentarPermisos = useCallback(() => {
-    setMostrarAdvertencia(false);
-    setTipoPermiso("sms");
+  const retryPermissions = useCallback(() => {
+    setShowWarning(false);
+    setPermissionType("sms");
     setModalVisible(true);
   }, []);
 
-  const continuarSinPermisos = useCallback(() => {
-    setMostrarAdvertencia(false);
-    resolverPermiso.current(true);
+  const continueWithoutPermissions = useCallback(() => {
+    setShowWarning(false);
+    resolvePermission.current(true);
   }, []);
 
   return {
-    
     featureRows: FEATURE_ROWS,
     modalVisible,
-    tipoPermiso,
-    mostrarAdvertencia,
-    pedirPermisos,
-    confirmarModal,
-    cancelarModal,
-    reintentarPermisos,
-    continuarSinPermisos,
+    permissionType,
+    showWarning,
+    requestPermissions,
+    confirmModal,
+    cancelModal,
+    retryPermissions,
+    continueWithoutPermissions,
   };
 }

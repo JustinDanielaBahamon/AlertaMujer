@@ -1,12 +1,13 @@
-import React, { useEffect, useRef } from "react";
-import {View,Text,Animated,TouchableOpacity,ScrollView,} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import LottieView from "lottie-react-native";
-import Card from "../../../src/components/ui/card/card";
-import PermisosModal from "../../../src/components/ui/modalMesanje/permisosMLL";
-import {useContactoTutorialViewModel,type ContactoFeatureItem,} from "./useContactoTutorialViewModel";
-import { contactoStyle, CONTACTO_COLORS } from "./contactoStyle";
 import { LinearGradient } from 'expo-linear-gradient';
+import LottieView from "lottie-react-native";
+import React, { useEffect, useRef } from "react";
+import { Animated, ScrollView, Text, TouchableOpacity, View, } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Card from "../../../src/components/ui/card/card";
+import PermissionsModal from "../../../src/components/ui/modalMesanje/permisosMLL";
+import { CONTACT_COLORS, contactStyle } from "./contactStyle";
+import { useContactTutorialViewModel, type ContactFeatureItem, } from "./useContactTutorialViewModel";
+
 // ─── Círculos decorativos de fondo ───────────────────────────────────────────
 function BackgroundCircles() {
   const f1 = useRef(new Animated.Value(0)).current;
@@ -28,30 +29,30 @@ function BackgroundCircles() {
 
   return (
     <>
-      <Animated.View style={[contactoStyle.bgCircleBase,
-        { width: 200, height: 200, borderRadius: 100, backgroundColor: CONTACTO_COLORS.circle1,
+      <Animated.View style={[contactStyle.bgCircleBase,
+        { width: 200, height: 200, borderRadius: 100, backgroundColor: CONTACT_COLORS.circle1,
           opacity: 0.09, top: -55, right: -60, transform: [{ translateY: f1 }] }]} />
-      <Animated.View style={[contactoStyle.bgCircleBase,
-        { width: 130, height: 130, borderRadius: 65, backgroundColor: CONTACTO_COLORS.circle2,
+      <Animated.View style={[contactStyle.bgCircleBase,
+        { width: 130, height: 130, borderRadius: 65, backgroundColor: CONTACT_COLORS.circle2,
           opacity: 0.10, top: 50, left: -40, transform: [{ translateY: f2 }] }]} />
-      <Animated.View style={[contactoStyle.bgCircleBase,
-        { width: 90, height: 90, borderRadius: 45, backgroundColor: CONTACTO_COLORS.circle3,
+      <Animated.View style={[contactStyle.bgCircleBase,
+        { width: 90, height: 90, borderRadius: 45, backgroundColor: CONTACT_COLORS.circle3,
           opacity: 0.09, top: 170, right: 10, transform: [{ translateY: f3 }] }]} />
-      <Animated.View style={[contactoStyle.bgCircleBase,
-        { width: 55, height: 55, borderRadius: 28, backgroundColor: CONTACTO_COLORS.circle4,
+      <Animated.View style={[contactStyle.bgCircleBase,
+        { width: 55, height: 55, borderRadius: 28, backgroundColor: CONTACT_COLORS.circle4,
           opacity: 0.13, top: 110, left: "44%" as any, transform: [{ translateY: f1 }] }]} />
-      <Animated.View style={[contactoStyle.bgCircleBase,
-        { width: 70, height: 70, borderRadius: 35, backgroundColor: CONTACTO_COLORS.circle2,
+      <Animated.View style={[contactStyle.bgCircleBase,
+        { width: 70, height: 70, borderRadius: 35, backgroundColor: CONTACT_COLORS.circle2,
           opacity: 0.08, top: 230, left: 20, transform: [{ translateY: f2 }] }]} />
-      <Animated.View style={[contactoStyle.bgRingBase,
-        { width: 100, height: 100, borderRadius: 50, borderColor: CONTACTO_COLORS.circle1,
+      <Animated.View style={[contactStyle.bgRingBase,
+        { width: 100, height: 100, borderRadius: 50, borderColor: CONTACT_COLORS.circle1,
           opacity: 0.10, top: 30, right: 30, transform: [{ translateY: f3 }] }]} />
     </>
   );
 }
 
 // ─── Fila de característica animada ──────────────────────────────────────────
-function FeatureRow({ item, enterDelay }: { item: ContactoFeatureItem; enterDelay: number }) {
+function FeatureRow({ item, enterDelay }: { item: ContactFeatureItem; enterDelay: number }) {
   const slideAnim   = useRef(new Animated.Value(28)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
@@ -64,28 +65,28 @@ function FeatureRow({ item, enterDelay }: { item: ContactoFeatureItem; enterDela
 
   return (
     <Animated.View style={{ opacity: opacityAnim, transform: [{ translateY: slideAnim }] }}>
-      <View style={[contactoStyle.featureRow, {
+      <View style={[contactStyle.featureRow, {
         backgroundColor: item.colorLight,
         borderColor:     item.colorBorder,
         shadowColor:     item.color,
       }]}>
-        <View style={[contactoStyle.featureRowAccent, { backgroundColor: item.color }]} />
+        <View style={[contactStyle.featureRowAccent, { backgroundColor: item.color }]} />
 
-        <View style={[contactoStyle.rowIconWrap, {
+        <View style={[contactStyle.rowIconWrap, {
           backgroundColor: item.color + "25",
           borderWidth: 1.5,
           borderColor: item.color + "40",
         }]}>
-          <Text style={contactoStyle.rowIcon}>{item.emoji}</Text>
+          <Text style={contactStyle.rowIcon}>{item.emoji}</Text>
         </View>
 
-        <View style={contactoStyle.rowTextContainer}>
-          <Text style={[contactoStyle.rowTitle, { color: item.color }]}>{item.title}</Text>
-          <Text style={contactoStyle.rowDesc}>{item.desc}</Text>
+        <View style={contactStyle.rowTextContainer}>
+          <Text style={[contactStyle.rowTitle, { color: item.color }]}>{item.title}</Text>
+          <Text style={contactStyle.rowDesc}>{item.desc}</Text>
         </View>
 
-        <View style={[contactoStyle.badge, { backgroundColor: item.color + "20" }]}>
-          <Text style={[contactoStyle.badgeText, { color: item.color }]}>{item.badge}</Text>
+        <View style={[contactStyle.badge, { backgroundColor: item.color + "20" }]}>
+          <Text style={[contactStyle.badgeText, { color: item.color }]}>{item.badge}</Text>
         </View>
       </View>
     </Animated.View>
@@ -94,12 +95,12 @@ function FeatureRow({ item, enterDelay }: { item: ContactoFeatureItem; enterDela
 
 // ─── Pantalla principal ───────────────────────────────────────────────────────
 interface Props {
-  vmExterno?: ReturnType<typeof useContactoTutorialViewModel>;
+   externalVm?: ReturnType<typeof useContactTutorialViewModel>;
 }
 
-export default function ContactosScreen({ vmExterno }: Props) {
-  const vmInterno = useContactoTutorialViewModel();
-  const vm = vmExterno ?? vmInterno;
+export default function ContactosScreen({  externalVm }: Props) {
+  const internalVm = useContactTutorialViewModel();
+  const vm =  externalVm ?? internalVm;
 
   // ── Animación card spring ────────────────────────────────────────────────
   const cardAnim = useRef(new Animated.Value(0)).current;
@@ -110,6 +111,7 @@ export default function ContactosScreen({ vmExterno }: Props) {
       useNativeDriver: true,
     }).start();
   }, []);
+
   const cardAnimStyle = {
     opacity: cardAnim,
     transform: [{
@@ -118,10 +120,10 @@ export default function ContactosScreen({ vmExterno }: Props) {
   };
 
   return (
-     <View style={contactoStyle.screenBg}>
+     <View style={contactStyle.screenBg}>
 
       <LinearGradient
-        colors={["#FFF0F6", "#FCE7F3", "#b026bd"]}
+        colors={["#f3afed", "#FCE7F3", "#b026bd"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={{ flex: 1 }}
@@ -132,13 +134,13 @@ export default function ContactosScreen({ vmExterno }: Props) {
       <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
 
         {/* Lottie */}
-        <View style={contactoStyle.lottieSection}>
+        <View style={contactStyle.lottieSection}>
           <LottieView
             source={require("../../../assets/imagesAlertaMujer/ScTutorial/Contacto.json")}
             autoPlay
             loop
             resizeMode="contain"
-            style={contactoStyle.lottie}
+            style={contactStyle.lottie}
           />
         </View>
 
@@ -146,16 +148,16 @@ export default function ContactosScreen({ vmExterno }: Props) {
         <Animated.View style={[{ flex: 1 }, cardAnimStyle]}>
           <Card title={`Tu Red de\n`} titleHighlight="Apoyo">
             <ScrollView
-              style={contactoStyle.cardScroll}
-              contentContainerStyle={contactoStyle.cardScrollContent}
+              style={contactStyle.cardScroll}
+              contentContainerStyle={contactStyle.cardScrollContent}
               showsVerticalScrollIndicator={false}
               scrollEventThrottle={16}
               nestedScrollEnabled={true}
             >
               {/* Sección principal */}
-              <View style={contactoStyle.sectionRow}>
-                <Text style={contactoStyle.sectionLabel}>TU RED DE FAMILIA</Text>
-                <View style={contactoStyle.sectionLine} />
+              <View style={contactStyle.sectionRow}>
+                <Text style={contactStyle.sectionLabel}>TU RED DE FAMILIA</Text>
+                <View style={contactStyle.sectionLine} />
               </View>
 
               {vm.featureRows.map((item, index) => (
@@ -166,40 +168,40 @@ export default function ContactosScreen({ vmExterno }: Props) {
                 />
               ))}
 
-              <View style={contactoStyle.divider} />
+              <View style={contactStyle.divider} />
 
               {/* Detalle descriptivo */}
               <View style={{ gap: 4 }}>
                 {vm.featureRows.map((item) => (
-                  <View key={`desc-${item.id}`} style={contactoStyle.descRow}>
-                    <View style={[contactoStyle.descDot, { backgroundColor: item.color }]} />
-                    <View style={contactoStyle.descTextWrap}>
+                  <View key={`desc-${item.id}`} style={contactStyle.descRow}>
+                    <View style={[contactStyle.descDot, { backgroundColor: item.color }]} />
+                    <View style={contactStyle.descTextWrap}>
                       <Text>
-                        <Text style={[contactoStyle.descHighlight, { color: item.color }]}>
+                        <Text style={[contactStyle.descHighlight, { color: item.color }]}>
                           {item.highlightLabel}
                         </Text>
-                        <Text style={contactoStyle.descBold}>{item.boldLabel} </Text>
-                        <Text style={contactoStyle.descNormal}>{item.detailDesc}</Text>
+                        <Text style={contactStyle.descBold}>{item.boldLabel} </Text>
+                        <Text style={contactStyle.descNormal}>{item.detailDesc}</Text>
                       </Text>
                     </View>
                   </View>
                 ))}
               </View>
 
-              <View style={contactoStyle.divider} />
+              <View style={contactStyle.divider} />
 
               {/* Sección permisos */}
-              <View style={contactoStyle.sectionRow}>
-                <Text style={contactoStyle.sectionLabel}>PERMISOS NECESARIOS</Text>
-                <View style={contactoStyle.sectionLine} />
+              <View style={contactStyle.sectionRow}>
+                <Text style={contactStyle.sectionLabel}>PERMISOS NECESARIOS</Text>
+                <View style={contactStyle.sectionLine} />
               </View>
 
-              <View style={contactoStyle.permisosCard}>
-                <View style={contactoStyle.permisosRow}>
-                  <Text style={contactoStyle.permisosEmoji}>👥</Text>
+              <View style={contactStyle.permisosCard}>
+                <View style={contactStyle.permisosRow}>
+                  <Text style={contactStyle.permisosEmoji}>👥</Text>
                   <View style={{ flex: 1 }}>
-                    <Text style={contactoStyle.permisosTitle}>Acceso a contactos</Text>
-                    <Text style={contactoStyle.permisosDesc}>
+                    <Text style={contactStyle.permisosTitle}>Acceso a contactos</Text>
+                    <Text style={contactStyle.permisosDesc}>
                       Necesitamos acceder a tus contactos para que puedas elegir tu red de confianza.
                     </Text>
                   </View>
@@ -207,9 +209,9 @@ export default function ContactosScreen({ vmExterno }: Props) {
               </View>
 
               {/* Badge inferior */}
-              <View style={contactoStyle.bottomBadge}>
+              <View style={contactStyle.bottomBadge}>
                 <Text style={{ fontSize: 16 }}>❤️</Text>
-                <Text style={contactoStyle.bottomBadgeText}>Siempre conectada</Text>
+                <Text style={contactStyle.bottomBadgeText}>Siempre conectada</Text>
               </View>
 
             </ScrollView>
@@ -219,27 +221,27 @@ export default function ContactosScreen({ vmExterno }: Props) {
       </SafeAreaView>
 
       {/* Overlay advertencia — lógica original intacta */}
-      {vm.mostrarAdvertencia && (
-        <View style={contactoStyle.overlayBg}>
-          <View style={contactoStyle.warningBox}>
-            <Text style={contactoStyle.warningText}>
+      {vm.showWarning && (
+        <View style={contactStyle.overlayBg}>
+          <View style={contactStyle.warningBox}>
+            <Text style={contactStyle.warningText}>
               ⚠️ Sin acceso a contactos no podrás elegir personas de confianza para tus alertas.
             </Text>
-            <TouchableOpacity onPress={vm.reintentarPermisos} style={contactoStyle.btnPrimary}>
-              <Text style={contactoStyle.btnPrimaryText}>Activar permisos</Text>
+            <TouchableOpacity onPress={vm.retryPermissions} style={contactStyle.btnPrimary}>
+              <Text style={contactStyle.btnPrimaryText}>Activar permisos</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={vm.continuarSinPermisos} style={contactoStyle.btnSecondary}>
-              <Text style={contactoStyle.btnSecondaryText}>Continuar sin permisos</Text>
+            <TouchableOpacity onPress={vm.continueWithoutPermissions} style={contactStyle.btnSecondary}>
+              <Text style={contactStyle.btnSecondaryText}>Continuar sin permisos</Text>
             </TouchableOpacity>
           </View>
         </View>
       )}
 
-      <PermisosModal
+      <PermissionsModal
         visible={vm.modalVisible}
         tipo="contacto"
-        onConfirmar={vm.confirmarModal}
-        onCancelar={vm.cancelarModal}
+        onConfirmar={vm.confirmModal}
+        onCancelar={vm.cancelModal}
       />
       </LinearGradient>
     </View>

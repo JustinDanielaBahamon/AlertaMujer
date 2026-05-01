@@ -4,26 +4,26 @@ import { Animated, StatusBar, StyleSheet, Text, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from 'expo-linear-gradient';
 import { TutorialPager } from "../../../src/components/ui/TutorialPager";
-import ActivacionTutorial from "../botón/botonScreen";
-import ContactosScreen from "../contacto/contactoScreen";
-import MensajesScreen from "../mensaje/mensajesScreen";
-import { useMensajesTutorialViewModel } from "../mensaje/useMensajesTutorialViewModel";
-import NotificacionScreen from "../notificación/notificacionScreen";
-import SeguridadScreen from "../seguridad/seguridadScreen";
-import UbicacionScreen from "../ubicación/ubicacionScreen";
+import ActivationTutorial from "../button/buttonScreen";
+import MessagesScreen from "../message/messageScreen";
+import ContactsScreen from "../contact/contactScreen";
+import { useMessagesTutorialViewModel } from "../message/useMessagesTutorialViewModel";
+import NotificationScreen from "../notification/notificationScreen";
+import SecurityScreen from "../security/securityScreen";
+import LocationScreen from "../location/locationScreen";
 import { COLORS, styles as universalStyles } from "../universalStyle";
-import { useContactoTutorialViewModel } from "../contacto/useContactoTutorialViewModel";
-import { useNotificacionTutorialViewModel } from "../notificación/useNotificacionTutorialViewModel";
-import { useSeguridadTutorialViewModel } from "../seguridad/useSeguridadTutorialViewModel";
-import { useUbicacionTutorialViewModel } from "../ubicación/useUbicacionTutorialViewModel";
+import { useContactTutorialViewModel } from "../contact/useContactTutorialViewModel";
+import { useNotificationTutorialViewModel } from "../notification/useNotificationTutorialViewModel";
+import { useSecurityTutorialViewModel } from "../security/useSecurityTutorialViewModel";
+import { useLocationTutorialViewModel } from "../location/useLocationTutorialViewModel";
 
 
-export default function Bienvenido() {
-  const mensajesVM     = useMensajesTutorialViewModel();
-  const contactosVM    = useContactoTutorialViewModel();
-  const ubicacionVM    = useUbicacionTutorialViewModel();
-  const seguridadVM    = useSeguridadTutorialViewModel();
-  const notificacionVM = useNotificacionTutorialViewModel();
+export default function Welcome() {
+  const messagesVM     = useMessagesTutorialViewModel();
+  const contactsVM     = useContactTutorialViewModel();
+  const locationVM     = useLocationTutorialViewModel();
+  const securityVM     = useSecurityTutorialViewModel();
+  const notificationVM = useNotificationTutorialViewModel();
 
   const cardAnim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
@@ -34,9 +34,9 @@ export default function Bienvenido() {
 
   return (
     <SafeAreaProvider>
-     <StatusBar barStyle="light-content" translucent={false} />
+      <StatusBar barStyle="light-content" translucent={false} />
 
-      {/* ── Gradiente ocupa TODA la pantalla, SafeAreaView va DENTRO ── */}
+      {/* ── Gradient covers the ENTIRE screen, SafeAreaView goes INSIDE ── */}
       <LinearGradient
         colors={["#a031e0", "#f7f7f7e7", "#b026bd"]}
         start={{ x: 0, y: 0 }}
@@ -46,24 +46,24 @@ export default function Bienvenido() {
         <SafeAreaView style={localStyles.safeArea} edges={['top', 'bottom']}>
           <TutorialPager
             paginasConBloqueo={{
-              2: mensajesVM.pedirPermisos,
-              3: ubicacionVM.pedirConfirmacionUbicacion,
-              4: contactosVM.pedirPermisos,
-              5: seguridadVM.pedirPermisos,
-              6: notificacionVM.pedirPermisos,
+              2: messagesVM.requestPermissions,
+              3: locationVM.requestLocationConfirmation,
+              4: contactsVM.requestPermissions,
+              5: securityVM.requestPermissions,
+              6: notificationVM.requestPermissions,
             }}
           >
-            {/* ── PÁGINA 0: BIENVENIDA ── */}
+            {/* ── PAGE 0: WELCOME ── */}
             <View style={localStyles.page}>
 
-              {/* Círculos decorativos */}
+              {/* Decorative circles */}
               <View style={localStyles.bgGradient}>
                 <View style={localStyles.bgCircle1} />
                 <View style={localStyles.bgCircle2} />
                 <View style={localStyles.bgCircle3} />
               </View>
 
-              {/* Lottie */}
+              {/* Lottie animation */}
               <View style={localStyles.lottieSection}>
                 <LottieView
                   source={require('../../../assets/imagesAlertaMujer/ScTutorial/forwomensday.json')}
@@ -74,7 +74,7 @@ export default function Bienvenido() {
                 />
               </View>
 
-              {/* Card con gradiente interno */}
+              {/* Card with internal gradient */}
               <Animated.View style={[
                 universalStyles.cardLarge,
                 {
@@ -133,13 +133,13 @@ export default function Bienvenido() {
 
             </View>
 
-            {/* ── OTRAS PÁGINAS ── */}
-            <ActivacionTutorial />
-            <MensajesScreen vmExterno={mensajesVM} />
-            <UbicacionScreen vmExterno={ubicacionVM} />
-            <ContactosScreen vmExterno={contactosVM} />
-            <SeguridadScreen vmExterno={seguridadVM} />
-            <NotificacionScreen vmExterno={notificacionVM} />
+            {/* ── Otras paginas ── */}
+            <ActivationTutorial />
+            <MessagesScreen externalVm={messagesVM} />
+            <LocationScreen externalVm={locationVM} />
+            <ContactsScreen externalVm={contactsVM} />
+            <SecurityScreen externalVm={securityVM} />
+            <NotificationScreen externalVm={notificationVM} />
 
           </TutorialPager>
         </SafeAreaView>
@@ -152,12 +152,12 @@ export default function Bienvenido() {
 const localStyles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    // ← sin backgroundColor, el gradiente se ve
+    
   },
   page: {
     flex: 1,
     alignItems: 'center',
-    // ← sin backgroundColor, el gradiente se ve
+    
   },
   bgGradient: { ...StyleSheet.absoluteFillObject, overflow: 'hidden' },
   bgCircle1: {

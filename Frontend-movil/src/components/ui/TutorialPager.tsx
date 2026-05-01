@@ -1,8 +1,5 @@
 import React, { useState, useRef } from "react";
-import {
-  View, ScrollView, Dimensions,
-  NativeSyntheticEvent, NativeScrollEvent
-} from "react-native";
+import { View, ScrollView, Dimensions, NativeSyntheticEvent, NativeScrollEvent } from "react-native";
 
 const { width } = Dimensions.get("window");
 
@@ -13,12 +10,12 @@ interface TutorialPagerProps {
 
 export const TutorialPager = ({ children, paginasConBloqueo = {} }: TutorialPagerProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [scrollBloqueado, setScrollBloqueado] = useState(false);
 
-  const scrollRef      = useRef<ScrollView>(null);
-  const activeIndexRef = useRef(0);
-  // ← Set de páginas que ya fueron aprobadas en esta sesión
-  const paginasAprobadas = useRef<Set<number>>(new Set());
+  const scrollRef          = useRef<ScrollView>(null);
+  const activeIndexRef     = useRef(0);
+  const procesandoRef      = useRef(false);
+  const scrollBloqueadoRef = useRef(false); // ← ref en lugar de estado
+  const paginasAprobadas   = useRef<Set<number>>(new Set());
 
   const pages = React.Children.toArray(children);
 
@@ -28,35 +25,44 @@ export const TutorialPager = ({ children, paginasConBloqueo = {} }: TutorialPage
     setActiveIndex(index);
   };
 
+  const setScrollBloqueado = (val: boolean) => {
+    scrollBloqueadoRef.current = val;
+    // Fuerza re-render para que scrollEnabled se actualice
+    scrollRef.current?.setNativeProps({ scrollEnabled: !val });
+  };
+
   const handleScrollEnd = async (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    if (scrollBloqueado) return;
+    // ── Usa refs, nunca estado — sin stale closure ──
+    if (scrollBloqueadoRef.current || procesandoRef.current) return;
 
     const xOffset      = event.nativeEvent.contentOffset.x;
     const intentIndex  = Math.round(xOffset / width);
     const currentIndex = activeIndexRef.current;
 
-    const avanzando = intentIndex > currentIndex;
+    const avanzando    = intentIndex > currentIndex;
     const tieneBloqueo = !!paginasConBloqueo[currentIndex];
-    // ← Si ya fue aprobada antes, no pide nada
-    const yaAprobada = paginasAprobadas.current.has(currentIndex);
+    const yaAprobada   = paginasAprobadas.current.has(currentIndex);
 
     if (avanzando && tieneBloqueo && !yaAprobada) {
 
+      procesandoRef.current = true;
       setScrollBloqueado(true);
       goToIndex(currentIndex);
 
       const puedePasar = await paginasConBloqueo[currentIndex]();
 
       if (puedePasar) {
-        // ← Marca esta página como aprobada para el resto de la sesión
         paginasAprobadas.current.add(currentIndex);
-        goToIndex(activeIndexRef.current + 1);
+        const destino = currentIndex + 1;
+        goToIndex(destino);
       }
 
-      setTimeout(() => setScrollBloqueado(false), 400);
+      setTimeout(() => {
+        setScrollBloqueado(false);
+        procesandoRef.current = false;
+      }, 400);
 
     } else {
-      // Avanza, regresa o ya estaba aprobada → sin bloqueo
       goToIndex(intentIndex);
     }
   };
@@ -68,7 +74,7 @@ export const TutorialPager = ({ children, paginasConBloqueo = {} }: TutorialPage
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        scrollEnabled={!scrollBloqueado}
+        scrollEnabled={true} // ← siempre true, controlamos con setNativeProps
         onMomentumScrollEnd={handleScrollEnd}
         scrollEventThrottle={16}
         style={{ flex: 1 }}

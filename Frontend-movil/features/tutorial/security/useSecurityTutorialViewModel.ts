@@ -1,9 +1,9 @@
 import { Audio } from "expo-av";
 import { Camera } from "expo-camera";
 import { useCallback, useRef, useState } from "react";
-import { SEGURIDAD_COLORS } from "./seguridadStyle";
+import { SECURITY_COLORS } from "./securityStyle";
 
-export interface SeguridadFeatureItem {
+export interface SecurityFeatureItem {
   id: string;
   emoji: string;
   title: string;
@@ -17,7 +17,7 @@ export interface SeguridadFeatureItem {
   colorBorder: string;
 }
 
-export const SEGURIDAD_FEATURE_ROWS: SeguridadFeatureItem[] = [
+export const SECURITY_FEATURE_ROWS: SecurityFeatureItem[] = [
   {
     id: "registro",
     emoji: "🎥",
@@ -27,9 +27,9 @@ export const SEGURIDAD_FEATURE_ROWS: SeguridadFeatureItem[] = [
     highlightLabel: "Registro: ",
     boldLabel: "Evidencia real.",
     detailDesc: "Se inicia captura automática de audio y video para documentar tu entorno en segundos.",
-    color: SEGURIDAD_COLORS.row1Color,
-    colorLight: SEGURIDAD_COLORS.row1Light,
-    colorBorder: SEGURIDAD_COLORS.row1Border,
+    color: SECURITY_COLORS.row1Color,
+    colorLight: SECURITY_COLORS.row1Light,
+    colorBorder: SECURITY_COLORS.row1Border,
   },
   {
     id: "respaldo",
@@ -40,9 +40,9 @@ export const SEGURIDAD_FEATURE_ROWS: SeguridadFeatureItem[] = [
     highlightLabel: "Respaldo: ",
     boldLabel: "Herramienta legal.",
     detailDesc: "Tu voz y entorno son protegidos para dejar constancia oficial de los hechos.",
-    color: SEGURIDAD_COLORS.row2Color,
-    colorLight: SEGURIDAD_COLORS.row2Light,
-    colorBorder: SEGURIDAD_COLORS.row2Border,
+    color: SECURITY_COLORS.row2Color,
+    colorLight: SECURITY_COLORS.row2Light,
+    colorBorder: SECURITY_COLORS.row2Border,
   },
   {
     id: "privacidad",
@@ -53,73 +53,73 @@ export const SEGURIDAD_FEATURE_ROWS: SeguridadFeatureItem[] = [
     highlightLabel: "Privacidad: ",
     boldLabel: "Encriptado.",
     detailDesc: "Tus grabaciones se manejan bajo los más altos estándares de seguridad y privacidad.",
-    color: SEGURIDAD_COLORS.row3Color,
-    colorLight: SEGURIDAD_COLORS.row3Light,
-    colorBorder: SEGURIDAD_COLORS.row3Border,
+    color: SECURITY_COLORS.row3Color,
+    colorLight: SECURITY_COLORS.row3Light,
+    colorBorder: SECURITY_COLORS.row3Border,
   },
 ];
 
-export function useSeguridadTutorialViewModel() {
-  const [modalVisible, setModalVisible]             = useState(false);
-  const [tipoPermiso, setTipoPermiso]               = useState<"camara" | "audio">("camara");
-  const [mostrarAdvertencia, setMostrarAdvertencia] = useState(false);
+export function useSecurityTutorialViewModel() {
+  const [modalVisible, setModalVisible]       = useState(false);
+  const [permissionType, setPermissionType]   = useState<"camara" | "audio">("camara");
+  const [showWarning, setShowWarning]         = useState(false);
 
-  const resolverPermiso = useRef<(valor: boolean) => void>(() => {});
-  const tipoPermisoRef  = useRef<"camara" | "audio">("camara");
+  const resolvePermission = useRef<(value: boolean) => void>(() => {});
+  const permissionTypeRef = useRef<"camara" | "audio">("camara");
   // 0=idle, 1=requesting, 2=user_cancelled
-  const flowStateRef    = useRef<number>(0);
+  const flowStateRef      = useRef<number>(0);
 
-  const actualizarTipo = (tipo: "camara" | "audio") => {
-    tipoPermisoRef.current = tipo;
-    setTipoPermiso(tipo);
+  const updatePermissionType = (type: "camara" | "audio") => {
+    permissionTypeRef.current = type;
+    setPermissionType(type);
   };
 
-  const pedirPermisos = useCallback((): Promise<boolean> => {
+  const requestPermissions = useCallback((): Promise<boolean> => {
     return new Promise((resolve) => {
-      resolverPermiso.current = resolve;
+      resolvePermission.current = resolve;
       flowStateRef.current = 0;
-      actualizarTipo("camara");
-      setMostrarAdvertencia(false);
+      updatePermissionType("camara");
+      setShowWarning(false);
       setModalVisible(true);
     });
   }, []);
 
-  const confirmarModal = useCallback(async () => {
-    const pasoActual = tipoPermisoRef.current;
+  const confirmModal = useCallback(async () => {
+    const currentStep = permissionTypeRef.current;
     flowStateRef.current = 1; // requesting
 
     try {
-      if (pasoActual === "camara") {
-        const resultado = await Camera.requestCameraPermissionsAsync();
-        const camaraOk  = resultado.granted || resultado.status === "granted";
+      if (currentStep === "camara") {
+        const result   = await Camera.requestCameraPermissionsAsync();
+        const cameraOk = result.granted || result.status === "granted";
 
         if (flowStateRef.current === 2) return;
 
-        if (camaraOk) {
+        if (cameraOk) {
           // ← Cámara concedida → pide audio
           flowStateRef.current = 0;
-          actualizarTipo("audio");
+          updatePermissionType("audio");
         } else {
           // ← Cámara denegada por el sistema → advertencia
           flowStateRef.current = 0;
           setModalVisible(false);
-          setMostrarAdvertencia(true);
+          setShowWarning(true);
         }
 
       } else {
         // ── Audio ──────────────────────────────────────────────────────────
-        const resultado = await Audio.requestPermissionsAsync();
+        const result   = await Audio.requestPermissionsAsync();
         // audioOk queda disponible por si en el futuro lo necesitas
-        const _audioOk  = resultado.granted || resultado.status === "granted";
+        const _audioOk = result.granted || result.status === "granted";
 
         if (flowStateRef.current === 2) return;
 
         // ← Confirmar audio siempre avanza al tutorial
         // La advertencia SOLO sale si el usuario presiona "Cancelar"
         flowStateRef.current = 0;
-        setMostrarAdvertencia(false);
+        setShowWarning(false);
         setModalVisible(false);
-        resolverPermiso.current(true);
+        resolvePermission.current(true);
       }
 
     } catch (e) {
@@ -127,43 +127,43 @@ export function useSeguridadTutorialViewModel() {
       flowStateRef.current = 0;
       setModalVisible(false);
       // ← Error técnico → avanza sin advertencia
-      resolverPermiso.current(true);
+      resolvePermission.current(true);
     }
   }, []);
 
   // ← Advertencia SOLO cuando el usuario cancela manualmente
-  const cancelarModal = useCallback(() => {
+  const cancelModal = useCallback(() => {
     if (flowStateRef.current === 1) {
       console.log("[Seguridad] Ignorando cancelación durante diálogo nativo");
       return;
     }
     flowStateRef.current = 2; // user_cancelled
     setModalVisible(false);
-    setMostrarAdvertencia(true); // ← aquí sí se muestra
+    setShowWarning(true); // ← aquí sí se muestra
   }, []);
 
-  const reintentarPermisos = useCallback(() => {
+  const retryPermissions = useCallback(() => {
     flowStateRef.current = 0;
-    setMostrarAdvertencia(false);
-    actualizarTipo("camara");
+    setShowWarning(false);
+    updatePermissionType("camara");
     setModalVisible(true);
   }, []);
 
-  const continuarSinPermisos = useCallback(() => {
+  const continueWithoutPermissions = useCallback(() => {
     flowStateRef.current = 0;
-    setMostrarAdvertencia(false);
-    resolverPermiso.current(true);
+    setShowWarning(false);
+    resolvePermission.current(true);
   }, []);
 
   return {
-    featureRows: SEGURIDAD_FEATURE_ROWS,
+    featureRows: SECURITY_FEATURE_ROWS,
     modalVisible,
-    tipoPermiso,
-    mostrarAdvertencia,
-    pedirPermisos,
-    confirmarModal,
-    cancelarModal,
-    reintentarPermisos,
-    continuarSinPermisos,
+    permissionType,
+    showWarning,
+    requestPermissions,
+    confirmModal,
+    cancelModal,
+    retryPermissions,
+    continueWithoutPermissions,
   };
 }

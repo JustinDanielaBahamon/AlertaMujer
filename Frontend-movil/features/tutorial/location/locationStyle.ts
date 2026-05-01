@@ -2,23 +2,23 @@ import { StyleSheet } from "react-native";
 
 // ─── Paleta del módulo Ubicación ──────────────────────────────────────────────
 export const UBIC_COLORS = {
-  accent:      "#059669",   // verde esmeralda
-  accentLight: "#ECFDF5",
-  accentDark:  "#047857",
+  accent:      "#8309b3",   // verde esmeralda
+  accentLight: "#f2e4fc",
+  accentDark:  "#8c0491",
 
   circle1: "#a939c0",
   circle2: "#7c3fc2",
-  circle3: "#035317",
-  circle4: "#34D399",
+  circle3: "#da0ff5",
+  circle4: "#7e34d3",
 
   screenBg:     "#EDFAF4",
-  sectionLabel: "#059669",
-  sectionLine:  "#A7F3D0",
+  sectionLabel: "#740596",
+  sectionLine:  "#ac72f0",
   divider:      "#D1FAE5",
 
   pickerBg:     "#FFFFFF",
-  pickerBorder: "#A7F3D0",
-  pickerLabel:  "#065F46",
+  pickerBorder: "#c398ec",
+  pickerLabel:  "#a60fe2",
 
   warningBg:    "#FEF3C7",
   warningBorder:"#FCD34D",
@@ -26,7 +26,7 @@ export const UBIC_COLORS = {
   warningIcon:  "#F59E0B",
 };
 
-export const ubicacionStyle = StyleSheet.create({
+export const locationStyle = StyleSheet.create({
   // ── Fondo ──────────────────────────────────────────────────────────────────
   screenBg: {
     flex: 1,
@@ -135,7 +135,7 @@ export const ubicacionStyle = StyleSheet.create({
   },
   infoDesc: {
     fontSize: 12,
-    color: "#6B7280",
+    color: "#7a808b",
     lineHeight: 18,
   },
 
