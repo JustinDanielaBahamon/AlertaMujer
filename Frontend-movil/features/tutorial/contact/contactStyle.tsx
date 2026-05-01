@@ -1,40 +1,42 @@
 import { StyleSheet } from "react-native";
 
-// ─── Paleta del módulo Notificación — alerta & atención ──────────────────────
-export const NOTIF_COLORS = {
-  accent:      "#D97706",   // dorado
+// ─── Paleta del módulo Contactos — familia & confianza ────────────────────────
+export const CONTACT_COLORS = {
+  accent:      "#ea0ccc",   // ámbar cálido
   accentLight: "#FFFBEB",
-  accentDark:  "#92400E",
+  accentDark:  "#ea0ccc",
 
-  row1Color:  "#DC2626",   // Alertas SOS – rojo urgente
-  row1Light:  "#FEF2F2",
-  row1Border: "#FECACA",
+  row1Color:  "#ea0ccc",   // Confianza – ámbar
+  row1Light:  "#fbebff",
+  row1Border: "#f08afd",
 
-  row2Color:  "#D97706",   // Red de apoyo – dorado
-  row2Light:  "#FFFBEB",
-  row2Border: "#FDE68A",
+  row2Color:  "#ea0ccc",   // Notificaciones – naranja
+  row2Light:  "#f5e4f5",
+  row2Border: "#f08afd",
 
-  row3Color:  "#7C3AED",   // Rapidez – morado
-  row3Light:  "#F5F3FF",
-  row3Border: "#DDD6FE",
+  row3Color:  "#ea0ccc",   // Gestión – ámbar oscuro
+  row3Light:  "#f3ebf1",
+  row3Border: "#f08afd",
 
-  circle1: "#D97706",
-  circle2: "#DC2626",
-  circle3: "#7C3AED",
-  circle4: "#FBBF24",
+  circle1: "#8a07aa",
+  circle2: "#d00cea",
+  circle3: "#6d27dd",
+  circle4: "#f5eacf",
 
-  screenBg:     "#FFFDF0",
-  sectionLabel: "#D97706",
-  sectionLine:  "#FDE68A",
-  divider:      "#FEF3C7",
+  screenBg:     "#f0d7ee",
+  sectionLabel: "#a806d9",
+  sectionLine:  "#d749f3",
+  divider:      "#eec7fe",
 };
 
-export const notificacionStyle = StyleSheet.create({
+export const contactStyle = StyleSheet.create({
+  // ── Fondo ──────────────────────────────────────────────────────────────────
   screenBg: {
     flex: 1,
-    backgroundColor: NOTIF_COLORS.screenBg,
+    backgroundColor: CONTACT_COLORS.screenBg,
   },
 
+  // ── Círculos de fondo ──────────────────────────────────────────────────────
   bgCircleBase: {
     position: "absolute",
   },
@@ -44,6 +46,7 @@ export const notificacionStyle = StyleSheet.create({
     backgroundColor: "transparent",
   },
 
+  // ── Lottie ─────────────────────────────────────────────────────────────────
   lottieSection: {
     width: "100%",
     height: 200,
@@ -57,6 +60,7 @@ export const notificacionStyle = StyleSheet.create({
     height: 200,
   },
 
+  // ── ScrollView ─────────────────────────────────────────────────────────────
   cardScroll: {
     flex: 1,
   },
@@ -64,6 +68,7 @@ export const notificacionStyle = StyleSheet.create({
     paddingBottom: 8,
   },
 
+  // ── Etiqueta de sección ────────────────────────────────────────────────────
   sectionRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -73,15 +78,16 @@ export const notificacionStyle = StyleSheet.create({
   sectionLabel: {
     fontSize: 10,
     fontWeight: "700",
-    color: NOTIF_COLORS.sectionLabel,
+    color: CONTACT_COLORS.sectionLabel,
     letterSpacing: 1.4,
   },
   sectionLine: {
     flex: 1,
     height: 1,
-    backgroundColor: NOTIF_COLORS.sectionLine,
+    backgroundColor: CONTACT_COLORS.sectionLine,
   },
 
+  // ── Fila de característica ─────────────────────────────────────────────────
   featureRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -106,6 +112,7 @@ export const notificacionStyle = StyleSheet.create({
     borderTopRightRadius: 18,
   },
 
+  // ── Ícono ──────────────────────────────────────────────────────────────────
   rowIconWrap: {
     width: 46,
     height: 46,
@@ -118,6 +125,7 @@ export const notificacionStyle = StyleSheet.create({
     fontSize: 24,
   },
 
+  // ── Texto de fila ──────────────────────────────────────────────────────────
   rowTextContainer: {
     flex: 1,
     justifyContent: "center",
@@ -133,6 +141,7 @@ export const notificacionStyle = StyleSheet.create({
     lineHeight: 18,
   },
 
+  // ── Badge ──────────────────────────────────────────────────────────────────
   badge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -146,12 +155,14 @@ export const notificacionStyle = StyleSheet.create({
     letterSpacing: 0.4,
   },
 
+  // ── Divisor ────────────────────────────────────────────────────────────────
   divider: {
     height: 1,
-    backgroundColor: NOTIF_COLORS.divider,
+    backgroundColor: CONTACT_COLORS.divider,
     marginVertical: 14,
   },
 
+  // ── Descripción detallada ──────────────────────────────────────────────────
   descRow: {
     flexDirection: "row",
     alignItems: "flex-start",
@@ -189,9 +200,9 @@ export const notificacionStyle = StyleSheet.create({
     borderRadius: 18,
     padding: 16,
     gap: 10,
-    backgroundColor: NOTIF_COLORS.accentLight,
+    backgroundColor: CONTACT_COLORS.accentLight,
     borderWidth: 1.5,
-    borderColor: NOTIF_COLORS.row2Border,
+    borderColor: CONTACT_COLORS.row1Border,
   },
   permisosRow: {
     flexDirection: "row",
@@ -201,43 +212,16 @@ export const notificacionStyle = StyleSheet.create({
   permisosEmoji: {
     fontSize: 22,
   },
-  permisosTitleWrap: {
-    flex: 1,
-  },
   permisosTitle: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#78350F",
+    color: "#9c0aa1",
   },
   permisosDesc: {
     fontSize: 12,
     color: "#6B7280",
     lineHeight: 18,
     marginTop: 2,
-  },
-
-  // ── Botón finalizar ────────────────────────────────────────────────────────
-  btnFinalizar: {
-    marginTop: 16,
-    borderRadius: 20,
-    paddingVertical: 15,
-    paddingHorizontal: 32,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: NOTIF_COLORS.accent,
-    shadowColor: NOTIF_COLORS.accentDark,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.30,
-    shadowRadius: 10,
-    elevation: 6,
-    flexDirection: "row",
-    gap: 8,
-  },
-  btnFinalizarText: {
-    fontSize: 15,
-    fontWeight: "800",
-    color: "#FFFFFF",
-    letterSpacing: 0.3,
   },
 
   // ── Badge inferior ─────────────────────────────────────────────────────────
@@ -247,17 +231,17 @@ export const notificacionStyle = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: NOTIF_COLORS.accentLight,
+    backgroundColor: CONTACT_COLORS.accentLight,
     paddingHorizontal: 20,
     paddingVertical: 9,
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: NOTIF_COLORS.row2Border,
+    borderColor: CONTACT_COLORS.row1Border,
   },
   bottomBadgeText: {
     fontSize: 13,
     fontWeight: "700",
-    color: NOTIF_COLORS.accent,
+    color: CONTACT_COLORS.accent,
     letterSpacing: 0.2,
   },
 

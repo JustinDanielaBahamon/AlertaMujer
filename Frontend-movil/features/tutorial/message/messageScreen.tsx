@@ -4,11 +4,11 @@ import { Animated, ScrollView, Text, TouchableOpacity, View } from "react-native
 import { SafeAreaView } from "react-native-safe-area-context";
 import Card from "../../../src/components/ui/card/card";
 import CustomePermisos from "../../../src/components/ui/modalMesanje/permisosMLL";
-import { mensajeStyle, MSG_COLORS } from "./mensajeStyle";
-import { useMensajesTutorialViewModel, type FeatureItem } from "./useMensajesTutorialViewModel";
+import { messageStyle, MSG_COLORS } from "./messageStyle";
+import { useMessagesTutorialViewModel, type FeatureItem } from "./useMessagesTutorialViewModel";
 import { LinearGradient } from 'expo-linear-gradient';
 
-// ─── Círculos decorativos de fondo ───────────────────────────────────────────
+// ─── Círculos de fondo decorativos ───────────────────────────────────────────
 function BackgroundCircles() {
   const f1 = useRef(new Animated.Value(0)).current;
   const f2 = useRef(new Animated.Value(0)).current;
@@ -29,29 +29,29 @@ function BackgroundCircles() {
 
   return (
     <>
-      <Animated.View style={[mensajeStyle.bgCircleBase,
+      <Animated.View style={[messageStyle.bgCircleBase,
         { width: 200, height: 200, borderRadius: 100, backgroundColor: MSG_COLORS.circle1,
           opacity: 0.08, top: -55, right: -60, transform: [{ translateY: f1 }] }]} />
-      <Animated.View style={[mensajeStyle.bgCircleBase,
+      <Animated.View style={[messageStyle.bgCircleBase,
         { width: 130, height: 130, borderRadius: 65, backgroundColor: MSG_COLORS.circle2,
           opacity: 0.09, top: 50, left: -40, transform: [{ translateY: f2 }] }]} />
-      <Animated.View style={[mensajeStyle.bgCircleBase,
+      <Animated.View style={[messageStyle.bgCircleBase,
         { width: 90, height: 90, borderRadius: 45, backgroundColor: MSG_COLORS.circle3,
           opacity: 0.08, top: 170, right: 10, transform: [{ translateY: f3 }] }]} />
-      <Animated.View style={[mensajeStyle.bgCircleBase,
+      <Animated.View style={[messageStyle.bgCircleBase,
         { width: 55, height: 55, borderRadius: 28, backgroundColor: MSG_COLORS.circle4,
           opacity: 0.12, top: 110, left: "44%", transform: [{ translateY: f1 }] }]} />
-      <Animated.View style={[mensajeStyle.bgCircleBase,
+      <Animated.View style={[messageStyle.bgCircleBase,
         { width: 70, height: 70, borderRadius: 35, backgroundColor: MSG_COLORS.circle2,
           opacity: 0.07, top: 230, left: 20, transform: [{ translateY: f2 }] }]} />
-      <Animated.View style={[mensajeStyle.bgRingBase,
+      <Animated.View style={[messageStyle.bgRingBase,
         { width: 100, height: 100, borderRadius: 50, borderColor: MSG_COLORS.circle1,
           opacity: 0.10, top: 30, right: 30, transform: [{ translateY: f3 }] }]} />
     </>
   );
 }
 
-// ─── Fila de característica animada ──────────────────────────────────────────
+// ─── fila de animacion ──────────────────────────────────────────────────────
 function FeatureRow({ item, enterDelay }: { item: FeatureItem; enterDelay: number }) {
   const slideAnim   = useRef(new Animated.Value(28)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -65,40 +65,41 @@ function FeatureRow({ item, enterDelay }: { item: FeatureItem; enterDelay: numbe
 
   return (
     <Animated.View style={{ opacity: opacityAnim, transform: [{ translateY: slideAnim }] }}>
-      <View style={[mensajeStyle.featureRow, {
+      <View style={[messageStyle.featureRow, {
         backgroundColor: item.colorLight,
         borderColor:     item.colorBorder,
         shadowColor:     item.color,
       }]}>
-        <View style={[mensajeStyle.featureRowAccent, { backgroundColor: item.color }]} />
-        <View style={[mensajeStyle.rowIconWrap, {
+        <View style={[messageStyle.featureRowAccent, { backgroundColor: item.color }]} />
+        <View style={[messageStyle.rowIconWrap, {
           backgroundColor: item.color + "25",
           borderWidth: 1.5,
           borderColor: item.color + "40",
         }]}>
-          <Text style={mensajeStyle.rowIcon}>{item.emoji}</Text>
+          <Text style={messageStyle.rowIcon}>{item.emoji}</Text>
         </View>
-        <View style={mensajeStyle.rowTextContainer}>
-          <Text style={[mensajeStyle.rowTitle, { color: item.color }]}>{item.title}</Text>
-          <Text style={mensajeStyle.rowDesc}>{item.desc}</Text>
+        <View style={messageStyle.rowTextContainer}>
+          <Text style={[messageStyle.rowTitle, { color: item.color }]}>{item.title}</Text>
+          <Text style={messageStyle.rowDesc}>{item.desc}</Text>
         </View>
-        <View style={[mensajeStyle.badge, { backgroundColor: item.color + "20" }]}>
-          <Text style={[mensajeStyle.badgeText, { color: item.color }]}>{item.badge}</Text>
+        <View style={[messageStyle.badge, { backgroundColor: item.color + "20" }]}>
+          <Text style={[messageStyle.badgeText, { color: item.color }]}>{item.badge}</Text>
         </View>
       </View>
     </Animated.View>
   );
 }
 
-// ─── Pantalla principal ───────────────────────────────────────────────────────
+// ─── Pantalla principal ───────────────────────────────────────────────────────────────
 interface Props {
-  vmExterno?: ReturnType<typeof useMensajesTutorialViewModel>;
+  externalVm?: ReturnType<typeof useMessagesTutorialViewModel>;
 }
 
-export default function MensajesScreen({ vmExterno }: Props) {
-  const vmInterno = useMensajesTutorialViewModel();
-  const vm = vmExterno ?? vmInterno;
+export default function MessagesScreen({ externalVm }: Props) {
+  const internalVm = useMessagesTutorialViewModel();
+  const vm = externalVm ?? internalVm;
 
+  // ── Animación de entrada de tarjeta de primavera ────────────────────────────────────────
   const cardAnim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.spring(cardAnim, {
@@ -117,45 +118,45 @@ export default function MensajesScreen({ vmExterno }: Props) {
   };
 
   return (
-    // 1️⃣ View exterior — igual que antes
-    <View style={mensajeStyle.screenBg}>
+   // 1️ Vista exterior — igual que antes
+    <View style={messageStyle.screenBg}>
 
       {/* 2️⃣ LinearGradient cubre todo el interior */}
       <LinearGradient
-        colors={["#f1d0de", "#FCE7F3", "#b026bd"]}
+        colors={["#f3afed", "#FCE7F3", "#b026bd"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={{ flex: 1 }}
       >
-        {/* 3️⃣ Círculos van DENTRO del gradiente */}
+        {/* 3️⃣ Los círculos van DENTRO del degradado */}
         <BackgroundCircles />
 
         <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
 
-          {/* Lottie */}
-          <View style={mensajeStyle.lottieSection}>
+          {/* Lottie animation */}
+          <View style={messageStyle.lottieSection}>
             <LottieView
               source={require("../../../assets/imagesAlertaMujer/ScTutorial/Message.json")}
               autoPlay
               loop
               resizeMode="contain"
-              style={mensajeStyle.lottie}
+              style={messageStyle.lottie}
             />
           </View>
 
-          {/* Card animada */}
+          {/* Animated card */}
           <Animated.View style={[{ flex: 1 }, cardAnimStyle]}>
             <Card title={`Mensajes y\n`} titleHighlight="Llamadas">
               <ScrollView
-                style={mensajeStyle.cardScroll}
-                contentContainerStyle={mensajeStyle.cardScrollContent}
+                style={messageStyle.cardScroll}
+                contentContainerStyle={messageStyle.cardScrollContent}
                 showsVerticalScrollIndicator={false}
                 scrollEventThrottle={16}
                 nestedScrollEnabled={true}
               >
-                <View style={mensajeStyle.sectionRow}>
-                  <Text style={mensajeStyle.sectionLabel}>CÓMO TE PROTEGEMOS</Text>
-                  <View style={mensajeStyle.sectionLine} />
+                <View style={messageStyle.sectionRow}>
+                  <Text style={messageStyle.sectionLabel}>CÓMO TE PROTEGEMOS</Text>
+                  <View style={messageStyle.sectionLine} />
                 </View>
 
                 {vm.featureRows.map((item, index) => (
@@ -166,47 +167,47 @@ export default function MensajesScreen({ vmExterno }: Props) {
                   />
                 ))}
 
-                <View style={mensajeStyle.divider} />
+                <View style={messageStyle.divider} />
 
                 <View style={{ gap: 4 }}>
                   {vm.featureRows.map((item) => (
-                    <View key={`desc-${item.id}`} style={mensajeStyle.descRow}>
-                      <View style={[mensajeStyle.descDot, { backgroundColor: item.color }]} />
-                      <View style={mensajeStyle.descTextWrap}>
+                    <View key={`desc-${item.id}`} style={messageStyle.descRow}>
+                      <View style={[messageStyle.descDot, { backgroundColor: item.color }]} />
+                      <View style={messageStyle.descTextWrap}>
                         <Text>
-                          <Text style={[mensajeStyle.descHighlight, { color: item.color }]}>
+                          <Text style={[messageStyle.descHighlight, { color: item.color }]}>
                             {item.highlightLabel}
                           </Text>
-                          <Text style={mensajeStyle.descBold}>{item.boldLabel} </Text>
-                          <Text style={mensajeStyle.descNormal}>{item.detailDesc}</Text>
+                          <Text style={messageStyle.descBold}>{item.boldLabel} </Text>
+                          <Text style={messageStyle.descNormal}>{item.detailDesc}</Text>
                         </Text>
                       </View>
                     </View>
                   ))}
                 </View>
 
-                <View style={mensajeStyle.divider} />
+                <View style={messageStyle.divider} />
 
-                <View style={mensajeStyle.sectionRow}>
-                  <Text style={mensajeStyle.sectionLabel}>PERMISOS NECESARIOS</Text>
-                  <View style={mensajeStyle.sectionLine} />
+                <View style={messageStyle.sectionRow}>
+                  <Text style={messageStyle.sectionLabel}>PERMISOS NECESARIOS</Text>
+                  <View style={messageStyle.sectionLine} />
                 </View>
 
-                <View style={mensajeStyle.permisosCard}>
-                  <View style={mensajeStyle.permisosRow}>
-                    <Text style={mensajeStyle.permisosEmoji}>🔐</Text>
+                <View style={messageStyle.permisosCard}>
+                  <View style={messageStyle.permisosRow}>
+                    <Text style={messageStyle.permisosEmoji}>🔐</Text>
                     <View style={{ flex: 1 }}>
-                      <Text style={mensajeStyle.permisosTitle}>Activa los permisos</Text>
-                      <Text style={mensajeStyle.permisosDesc}>
+                      <Text style={messageStyle.permisosTitle}>Activa los permisos</Text>
+                      <Text style={messageStyle.permisosDesc}>
                         SMS y llamadas son necesarios para que las alertas funcionen correctamente.
                       </Text>
                     </View>
                   </View>
                 </View>
 
-                <View style={mensajeStyle.bottomBadge}>
+                <View style={messageStyle.bottomBadge}>
                   <Text style={{ fontSize: 16 }}>📡</Text>
-                  <Text style={mensajeStyle.bottomBadgeText}>Alerta en segundos</Text>
+                  <Text style={messageStyle.bottomBadgeText}>Alerta en segundos</Text>
                 </View>
 
               </ScrollView>
@@ -215,18 +216,18 @@ export default function MensajesScreen({ vmExterno }: Props) {
 
         </SafeAreaView>
 
-        {/* 4️⃣ Overlay advertencia también va DENTRO del gradiente */}
-        {vm.mostrarAdvertencia && (
-          <View style={mensajeStyle.overlayBg}>
-            <View style={mensajeStyle.warningBox}>
-              <Text style={mensajeStyle.warningText}>
+        {/* 4️⃣ La superposición de advertencia también va DENTRO del degradado */}
+        {vm.showWarning && (
+          <View style={messageStyle.overlayBg}>
+            <View style={messageStyle.warningBox}>
+              <Text style={messageStyle.warningText}>
                 ⚠️ Sin estos permisos las alertas de emergencia no funcionarán correctamente.
               </Text>
-              <TouchableOpacity onPress={vm.reintentarPermisos} style={mensajeStyle.btnPrimary}>
-                <Text style={mensajeStyle.btnPrimaryText}>Activar permisos</Text>
+              <TouchableOpacity onPress={vm.retryPermissions} style={messageStyle.btnPrimary}>
+                <Text style={messageStyle.btnPrimaryText}>Activar permisos</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={vm.continuarSinPermisos} style={mensajeStyle.btnSecondary}>
-                <Text style={mensajeStyle.btnSecondaryText}>Continuar sin permisos</Text>
+              <TouchableOpacity onPress={vm.continueWithoutPermissions} style={messageStyle.btnSecondary}>
+                <Text style={messageStyle.btnSecondaryText}>Continuar sin permisos</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -234,15 +235,15 @@ export default function MensajesScreen({ vmExterno }: Props) {
 
         <CustomePermisos
           visible={vm.modalVisible}
-          tipo={vm.tipoPermiso}
-          onConfirmar={vm.confirmarModal}
-          onCancelar={vm.cancelarModal}
+          tipo={vm.permissionType}
+          onConfirmar={vm.confirmModal}
+          onCancelar={vm.cancelModal}
         />
 
-      {/* 5️⃣ Cierre del LinearGradient */}
+      {/* 5️⃣ Cerrar LinearGradient */}
       </LinearGradient>
 
-    {/* 6️⃣ Cierre del View exterior */}
+    {/* 6️⃣ Cerrar vista externa */}
     </View>
   );
 }

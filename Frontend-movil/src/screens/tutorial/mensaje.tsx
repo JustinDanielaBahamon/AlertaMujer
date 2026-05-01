@@ -1,1 +1,1 @@
-export { default } from "../../../features/tutorial/mensaje/mensajesScreen";
+export { default } from "../../../features/tutorial/message/messageScreen";

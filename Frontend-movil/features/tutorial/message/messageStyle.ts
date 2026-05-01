@@ -1,39 +1,38 @@
 import { StyleSheet } from "react-native";
 
-// ─── Paleta del módulo Contactos — familia & confianza ────────────────────────
-export const CONTACTO_COLORS = {
-  accent:      "#D97706",   // ámbar cálido
-  accentLight: "#FFFBEB",
-  accentDark:  "#B45309",
+// ─── Paleta del módulo Mensajes ───────────────────────────────────────────────
+export const MSG_COLORS = {
+  accent:      "#7C3AED",
+  accentLight: "#F5F3FF",
+  accentDark:  "#5B21B6",
 
-  row1Color:  "#D97706",   // Confianza – ámbar
-  row1Light:  "#FFFBEB",
-  row1Border: "#FDE68A",
+  row1Color:  "#7C3AED",   // SMS – morado
+  row1Light:  "#F5F3FF",
+  row1Border: "#DDD6FE",
 
-  row2Color:  "#EA580C",   // Notificaciones – naranja
-  row2Light:  "#FFF7ED",
-  row2Border: "#FED7AA",
+  row2Color:  "#DB2777",   // Llamada – rosa
+  row2Light:  "#FDF2F8",
+  row2Border: "#FBCFE8",
 
-  row3Color:  "#B45309",   // Gestión – ámbar oscuro
-  row3Light:  "#FEF3C7",
-  row3Border: "#FDE68A",
+  row3Color:  "#0891B2",   // Confirmación – azul
+  row3Light:  "#ECFEFF",
+  row3Border: "#A5F3FC",
 
-  circle1: "#D97706",
-  circle2: "#EA580C",
-  circle3: "#F59E0B",
-  circle4: "#FBBF24",
+  circle1: "#7C3AED",
+  circle2: "#b727db",
+  circle3: "#a00bf7",
+  circle4: "#A78BFA",
 
-  screenBg:     "#FFFBF0",
-  sectionLabel: "#D97706",
-  sectionLine:  "#FDE68A",
-  divider:      "#FEF3C7",
+  screenBg:     "#F5F0FF",
+  sectionLabel: "#7C3AED",
+  sectionLine:  "#EDE9FE",
+  divider:      "#F3F0FF",
 };
 
-export const contactoStyle = StyleSheet.create({
+export const messageStyle = StyleSheet.create({
   // ── Fondo ──────────────────────────────────────────────────────────────────
   screenBg: {
     flex: 1,
-    backgroundColor: CONTACTO_COLORS.screenBg,
   },
 
   // ── Círculos de fondo ──────────────────────────────────────────────────────
@@ -60,7 +59,7 @@ export const contactoStyle = StyleSheet.create({
     height: 200,
   },
 
-  // ── ScrollView ─────────────────────────────────────────────────────────────
+  // ── ScrollView dentro de la card ───────────────────────────────────────────
   cardScroll: {
     flex: 1,
   },
@@ -78,13 +77,13 @@ export const contactoStyle = StyleSheet.create({
   sectionLabel: {
     fontSize: 10,
     fontWeight: "700",
-    color: CONTACTO_COLORS.sectionLabel,
+    color: MSG_COLORS.sectionLabel,
     letterSpacing: 1.4,
   },
   sectionLine: {
     flex: 1,
     height: 1,
-    backgroundColor: CONTACTO_COLORS.sectionLine,
+    backgroundColor: MSG_COLORS.sectionLine,
   },
 
   // ── Fila de característica ─────────────────────────────────────────────────
@@ -106,7 +105,9 @@ export const contactoStyle = StyleSheet.create({
   },
   featureRowAccent: {
     position: "absolute",
-    top: 0, left: 0, right: 0,
+    top: 0,
+    left: 0,
+    right: 0,
     height: 3,
     borderTopLeftRadius: 18,
     borderTopRightRadius: 18,
@@ -158,7 +159,7 @@ export const contactoStyle = StyleSheet.create({
   // ── Divisor ────────────────────────────────────────────────────────────────
   divider: {
     height: 1,
-    backgroundColor: CONTACTO_COLORS.divider,
+    backgroundColor: MSG_COLORS.divider,
     marginVertical: 14,
   },
 
@@ -200,9 +201,9 @@ export const contactoStyle = StyleSheet.create({
     borderRadius: 18,
     padding: 16,
     gap: 10,
-    backgroundColor: CONTACTO_COLORS.accentLight,
+    backgroundColor: "#F5F3FF",
     borderWidth: 1.5,
-    borderColor: CONTACTO_COLORS.row1Border,
+    borderColor: "#DDD6FE",
   },
   permisosRow: {
     flexDirection: "row",
@@ -215,7 +216,7 @@ export const contactoStyle = StyleSheet.create({
   permisosTitle: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#78350F",
+    color: "#1E1B4B",
   },
   permisosDesc: {
     fontSize: 12,
@@ -231,17 +232,17 @@ export const contactoStyle = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: CONTACTO_COLORS.accentLight,
+    backgroundColor: "#F5F3FF",
     paddingHorizontal: 20,
     paddingVertical: 9,
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: CONTACTO_COLORS.row1Border,
+    borderColor: "#DDD6FE",
   },
   bottomBadgeText: {
     fontSize: 13,
     fontWeight: "700",
-    color: CONTACTO_COLORS.accent,
+    color: MSG_COLORS.accent,
     letterSpacing: 0.2,
   },
 

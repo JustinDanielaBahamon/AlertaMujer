@@ -1,1 +1,1 @@
-export { default } from "../../../features/tutorial/ubicación/ubicacionScreen";
+export { default } from "../../../features/tutorial/location/locationScreen";

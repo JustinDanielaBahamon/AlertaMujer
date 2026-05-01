@@ -1,9 +1,9 @@
-import { useCallback, useRef, useState } from "react";
-import { Platform, PermissionsAndroid } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useCallback, useRef, useState } from "react";
+import { PermissionsAndroid, Platform } from "react-native";
 import type { MainStackParamList } from "../../../src/navigation/types";
-import { NOTIF_COLORS } from "./notificacionStyle";
+import { NOTIF_COLORS } from "./notificationStyle";
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
 
@@ -21,7 +21,7 @@ export interface NotifFeatureItem {
   colorBorder: string;
 }
 
-// ─── Datos estáticos ──────────────────────────────────────────────────────────
+// ─── Static data ──────────────────────────────────────────────────────────────
 export const NOTIF_FEATURE_ROWS: NotifFeatureItem[] = [
   {
     id: "sos",
@@ -64,66 +64,66 @@ export const NOTIF_FEATURE_ROWS: NotifFeatureItem[] = [
   },
 ];
 
-export function useNotificacionTutorialViewModel() {
+export function useNotificationTutorialViewModel() {
 
   const navigation = useNavigation<Nav>();
-  const [modalVisible, setModalVisible]             = useState(false);
-  const [mostrarAdvertencia, setMostrarAdvertencia] = useState(false);
+  const [modalVisible, setModalVisible]   = useState(false);
+  const [showWarning, setShowWarning]     = useState(false);
 
-  const resolverPermiso = useRef<(valor: boolean) => void>(() => {});
+  const resolvePermission = useRef<(value: boolean) => void>(() => {});
 
-  const pedirPermisos = useCallback((): Promise<boolean> => {
+  const requestPermissions = useCallback((): Promise<boolean> => {
     return new Promise((resolve) => {
-      resolverPermiso.current = resolve;
+      resolvePermission.current = resolve;
       setModalVisible(true);
-      setMostrarAdvertencia(false);
+      setShowWarning(false);
     });
   }, []);
 
-  const abrirModal = useCallback(() => {
-    setMostrarAdvertencia(false);
+  const openModal = useCallback(() => {
+    setShowWarning(false);
     setModalVisible(true);
   }, []);
 
-  const confirmarModal = useCallback(async () => {
+  const confirmModal = useCallback(async () => {
     setModalVisible(false);
 
-    // ✅ Pide permisos nativos sin usar expo-notifications
+    // ✅ Request native permissions without using expo-notifications
     if (Platform.OS === "android" && Platform.Version >= 33) {
       await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
       );
     }
-    // En iOS los permisos de notificación se manejan al registrar el dispositivo
-    // No se necesita llamada extra aquí
+    // On iOS, notification permissions are handled when registering the device
+    // No extra call needed here
 
     navigation.replace("DrawerHome");
   }, [navigation]);
 
-  const cancelarModal = useCallback(() => {
+  const cancelModal = useCallback(() => {
     setModalVisible(false);
-    setMostrarAdvertencia(true);
+    setShowWarning(true);
   }, []);
 
-  const reintentarPermisos = useCallback(() => {
-    setMostrarAdvertencia(false);
+  const retryPermissions = useCallback(() => {
+    setShowWarning(false);
     setModalVisible(true);
   }, []);
 
-  const continuarSinPermisos = useCallback(() => {
-    setMostrarAdvertencia(false);
+  const continueWithoutPermissions = useCallback(() => {
+    setShowWarning(false);
     navigation.replace("DrawerHome");
   }, [navigation]);
 
   return {
     featureRows: NOTIF_FEATURE_ROWS,
     modalVisible,
-    mostrarAdvertencia,
-    pedirPermisos,
-    abrirModal,
-    confirmarModal,
-    cancelarModal,
-    reintentarPermisos,
-    continuarSinPermisos,
+    showWarning,
+    requestPermissions,
+    openModal,
+    confirmModal,
+    cancelModal,
+    retryPermissions,
+    continueWithoutPermissions,
   };
 }

@@ -1,1 +1,1 @@
-export { default } from "../../../features/tutorial/contacto/contactoScreen";
+export { default } from "../../../features/tutorial/contact/contactScreen";

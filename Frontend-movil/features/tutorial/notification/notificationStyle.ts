@@ -1,42 +1,40 @@
 import { StyleSheet } from "react-native";
 
-// ─── Paleta del módulo Seguridad — protección & confianza ─────────────────────
-export const SEGURIDAD_COLORS = {
-  accent:      "#1D4ED8",   // azul seguridad
-  accentLight: "#EFF6FF",
-  accentDark:  "#1E3A8A",
+// ─── Paleta del módulo Notificación — alerta & atención ──────────────────────
+export const NOTIF_COLORS = {
+  accent:      "#b715cc",   // dorado
+  accentLight: "#FFFBEB",
+  accentDark:  "#fefbff",
 
-  row1Color:  "#1D4ED8",   // Registro – azul
-  row1Light:  "#EFF6FF",
-  row1Border: "#BFDBFE",
+  row1Color:  "#7C3AED",   // Alertas SOS – rojo urgente
+  row1Light:  "#ffffff",
+  row1Border: "#620985",
 
-  row2Color:  "#6D28D9",   // Respaldo – violeta
-  row2Light:  "#F5F3FF",
-  row2Border: "#DDD6FE",
+  row2Color:  "#c706d9",   // Red de apoyo – dorado
+  row2Light:  "#fffdff",
+  row2Border: "#80079e",
 
-  row3Color:  "#0F766E",   // Privacidad – teal
-  row3Light:  "#F0FDFA",
-  row3Border: "#99F6E4",
+  row3Color:  "#7C3AED",   // Rapidez – morado
+  row3Light:  "#fffdff",
+  row3Border: "#80079e",
 
-  circle1: "#1D4ED8",
-  circle2: "#6D28D9",
-  circle3: "#0F766E",
-  circle4: "#3B82F6",
+  circle1: "#3b087e",
+  circle2: "#9b05bd",
+  circle3: "#a108af",
+  circle4: "#db17ec",
 
-  screenBg:     "#F0F4FF",
-  sectionLabel: "#1D4ED8",
-  sectionLine:  "#BFDBFE",
-  divider:      "#DBEAFE",
+  screenBg:     "#d85ad2",
+  sectionLabel: "#b605da",
+  sectionLine:  "#8e1ecf",
+  divider:      "#c879d3",
 };
 
-export const seguridadStyle = StyleSheet.create({
-  // ── Fondo ──────────────────────────────────────────────────────────────────
+export const notificationStyle = StyleSheet.create({
   screenBg: {
     flex: 1,
-    backgroundColor: SEGURIDAD_COLORS.screenBg,
+    backgroundColor: NOTIF_COLORS.screenBg,
   },
 
-  // ── Círculos de fondo ──────────────────────────────────────────────────────
   bgCircleBase: {
     position: "absolute",
   },
@@ -46,7 +44,6 @@ export const seguridadStyle = StyleSheet.create({
     backgroundColor: "transparent",
   },
 
-  // ── Lottie ─────────────────────────────────────────────────────────────────
   lottieSection: {
     width: "100%",
     height: 200,
@@ -60,7 +57,6 @@ export const seguridadStyle = StyleSheet.create({
     height: 200,
   },
 
-  // ── ScrollView ─────────────────────────────────────────────────────────────
   cardScroll: {
     flex: 1,
   },
@@ -68,7 +64,6 @@ export const seguridadStyle = StyleSheet.create({
     paddingBottom: 8,
   },
 
-  // ── Etiqueta de sección ────────────────────────────────────────────────────
   sectionRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -78,16 +73,15 @@ export const seguridadStyle = StyleSheet.create({
   sectionLabel: {
     fontSize: 10,
     fontWeight: "700",
-    color: SEGURIDAD_COLORS.sectionLabel,
+    color: NOTIF_COLORS.sectionLabel,
     letterSpacing: 1.4,
   },
   sectionLine: {
     flex: 1,
     height: 1,
-    backgroundColor: SEGURIDAD_COLORS.sectionLine,
+    backgroundColor: NOTIF_COLORS.sectionLine,
   },
 
-  // ── Fila de característica ─────────────────────────────────────────────────
   featureRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -112,7 +106,6 @@ export const seguridadStyle = StyleSheet.create({
     borderTopRightRadius: 18,
   },
 
-  // ── Ícono ──────────────────────────────────────────────────────────────────
   rowIconWrap: {
     width: 46,
     height: 46,
@@ -125,7 +118,6 @@ export const seguridadStyle = StyleSheet.create({
     fontSize: 24,
   },
 
-  // ── Texto de fila ──────────────────────────────────────────────────────────
   rowTextContainer: {
     flex: 1,
     justifyContent: "center",
@@ -141,7 +133,6 @@ export const seguridadStyle = StyleSheet.create({
     lineHeight: 18,
   },
 
-  // ── Badge ──────────────────────────────────────────────────────────────────
   badge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -155,14 +146,12 @@ export const seguridadStyle = StyleSheet.create({
     letterSpacing: 0.4,
   },
 
-  // ── Divisor ────────────────────────────────────────────────────────────────
   divider: {
     height: 1,
-    backgroundColor: SEGURIDAD_COLORS.divider,
+    backgroundColor: NOTIF_COLORS.divider,
     marginVertical: 14,
   },
 
-  // ── Descripción detallada ──────────────────────────────────────────────────
   descRow: {
     flexDirection: "row",
     alignItems: "flex-start",
@@ -199,19 +188,15 @@ export const seguridadStyle = StyleSheet.create({
   permisosCard: {
     borderRadius: 18,
     padding: 16,
-    gap: 12,
-    backgroundColor: SEGURIDAD_COLORS.accentLight,
+    gap: 10,
+    backgroundColor: NOTIF_COLORS.accentLight,
     borderWidth: 1.5,
-    borderColor: SEGURIDAD_COLORS.row1Border,
+    borderColor: NOTIF_COLORS.row2Border,
   },
   permisosRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-  },
-  permisosSeparator: {
-    height: 1,
-    backgroundColor: SEGURIDAD_COLORS.sectionLine,
   },
   permisosEmoji: {
     fontSize: 22,
@@ -222,13 +207,37 @@ export const seguridadStyle = StyleSheet.create({
   permisosTitle: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#1E3A8A",
+    color: "#990cb6",
   },
   permisosDesc: {
     fontSize: 12,
     color: "#6B7280",
     lineHeight: 18,
     marginTop: 2,
+  },
+
+  // ── Botón finalizar ────────────────────────────────────────────────────────
+  btnFinalizar: {
+    marginTop: 16,
+    borderRadius: 20,
+    paddingVertical: 15,
+    paddingHorizontal: 32,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: NOTIF_COLORS.accent,
+    shadowColor: NOTIF_COLORS.accentDark,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.30,
+    shadowRadius: 10,
+    elevation: 6,
+    flexDirection: "row",
+    gap: 8,
+  },
+  btnFinalizarText: {
+    fontSize: 15,
+    fontWeight: "800",
+    color: "#FFFFFF",
+    letterSpacing: 0.3,
   },
 
   // ── Badge inferior ─────────────────────────────────────────────────────────
@@ -238,17 +247,17 @@ export const seguridadStyle = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: SEGURIDAD_COLORS.accentLight,
+    backgroundColor: NOTIF_COLORS.accentLight,
     paddingHorizontal: 20,
     paddingVertical: 9,
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: SEGURIDAD_COLORS.row1Border,
+    borderColor: NOTIF_COLORS.row2Border,
   },
   bottomBadgeText: {
     fontSize: 13,
     fontWeight: "700",
-    color: SEGURIDAD_COLORS.accent,
+    color: NOTIF_COLORS.accent,
     letterSpacing: 0.2,
   },
 
