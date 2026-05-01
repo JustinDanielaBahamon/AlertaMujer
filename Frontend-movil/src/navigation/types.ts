@@ -1,4 +1,5 @@
 import type { Contacto } from "../models/Contacto";
+import type { Alerta } from "../models/Alerta";  // ← importa el modelo
 
 export type AuthStackParamList = {
   Index: undefined;
@@ -19,8 +20,8 @@ export type MainStackParamList = {
   TutorialContacto: undefined;
   TutorialSeguridad: undefined;
   TutorialNotificacion: undefined;
-  /** Sin `contacto` = alta; con `contacto` = edición */
   AgregarContacto: { contacto?: Contacto } | undefined;
+  DetalleAlerta: { alerta: Alerta };  // ← esto faltaba
 };
 
 /** @deprecated Usar AuthStackParamList o MainStackParamList según el flujo */
