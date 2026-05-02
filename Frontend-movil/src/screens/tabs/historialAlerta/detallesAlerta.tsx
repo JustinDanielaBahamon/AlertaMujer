@@ -1,25 +1,30 @@
-import React from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
+import React, { useMemo } from "react";
+import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { useNavigation, useRoute, RouteProp, NavigationProp, ParamListBase } from "@react-navigation/native";
 import { MaterialIcons, Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import type { MainStackParamList } from "../../../navigation/types";
-import { styles } from "./detalle.Style";
+import { createStyles } from "./detalle.Style";
+import { useTheme } from "../../../../src/contexts/ThemeContext";
+import { getEmergenciaColors, getAsistenciaColors } from "./historial.style";
 import { useDetalleAlertaViewModel } from "../../../../features/historial/useDetalleAlertaViewModel";
 import { getMainStackNavigation } from "../../../navigation/navigationHelpers";
 
 type DetalleAlertaRouteProp = RouteProp<MainStackParamList, "DetalleAlerta">;
 
 export default function DetalleAlerta() {
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const route = useRoute<DetalleAlertaRouteProp>();
   const { alerta } = route.params;
   const { esEmergencia, compartiendo, compartirReporte } = useDetalleAlertaViewModel(alerta);
+
+  // Colores del tipo de alerta (reutilizando los mismos helpers del historial)
+  const emergencyColors  = useMemo(() => getEmergenciaColors(theme), [theme]);
+  const assistanceColors = useMemo(() => getAsistenciaColors(theme), [theme]);
+  const alertColors      = esEmergencia ? emergencyColors : assistanceColors;
 
   const irAMapaInterno = () => {
     const main = getMainStackNavigation(navigation);
@@ -41,8 +46,8 @@ export default function DetalleAlerta() {
     >
       {/* HEADER */}
       <LinearGradient
-        colors={["rgb(202,171,222)", "rgb(123, 29, 178)"]}
-        start={{ x: 1, y: 0 }}
+        colors={[theme.headercolor1, theme.headercolor2]}
+        start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.Gradiente}
       >
@@ -57,14 +62,15 @@ export default function DetalleAlerta() {
         <View style={styles.HeaderContenido}>
           <View style={[
             styles.IconoTipo,
-            { backgroundColor: esEmergencia ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.15)" }
+            { backgroundColor: esEmergencia ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.15)" },
           ]}>
             <MaterialIcons name="place" size={32} color="white" />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.TipoTexto}>{alerta.tipo}</Text>
+            {/* Tipo con color del tema */}
+            <Text style={[styles.TipoTexto, { color: "white" }]}>{alerta.tipo}</Text>
             <View style={styles.BadgeEstado}>
-              <View style={styles.PuntoEstado} />
+              <View style={[styles.PuntoEstado, { backgroundColor: alertColors.border }]} />
               <Text style={styles.TextoEstado}>{alerta.estado.toUpperCase()}</Text>
             </View>
           </View>
@@ -94,21 +100,24 @@ export default function DetalleAlerta() {
         {/* UBICACIÓN */}
         <Text style={styles.SeccionTitulo}>Ubicación</Text>
         <View style={styles.TarjetaUbicacion}>
-          <MaterialIcons name="place" size={20} color="#7B1DB2" />
+          <MaterialIcons name="place" size={20} color={alertColors.iconTint} />
           <View style={{ flex: 1 }}>
             <Text style={styles.UbicacionTexto}>{alerta.ubicacion}</Text>
             <Text style={styles.UbicacionSubtexto}>Colombia</Text>
           </View>
-          <TouchableOpacity style={styles.BotonMapa} onPress={irAMapaInterno}>
-            <Text style={styles.BotonMapaTexto}>Ver mapa</Text>
+          <TouchableOpacity
+            style={[styles.BotonMapa, { backgroundColor: alertColors.badgeBg }]}
+            onPress={irAMapaInterno}
+          >
+            <Text style={[styles.BotonMapaTexto, { color: alertColors.text }]}>Ver mapa</Text>
           </TouchableOpacity>
         </View>
 
         {/* CONTACTOS NOTIFICADOS */}
         <Text style={styles.SeccionTitulo}>Contactos notificados</Text>
         <View style={styles.TarjetaContacto}>
-          <View style={styles.AvatarContacto}>
-            <Text style={styles.AvatarTexto}>JM</Text>
+          <View style={[styles.AvatarContacto, { backgroundColor: alertColors.iconBg }]}>
+            <Text style={[styles.AvatarTexto, { color: alertColors.text }]}>JM</Text>
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.NombreContacto}>Justin Martínez</Text>
@@ -122,7 +131,11 @@ export default function DetalleAlerta() {
 
         {/* BOTÓN COMPARTIR */}
         <TouchableOpacity
-          style={[styles.BotonCompartir, compartiendo && { opacity: 0.7 }]}
+          style={[
+            styles.BotonCompartir,
+            { backgroundColor: theme.mode === "dark" ? "#07597a" : alertColors.border },
+            compartiendo && { opacity: 0.7 },
+          ]}
           onPress={compartirReporte}
           disabled={compartiendo}
         >
