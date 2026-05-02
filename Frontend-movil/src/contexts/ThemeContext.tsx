@@ -49,6 +49,17 @@ export type AppTheme = {
   contactCousserIcon: string;     // color ícono de conteo
   contactBuscadorBg: string;      // fondo barra de búsqueda
   contactBuscadorText: string;    // texto dentro del buscador
+
+  // ─── Asistencia ──────────────────────────────────────────────
+  asistenciaEmergenciaGradiente: [string, string]; // ← AÑADIR
+  asistenciaViolenciaGradiente: [string, string];
+  asistenciaMentalGradiente: [string, string];
+  asistenciaIconoUserBg: string;
+  asistenciaIconoBombilloBg: string;
+  asistenciaIconoBombilloColor: string;
+  asistenciaIconoEstrellaBg: string;
+  
+
 };
 
 // ─── Contraste automático ─────────────────────────────────────────────────────
@@ -132,6 +143,15 @@ const THEMES: Record<AppMode, AppTheme> = {
     contactCousserIcon: "#7B1FA2",
     contactBuscadorBg: "#F3EEF8",
     contactBuscadorText: "#2a0045",
+   
+    asistenciaEmergenciaGradiente: ["#c4a8d6", "#7b1db2"], 
+    asistenciaViolenciaGradiente: ["rgb(240, 87, 87)", "rgb(132, 0, 255)"],
+    asistenciaMentalGradiente:    ["rgb(142, 189, 255)", "rgb(255, 0, 191)"],
+    asistenciaIconoUserBg:        "purple",
+    asistenciaIconoBombilloBg:    "rgba(205, 117, 230, 0.29)",
+    asistenciaIconoBombilloColor: "#1E1228",
+    asistenciaIconoEstrellaBg:    "purple",
+    
   },
 
   // ── DARK (oscuro con acentos morado/verde/azul) ────────────────────────────
@@ -144,13 +164,13 @@ const THEMES: Record<AppMode, AppTheme> = {
     text: "#f0e6ff",
     card: "#2e2e38",
     tabBackground: "#000000",
-    tabActiveColor: "#fcfcfc",
-    tabInactiveColor: "rgba(133, 128, 139, 0.4)",
+    tabActiveColor: "#9718ff",
+    tabInactiveColor: "rgba(230, 217, 247, 0.89)",
     logo: logonegro,
     imagenBoton: botondorado,
     icono: "#c084fc",
     headercolor1: "#030303",
-    headercolor2: "#010e33",
+    headercolor2: "#200138",
 
     // Contactos — oscuro con acentos morado, verde y azul
     contactCardBg: "#28282f",
@@ -179,6 +199,14 @@ const THEMES: Record<AppMode, AppTheme> = {
     contactCousserIcon: "#c084fc",
     contactBuscadorBg: "#232330",
     contactBuscadorText: "#e8d5ff",
+
+    asistenciaEmergenciaGradiente: ["#3a035c", "#0b022c"], 
+    asistenciaViolenciaGradiente: ["#350249", "#33012b"],
+    asistenciaMentalGradiente:    ["#042f63", "#090111"],
+    asistenciaIconoUserBg:        "#010e33",
+    asistenciaIconoBombilloBg:    "#3a2d55",
+    asistenciaIconoBombilloColor: "#c084fc",
+    asistenciaIconoEstrellaBg:    "#010e33",
   },
 
   // ── ROSA (fucsia/rosa) ─────────────────────────────────────────────────────
@@ -193,11 +221,11 @@ const THEMES: Record<AppMode, AppTheme> = {
     tabBackground: "#cf3389",
     tabActiveColor: getContrastText("#ee108a"),
     tabInactiveColor: "rgba(255, 255, 255, 0.95)",
-    logo: logonegro,
+    logo: logorosa,
     imagenBoton: botonrosa,
     icono: "#eb0a86",
     headercolor1: "#cf3389",
-    headercolor2: "#a0005a",
+    headercolor2: "#860e52",
 
     // Contactos — paleta rosa/fucsia con contraste
     contactCardBg: "#fff5fa",
@@ -226,6 +254,14 @@ const THEMES: Record<AppMode, AppTheme> = {
     contactCousserIcon: "#c2185b",
     contactBuscadorBg: "#fde8f4",
     contactBuscadorText: "#3a0020",
+
+    asistenciaEmergenciaGradiente: ["#aa0069", "#8f45b9"], 
+    asistenciaViolenciaGradiente: ["#e70059", "#8000a7"],
+    asistenciaMentalGradiente:    ["#a80a81", "#f58ef5"],
+    asistenciaIconoUserBg:        "#a0005a",
+    asistenciaIconoBombilloBg:    "#fce4f0",
+    asistenciaIconoBombilloColor: "#c2185b",
+    asistenciaIconoEstrellaBg:    "#a0005a",
   },
 
   // ── VINO (borgoña/vino tinto) ──────────────────────────────────────────────
@@ -273,6 +309,14 @@ const THEMES: Record<AppMode, AppTheme> = {
     contactCousserIcon: "#b71c1c",
     contactBuscadorBg: "#fff0f0",
     contactBuscadorText: "#2a0000",
+
+    asistenciaEmergenciaGradiente: ["#470238", "#83044a"], 
+    asistenciaViolenciaGradiente: ["#28033a", "#942010"],
+    asistenciaMentalGradiente:    ["#680c2f", "#62026b"],
+    asistenciaIconoUserBg:        "#4a0020",
+    asistenciaIconoBombilloBg:    "#FFEBEE",
+    asistenciaIconoBombilloColor: "#b71c1c",
+    asistenciaIconoEstrellaBg:    "#4a0020",
   },
 
   // ── AZUL (navy/índigo) ─────────────────────────────────────────────────────
@@ -320,6 +364,14 @@ const THEMES: Record<AppMode, AppTheme> = {
     contactCousserIcon: "#1565C0",
     contactBuscadorBg: "#eef2ff",
     contactBuscadorText: "#0b013b",
+
+    asistenciaEmergenciaGradiente: ["#1d0479", "#7a3fbe"], 
+    asistenciaViolenciaGradiente: ["#2c5d96", "#4f07a1"],
+    asistenciaMentalGradiente:    ["#3c48a5", "#02021a"],
+    asistenciaIconoUserBg:        "#1a237e",
+    asistenciaIconoBombilloBg:    "#E8EAF6",
+    asistenciaIconoBombilloColor: "#1565C0",
+    asistenciaIconoEstrellaBg:    "#1a237e",
   },
 
   // ── MAGENTA (morado oscuro/ciruela) ───────────────────────────────────────
@@ -337,8 +389,8 @@ const THEMES: Record<AppMode, AppTheme> = {
     logo: logoMorado,
     imagenBoton: botonmorado,
     icono: "#6a0572",
-    headercolor1: "#5a095a",
-    headercolor2: "#2d002d",
+    headercolor1: "#490449",
+    headercolor2: "#860386",
 
     // Contactos — paleta magenta/ciruela con violetas
     contactCardBg: "#fdf4fd",
@@ -367,6 +419,14 @@ const THEMES: Record<AppMode, AppTheme> = {
     contactCousserIcon: "#6a0572",
     contactBuscadorBg: "#fce8fc",
     contactBuscadorText: "#2a002a",
+
+    asistenciaEmergenciaGradiente: ["#4f1970", "#821bbd"], 
+    asistenciaViolenciaGradiente: ["#6a0572", "#2d002d"],
+    asistenciaMentalGradiente:    ["#8361e9", "#38023b"],
+    asistenciaIconoUserBg:        "#2d002d",
+    asistenciaIconoBombilloBg:    "#F3E5F5",
+    asistenciaIconoBombilloColor: "#6a0572",
+    asistenciaIconoEstrellaBg:    "#2d002d",
   },
 };
 
