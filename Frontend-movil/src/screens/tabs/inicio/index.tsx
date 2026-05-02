@@ -1,129 +1,228 @@
-import { View, Text, TouchableOpacity, ActivityIndicator, Image, Animated } from "react-native";
-import { styles } from "./inicio.styles";
+import {
+  View, Text, TouchableOpacity, ActivityIndicator,
+  Animated, Easing, useWindowDimensions, Image,
+} from "react-native";
+import { createStyles } from "./inicio.styles";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { useInicioViewModel } from "../../../../features/inicio/useInicioViewModel";
 import { useTheme } from "../../../../src/contexts/ThemeContext";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Camera } from "expo-camera";
 import { Audio } from "expo-av";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useNavigation, type NavigationProp, type ParamListBase } from "@react-navigation/native";
+import { getMainStackNavigation } from "../../../navigation/navigationHelpers";
 
 export default function Inicio() {
   const vm = useInicioViewModel();
   const { theme } = useTheme();
-  const [camaraActiva, setCamaraActiva] = useState(false);
-  const [microfonoActivo, setMicrofonoActivo] = useState(false);
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation<NavigationProp<ParamListBase>>();
+  const { width, height } = useWindowDimensions();
+  const styles = useMemo(() => createStyles(theme, width, height), [theme, width, height]);
 
-  const scaleInicio    = useRef(new Animated.Value(1)).current;
-  const scaleMapa      = useRef(new Animated.Value(1)).current;
-  const scaleAlerta    = useRef(new Animated.Value(1)).current;
-  const scaleContactos = useRef(new Animated.Value(1)).current;
-  const scaleHistorial = useRef(new Animated.Value(1)).current;
+  const BUTTON_SIZE = width * 0.75;
 
-  const animarBoton = (anim: Animated.Value) => {
-    Animated.sequence([
-      Animated.timing(anim, { toValue: 1.2, duration: 100, useNativeDriver: true }),
-      Animated.timing(anim, { toValue: 1,   duration: 100, useNativeDriver: true }),
-    ]).start();
+  const [cameraActive, setCameraActive] = useState(false);
+  const [micActive, setMicActive]       = useState(false);
+
+  // ── Animaciones glow expansivo (pulseAnim eliminado) ──────────────────────
+  const glow1Scale   = useRef(new Animated.Value(1)).current;
+  const glow1Opacity = useRef(new Animated.Value(0.6)).current;
+  const glow2Scale   = useRef(new Animated.Value(1)).current;
+  const glow2Opacity = useRef(new Animated.Value(0.3)).current;
+  const glow3Scale   = useRef(new Animated.Value(1)).current;
+  const glow3Opacity = useRef(new Animated.Value(0.15)).current;
+
+  useEffect(() => {
+    const loopGlow1 = () => {
+      glow1Scale.setValue(1);
+      glow1Opacity.setValue(0.65);
+      Animated.parallel([
+        Animated.timing(glow1Scale,   { toValue: 1.28, duration: 1600, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+        Animated.timing(glow1Opacity, { toValue: 0,    duration: 1600, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+      ]).start(() => loopGlow1());
+    };
+
+    const loopGlow2 = () => {
+      glow2Scale.setValue(1);
+      glow2Opacity.setValue(0.45);
+      Animated.parallel([
+        Animated.timing(glow2Scale,   { toValue: 1.55, duration: 2000, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+        Animated.timing(glow2Opacity, { toValue: 0,    duration: 2000, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+      ]).start(() => loopGlow2());
+    };
+
+    const loopGlow3 = () => {
+      glow3Scale.setValue(1);
+      glow3Opacity.setValue(0.25);
+      Animated.parallel([
+        Animated.timing(glow3Scale,   { toValue: 1.85, duration: 2500, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+        Animated.timing(glow3Opacity, { toValue: 0,    duration: 2500, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+      ]).start(() => loopGlow3());
+    };
+
+    loopGlow1();
+    setTimeout(() => loopGlow2(), 600);
+    setTimeout(() => loopGlow3(), 1200);
+  }, []);
+
+  // ── Navegación a mapa ─────────────────────────────────────────────────────
+  const goToMap = () => {
+    const main = getMainStackNavigation(navigation);
+    main?.navigate("DrawerHome", {
+      screen: "Inicio",
+      params: { screen: "Mapa" },
+    } as never);
   };
 
-  const toggleCamara = async () => {
+  // ── Permisos ──────────────────────────────────────────────────────────────
+  const toggleCamera = async () => {
     const { status } = await Camera.requestCameraPermissionsAsync();
-    if (status === "granted") setCamaraActiva(prev => !prev);
+    if (status === "granted") setCameraActive(prev => !prev);
   };
 
-  const toggleMicrofono = async () => {
+  const toggleMic = async () => {
     const { status } = await Audio.requestPermissionsAsync();
-    if (status === "granted") setMicrofonoActivo(prev => !prev);
+    if (status === "granted") setMicActive(prev => !prev);
   };
 
   return (
-  <View style={[styles.container, { backgroundColor: theme.background, paddingBottom: insets.bottom }]}>
+    <View style={[styles.container, { backgroundColor: theme.background, paddingBottom: insets.bottom }]}>
 
-    {/* Ubicación */}
-    <View style={[
-      styles.containerUbicacion,
-      {
-        backgroundColor: theme.containerBackground,
-        borderColor: theme.icono,
-      }
-    ]}>
-      <MaterialIcons name="location-on" size={24} color={theme.icono} />
-      <View style={styles.infoUbicacion}>
-        <Text style={[styles.tituloUbicacion, { color: theme.text }]}>
-          Ubicación actual
-        </Text>
-        <Text style={[styles.textoUbicacion, { color: theme.text }]} numberOfLines={1}>
-          {vm.ubicacionNombre}
-        </Text>
+      {/* Ubicación */}
+      <TouchableOpacity
+        style={[styles.locationCard, { backgroundColor: theme.containerBackground, borderColor: theme.icono }]}
+        onPress={goToMap}
+        activeOpacity={0.8}
+      >
+        <MaterialIcons name="location-on" size={24} color={theme.icono} />
+        <View style={styles.locationInfo}>
+          <Text style={[styles.locationLabel, { color: theme.text }]}>Ubicación actual</Text>
+          <Text style={[styles.locationValue, { color: theme.text }]} numberOfLines={1}>
+            {vm.ubicacionNombre}
+          </Text>
+        </View>
+        <TouchableOpacity
+          onPress={(e) => { e.stopPropagation(); vm.obtenerUbicacion(); }}
+          disabled={vm.cargando}
+        >
+          {vm.cargando ? (
+            <ActivityIndicator size="small" color={theme.icono} />
+          ) : (
+            <MaterialIcons name="refresh" size={24} color={theme.icono} />
+          )}
+        </TouchableOpacity>
+      </TouchableOpacity>
+
+      {/* Indicadores cámara / micrófono */}
+      <View style={styles.indicatorsRow}>
+        <TouchableOpacity
+          style={[styles.indicator, cameraActive ? styles.indicatorOn : styles.indicatorOff]}
+          onPress={toggleCamera}
+        >
+          <View style={[styles.dot, cameraActive ? styles.dotGreen : styles.dotRed]} />
+          <Ionicons name="camera" size={20} color={cameraActive ? "#2ecc71" : "#e74c3c"} />
+          <Text style={[styles.indicatorText, { color: cameraActive ? "#2ecc71" : "#e74c3c" }]}>
+            Cámara
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.indicator, micActive ? styles.indicatorOn : styles.indicatorOff]}
+          onPress={toggleMic}
+        >
+          <View style={[styles.dot, micActive ? styles.dotGreen : styles.dotRed]} />
+          <Ionicons name="mic" size={20} color={micActive ? "#2ecc71" : "#e74c3c"} />
+          <Text style={[styles.indicatorText, { color: micActive ? "#2ecc71" : "#e74c3c" }]}>
+            Micrófono
+          </Text>
+        </TouchableOpacity>
       </View>
-      <TouchableOpacity onPress={vm.obtenerUbicacion} disabled={vm.cargando}>
-        {vm.cargando ? (
-          <ActivityIndicator size="small" color={theme.icono} />
-        ) : (
-          <MaterialIcons name="refresh" size={24} color={theme.icono} />
-        )}
-      </TouchableOpacity>
-    </View>
 
-    {/* Indicadores */}
-    <View style={styles.indicadoresContainer}>
-      <TouchableOpacity
-        style={[styles.indicador, camaraActiva ? styles.indicadorActivo : styles.indicadorInactivo]}
-        onPress={toggleCamara}
-      >
-        <View style={[styles.luz, camaraActiva ? styles.luzVerde : styles.luzRoja]} />
-        <Ionicons name="camera" size={20} color={camaraActiva ? "#2ecc71" : "#e74c3c"} />
-        <Text style={[styles.indicadorTexto, camaraActiva ? styles.textoVerde : styles.textoRojo]}>
-          Cámara
-        </Text>
-      </TouchableOpacity>
+      {/* Botón central con glow expansivo */}
+      <View style={[styles.centerSection, { paddingVertical: BUTTON_SIZE * 0.45 }]}>
 
-      <TouchableOpacity
-        style={[styles.indicador, microfonoActivo ? styles.indicadorActivo : styles.indicadorInactivo]}
-        onPress={toggleMicrofono}
-      >
-        <View style={[styles.luz, microfonoActivo ? styles.luzVerde : styles.luzRoja]} />
-        <Ionicons name="mic" size={20} color={microfonoActivo ? "#2ecc71" : "#e74c3c"} />
-        <Text style={[styles.indicadorTexto, microfonoActivo ? styles.textoVerde : styles.textoRojo]}>
-          Micrófono
-        </Text>
-      </TouchableOpacity>
-    </View>
+        {/* Anillo glow 3 — exterior */}
+        <Animated.View
+          pointerEvents="none"
+          style={{
+            position: "absolute",
+            width: BUTTON_SIZE,
+            height: BUTTON_SIZE,
+            borderRadius: BUTTON_SIZE / 2,
+            backgroundColor: theme.icono + "18",
+            transform: [{ scale: glow3Scale }],
+            opacity: glow3Opacity,
+          }}
+        />
 
-    {/* Botón + texto juntos, sin flex */}
-    <View style={styles.centerSection}>
-      <TouchableOpacity
-        activeOpacity={1}
-        onPressIn={vm.onPressInBoton}
-        onPressOut={vm.onPressOutBoton}
-        onPress={vm.activarAlerta}
-        style={[
-          styles.botonAlerta,
-          {
+        {/* Anillo glow 2 — medio */}
+        <Animated.View
+          pointerEvents="none"
+          style={{
+            position: "absolute",
+            width: BUTTON_SIZE,
+            height: BUTTON_SIZE,
+            borderRadius: BUTTON_SIZE / 2,
+            backgroundColor: theme.icono + "28",
+            transform: [{ scale: glow2Scale }],
+            opacity: glow2Opacity,
+          }}
+        />
+
+        {/* Anillo glow 1 — interior */}
+        <Animated.View
+          pointerEvents="none"
+          style={{
+            position: "absolute",
+            width: BUTTON_SIZE,
+            height: BUTTON_SIZE,
+            borderRadius: BUTTON_SIZE / 2,
+            backgroundColor: theme.icono + "45",
+            transform: [{ scale: glow1Scale }],
+            opacity: glow1Opacity,
+          }}
+        />
+
+        {/* Botón principal — imagen estática, sin pulso */}
+        <TouchableOpacity
+          activeOpacity={1}
+          onPressIn={vm.onPressInBoton}
+          onPressOut={vm.onPressOutBoton}
+          onPress={vm.activarAlerta}
+          style={{
+            width: BUTTON_SIZE,
+            height: BUTTON_SIZE,
+            borderRadius: BUTTON_SIZE / 2,
+            justifyContent: "center",
+            alignItems: "center",
+            shadowColor: theme.icono,
+            shadowOffset: { width: 0, height: vm.pressed ? 2 : 10 },
+            shadowOpacity: vm.pressed ? 0.2 : 0.6,
+            shadowRadius: vm.pressed ? 4 : 20,
+            elevation: vm.pressed ? 4 : 18,
             transform: [{ scale: vm.pressed ? 0.92 : 1 }],
             opacity: vm.pressed ? 0.85 : 1,
-            shadowOffset: { width: 0, height: vm.pressed ? 2 : 10 },
-            shadowOpacity: vm.pressed ? 0.2 : 0.5,
-            elevation: vm.pressed ? 4 : 12,
-          },
-        ]}
-      >
-        <Image
-          source={theme.imagenBoton}
-          style={styles.imagen}
-          resizeMode="contain"
-        />
-      </TouchableOpacity>
+          }}
+        >
+          <Image
+            source={theme.imagenBoton}
+            style={{
+              width: BUTTON_SIZE * 1.1,
+              height: BUTTON_SIZE * 1.1,
+              resizeMode: "contain",
+            }}
+          />
+        </TouchableOpacity>
 
-      {/* ✅ texto pegado al botón dentro del mismo View */}
-      <Text style={[styles.texto, { color: theme.text }]}>
+      </View>
+
+      {/* Texto de instrucción */}
+      <Text style={[styles.instructionText, { color: theme.text }]}>
         Presiona en caso de{"\n"}Emergencia
       </Text>
-    </View>
 
-  </View>
-  
-);
+    </View>
+  );
 }

@@ -1,161 +1,120 @@
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet } from "react-native";
+import { AppTheme } from "../../../../src/contexts/ThemeContext";
 
-const { width, height } = Dimensions.get('window');
+export const createStyles = (theme: AppTheme, width: number, height: number) => {
+  const BUTTON_SIZE = width * 0.75; // tamaño original
 
-// ✅ Tamaño del botón proporcional a la pantalla
-const BOTON_SIZE = width * 0.75;  // 62% del ancho de pantalla
+  return StyleSheet.create({
 
-export const styles = StyleSheet.create({
+    // ── CONTENEDOR ────────────────────────────────────────────────────────────
+    container: {
+      flex: 1,
+      justifyContent: "flex-start",
+    },
 
-  container: {
-  flex: 1,
-  justifyContent: 'flex-start',  // ✅ todo sube arriba, sin espacio extra
-},
+    // ── UBICACIÓN ─────────────────────────────────────────────────────────────
+    locationCard: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      padding: 10,
+      marginHorizontal: 20,
+      marginTop: 15,
+      borderWidth: 2,
+      borderRadius: 10,
+    },
 
-  // Ubicación
-  containerUbicacion: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 10,
-    marginHorizontal: 20,
-    marginTop: 15,
-    borderWidth: 2,
-    borderRadius: 10,
-  },
+    locationInfo: {
+      flex: 1,
+      marginLeft: 10,
+    },
 
-  infoUbicacion: {
-    flex: 1,
-    marginLeft: 10,
-  },
+    locationLabel: {
+      fontSize: 12,
+    },
 
-  tituloUbicacion: {
-    fontSize: 12,
-  },
+    locationValue: {
+      fontSize: 14,
+      fontWeight: "bold",
+    },
 
-  textoUbicacion: {
-    fontSize: 14,
-    fontWeight: "bold",
-  },
+    // ── INDICADORES ───────────────────────────────────────────────────────────
+    indicatorsRow: {
+      flexDirection: "row",
+      justifyContent: "center",
+      gap: 12,
+      marginTop: 16,
+      marginBottom: 4,
+      paddingHorizontal: 20,
+    },
 
-  iconoUbicacion: {
-    fontSize: 24,
-    marginRight: 10,
-  },
+    indicator: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      borderRadius: 25,
+      paddingHorizontal: 18,
+      paddingVertical: 10,
+      borderWidth: 1.5,
+    },
 
-  // Indicadores
-  indicadoresContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 12,
-    marginTop: 16,
-    marginBottom: 4,
-    paddingHorizontal: 20,
-  },
+    indicatorOn: {
+      backgroundColor: "#eaffea",
+      borderColor: "#2ecc71",
+    },
 
-  indicador: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    borderRadius: 25,
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    borderWidth: 1.5,
-  },
+    indicatorOff: {
+      backgroundColor: "#fff0f0",
+      borderColor: "#e74c3c",
+    },
 
-  indicadorActivo: {
-    backgroundColor: '#eaffea',
-    borderColor: '#2ecc71',
-  },
+    dot: {
+      width: 9,
+      height: 9,
+      borderRadius: 5,
+    },
 
-  indicadorInactivo: {
-    backgroundColor: '#fff0f0',
-    borderColor: '#e74c3c',
-  },
+    dotGreen: {
+      backgroundColor: "#2ecc71",
+      shadowColor: "#2ecc71",
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.9,
+      shadowRadius: 4,
+      elevation: 4,
+    },
 
-  luz: {
-    width: 9,
-    height: 9,
-    borderRadius: 5,
-  },
+    dotRed: {
+      backgroundColor: "#e74c3c",
+      shadowColor: "#e74c3c",
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.9,
+      shadowRadius: 4,
+      elevation: 4,
+    },
 
-  luzVerde: {
-    backgroundColor: '#2ecc71',
-    shadowColor: '#2ecc71',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.9,
-    shadowRadius: 4,
-    elevation: 4,
-  },
+    indicatorText: {
+      fontSize: 13,
+      fontWeight: "700",
+    },
 
-  luzRoja: {
-    backgroundColor: '#e74c3c',
-    shadowColor: '#e74c3c',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.9,
-    shadowRadius: 4,
-    elevation: 4,
-  },
+    // ── SECCIÓN CENTRAL ───────────────────────────────────────────────────────
+    centerSection: {
+      flex: 1,                    // ocupa el espacio restante entre indicadores y texto
+      alignItems: "center",
+      justifyContent: "center",
+      marginTop: 15,// centra el botón verticalmente en ese espacio
+    },
 
-  indicadorTexto: {
-    fontSize: 13,
-    fontWeight: '700',
-  },
-
-  textoVerde: {
-    color: '#2ecc71',
-  },
-
-  textoRojo: {
-    color: '#e74c3c',
-  },
-
-  // ✅ Botón central adaptable
-  // ✅ Botón central adaptable
-  centerSection: {
-  alignItems: 'center',
-  paddingTop: height * 0.03,
-},
-
-botonAlerta: {
-  width: BOTON_SIZE,
-  height: BOTON_SIZE,
-  borderRadius: BOTON_SIZE / 2,
-  justifyContent: 'center',
-  alignItems: 'center',
-},
-
-imagen: {
-  width: BOTON_SIZE * 1.1,
-  height: BOTON_SIZE * 1.1,
-  resizeMode: 'contain',
-},
-
-texto: {
-  fontSize: width * 0.045,
-  fontWeight: '800',
-  textAlign: 'center',
-  textTransform: 'uppercase',
-  letterSpacing: 0.8,
-  lineHeight: 28,
-  marginTop: height * 0.040,
-  paddingHorizontal: 10,
-},
-
-  topSection: {
-    position: 'absolute',
-    top: 50,
-    alignSelf: 'center',
-    zIndex: 10,
-  },
-
-  botonLogin: {
-    color: 'white',
-    borderRadius: 20,
-    borderColor: 'white',
-    borderWidth: 3,
-    padding: 10,
-    backgroundColor: 'purple',
-  },
-
-});
+    // ── TEXTO INSTRUCCIÓN — igual al original ─────────────────────────────────
+    instructionText: {
+      fontSize: width * 0.045,
+      fontWeight: "800",
+      textAlign: "center",
+      textTransform: "uppercase",
+      letterSpacing: 0.8,
+      lineHeight: 28,
+      marginBottom: height * 0.01,
+      paddingHorizontal: 10,
+    },
+  });
+};
