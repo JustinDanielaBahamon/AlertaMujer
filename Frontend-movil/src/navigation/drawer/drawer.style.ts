@@ -1,182 +1,213 @@
 import { StyleSheet } from "react-native";
 import { AppTheme } from "../../contexts/ThemeContext";
 
-export const obtenerEstilosDrawer = (theme: AppTheme) => StyleSheet.create({
+export const obtenerEstilosDrawer = (theme: AppTheme) => {
 
-  drawerFondo: {
-    flex: 1,
-    backgroundColor: theme.background,
-  },
+  const esModoOscuro = theme.mode === "dark";
 
-  headerZona: {
-    paddingHorizontal: 24,
-    paddingTop: 24,
-    paddingBottom: 24,
-    alignItems: "center",        // centra todo horizontalmente
-  },
+  // Modo oscuro → tarjetas translúcidas oscuras, texto claro
+  // Resto de temas → tarjetas BLANCAS, texto siempre oscuro para máximo contraste
+  const tarjetaBg     = esModoOscuro ? "rgba(255,255,255,0.10)" : "#ffffff";
+  const tarjetaBorde  = esModoOscuro ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.06)";
+  const textoTarjeta  = esModoOscuro ? "#ffffff" : "#1a1a1a";
 
-  decoracionFondo: {
-    position: "absolute",
-    right: -20,
-    top: -10,
-    zIndex: 0,
-  },
+  // Iconos dentro del círculo: en modo oscuro usa theme.icono, en claro también
+  const colorIcono = theme.icono;
 
-  avatarFila: {
-    alignItems: "center",        //  avatar centrado
-    marginBottom: 12,
-  },
+  return StyleSheet.create({
 
-  avatar: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    borderWidth: 3,
-  },
+    // Fondo = exactamente headerBackground, sin capas encima
+    drawerFondo: {
+      flex: 1,
+      backgroundColor: theme.headerBackground,
+    },
 
-  nombre: {
-    color: theme.text,
-    fontSize: 20,
-    fontWeight: "bold",
-    textAlign: "center",         // nombre centrado
-    zIndex: 1,
-  },
+    // Zona de perfil = mismo headerBackground, sin backgroundColor diferente
+    headerZona: {
+      paddingHorizontal: 24,
+      paddingTop: 24,
+      paddingBottom: 24,
+      alignItems: "center",
+      // SIN backgroundColor para que sea igual al fondo del drawer
+    },
 
-  correo: {
-    color: theme.text,
-    fontSize: 13,
-    opacity: 0.65,
-    marginTop: 2,
-    textAlign: "center",         // correo centrado
-    zIndex: 1,
-  },
+    decoracionFondo: {
+      position: "absolute",
+      right: -20,
+      top: -10,
+      zIndex: 0,
+    },
 
-  lineaAccento: {
-    width: 40,
-    height: 3,
-    borderRadius: 2,
-    marginTop: 10,
-  },
+    avatarFila: {
+      alignItems: "center",
+      marginBottom: 12,
+    },
 
-  listaMenu: {
-    paddingHorizontal: 16,
-    gap: 8,
-  },
+    avatar: {
+      width: 72,
+      height: 72,
+      borderRadius: 36,
+      borderWidth: 3,
+      // borderColor inline: theme.icono
+    },
 
-  tarjetaItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: theme.card,
-    borderRadius: 14,
-    paddingVertical: 13,
-    paddingHorizontal: 14,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
-  },
+    nombre: {
+      color: theme.headerText,
+      fontSize: 20,
+      fontWeight: "bold",
+      textAlign: "center",
+      zIndex: 1,
+    },
 
-  iconoCirculo: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 13,
-  },
+    correo: {
+      color: theme.headerText,
+      fontSize: 13,
+      opacity: 0.8,
+      marginTop: 2,
+      textAlign: "center",
+      zIndex: 1,
+    },
 
-  textoItem: {
-    flex: 1,
-    fontSize: 15,
-    fontWeight: "600",
-  },
+    lineaAccento: {
+      width: 40,
+      height: 3,
+      borderRadius: 2,
+      marginTop: 10,
+      // backgroundColor inline: theme.icono
+    },
 
-  chevron: {
-    marginLeft: 4,
-  },
+    listaMenu: {
+      paddingHorizontal: 16,
+      gap: 8,
+    },
 
-  submenuContenedor: {
-    marginTop: 2,
-  },
+    // Tarjetas BLANCAS en todos los temas excepto dark
+    tarjetaItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: tarjetaBg,
+      borderRadius: 14,
+      paddingVertical: 13,
+      paddingHorizontal: 14,
+      borderWidth: 1,
+      borderColor: tarjetaBorde,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: esModoOscuro ? 0.3 : 0.10,
+      shadowRadius: 6,
+      elevation: 3,
+    },
 
-  footer: {
-    paddingHorizontal: 16,
-    paddingBottom: 20,
-    paddingTop: 8,
-    gap: 10,
-  },
+    iconoCirculo: {
+      width: 38,
+      height: 38,
+      borderRadius: 12,
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: 13,
+      // backgroundColor inline: theme.icono + "22"
+    },
 
-  btnCompartir: {
-    borderRadius: 16,
-    overflow: "hidden",
-  },
+    // Texto siempre legible según el fondo de la tarjeta
+    textoItem: {
+      flex: 1,
+      fontSize: 15,
+      fontWeight: "600",
+      color: textoTarjeta,
+    },
 
-  btnCerrar: {
-    borderRadius: 16,
-    overflow: "hidden",
-  },
+    chevron: {
+      marginLeft: 4,
+      opacity: 0.7,
+    },
 
-  btnInterior: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    gap: 12,
-  },
+    submenuContenedor: {
+      marginTop: 2,
+    },
 
-  btnIconoFondo: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: "rgba(255,255,255,0.25)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
+    footer: {
+      paddingHorizontal: 16,
+      paddingBottom: 20,
+      paddingTop: 8,
+      gap: 10,
+    },
 
-  btnTitulo: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 15,
-  },
+    btnCompartir: {
+      borderRadius: 16,
+      overflow: "hidden",
+    },
 
-  btnSubtitulo: {
-    color: "rgba(255,255,255,0.8)",
-    fontSize: 11,
-    marginTop: 1,
-  },
+    btnCerrar: {
+      borderRadius: 16,
+      overflow: "hidden",
+    },
 
-  branding: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingTop: 10,
-    opacity: 0.75,
-  },
+    btnInterior: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+      gap: 12,
+    },
 
-  brandingNombre: {
-    fontWeight: "bold",
-    fontSize: 13,
-  },
+    btnIconoFondo: {
+      width: 36,
+      height: 36,
+      borderRadius: 10,
+      backgroundColor: "rgba(255,255,255,0.25)",
+      alignItems: "center",
+      justifyContent: "center",
+    },
 
-  brandingSlogan: {
-    fontSize: 10,
-    opacity: 0.8,
-  },
+    btnTitulo: {
+      fontWeight: "bold",
+      fontSize: 15,
+    },
 
-  // Legacy conservados
-  drawerBody: { flex: 1 },
-  cardContainer: { flex: 1 },
-  header: { alignItems: "center" },
-  innerCard: {},
-  item: { color: theme.headerText, fontSize: 16 },
-  itemFila: { flexDirection: "row", alignItems: "center" },
-  iconoFondo: { width: 34, height: 34, borderRadius: 10 },
-  separador: { height: StyleSheet.hairlineWidth },
-  shareBtn: { backgroundColor: "#0088ff93", padding: 12, borderRadius: 12 },
-  logoutBtn: { backgroundColor: "#ff00009f", padding: 12, borderRadius: 12 },
-  btnText: { color: "#fff", textAlign: "center", fontWeight: "bold" },
-  drawerHeader: { paddingHorizontal: 16, paddingVertical: 24 },
-  drawerTitle: { fontSize: 18, fontWeight: "700" },
-  drawerSubtitle: { marginTop: 6, fontSize: 13, opacity: 0.7 },
-});
+    btnSubtitulo: {
+      fontSize: 11,
+      marginTop: 1,
+      opacity: 0.85,
+    },
+
+    // Branding con fondo semitransparente para que siempre se vea
+    branding: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      paddingVertical: 10,
+      paddingHorizontal: 16,
+      marginHorizontal: 16,
+      marginBottom: 4,
+      backgroundColor: "rgba(255,255,255,0.15)",
+      borderRadius: 12,
+    },
+
+    brandingNombre: {
+      fontWeight: "bold",
+      fontSize: 13,
+      // color inline: theme.headerText
+    },
+
+    brandingSlogan: {
+      fontSize: 10,
+      // color inline: theme.headerText
+    },
+
+    // Legacy
+    drawerBody: { flex: 1 },
+    cardContainer: { flex: 1 },
+    header: { alignItems: "center" },
+    innerCard: {},
+    item: { color: theme.headerText, fontSize: 16 },
+    itemFila: { flexDirection: "row", alignItems: "center" },
+    iconoFondo: { width: 34, height: 34, borderRadius: 10 },
+    separador: { height: StyleSheet.hairlineWidth },
+    shareBtn: { backgroundColor: "#0088ff93", padding: 12, borderRadius: 12 },
+    logoutBtn: { backgroundColor: "#ff00009f", padding: 12, borderRadius: 12 },
+    btnText: { color: "#fff", textAlign: "center", fontWeight: "bold" },
+    drawerHeader: { paddingHorizontal: 16, paddingVertical: 24 },
+    drawerTitle: { fontSize: 18, fontWeight: "700" },
+    drawerSubtitle: { marginTop: 6, fontSize: 13, opacity: 0.7 },
+  });
+};
