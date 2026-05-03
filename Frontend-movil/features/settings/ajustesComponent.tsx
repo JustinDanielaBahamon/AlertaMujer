@@ -1,5 +1,6 @@
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { Switch, View, Text, TouchableOpacity } from 'react-native';
 import { useAjustesViewModel } from './useAjustesViewModel';
 import { obtenerEstilos } from './ajustes.styles';
 import { AppMode } from '../../src/contexts/ThemeContext';
@@ -17,17 +18,34 @@ export default function AjustesComponent({ navigation }: any) {
     { id: 'magenta', color: '#490449', label: 'Magenta' },
   ];
 
+  const esModoOscuro = theme.mode === 'dark';
+
   return (
     <View style={styles.container}>
 
-      {/* MODO CLARO / OSCURO */}
-      <TouchableOpacity onPress={toggleTheme} style={styles.item}>
-        <Text style={{ color: theme.text, fontWeight: '500' }}>
-          {obtenerIconoTema()}
-        </Text>
-      </TouchableOpacity>
+      {/* modo claro y oscuro */}
+      <View style={styles.item}>
+        <View style={styles.filaSwitch}>
+          <Ionicons
+            name={esModoOscuro ? 'moon-outline' : 'sunny-outline'}
+            size={18}
+            color={theme.text}
+            style={{ marginRight: 8 }}
+          />
+          <Text style={[styles.textoSwitch, { color: theme.text }]}>
+            {obtenerIconoTema().replace(/^[^\s]+\s/, '')}
+          </Text>
+          <Switch
+            value={esModoOscuro}
+            onValueChange={toggleTheme}
+            trackColor={{ false: '#ccc', true: theme.tabActiveColor }}
+            thumbColor="#fff"
+            style={{ marginLeft: 'auto' }}
+          />
+        </View>
+      </View>
 
-      {/* TEMAS PREDETERMINADOS */}
+      {/* temas predeterminados */}
       <View style={styles.item}>
         <Text style={[styles.tituloSeccion, { color: theme.text }]}>
           Temas Predeterminados
@@ -38,7 +56,7 @@ export default function AjustesComponent({ navigation }: any) {
               key={t.id}
               onPress={() => setMode(t.id)}
               accessibilityLabel={`Tema ${t.label}`}
-               style={styles.circuloWrapper} 
+              style={styles.circuloWrapper}
             >
               <View
                 style={[
@@ -56,15 +74,27 @@ export default function AjustesComponent({ navigation }: any) {
         </View>
       </View>
 
+      {/* idioma */}
       <TouchableOpacity onPress={toggleLocale} style={styles.item}>
-        <Text style={{ color: theme.text }}>🌍 Idioma: {obtenerTextoIdioma()}</Text>
+        <View style={styles.filaConChevron}>
+          <Ionicons name="globe-outline" size={17} color={theme.text} style={{ marginRight: 8 }} />
+          <Text style={{ color: theme.text, flex: 1, fontSize: 14 }}>
+            Idioma: {obtenerTextoIdioma()}
+          </Text>
+          <Ionicons name="chevron-forward" size={15} color={theme.tabActiveColor} />
+        </View>
       </TouchableOpacity>
 
+      {/* tutoriales */}
       <TouchableOpacity
         onPress={() => navigation.navigate("TutorialBienvenida")}
-        style={styles.item}
+        style={[styles.item, { borderBottomWidth: 0 }]}
       >
-        <Text style={{ color: theme.text }}>📖 Ver Tutoriales</Text>
+        <View style={styles.filaConChevron}>
+          <Ionicons name="school-outline" size={17} color={theme.text} style={{ marginRight: 8 }} />
+          <Text style={{ color: theme.text, flex: 1, fontSize: 14 }}>Ver Tutoriales</Text>
+          <Ionicons name="chevron-forward" size={15} color={theme.tabActiveColor} />
+        </View>
       </TouchableOpacity>
 
     </View>

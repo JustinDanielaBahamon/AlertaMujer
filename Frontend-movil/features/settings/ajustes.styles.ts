@@ -2,34 +2,52 @@ import { StyleSheet } from "react-native";
 
 export const obtenerEstilos = (theme: any) => StyleSheet.create({
   container: {
-    paddingLeft: 20,
     backgroundColor: theme.card,
-    borderRadius: 15,
-    marginHorizontal: 10,
-    marginBottom: 10,
-    paddingBottom: 15,
+    borderRadius: 14,
+    marginHorizontal: 16,
+    marginBottom: 8,
+    paddingHorizontal: 14,
+    paddingBottom: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
   },
   item: {
     paddingVertical: 12,
-    borderBottomWidth: 0.5,
-    borderBottomColor: 'rgba(0,0,0,0.1)',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(0,0,0,0.08)',
+  },
+  filaSwitch: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  textoSwitch: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  filaConChevron: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   tituloSeccion: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginTop: 15,
+    fontSize: 12,
+    fontWeight: '600',
     marginBottom: 10,
+    opacity: 0.7,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   filaColores: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
-    marginTop: 8,
   },
-  circuloWrapper: {          // ← el TouchableOpacity usa este
+  circuloWrapper: {
     padding: 3,
   },
-  circulo: {                 // ← el View interior usa este
+  circulo: {
     width: 36,
     height: 36,
     borderRadius: 18,
@@ -45,7 +63,7 @@ export const obtenerEstilos = (theme: any) => StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 4,
   },
-  checkmark: {               // ← estilo que faltaba
+  checkmark: {
     color: '#ffffff',
     fontWeight: 'bold',
     fontSize: 16,
