@@ -1,3 +1,4 @@
+// src/screens/tabs/inicio/inicio.styles.ts
 import { StyleSheet } from "react-native";
 import { AppTheme } from "../../../../src/contexts/ThemeContext";
 
@@ -38,7 +39,7 @@ export const createStyles = (theme: AppTheme, width: number, height: number) => 
       fontWeight: "bold",
     },
 
-    // ── INDICADORES ───────────────────────────────────────────────────────────
+    // ── INDICADORES — sin cápsula, solo dot + icono + texto ───────────────────
     indicatorsRow: {
       flexDirection: "row",
       justifyContent: "center",
@@ -52,20 +53,8 @@ export const createStyles = (theme: AppTheme, width: number, height: number) => 
       flexDirection: "row",
       alignItems: "center",
       gap: 8,
-      borderRadius: 25,
-      paddingHorizontal: 18,
-      paddingVertical: 10,
-      borderWidth: 1.5,
-    },
-
-    indicatorOn: {
-      backgroundColor: "#eaffea",
-      borderColor: "#2ecc71",
-    },
-
-    indicatorOff: {
-      backgroundColor: "#fff0f0",
-      borderColor: "#e74c3c",
+      paddingHorizontal: 4,
+      paddingVertical: 6,
     },
 
     dot: {
@@ -74,9 +63,9 @@ export const createStyles = (theme: AppTheme, width: number, height: number) => 
       borderRadius: 5,
     },
 
-    dotGreen: {
-      backgroundColor: "#2ecc71",
-      shadowColor: "#2ecc71",
+    dotPurple: {
+      backgroundColor: "#7B2FBE",
+      shadowColor: "#7B2FBE",
       shadowOffset: { width: 0, height: 0 },
       shadowOpacity: 0.9,
       shadowRadius: 4,
