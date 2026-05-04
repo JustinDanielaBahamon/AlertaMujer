@@ -1,3 +1,4 @@
+// features/registro/registroScreen.tsx
 import {
   View,
   Text,
@@ -41,11 +42,22 @@ export default function Registro() {
           <View style={styles.ContenedorFormulario}>
             <Text style={styles.TituloFormu}>{t.registro.titulo}</Text>
 
+            {/* Nombre */}
             <View style={styles.contenedorInput}>
               <Image style={styles.IconoCorreo} source={require("../../assets/imagesAlertaMujer/ScRegistro/user.png")} />
-              <TextInput style={styles.inputCorreo} placeholder={t.registro.nombre} placeholderTextColor={"#000"} />
+              <TextInput
+                style={styles.inputCorreo}
+                placeholder={t.registro.nombre}
+                placeholderTextColor={"#000"}
+                value={vm.nombre}
+                onChangeText={vm.setNombre}
+              />
             </View>
+            {vm.errores.nombre && (
+              <Text style={{ color: "red", marginLeft: 10 }}>{vm.errores.nombre}</Text>
+            )}
 
+            {/* Teléfono */}
             <View style={styles.contenedorInput}>
               <Image style={styles.IconoCorreo} source={require("../../assets/imagesAlertaMujer/ScRegistro/phone.png")} />
               <TextInput
@@ -53,9 +65,15 @@ export default function Registro() {
                 placeholder={t.registro.telefono}
                 placeholderTextColor={"#000"}
                 keyboardType="phone-pad"
+                value={vm.telefono}
+                onChangeText={vm.setTelefono}
               />
             </View>
+            {vm.errores.telefono && (
+              <Text style={{ color: "red", marginLeft: 10 }}>{vm.errores.telefono}</Text>
+            )}
 
+            {/* Número de documento */}
             <View style={styles.contenedorInput}>
               <Image style={styles.IconoCorreo} source={require("../../assets/imagesAlertaMujer/ScRegistro/Documento.png")} />
               <TextInput
@@ -66,12 +84,19 @@ export default function Registro() {
                 onChangeText={vm.setDocumento}
               />
             </View>
+            {vm.errores.documento && (
+              <Text style={{ color: "red", marginLeft: 10 }}>{vm.errores.documento}</Text>
+            )}
 
+            {/* Tipo de documento */}
             <TouchableOpacity style={styles.contenedorInput} onPress={vm.toggleListaTipoDocumento}>
               <Image style={styles.IconoCorreo} source={require("../../assets/imagesAlertaMujer/ScRegistro/Documento.png")} />
               <Text style={{ flex: 1 }}>{vm.tipoDocumento || t.registro.tipo_documento}</Text>
               <Image style={styles.IconoCorreo} source={require("../../assets/imagesAlertaMujer/ScRegistro/flechaLista.png")} />
             </TouchableOpacity>
+            {vm.errores.tipoDocumento && (
+              <Text style={{ color: "red", marginLeft: 10 }}>{vm.errores.tipoDocumento}</Text>
+            )}
 
             {vm.mostrarLista && (
               <View style={styles.listaDropdown}>
@@ -87,6 +112,7 @@ export default function Registro() {
               </View>
             )}
 
+            {/* Fecha de nacimiento con formato automático DD/MM/AAAA */}
             <View style={styles.contenedorInput}>
               <Ionicons name="calendar-outline" size={20} color="#000" />
               <TextInput
@@ -99,7 +125,11 @@ export default function Registro() {
                 maxLength={10}
               />
             </View>
+            {vm.errores.fechaNacimiento && (
+              <Text style={{ color: "red", marginLeft: 10 }}>{vm.errores.fechaNacimiento}</Text>
+            )}
 
+            {/* Correo */}
             <View style={styles.contenedorInput}>
               <Image style={styles.IconoCorreo} source={require("../../assets/imagesAlertaMujer/ScLogin/correo.png")} />
               <TextInput
@@ -110,11 +140,11 @@ export default function Registro() {
                 onChangeText={vm.setCorreo}
               />
             </View>
-
             {vm.errores.correo && (
               <Text style={{ color: "red", marginLeft: 10 }}>{vm.errores.correo}</Text>
             )}
 
+            {/* Contraseña */}
             <View style={styles.contenedorInput}>
               <Image style={styles.IconoCorreo} source={require("../../assets/imagesAlertaMujer/ScRegistro/llave.png")} />
               <TextInput
@@ -128,11 +158,11 @@ export default function Registro() {
                 <Image style={styles.IconoCorreo} source={require("../../assets/imagesAlertaMujer/ScLogin/ojoPriv.png")} />
               </TouchableOpacity>
             </View>
-
             {vm.errores.password && (
               <Text style={{ color: "red", marginLeft: 10 }}>{vm.errores.password}</Text>
             )}
 
+            {/* Confirmar contraseña */}
             <View style={styles.contenedorInput}>
               <TextInput
                 style={styles.inputContraseña}
@@ -145,7 +175,6 @@ export default function Registro() {
                 <Image style={styles.IconoCorreo} source={require("../../assets/imagesAlertaMujer/ScLogin/ojoPriv.png")} />
               </TouchableOpacity>
             </View>
-
             {vm.errores.confirmPassword && (
               <Text style={{ color: "red", marginLeft: 10 }}>{vm.errores.confirmPassword}</Text>
             )}

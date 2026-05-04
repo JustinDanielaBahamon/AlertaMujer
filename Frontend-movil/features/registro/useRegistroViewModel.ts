@@ -1,3 +1,4 @@
+// features/registro/useRegistroViewModel.ts
 import { useCallback, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -5,6 +6,11 @@ import type { AuthStackParamList } from "../../src/navigation/types";
 import { useAuth } from "../../src/contexts/AuthContext";
 
 type ErroresType = {
+  nombre?: string;
+  telefono?: string;
+  documento?: string;
+  tipoDocumento?: string;
+  fechaNacimiento?: string;
   correo?: string;
   password?: string;
   confirmPassword?: string;
@@ -20,12 +26,14 @@ export function useRegistroViewModel() {
   const [mostrarLista, setMostrarLista] = useState(false);
   const [tipoDocumento, setTipoDocumento] = useState("");
 
+  const [nombre, setNombre] = useState("");
+  const [telefono, setTelefono] = useState("");
   const [documento, setDocumento] = useState("");
   const [correo, setCorreo] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [mostrarConfirmPassword, setMostrarConfirmPassword] = useState(false);
-  const [fechaNacimiento, setFechaNacimiento] = useState("");
+  const [fechaNacimiento, setFechaNacimientoRaw] = useState("");
 
   const [aceptaTerminos, setAceptaTerminos] = useState(false);
   const [aceptaPrivacidad, setAceptaPrivacidad] = useState(false);
@@ -36,8 +44,45 @@ export function useRegistroViewModel() {
 
   const [errores, setErrores] = useState<ErroresType>({});
 
+  // ── Formato automático DD/MM/AAAA ─────────────────────────────────────────
+  const setFechaNacimiento = useCallback((text: string) => {
+    // Solo dígitos
+    const digits = text.replace(/\D/g, "");
+    let formatted = "";
+    if (digits.length <= 2) {
+      formatted = digits;
+    } else if (digits.length <= 4) {
+      formatted = digits.slice(0, 2) + "/" + digits.slice(2);
+    } else {
+      formatted = digits.slice(0, 2) + "/" + digits.slice(2, 4) + "/" + digits.slice(4, 8);
+    }
+    setFechaNacimientoRaw(formatted);
+  }, []);
+
   const validarFormulario = useCallback(() => {
     const nuevosErrores: ErroresType = {};
+
+    if (!nombre.trim()) {
+      nuevosErrores.nombre = "El nombre es obligatorio";
+    }
+
+    if (!telefono.trim()) {
+      nuevosErrores.telefono = "El teléfono es obligatorio";
+    }
+
+    if (!documento.trim()) {
+      nuevosErrores.documento = "El número de documento es obligatorio";
+    }
+
+    if (!tipoDocumento) {
+      nuevosErrores.tipoDocumento = "El tipo de documento es obligatorio";
+    }
+
+    if (!fechaNacimiento.trim()) {
+      nuevosErrores.fechaNacimiento = "La fecha de nacimiento es obligatoria";
+    } else if (fechaNacimiento.length < 10) {
+      nuevosErrores.fechaNacimiento = "Ingresa una fecha completa DD/MM/AAAA";
+    }
 
     if (!correo) {
       nuevosErrores.correo = "El correo es obligatorio";
@@ -57,7 +102,7 @@ export function useRegistroViewModel() {
 
     setErrores(nuevosErrores);
     return Object.keys(nuevosErrores).length === 0;
-  }, [correo, password, confirmPassword]);
+  }, [nombre, telefono, documento, tipoDocumento, fechaNacimiento, correo, password, confirmPassword]);
 
   const irATerminos = useCallback(() => {
     setErrorTerminos("");
@@ -117,7 +162,7 @@ export function useRegistroViewModel() {
     signIn(
       {
         id: Date.now(),
-        nombre: documento.trim() || "Usuario",
+        nombre: nombre.trim() || "Usuario",
         correo: correo.trim(),
       },
       { initialMainRoute: "TutorialBienvenida" },
@@ -126,12 +171,16 @@ export function useRegistroViewModel() {
     aceptaTerminos,
     aceptaPrivacidad,
     validarFormulario,
-    documento,
+    nombre,
     correo,
     signIn,
   ]);
 
   return {
+    nombre,
+    setNombre,
+    telefono,
+    setTelefono,
     mostrarPassword,
     setMostrarPassword,
     mostrarLista,
