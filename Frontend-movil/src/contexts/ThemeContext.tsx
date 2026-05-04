@@ -18,48 +18,47 @@ export type AppTheme = {
   tabInactiveColor: string;
   logo: ImageSourcePropType;
   imagenBoton: ImageSourcePropType;
+  imagenActivacion: ImageSourcePropType; // ← nuevo
   icono: string;
   headercolor1: string;
   headercolor2: string;
 
   // ─── Contactos ───────────────────────────────────────────────
-  contactCardBg: string;          // fondo de la tarjeta
-  contactCardBorder: string;      // borde de la tarjeta
-  contactNombre: string;          // texto nombre
-  contactSubtext: string;         // teléfono, textos secundarios
-  contactAccent: string;          // color principal de acento (iconos, bordes foto)
-  contactBadgeBg: string;         // fondo del badge parentesco
-  contactBadgeText: string;       // texto del badge
-  contactBadgeBorder: string;     // borde del badge
-  contactAvatarBorder: string;    // aro de la foto de perfil
-  contactDivider: string;         // línea divisora acciones
-  contactIconCallBg: string;      // fondo círculo Llamar
-  contactIconWaBg: string;        // fondo círculo WhatsApp
-  contactIconLocBg: string;       // fondo círculo Ubicación
-  contactIconCallColor: string;   // color icono Llamar
-  contactIconLocColor: string;    // color icono Ubicación
-  contactBotonEditar: string;     // fondo boton editar
-  contactBotonEditarIcon: string; // color icono editar
-  contactSugerenciaBg: string;    // fondo tarjeta "agregar más"
-  contactSugerenciaBorder: string;// borde tarjeta "agregar más"
-  contactSugerenciaIcon: string;  // color icono user-plus
-  contactBotonAgregarBg: string;  // fondo botón "+ Agregar"
-  contactFlotanteBg: string;      // fondo botón flotante
-  contactCousserBg: string;       // fondo ícono de conteo
-  contactCousserIcon: string;     // color ícono de conteo
-  contactBuscadorBg: string;      // fondo barra de búsqueda
-  contactBuscadorText: string;    // texto dentro del buscador
+  contactCardBg: string;
+  contactCardBorder: string;
+  contactNombre: string;
+  contactSubtext: string;
+  contactAccent: string;
+  contactBadgeBg: string;
+  contactBadgeText: string;
+  contactBadgeBorder: string;
+  contactAvatarBorder: string;
+  contactDivider: string;
+  contactIconCallBg: string;
+  contactIconWaBg: string;
+  contactIconLocBg: string;
+  contactIconCallColor: string;
+  contactIconLocColor: string;
+  contactBotonEditar: string;
+  contactBotonEditarIcon: string;
+  contactSugerenciaBg: string;
+  contactSugerenciaBorder: string;
+  contactSugerenciaIcon: string;
+  contactBotonAgregarBg: string;
+  contactFlotanteBg: string;
+  contactCousserBg: string;
+  contactCousserIcon: string;
+  contactBuscadorBg: string;
+  contactBuscadorText: string;
 
   // ─── Asistencia ──────────────────────────────────────────────
-  asistenciaEmergenciaGradiente: [string, string]; // ← AÑADIR
+  asistenciaEmergenciaGradiente: [string, string];
   asistenciaViolenciaGradiente: [string, string];
   asistenciaMentalGradiente: [string, string];
   asistenciaIconoUserBg: string;
   asistenciaIconoBombilloBg: string;
   asistenciaIconoBombilloColor: string;
   asistenciaIconoEstrellaBg: string;
-  
-
 };
 
 // ─── Contraste automático ─────────────────────────────────────────────────────
@@ -79,7 +78,7 @@ function getContrastText(bg: string): string {
   return luminance > 0.5 ? "#1a1a1a" : "#ffffff";
 }
 
-// ─── Assets ──────────────────────────────────────────────────────────────────
+// ─── Assets logos ─────────────────────────────────────────────────────────────
 
 const logoActual = require("../../assets/imagesAlertaMujer/logos/logoAlertaMujer.png");
 const logoMorado = require("../../assets/imagesAlertaMujer/logos/logo-morado.png");
@@ -88,17 +87,27 @@ const logorosa   = require("../../assets/imagesAlertaMujer/logos/logo-rosa.png")
 const logovino   = require("../../assets/imagesAlertaMujer/logos/logo-vino.png");
 const logonegro  = require("../../assets/imagesAlertaMujer/logos/logo-negro.png");
 
+// ─── Assets botones ───────────────────────────────────────────────────────────
+
 const botonmorado = require("../../assets/imagesAlertaMujer/ScInicio/boton-morado.png");
 const botonAzul   = require("../../assets/imagesAlertaMujer/ScInicio/boton-azul.png");
 const botonrosa   = require("../../assets/imagesAlertaMujer/ScInicio/boton-rosa.png");
 const botonvino   = require("../../assets/imagesAlertaMujer/ScInicio/boton-vino.png");
 const botondorado = require("../../assets/imagesAlertaMujer/ScInicio/boton-dorado.png");
 
+// ─── Assets activacion ────────────────────────────────────────────────────────
+
+const activacionMorado = require("../../assets/imagesAlertaMujer/ScActivacion/morado.png");
+const activacionRosa   = require("../../assets/imagesAlertaMujer/ScActivacion/rosa.png");
+const activacionAzul   = require("../../assets/imagesAlertaMujer/ScActivacion/Azul.png");
+const activacionVino   = require("../../assets/imagesAlertaMujer/ScActivacion/vino.png");
+const activacionLogo   = require("../../assets/imagesAlertaMujer/ScActivacion/LOGO.png");
+
 // ─── Temas ────────────────────────────────────────────────────────────────────
 
 const THEMES: Record<AppMode, AppTheme> = {
 
-  // ── LIGHT (morado/lavanda) ─────────────────────────────────────────────────
+  // ── LIGHT ─────────────────────────────────────────────────────────────────
   light: {
     mode: "light",
     headerBackground: "rgb(202,171,222)",
@@ -112,11 +121,10 @@ const THEMES: Record<AppMode, AppTheme> = {
     tabInactiveColor: "rgba(255, 241, 241, 0.7)",
     logo: logoActual,
     imagenBoton: botonmorado,
+    imagenActivacion: activacionMorado,
     icono: "#9b009b",
     headercolor1: "#c4a8d6",
     headercolor2: "#7b1db2",
-
-    // Contactos — tonos lavanda/morado claros
     contactCardBg: "#ffffff",
     contactCardBorder: "#e0d0f0",
     contactNombre: "#2a0045",
@@ -143,23 +151,21 @@ const THEMES: Record<AppMode, AppTheme> = {
     contactCousserIcon: "#7B1FA2",
     contactBuscadorBg: "#F3EEF8",
     contactBuscadorText: "#2a0045",
-   
-    asistenciaEmergenciaGradiente: ["#c4a8d6", "#7b1db2"], 
+    asistenciaEmergenciaGradiente: ["#c4a8d6", "#7b1db2"],
     asistenciaViolenciaGradiente: ["rgb(240, 87, 87)", "rgb(132, 0, 255)"],
     asistenciaMentalGradiente:    ["rgb(142, 189, 255)", "rgb(255, 0, 191)"],
     asistenciaIconoUserBg:        "purple",
     asistenciaIconoBombilloBg:    "rgba(205, 117, 230, 0.29)",
     asistenciaIconoBombilloColor: "#1E1228",
     asistenciaIconoEstrellaBg:    "purple",
-    
   },
 
-  // ── DARK (oscuro con acentos morado/verde/azul) ────────────────────────────
+  // ── DARK ──────────────────────────────────────────────────────────────────
   dark: {
     mode: "dark",
     headerBackground: "#000000",
     headerText: "#fefeff",
-    background: "#2e2e31",
+    background: "#3d3d42",
     containerBackground: "#1e1e22",
     text: "#f0e6ff",
     card: "#2e2e38",
@@ -168,11 +174,10 @@ const THEMES: Record<AppMode, AppTheme> = {
     tabInactiveColor: "rgba(230, 217, 247, 0.89)",
     logo: logonegro,
     imagenBoton: botondorado,
+    imagenActivacion: activacionLogo,
     icono: "#c084fc",
     headercolor1: "#030303",
     headercolor2: "#200138",
-
-    // Contactos — oscuro con acentos morado, verde y azul
     contactCardBg: "#28282f",
     contactCardBorder: "#3d3d50",
     contactNombre: "#e8d5ff",
@@ -183,11 +188,11 @@ const THEMES: Record<AppMode, AppTheme> = {
     contactBadgeBorder: "#6d28d9",
     contactAvatarBorder: "#a855f7",
     contactDivider: "#3a3a48",
-    contactIconCallBg: "#2d2040",      // morado oscuro
-    contactIconCallColor: "#c084fc",   // morado claro
-    contactIconWaBg: "#1a2e22",        // verde oscuro
-    contactIconLocBg: "#1a233a",       // azul oscuro
-    contactIconLocColor: "#60a5fa",    // azul claro
+    contactIconCallBg: "#2d2040",
+    contactIconCallColor: "#c084fc",
+    contactIconWaBg: "#1a2e22",
+    contactIconLocBg: "#1a233a",
+    contactIconLocColor: "#60a5fa",
     contactBotonEditar: "#2d2040",
     contactBotonEditarIcon: "#c084fc",
     contactSugerenciaBg: "#22202e",
@@ -199,8 +204,7 @@ const THEMES: Record<AppMode, AppTheme> = {
     contactCousserIcon: "#c084fc",
     contactBuscadorBg: "#232330",
     contactBuscadorText: "#e8d5ff",
-
-    asistenciaEmergenciaGradiente: ["#3a035c", "#0b022c"], 
+    asistenciaEmergenciaGradiente: ["#3a035c", "#0b022c"],
     asistenciaViolenciaGradiente: ["#350249", "#33012b"],
     asistenciaMentalGradiente:    ["#042f63", "#090111"],
     asistenciaIconoUserBg:        "#010e33",
@@ -209,7 +213,7 @@ const THEMES: Record<AppMode, AppTheme> = {
     asistenciaIconoEstrellaBg:    "#010e33",
   },
 
-  // ── ROSA (fucsia/rosa) ─────────────────────────────────────────────────────
+  // ── ROSA ──────────────────────────────────────────────────────────────────
   rosa: {
     mode: "rosa",
     headerBackground: "#cf3389",
@@ -223,11 +227,10 @@ const THEMES: Record<AppMode, AppTheme> = {
     tabInactiveColor: "rgba(255, 255, 255, 0.95)",
     logo: logorosa,
     imagenBoton: botonrosa,
+    imagenActivacion: activacionRosa,
     icono: "#eb0a86",
     headercolor1: "#cf3389",
     headercolor2: "#860e52",
-
-    // Contactos — paleta rosa/fucsia con contraste
     contactCardBg: "#fff5fa",
     contactCardBorder: "#f8b4d4",
     contactNombre: "#3a0020",
@@ -254,8 +257,7 @@ const THEMES: Record<AppMode, AppTheme> = {
     contactCousserIcon: "#c2185b",
     contactBuscadorBg: "#fde8f4",
     contactBuscadorText: "#3a0020",
-
-    asistenciaEmergenciaGradiente: ["#aa0069", "#8f45b9"], 
+    asistenciaEmergenciaGradiente: ["#aa0069", "#8f45b9"],
     asistenciaViolenciaGradiente: ["#e70059", "#8000a7"],
     asistenciaMentalGradiente:    ["#a80a81", "#f58ef5"],
     asistenciaIconoUserBg:        "#a0005a",
@@ -264,7 +266,7 @@ const THEMES: Record<AppMode, AppTheme> = {
     asistenciaIconoEstrellaBg:    "#a0005a",
   },
 
-  // ── VINO (borgoña/vino tinto) ──────────────────────────────────────────────
+  // ── VINO ──────────────────────────────────────────────────────────────────
   vino: {
     mode: "vino",
     headerBackground: "#770736",
@@ -278,11 +280,10 @@ const THEMES: Record<AppMode, AppTheme> = {
     tabInactiveColor: "rgb(255, 247, 247)",
     logo: logovino,
     imagenBoton: botonvino,
+    imagenActivacion: activacionVino,
     icono: "#770736",
     headercolor1: "#770736",
     headercolor2: "#4a0020",
-
-    // Contactos — paleta vino con rojos cálidos y contraste crema
     contactCardBg: "#fff8f8",
     contactCardBorder: "#f5c6c6",
     contactNombre: "#2a0000",
@@ -296,7 +297,7 @@ const THEMES: Record<AppMode, AppTheme> = {
     contactIconCallBg: "#FFEBEE",
     contactIconCallColor: "#b71c1c",
     contactIconWaBg: "#E8F5E9",
-    contactIconLocBg: "#FFF3E0",       // naranja muy claro para contraste
+    contactIconLocBg: "#FFF3E0",
     contactIconLocColor: "#e65100",
     contactBotonEditar: "#FFEBEE",
     contactBotonEditarIcon: "#b71c1c",
@@ -309,8 +310,7 @@ const THEMES: Record<AppMode, AppTheme> = {
     contactCousserIcon: "#b71c1c",
     contactBuscadorBg: "#fff0f0",
     contactBuscadorText: "#2a0000",
-
-    asistenciaEmergenciaGradiente: ["#470238", "#83044a"], 
+    asistenciaEmergenciaGradiente: ["#470238", "#83044a"],
     asistenciaViolenciaGradiente: ["#28033a", "#942010"],
     asistenciaMentalGradiente:    ["#680c2f", "#62026b"],
     asistenciaIconoUserBg:        "#4a0020",
@@ -319,7 +319,7 @@ const THEMES: Record<AppMode, AppTheme> = {
     asistenciaIconoEstrellaBg:    "#4a0020",
   },
 
-  // ── AZUL (navy/índigo) ─────────────────────────────────────────────────────
+  // ── AZUL ──────────────────────────────────────────────────────────────────
   Azul: {
     mode: "Azul",
     headerBackground: "#0b013b",
@@ -333,11 +333,10 @@ const THEMES: Record<AppMode, AppTheme> = {
     tabInactiveColor: "rgba(255,255,255,0.4)",
     logo: logoAzul,
     imagenBoton: botonAzul,
+    imagenActivacion: activacionAzul,
     icono: "#1565C0",
     headercolor1: "#0b013b",
     headercolor2: "#1a237e",
-
-    // Contactos — paleta azul navy con celeste y índigo
     contactCardBg: "#f8faff",
     contactCardBorder: "#c5cae9",
     contactNombre: "#0b013b",
@@ -364,8 +363,7 @@ const THEMES: Record<AppMode, AppTheme> = {
     contactCousserIcon: "#1565C0",
     contactBuscadorBg: "#eef2ff",
     contactBuscadorText: "#0b013b",
-
-    asistenciaEmergenciaGradiente: ["#1d0479", "#7a3fbe"], 
+    asistenciaEmergenciaGradiente: ["#1d0479", "#7a3fbe"],
     asistenciaViolenciaGradiente: ["#2c5d96", "#4f07a1"],
     asistenciaMentalGradiente:    ["#3c48a5", "#02021a"],
     asistenciaIconoUserBg:        "#1a237e",
@@ -374,7 +372,7 @@ const THEMES: Record<AppMode, AppTheme> = {
     asistenciaIconoEstrellaBg:    "#1a237e",
   },
 
-  // ── MAGENTA (morado oscuro/ciruela) ───────────────────────────────────────
+  // ── MAGENTA ───────────────────────────────────────────────────────────────
   magenta: {
     mode: "magenta",
     headerBackground: "#490449",
@@ -388,11 +386,10 @@ const THEMES: Record<AppMode, AppTheme> = {
     tabInactiveColor: "rgba(255,255,255,0.5)",
     logo: logoMorado,
     imagenBoton: botonmorado,
+    imagenActivacion: activacionMorado,
     icono: "#6a0572",
     headercolor1: "#490449",
     headercolor2: "#860386",
-
-    // Contactos — paleta magenta/ciruela con violetas
     contactCardBg: "#fdf4fd",
     contactCardBorder: "#e1bee7",
     contactNombre: "#2a002a",
@@ -419,8 +416,7 @@ const THEMES: Record<AppMode, AppTheme> = {
     contactCousserIcon: "#6a0572",
     contactBuscadorBg: "#fce8fc",
     contactBuscadorText: "#2a002a",
-
-    asistenciaEmergenciaGradiente: ["#4f1970", "#821bbd"], 
+    asistenciaEmergenciaGradiente: ["#4f1970", "#821bbd"],
     asistenciaViolenciaGradiente: ["#6a0572", "#2d002d"],
     asistenciaMentalGradiente:    ["#8361e9", "#38023b"],
     asistenciaIconoUserBg:        "#2d002d",
