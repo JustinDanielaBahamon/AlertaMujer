@@ -3,18 +3,15 @@ import { AppTheme } from "../../../../src/contexts/ThemeContext";
 
 export const createStyles = (theme: AppTheme) =>
   StyleSheet.create({
-
-    // ── CONTENEDOR PRINCIPAL ──────────────────────────────────────────────────
     ContenedorPrincipal: {
       flex: 1,
       backgroundColor: theme.background,
     },
 
-    // ── HEADER GRADIENTE ─────────────────────────────────────────────────────
     Gradiente: {
       paddingTop: 50,
       paddingHorizontal: 20,
-      paddingBottom: 40,
+      paddingBottom: 32,
       borderBottomLeftRadius: 40,
       borderBottomRightRadius: 40,
     },
@@ -30,9 +27,7 @@ export const createStyles = (theme: AppTheme) =>
     },
 
     HeaderContenido: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 14,
+      width: "100%",
     },
 
     IconoTipo: {
@@ -73,176 +68,186 @@ export const createStyles = (theme: AppTheme) =>
       fontSize: 12,
     },
 
-    // ── TARJETA FECHA/HORA/DURACIÓN ───────────────────────────────────────────
-    TarjetaFecha: {
-      flexDirection: "row",
-      backgroundColor: theme.containerBackground,
-      borderRadius: 18,
-      marginHorizontal: 20,
-      marginTop: 18,
-      paddingVertical: 16,
-      paddingHorizontal: 8,
-      elevation: 4,
-      shadowColor: theme.headercolor2,
-      shadowOffset: { width: 0, height: 3 },
-      shadowOpacity: 0.15,
-      shadowRadius: 6,
-    },
-
-    StatItem: {
-      flex: 1,
-      alignItems: "center",
-    },
-
-    StatLabel: {
-      fontSize: 11,
-      color: theme.contactSubtext,
-      marginBottom: 4,
-    },
-
-    StatValor: {
-      fontSize: 14,
-      fontWeight: "600",
-      color: theme.text,
-    },
-
-    Separador: {
-      width: 0.5,
-      backgroundColor: theme.contactDivider,
-      marginVertical: 4,
-    },
-
-    // ── CUERPO ────────────────────────────────────────────────────────────────
     Cuerpo: {
       padding: 20,
+      paddingTop: 14,
     },
 
-    SeccionTitulo: {
-      fontSize: 12,
-      fontWeight: "600",
-      color: theme.contactSubtext,
-      textTransform: "uppercase",
-      letterSpacing: 0.5,
-      marginBottom: 10,
-      marginTop: 10,
-    },
-
-    // ── UBICACIÓN ─────────────────────────────────────────────────────────────
-    TarjetaUbicacion: {
+    TarjetaResumen: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 10,
+      gap: 12,
       backgroundColor: theme.containerBackground,
-      borderRadius: 14,
+      borderRadius: 18,
       padding: 14,
-      elevation: 2,
-      shadowColor: theme.headercolor2,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.08,
-      shadowRadius: 4,
+      borderWidth: 1,
+      borderColor: theme.contactDivider,
+      marginBottom: 14,
     },
 
-    UbicacionTexto: {
-      fontSize: 14,
-      fontWeight: "600",
-      color: theme.text,
-    },
-
-    UbicacionSubtexto: {
-      fontSize: 12,
-      color: theme.contactSubtext,
-      marginTop: 2,
-    },
-
-    BotonMapa: {
-      backgroundColor: theme.contactBadgeBg,
-      borderRadius: 10,
-      paddingHorizontal: 12,
-      paddingVertical: 7,
-    },
-
-    BotonMapaTexto: {
-      color: theme.contactAccent,
-      fontSize: 12,
-      fontWeight: "600",
-    },
-
-    // ── CONTACTO ──────────────────────────────────────────────────────────────
-    TarjetaContacto: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 10,
-      backgroundColor: theme.containerBackground,
-      borderRadius: 14,
-      padding: 14,
-      elevation: 2,
-      shadowColor: theme.headercolor2,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.08,
-      shadowRadius: 4,
-    },
-
-    AvatarContacto: {
-      width: 38,
-      height: 38,
-      borderRadius: 19,
-      backgroundColor: theme.contactBadgeBg,
+    IconoResumen: {
+      width: 46,
+      height: 46,
+      borderRadius: 23,
       alignItems: "center",
       justifyContent: "center",
     },
 
-    AvatarTexto: {
-      fontSize: 13,
-      fontWeight: "600",
-      color: theme.contactAccent,
-    },
-
-    NombreContacto: {
-      fontSize: 14,
-      fontWeight: "600",
+    ResumenTipo: {
+      fontSize: 20,
+      fontWeight: "800",
       color: theme.text,
+      marginBottom: 3,
     },
 
-    RelacionContacto: {
-      fontSize: 12,
-      color: theme.contactSubtext,
-    },
-
-    FilaRecibio: {
+    ResumenFilaMeta: {
       flexDirection: "row",
       alignItems: "center",
       gap: 5,
+      marginTop: 3,
     },
 
-    PuntoVerde: {
-      width: 7,
-      height: 7,
-      borderRadius: 4,
-      backgroundColor: "#4CAF50",
+    ResumenMetaTexto: {
+      fontSize: 13,
+      color: theme.contactSubtext,
+      flex: 1,
     },
 
-    TextoRecibio: {
-      fontSize: 12,
-      color: "#4CAF50",
-      fontWeight: "500",
+    BadgeResumenEstado: {
+      borderRadius: 999,
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      alignSelf: "flex-start",
     },
 
-    // ── BOTÓN COMPARTIR ───────────────────────────────────────────────────────
-    BotonCompartir: {
-      flexDirection: "row",
+    BadgeResumenEstadoTexto: {
+      fontSize: 11,
+      fontWeight: "700",
+      letterSpacing: 0.4,
+    },
+
+    TarjetaMapa: {
+      borderRadius: 16,
+      overflow: "hidden",
+      marginBottom: 20,
+      borderWidth: 3,
+      borderColor: 'rgba(255, 255, 255, 0.89)',
+      position: "relative",
+     
+    },
+
+    MapaFondo: {
+      height: 220,
+      width: "100%",
+    },
+
+    BotonCentroMapa: {
+      width: 42,
+      height: 42,
+      borderRadius: 21,
+      backgroundColor: theme.contactAccent,
       alignItems: "center",
       justifyContent: "center",
-      gap: 8,
-      backgroundColor: theme.contactAccent,
+    },
+
+    SeccionTitulo: {
+      fontSize: 25,
+      fontWeight: "600",
+      color: theme.text,
+      marginBottom: 14,
+    },
+
+    GridInformacion: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      justifyContent: "space-between",
+      rowGap: 10,
+      marginBottom: 10,
+    },
+
+    InfoCard: {
+      width: "48.5%",
+      backgroundColor: theme.containerBackground,
       borderRadius: 14,
-      padding: 15,
-      marginTop: 24,
+      borderWidth: 1,
+      borderColor: theme.contactDivider,
+      padding: 12,
+      minHeight: 96,
+    },
+
+    InfoHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      marginBottom: 10,
+    },
+
+    InfoLabel: {
+      fontSize: 13,
+      color: theme.contactSubtext,
+    },
+
+    InfoValue: {
+      fontSize: 17,
+      color: theme.text,
+      fontWeight: "700",
+      lineHeight: 22,
+    },
+
+    TarjetaDescripcion: {
+      backgroundColor: theme.containerBackground,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: theme.contactDivider,
+      padding: 14,
+      marginBottom: 18,
+    },
+
+    DescripcionTitulo: {
+      fontSize: 15,
+      color: 'purple',
+      marginBottom: 6,
+      fontWeight:'800'
+    },
+
+    DescripcionTexto: {
+      fontSize: 16,
+      color: theme.text,
+      lineHeight: 22,
+    },
+
+    FilaAcciones: {
+      flexDirection: "row",
+      justifyContent: "space-between",
       marginBottom: 20,
     },
 
-    BotonCompartirTexto: {
-      color: "white",
-      fontSize: 15,
-      fontWeight: "600",
+    AccionItem: {
+      alignItems: "center",
+      width: "24%",
+      gap: 8,
     },
+
+    AccionCirculo: {
+      width: 52,
+      height: 52,
+      borderRadius: 26,
+      backgroundColor: theme.contactBadgeBg,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+
+    AccionTexto: {
+      fontSize: 14,
+      color: theme.text,
+      textAlign: "center",
+    },
+
+    SeparadorFinal: {
+      height: 2,
+    },
+    Footer:{
+      backgroundColor:'white',
+      padding:17
+    }
   });
