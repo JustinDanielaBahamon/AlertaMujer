@@ -1,3 +1,4 @@
+// src/screens/tabs/inicio/index.tsx
 import {
   View, Text, TouchableOpacity, ActivityIndicator,
   Animated, Easing, useWindowDimensions, Image,
@@ -115,26 +116,20 @@ export default function Inicio() {
         </TouchableOpacity>
       </TouchableOpacity>
 
-      {/* Indicadores cámara / micrófono */}
+      {/* Indicadores cámara / micrófono — sin cápsula, solo dot + texto */}
       <View style={styles.indicatorsRow}>
-        <TouchableOpacity
-          style={[styles.indicator, cameraActive ? styles.indicatorOn : styles.indicatorOff]}
-          onPress={toggleCamera}
-        >
-          <View style={[styles.dot, cameraActive ? styles.dotGreen : styles.dotRed]} />
-          <Ionicons name="camera" size={20} color={cameraActive ? "#2ecc71" : "#e74c3c"} />
-          <Text style={[styles.indicatorText, { color: cameraActive ? "#2ecc71" : "#e74c3c" }]}>
+        <TouchableOpacity style={styles.indicator} onPress={toggleCamera} activeOpacity={0.7}>
+          <View style={[styles.dot, cameraActive ? styles.dotPurple : styles.dotRed]} />
+          <Ionicons name="camera" size={20} color={cameraActive ? "#7B2FBE" : "#e74c3c"} />
+          <Text style={[styles.indicatorText, { color: cameraActive ? "#7B2FBE" : "#e74c3c" }]}>
             Cámara
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.indicator, micActive ? styles.indicatorOn : styles.indicatorOff]}
-          onPress={toggleMic}
-        >
-          <View style={[styles.dot, micActive ? styles.dotGreen : styles.dotRed]} />
-          <Ionicons name="mic" size={20} color={micActive ? "#2ecc71" : "#e74c3c"} />
-          <Text style={[styles.indicatorText, { color: micActive ? "#2ecc71" : "#e74c3c" }]}>
+        <TouchableOpacity style={styles.indicator} onPress={toggleMic} activeOpacity={0.7}>
+          <View style={[styles.dot, micActive ? styles.dotPurple : styles.dotRed]} />
+          <Ionicons name="mic" size={20} color={micActive ? "#7B2FBE" : "#e74c3c"} />
+          <Text style={[styles.indicatorText, { color: micActive ? "#7B2FBE" : "#e74c3c" }]}>
             Micrófono
           </Text>
         </TouchableOpacity>
