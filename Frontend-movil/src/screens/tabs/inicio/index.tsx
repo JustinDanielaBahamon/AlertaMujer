@@ -1,7 +1,5 @@
 // src/screens/tabs/inicio/index.tsx
-import {
-  View, Text, TouchableOpacity, ActivityIndicator,
-  Animated, Easing, useWindowDimensions, Image,
+import {View, Text, TouchableOpacity, ActivityIndicator,Animated, Easing, useWindowDimensions, Image,
 } from "react-native";
 import { createStyles } from "./inicio.styles";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
@@ -117,19 +115,28 @@ export default function Inicio() {
       </TouchableOpacity>
 
       {/* Indicadores cámara / micrófono — sin cápsula, solo dot + texto */}
+      {/* Indicadores cámara / micrófono */}
       <View style={styles.indicatorsRow}>
         <TouchableOpacity style={styles.indicator} onPress={toggleCamera} activeOpacity={0.7}>
-          <View style={[styles.dot, cameraActive ? styles.dotPurple : styles.dotRed]} />
-          <Ionicons name="camera" size={20} color={cameraActive ? "#7B2FBE" : "#e74c3c"} />
-          <Text style={[styles.indicatorText, { color: cameraActive ? "#7B2FBE" : "#e74c3c" }]}>
+          <View style={[styles.dot, cameraActive ? { backgroundColor: theme.icono } : styles.dotRed]} />
+          <Ionicons
+            name="camera"
+            size={20}
+            color={cameraActive ? theme.icono : "#e74c3c"}
+          />
+          <Text style={[styles.indicatorText, { color: cameraActive ? theme.icono : "#e74c3c" }]}>
             Cámara
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.indicator} onPress={toggleMic} activeOpacity={0.7}>
-          <View style={[styles.dot, micActive ? styles.dotPurple : styles.dotRed]} />
-          <Ionicons name="mic" size={20} color={micActive ? "#7B2FBE" : "#e74c3c"} />
-          <Text style={[styles.indicatorText, { color: micActive ? "#7B2FBE" : "#e74c3c" }]}>
+          <View style={[styles.dot, micActive ? { backgroundColor: theme.icono } : styles.dotRed]} />
+          <Ionicons
+            name="mic"
+            size={20}
+            color={micActive ? theme.icono : "#e74c3c"}
+          />
+          <Text style={[styles.indicatorText, { color: micActive ? theme.icono : "#e74c3c" }]}>
             Micrófono
           </Text>
         </TouchableOpacity>

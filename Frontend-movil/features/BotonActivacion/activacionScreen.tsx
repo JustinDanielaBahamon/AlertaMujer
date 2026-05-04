@@ -1,51 +1,57 @@
 import { View, Text, TouchableOpacity, Image } from "react-native";
-import { styles } from "./activacionStyle";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useActivacionViewModel } from "./useActivacionViewModel";
+import { useTheme } from "../../src/contexts/ThemeContext";
+import { createStyles } from "./activacionStyle";
 
 export default function Activacion() {
   const vm = useActivacionViewModel();
+  const { theme } = useTheme();
+  
+  const backgroundColor = theme.mode === "dark" ? "#4a4a50" : theme.background;
+  const styles = createStyles(theme);
 
   return (
-    <View style={styles.contenedorPrincipal}>
+    <View style={[styles.mainContainer, { backgroundColor }]}>
       <View style={styles.card}>
         <View style={styles.logoContainer}>
+          {/* ✅ Usa el logo del tema en lugar del hardcodeado */}
           <Image
-            source={require("../../assets/imagesAlertaMujer/LOGO.png")}
+            source={theme.imagenActivacion}
             style={styles.logo}
           />
         </View>
 
-        <View style={styles.moduloContador}>
-          <View style={styles.circulo}>
-            <Text style={styles.numero}>{vm.contador}</Text>
+        <View style={styles.counterModule}>
+          <View style={styles.circle}>
+            <Text style={styles.number}>{vm.contador}</Text>
           </View>
-          <Text style={styles.textoEstado}>Activando Alerta SOS...</Text>
+          <Text style={styles.statusText}>Activando Alerta SOS...</Text>
         </View>
 
-        <View style={styles.lista}>
-          <View style={styles.itemFila}>
-            <View style={styles.iconoFondo}>
-              <MaterialIcons name="location-on" size={18} color="#7B2CBF" />
+        <View style={styles.list}>
+          <View style={styles.itemRow}>
+            <View style={styles.iconBackground}>
+              <MaterialIcons name="location-on" size={18} color={theme.icono} />
             </View>
-            <Text style={styles.itemTexto}>Enviando ubicación en tiempo real</Text>
+            <Text style={styles.itemText}>Enviando ubicación en tiempo real</Text>
           </View>
-          <View style={styles.itemFila}>
-            <View style={styles.iconoFondo}>
-              <MaterialIcons name="videocam" size={18} color="#7B2CBF" />
+          <View style={styles.itemRow}>
+            <View style={styles.iconBackground}>
+              <MaterialIcons name="videocam" size={18} color={theme.icono} />
             </View>
-            <Text style={styles.itemTexto}>Iniciando grabación de video</Text>
+            <Text style={styles.itemText}>Iniciando grabación de video</Text>
           </View>
-          <View style={styles.itemFila}>
-            <View style={styles.iconoFondo}>
-              <MaterialIcons name="call" size={18} color="#7B2CBF" />
+          <View style={styles.itemRow}>
+            <View style={styles.iconBackground}>
+              <MaterialIcons name="call" size={18} color={theme.icono} />
             </View>
-            <Text style={styles.itemTexto}>Llamando a tus contactos elegidos</Text>
+            <Text style={styles.itemText}>Llamando a tus contactos elegidos</Text>
           </View>
         </View>
 
-        <TouchableOpacity style={styles.botonCancelar} onPress={vm.cancelar}>
-          <Text style={styles.textoCancelar}>Cancelar Alerta</Text>
+        <TouchableOpacity style={styles.cancelButton} onPress={vm.cancelar}>
+          <Text style={styles.cancelText}>Cancelar Alerta</Text>
         </TouchableOpacity>
       </View>
     </View>

@@ -1,22 +1,21 @@
-import {StyleSheet } from 'react-native';
+import { AppTheme } from "../../src/contexts/ThemeContext";
 
-export const styles = StyleSheet.create({
-  contenedorPrincipal: {
+export const createStyles = (theme: AppTheme) => ({
+  mainContainer: {
     flex: 1,
-    backgroundColor: "#D1C4E9", // Un morado pastel más elegante
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: theme.background,
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
     padding: 20,
   },
   card: {
-    width: "100%",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 30, // Bordes más redondeados para look moderno
+    width: "100%" as const,
+    backgroundColor: theme.card,
+    borderRadius: 30,
     padding: 25,
-    paddingTop: 70, 
-    alignItems: "center",
-    position: "relative",
-    // Sombras premium
+    paddingTop: 70,
+    alignItems: "center" as const,
+    position: "relative" as const,
     elevation: 15,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 10 },
@@ -24,98 +23,87 @@ export const styles = StyleSheet.create({
     shadowRadius: 20,
   },
   logoContainer: {
-    position: "absolute",
+    position: "absolute" as const,
     top: -55,
     width: 110,
     height: 110,
     borderRadius: 55,
-    backgroundColor: "#FFF",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: theme.card,
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
     borderWidth: 4,
-    borderColor: "#7B2CBF",
+    borderColor: theme.icono,
     zIndex: 10,
     elevation: 20,
-    shadowColor: "#7B2CBF",
+    shadowColor: theme.icono,
     shadowOpacity: 0.4,
     shadowRadius: 10,
   },
   logo: {
     width: 100,
     height: 100,
-    resizeMode: "contain",
+    resizeMode: "contain" as const,
   },
-  moduloContador: {
-    alignItems: "center",
+  counterModule: {
+    alignItems: "center" as const,
     marginBottom: 30,
   },
-  circulo: {
+  circle: {
     width: 130,
     height: 130,
     borderRadius: 65,
-    backgroundColor: "#F3E5F5",
+    backgroundColor: theme.containerBackground,
     borderWidth: 8,
-    borderColor: "#7B2CBF",
-    justifyContent: "center",
-    alignItems: "center",
+    borderColor: theme.icono,
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
     marginBottom: 10,
   },
-  numero: {
+  number: {
     fontSize: 60,
-    fontWeight: "900",
-    color: "#4A148C",
+    fontWeight: "900" as const,
+    color: theme.text,
   },
-  textoEstado: {
+  statusText: {
     fontSize: 18,
-    fontWeight: "600",
-    color: "#7B2CBF",
+    fontWeight: "600" as const,
+    color: theme.icono,
   },
-  lista: {
-    width: "100%",
+  list: {
+    width: "100%" as const,
     marginBottom: 25,
   },
-  itemFila: {
-    flexDirection: "row",
-    alignItems: "center",
+  itemRow: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
     marginBottom: 15,
-    backgroundColor: "#F9F9F9",
+    backgroundColor: theme.containerBackground,
     padding: 10,
     borderRadius: 15,
   },
-  iconoFondo: {
+  iconBackground: {
     width: 35,
     height: 35,
     borderRadius: 10,
-    backgroundColor: "#EDE7F6",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: theme.contactBadgeBg,
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
     marginRight: 12,
   },
-  itemTexto: {
-    color: "#444",
+  itemText: {
+    color: theme.text,
     fontSize: 14,
-    fontWeight: "500",
+    fontWeight: "500" as const,
   },
-
-
-  botonCancelar: {
-    backgroundColor: "#380369", // Color neutro para no distraer del botón principal
-    width: "100%",
+  cancelButton: {
+    backgroundColor: theme.tabBackground,
+    width: "100%" as const,
     paddingVertical: 15,
     borderRadius: 15,
-    alignItems: "center",
+    alignItems: "center" as const,
   },
-  textoCancelar: {
-    color: "#ffffff",
-    fontWeight: "600",
+  cancelText: {
+    color: theme.headerText,
+    fontWeight: "600" as const,
   },
-  footerTexto: {
-    marginTop: 20,
-    color: "#FFF",
-    fontSize: 12,
-    fontWeight: "500",
-    opacity: 0.8,
-  }
 });
-
-
