@@ -1,5 +1,5 @@
 import type { Contacto } from "../models/Contacto";
-import type { Alerta } from "../models/Alerta";  // ← importa el modelo
+import type { Alerta } from "../models/Alerta";
 
 export type AuthStackParamList = {
   Index: undefined;
@@ -13,7 +13,9 @@ export type AuthStackParamList = {
 export type MainStackParamList = {
   DrawerHome: undefined;
   Perfil: undefined;
+
   Activacion: undefined;
+
   TutorialBienvenida: undefined;
   TutorialBoton: undefined;
   TutorialMensaje: undefined;
@@ -21,9 +23,45 @@ export type MainStackParamList = {
   TutorialContacto: undefined;
   TutorialSeguridad: undefined;
   TutorialNotificacion: undefined;
-  AgregarContacto: { contacto?: Contacto } | undefined;
-  DetalleAlerta: { alerta: Alerta };  // ← esto faltaba
+
+  AgregarContacto:
+    | {
+        contacto?: Contacto;
+      }
+    | undefined;
+
+  DetalleAlerta: {
+    alerta: Alerta;
+  };
+
+  historialMapa: {
+    ubicacion: {
+      id: string;
+
+      latitude: number;
+      longitude: number;
+
+      direccion: string;
+      barrio: string;
+
+      municipio: string;
+
+      ciudad: string;
+      departamento: string;
+      pais: string;
+
+      fecha: string;
+
+      estado: "Activo" | "Inactivo";
+
+      precision: string;
+
+      notas?: string;
+    };
+  };
 };
 
-/** @deprecated Usar AuthStackParamList o MainStackParamList según el flujo */
-export type RootStackParamList = AuthStackParamList & MainStackParamList;
+/** @deprecated */
+export type RootStackParamList =
+  AuthStackParamList &
+  MainStackParamList;
