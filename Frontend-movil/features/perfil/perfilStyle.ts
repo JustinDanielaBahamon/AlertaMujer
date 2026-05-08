@@ -8,34 +8,45 @@ export const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingVertical: 14,
     gap: 12,
+  },
+  btnVolver: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: "rgba(255,255,255,0.15)",
+    alignItems: "center",
+    justifyContent: "center",
   },
   tituloHeader: {
     color: "#fff",
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: "500",
     flex: 1,
   },
+
+  // ScrollView
   scrollContent: {
-    padding: 20,
-    gap: 20,
     paddingBottom: 40,
   },
-  // Foto
+
+  // Avatar en zona morada
   contenedorFoto: {
-    alignItems: "center",
-    gap: 12,
-  },
+  alignItems: "center",
+  paddingTop: 16,
+  paddingBottom: 36,  // ← antes era gap: 4 con paddingVertical: 24
+  gap: 6,             // ← un poco más de separación
+},
   circuloFoto: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    borderWidth: 3,
-    borderColor: "#BC27BE",
+    borderWidth: 4,
+    borderColor: "#fff",
     overflow: "hidden",
-    backgroundColor: "#7a2d7a",
+    backgroundColor: "#e8d0f0",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -43,94 +54,94 @@ export const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
-  btnCambiarFoto: {
-    backgroundColor: "rgba(188,39,190,0.3)",
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "#BC27BE",
+  camaraIcono: {
+    position: "absolute",
+    bottom: 2,
+    right: 2,
+    backgroundColor: "#BC27BE",
+    borderRadius: 14,
+    padding: 5,
+    borderWidth: 2,
+    borderColor: "#fff",
   },
-  textoCambiarFoto: {
+  nombreUsuario: {
+    fontSize: 18,
+    fontWeight: "500",
     color: "#fff",
-    fontSize: 14,
-    fontWeight: "600",
+    marginTop: 10,
+    marginBottom: 2,
   },
+  correoUsuario: {
+    fontSize: 13,
+    color: "rgba(255,255,255,0.7)",
+  },
+
+  // Cuerpo blanco
+  cuerpo: {
+  backgroundColor: "#f7f0fa",
+  borderTopLeftRadius: 32,
+  borderTopRightRadius: 32,
+  paddingTop: 28,
+  paddingHorizontal: 20,
+  paddingBottom: 40,
+  minHeight: 500,
+  gap: 14,
+  // ← sin cambios acá, el problema era en contenedorFoto
+},
+
   // Tarjeta
   tarjeta: {
     backgroundColor: "#fff",
     borderRadius: 20,
     padding: 20,
-    gap: 16,
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    gap: 12,
+    borderWidth: 0.5,
+    borderColor: "rgba(70,4,71,0.12)",
   },
   tituloSeccion: {
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: 11,
+    fontWeight: "500",
     color: "#460447",
-    marginBottom: 4,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginBottom: 2,
   },
   contenedorInput: {
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#BC27BE",
-    borderRadius: 20,
-    paddingHorizontal: 15,
-    height: 50,
-    backgroundColor: "#F3E8FF",
+    borderColor: "#e0bce0",
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    height: 48,
+    backgroundColor: "#faf5ff",
   },
   input: {
     flex: 1,
-    fontSize: 16,
-    color: "#000",
-  },
-  // Incognito switch
-  filaIncognito: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#F3E8FF",
-    borderRadius: 16,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: "#BC27BE",
-  },
-  textoIncognito: {
     fontSize: 15,
-    fontWeight: "600",
-    color: "#460447",
+    color: "#2d0030",
   },
-  subtextoIncognito: {
-    fontSize: 12,
-    color: "#666",
-    marginTop: 2,
-  },
+
   // Botones
   btnGuardar: {
-    backgroundColor: "rgba(164,7,255,0.85)",
-    borderRadius: 25,
+    backgroundColor: "#BC27BE",
+    borderRadius: 16,
     height: 50,
     alignItems: "center",
     justifyContent: "center",
-    elevation: 4,
   },
   textoGuardar: {
     color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 16,
+    fontWeight: "500",
   },
   btnContrasena: {
     backgroundColor: "#fff",
-    borderRadius: 25,
+    borderRadius: 16,
     height: 50,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 2,
+    borderWidth: 1.5,
     borderColor: "#BC27BE",
     flexDirection: "row",
     gap: 8,
@@ -138,19 +149,20 @@ export const styles = StyleSheet.create({
   textoContrasena: {
     color: "#460447",
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: "500",
   },
-  // Mensaje
+
+  // Mensajes
   mensajeExito: {
     textAlign: "center",
-    color: "#2ecc71",
+    color: "#27ae60",
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: "500",
   },
   mensajeError: {
     textAlign: "center",
     color: "#e74c3c",
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: "500",
   },
 });
