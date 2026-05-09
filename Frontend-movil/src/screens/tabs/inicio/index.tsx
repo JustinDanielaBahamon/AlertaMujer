@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-// src/screens/tabs/inicio/index.tsx
-import {View, Text, TouchableOpacity, ActivityIndicator,Animated, Easing, useWindowDimensions, Image,
-=======
+
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation, type NavigationProp, type ParamListBase } from "@react-navigation/native";
 import { Audio } from "expo-av";
@@ -14,7 +11,6 @@ import {
   Text, TouchableOpacity,
   useWindowDimensions,
   View,
->>>>>>> 9949a9e571258b3dbac5cbc0239d6de08f652a72
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useInicioViewModel } from "../../../../features/inicio/useInicioViewModel";
@@ -198,10 +194,7 @@ export default function Inicio() {
         </TouchableOpacity>
       </TouchableOpacity>
 
-<<<<<<< HEAD
-      {/* Indicadores cámara / micrófono — sin cápsula, solo dot + texto */}
-=======
->>>>>>> 9949a9e571258b3dbac5cbc0239d6de08f652a72
+
       {/* Indicadores cámara / micrófono */}
       <View style={styles.indicatorsRow}>
         <TouchableOpacity style={styles.indicator} onPress={toggleCamera} activeOpacity={0.7}>
