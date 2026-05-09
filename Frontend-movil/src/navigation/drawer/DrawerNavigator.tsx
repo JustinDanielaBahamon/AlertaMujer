@@ -35,24 +35,18 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
 
   const isDarkMode = theme.mode === "dark";
 
-  // rosa, vino, magenta, Azul → iconos BLANCOS sobre círculo de color
-  // light, dark → iconos MORADOS (theme.icono)
   const whiteIconThemes = ["rosa", "vino", "magenta", "Azul"];
   const cardIconColor = whiteIconThemes.includes(theme.mode) ? "#ffffff" : theme.icono;
   const cardIconBg    = whiteIconThemes.includes(theme.mode)
     ? theme.icono + "cc"
     : theme.icono + "22";
 
-  // Botón Compartir: blanco con texto del tema o invertido en dark
   const shareButtonBg   = isDarkMode ? theme.icono : "#ffffff";
   const shareButtonText = isDarkMode ? "#ffffff" : theme.icono;
 
-  // Botón Cerrar sesión: siempre headercolor2 con texto blanco
   const logoutButtonBg   = theme.headercolor2;
   const logoutButtonText = "#ffffff";
 
-  // Línea de acento y borde avatar blancos en: dark, vino, Azul, magenta, rosa
-  // Solo "light" usa el color icono del tema
   const whiteAccentThemes = ["dark", "vino", "Azul", "magenta", "rosa"];
   const accentLineColor = whiteAccentThemes.includes(theme.mode) ? "#ffffff" : theme.icono;
 
@@ -68,7 +62,10 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
 
   const navigateTo = (route: string) => {
     setIsSettingsOpen(false);
-    props.navigation.navigate(route as never);
+    props.navigation.closeDrawer();
+    setTimeout(() => {
+      props.navigation.getParent()?.navigate(route as never);
+    }, 250);
   };
 
   return (
@@ -80,23 +77,38 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
           showsVerticalScrollIndicator={false}
         >
 
-          {/* Perfil: mismo fondo que el drawer, sin capa diferente */}
-          <View style={styles.headerZona}>
+          {/* ✅ Perfil tappable con datos dinámicos del usuario */}
+          <TouchableOpacity
+            style={styles.headerZona}
+            onPress={() => navigateTo("Perfil")}
+            activeOpacity={0.75}
+          >
             <View style={styles.avatarFila}>
+              {/* ✅ Foto dinámica: usa la del usuario o la imagen por defecto */}
               <Image
-                source={{ uri: "https://i.redd.it/f85dk8outnof1.png" }}
+                source={
+                  user?.fotoPerfil
+                    ? { uri: user.fotoPerfil }
+                    : { uri: "https://i.redd.it/f85dk8outnof1.png" }
+                }
                 style={[styles.avatar, { borderColor: accentLineColor }]}
               />
             </View>
-            <Text style={styles.nombre}>Isabella Quintero</Text>
-            <Text style={styles.correo}>{user?.correo || "isabella@gmail.com"}</Text>
+            {/* ✅ Nombre dinámico */}
+            <Text style={styles.nombre}>
+              {user?.nombre || "Isabella Quintero"}
+            </Text>
+            {/* ✅ Correo dinámico */}
+            <Text style={styles.correo}>
+              {user?.correo || "isabella@gmail.com"}
+            </Text>
             <View style={[styles.lineaAccento, { backgroundColor: accentLineColor }]} />
-          </View>
+          </TouchableOpacity>
 
-          {/* Menú: tarjetas blancas (o translúcidas en dark) */}
+          {/* Menú */}
           <View style={styles.listaMenu}>
 
-            <TouchableOpacity style={styles.tarjetaItem} onPress={() => navigateTo("Inicio")} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.tarjetaItem} onPress={() => navigateTo("DrawerHome")} activeOpacity={0.7}>
               <View style={[styles.iconoCirculo, { backgroundColor: cardIconBg }]}>
                 <Ionicons name="home-outline" size={20} color={cardIconColor} />
               </View>
@@ -150,7 +162,6 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
           {/* Footer */}
           <View style={styles.footer}>
 
-            {/* Botón Compartir */}
             <TouchableOpacity
               style={[styles.btnCompartir, { backgroundColor: shareButtonBg }]}
               activeOpacity={0.8}
@@ -169,7 +180,6 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
               </View>
             </TouchableOpacity>
 
-            {/* Botón Cerrar sesión */}
             <TouchableOpacity
               style={[styles.btnCerrar, { backgroundColor: logoutButtonBg }]}
               onPress={signOut}
@@ -184,7 +194,6 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
               </View>
             </TouchableOpacity>
 
-            {/* Branding */}
             <View style={styles.branding}>
               <Ionicons name="shield-checkmark-outline" size={20} color={theme.headerText} />
               <View style={{ marginLeft: 8 }}>

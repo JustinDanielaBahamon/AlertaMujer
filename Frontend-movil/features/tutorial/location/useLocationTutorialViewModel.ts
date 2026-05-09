@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCallback, useRef, useState } from "react";
 import LottieView from "lottie-react-native";
 
@@ -13,6 +14,9 @@ export const MUNICIPALITIES_HUILA = [
 
 export const PLACEHOLDER_MUNICIPALITY = "";
 
+// Clave fija de AsyncStorage para la ubicación
+export const STORAGE_KEY_UBICACION = "@alerta_mujer:ubicacion";
+
 export interface LocationErrors {
   department: string | null;
   municipality: string | null;
@@ -26,8 +30,8 @@ export function useLocationTutorialViewModel() {
   const [showValidationBanner, setShowValidationBanner] = useState(false);
   const [alreadyConfirmed, setAlreadyConfirmed]         = useState(false);
 
-  const alreadyConfirmedRef = useRef(false);          // ← ref auxiliar
-  const resolveStep = useRef<(value: boolean) => void>(() => {}); // ← función vacía por defecto
+  const alreadyConfirmedRef = useRef(false);
+  const resolveStep = useRef<(value: boolean) => void>(() => {});
   const lottieRef   = useRef<LottieView>(null);
 
   const validate = useCallback((): boolean => {
@@ -55,34 +59,37 @@ export function useLocationTutorialViewModel() {
 
   const requestLocationConfirmation = useCallback((): Promise<boolean> => {
     return new Promise((resolve) => {
-      if (!validate()) {
-        resolve(false);
-        return;
-      }
-      if (alreadyConfirmedRef.current) {  // ← lee la ref, sin stale closure
-        resolve(true);
-        return;
-      }
+      if (!validate()) { resolve(false); return; }
+      if (alreadyConfirmedRef.current) { resolve(true); return; }
       resolveStep.current = resolve;
       setConfirmationModalVisible(true);
     });
-  }, [validate]); // ← sin alreadyConfirmed en deps
+  }, [validate]);
 
-  const confirmLocation = useCallback(() => {
-    alreadyConfirmedRef.current = true;  // ← ref primero
-    setAlreadyConfirmed(true);           // ← estado para la UI del modal
+  // Guarda departamento + municipio en AsyncStorage al confirmar
+  const confirmLocation = useCallback(async () => {
+    try {
+      await AsyncStorage.setItem(
+        STORAGE_KEY_UBICACION,
+        JSON.stringify({ department, municipality })
+      );
+    } catch {
+      // Si falla el guardado no bloqueamos el flujo
+    }
+    alreadyConfirmedRef.current = true;
+    setAlreadyConfirmed(true);
     setConfirmationModalVisible(false);
-    resolveStep.current(true); // si vino del Pager resuelve; si vino del botón es () => {} inofensivo
-  }, []);
+    resolveStep.current(true);
+  }, [department, municipality]);
 
   const closeConfirmation = useCallback(() => {
-    if (alreadyConfirmedRef.current) {   // ← lee la ref, sin stale closure
+    if (alreadyConfirmedRef.current) {
       setConfirmationModalVisible(false);
       return;
     }
     setConfirmationModalVisible(false);
     resolveStep.current(false);
-  }, []); // ← sin dependencias
+  }, []);
 
   return {
     department,

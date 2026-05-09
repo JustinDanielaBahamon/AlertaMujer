@@ -12,6 +12,7 @@ export type AuthStackParamList = {
 
 export type MainStackParamList = {
   DrawerHome: undefined;
+  Perfil: undefined;
 
   Activacion: undefined;
 
