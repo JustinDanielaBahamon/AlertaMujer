@@ -4,7 +4,7 @@ export const styles = StyleSheet.create({
 
   container: {
     backgroundColor: 'rgb(202,171,222)', // tu color
-    height: 120,
+    height: 110,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
