@@ -1,19 +1,6 @@
 import React from "react";
-import {
-  Image,
-  Text,
-  TouchableOpacity,
-  View,
-  Linking,
-  Platform,
-  TextInput,
-} from "react-native";
-import {
-  MaterialIcons,
-  Feather,
-  MaterialCommunityIcons,
-  AntDesign,
-} from "@expo/vector-icons";
+import {Image,Text,TouchableOpacity,View,Linking,Platform,TextInput,} from "react-native";
+import {MaterialIcons,Feather,MaterialCommunityIcons,AntDesign,} from "@expo/vector-icons";
 import { SwipeListView } from "react-native-swipe-list-view";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -121,13 +108,45 @@ export default function Contactos() {
             <View style={styles.contactCard}>
               {/* Sección superior: foto, info, botones */}
               <View style={styles.topSection}>
+
+                {/* ── AVATAR CON LÓGICA DE 3 NIVELES ─────────────────────── */}
                 <View style={styles.photoContainer}>
-                  <Image
-                    source={require("../../../../assets/imagesAlertaMujer/ScContacto/contacto.png")}
-                    style={[styles.profilePhoto, { borderColor: theme.contactAvatarBorder }]}
-                  />
+                  {c.foto ? (
+                    // Nivel 1: foto personalizada o traída de la agenda
+                    <Image
+                      source={{ uri: c.foto }}
+                      style={[styles.profilePhoto, { borderColor: theme.contactAvatarBorder }]}
+                    />
+                  ) : c.nombre.trim() ? (
+                    // Nivel 2: inicial del nombre sobre fondo de color
+                    <View style={[
+                      styles.profilePhoto,
+                      {
+                        borderColor: theme.contactAvatarBorder,
+                        borderWidth: 2,
+                        backgroundColor: theme.contactAccent + "18",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      },
+                    ]}>
+                      <Text style={{
+                        fontSize: 22,
+                        fontWeight: "800",
+                        color: theme.contactAccent,
+                      }}>
+                        {c.nombre.trim().charAt(0).toUpperCase()}
+                      </Text>
+                    </View>
+                  ) : (
+                    // Nivel 3: imagen por defecto
+                    <Image
+                      source={require("../../../../assets/imagesAlertaMujer/ScContacto/contacto.png")}
+                      style={[styles.profilePhoto, { borderColor: theme.contactAvatarBorder }]}
+                    />
+                  )}
                   <View style={styles.statusDot} />
                 </View>
+                {/* ────────────────────────────────────────────────────────── */}
 
                 <View style={styles.contactInfo}>
                   <Text style={[styles.contactName, { color: theme.contactNombre }]}>
