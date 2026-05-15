@@ -1,1 +1,1 @@
-export { default } from "../../features/registro/registroScreen";
+export { default } from "../features/authentication/views/registroScreen";

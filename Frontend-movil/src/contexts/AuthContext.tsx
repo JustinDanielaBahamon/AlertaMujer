@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
-import type { Usuario } from "../models/Usuario";
+import type { Usuario } from "../features/authentication/models/Usuario";
 import type { MainStackParamList } from "../navigation/types";
 
 export type SignInOptions = {

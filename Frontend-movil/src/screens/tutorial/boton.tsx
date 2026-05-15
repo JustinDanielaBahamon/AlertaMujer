@@ -1,1 +1,1 @@
-export { default } from "../../../features/tutorial/button/buttonScreen";
+export { default } from "../../features/tutorial/view/buttonScreen";

@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { LinearGradient } from 'expo-linear-gradient';
-import { COLORS } from "../../../../features/tutorial/universalStyle";
+import { COLORS } from "../../../features/tutorial/styles/universalStyle";
 
 interface Props {
   title?: string;

@@ -1,4 +1,4 @@
-export { default } from "../../../features/tutorial/bienvenida/WelcomeScreen";
+export { default } from "../../features/tutorial/view/WelcomeScreen";
 
 
 
