@@ -6,11 +6,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getTabScreenOptions } from "../components/ui/Tabs/TabsNavegationStyle";
 import { useTheme } from "../contexts/ThemeContext";
 
-import Asistencia from "../screens/tabs/Asistencia/Asistencia";
-import Contactos from "../screens/tabs/contactos/contactos";
-import Historial from "../screens/tabs/historialAlerta/historial";
-import Inicio from "../screens/tabs/inicio";
-import Mapa from "../screens/tabs/mapa/MapaView";
+import Asistencia from "../features/Asistencia/view/Asistencia";
+import Contactos from "../features/contactos/view/contactos";
+import Historial from "../features/historial/view/historial";
+import Inicio from "../features/inicio/view/index";
+import Mapa from "../features/mapa/view/MapaView";
 
 const Tab = createBottomTabNavigator();
 

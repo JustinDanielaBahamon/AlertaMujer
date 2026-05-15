@@ -14,7 +14,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useTheme } from "../../contexts/ThemeContext";
 import { obtenerEstilosDrawer } from "../drawer/drawer.style";
 import TabNavigator from "../TabNavigator";
-import AjustesSubmenu from "../../../features/settings/ajustesComponent";
+import AjustesSubmenu from "../../features/settings/components/ajustesComponent";
 
 const Drawer = createDrawerNavigator();
 

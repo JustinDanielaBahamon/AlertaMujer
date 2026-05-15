@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
-import type { Contacto } from "../models/Contacto";
+import type { Contacto } from "../features/contactos/models/Contacto";
 
 type ContactosContextType = {
   contactos: Contacto[];

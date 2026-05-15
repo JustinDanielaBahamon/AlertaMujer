@@ -1,1 +1,1 @@
-export { default } from "../../../features/tutorial/location/locationScreen";
+export { default } from "../../features/tutorial/view/locationScreen";
