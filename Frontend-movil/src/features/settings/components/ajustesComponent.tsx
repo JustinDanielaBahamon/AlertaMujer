@@ -84,6 +84,18 @@ export default function AjustesComponent({ navigation }: any) {
         </View>
       </TouchableOpacity>
 
+      {/* metodos de activacion */}
+      <TouchableOpacity
+        onPress={() => navigation.navigate("MetodosActivacion")}
+        style={styles.item}
+      >
+        <View style={styles.filaConChevron}>
+          <Ionicons name="flash-outline" size={17} color={theme.text} style={{ marginRight: 8 }} />
+          <Text style={{ color: theme.text, flex: 1, fontSize: 14 }}>Metodos de activacion</Text>
+          <Ionicons name="chevron-forward" size={15} color={theme.tabActiveColor} />
+        </View>
+      </TouchableOpacity>
+
       {/* tutoriales */}
       <TouchableOpacity
         onPress={() => navigation.navigate("TutorialBienvenida")}
