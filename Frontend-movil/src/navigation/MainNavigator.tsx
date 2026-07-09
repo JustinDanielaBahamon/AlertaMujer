@@ -15,6 +15,7 @@ import AgregarContactoScreen from "../features/contactos/view/agregarScreen";
 import DetalleAlertaScreen from "../features/historial/view/detallesAlerta"; // ← nuevo
 import PerfilScreen from "../features/perfil/view/perfilScreen";
 import HistorialMapa from "../features/historial/view/historial";
+import MetodosActivacionScreen from "../features/settings/view/metodosActivacionScreen";
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -47,6 +48,7 @@ export default function MainNavigator({ initialRouteName }: Props) {
       <Stack.Screen name="DetalleAlerta" component={DetalleAlertaScreen} />
       <Stack.Screen name="Perfil" component={PerfilScreen} /> 
       <Stack.Screen name="historialMapa" component={HistorialMapa}/>
+      <Stack.Screen name="MetodosActivacion" component={MetodosActivacionScreen} />
     </Stack.Navigator>
   );
 }
