@@ -1,12 +1,23 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Switch, Text, TouchableOpacity, View } from 'react-native';
+import ModalIdioma from '../../../components/ui/modalIdioma/modalIdioma';
 import { AppMode } from '../../../contexts/ThemeContext';
 import { obtenerEstilos } from '../styles/ajustes.styles';
-import { useAjustesViewModel } from '../viewModel/useAjustesViewModel';
+import { OPCIONES_IDIOMA, useAjustesViewModel } from '../viewModel/useAjustesViewModel';
 
 export default function AjustesComponent({ navigation }: any) {
-  const { theme, toggleTheme, toggleLocale, setMode, obtenerTextoIdioma, obtenerIconoTema } =
-    useAjustesViewModel();
+  const {
+    theme,
+    toggleTheme,
+    setMode,
+    locale,
+    modalIdiomaVisible,
+    abrirModalIdioma,
+    cerrarModalIdioma,
+    seleccionarIdioma,
+    obtenerTextoIdioma,
+    obtenerIconoTema,
+  } = useAjustesViewModel();
 
   const styles = obtenerEstilos(theme);
 
@@ -74,7 +85,7 @@ export default function AjustesComponent({ navigation }: any) {
       </View>
 
       {/* idioma */}
-      <TouchableOpacity onPress={toggleLocale} style={styles.item}>
+      <TouchableOpacity onPress={abrirModalIdioma} style={styles.item}>
         <View style={styles.filaConChevron}>
           <Ionicons name="globe-outline" size={17} color={theme.text} style={{ marginRight: 8 }} />
           <Text style={{ color: theme.text, flex: 1, fontSize: 14 }}>
@@ -107,6 +118,16 @@ export default function AjustesComponent({ navigation }: any) {
           <Ionicons name="chevron-forward" size={15} color={theme.tabActiveColor} />
         </View>
       </TouchableOpacity>
+
+      {/* modal de seleccion de idioma */}
+      <ModalIdioma
+        visible={modalIdiomaVisible}
+        locale={locale}
+        opciones={OPCIONES_IDIOMA}
+        theme={theme}
+        onSeleccionar={seleccionarIdioma}
+        onCerrar={cerrarModalIdioma}
+      />
 
     </View>
   );
