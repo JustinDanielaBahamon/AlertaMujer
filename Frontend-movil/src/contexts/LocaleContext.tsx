@@ -3,16 +3,18 @@ import React, { createContext, useCallback, useContext, useMemo, useState } from
 // Importamos los archivos con los textos en cada idioma
 import es from "../locales/es.json";
 import en from "../locales/en.json";
+import pt from "../locales/pt.json";
+import fr from "../locales/fr.json";
 
 // Los idiomas disponibles en la app
-export type AppLocale = "es" | "en";
+export type AppLocale = "es" | "en" | "pt" | "fr";
 
 // Juntamos los textos en un objeto para buscar por idioma facil
-const STRINGS = { es, en };
+const STRINGS = { es, en, pt, fr };
 
 // Esto define que cosas puede darte el contexto
 type LocaleContextValue = {
-  locale: AppLocale;        // idioma activo: "es" o "en"
+  locale: AppLocale;        // idioma activo: "es", "en", "pt" o "fr"
   t: typeof es;             // todos los textos del idioma activo
   setLocale: (l: AppLocale) => void;  // para cambiar a un idioma especifico
   toggleLocale: () => void; // para alternar entre español e ingles
