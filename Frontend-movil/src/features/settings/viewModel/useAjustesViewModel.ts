@@ -12,7 +12,7 @@ export const OPCIONES_IDIOMA: { code: AppLocale; label: string }[] = [
 
 export const useAjustesViewModel = () => {
   const { theme, toggleTheme, setMode } = useTheme();
-  const { locale, toggleLocale, setLocale } = useLocale();
+  const { locale, toggleLocale, setLocale, t } = useLocale();
 
   // Controla si el modal de seleccion de idioma esta visible
   const [modalIdiomaVisible, setModalIdiomaVisible] = useState(false);
@@ -31,9 +31,9 @@ export const useAjustesViewModel = () => {
   };
 
   const obtenerIconoTema = () => {
-    if (theme.mode === "dark") return "🌙 Modo Oscuro";
-    if (theme.mode === "light") return "☀️ Modo Claro";
-    return "🎨 Tema Personalizado"; // Por si está en rosa/vino
+    if (theme.mode === "dark") return `🌙 ${t.ajustes.oscuro}`;
+    if (theme.mode === "light") return `☀️ ${t.ajustes.claro}`;
+    return `🎨 ${t.ajustes.tema_personalizado}`; // Por si está en rosa/vino
   };
 
   return {

@@ -2,11 +2,13 @@ import { View, Text, TouchableOpacity, Image } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useActivacionViewModel } from "../viewModel/useActivacionViewModel";
 import { useTheme } from "../../../contexts/ThemeContext";
+import { useLocale } from "../../../contexts/LocaleContext";
 import { createStyles } from "../style/activacionStyle";
 
 export default function Activacion() {
   const vm = useActivacionViewModel();
   const { theme } = useTheme();
+  const { t } = useLocale();
   
   const backgroundColor = theme.mode === "dark" ? "#4a4a50" : theme.background;
   const styles = createStyles(theme);
@@ -26,7 +28,7 @@ export default function Activacion() {
           <View style={styles.circle}>
             <Text style={styles.number}>{vm.contador}</Text>
           </View>
-          <Text style={styles.statusText}>Activando Alerta SOS...</Text>
+          <Text style={styles.statusText}>{t.activacion.titulo}</Text>
         </View>
 
         <View style={styles.list}>
@@ -34,24 +36,24 @@ export default function Activacion() {
             <View style={styles.iconBackground}>
               <MaterialIcons name="location-on" size={18} color={theme.icono} />
             </View>
-            <Text style={styles.itemText}>Enviando ubicación en tiempo real</Text>
+            <Text style={styles.itemText}>{t.activacion.enviando_ubicacion}</Text>
           </View>
           <View style={styles.itemRow}>
             <View style={styles.iconBackground}>
               <MaterialIcons name="videocam" size={18} color={theme.icono} />
             </View>
-            <Text style={styles.itemText}>Iniciando grabación de video</Text>
+            <Text style={styles.itemText}>{t.activacion.iniciando_grabacion}</Text>
           </View>
           <View style={styles.itemRow}>
             <View style={styles.iconBackground}>
               <MaterialIcons name="call" size={18} color={theme.icono} />
             </View>
-            <Text style={styles.itemText}>Llamando a tus contactos elegidos</Text>
+            <Text style={styles.itemText}>{t.activacion.llamando_contactos}</Text>
           </View>
         </View>
 
         <TouchableOpacity style={styles.cancelButton} onPress={vm.cancelar}>
-          <Text style={styles.cancelText}>Cancelar Alerta</Text>
+          <Text style={styles.cancelText}>{t.activacion.cancelar}</Text>
         </TouchableOpacity>
       </View>
     </View>

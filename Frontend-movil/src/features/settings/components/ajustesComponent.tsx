@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Switch, Text, TouchableOpacity, View } from 'react-native';
 import ModalIdioma from '../../../components/ui/modalIdioma/modalIdioma';
 import { AppMode } from '../../../contexts/ThemeContext';
+import { useLocale } from '../../../contexts/LocaleContext';
 import { obtenerEstilos } from '../styles/ajustes.styles';
 import { OPCIONES_IDIOMA, useAjustesViewModel } from '../viewModel/useAjustesViewModel';
 
@@ -18,6 +19,8 @@ export default function AjustesComponent({ navigation }: any) {
     obtenerTextoIdioma,
     obtenerIconoTema,
   } = useAjustesViewModel();
+
+  const { t } = useLocale();
 
   const styles = obtenerEstilos(theme);
 
@@ -58,24 +61,24 @@ export default function AjustesComponent({ navigation }: any) {
       {/* temas predeterminados */}
       <View style={styles.item}>
         <Text style={[styles.tituloSeccion, { color: theme.text }]}>
-          Temas Predeterminados
+          {t.ajustes.temas}
         </Text>
         <View style={styles.filaColores}>
-          {temasExtra.map((t) => (
+          {temasExtra.map((tema) => (
             <TouchableOpacity
-              key={t.id}
-              onPress={() => setMode(t.id)}
-              accessibilityLabel={`Tema ${t.label}`}
+              key={tema.id}
+              onPress={() => setMode(tema.id)}
+              accessibilityLabel={`${t.ajustes.tema} ${tema.label}`}
               style={styles.circuloWrapper}
             >
               <View
                 style={[
                   styles.circulo,
-                  { backgroundColor: t.color },
-                  theme.mode === t.id && styles.circuloActivo,
+                  { backgroundColor: tema.color },
+                  theme.mode === tema.id && styles.circuloActivo,
                 ]}
               >
-                {theme.mode === t.id && (
+                {theme.mode === tema.id && (
                   <Text style={styles.checkmark}>✓</Text>
                 )}
               </View>
@@ -89,7 +92,7 @@ export default function AjustesComponent({ navigation }: any) {
         <View style={styles.filaConChevron}>
           <Ionicons name="globe-outline" size={17} color={theme.text} style={{ marginRight: 8 }} />
           <Text style={{ color: theme.text, flex: 1, fontSize: 14 }}>
-            Idioma: {obtenerTextoIdioma()}
+            {t.ajustes.idioma}: {obtenerTextoIdioma()}
           </Text>
           <Ionicons name="chevron-forward" size={15} color={theme.tabActiveColor} />
         </View>
@@ -102,7 +105,7 @@ export default function AjustesComponent({ navigation }: any) {
       >
         <View style={styles.filaConChevron}>
           <Ionicons name="flash-outline" size={17} color={theme.text} style={{ marginRight: 8 }} />
-          <Text style={{ color: theme.text, flex: 1, fontSize: 14 }}>Metodos de activacion</Text>
+          <Text style={{ color: theme.text, flex: 1, fontSize: 14 }}>{t.ajustes.metodos_activacion}</Text>
           <Ionicons name="chevron-forward" size={15} color={theme.tabActiveColor} />
         </View>
       </TouchableOpacity>
@@ -114,7 +117,7 @@ export default function AjustesComponent({ navigation }: any) {
       >
         <View style={styles.filaConChevron}>
           <Ionicons name="school-outline" size={17} color={theme.text} style={{ marginRight: 8 }} />
-          <Text style={{ color: theme.text, flex: 1, fontSize: 14 }}>Ver Tutoriales</Text>
+          <Text style={{ color: theme.text, flex: 1, fontSize: 14 }}>{t.ajustes.ver_tutoriales}</Text>
           <Ionicons name="chevron-forward" size={15} color={theme.tabActiveColor} />
         </View>
       </TouchableOpacity>
