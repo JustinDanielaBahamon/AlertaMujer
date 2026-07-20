@@ -1,4 +1,3 @@
-
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation, type NavigationProp, type ParamListBase } from "@react-navigation/native";
 import { Audio } from "expo-av";
@@ -9,6 +8,7 @@ import {ActivityIndicator,Animated, Easing,Image,Text, TouchableOpacity,useWindo
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useInicioViewModel } from "../viewModel/useInicioViewModel";
 import { useTheme } from "../../../../src/contexts/ThemeContext";
+import { useLocale } from "../../../../src/contexts/LocaleContext";
 import type { Alerta, EstadoAlerta } from "../../../features/historial/models/Alerta";
 import { getMainStackNavigation } from "../../../navigation/navigationHelpers";
 import { createStyles } from "../styles/inicio.styles";
@@ -23,7 +23,10 @@ const mockAlerts: Alerta[] = [
 ];
 
 //  Utilidad: calcula "hace N días" desde la fecha del historial 
-function calcularTiempoTranscurrido(fechaStr: string): string {
+function calcularTiempoTranscurrido(
+  fechaStr: string,
+  textos: { hoy: string; hace_1_dia: string; hace_dias: string }
+): string {
   // Formato esperado: "30 Mar, 2026"
   const meses: Record<string, number> = {
     Ene: 0, Feb: 1, Mar: 2, Abr: 3, May: 4, Jun: 5,
@@ -40,14 +43,15 @@ function calcularTiempoTranscurrido(fechaStr: string): string {
   const diffMs = hoy.getTime() - fechaAlerta.getTime();
   const diffDias = Math.round(diffMs / (1000 * 60 * 60 * 24));
 
-  if (diffDias === 0) return "Hoy";
-  if (diffDias === 1) return "Hace 1 día";
-  return `Hace ${diffDias} días`;
+  if (diffDias === 0) return textos.hoy;
+  if (diffDias === 1) return textos.hace_1_dia;
+  return textos.hace_dias.replace("{n}", String(diffDias));
 }
 
 export default function Inicio() {
   const vm = useInicioViewModel();
   const { theme } = useTheme();
+  const { t } = useLocale();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const { width, height } = useWindowDimensions();
@@ -62,8 +66,12 @@ export default function Inicio() {
   //  Última alerta derivada del historial 
   const ultimaAlerta = useMemo(() => mockAlerts[0], []);
   const tiempoTranscurrido = useMemo(
-    () => calcularTiempoTranscurrido(ultimaAlerta.fecha),
-    [ultimaAlerta.fecha]
+    () => calcularTiempoTranscurrido(ultimaAlerta.fecha, {
+      hoy: t.inicio.hoy,
+      hace_1_dia: t.inicio.hace_1_dia,
+      hace_dias: t.inicio.hace_dias,
+    }),
+    [ultimaAlerta.fecha, t]
   );
 
   //  Animaciones glow expansivo
@@ -149,9 +157,9 @@ export default function Inicio() {
       >
         <MaterialIcons name="verified-user" size={22} color="#27ae60" />
         <View style={styles.safeZoneInfo}>
-          <Text style={[styles.safeZoneTitle, { color: "#27ae60" }]}>Zona segura</Text>
+          <Text style={[styles.safeZoneTitle, { color: "#27ae60" }]}>{t.inicio.zona_segura}</Text>
           <Text style={[styles.safeZoneSubtitle, { color: theme.text }]}>
-            No se han reportado incidentes cerca de ti
+            {t.inicio.sin_incidentes}
           </Text>
         </View>
         <MaterialIcons name="chevron-right" size={20} color={theme.text} />
@@ -165,12 +173,12 @@ export default function Inicio() {
       >
         <MaterialIcons name="location-on" size={24} color={theme.icono} />
         <View style={styles.locationInfo}>
-          <Text style={[styles.locationLabel, { color: theme.text }]}>Ubicación actual</Text>
+          <Text style={[styles.locationLabel, { color: theme.text }]}>{t.inicio.ubicacion_actual}</Text>
           <Text style={[styles.locationValue, { color: theme.text }]} numberOfLines={1}>
-            {!vm.cargando && vm.ubicacionNombre !== "Obteniendo ubicación..." && vm.ubicacionNombre !== "Permiso denegado" && vm.ubicacionNombre !== "Error al actualizar" && (
+            {!vm.cargando && vm.ubicacionLista && (
               <View style={styles.gpsRow}>
                 <View style={styles.gpsDot} />
-                <Text style={styles.gpsText}>GPS activo</Text>
+                <Text style={styles.gpsText}>{t.inicio.gps_activo}</Text>
               </View>
             )}
             {vm.ubicacionNombre}
@@ -199,7 +207,7 @@ export default function Inicio() {
             color={cameraActive ? theme.icono : "#e74c3c"}
           />
           <Text style={[styles.indicatorText, { color: cameraActive ? theme.icono : "#e74c3c" }]}>
-            Cámara
+            {t.inicio.camara}
           </Text>
         </TouchableOpacity>
 
@@ -211,7 +219,7 @@ export default function Inicio() {
             color={micActive ? theme.icono : "#e74c3c"}
           />
           <Text style={[styles.indicatorText, { color: micActive ? theme.icono : "#e74c3c" }]}>
-            Micrófono
+            {t.inicio.microfono}
           </Text>
         </TouchableOpacity>
       </View>
@@ -296,7 +304,7 @@ export default function Inicio() {
 
       {/* Texto de instrucción — fuente reducida para no pegarse al botón */}
       <Text style={[styles.instructionText, { color: theme.text }]}>
-        Presiona en caso de Emergencia
+        {t.inicio.presiona_emergencia.replace("\n", " ")}
       </Text>
 
       {/* Ultima alerta, (esta conectada al historial) */}
@@ -311,10 +319,10 @@ export default function Inicio() {
         <MaterialIcons name="history" size={22} color={theme.icono} />
         <View style={styles.lastAlertInfo}>
           <Text style={[styles.lastAlertTitle, { color: theme.text }]}>
-            <Text style={{ fontWeight: "bold" }}>Última alerta:</Text> {tiempoTranscurrido}
+            <Text style={{ fontWeight: "bold" }}>{t.inicio.ultima_alerta}</Text> {tiempoTranscurrido}
           </Text>
           <Text style={[styles.lastAlertSubtitle, { color: theme.text }]}>
-            Última ubicación enviada: {ultimaAlerta.hora} — {ultimaAlerta.ubicacion}
+            {t.inicio.ultima_ubicacion_enviada} {ultimaAlerta.hora} — {ultimaAlerta.ubicacion}
           </Text>
         </View>
         <MaterialIcons name="chevron-right" size={20} color={theme.text} />

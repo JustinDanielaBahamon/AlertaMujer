@@ -12,6 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import AppHeader from "../../components/ui/Header/header";
 import { useAuth } from "../../contexts/AuthContext";
 import { useTheme } from "../../contexts/ThemeContext";
+import { useLocale } from "../../contexts/LocaleContext";
 import { obtenerEstilosDrawer } from "../drawer/drawer.style";
 import TabNavigator from "../TabNavigator";
 import AjustesSubmenu from "../../features/settings/components/ajustesComponent";
@@ -30,6 +31,7 @@ function HeaderWithTabs() {
 function CustomDrawerContent(props: DrawerContentComponentProps) {
   const { signOut, user } = useAuth();
   const { theme } = useTheme();
+  const { t } = useLocale();
   const styles = obtenerEstilosDrawer(theme);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -112,7 +114,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
               <View style={[styles.iconoCirculo, { backgroundColor: cardIconBg }]}>
                 <Ionicons name="home-outline" size={20} color={cardIconColor} />
               </View>
-              <Text style={styles.textoItem}>Inicio</Text>
+              <Text style={styles.textoItem}>{t.menu.inicio}</Text>
               <Ionicons name="chevron-forward" size={16} color={cardIconColor} style={styles.chevron} />
             </TouchableOpacity>
 
@@ -120,7 +122,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
               <View style={[styles.iconoCirculo, { backgroundColor: cardIconBg }]}>
                 <Ionicons name="people-outline" size={20} color={cardIconColor} />
               </View>
-              <Text style={styles.textoItem}>Contactos</Text>
+              <Text style={styles.textoItem}>{t.menu.contactos}</Text>
               <Ionicons name="chevron-forward" size={16} color={cardIconColor} style={styles.chevron} />
             </TouchableOpacity>
 
@@ -128,7 +130,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
               <View style={[styles.iconoCirculo, { backgroundColor: cardIconBg }]}>
                 <Ionicons name="time-outline" size={20} color={cardIconColor} />
               </View>
-              <Text style={styles.textoItem}>Historial</Text>
+              <Text style={styles.textoItem}>{t.menu.historial}</Text>
               <Ionicons name="chevron-forward" size={16} color={cardIconColor} style={styles.chevron} />
             </TouchableOpacity>
 
@@ -140,7 +142,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
               <View style={[styles.iconoCirculo, { backgroundColor: cardIconBg }]}>
                 <Ionicons name="settings-outline" size={20} color={cardIconColor} />
               </View>
-              <Text style={styles.textoItem}>Configuración</Text>
+              <Text style={styles.textoItem}>{t.menu.configuracion}</Text>
               <Ionicons
                 name={isSettingsOpen ? "chevron-down" : "chevron-forward"}
                 size={16}
@@ -173,8 +175,8 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
                   <Ionicons name="share-social-outline" size={20} color={shareButtonText} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={[styles.btnTitulo, { color: shareButtonText }]}>Compartir Enlace</Text>
-                  <Text style={[styles.btnSubtitulo, { color: shareButtonText }]}>Invita a otras mujeres a unirse</Text>
+                  <Text style={[styles.btnTitulo, { color: shareButtonText }]}>{t.menu.compartir_titulo}</Text>
+                  <Text style={[styles.btnSubtitulo, { color: shareButtonText }]}>{t.menu.compartir_desc}</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={16} color={shareButtonText} />
               </View>
@@ -189,7 +191,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
                 <View style={[styles.btnIconoFondo, { backgroundColor: "rgba(255,255,255,0.25)" }]}>
                   <Ionicons name="log-out-outline" size={20} color={logoutButtonText} />
                 </View>
-                <Text style={[styles.btnTitulo, { flex: 1, color: logoutButtonText }]}>Cerrar sesión</Text>
+                <Text style={[styles.btnTitulo, { flex: 1, color: logoutButtonText }]}>{t.menu.cerrar_sesion}</Text>
                 <Ionicons name="chevron-forward" size={16} color={logoutButtonText} />
               </View>
             </TouchableOpacity>
@@ -198,7 +200,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
               <Ionicons name="shield-checkmark-outline" size={20} color={theme.headerText} />
               <View style={{ marginLeft: 8 }}>
                 <Text style={[styles.brandingNombre, { color: theme.headerText }]}>Alerta Mujer</Text>
-                <Text style={[styles.brandingSlogan, { color: theme.headerText }]}>Juntas somos más fuertes</Text>
+                <Text style={[styles.brandingSlogan, { color: theme.headerText }]}>{t.menu.slogan}</Text>
               </View>
               <Ionicons name="heart" size={14} color={theme.headerText} style={{ marginLeft: 8 }} />
             </View>

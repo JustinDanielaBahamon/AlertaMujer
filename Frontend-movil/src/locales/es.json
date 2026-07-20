@@ -35,7 +35,18 @@
   "microfono": "Micrófono",
   "presiona_emergencia": "Presiona en caso de\nEmergencia",
   "boton_alerta": "Enviar alerta",
-  "estado_segura": "Estás segura"
+  "estado_segura": "Estás segura",
+  "zona_segura": "Zona segura",
+  "sin_incidentes": "No se han reportado incidentes cerca de ti",
+  "gps_activo": "GPS activo",
+  "ubicacion_desconocida": "Ubicación desconocida",
+  "permiso_denegado": "Permiso denegado",
+  "error_actualizar": "Error al actualizar",
+  "ultima_alerta": "Última alerta:",
+  "ultima_ubicacion_enviada": "Última ubicación enviada:",
+  "hoy": "Hoy",
+  "hace_1_dia": "Hace 1 día",
+  "hace_dias": "Hace {n} días"
   },
   "contactos": {
   "titulo": "Mis Contactos de Confianza",
@@ -92,7 +103,9 @@
   "claro": "Modo claro",
   "cerrar_sesion": "Cerrar sesión",
   "terminos": "Términos y condiciones",
-  "privacidad": "Política de privacidad"
+  "privacidad": "Política de privacidad",
+  "metodos_activacion": "Métodos de activación",
+  "tema_personalizado": "Tema Personalizado"
 
   },
   "recuperar": {
@@ -160,5 +173,26 @@
     "reintentar": "Reintentar",
     "guardar": "Guardar",
     "editar": "Editar"
-  }
+  },
+
+"menu": {
+  "abrir_menu": "Abrir menú",
+  "inicio": "Inicio",
+  "mapa": "Mapa",
+  "asistencia": "Asistencia",
+  "contactos": "Contactos",
+  "historial": "Historial",
+  "configuracion": "Configuración",
+  "compartir_titulo": "Compartir Enlace",
+  "compartir_desc": "Invita a otras mujeres a unirse",
+  "cerrar_sesion": "Cerrar sesión",
+  "slogan": "Juntas somos más fuertes"
+},
+"activacion": {
+  "titulo": "Activando Alerta SOS...",
+  "enviando_ubicacion": "Enviando ubicación en tiempo real",
+  "iniciando_grabacion": "Iniciando grabación de video",
+  "llamando_contactos": "Llamando a tus contactos elegidos",
+  "cancelar": "Cancelar Alerta"
+}
 }

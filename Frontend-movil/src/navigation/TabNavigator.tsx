@@ -5,6 +5,7 @@ import { Animated, StyleSheet, Text, TouchableOpacity, View } from "react-native
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getTabScreenOptions } from "../components/ui/Tabs/TabsNavegationStyle";
 import { useTheme } from "../contexts/ThemeContext";
+import { useLocale } from "../contexts/LocaleContext";
 
 import Asistencia from "../features/Asistencia/view/Asistencia";
 import Contactos from "../features/contactos/view/contactos";
@@ -22,14 +23,15 @@ const TABS = [
   { name: "Historial", icono: "time",    iconoOff: "time-outline"    },
 ];
 
-function TabBoton({ label, isFocused, onPress, color }: {
+function TabBoton({ routeName, label, isFocused, onPress, color }: {
+  routeName: string;
   label: string;
   isFocused: boolean;
   onPress: () => void;
   color: string;
 }) {
   const scale = useRef(new Animated.Value(1)).current;
-  const tab = TABS.find(t => t.name === label)!;
+  const tab = TABS.find(t => t.name === routeName)!;
 
   const handlePress = () => {
     Animated.sequence([
@@ -76,7 +78,17 @@ const tabStyles = StyleSheet.create({
 
 export default function TabNavigator() {
   const { theme } = useTheme();
+  const { t } = useLocale();
   const insets = useSafeAreaInsets(); // ← detecta el espacio de los botones Android/iOS automáticamente
+
+  // Traduce cada nombre de ruta a su texto visible en el idioma activo
+  const etiquetasTabs: Record<string, string> = {
+    Inicio: t.menu.inicio,
+    Mapa: t.menu.mapa,
+    Asistencia: t.menu.asistencia,
+    Contactos: t.menu.contactos,
+    Historial: t.menu.historial,
+  };
 
   return (
     <Tab.Navigator
@@ -98,7 +110,8 @@ export default function TabNavigator() {
             return (
               <TabBoton
                 key={route.key}
-                label={route.name}
+                routeName={route.name}
+                label={etiquetasTabs[route.name] ?? route.name}
                 isFocused={isFocused}
                 color={color}
                 onPress={() => navigation.navigate(route.name)}

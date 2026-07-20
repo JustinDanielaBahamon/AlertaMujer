@@ -35,7 +35,18 @@
   "microfono": "Microphone",
   "presiona_emergencia": "Press in case of\nEmergency",
   "boton_alerta": "Send alert",
-  "estado_segura": "You are safe"
+  "estado_segura": "You are safe",
+  "zona_segura": "Safe zone",
+  "sin_incidentes": "No incidents have been reported near you",
+  "gps_activo": "GPS active",
+  "ubicacion_desconocida": "Unknown location",
+  "permiso_denegado": "Permission denied",
+  "error_actualizar": "Error updating",
+  "ultima_alerta": "Last alert:",
+  "ultima_ubicacion_enviada": "Last location sent:",
+  "hoy": "Today",
+  "hace_1_dia": "1 day ago",
+  "hace_dias": "{n} days ago"
   },
  "contactos": {
   "titulo": "My Trusted Contacts",
@@ -92,7 +103,9 @@
   "claro": "Light mode",
   "cerrar_sesion": "Sign out",
   "terminos": "Terms and conditions",
-  "privacidad": "Privacy policy"
+  "privacidad": "Privacy policy",
+  "metodos_activacion": "Activation Methods",
+  "tema_personalizado": "Custom Theme"
 
   },
   "recuperar": {
@@ -160,5 +173,25 @@
     "reintentar": "Retry",
     "guardar": "Save",
     "editar": "Edit"
-  }
+  },
+"menu": {
+  "abrir_menu": "Open menu",
+  "inicio": "Home",
+  "mapa": "Map",
+  "asistencia": "Assistance",
+  "contactos": "Contacts",
+  "historial": "History",
+  "configuracion": "Settings",
+  "compartir_titulo": "Share Link",
+  "compartir_desc": "Invite other women to join",
+  "cerrar_sesion": "Sign out",
+  "slogan": "Together we are stronger"
+},
+"activacion": {
+  "titulo": "Activating SOS Alert...",
+  "enviando_ubicacion": "Sending real-time location",
+  "iniciando_grabacion": "Starting video recording",
+  "llamando_contactos": "Calling your chosen contacts",
+  "cancelar": "Cancel Alert"
+}
 }
