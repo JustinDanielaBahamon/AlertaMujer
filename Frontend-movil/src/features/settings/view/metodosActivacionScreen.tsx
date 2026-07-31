@@ -4,11 +4,13 @@ import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "../../../contexts/ThemeContext";
+import { useLocale } from "../../../contexts/LocaleContext";
 import { createMetodosActivacionStyles } from "../styles/metodosActivacion.styles";
 import { useMetodosActivacionViewModel } from "../viewModel/useMetodosActivacionViewModel";
 
 export default function MetodosActivacionScreen() {
   const { theme } = useTheme();
+  const { t } = useLocale();
   const styles = useMemo(() => createMetodosActivacionStyles(theme), [theme]);
   const insets = useSafeAreaInsets();
   const { metodos, volver } = useMetodosActivacionViewModel();
@@ -22,7 +24,7 @@ export default function MetodosActivacionScreen() {
         <TouchableOpacity onPress={volver} style={styles.btnVolver}>
           <Ionicons name="arrow-back" size={22} color={theme.headerText} />
         </TouchableOpacity>
-        <Text style={styles.tituloHeader}>Metodos de activación</Text>
+        <Text style={styles.tituloHeader}>{t.metodosActivacion.titulo_header}</Text>
       </View>
 
       <ScrollView
@@ -30,9 +32,7 @@ export default function MetodosActivacionScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.intro}>
-          Ademas del boton principal de alerta, puedes activar una alerta
-          usando estos metodos alternativos. Conócelos para reaccionar más
-          rapido en caso de necesitarlo.
+          {t.metodosActivacion.intro}
         </Text>
 
         {metodos.map((metodo) => (
@@ -64,8 +64,7 @@ export default function MetodosActivacionScreen() {
         <View style={styles.notaWrap}>
           <Ionicons name="information-circle-outline" size={18} color={theme.icono} />
           <Text style={styles.notaTexto}>
-            Muy pronto se añadirán mas formas de activacion rápida. Esta
-            seccion se actualizara de forma automatica cuando esten disponibles.
+            {t.metodosActivacion.nota}
           </Text>
         </View>
       </ScrollView>

@@ -6,6 +6,7 @@ import Card from "../../../components/ui/card/card";
 import { BUTTON_COLORS, buttonStyle } from "../styles/buttonStyle";
 import { useButtonTutorialViewModel, type TapOption, } from "../viewModel/useButtonTutorialViewModel";
 import { LinearGradient } from 'expo-linear-gradient';
+import { useLocale } from "../../../contexts/LocaleContext";
 
 // ─── Decorative background circles ───────────────────────────────────────────
 function BackgroundCircles() {
@@ -126,7 +127,7 @@ function TapRow({ item, isActive, onPress, enterDelay }: {
 }
 
 // ─── Animated SOS button ──────────────────────────────────────────────────────
-function SOSButton({ onTap }: { onTap: (msg: string) => void }) {
+function SOSButton({ onTap, sosLabel, tocaAquiLabel }: { onTap: (msg: string) => void; sosLabel: string; tocaAquiLabel: string }) {
   const scaleAnim    = useRef(new Animated.Value(1)).current;
   const ring1Anim    = useRef(new Animated.Value(1)).current;
   const ring1Opacity = useRef(new Animated.Value(0.5)).current;
@@ -158,7 +159,7 @@ function SOSButton({ onTap }: { onTap: (msg: string) => void }) {
       Animated.timing(scaleAnim, { toValue: 0.86, duration: 90, useNativeDriver: true }),
       Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true, speed: 16, bounciness: 16 }),
     ]).start();
-    onTap("🚨 Botón SOS activado");
+    onTap(sosLabel);
   };
 
   return (
@@ -168,7 +169,7 @@ function SOSButton({ onTap }: { onTap: (msg: string) => void }) {
       <TouchableOpacity onPress={handlePress} activeOpacity={0.9}>
         <Animated.View style={[buttonStyle.sosBtn, { transform: [{ scale: scaleAnim }] }]}>
           <Text style={buttonStyle.sosBtnText}>SOS</Text>
-          <Text style={buttonStyle.sosBtnSub}>Toca aquí</Text>
+          <Text style={buttonStyle.sosBtnSub}>{tocaAquiLabel}</Text>
         </Animated.View>
       </TouchableOpacity>
     </View>
@@ -177,6 +178,7 @@ function SOSButton({ onTap }: { onTap: (msg: string) => void }) {
 
 // ─── Main screen ──────────────────────────────────────────────────────────────
 export default function ActivationTutorial() {
+  const { t } = useLocale();
   const {
     activeRow,
     feedback,
@@ -213,7 +215,7 @@ export default function ActivationTutorial() {
 
           {/* Animated card */}
           <Animated.View style={[{ flex: 1 }, cardAnimStyle]}>
-            <Card title={`Cómo funciona el\n`} titleHighlight="botón">
+            <Card title={`${t.tutorial.boton_titulo_1}\n`} titleHighlight={t.tutorial.boton_titulo_2}>
               <ScrollView
                 style={buttonStyle.cardScroll}
                 contentContainerStyle={buttonStyle.cardScrollContent}
@@ -223,7 +225,7 @@ export default function ActivationTutorial() {
               >
                 {/* Gestures section */}
                 <View style={buttonStyle.sectionRow}>
-                  <Text style={buttonStyle.sectionLabel}>GESTOS DISPONIBLES</Text>
+                  <Text style={buttonStyle.sectionLabel}>{t.tutorial.boton_gestos_titulo}</Text>
                   <View style={buttonStyle.sectionLine} />
                 </View>
 
@@ -259,13 +261,13 @@ export default function ActivationTutorial() {
 
                 {/* Demo section */}
                 <View style={buttonStyle.sectionRow}>
-                  <Text style={buttonStyle.sectionLabel}>PRUEBA EL BOTÓN</Text>
+                  <Text style={buttonStyle.sectionLabel}>{t.tutorial.boton_prueba_titulo}</Text>
                   <View style={buttonStyle.sectionLine} />
                 </View>
 
                 <View style={buttonStyle.demoContainer}>
-                  <Text style={buttonStyle.demoHint}>Toca el botón para ver cómo funciona</Text>
-                  <SOSButton onTap={handleSOSTap} />
+                  <Text style={buttonStyle.demoHint}>{t.tutorial.boton_prueba_hint}</Text>
+                  <SOSButton onTap={handleSOSTap} sosLabel={t.tutorial.boton_sos_activado} tocaAquiLabel={t.tutorial.boton_toca_aqui} />
                   <Animated.View style={[buttonStyle.feedbackPill, { opacity: feedbackOpacity }]}>
                     <Text style={buttonStyle.feedbackText}>{feedback}</Text>
                   </Animated.View>
@@ -274,7 +276,7 @@ export default function ActivationTutorial() {
                 {/* Bottom badge */}
                 <View style={buttonStyle.bottomBadge}>
                   <Text style={{ fontSize: 16 }}>🚨</Text>
-                  <Text style={buttonStyle.bottomBadgeText}>Alerta en segundos</Text>
+                  <Text style={buttonStyle.bottomBadgeText}>{t.tutorial.boton_alerta_segundos}</Text>
                 </View>
 
               </ScrollView>

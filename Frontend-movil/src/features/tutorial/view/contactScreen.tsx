@@ -7,6 +7,7 @@ import Card from "../../../components/ui/card/card";
 import PermissionsModal from "../../../components/ui/modalMesanje/permisosMLL";
 import { CONTACT_COLORS, contactStyle } from "../styles/contactStyle";
 import { useContactTutorialViewModel, type ContactFeatureItem, } from "../viewModel/useContactTutorialViewModel";
+import { useLocale } from "../../../contexts/LocaleContext";
 
 // ─── Círculos decorativos de fondo ───────────────────────────────────────────
 function BackgroundCircles() {
@@ -99,6 +100,7 @@ interface Props {
 }
 
 export default function ContactosScreen({  externalVm }: Props) {
+  const { t } = useLocale();
   const internalVm = useContactTutorialViewModel();
   const vm =  externalVm ?? internalVm;
 
@@ -146,7 +148,7 @@ export default function ContactosScreen({  externalVm }: Props) {
 
         {/* Card animada */}
         <Animated.View style={[{ flex: 1 }, cardAnimStyle]}>
-          <Card title={`Tu Red de\n`} titleHighlight="Apoyo">
+          <Card title={`${t.tutorial.contacto_titulo_1}\n`} titleHighlight={t.tutorial.contacto_titulo_2}>
             <ScrollView
               style={contactStyle.cardScroll}
               contentContainerStyle={contactStyle.cardScrollContent}
@@ -156,7 +158,7 @@ export default function ContactosScreen({  externalVm }: Props) {
             >
               {/* Sección principal */}
               <View style={contactStyle.sectionRow}>
-                <Text style={contactStyle.sectionLabel}>TU RED DE FAMILIA</Text>
+                <Text style={contactStyle.sectionLabel}>{t.tutorial.contacto_red_familia_titulo}</Text>
                 <View style={contactStyle.sectionLine} />
               </View>
 
@@ -192,7 +194,7 @@ export default function ContactosScreen({  externalVm }: Props) {
 
               {/* Sección permisos */}
               <View style={contactStyle.sectionRow}>
-                <Text style={contactStyle.sectionLabel}>PERMISOS NECESARIOS</Text>
+                <Text style={contactStyle.sectionLabel}>{t.tutorial.contacto_permisos_titulo}</Text>
                 <View style={contactStyle.sectionLine} />
               </View>
 
@@ -200,9 +202,9 @@ export default function ContactosScreen({  externalVm }: Props) {
                 <View style={contactStyle.permisosRow}>
                   <Text style={contactStyle.permisosEmoji}>👥</Text>
                   <View style={{ flex: 1 }}>
-                    <Text style={contactStyle.permisosTitle}>Acceso a contactos</Text>
+                    <Text style={contactStyle.permisosTitle}>{t.tutorial.contacto_permisos_acceso_titulo}</Text>
                     <Text style={contactStyle.permisosDesc}>
-                      Necesitamos acceder a tus contactos para que puedas elegir tu red de confianza.
+                      {t.tutorial.contacto_permisos_acceso_desc}
                     </Text>
                   </View>
                 </View>
@@ -211,7 +213,7 @@ export default function ContactosScreen({  externalVm }: Props) {
               {/* Badge inferior */}
               <View style={contactStyle.bottomBadge}>
                 <Text style={{ fontSize: 16 }}>❤️</Text>
-                <Text style={contactStyle.bottomBadgeText}>Siempre conectada</Text>
+                <Text style={contactStyle.bottomBadgeText}>{t.tutorial.contacto_badge_inferior}</Text>
               </View>
 
             </ScrollView>
@@ -225,13 +227,13 @@ export default function ContactosScreen({  externalVm }: Props) {
         <View style={contactStyle.overlayBg}>
           <View style={contactStyle.warningBox}>
             <Text style={contactStyle.warningText}>
-              ⚠️ Sin acceso a contactos no podrás elegir personas de confianza para tus alertas.
+              {t.tutorial.contacto_warning_texto}
             </Text>
             <TouchableOpacity onPress={vm.retryPermissions} style={contactStyle.btnPrimary}>
-              <Text style={contactStyle.btnPrimaryText}>Activar permisos</Text>
+              <Text style={contactStyle.btnPrimaryText}>{t.tutorial.contacto_btn_activar_permisos}</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={vm.continueWithoutPermissions} style={contactStyle.btnSecondary}>
-              <Text style={contactStyle.btnSecondaryText}>Continuar sin permisos</Text>
+              <Text style={contactStyle.btnSecondaryText}>{t.tutorial.contacto_btn_continuar_sin_permisos}</Text>
             </TouchableOpacity>
           </View>
         </View>

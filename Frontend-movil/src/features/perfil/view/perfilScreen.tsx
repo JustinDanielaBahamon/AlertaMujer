@@ -9,6 +9,7 @@ import { StatusBar } from "expo-status-bar";
 import { createPerfilStyles } from "../styles/perfilStyle";
 import { usePerfilViewModel } from "../viewModel/usePerfilViewModel";
 import { useTheme } from "../../../contexts/ThemeContext";
+import { useLocale } from "../../../contexts/LocaleContext";
 
 // Genera iniciales desde el nombre completo (máx 2 letras)
 function getIniciales(nombre: string): string {
@@ -27,6 +28,7 @@ export default function PerfilScreen() {
   const vm = usePerfilViewModel();
   const insets = useSafeAreaInsets();
   const { theme } = useTheme();
+  const { t } = useLocale();
   const styles = useMemo(() => createPerfilStyles(theme), [theme]);
 
   const esError =
@@ -44,7 +46,7 @@ export default function PerfilScreen() {
         <TouchableOpacity onPress={vm.volver} style={styles.btnVolver}>
           <Ionicons name="arrow-back" size={22} color={theme.headerText} />
         </TouchableOpacity>
-        <Text style={styles.tituloHeader}>Mi perfil</Text>
+        <Text style={styles.tituloHeader}>{t.perfil.titulo_header}</Text>
       </View>
 
       <ScrollView
@@ -73,8 +75,8 @@ export default function PerfilScreen() {
               <Ionicons name="camera-outline" size={13} color="#fff" />
             </View>
           </TouchableOpacity>
-          <Text style={styles.nombreUsuario}>{vm.nombre || "Tu nombre"}</Text>
-          <Text style={styles.correoUsuario}>{vm.correo || "tu@correo.com"}</Text>
+          <Text style={styles.nombreUsuario}>{vm.nombre || t.perfil.nombre_default}</Text>
+          <Text style={styles.correoUsuario}>{vm.correo || t.perfil.correo_default}</Text>
         </View>
 
         {/* Cuerpo */}
@@ -82,16 +84,16 @@ export default function PerfilScreen() {
 
           {/* ── Datos personales ── */}
           <View style={styles.tarjeta}>
-            <Text style={styles.tituloSeccion}>Datos personales</Text>
+            <Text style={styles.tituloSeccion}>{t.perfil.titulo_datos_personales}</Text>
 
             {/* Nombre */}
             <View style={styles.campoWrap}>
-              <Text style={styles.inputLabel}>Nombre completo</Text>
+              <Text style={styles.inputLabel}>{t.perfil.label_nombre}</Text>
               <View style={styles.contenedorInput}>
                 <Ionicons name="person-outline" size={18} color={theme.icono} />
                 <TextInput
                   style={styles.input}
-                  placeholder="Tu nombre completo"
+                  placeholder={t.perfil.placeholder_nombre}
                   placeholderTextColor={theme.icono + "70"}
                   value={vm.nombre}
                   onChangeText={vm.setNombre}
@@ -103,12 +105,12 @@ export default function PerfilScreen() {
 
             {/* Correo */}
             <View style={styles.campoWrap}>
-              <Text style={styles.inputLabel}>Correo electrónico</Text>
+              <Text style={styles.inputLabel}>{t.perfil.label_correo}</Text>
               <View style={styles.contenedorInput}>
                 <Ionicons name="mail-outline" size={18} color={theme.icono} />
                 <TextInput
                   style={styles.input}
-                  placeholder="tu@correo.com"
+                  placeholder={t.perfil.placeholder_correo}
                   placeholderTextColor={theme.icono + "70"}
                   value={vm.correo}
                   onChangeText={vm.setCorreo}
@@ -121,12 +123,12 @@ export default function PerfilScreen() {
 
             {/* Teléfono */}
             <View style={styles.campoWrap}>
-              <Text style={styles.inputLabel}>Teléfono</Text>
+              <Text style={styles.inputLabel}>{t.perfil.label_telefono}</Text>
               <View style={styles.contenedorInput}>
                 <Ionicons name="call-outline" size={18} color={theme.icono} />
                 <TextInput
                   style={styles.input}
-                  placeholder="+57 300 000 0000"
+                  placeholder={t.perfil.placeholder_telefono}
                   placeholderTextColor={theme.icono + "70"}
                   value={vm.telefono}
                   onChangeText={vm.setTelefono}
@@ -138,12 +140,12 @@ export default function PerfilScreen() {
 
             {/* Fecha de nacimiento */}
             <View style={styles.campoWrap}>
-              <Text style={styles.inputLabel}>Fecha de nacimiento</Text>
+              <Text style={styles.inputLabel}>{t.perfil.label_fecha_nacimiento}</Text>
               <View style={styles.contenedorInput}>
                 <Ionicons name="calendar-outline" size={18} color={theme.icono} />
                 <TextInput
                   style={styles.input}
-                  placeholder="DD/MM/YYYY"
+                  placeholder={t.perfil.placeholder_fecha}
                   placeholderTextColor={theme.icono + "70"}
                   value={vm.fechaNacimiento}
                   onChangeText={vm.handleFechaChange}
@@ -157,27 +159,27 @@ export default function PerfilScreen() {
 
           {/* ── Ubicación (solo lectura) ── */}
           <View style={styles.tarjeta}>
-            <Text style={styles.tituloSeccion}>Ubicación</Text>
+            <Text style={styles.tituloSeccion}>{t.perfil.titulo_ubicacion}</Text>
 
             {/* Departamento */}
             <View style={styles.campoWrap}>
-              <Text style={styles.inputLabel}>Departamento</Text>
+              <Text style={styles.inputLabel}>{t.perfil.label_departamento}</Text>
               <View style={styles.contenedorInputReadonly}>
                 <Ionicons name="map-outline" size={18} color={theme.icono} />
                 <Text style={styles.inputReadonly}>{vm.department}</Text>
                 <View style={styles.badgeFijo}>
-                  <Text style={styles.badgeFijoText}>Fijo</Text>
+                  <Text style={styles.badgeFijoText}>{t.perfil.badge_fijo}</Text>
                 </View>
               </View>
             </View>
 
             {/* Municipio */}
             <View style={styles.campoWrap}>
-              <Text style={styles.inputLabel}>Municipio</Text>
+              <Text style={styles.inputLabel}>{t.perfil.label_municipio}</Text>
               <View style={styles.contenedorInputReadonly}>
                 <Ionicons name="location-outline" size={18} color={theme.icono} />
                 <Text style={styles.inputReadonly}>
-                  {vm.municipio || "Sin configurar"}
+                  {vm.municipio || t.perfil.municipio_sin_configurar}
                 </Text>
                 {vm.municipio ? (
                   <View style={styles.badgeFijo}>
@@ -187,7 +189,7 @@ export default function PerfilScreen() {
               </View>
               {!vm.municipio && (
                 <Text style={styles.hintText}>
-                  Configura tu municipio en el tutorial de ubicación
+                  {t.perfil.hint_municipio}
                 </Text>
               )}
             </View>
@@ -210,7 +212,7 @@ export default function PerfilScreen() {
             {vm.cargando ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.textoGuardar}>Guardar cambios</Text>
+              <Text style={styles.textoGuardar}>{t.perfil.btn_guardar}</Text>
             )}
           </TouchableOpacity>
 

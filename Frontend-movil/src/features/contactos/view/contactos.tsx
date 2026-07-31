@@ -8,12 +8,14 @@ import { createStyles } from "../style/contactos.styles";
 import { useContactosTabViewModel } from "../viewModel/useContactosViewModel";
 import ModalAccionesContacto from "../../../components/ui/modalAccionesContacto/modalAccionesContacto";
 import { useTheme } from "../../../../src/contexts/ThemeContext";
+import { useLocale } from "../../../contexts/LocaleContext";
 
 type Contacto = ReturnType<typeof useContactosTabViewModel>["contactos"][0];
 
 export default function Contactos() {
   const vm = useContactosTabViewModel();
   const { theme } = useTheme();
+  const { t } = useLocale();
   const styles = createStyles(theme);
 
   const headerGradient: [string, string] = [theme.headercolor1, theme.headercolor2];
@@ -53,9 +55,9 @@ export default function Contactos() {
         >
           <View style={styles.headerContent}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.headerTitle}>Mis Contactos de Confianza</Text>
+              <Text style={styles.headerTitle}>{t.contactos.titulo}</Text>
               <Text style={styles.headerSubtitle}>
-                Estas personas recibirán tu ubicación en caso de emergencia.
+                {t.contactos.subtitulo}
               </Text>
             </View>
             <Image
@@ -72,7 +74,7 @@ export default function Contactos() {
           <Feather name="users" size={18} color={theme.contactCousserIcon} />
         </View>
         <Text style={[styles.countText, { color: theme.text }]}>
-          Tus contactos ({vm.contactosFiltrados.length})
+          {t.contactos.tus_contactos} ({vm.contactosFiltrados.length})
         </Text>
       </View>
 
@@ -81,7 +83,7 @@ export default function Contactos() {
         <Feather name="search" size={18} color="#9E9E9E" />
         <TextInput
           style={styles.searchInput}
-          placeholder="Buscar por nombre o teléfono..."
+          placeholder={t.contactos.buscar_placeholder}
           placeholderTextColor="#9E9E9E"
           value={vm.busqueda}
           onChangeText={vm.setBusqueda}
@@ -158,7 +160,7 @@ export default function Contactos() {
                   }]}>
                     <AntDesign name="heart" size={12} color={theme.contactAccent} />
                     <Text style={[styles.badgeText, { color: theme.contactBadgeText }]}>
-                      {c.parentesco || "Amigo"}
+                      {c.parentesco || t.contactos.parentesco_default}
                     </Text>
                   </View>
                   <View style={styles.phoneRow}>
@@ -169,7 +171,7 @@ export default function Contactos() {
                   </View>
                   <View style={{ flexDirection: "row", alignItems: "center", marginTop: 4 }}>
                     <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: "#28a745", marginRight: 5 }} />
-                    <Text style={{ fontSize: 12, color: "#28a745", fontWeight: "500" }}>Disponible</Text>
+                    <Text style={{ fontSize: 12, color: "#28a745", fontWeight: "500" }}>{t.contactos.disponible}</Text>
                   </View>
                 </View>
 
@@ -198,7 +200,7 @@ export default function Contactos() {
                   <View style={[styles.actionCircle, { backgroundColor: theme.contactIconCallBg }]}>
                     <Feather name="phone" size={20} color={theme.contactIconCallColor} />
                   </View>
-                  <Text style={styles.actionText}>Llamar</Text>
+                  <Text style={styles.actionText}>{t.contactos.llamar}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -208,14 +210,14 @@ export default function Contactos() {
                   <View style={[styles.actionCircle, { backgroundColor: theme.contactIconWaBg }]}>
                     <MaterialCommunityIcons name="whatsapp" size={22} color="#2e7d32" />
                   </View>
-                  <Text style={styles.actionText}>WhatsApp</Text>
+                  <Text style={styles.actionText}>{t.contactos.whatsapp}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.actionItem}>
                   <View style={[styles.actionCircle, { backgroundColor: theme.contactIconLocBg }]}>
                     <Feather name="map-pin" size={20} color={theme.contactIconLocColor} />
                   </View>
-                  <Text style={styles.actionText}>Ubicación</Text>
+                  <Text style={styles.actionText}>{t.contactos.ubicacion_boton}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -229,7 +231,7 @@ export default function Contactos() {
               onPress={() => vm.borrarConSwipe(c)}
             >
               <MaterialIcons name="delete" size={28} color="white" />
-              <Text style={styles.deleteSwipeText}>Eliminar</Text>
+              <Text style={styles.deleteSwipeText}>{t.contactos.eliminar}</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -244,10 +246,10 @@ export default function Contactos() {
             </View>
             <View style={{ flex: 1, marginRight: 10 }}>
               <Text style={[{ fontWeight: "bold", fontSize: 14 }, { color: theme.text }]}>
-                ¿Quieres agregar más?
+                {t.contactos.agregar_mas}
               </Text>
               <Text style={{ fontSize: 12, color: theme.contactSubtext }}>
-                Añade personas de confianza.
+                {t.contactos.agregar_desc}
               </Text>
             </View>
             <TouchableOpacity
@@ -255,7 +257,7 @@ export default function Contactos() {
               onPress={vm.irAgregarContacto}
             >
               <Text style={{ color: "white", fontWeight: "bold", fontSize: 12 }}>
-                + Agregar
+                {t.contactos.agregar_corto}
               </Text>
             </TouchableOpacity>
           </View>

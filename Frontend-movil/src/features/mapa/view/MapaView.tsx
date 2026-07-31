@@ -9,6 +9,7 @@ import {Animated,FlatList,Image,Linking,Modal,Text,TouchableOpacity,TouchableWit
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { useTheme } from "../../../contexts/ThemeContext";
+import { useLocale } from "../../../contexts/LocaleContext";
 import { styles } from "../styles/MapaStyles";
 
 type Coordenada = {
@@ -22,6 +23,7 @@ type MapaRouteParams = {
 
 export default function MapaView() {
   const { theme } = useTheme();
+  const { t } = useLocale();
   const route = useRoute();
   const navigation =
   useNavigation<NativeStackNavigationProp<MainStackParamList>>();
@@ -101,9 +103,9 @@ export default function MapaView() {
       const { status } = await Location.requestForegroundPermissionsAsync();
 
       if (status !== "granted") {
-        if (intentosPermiso === 0) { alert("Permiso denegado. Se recomienda activarlo."); return; }
-        if (intentosPermiso === 1) { alert("Permiso denegado nuevamente."); return; }
-        if (intentosPermiso >= 2) { alert("Activa el permiso desde configuración."); Linking.openSettings(); return; }
+        if (intentosPermiso === 0) { alert(t.mapa.permiso_denegado); return; }
+        if (intentosPermiso === 1) { alert(t.mapa.permiso_denegado2); return; }
+        if (intentosPermiso >= 2) { alert(t.mapa.permiso_configuracion); Linking.openSettings(); return; }
       }
 
       // POSICIÓN INICIAL REAL
@@ -248,12 +250,12 @@ export default function MapaView() {
   // ─── ETIQUETAS DEL HISTORIAL ──────────────────────────────────────────────
   const formatearFechaHistorial = (index: number) => {
     if (index === 0) {
-      return `Hoy, ${
+      return `${t.inicio.hoy}, ${
         ultimaActualizacion ? formatearHora(ultimaActualizacion) : "--:--"
       }`;
     }
-    if (index === 1) return "Hace unos minutos";
-    return "Movimiento reciente";
+    if (index === 1) return t.mapa.hace_minutos;
+    return t.mapa.movimiento_reciente;
   };
 
   // ─── PANTALLA DE CARGA ────────────────────────────────────────────────────
@@ -262,13 +264,13 @@ export default function MapaView() {
       <View style={[styles.loadingContainer, { backgroundColor: theme.background }]}>
         <MaterialIcons name="location-searching" size={48} color="#7B1DB2" />
         <Text style={[styles.loadingText, { color: theme.text }]}>
-          Obteniendo ubicación...
+          {t.mapa.cargando}
         </Text>
         <TouchableOpacity
           style={styles.botonReintentar}
           onPress={() => setIntentosPermiso((prev) => prev + 1)}
         >
-          <Text style={styles.botonReintentarTexto}>Intentar de nuevo</Text>
+          <Text style={styles.botonReintentarTexto}>{t.mapa.intentar_nuevo}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -280,22 +282,22 @@ export default function MapaView() {
   const acciones = [
     {
       icono: "share",
-      label: "Compartir",
+      label: t.mapa.compartir,
       accion: () => {},
     },
     {
       icono: "refresh",
-      label: "Actualizar",
+      label: t.mapa.actualizar,
       accion: refrescarUbicacion,
     },
     {
       icono: "navigation",
-      label: "Navegar",
+      label: t.mapa.navegar,
       accion: () => {},
     },
     {
       icono: "bookmark",
-      label: "Guardar",
+      label: t.mapa.guardar,
     
       accion: async () => {
     
@@ -321,40 +323,40 @@ export default function MapaView() {
               longitude: location.longitude,
           
               direccion:
-                `${info?.street || "Sin calle"} ${info?.streetNumber || ""}`,
+                `${info?.street || t.mapa.sin_calle} ${info?.streetNumber || ""}`,
           
               barrio:
                 info?.district &&
                 info?.district !== info?.city
                   ? info.district
-                  : "Sector desconocido",
+                  : t.mapa.sector_desconocido,
           
               municipio:
                 info?.city ||
                 info?.district ||
-                "Municipio desconocido",
+                t.mapa.municipio_desconocido,
           
               ciudad:
                 info?.city ||
                 info?.subregion ||
                 info?.district ||
-                "Ciudad desconocida",
+                t.mapa.ciudad_desconocida,
           
               departamento:
                 info?.region ||
-                "Departamento desconocido",
+                t.mapa.departamento_desconocido,
           
               pais:
                 info?.country ||
-                "País desconocido",
+                t.mapa.pais_desconocido,
           
               fecha: new Date().toISOString(),
           
-              estado: "Activo",
+              estado: t.mapa.activo,
           
-              precision: "Alta (±5m)",
+              precision: t.mapa.precision_alta,
           
-              notas: "Ubicación guardada desde el mapa",
+              notas: t.mapa.nota_guardada,
             },
           });
     
@@ -362,7 +364,7 @@ export default function MapaView() {
     
           console.log("ERROR UBICACIÓN:", error);
     
-          alert("No se pudo obtener la dirección");
+          alert(t.mapa.no_pudo_obtener_direccion);
     
         }
       },
@@ -395,14 +397,14 @@ export default function MapaView() {
     >
       <Marker
         coordinate={location}
-        title="Tu ubicación"
+        title={t.mapa.tu_ubicacion_marcador}
         pinColor="red"
       />
   
       {destinoAlerta && (
         <Marker
           coordinate={destinoAlerta.coordenada}
-          title="Dirección de alerta"
+          title={t.mapa.direccion_alerta_marcador}
           description={destinoAlerta.direccion}
           pinColor="#7B1DB2"
         />
@@ -412,7 +414,7 @@ export default function MapaView() {
         <Marker
           key={index}
           coordinate={pos}
-          title={`Historial ${index + 1}`}
+          title={`${t.mapa.historial} ${index + 1}`}
           pinColor={`hsl(${(index * 50) % 360}, 20%, 50%)`}
         />
       ))}
@@ -445,9 +447,9 @@ export default function MapaView() {
             >
               <View style={styles.headerContenido}>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.tituloHeader}>Tu ubicación</Text>
+                  <Text style={styles.tituloHeader}>{t.mapa.titulo}</Text>
                   <Text style={styles.SubtituloHeader}>
-                    Aquí se muestra tu ubicación actual
+                    {t.mapa.subtitulo}
                   </Text>
                   <View style={styles.filaUbicacion}>
                     <MaterialIcons
@@ -458,7 +460,7 @@ export default function MapaView() {
                     <Text style={styles.subtituloHeader}>
                       {location
                         ? `${location.latitude.toFixed(3)}, ${location.longitude.toFixed(3)}`
-                        : "Obteniendo..."}
+                        : t.mapa.obteniendo}
                     </Text>
                   </View>
                 </View>
@@ -497,7 +499,7 @@ export default function MapaView() {
               <View style={{ flexDirection: "row" }}>
                 <View style={styles.columnaCoord}>
                   <Text style={[styles.labelCoord, { color: theme.contactSubtext }]}>
-                    Latitud
+                    {t.mapa.latitud}
                   </Text>
                   <Text style={[styles.valorCoord, { color: theme.text }]}>
                     {location.latitude.toFixed(5)}
@@ -505,7 +507,7 @@ export default function MapaView() {
                 </View>
                 <View style={styles.columnaCoord}>
                   <Text style={[styles.labelCoord, { color: theme.contactSubtext }]}>
-                    Longitud
+                    {t.mapa.longitud}
                   </Text>
                   <Text style={[styles.valorCoord, { color: theme.text }]}>
                     {location.longitude.toFixed(5)}
@@ -515,14 +517,14 @@ export default function MapaView() {
 
               <View style={styles.filaActivo}>
                 <Text style={[styles.textoActualizacion, { color: theme.contactSubtext }]}>
-                  Última actualización:{" "}
+                  {t.mapa.ultima_actualizacion}{" "}
                   {ultimaActualizacion
-                    ? `Hoy, ${formatearHora(ultimaActualizacion)}`
+                    ? `${t.inicio.hoy}, ${formatearHora(ultimaActualizacion)}`
                     : "--"}
                 </Text>
                 <View style={styles.badgeActivo}>
                   <View style={styles.puntoActivo} />
-                  <Text style={styles.textoActivo}>Activo</Text>
+                  <Text style={styles.textoActivo}>{t.mapa.activo}</Text>
                 </View>
               </View>
             </View>
@@ -530,10 +532,10 @@ export default function MapaView() {
             {/* TÍTULO HISTORIAL */}
             <View style={styles.filaTituloHistorial}>
               <Text style={[styles.tituloHistorial, { color: theme.text }]}>
-                Historial reciente
+                {t.mapa.historial_reciente}
               </Text>
               <TouchableOpacity>
-                <Text style={styles.verTodo}>Ver todo &gt;</Text>
+                <Text style={styles.verTodo}>{t.mapa.ver_todo}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -571,40 +573,40 @@ export default function MapaView() {
             longitude: location.longitude,
         
             direccion:
-              `${info?.street || "Sin calle"} ${info?.streetNumber || ""}`,
+              `${info?.street || t.mapa.sin_calle} ${info?.streetNumber || ""}`,
         
             barrio:
               info?.district &&
               info?.district !== info?.city
                 ? info.district
-                : "Sector desconocido",
+                : t.mapa.sector_desconocido,
         
             municipio:
               info?.city ||
               info?.district ||
-              "Municipio desconocido",
+              t.mapa.municipio_desconocido,
         
             ciudad:
               info?.city ||
               info?.subregion ||
               info?.district ||
-              "Ciudad desconocida",
+              t.mapa.ciudad_desconocida,
         
             departamento:
               info?.region ||
-              "Departamento desconocido",
+              t.mapa.departamento_desconocido,
         
             pais:
               info?.country ||
-              "País desconocido",
+              t.mapa.pais_desconocido,
         
             fecha: new Date().toISOString(),
         
-            estado: "Activo",
+            estado: t.mapa.activo,
         
-            precision: "Alta (±5m)",
+            precision: t.mapa.precision_alta,
         
-            notas: "Ubicación guardada desde el mapa",
+            notas: t.mapa.nota_guardada,
           },
         });
 
@@ -612,7 +614,7 @@ export default function MapaView() {
 
         console.log(error);
 
-        alert("No se pudo abrir la ubicación");
+        alert(t.mapa.no_pudo_abrir_ubicacion);
 
       }
     }}
@@ -662,7 +664,7 @@ export default function MapaView() {
         ListEmptyComponent={
           <View style={styles.sinHistorial}>
             <Text style={[styles.textoSinHistorial, { color: theme.contactSubtext }]}>
-              Sin historial aún.
+              {t.mapa.sin_historial}
             </Text>
           </View>
         }
@@ -675,7 +677,7 @@ export default function MapaView() {
           {showClose && (
             <Animated.View style={[styles.botonCerrarMapa, { opacity: closeOpacity }]}>
               <TouchableWithoutFeedback onPress={() => setFullscreen(false)}>
-                <Text style={styles.textoCerrar}>Cerrar mapa</Text>
+                <Text style={styles.textoCerrar}>{t.mapa.cerrar_mapa}</Text>
               </TouchableWithoutFeedback>
             </Animated.View>
           )}

@@ -7,6 +7,7 @@ import Card from "../../../components/ui/card/card";
 import PermissionsModal from "../../../components/ui/modalMesanje/permisosMLL";
 import { SECURITY_COLORS, securityStyle } from "../styles/securityStyle";
 import { useSecurityTutorialViewModel, type SecurityFeatureItem, } from "../viewModel/useSecurityTutorialViewModel";
+import { useLocale } from "../../../contexts/LocaleContext";
 
 // ─── Círculos decorativos de fondo ───────────────────────────────────────────
 function BackgroundCircles() {
@@ -99,6 +100,7 @@ interface Props {
 }
 
 export default function CameraAndMicrophoneTutorial({ externalVm }: Props) {
+  const { t } = useLocale();
   const internalVm = useSecurityTutorialViewModel();
   const vm = externalVm ?? internalVm;
 
@@ -143,7 +145,7 @@ export default function CameraAndMicrophoneTutorial({ externalVm }: Props) {
 
         {/* Card animada */}
         <Animated.View style={[{ flex: 1 }, cardAnimStyle]}>
-          <Card title={`Seguridad en\n`} titleHighlight="Video y Audio">
+          <Card title={`${t.tutorial.seguridad_titulo_1}\n`} titleHighlight={t.tutorial.seguridad_titulo_2}>
             <ScrollView
               style={securityStyle.cardScroll}
               contentContainerStyle={securityStyle.cardScrollContent}
@@ -153,7 +155,7 @@ export default function CameraAndMicrophoneTutorial({ externalVm }: Props) {
             >
               {/* Sección principal */}
               <View style={securityStyle.sectionRow}>
-                <Text style={securityStyle.sectionLabel}>TU EVIDENCIA SEGURA</Text>
+                <Text style={securityStyle.sectionLabel}>{t.tutorial.seguridad_evidencia_titulo}</Text>
                 <View style={securityStyle.sectionLine} />
               </View>
 
@@ -189,7 +191,7 @@ export default function CameraAndMicrophoneTutorial({ externalVm }: Props) {
 
               {/* Sección permisos — muestra los dos (cámara y audio) */}
               <View style={securityStyle.sectionRow}>
-                <Text style={securityStyle.sectionLabel}>PERMISOS NECESARIOS</Text>
+                <Text style={securityStyle.sectionLabel}>{t.tutorial.seguridad_permisos_titulo}</Text>
                 <View style={securityStyle.sectionLine} />
               </View>
 
@@ -198,9 +200,9 @@ export default function CameraAndMicrophoneTutorial({ externalVm }: Props) {
                 <View style={securityStyle.permisosRow}>
                   <Text style={securityStyle.permisosEmoji}>📷</Text>
                   <View style={securityStyle.permisosTitleWrap}>
-                    <Text style={securityStyle.permisosTitle}>Acceso a cámara</Text>
+                    <Text style={securityStyle.permisosTitle}>{t.tutorial.seguridad_permisos_camara_titulo}</Text>
                     <Text style={securityStyle.permisosDesc}>
-                      Necesaria para grabar video como evidencia en emergencias.
+                      {t.tutorial.seguridad_permisos_camara_desc}
                     </Text>
                   </View>
                 </View>
@@ -211,9 +213,9 @@ export default function CameraAndMicrophoneTutorial({ externalVm }: Props) {
                 <View style={securityStyle.permisosRow}>
                   <Text style={securityStyle.permisosEmoji}>🎙️</Text>
                   <View style={securityStyle.permisosTitleWrap}>
-                    <Text style={securityStyle.permisosTitle}>Acceso a micrófono</Text>
+                    <Text style={securityStyle.permisosTitle}>{t.tutorial.seguridad_permisos_microfono_titulo}</Text>
                     <Text style={securityStyle.permisosDesc}>
-                      Necesario para grabar audio y capturar tu entorno sonoro.
+                      {t.tutorial.seguridad_permisos_microfono_desc}
                     </Text>
                   </View>
                 </View>
@@ -222,7 +224,7 @@ export default function CameraAndMicrophoneTutorial({ externalVm }: Props) {
               {/* Badge inferior */}
               <View style={securityStyle.bottomBadge}>
                 <Text style={{ fontSize: 16 }}>🛡️</Text>
-                <Text style={securityStyle.bottomBadgeText}>Grabación encriptada</Text>
+                <Text style={securityStyle.bottomBadgeText}>{t.tutorial.seguridad_badge_inferior}</Text>
               </View>
 
             </ScrollView>
@@ -236,13 +238,13 @@ export default function CameraAndMicrophoneTutorial({ externalVm }: Props) {
         <View style={securityStyle.overlayBg}>
           <View style={securityStyle.warningBox}>
             <Text style={securityStyle.warningText}>
-              ⚠️ Sin cámara y micrófono no podrás grabar evidencia en caso de emergencia.
+              {t.tutorial.seguridad_warning_texto}
             </Text>
             <TouchableOpacity onPress={vm.retryPermissions} style={securityStyle.btnPrimary}>
-              <Text style={securityStyle.btnPrimaryText}>Activar permisos</Text>
+              <Text style={securityStyle.btnPrimaryText}>{t.tutorial.seguridad_btn_activar_permisos}</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={vm.continueWithoutPermissions} style={securityStyle.btnSecondary}>
-              <Text style={securityStyle.btnSecondaryText}>Continuar sin permisos</Text>
+              <Text style={securityStyle.btnSecondaryText}>{t.tutorial.seguridad_btn_continuar_sin_permisos}</Text>
             </TouchableOpacity>
           </View>
         </View>

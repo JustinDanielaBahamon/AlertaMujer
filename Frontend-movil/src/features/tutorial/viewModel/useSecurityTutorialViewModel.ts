@@ -1,7 +1,8 @@
 import { Audio } from "expo-av";
 import { Camera } from "expo-camera";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { SECURITY_COLORS } from "../styles/securityStyle";
+import { useLocale } from "../../../contexts/LocaleContext";
 
 export interface SecurityFeatureItem {
   id: string;
@@ -17,16 +18,19 @@ export interface SecurityFeatureItem {
   colorBorder: string;
 }
 
-export const SECURITY_FEATURE_ROWS: SecurityFeatureItem[] = [
+type LocaleT = ReturnType<typeof useLocale>["t"];
+
+// ─── Datos (ahora dependen del idioma activo) ─────────────────────────────────
+const getSecurityFeatureRows = (t: LocaleT): SecurityFeatureItem[] => [
   {
     id: "registro",
     emoji: "🎥",
-    title: "Registro clave",
-    badge: "Evidencia",
-    desc: "Captura automática de audio y video.",
-    highlightLabel: "Registro: ",
-    boldLabel: "Evidencia real.",
-    detailDesc: "Se inicia captura automática de audio y video para documentar tu entorno en segundos.",
+    title: t.tutorial.seguridad_registro_titulo,
+    badge: t.tutorial.seguridad_registro_badge,
+    desc: t.tutorial.seguridad_registro_desc,
+    highlightLabel: t.tutorial.seguridad_registro_highlight,
+    boldLabel: t.tutorial.seguridad_registro_bold,
+    detailDesc: t.tutorial.seguridad_registro_detail,
     color: SECURITY_COLORS.row1Color,
     colorLight: SECURITY_COLORS.row1Light,
     colorBorder: SECURITY_COLORS.row1Border,
@@ -34,12 +38,12 @@ export const SECURITY_FEATURE_ROWS: SecurityFeatureItem[] = [
   {
     id: "respaldo",
     emoji: "⚖️",
-    title: "Respaldo total",
-    badge: "Legal",
-    desc: "Tu voz y entorno quedan documentados.",
-    highlightLabel: "Respaldo: ",
-    boldLabel: "Herramienta legal.",
-    detailDesc: "Tu voz y entorno son protegidos para dejar constancia oficial de los hechos.",
+    title: t.tutorial.seguridad_respaldo_titulo,
+    badge: t.tutorial.seguridad_respaldo_badge,
+    desc: t.tutorial.seguridad_respaldo_desc,
+    highlightLabel: t.tutorial.seguridad_respaldo_highlight,
+    boldLabel: t.tutorial.seguridad_respaldo_bold,
+    detailDesc: t.tutorial.seguridad_respaldo_detail,
     color: SECURITY_COLORS.row2Color,
     colorLight: SECURITY_COLORS.row2Light,
     colorBorder: SECURITY_COLORS.row2Border,
@@ -47,12 +51,12 @@ export const SECURITY_FEATURE_ROWS: SecurityFeatureItem[] = [
   {
     id: "privacidad",
     emoji: "🔒",
-    title: "Privacidad total",
-    badge: "Encriptado",
-    desc: "Estándares de seguridad más altos.",
-    highlightLabel: "Privacidad: ",
-    boldLabel: "Encriptado.",
-    detailDesc: "Tus grabaciones se manejan bajo los más altos estándares de seguridad y privacidad.",
+    title: t.tutorial.seguridad_privacidad_titulo,
+    badge: t.tutorial.seguridad_privacidad_badge,
+    desc: t.tutorial.seguridad_privacidad_desc,
+    highlightLabel: t.tutorial.seguridad_privacidad_highlight,
+    boldLabel: t.tutorial.seguridad_privacidad_bold,
+    detailDesc: t.tutorial.seguridad_privacidad_detail,
     color: SECURITY_COLORS.row3Color,
     colorLight: SECURITY_COLORS.row3Light,
     colorBorder: SECURITY_COLORS.row3Border,
@@ -60,6 +64,9 @@ export const SECURITY_FEATURE_ROWS: SecurityFeatureItem[] = [
 ];
 
 export function useSecurityTutorialViewModel() {
+  const { t } = useLocale();
+  const featureRows = useMemo(() => getSecurityFeatureRows(t), [t]);
+
   const [modalVisible, setModalVisible]       = useState(false);
   const [permissionType, setPermissionType]   = useState<"camara" | "audio">("camara");
   const [showWarning, setShowWarning]         = useState(false);
@@ -156,7 +163,7 @@ export function useSecurityTutorialViewModel() {
   }, []);
 
   return {
-    featureRows: SECURITY_FEATURE_ROWS,
+    featureRows,
     modalVisible,
     permissionType,
     showWarning,

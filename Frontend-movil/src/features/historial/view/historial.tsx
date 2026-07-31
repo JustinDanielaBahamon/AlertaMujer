@@ -4,6 +4,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useCallback, useMemo, useState } from "react";
 import { FlatList, Image, RefreshControl, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useTheme } from "../../../../src/contexts/ThemeContext";
+import { useLocale } from "../../../../src/contexts/LocaleContext";
 import { getMainStackNavigation } from "../../../navigation/navigationHelpers";
 import type { Alerta, EstadoAlerta } from "../models/Alerta";
 import { createStyles, getAsistenciaColors, getEmergenciaColors } from "../style/historial.style";
@@ -18,6 +19,7 @@ const mockAlerts: Alerta[] = [
 
 export default function Historial() {
   const { theme } = useTheme();
+  const { t } = useLocale();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   // Colores por tipo derivados del tema activo
@@ -155,9 +157,9 @@ export default function Historial() {
           >
             <View style={styles.headerContent}>
               <View style={{ flex: 1 }}>
-                <Text style={styles.headerTitle}>Historial de Alertas</Text>
+                <Text style={styles.headerTitle}>{t.historial.titulo}</Text>
                 <Text style={styles.headerSubtitle}>
-                  Consulta el registro de tus alertas y su estado actual.
+                  {t.historial.subtitulo}
                 </Text>
               </View>
               <Image
@@ -178,7 +180,7 @@ export default function Historial() {
           />
           <TextInput
             style={styles.searchInput}
-            placeholder="Buscar por fecha, lugar o estado..."
+            placeholder={t.historial.buscar}
             placeholderTextColor={theme.contactSubtext}
             value={searchQuery}
             onChangeText={handleSearch}
@@ -193,32 +195,32 @@ export default function Historial() {
         {/* ESTADÍSTICAS */}
         <View style={styles.statsCard}>
           <View style={styles.statItem}>
-            <Text style={styles.statLabel}>Total</Text>
+            <Text style={styles.statLabel}>{t.historial.stats_total}</Text>
             <Text style={[styles.statNumber, { color: theme.text }]}>{stats.total}</Text>
-            <Text style={styles.statSublabel}>alertas</Text>
+            <Text style={styles.statSublabel}>{t.historial.stats_alertas}</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={[styles.statLabel, { color: emergencyColors.text }]}>Enviadas</Text>
+            <Text style={[styles.statLabel, { color: emergencyColors.text }]}>{t.historial.stats_enviadas}</Text>
             <Text style={[styles.statNumber, { color: emergencyColors.text }]}>{stats.sent}</Text>
-            <Text style={styles.statSublabel}>alertas</Text>
+            <Text style={styles.statSublabel}>{t.historial.stats_alertas}</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={[styles.statLabel, { color: assistanceColors.text }]}>Canceladas</Text>
+            <Text style={[styles.statLabel, { color: assistanceColors.text }]}>{t.historial.stats_canceladas}</Text>
             <Text style={[styles.statNumber, { color: assistanceColors.text }]}>{stats.cancelled}</Text>
-            <Text style={styles.statSublabel}>alertas</Text>
+            <Text style={styles.statSublabel}>{t.historial.stats_alertas}</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={[styles.statLabel, { color: theme.contactSubtext }]}>En curso</Text>
+            <Text style={[styles.statLabel, { color: theme.contactSubtext }]}>{t.historial.stats_en_curso}</Text>
             <Text style={[styles.statNumber, { color: theme.contactSubtext }]}>{stats.ongoing}</Text>
-            <Text style={styles.statSublabel}>alertas</Text>
+            <Text style={styles.statSublabel}>{t.historial.stats_alertas}</Text>
           </View>
         </View>
       </View>
     ),
-    [searchQuery, stats, theme, emergencyColors, assistanceColors, styles]
+    [searchQuery, stats, theme, emergencyColors, assistanceColors, styles, t]
   );
 
   return (
@@ -241,7 +243,7 @@ export default function Historial() {
         }
         ListEmptyComponent={
           <View style={{ alignItems: "center", marginTop: 50 }}>
-            <Text style={styles.emptyText}>No se encontraron alertas.</Text>
+            <Text style={styles.emptyText}>{t.historial.sin_alertas}</Text>
           </View>
         }
       />

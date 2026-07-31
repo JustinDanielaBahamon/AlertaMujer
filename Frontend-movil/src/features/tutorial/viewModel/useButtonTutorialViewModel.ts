@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Animated } from "react-native";
 import { BUTTON_COLORS } from "../styles/buttonStyle";
+import { useLocale } from "../../../contexts/LocaleContext";
 
 // ─── Tipos públicos ───────────────────────────────────────────────────────────
 export type TapType = "short" | "double" | "hold" | null;
@@ -19,17 +20,19 @@ export interface TapOption {
   colorBorder: string;
 }
 
-// ─── Datos estáticos de gestos ────────────────────────────────────────────────
-export const TAP_OPTIONS: TapOption[] = [
+type LocaleT = ReturnType<typeof useLocale>["t"];
+
+// ─── Datos de gestos (ahora dependen del idioma activo) ───────────────────────
+const getTapOptions = (t: LocaleT): TapOption[] => [
   {
     id: "short",
     emoji: "👆",
-    title: "Toque corto",
-    badge: "Discreta",
-    highlightLabel: "Toque corto: ",
-    boldLabel: "Alerta discreta.",
-    desc: "Envía un SMS silencioso con tu ubicación exacta.",
-    detailDesc: "Envía un SMS silencioso con tu ubicación.",
+    title: t.tutorial.boton_toque_corto_titulo,
+    badge: t.tutorial.boton_toque_corto_badge,
+    highlightLabel: t.tutorial.boton_toque_corto_highlight,
+    boldLabel: t.tutorial.boton_toque_corto_bold,
+    desc: t.tutorial.boton_toque_corto_desc,
+    detailDesc: t.tutorial.boton_toque_corto_detail,
     color: BUTTON_COLORS.row1Color,
     colorLight: BUTTON_COLORS.row1Light,
     colorBorder: BUTTON_COLORS.row1Border,
@@ -37,12 +40,12 @@ export const TAP_OPTIONS: TapOption[] = [
   {
     id: "double",
     emoji: "✌️",
-    title: "Doble toque",
-    badge: "Urgente",
-    highlightLabel: "Doble toque: ",
-    boldLabel: "Alerta urgente.",
-    desc: "Tus contactos reciben notificación y llamada.",
-    detailDesc: "Tus contactos reciben notificación y llamada automática.",
+    title: t.tutorial.boton_doble_titulo,
+    badge: t.tutorial.boton_doble_badge,
+    highlightLabel: t.tutorial.boton_doble_highlight,
+    boldLabel: t.tutorial.boton_doble_bold,
+    desc: t.tutorial.boton_doble_desc,
+    detailDesc: t.tutorial.boton_doble_detail,
     color: BUTTON_COLORS.row2Color,
     colorLight: BUTTON_COLORS.row2Light,
     colorBorder: BUTTON_COLORS.row2Border,
@@ -50,12 +53,12 @@ export const TAP_OPTIONS: TapOption[] = [
   {
     id: "hold",
     emoji: "✊",
-    title: "Mantener presionado",
-    badge: "Máxima",
-    highlightLabel: "Mantener: ",
-    boldLabel: "Alerta máxima.",
-    desc: "Inicia grabación, sirena y ubicación en tiempo real.",
-    detailDesc: "Inicia grabación, sirena y ubicación en tiempo real.",
+    title: t.tutorial.boton_mantener_titulo,
+    badge: t.tutorial.boton_mantener_badge,
+    highlightLabel: t.tutorial.boton_mantener_highlight,
+    boldLabel: t.tutorial.boton_mantener_bold,
+    desc: t.tutorial.boton_mantener_desc,
+    detailDesc: t.tutorial.boton_mantener_detail,
     color: BUTTON_COLORS.row3Color,
     colorLight: BUTTON_COLORS.row3Light,
     colorBorder: BUTTON_COLORS.row3Border,
@@ -64,6 +67,9 @@ export const TAP_OPTIONS: TapOption[] = [
 
 // ─── ViewModel ────────────────────────────────────────────────────────────────
 export function useButtonTutorialViewModel() {
+  const { t } = useLocale();
+  const tapOptions = useMemo(() => getTapOptions(t), [t]);
+
   // ── Estado ──────────────────────────────────────────────────────────────────
   const [activeRow, setActiveRow]   = useState<TapType>(null);
   const [tapCount, setTapCount]     = useState(0);
@@ -133,7 +139,7 @@ export function useButtonTutorialViewModel() {
     cardAnimStyle,
     feedbackOpacity,
     // datos
-    tapOptions: TAP_OPTIONS,
+    tapOptions,
     // handlers
     handleTapRow,
     handleSOSTap,

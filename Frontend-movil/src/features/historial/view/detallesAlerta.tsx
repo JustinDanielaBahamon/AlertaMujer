@@ -7,6 +7,7 @@ import { ActivityIndicator, Alert, Image, Modal, Pressable, ScrollView, Text, To
 import MapView, { Marker } from "react-native-maps";
 import { useDetalleAlertaViewModel } from "../viewModel/useDetalleAlertaViewModel";
 import { useTheme } from "../../../../src/contexts/ThemeContext";
+import { useLocale } from "../../../../src/contexts/LocaleContext";
 import { getMainStackNavigation } from "../../../navigation/navigationHelpers";
 import type { MainStackParamList } from "../../../navigation/types";
 import { createStyles } from "../style/detalle.Style";
@@ -17,6 +18,7 @@ type Coordenada = { latitude: number; longitude: number };
 
 export default function DetalleAlerta() {
   const { theme } = useTheme();
+  const { t } = useLocale();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
@@ -70,8 +72,8 @@ export default function DetalleAlerta() {
     };
   }, [alerta.ubicacion]);
 
-  const accionLlamar = () => Alert.alert("Llamar", "Esta accion estara disponible pronto.");
-  const accionReportar = () => Alert.alert("Reportar", "Gracias, pronto podras enviar reportes desde aqui.");
+  const accionLlamar = () => Alert.alert(t.detalle.alert_llamar_titulo, t.detalle.alert_llamar_msg);
+  const accionReportar = () => Alert.alert(t.detalle.alert_reportar_titulo, t.detalle.alert_reportar_msg);
   const abrirMapaCompleto = () => coordenadaAlerta && setMapaPantallaCompleta(true);
 
   return (
@@ -95,9 +97,9 @@ export default function DetalleAlerta() {
           <View style={styles.HeaderContenido}>
             <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
               <View style={{ flex: 1 }}>
-                <Text style={{ color: "white", fontSize: 25, fontWeight: "800" }}>Detalle de la alerta</Text>
+                <Text style={{ color: "white", fontSize: 25, fontWeight: "800" }}>{t.detalle.titulo}</Text>
                 <Text style={{ color: "white", fontSize: 13, opacity: 0.8 }}>
-                  Informacion completa del evento y la ubicacion registrada.
+                  {t.detalle.subtitulo}
                 </Text>
               </View>
               <Image
@@ -158,7 +160,7 @@ export default function DetalleAlerta() {
                   <ActivityIndicator size="small" color={theme.contactAccent} />
                 ) : (
                   <Text style={{ color: theme.text, fontSize: 13, fontWeight: "600", textAlign: "center", marginTop: 100 }}>
-                    No se pudo cargar el mapa
+                    {t.detalle.no_pudo_cargar_mapa}
                   </Text>
                 )}
               </LinearGradient>
@@ -186,7 +188,7 @@ export default function DetalleAlerta() {
                 }}
                 onPress={irAMapaInterno}
               >
-                <Text style={{ color: "white", fontSize: 12, fontWeight: "600" }}>Ver mapa</Text>
+                <Text style={{ color: "white", fontSize: 12, fontWeight: "600" }}>{t.detalle.ver_mapa}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.BotonCentroMapa} onPress={irAMapaInterno}>
                 <MaterialIcons name="my-location" size={20} color="white" />
@@ -194,69 +196,69 @@ export default function DetalleAlerta() {
             </View>
           </View>
 
-          <Text style={styles.SeccionTitulo}>Informacion</Text>
+          <Text style={styles.SeccionTitulo}>{t.detalle.informacion}</Text>
           <View style={styles.GridInformacion}>
             <View style={styles.InfoCard}>
               <View style={styles.InfoHeader}>
                 <MaterialIcons name="event" size={18} color={theme.contactAccent} />
-                <Text style={styles.InfoLabel}>Fecha</Text>
+                <Text style={styles.InfoLabel}>{t.detalle.fecha}</Text>
               </View>
               <Text style={styles.InfoValue}>{alerta.fecha}</Text>
             </View>
             <View style={styles.InfoCard}>
               <View style={styles.InfoHeader}>
                 <MaterialIcons name="schedule" size={18} color={theme.contactAccent} />
-                <Text style={styles.InfoLabel}>Hora</Text>
+                <Text style={styles.InfoLabel}>{t.detalle.hora}</Text>
               </View>
               <Text style={styles.InfoValue}>{alerta.hora}</Text>
             </View>
             <View style={styles.InfoCard}>
               <View style={styles.InfoHeader}>
                 <MaterialIcons name="near-me" size={18} color={theme.contactAccent} />
-                <Text style={styles.InfoLabel}>Estado</Text>
+                <Text style={styles.InfoLabel}>{t.detalle.estado}</Text>
               </View>
               <Text style={styles.InfoValue}>{alerta.estado}</Text>
             </View>
             <View style={styles.InfoCard}>
               <View style={styles.InfoHeader}>
                 <MaterialIcons name="groups" size={18} color={theme.contactAccent} />
-                <Text style={styles.InfoLabel}>Contactos</Text>
+                <Text style={styles.InfoLabel}>{t.detalle.contactos}</Text>
               </View>
-              <Text style={styles.InfoValue}>3 notificados</Text>
+              <Text style={styles.InfoValue}>{t.detalle.contactos_notificados.replace("{n}", "3")}</Text>
             </View>
           </View>
 
           <View style={styles.TarjetaDescripcion}>
-            <Text style={styles.DescripcionTitulo}>Descripcion</Text>
-            <Text style={styles.DescripcionTexto}>Emergencia activada por la usuaria.</Text>
+            <Text style={styles.DescripcionTitulo}>{t.detalle.descripcion}</Text>
+            <Text style={styles.DescripcionTexto}>{t.detalle.descripcion_texto}</Text>
           </View>
         </View>
         <View style={styles.Footer}>
-            <Text style={styles.SeccionTitulo}>Acciones rapidas</Text>
+            <Text style={styles.SeccionTitulo}>{t.detalle.acciones_rapidas}</Text>
             <View style={styles.FilaAcciones}>
               <TouchableOpacity style={styles.AccionItem} onPress={compartirReporte} disabled={compartiendo}>
                 <View style={styles.AccionCirculo}>
                   <Feather name="share-2" size={18} color={theme.contactAccent} />
                 </View>
-                <Text style={styles.AccionTexto}>{compartiendo ? "Enviando..." : "Compartir"}</Text>
+                <Text style={styles.AccionTexto}>{compartiendo ? t.detalle.enviando : t.detalle.compartir}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.AccionItem} onPress={irAMapaInterno}>
                 <View style={styles.AccionCirculo}>
                   <Feather name="navigation" size={18} color={theme.contactAccent} />
                 </View>
-                <Text style={styles.AccionTexto}>Navegar</Text>
+                <Text style={styles.AccionTexto}>{t.detalle.navegar}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.AccionItem} onPress={accionLlamar}>
                 <View style={styles.AccionCirculo}>
                   <Feather name="phone" size={18} color={theme.contactAccent} />
                 </View>
-                <Text style={styles.AccionTexto}>Llamar</Text>
+                <Text style={styles.AccionTexto}>{t.detalle.llamar}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.AccionItem} onPress={accionReportar}>
                 <View style={styles.AccionCirculo}>
                   <MaterialIcons name="warning-amber" size={20} color={theme.contactAccent} />
                 </View>
-                <Text style={styles.AccionTexto}>Reportar</Text>
+                <Text style={styles.AccionTexto}>{t.detalle.reportar}</Text>
               </TouchableOpacity>
             </View>
             <View style={styles.SeparadorFinal} />
@@ -279,7 +281,7 @@ export default function DetalleAlerta() {
             </MapView>
           ) : (
             <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-              <Text style={{ color: theme.text }}>No se pudo cargar el mapa.</Text>
+              <Text style={{ color: theme.text }}>{t.detalle.no_pudo_cargar_mapa_punto}</Text>
             </View>
           )}
           <TouchableOpacity
@@ -294,7 +296,7 @@ export default function DetalleAlerta() {
               paddingVertical: 10,
             }}
           >
-            <Text style={{ color: "white", fontWeight: "700" }}>Cerrar mapa</Text>
+            <Text style={{ color: "white", fontWeight: "700" }}>{t.detalle.cerrar_mapa}</Text>
           </TouchableOpacity>
         </View>
       </Modal>

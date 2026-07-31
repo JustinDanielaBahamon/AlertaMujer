@@ -7,6 +7,7 @@ import CustomePermisos from "../../../components/ui/modalMesanje/permisosMLL";
 import { messageStyle, MSG_COLORS } from "../styles/messageStyle";
 import { useMessagesTutorialViewModel, type FeatureItem } from "../viewModel/useMessagesTutorialViewModel";
 import { LinearGradient } from 'expo-linear-gradient';
+import { useLocale } from "../../../contexts/LocaleContext";
 
 // ─── Círculos de fondo decorativos ───────────────────────────────────────────
 function BackgroundCircles() {
@@ -96,6 +97,7 @@ interface Props {
 }
 
 export default function MessagesScreen({ externalVm }: Props) {
+  const { t } = useLocale();
   const internalVm = useMessagesTutorialViewModel();
   const vm = externalVm ?? internalVm;
 
@@ -146,7 +148,7 @@ export default function MessagesScreen({ externalVm }: Props) {
 
           {/* Animated card */}
           <Animated.View style={[{ flex: 1 }, cardAnimStyle]}>
-            <Card title={`Mensajes y\n`} titleHighlight="Llamadas">
+            <Card title={`${t.tutorial.mensaje_titulo_1}\n`} titleHighlight={t.tutorial.mensaje_titulo_2}>
               <ScrollView
                 style={messageStyle.cardScroll}
                 contentContainerStyle={messageStyle.cardScrollContent}
@@ -155,7 +157,7 @@ export default function MessagesScreen({ externalVm }: Props) {
                 nestedScrollEnabled={true}
               >
                 <View style={messageStyle.sectionRow}>
-                  <Text style={messageStyle.sectionLabel}>CÓMO TE PROTEGEMOS</Text>
+                  <Text style={messageStyle.sectionLabel}>{t.tutorial.mensaje_proteccion_titulo}</Text>
                   <View style={messageStyle.sectionLine} />
                 </View>
 
@@ -189,7 +191,7 @@ export default function MessagesScreen({ externalVm }: Props) {
                 <View style={messageStyle.divider} />
 
                 <View style={messageStyle.sectionRow}>
-                  <Text style={messageStyle.sectionLabel}>PERMISOS NECESARIOS</Text>
+                  <Text style={messageStyle.sectionLabel}>{t.tutorial.mensaje_permisos_titulo}</Text>
                   <View style={messageStyle.sectionLine} />
                 </View>
 
@@ -197,9 +199,9 @@ export default function MessagesScreen({ externalVm }: Props) {
                   <View style={messageStyle.permisosRow}>
                     <Text style={messageStyle.permisosEmoji}>🔐</Text>
                     <View style={{ flex: 1 }}>
-                      <Text style={messageStyle.permisosTitle}>Activa los permisos</Text>
+                      <Text style={messageStyle.permisosTitle}>{t.tutorial.mensaje_permisos_activa_titulo}</Text>
                       <Text style={messageStyle.permisosDesc}>
-                        SMS y llamadas son necesarios para que las alertas funcionen correctamente.
+                        {t.tutorial.mensaje_permisos_activa_desc}
                       </Text>
                     </View>
                   </View>
@@ -207,7 +209,7 @@ export default function MessagesScreen({ externalVm }: Props) {
 
                 <View style={messageStyle.bottomBadge}>
                   <Text style={{ fontSize: 16 }}>📡</Text>
-                  <Text style={messageStyle.bottomBadgeText}>Alerta en segundos</Text>
+                  <Text style={messageStyle.bottomBadgeText}>{t.tutorial.mensaje_badge_inferior}</Text>
                 </View>
 
               </ScrollView>
@@ -221,13 +223,13 @@ export default function MessagesScreen({ externalVm }: Props) {
           <View style={messageStyle.overlayBg}>
             <View style={messageStyle.warningBox}>
               <Text style={messageStyle.warningText}>
-                ⚠️ Sin estos permisos las alertas de emergencia no funcionarán correctamente.
+                {t.tutorial.mensaje_warning_texto}
               </Text>
               <TouchableOpacity onPress={vm.retryPermissions} style={messageStyle.btnPrimary}>
-                <Text style={messageStyle.btnPrimaryText}>Activar permisos</Text>
+                <Text style={messageStyle.btnPrimaryText}>{t.tutorial.mensaje_btn_activar_permisos}</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={vm.continueWithoutPermissions} style={messageStyle.btnSecondary}>
-                <Text style={messageStyle.btnSecondaryText}>Continuar sin permisos</Text>
+                <Text style={messageStyle.btnSecondaryText}>{t.tutorial.mensaje_btn_continuar_sin_permisos}</Text>
               </TouchableOpacity>
             </View>
           </View>

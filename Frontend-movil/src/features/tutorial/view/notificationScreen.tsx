@@ -7,6 +7,7 @@ import PermisosModal from "../../../components/ui/modalMesanje/permisosMLL";
 import { useNotificationTutorialViewModel, type NotifFeatureItem, } from "../viewModel/useNotificationTutorialViewModel";
 import { notificationStyle, NOTIF_COLORS } from "../styles/notificationStyle";
 import { LinearGradient } from 'expo-linear-gradient';
+import { useLocale } from "../../../contexts/LocaleContext";
 
 // ─── Decorative background circles ───────────────────────────────────────────
 function BackgroundCircles() {
@@ -99,6 +100,7 @@ interface NotificationTutorialProps {
 }
 
 export default function NotificationTutorial({ externalVm }: NotificationTutorialProps) {
+  const { t } = useLocale();
   const internalVM = useNotificationTutorialViewModel();
   const vm = externalVm ?? internalVM;
 
@@ -143,7 +145,7 @@ export default function NotificationTutorial({ externalVm }: NotificationTutoria
 
           {/* Animated card */}
           <Animated.View style={[{ flex: 1 }, cardAnimStyle]}>
-            <Card title={`Mantente\n`} titleHighlight="Informada">
+            <Card title={`${t.tutorial.notificacion_titulo_1}\n`} titleHighlight={t.tutorial.notificacion_titulo_2}>
               <ScrollView
                 style={notificationStyle.cardScroll}
                 contentContainerStyle={notificationStyle.cardScrollContent}
@@ -153,7 +155,7 @@ export default function NotificationTutorial({ externalVm }: NotificationTutoria
               >
                 {/* Main section header */}
                 <View style={notificationStyle.sectionRow}>
-                  <Text style={notificationStyle.sectionLabel}>SIEMPRE INFORMADA</Text>
+                  <Text style={notificationStyle.sectionLabel}>{t.tutorial.notificacion_informada_titulo}</Text>
                   <View style={notificationStyle.sectionLine} />
                 </View>
 
@@ -189,7 +191,7 @@ export default function NotificationTutorial({ externalVm }: NotificationTutoria
 
                 {/* Permissions section */}
                 <View style={notificationStyle.sectionRow}>
-                  <Text style={notificationStyle.sectionLabel}>PERMISOS NECESARIOS</Text>
+                  <Text style={notificationStyle.sectionLabel}>{t.tutorial.notificacion_permisos_titulo}</Text>
                   <View style={notificationStyle.sectionLine} />
                 </View>
 
@@ -197,9 +199,9 @@ export default function NotificationTutorial({ externalVm }: NotificationTutoria
                   <View style={notificationStyle.permisosRow}>
                     <Text style={notificationStyle.permisosEmoji}>🔔</Text>
                     <View style={notificationStyle.permisosTitleWrap}>
-                      <Text style={notificationStyle.permisosTitle}>Notificaciones push</Text>
+                      <Text style={notificationStyle.permisosTitle}>{t.tutorial.notificacion_permisos_push_titulo}</Text>
                       <Text style={notificationStyle.permisosDesc}>
-                        Necesarias para recibir alertas SOS y avisos de tu red de apoyo en tiempo real.
+                        {t.tutorial.notificacion_permisos_push_desc}
                       </Text>
                     </View>
                   </View>
@@ -212,13 +214,13 @@ export default function NotificationTutorial({ externalVm }: NotificationTutoria
                   activeOpacity={0.85}
                 >
                   <Text style={{ fontSize: 18 }}>🚀</Text>
-                  <Text style={notificationStyle.btnFinalizarText}>Finalizar y Activar</Text>
+                  <Text style={notificationStyle.btnFinalizarText}>{t.tutorial.notificacion_btn_finalizar}</Text>
                 </TouchableOpacity>
 
                 {/* Bottom badge */}
                 <View style={notificationStyle.bottomBadge}>
                   <Text style={{ fontSize: 16 }}>⚡</Text>
-                  <Text style={notificationStyle.bottomBadgeText}>Alertas en tiempo real</Text>
+                  <Text style={notificationStyle.bottomBadgeText}>{t.tutorial.notificacion_badge_inferior}</Text>
                 </View>
 
               </ScrollView>
@@ -232,13 +234,13 @@ export default function NotificationTutorial({ externalVm }: NotificationTutoria
           <View style={notificationStyle.overlayBg}>
             <View style={notificationStyle.warningBox}>
               <Text style={notificationStyle.warningText}>
-                ⚠️ Sin notificaciones no recibirás avisos cuando tu red de apoyo responda.
+                {t.tutorial.notificacion_warning_texto}
               </Text>
               <TouchableOpacity onPress={vm.retryPermissions} style={notificationStyle.btnPrimary}>
-                <Text style={notificationStyle.btnPrimaryText}>Activar notificaciones</Text>
+                <Text style={notificationStyle.btnPrimaryText}>{t.tutorial.notificacion_btn_activar}</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={vm.continueWithoutPermissions} style={notificationStyle.btnSecondary}>
-                <Text style={notificationStyle.btnSecondaryText}>Ir al inicio</Text>
+                <Text style={notificationStyle.btnSecondaryText}>{t.tutorial.notificacion_btn_ir_inicio}</Text>
               </TouchableOpacity>
             </View>
           </View>

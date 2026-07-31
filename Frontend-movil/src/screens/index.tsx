@@ -1,8 +1,10 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import { useIndexViewModel } from "./useIndexViewModel";
+import { useLocale } from "../contexts/LocaleContext";
 
 export default function Index() {
   const vm = useIndexViewModel();
+  const { t } = useLocale();
 
   return (
     <View
@@ -13,7 +15,7 @@ export default function Index() {
         alignItems: "center",
       }}
     >
-      <Text style={{ color: "white" }}>Bienvenido (pantalla de prueba)</Text>
+      <Text style={{ color: "white" }}>{t.indexDemo.mensaje}</Text>
 
       <TouchableOpacity onPress={vm.entrarComoDemo}>
         <Text
@@ -27,7 +29,7 @@ export default function Index() {
             backgroundColor: "purple",
           }}
         >
-          Entrar como demo (home)
+          {t.indexDemo.btn_demo}
         </Text>
       </TouchableOpacity>
 
@@ -43,7 +45,7 @@ export default function Index() {
             backgroundColor: "purple",
           }}
         >
-          Ir a login
+          {t.indexDemo.btn_login}
         </Text>
       </TouchableOpacity>
     </View>

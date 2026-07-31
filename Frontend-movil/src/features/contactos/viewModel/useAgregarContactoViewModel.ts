@@ -48,8 +48,8 @@ export function useAgregarContactoViewModel() {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
       Alert.alert(
-        "Permiso requerido",
-        "Necesitamos acceso a tu galería para seleccionar una foto."
+        t.agregar.permiso_galeria_titulo,
+        t.agregar.permiso_galeria_desc
       );
       return;
     }
@@ -132,9 +132,11 @@ export function useAgregarContactoViewModel() {
 
     if (duplicado) {
       Alert.alert(
-        "Contacto duplicado",
-        `El número ${telefonoNormalizado.replace(/(\d{3})(\d{3})(\d{4})/, "$1 $2 $3")} ya está registrado como contacto de emergencia de ${duplicado.nombre}.`,
-        [{ text: "Entendido", style: "cancel" }]
+        t.agregar.duplicado_titulo,
+        t.agregar.duplicado_desc
+          .replace("{telefono}", telefonoNormalizado.replace(/(\d{3})(\d{3})(\d{4})/, "$1 $2 $3"))
+          .replace("{nombre}", duplicado.nombre),
+        [{ text: t.agregar.duplicado_boton, style: "cancel" }]
       );
       return;
     }

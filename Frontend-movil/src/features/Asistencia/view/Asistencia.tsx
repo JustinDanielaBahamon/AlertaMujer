@@ -4,9 +4,11 @@ import { styles } from '../style/Asistencia.style';
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from "../../../../src/contexts/ThemeContext";
+import { useLocale } from "../../../../src/contexts/LocaleContext";
 
 export default function Asistencia() {
   const { theme } = useTheme();
+  const { t } = useLocale();
 
   const llamar = (numero: string) => {
     const url = Platform.OS === 'android' ? `tel:${numero}` : `telprompt:${numero}`;
@@ -35,9 +37,9 @@ export default function Asistencia() {
         >
           <View style={styles.HeaderContenido}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.TituloHeader}>Canales de Asistencia</Text>
+              <Text style={styles.TituloHeader}>{t.asistencia.titulo}</Text>
               <Text style={styles.SubtituloHeader}>
-                Canales a los que podrás acudir en caso de emergencia.
+                {t.asistencia.canales}
               </Text>
             </View>
             <View>
@@ -66,18 +68,18 @@ export default function Asistencia() {
             style={{ borderRadius: 22, padding: 20, marginBottom: 15 }}
           >
             <Text style={{ color: 'white', fontSize: 21, fontWeight: '600' }}>
-              Emergencia inmediata
+              {t.asistencia.emergencia_titulo}
             </Text>
             <Text style={{ color: 'white', fontSize: 42, fontWeight: 'bold', marginVertical: 2 }}>
               123
             </Text>
             <Text style={{ color: 'white', fontSize: 14, marginBottom: 15 }}>
-              Policía · Ambulancia · Bomberos
+              {t.asistencia.emergencia_desc}
             </Text>
             <TouchableOpacity onPress={() => llamar('123')} style={styles.BotonPolicia}>
               <View style={styles.LlamarIcono}>
                 <Feather name="phone" size={20} color="white" />
-                <Text style={styles.llamarTexto}>Llamar ahora</Text>
+                <Text style={styles.llamarTexto}>{t.asistencia.llamar_ahora}</Text>
               </View>
             </TouchableOpacity>
           </LinearGradient>
@@ -93,13 +95,13 @@ export default function Asistencia() {
               <View style={[styles.iconoUser, { backgroundColor: iconoUserBg }]}>
                 <Feather name="user" size={24} color="white" />
               </View>
-              <Text style={{ color: 'white', fontSize: 14, fontWeight: 'bold' }}>VIOLENCIA</Text>
+              <Text style={{ color: 'white', fontSize: 14, fontWeight: 'bold' }}>{t.asistencia.violencia}</Text>
               <Text style={{ color: 'white', fontSize: 32, fontWeight: 'bold' }}>156</Text>
               <Text style={{ color: 'white', fontSize: 12, marginBottom: 15, height: 40 }}>
-                Orientación jurídica y psicológica
+                {t.asistencia.violencia_desc}
               </Text>
               <TouchableOpacity onPress={() => llamar('156')} style={styles.llamarViolencia}>
-                <Text style={styles.llamadaSegundaSeccion}>Llamar</Text>
+                <Text style={styles.llamadaSegundaSeccion}>{t.asistencia.llamar}</Text>
               </TouchableOpacity>
             </LinearGradient>
 
@@ -111,13 +113,13 @@ export default function Asistencia() {
               <View style={[styles.iconoBombillo, { backgroundColor: iconoBombilloBg }]}>
                 <MaterialIcons name="lightbulb-outline" size={26} color={iconoBombilloColor} />
               </View>
-              <Text style={{ color: 'white', fontSize: 14, fontWeight: 'bold' }}>SALUD MENTAL</Text>
+              <Text style={{ color: 'white', fontSize: 14, fontWeight: 'bold' }}>{t.asistencia.salud_mental}</Text>
               <Text style={{ color: 'white', fontSize: 32, fontWeight: 'bold' }}>106</Text>
               <Text style={{ textAlign: 'right', color: 'white', fontSize: 12, marginBottom: 15, height: 40 }}>
-                Línea de crisis emocional
+                {t.asistencia.salud_desc}
               </Text>
               <TouchableOpacity onPress={() => llamar('106')} style={styles.llamarMental}>
-                <Text style={styles.llamadaSegundaSeccion}>Llamar</Text>
+                <Text style={styles.llamadaSegundaSeccion}>{t.asistencia.llamar}</Text>
               </TouchableOpacity>
             </LinearGradient>
 
@@ -137,7 +139,7 @@ export default function Asistencia() {
                   </View>
                   <View>
                     <Text style={{ color: 'white', fontSize: 13, fontWeight: '600' }}>
-                      Defensoría del Pueblo
+                      {t.asistencia.defensoria}
                     </Text>
                     <Text style={{ color: 'white', fontSize: 13 }}>01 8000 914814</Text>
                   </View>
@@ -146,7 +148,7 @@ export default function Asistencia() {
                   onPress={() => llamar('018000914814')}
                   style={[styles.llamarMental, { width: 80 }]}
                 >
-                  <Text style={styles.llamadaSegundaSeccion}>Llamar</Text>
+                  <Text style={styles.llamadaSegundaSeccion}>{t.asistencia.llamar}</Text>
                 </TouchableOpacity>
               </View>
             </LinearGradient>

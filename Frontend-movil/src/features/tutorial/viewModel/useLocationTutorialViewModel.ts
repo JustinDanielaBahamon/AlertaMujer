@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCallback, useRef, useState } from "react";
 import LottieView from "lottie-react-native";
+import { useLocale } from "../../../contexts/LocaleContext";
 
 export const MUNICIPALITIES_HUILA = [
   "Neiva", "Pitalito", "Garzón", "San Agustín", "Gigante",
@@ -23,6 +24,7 @@ export interface LocationErrors {
 }
 
 export function useLocationTutorialViewModel() {
+  const { t } = useLocale();
   const [department, setDepartment]     = useState("Huila");
   const [municipality, setMunicipality] = useState(PLACEHOLDER_MUNICIPALITY);
   const [confirmationModalVisible, setConfirmationModalVisible] = useState(false);
@@ -36,16 +38,16 @@ export function useLocationTutorialViewModel() {
 
   const validate = useCallback((): boolean => {
     const newErrors: LocationErrors = {
-      department:   !department ? "Selecciona un departamento" : null,
+      department:   !department ? t.tutorial.ubicacion_error_departamento : null,
       municipality: (!municipality || municipality === PLACEHOLDER_MUNICIPALITY)
-                    ? "Selecciona un municipio" : null,
+                    ? t.tutorial.ubicacion_error_municipio : null,
     };
     setErrors(newErrors);
     const hasError = Object.values(newErrors).some(Boolean);
     setShowValidationBanner(hasError);
     if (hasError) setTimeout(() => setShowValidationBanner(false), 3000);
     return !hasError;
-  }, [department, municipality]);
+  }, [department, municipality, t]);
 
   const clearError = useCallback((field: keyof LocationErrors) => {
     setErrors((prev) => ({ ...prev, [field]: null }));
