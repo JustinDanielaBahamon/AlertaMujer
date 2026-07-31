@@ -1,6 +1,7 @@
 import * as SMS from "expo-sms";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { MSG_COLORS } from "../styles/messageStyle";
+import { useLocale } from "../../../contexts/LocaleContext";
 
 // ─── Tipos públicos ───────────────────────────────────────────────────────────
 export interface FeatureItem {
@@ -17,17 +18,19 @@ export interface FeatureItem {
   colorBorder: string;
 }
 
-// ─── Datos estáticos ──────────────────────────────────────────────────────────
-export const FEATURE_ROWS: FeatureItem[] = [
+type LocaleT = ReturnType<typeof useLocale>["t"];
+
+// ─── Datos (ahora dependen del idioma activo) ─────────────────────────────────
+const getFeatureRows = (t: LocaleT): FeatureItem[] => [
   {
     id: "sms",
     emoji: "💬",
-    title: "SMS Automático",
-    badge: "Instantáneo",
-    desc: "Mensaje de texto con tu ubicación exacta.",
-    highlightLabel: "SMS Automático: ",
-    boldLabel: "Aviso rápido.",
-    detailDesc: "Se envía un mensaje de texto con tu ubicación exacta a tus contactos de confianza.",
+    title: t.tutorial.mensaje_sms_titulo,
+    badge: t.tutorial.mensaje_sms_badge,
+    desc: t.tutorial.mensaje_sms_desc,
+    highlightLabel: t.tutorial.mensaje_sms_highlight,
+    boldLabel: t.tutorial.mensaje_sms_bold,
+    detailDesc: t.tutorial.mensaje_sms_detail,
     color: MSG_COLORS.row1Color,
     colorLight: MSG_COLORS.row1Light,
     colorBorder: MSG_COLORS.row1Border,
@@ -35,12 +38,12 @@ export const FEATURE_ROWS: FeatureItem[] = [
   {
     id: "call",
     emoji: "📞",
-    title: "Llamada SOS",
-    badge: "Urgente",
-    desc: "Llamada de emergencia automática.",
-    highlightLabel: "Llamada SOS: ",
-    boldLabel: "Auxilio directo.",
-    detailDesc: "El sistema inicia una llamada de emergencia a tus personas de confianza.",
+    title: t.tutorial.mensaje_llamada_titulo,
+    badge: t.tutorial.mensaje_llamada_badge,
+    desc: t.tutorial.mensaje_llamada_desc,
+    highlightLabel: t.tutorial.mensaje_llamada_highlight,
+    boldLabel: t.tutorial.mensaje_llamada_bold,
+    detailDesc: t.tutorial.mensaje_llamada_detail,
     color: MSG_COLORS.row2Color,
     colorLight: MSG_COLORS.row2Light,
     colorBorder: MSG_COLORS.row2Border,
@@ -48,12 +51,12 @@ export const FEATURE_ROWS: FeatureItem[] = [
   {
     id: "confirm",
     emoji: "✅",
-    title: "Confirmación",
-    badge: "Seguridad",
-    desc: "Notificación cuando la ayuda está en camino.",
-    highlightLabel: "Confirmación: ",
-    boldLabel: "Seguridad total.",
-    detailDesc: "Recibirás una notificación cuando la ayuda esté en camino hacia ti.",
+    title: t.tutorial.mensaje_confirmacion_titulo,
+    badge: t.tutorial.mensaje_confirmacion_badge,
+    desc: t.tutorial.mensaje_confirmacion_desc,
+    highlightLabel: t.tutorial.mensaje_confirmacion_highlight,
+    boldLabel: t.tutorial.mensaje_confirmacion_bold,
+    detailDesc: t.tutorial.mensaje_confirmacion_detail,
     color: MSG_COLORS.row3Color,
     colorLight: MSG_COLORS.row3Light,
     colorBorder: MSG_COLORS.row3Border,
@@ -62,6 +65,9 @@ export const FEATURE_ROWS: FeatureItem[] = [
 
 // ─── ViewModel ────────────────────────────────────────────────────────────────
 export function useMessagesTutorialViewModel() {
+  const { t } = useLocale();
+  const featureRows = useMemo(() => getFeatureRows(t), [t]);
+
   const [modalVisible, setModalVisible]   = useState(false);
   const [permissionType, setPermissionType] = useState<"sms" | "llamada">("sms");
   const [showWarning, setShowWarning]     = useState(false);
@@ -105,7 +111,7 @@ export function useMessagesTutorialViewModel() {
   }, []);
 
   return {
-    featureRows: FEATURE_ROWS,
+    featureRows,
     modalVisible,
     permissionType,
     showWarning,

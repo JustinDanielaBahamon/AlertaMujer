@@ -8,6 +8,7 @@ import ModalConfirmacion from "@/components/ui/modalConfirmacion/confirmacion";
 import { useLocationTutorialViewModel, PLACEHOLDER_MUNICIPALITY } from "../viewModel/useLocationTutorialViewModel";
 import { locationStyle, UBIC_COLORS } from "../styles/locationStyle";
 import { LinearGradient } from 'expo-linear-gradient';
+import { useLocale } from "../../../contexts/LocaleContext";
 
 // ─── Círculos de fondo decorativos ───────────────────────────────────────────
 function BackgroundCircles() {
@@ -59,6 +60,7 @@ interface LocationScreenProps {
 
 // ─── Pantalla principal ───────────────────────────────────────────────────────────────
 export default function LocationScreen({ externalVm }: LocationScreenProps) {
+  const { t } = useLocale();
   const internalVM = useLocationTutorialViewModel();
   const vm = externalVm ?? internalVM;
 
@@ -128,7 +130,7 @@ export default function LocationScreen({ externalVm }: LocationScreenProps) {
 
           {/* tarjeta  */}
           <Animated.View style={[{ flex: 1 }, cardAnimStyle]}>
-            <Card title={`Tu\n`} titleHighlight="Ubicación">
+            <Card title={`${t.tutorial.ubicacion_titulo_1}\n`} titleHighlight={t.tutorial.ubicacion_titulo_2}>
               <ScrollView
                 style={locationStyle.cardScroll}
                 contentContainerStyle={locationStyle.cardScrollContent}
@@ -138,7 +140,7 @@ export default function LocationScreen({ externalVm }: LocationScreenProps) {
               >
                 {/* seleccion de la ubicacion  */}
                 <View style={locationStyle.sectionRow}>
-                  <Text style={locationStyle.sectionLabel}>CONFIGURA TU UBICACIÓN</Text>
+                  <Text style={locationStyle.sectionLabel}>{t.tutorial.ubicacion_configura_titulo}</Text>
                   <View style={locationStyle.sectionLine} />
                 </View>
 
@@ -149,9 +151,9 @@ export default function LocationScreen({ externalVm }: LocationScreenProps) {
                     <Text style={locationStyle.infoIcon}>📍</Text>
                   </View>
                   <View style={locationStyle.infoTextContainer}>
-                    <Text style={locationStyle.infoTitle}>Ayuda local</Text>
+                    <Text style={locationStyle.infoTitle}>{t.tutorial.ubicacion_ayuda_titulo}</Text>
                     <Text style={locationStyle.infoDesc}>
-                      Selecciona tu ubicación para que los servicios de emergencia sepan dónde encontrarte.
+                      {t.tutorial.ubicacion_ayuda_desc}
                     </Text>
                   </View>
                 </View>
@@ -164,7 +166,7 @@ export default function LocationScreen({ externalVm }: LocationScreenProps) {
                   >
                     <Text style={{ fontSize: 18 }}>⚠️</Text>
                     <Text style={locationStyle.validationBannerText}>
-                      Por favor selecciona tu departamento y municipio antes de continuar.
+                      {t.tutorial.ubicacion_validacion_banner}
                     </Text>
                   </Animated.View>
                 )}
@@ -173,7 +175,7 @@ export default function LocationScreen({ externalVm }: LocationScreenProps) {
                 <View style={locationStyle.pickerGroup}>
                   <View style={locationStyle.pickerLabelRow}>
                     <View style={locationStyle.pickerLabelDot} />
-                    <Text style={locationStyle.pickerLabel}>DEPARTAMENTO</Text>
+                    <Text style={locationStyle.pickerLabel}>{t.tutorial.ubicacion_departamento_label}</Text>
                   </View>
                   <View style={[
                     locationStyle.pickerWrap,
@@ -199,7 +201,7 @@ export default function LocationScreen({ externalVm }: LocationScreenProps) {
                 <View style={locationStyle.pickerGroup}>
                   <View style={locationStyle.pickerLabelRow}>
                     <View style={locationStyle.pickerLabelDot} />
-                    <Text style={locationStyle.pickerLabel}>MUNICIPIO</Text>
+                    <Text style={locationStyle.pickerLabel}>{t.tutorial.ubicacion_municipio_label}</Text>
                   </View>
                   <View style={[
                     locationStyle.pickerWrap,
@@ -212,7 +214,7 @@ export default function LocationScreen({ externalVm }: LocationScreenProps) {
                     >
                       {/* Opción de marcador de posición */}
                       <Picker.Item
-                        label="Selecciona tu municipio..."
+                        label={t.tutorial.ubicacion_municipio_placeholder}
                         value={PLACEHOLDER_MUNICIPALITY}
                         color="#9CA3AF"
                       />
@@ -233,7 +235,7 @@ export default function LocationScreen({ externalVm }: LocationScreenProps) {
 
                 {/* Resumen de la selección actual */}
                 <View style={locationStyle.sectionRow}>
-                  <Text style={locationStyle.sectionLabel}>TU SELECCIÓN</Text>
+                  <Text style={locationStyle.sectionLabel}>{t.tutorial.ubicacion_seleccion_titulo}</Text>
                   <View style={locationStyle.sectionLine} />
                 </View>
 
@@ -241,26 +243,26 @@ export default function LocationScreen({ externalVm }: LocationScreenProps) {
                   <View style={locationStyle.seleccionRow}>
                     <Text style={{ fontSize: 16 }}>🗺️</Text>
                     <View style={{ flex: 1 }}>
-                      <Text style={locationStyle.seleccionLabel}>Departamento</Text>
+                      <Text style={locationStyle.seleccionLabel}>{t.tutorial.ubicacion_departamento_texto}</Text>
                       <Text style={locationStyle.seleccionValue}>{vm.department || "—"}</Text>
                     </View>
                     <View style={locationStyle.seleccionBadge}>
-                      <Text style={locationStyle.seleccionBadgeText}>Fijo</Text>
+                      <Text style={locationStyle.seleccionBadgeText}>{t.tutorial.ubicacion_fijo_badge}</Text>
                     </View>
                   </View>
                   <View style={[locationStyle.seleccionRow, { borderTopWidth: 1, borderTopColor: UBIC_COLORS.divider, paddingTop: 8 }]}>
                     <Text style={{ fontSize: 16 }}>📌</Text>
                     <View style={{ flex: 1 }}>
-                      <Text style={locationStyle.seleccionLabel}>Municipio</Text>
+                      <Text style={locationStyle.seleccionLabel}>{t.tutorial.ubicacion_municipio_texto}</Text>
                       <Text style={[locationStyle.seleccionValue,
                         municipalityNotSelected && { color: "#9CA3AF", fontStyle: "italic", fontWeight: "400" }
                       ]}>
-                        {municipalityNotSelected ? "Sin seleccionar" : vm.municipality}
+                        {municipalityNotSelected ? t.tutorial.ubicacion_sin_seleccionar : vm.municipality}
                       </Text>
                     </View>
                     {!municipalityNotSelected && (
                       <View style={locationStyle.seleccionBadge}>
-                        <Text style={locationStyle.seleccionBadgeText}>✓ OK</Text>
+                        <Text style={locationStyle.seleccionBadgeText}>{t.tutorial.ubicacion_ok_badge}</Text>
                       </View>
                     )}
                   </View>
@@ -273,13 +275,13 @@ export default function LocationScreen({ externalVm }: LocationScreenProps) {
                   activeOpacity={0.85}
                 >
                   <Text style={{ fontSize: 18 }}>💾</Text>
-                  <Text style={locationStyle.btnGuardarText}>Guardar Ubicación</Text>
+                  <Text style={locationStyle.btnGuardarText}>{t.tutorial.ubicacion_guardar_boton}</Text>
                 </TouchableOpacity>
 
                 {/* Insignia inferior */}
                 <View style={locationStyle.bottomBadge}>
                   <Text style={{ fontSize: 16 }}>🛡️</Text>
-                  <Text style={locationStyle.bottomBadgeText}>Datos protegidos</Text>
+                  <Text style={locationStyle.bottomBadgeText}>{t.tutorial.ubicacion_datos_protegidos}</Text>
                 </View>
 
               </ScrollView>

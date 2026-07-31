@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Modal, TouchableOpacity } from 'react-native';
 import { localStyles } from './confirmacionStyle';
+import { useLocale } from '../../../contexts/LocaleContext';
 
 interface ModalConfirmacionProps {
   visible: boolean;
@@ -19,7 +20,8 @@ export default function ModalConfirmacion({
   onRegresar,
   soloConfirmar, // ← agregar esto
 }: ModalConfirmacionProps) {
-  
+  const { t } = useLocale();
+
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onRegresar}>
       <View style={localStyles.overlay}>
@@ -29,32 +31,32 @@ export default function ModalConfirmacion({
             <Text style={localStyles.iconText}>⚠️</Text>
           </View>
 
-          <Text style={localStyles.modalTitle}>¡Casi listos!</Text>
+          <Text style={localStyles.modalTitle}>{t.confirmacion.titulo}</Text>
           
           <Text style={localStyles.modalSubtitle}>
-            Confirma que tu ubicación sea correcta para poder asistirte mejor:
+            {t.confirmacion.subtitulo}
           </Text>
 
           <View style={localStyles.infoBox}>
             <View style={localStyles.dataRow}>
-              <Text style={localStyles.dataLabel}>Departamento:</Text>
+              <Text style={localStyles.dataLabel}>{t.confirmacion.departamento_label}</Text>
               <Text style={localStyles.dataValue}>{departamento}</Text>
             </View>
             <View style={localStyles.dataRow}>
-              <Text style={localStyles.dataLabel}>Municipio:</Text>
+              <Text style={localStyles.dataLabel}>{t.confirmacion.municipio_label}</Text>
               <Text style={localStyles.dataValue}>{municipio}</Text>
             </View>
           </View>
 
           <View style={localStyles.buttonContainer}>
             <TouchableOpacity style={localStyles.btnConfirmar} onPress={onConfirmar}>
-              <Text style={localStyles.btnTextConfirmar}>Sí, confirmar</Text>
+              <Text style={localStyles.btnTextConfirmar}>{t.confirmacion.btn_confirmar}</Text>
             </TouchableOpacity>
 
             {/* ← Solo muestra "Cambiar datos" si NO ha confirmado aún */}
             {!soloConfirmar && (
               <TouchableOpacity style={localStyles.btnRegresar} onPress={onRegresar}>
-                <Text style={localStyles.btnTextRegresar}>Cambiar datos</Text>
+                <Text style={localStyles.btnTextRegresar}>{t.confirmacion.btn_cambiar}</Text>
               </TouchableOpacity>
             )}
           </View>

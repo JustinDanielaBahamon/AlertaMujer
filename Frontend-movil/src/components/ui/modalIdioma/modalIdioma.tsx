@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Modal, Text, TouchableOpacity, View } from 'react-native';
-import { AppLocale } from '../../../contexts/LocaleContext';
+import { AppLocale, useLocale } from '../../../contexts/LocaleContext';
 import { localStyles } from './modalIdioma.style';
 
 export type OpcionIdioma = {
@@ -26,6 +26,8 @@ export default function ModalIdioma({
   onSeleccionar,
   onCerrar,
 }: ModalIdiomaProps) {
+  const { t } = useLocale();
+
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCerrar}>
       <TouchableOpacity
@@ -34,7 +36,7 @@ export default function ModalIdioma({
         onPress={onCerrar}
       >
         <TouchableOpacity activeOpacity={1} style={[localStyles.modalCard, { backgroundColor: theme.card }]}>
-          <Text style={[localStyles.modalTitle, { color: theme.text }]}>Selecciona un idioma</Text>
+          <Text style={[localStyles.modalTitle, { color: theme.text }]}>{t.modal.seleccionar_idioma}</Text>
 
           {opciones.map((opcion) => {
             const seleccionado = opcion.code === locale;
@@ -61,7 +63,7 @@ export default function ModalIdioma({
 
           <TouchableOpacity style={localStyles.btnCerrar} onPress={onCerrar}>
             <Text style={[localStyles.btnCerrarTexto, { color: theme.tabActiveColor }]}>
-              Cerrar
+              {t.modal.cerrar}
             </Text>
           </TouchableOpacity>
         </TouchableOpacity>

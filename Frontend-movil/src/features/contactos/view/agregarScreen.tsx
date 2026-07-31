@@ -28,7 +28,7 @@ export default function AgregarContacto() {
   const nameInitial = vm.nombre.trim().charAt(0).toUpperCase() || "C";
   const relationPreview = vm.parentesco.trim() || "Relación";
   const phonePreview = vm.telefono.trim() || "Sin número";
-  const namePreview = vm.nombre.trim() || "Nuevo contacto";
+  const namePreview = vm.nombre.trim() || t.agregar.titulo_agregar;
 
   const isNameValid = vm.nombre.trim().length > 0;
   const isRelationValid = vm.parentesco.trim().length > 0;
@@ -49,9 +49,9 @@ export default function AgregarContacto() {
       >
         <View style={styles.headerContent}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.headerTitle}>Mis Contactos de Confianza</Text>
+            <Text style={styles.headerTitle}>{t.agregar.header_titulo}</Text>
             <Text style={styles.headerSubtitle}>
-              Estas personas recibirán tu ubicación en caso de emergencia.
+              {t.agregar.header_subtitulo}
             </Text>
           </View>
           <Image
@@ -78,7 +78,7 @@ export default function AgregarContacto() {
               marginBottom: 16,
             }}>
               <Text style={[styles.sectionTitle, { marginBottom: 14, textAlign: "center" }]}>
-                Foto de perfil
+                {t.agregar.foto_titulo}
               </Text>
 
               <TouchableOpacity
@@ -148,12 +148,12 @@ export default function AgregarContacto() {
                   fontWeight: "600",
                   marginBottom: 4,
                 }}>
-                  {vm.fotoUri ? "Cambiar foto" : "Agregar foto"}
+                  {vm.fotoUri ? t.agregar.foto_cambiar : t.agregar.foto_agregar}
                 </Text>
                 <Text style={{ fontSize: 11, color: theme.contactSubtext, textAlign: "center" }}>
                   {vm.fotoUri
-                    ? "Desde galería · toca para cambiar"
-                    : "Desde galería o se usará la inicial"}
+                    ? t.agregar.foto_galeria_cambiar
+                    : t.agregar.foto_galeria_inicial}
                 </Text>
               </TouchableOpacity>
 
@@ -175,7 +175,7 @@ export default function AgregarContacto() {
                 >
                   <Ionicons name="trash-outline" size={13} color="#E53935" />
                   <Text style={{ fontSize: 12, color: "#E53935", fontWeight: "600" }}>
-                    Quitar foto
+                    {t.agregar.foto_quitar}
                   </Text>
                 </TouchableOpacity>
               )}
@@ -186,14 +186,14 @@ export default function AgregarContacto() {
               <View style={styles.sectionIcon}>
                 <Ionicons name="people-outline" size={22} color={theme.contactAccent} />
               </View>
-              <Text style={styles.sectionTitle}>Información del contacto</Text>
+              <Text style={styles.sectionTitle}>{t.agregar.info_contacto_titulo}</Text>
             </View>
 
             {/* INPUT NOMBRE */}
             <View style={styles.inputCard}>
               <Ionicons name="person-outline" size={20} color={theme.contactAccent} />
               <View style={styles.inputTextWrap}>
-                <Text style={styles.inputLabel}>Nombre</Text>
+                <Text style={styles.inputLabel}>{t.agregar.label_nombre}</Text>
                 <TextInput
                   style={styles.inputValue}
                   placeholder={t.agregar.placeholder_nombre}
@@ -211,7 +211,7 @@ export default function AgregarContacto() {
             <View style={styles.inputCard}>
               <Ionicons name="people-outline" size={20} color={theme.contactAccent} />
               <View style={styles.inputTextWrap}>
-                <Text style={styles.inputLabel}>Parentesco</Text>
+                <Text style={styles.inputLabel}>{t.agregar.label_parentesco}</Text>
                 <TextInput
                   style={styles.inputValue}
                   placeholder={t.agregar.placeholder_parentesco}
@@ -229,7 +229,7 @@ export default function AgregarContacto() {
             <View style={styles.inputCard}>
               <Ionicons name="call-outline" size={20} color={theme.contactAccent} />
               <View style={styles.inputTextWrap}>
-                <Text style={styles.inputLabel}>Celular</Text>
+                <Text style={styles.inputLabel}>{t.agregar.label_celular}</Text>
                 <TextInput
                   style={styles.inputValue}
                   placeholder={t.agregar.placeholder_telefono}
@@ -252,12 +252,12 @@ export default function AgregarContacto() {
                 <Ionicons name="shield-checkmark-outline" size={20} color={theme.contactAccent} />
               </View>
               <Text style={styles.infoText}>
-                Este contacto recibirá tu ubicación si activas una alerta.
+                {t.agregar.info_ubicacion}
               </Text>
             </View>
 
             {/* ── VISTA PREVIA ──────────────────────────────────────────── */}
-            <Text style={styles.previewTitle}>Vista previa</Text>
+            <Text style={styles.previewTitle}>{t.agregar.vista_previa}</Text>
 
             <View style={styles.previewCard}>
               <View style={{ position: "relative" }}>
@@ -296,7 +296,7 @@ export default function AgregarContacto() {
                 <Text style={styles.previewValue}>{phonePreview}</Text>
                 <View style={styles.previewRow}>
                   <View style={styles.statusDot} />
-                  <Text style={styles.statusText}>Disponible</Text>
+                  <Text style={styles.statusText}>{t.agregar.disponible}</Text>
                 </View>
               </View>
             </View>
@@ -311,12 +311,12 @@ export default function AgregarContacto() {
               {/* ✅ guardar() ya no necesita recibir fotoUri como argumento */}
               <TouchableOpacity style={styles.buttonInner} onPress={vm.guardar}>
                 <Ionicons name="save-outline" size={18} color="#f7eeee" />
-                <Text style={styles.buttonTextWhite}>Guardar contacto</Text>
+                <Text style={styles.buttonTextWhite}>{t.agregar.boton_guardar_nuevo}</Text>
               </TouchableOpacity>
             </LinearGradient>
 
             <TouchableOpacity style={styles.cancelButton} onPress={vm.cancelar}>
-              <Text style={styles.cancelButtonText}>Cancelar</Text>
+              <Text style={styles.cancelButtonText}>{t.agregar.cancelar}</Text>
             </TouchableOpacity>
 
           </View>

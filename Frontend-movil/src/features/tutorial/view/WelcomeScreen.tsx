@@ -16,9 +16,11 @@ import SecurityScreen from "../view/securityScreen";
 import { useSecurityTutorialViewModel } from "../viewModel/useSecurityTutorialViewModel";
 import { COLORS, styles as universalStyles } from "../styles/universalStyle";
 import { useLocationTutorialViewModel } from "../viewModel/useLocationTutorialViewModel";
+import { useLocale } from "../../../contexts/LocaleContext";
 
 
 export default function Welcome() {
+  const { t } = useLocale();
   const messagesVM     = useMessagesTutorialViewModel();
   const contactsVM     = useContactTutorialViewModel();
   const locationVM     = useLocationTutorialViewModel();
@@ -98,8 +100,8 @@ export default function Welcome() {
                   <View style={universalStyles.cardAccent} />
 
                   <Text style={universalStyles.cardTitle}>
-                    ¡Tu seguridad es{'\n'}
-                    <Text style={universalStyles.cardTitleHighlight}>nuestra prioridad!</Text>
+                    {t.tutorial.bienvenida_titulo_1}{'\n'}
+                    <Text style={universalStyles.cardTitleHighlight}>{t.tutorial.bienvenida_titulo_2}</Text>
                   </Text>
 
                   <View style={universalStyles.divider} />
@@ -107,24 +109,24 @@ export default function Welcome() {
                   <View style={universalStyles.row}>
                     <Text style={universalStyles.rowIcon}>🤝</Text>
                     <View style={universalStyles.rowTextContainer}>
-                      <Text style={universalStyles.rowTitle}>Red de apoyo digital</Text>
-                      <Text style={universalStyles.rowDesc}>Conecta con las personas de confianza en segundos.</Text>
+                      <Text style={universalStyles.rowTitle}>{t.tutorial.bienvenida_red_titulo}</Text>
+                      <Text style={universalStyles.rowDesc}>{t.tutorial.bienvenida_red_desc}</Text>
                     </View>
                   </View>
 
                   <View style={universalStyles.row}>
                     <Text style={universalStyles.rowIcon}>📍</Text>
                     <View style={universalStyles.rowTextContainer}>
-                      <Text style={universalStyles.rowTitle}>Ubicación en tiempo real</Text>
-                      <Text style={universalStyles.rowDesc}>Comparte dónde estás con un solo toque.</Text>
+                      <Text style={universalStyles.rowTitle}>{t.tutorial.bienvenida_ubicacion_titulo}</Text>
+                      <Text style={universalStyles.rowDesc}>{t.tutorial.bienvenida_ubicacion_desc}</Text>
                     </View>
                   </View>
 
                   <View style={universalStyles.row}>
                     <Text style={universalStyles.rowIcon}>🚨</Text>
                     <View style={universalStyles.rowTextContainer}>
-                      <Text style={universalStyles.rowTitle}>Alerta inmediata</Text>
-                      <Text style={universalStyles.rowDesc}>Pide ayuda rápido ante cualquier situación de riesgo.</Text>
+                      <Text style={universalStyles.rowTitle}>{t.tutorial.bienvenida_alerta_titulo}</Text>
+                      <Text style={universalStyles.rowDesc}>{t.tutorial.bienvenida_alerta_desc}</Text>
                     </View>
                   </View>
 

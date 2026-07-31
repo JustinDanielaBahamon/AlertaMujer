@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Modal, TouchableOpacity } from 'react-native';
 import { localStyles } from "./permisosStyle";
+import { useLocale } from '../../../contexts/LocaleContext';
 
 interface PermisosModalProps {
   visible: boolean;
@@ -10,6 +11,7 @@ interface PermisosModalProps {
 }
 
 export default function PermisosModal({ visible, tipo, onConfirmar, onCancelar }: PermisosModalProps) {
+  const { t } = useLocale();
 
   const icono =
     tipo === 'sms'          ? "✉️" :
@@ -20,20 +22,20 @@ export default function PermisosModal({ visible, tipo, onConfirmar, onCancelar }
                               "📞";
 
   const titulo =
-    tipo === 'sms'          ? "Permitir que Alerta Mujer acceda a los mensajes" :
-    tipo === 'contacto'     ? "Permitir que Alerta Mujer acceda a tus contactos" :
-    tipo === 'camara'       ? "Permitir que Alerta Mujer acceda a la cámara" :
-    tipo === 'audio'        ? "Permitir que Alerta Mujer acceda al micrófono" :
-    tipo === 'notificacion' ? "Permitir que Alerta Mujer envíe notificaciones" :
-    "Permitir que Alerta Mujer realice llamadas";
+    tipo === 'sms'          ? t.permisos.sms_titulo :
+    tipo === 'contacto'     ? t.permisos.contacto_titulo :
+    tipo === 'camara'       ? t.permisos.camara_titulo :
+    tipo === 'audio'        ? t.permisos.audio_titulo :
+    tipo === 'notificacion' ? t.permisos.notificacion_titulo :
+    t.permisos.llamada_titulo;
 
   const descripcion =
-    tipo === 'sms'          ? "Esta función enviará un mensaje de texto con tu ubicación a tus contactos de emergencia." :
-    tipo === 'contacto'     ? "Necesitamos acceso para elegir personas de confianza que recibirán tus alertas de emergencia." :
-    tipo === 'camara'       ? "Permite grabar video como evidencia visual si te encuentras en peligro." :
-    tipo === 'audio'        ? "Permite grabar audio para documentar lo que ocurre a tu alrededor en caso de emergencia." :
-    tipo === 'notificacion' ? "Te avisaremos cuando alguien responda tu alerta o cuando haya novedades importantes." :
-    "La aplicación podrá iniciar una llamada directa para solicitar ayuda inmediata.";
+    tipo === 'sms'          ? t.permisos.sms_desc :
+    tipo === 'contacto'     ? t.permisos.contacto_desc :
+    tipo === 'camara'       ? t.permisos.camara_desc :
+    tipo === 'audio'        ? t.permisos.audio_desc :
+    tipo === 'notificacion' ? t.permisos.notificacion_desc :
+    t.permisos.llamada_desc;
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancelar}>
@@ -48,11 +50,11 @@ export default function PermisosModal({ visible, tipo, onConfirmar, onCancelar }
           <Text style={localStyles.modalSub}>{descripcion}</Text>
 
           <TouchableOpacity style={localStyles.btnConfirmar} onPress={onConfirmar}>
-            <Text style={localStyles.btnConfirmarText}>Confirmar</Text>
+            <Text style={localStyles.btnConfirmarText}>{t.permisos.btn_confirmar}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={localStyles.btnRegresar} onPress={onCancelar}>
-            <Text style={localStyles.btnRegresarText}>Regresar</Text>
+            <Text style={localStyles.btnRegresarText}>{t.permisos.btn_regresar}</Text>
           </TouchableOpacity>
 
         </View>

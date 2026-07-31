@@ -1,6 +1,7 @@
 import * as Contacts from "expo-contacts";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { CONTACT_COLORS } from "../styles/contactStyle";
+import { useLocale } from "../../../contexts/LocaleContext";
 
 // ─── Tipos públicos ───────────────────────────────────────────────────────────
 export interface ContactFeatureItem {
@@ -17,17 +18,19 @@ export interface ContactFeatureItem {
   colorBorder: string;
 }
 
-// ─── Datos estáticos ──────────────────────────────────────────────────────────
-export const CONTACT_FEATURE_ROWS: ContactFeatureItem[] = [
+type LocaleT = ReturnType<typeof useLocale>["t"];
+
+// ─── Datos (ahora dependen del idioma activo) ─────────────────────────────────
+const getContactFeatureRows = (t: LocaleT): ContactFeatureItem[] => [
   {
     id: "confianza",
     emoji: "🤝",
-    title: "Red de confianza",
-    badge: "Familia",
-    desc: "Familiares y amigos cercanos que te cuidan.",
-    highlightLabel: "Confianza: ",
-    boldLabel: "Red segura.",
-    detailDesc: "Agrega a tus familiares y amigos cercanos para que te cuiden en cualquier momento.",
+    title: t.tutorial.contacto_confianza_titulo,
+    badge: t.tutorial.contacto_confianza_badge,
+    desc: t.tutorial.contacto_confianza_desc,
+    highlightLabel: t.tutorial.contacto_confianza_highlight,
+    boldLabel: t.tutorial.contacto_confianza_bold,
+    detailDesc: t.tutorial.contacto_confianza_detail,
     color: CONTACT_COLORS.row1Color,
     colorLight: CONTACT_COLORS.row1Light,
     colorBorder: CONTACT_COLORS.row1Border,
@@ -35,12 +38,12 @@ export const CONTACT_FEATURE_ROWS: ContactFeatureItem[] = [
   {
     id: "notificaciones",
     emoji: "🔔",
-    title: "Aviso inmediato",
-    badge: "Urgente",
-    desc: "Reciben tu ubicación exacta al activar alerta.",
-    highlightLabel: "Notificaciones: ",
-    boldLabel: "Aviso inmediato.",
-    detailDesc: "Ellos recibirán tu ubicación exacta cuando actives una alerta de emergencia.",
+    title: t.tutorial.contacto_notificaciones_titulo,
+    badge: t.tutorial.contacto_notificaciones_badge,
+    desc: t.tutorial.contacto_notificaciones_desc,
+    highlightLabel: t.tutorial.contacto_notificaciones_highlight,
+    boldLabel: t.tutorial.contacto_notificaciones_bold,
+    detailDesc: t.tutorial.contacto_notificaciones_detail,
     color: CONTACT_COLORS.row2Color,
     colorLight: CONTACT_COLORS.row2Light,
     colorBorder: CONTACT_COLORS.row2Border,
@@ -48,12 +51,12 @@ export const CONTACT_FEATURE_ROWS: ContactFeatureItem[] = [
   {
     id: "gestion",
     emoji: "⚙️",
-    title: "Gestión flexible",
-    badge: "Siempre",
-    desc: "Administra tus contactos cuando quieras.",
-    highlightLabel: "Gestión: ",
-    boldLabel: "Siempre conectada.",
-    detailDesc: "Puedes gestionar tus contactos en cualquier momento desde tu perfil.",
+    title: t.tutorial.contacto_gestion_titulo,
+    badge: t.tutorial.contacto_gestion_badge,
+    desc: t.tutorial.contacto_gestion_desc,
+    highlightLabel: t.tutorial.contacto_gestion_highlight,
+    boldLabel: t.tutorial.contacto_gestion_bold,
+    detailDesc: t.tutorial.contacto_gestion_detail,
     color: CONTACT_COLORS.row3Color,
     colorLight: CONTACT_COLORS.row3Light,
     colorBorder: CONTACT_COLORS.row3Border,
@@ -62,6 +65,9 @@ export const CONTACT_FEATURE_ROWS: ContactFeatureItem[] = [
 
 // ─── ViewModel — lógica original 100% intacta ─────────────────────────────────
 export function useContactTutorialViewModel() {
+  const { t } = useLocale();
+  const featureRows = useMemo(() => getContactFeatureRows(t), [t]);
+
   const [showWarning, setShowWarning] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -101,7 +107,7 @@ export function useContactTutorialViewModel() {
   }, []);
 
   return {
-    featureRows: CONTACT_FEATURE_ROWS,
+    featureRows,
     modalVisible,
     showWarning,
     requestPermissions,

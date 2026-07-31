@@ -2,6 +2,7 @@ import { Text, ScrollView, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useLocale } from '../../contexts/LocaleContext';
 
 type Props = {
   titulo: string;
@@ -10,6 +11,7 @@ type Props = {
 
 export default function Privacidad(){
   const navigation = useNavigation<any>();
+  const { t } = useLocale();
 
   const ItemPrivacidad = ({ titulo, descripcion }: Props) => (
     <View style={{ marginBottom: 12 }}>
@@ -22,6 +24,8 @@ export default function Privacidad(){
     </View>
   );
 
+  const items = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
+
   return(
     <SafeAreaView style={{ flex: 1 }}>
       <LinearGradient
@@ -31,7 +35,7 @@ export default function Privacidad(){
         <ScrollView contentContainerStyle={{ padding: 20 }}>
 
           <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#ffffff', textAlign: 'center', marginBottom: 12 }}>
-            Política de Privacidad
+            {t.politicaPrivacidad.encabezado}
           </Text>
 
           {/* tarjeta */}
@@ -48,50 +52,13 @@ export default function Privacidad(){
             borderColor: '#000000'
           }}>
 
-            <ItemPrivacidad
-              titulo="1. Información recopilada"
-              descripcion="La aplicación puede recopilar información como ubicación en tiempo real, datos de contacto y acceso a cámara y micrófono, necesarios para el funcionamiento de las funciones de seguridad."
-            />
-
-            <ItemPrivacidad
-              titulo="2. Uso de la información"
-              descripcion="La información recopilada se utiliza exclusivamente para enviar alertas de emergencia, compartir ubicación con contactos seleccionados y generar evidencia en situaciones de riesgo."
-            />
-
-            <ItemPrivacidad
-              titulo="3. Compartición de datos"
-              descripcion="La información solo será compartida con los contactos de emergencia previamente configurados por el usuario o cuando sea necesario para cumplir con obligaciones legales."
-            />
-
-            <ItemPrivacidad
-              titulo="4. Almacenamiento de datos"
-              descripcion="Los datos pueden almacenarse de forma local en el dispositivo o en servidores seguros, dependiendo de la funcionalidad utilizada."
-            />
-
-            <ItemPrivacidad
-              titulo="5. Seguridad"
-              descripcion="Se implementan medidas de seguridad para proteger la información del usuario, sin embargo, no se puede garantizar una seguridad absoluta."
-            />
-
-            <ItemPrivacidad
-              titulo="6. Derechos del usuario"
-              descripcion="El usuario puede gestionar, modificar o eliminar su información personal desde la aplicación o solicitándolo a través de los canales de contacto."
-            />
-
-            <ItemPrivacidad
-              titulo="7. Permisos"
-              descripcion="La aplicación solicita permisos como ubicación, cámara, micrófono y contactos únicamente para funciones relacionadas con la seguridad del usuario."
-            />
-
-            <ItemPrivacidad
-              titulo="8. Cambios en la política"
-              descripcion="Nos reservamos el derecho de modificar esta política en cualquier momento. Los cambios serán notificados dentro de la aplicación."
-            />
-
-            <ItemPrivacidad
-              titulo="9. Contacto"
-              descripcion="Para dudas relacionadas con la privacidad, el usuario puede comunicarse a través de los canales oficiales disponibles en la aplicación."
-            />
+            {items.map((n) => (
+              <ItemPrivacidad
+                key={n}
+                titulo={t.politicaPrivacidad[`item${n}_titulo` as keyof typeof t.politicaPrivacidad]}
+                descripcion={t.politicaPrivacidad[`item${n}_desc` as keyof typeof t.politicaPrivacidad]}
+              />
+            ))}
 
           </View>
 
@@ -107,7 +74,7 @@ export default function Privacidad(){
             }}
           >
             <Text style={{ color: '#fff', fontWeight: 'bold' }}>
-              Volver
+              {t.politicaPrivacidad.volver}
             </Text>
           </TouchableOpacity>
 

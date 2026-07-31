@@ -7,9 +7,10 @@ import MapView, { Marker } from "react-native-maps";
 import { LinearGradient } from "expo-linear-gradient";
 import type { MainStackParamList } from "../../../navigation/types";
 import { useTheme } from "../../../contexts/ThemeContext";
+import { useLocale } from "../../../contexts/LocaleContext";
 import { styles } from "../styles/historialMapa.style";
 
-type HistorialRouteProp = RouteProp<
+type HistorialRouteProp = RouteProp
   MainStackParamList,
   "historialMapa"
 >;
@@ -17,11 +18,12 @@ type HistorialRouteProp = RouteProp<
 export default function HistorialMapa() {
 
   const { theme } = useTheme();
+  const { t } = useLocale();
 
   const route = useRoute<HistorialRouteProp>();
 
   const navigation =
-    useNavigation<
+    useNavigation
       NativeStackNavigationProp<MainStackParamList>
     >();
 
@@ -76,7 +78,7 @@ export default function HistorialMapa() {
           </TouchableOpacity>
 
           <Text style={styles.headerTitle}>
-            Detalle de ubicación
+            {t.historialMapa.titulo}
           </Text>
         </LinearGradient>
 
@@ -112,7 +114,7 @@ export default function HistorialMapa() {
                   },
                 ]}
               >
-                Hoy, {horaFormateada}
+                {t.historialMapa.hoy}, {horaFormateada}
               </Text>
 
               <Text
@@ -183,7 +185,7 @@ export default function HistorialMapa() {
                     ubicacion.longitude,
                 }}
 
-                title="Ubicación guardada"
+                title={t.historialMapa.ubicacion_guardada_marcador}
 
                 description={
                   ubicacion.direccion
@@ -216,7 +218,7 @@ export default function HistorialMapa() {
                   fontWeight: "700",
                 }}
               >
-                Abrir mapa
+                {t.historialMapa.abrir_mapa}
               </Text>
             </View>
 
@@ -235,63 +237,63 @@ export default function HistorialMapa() {
 
             <InfoRow
               icon="calendar-today"
-              label="Fecha y hora"
-              value={`Hoy, ${horaFormateada}`}
+              label={t.historialMapa.fecha_hora}
+              value={`${t.historialMapa.hoy}, ${horaFormateada}`}
               theme={theme}
             />
 
             <InfoRow
               icon="place"
-              label="Dirección"
+              label={t.historialMapa.direccion}
               value={ubicacion.direccion}
               theme={theme}
             />
 
             <InfoRow
               icon="home"
-              label="Barrio"
+              label={t.historialMapa.barrio}
               value={ubicacion.barrio}
               theme={theme}
             />
 
             <InfoRow
               icon="location-city"
-              label="Municipio"
+              label={t.historialMapa.municipio}
               value={ubicacion.municipio}
               theme={theme}
             />
 
             <InfoRow
               icon="public"
-              label="País"
+              label={t.historialMapa.pais}
               value={ubicacion.pais}
               theme={theme}
             />
 
             <InfoRow
               icon="my-location"
-              label="Latitud"
+              label={t.historialMapa.latitud}
               value={ubicacion.latitude.toFixed(5)}
               theme={theme}
             />
 
             <InfoRow
               icon="location-on"
-              label="Longitud"
+              label={t.historialMapa.longitud}
               value={ubicacion.longitude.toFixed(5)}
               theme={theme}
             />
 
             <InfoRow
               icon="gps-fixed"
-              label="Precisión"
+              label={t.historialMapa.precision}
               value={ubicacion.precision}
               theme={theme}
             />
 
             <InfoRow
               icon="check-circle"
-              label="Estado"
+              label={t.historialMapa.estado}
               value={ubicacion.estado}
               theme={theme}
               active
@@ -339,7 +341,7 @@ export default function HistorialMapa() {
                   ubicacion.longitude,
               }}
 
-              title="Ubicación guardada"
+              title={t.historialMapa.ubicacion_guardada_marcador}
 
               description={
                 ubicacion.direccion
@@ -377,7 +379,7 @@ export default function HistorialMapa() {
                   fontWeight: "700",
                 }}
               >
-                Cerrar mapa
+                {t.historialMapa.cerrar_mapa}
               </Text>
             </View>
           </TouchableWithoutFeedback>

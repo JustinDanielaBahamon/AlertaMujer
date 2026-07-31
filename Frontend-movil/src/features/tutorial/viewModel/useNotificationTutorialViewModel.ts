@@ -1,9 +1,10 @@
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { PermissionsAndroid, Platform } from "react-native";
 import type { MainStackParamList } from "../../../navigation/types";
 import { NOTIF_COLORS } from "../styles/notificationStyle";
+import { useLocale } from "../../../contexts/LocaleContext";
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
 
@@ -21,17 +22,19 @@ export interface NotifFeatureItem {
   colorBorder: string;
 }
 
-// ─── Static data ──────────────────────────────────────────────────────────────
-export const NOTIF_FEATURE_ROWS: NotifFeatureItem[] = [
+type LocaleT = ReturnType<typeof useLocale>["t"];
+
+// ─── Datos (ahora dependen del idioma activo) ─────────────────────────────────
+const getNotifFeatureRows = (t: LocaleT): NotifFeatureItem[] => [
   {
     id: "sos",
     emoji: "🚨",
-    title: "Alertas SOS",
-    badge: "Tiempo real",
-    desc: "Avisos críticos aunque la app esté cerrada.",
-    highlightLabel: "Alertas SOS: ",
-    boldLabel: "Tiempo real.",
-    detailDesc: "Recibirás avisos críticos incluso si la aplicación no está abierta en tu dispositivo.",
+    title: t.tutorial.notificacion_sos_titulo,
+    badge: t.tutorial.notificacion_sos_badge,
+    desc: t.tutorial.notificacion_sos_desc,
+    highlightLabel: t.tutorial.notificacion_sos_highlight,
+    boldLabel: t.tutorial.notificacion_sos_bold,
+    detailDesc: t.tutorial.notificacion_sos_detail,
     color: NOTIF_COLORS.row1Color,
     colorLight: NOTIF_COLORS.row1Light,
     colorBorder: NOTIF_COLORS.row1Border,
@@ -39,12 +42,12 @@ export const NOTIF_FEATURE_ROWS: NotifFeatureItem[] = [
   {
     id: "red",
     emoji: "🤝",
-    title: "Red de apoyo",
-    badge: "Siempre activa",
-    desc: "Conectada para ayudar y ser ayudada.",
-    highlightLabel: "Red de Apoyo: ",
-    boldLabel: "Seguridad activa.",
-    detailDesc: "Mantente siempre conectada para ayudar o ser ayudada por tu red de confianza sin demora.",
+    title: t.tutorial.notificacion_red_titulo,
+    badge: t.tutorial.notificacion_red_badge,
+    desc: t.tutorial.notificacion_red_desc,
+    highlightLabel: t.tutorial.notificacion_red_highlight,
+    boldLabel: t.tutorial.notificacion_red_bold,
+    detailDesc: t.tutorial.notificacion_red_detail,
     color: NOTIF_COLORS.row2Color,
     colorLight: NOTIF_COLORS.row2Light,
     colorBorder: NOTIF_COLORS.row2Border,
@@ -52,12 +55,12 @@ export const NOTIF_FEATURE_ROWS: NotifFeatureItem[] = [
   {
     id: "rapidez",
     emoji: "⚡",
-    title: "Rapidez",
-    badge: "Inmediata",
-    desc: "La notificación más poderosa para tu protección.",
-    highlightLabel: "Rapidez: ",
-    boldLabel: "Comunicación.",
-    detailDesc: "La notificación inmediata es la herramienta más poderosa para garantizar tu protección.",
+    title: t.tutorial.notificacion_rapidez_titulo,
+    badge: t.tutorial.notificacion_rapidez_badge,
+    desc: t.tutorial.notificacion_rapidez_desc,
+    highlightLabel: t.tutorial.notificacion_rapidez_highlight,
+    boldLabel: t.tutorial.notificacion_rapidez_bold,
+    detailDesc: t.tutorial.notificacion_rapidez_detail,
     color: NOTIF_COLORS.row3Color,
     colorLight: NOTIF_COLORS.row3Light,
     colorBorder: NOTIF_COLORS.row3Border,
@@ -65,6 +68,8 @@ export const NOTIF_FEATURE_ROWS: NotifFeatureItem[] = [
 ];
 
 export function useNotificationTutorialViewModel() {
+  const { t } = useLocale();
+  const featureRows = useMemo(() => getNotifFeatureRows(t), [t]);
 
   const navigation = useNavigation<Nav>();
   const [modalVisible, setModalVisible]   = useState(false);
@@ -116,7 +121,7 @@ export function useNotificationTutorialViewModel() {
   }, [navigation]);
 
   return {
-    featureRows: NOTIF_FEATURE_ROWS,
+    featureRows,
     modalVisible,
     showWarning,
     requestPermissions,
