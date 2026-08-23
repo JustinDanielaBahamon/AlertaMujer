@@ -61,6 +61,11 @@ export type MainStackParamList = {
       notas?: string;
     };
   };
+
+  guardarUbi: {
+    latitude: number;
+    longitude: number;
+  };
 };
 
 /** @deprecated */

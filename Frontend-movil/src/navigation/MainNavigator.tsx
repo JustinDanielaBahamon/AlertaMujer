@@ -16,6 +16,7 @@ import DetalleAlertaScreen from "../features/historial/view/detallesAlerta"; // 
 import PerfilScreen from "../features/perfil/view/perfilScreen";
 import HistorialMapa from "../features/historial/view/historial";
 import MetodosActivacionScreen from "../features/settings/view/metodosActivacionScreen";
+import GuardarUbi from "../screens/tabs/mapa/guardarUbi";
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -49,6 +50,7 @@ export default function MainNavigator({ initialRouteName }: Props) {
       <Stack.Screen name="Perfil" component={PerfilScreen} /> 
       <Stack.Screen name="historialMapa" component={HistorialMapa}/>
       <Stack.Screen name="MetodosActivacion" component={MetodosActivacionScreen} />
+      <Stack.Screen name="guardarUbi" component={GuardarUbi}/>
     </Stack.Navigator>
   );
 }
