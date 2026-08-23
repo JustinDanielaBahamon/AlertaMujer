@@ -3,7 +3,15 @@ import { useNavigation, type NavigationProp, type ParamListBase } from "@react-n
 import { Audio } from "expo-av";
 import { Camera } from "expo-camera";
 import { useEffect, useMemo, useRef, useState } from "react";
-import {ActivityIndicator,Animated, Easing,Image,Text, TouchableOpacity,useWindowDimensions,View,
+import {
+  ActivityIndicator,
+  Animated,
+  Easing,
+  Image,
+  Text,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useInicioViewModel } from "../viewModel/useInicioViewModel";

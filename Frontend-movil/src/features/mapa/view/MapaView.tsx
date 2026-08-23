@@ -1,7 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { useNavigation,useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import type { MainStackParamList } from "../../../navigation/types";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Location from "expo-location";
 import React, { useEffect, useRef, useState } from "react";
@@ -11,6 +10,7 @@ import MapView, { Marker } from "react-native-maps";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { styles } from "../styles/MapaStyles";
+import type { MainStackParamList } from "../../../navigation/types";
 
 type Coordenada = {
   latitude: number;
@@ -97,7 +97,7 @@ export default function MapaView() {
   // ─── GPS PRINCIPAL — posición real, sin números aleatorios ───────────────
   useEffect(() => {
     let subscription: Location.LocationSubscription | null = null;
-    let historialInterval: NodeJS.Timeout;
+   let historialInterval: ReturnType<typeof setInterval>;
 
     const iniciarUbicacion = async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -128,7 +128,7 @@ export default function MapaView() {
         {
           accuracy:         Location.Accuracy.Balanced,
           timeInterval:     15000, // mínimo 15 segundos entre actualizaciones
-          distanceInterval: 10,    // solo si se movió más de 10 metros
+          distanceInterval: 30,    // solo si se movió más de 10 metros
         },
         (loc) => {
           const newLoc: Coordenada = {
@@ -203,9 +203,10 @@ export default function MapaView() {
     };
   }, [intentosPermiso]);
 
-  // ─── REFRESH MANUAL — solo actualiza posición, no reinicia el useEffect ──
+// ─── REFRESH MANUAL — Ahora también agrega una tarjeta al historial ──
   const refrescarUbicacion = async () => {
     try {
+      // 1. Pedir la ubicación actual al GPS
       const current = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
       });
@@ -215,11 +216,23 @@ export default function MapaView() {
         longitude: current.coords.longitude,
       };
 
+      // 2. Actualizar el marcador principal y la hora de la tarjeta de arriba
       setLocation(newLoc);
       setUltimaActualizacion(new Date());
 
+      // 3. ACTUALIZAR EL HISTORIAL (Esto creará la nueva card en la FlatList)
+      setHistorial((prev) => {
+        // Opcional: Solo agregar si el usuario se movió algo (ej. 1 metro) 
+        // o si quieres que aparezca SIEMPRE, quita la validación del 'distancia'
+        const nuevoHistorial = [...prev, newLoc];
+        
+        // Mantenemos solo los últimos 20 para no saturar la memoria
+        return nuevoHistorial.slice(-20);
+      });
+
     } catch (error) {
       console.error("Error al refrescar ubicación:", error);
+      alert("No se pudo obtener la ubicación actual");
     }
   };
 
@@ -283,7 +296,9 @@ export default function MapaView() {
     {
       icono: "share",
       label: t.mapa.compartir,
-      accion: () => {},
+      accion: () => {
+        console.log("Compartir ubicación");
+      },
     },
     {
       icono: "refresh",
@@ -293,80 +308,22 @@ export default function MapaView() {
     {
       icono: "navigation",
       label: t.mapa.navegar,
-      accion: () => {},
+      accion: () => {
+        if (location) {
+          const url = `https://www.google.com/maps/dir/?api=1&destination=${location.latitude},${location.longitude}`;
+          Linking.openURL(url);
+        }
+      },
     },
     {
       icono: "bookmark",
       label: t.mapa.guardar,
-    
       accion: async () => {
-    
         if (!location) return;
-    
-        try {
-    
-          // ✅ OBTENER DIRECCIÓN REAL
-          const reverse = await Location.reverseGeocodeAsync({
-            latitude: location.latitude,
-            longitude: location.longitude,
-          });
-    
-          const info = reverse[0];
-    
-          navigation.navigate("historialMapa", {
-
-            ubicacion: {
-          
-              id: Date.now().toString(),
-          
-              latitude: location.latitude,
-              longitude: location.longitude,
-          
-              direccion:
-                `${info?.street || t.mapa.sin_calle} ${info?.streetNumber || ""}`,
-          
-              barrio:
-                info?.district &&
-                info?.district !== info?.city
-                  ? info.district
-                  : t.mapa.sector_desconocido,
-          
-              municipio:
-                info?.city ||
-                info?.district ||
-                t.mapa.municipio_desconocido,
-          
-              ciudad:
-                info?.city ||
-                info?.subregion ||
-                info?.district ||
-                t.mapa.ciudad_desconocida,
-          
-              departamento:
-                info?.region ||
-                t.mapa.departamento_desconocido,
-          
-              pais:
-                info?.country ||
-                t.mapa.pais_desconocido,
-          
-              fecha: new Date().toISOString(),
-          
-              estado: t.mapa.activo,
-          
-              precision: t.mapa.precision_alta,
-          
-              notas: t.mapa.nota_guardada,
-            },
-          });
-    
-        } catch (error) {
-    
-          console.log("ERROR UBICACIÓN:", error);
-    
-          alert(t.mapa.no_pudo_obtener_direccion);
-    
-        }
+        navigation.navigate("guardarUbi", {
+          latitude: location.latitude,
+          longitude: location.longitude,
+        });
       },
     },
   ] as const;
@@ -409,6 +366,26 @@ export default function MapaView() {
           pinColor="#7B1DB2"
         />
       )}
+      {/* 2. EL DESTINO DE LA ALERTA (MORADO) */}
+{destinoAlerta && (
+  <Marker
+    coordinate={destinoAlerta.coordenada}
+    title="Dirección de alerta"
+    description={destinoAlerta.direccion}
+    pinColor="#7B1DB2"
+  />
+)}
+
+{/* 3. EL RASTRO DEL HISTORIAL (MORADO SUAVE PARA NO CONFUNDIR) */}
+{historial.map((pos, index) => (
+  <Marker
+    key={index}
+    coordinate={pos}
+    title={`Punto de trayecto ${index + 1}`}
+    // Usamos el mismo morado para que el rastro se vea uniforme
+    pinColor="#7B1DB2" 
+  />
+))}
   
       {historial.map((pos, index) => (
         <Marker
@@ -564,48 +541,35 @@ export default function MapaView() {
         const info = reverse[0];
 
         navigation.navigate("historialMapa", {
-
           ubicacion: {
-        
             id: Date.now().toString(),
-        
-            latitude: location.latitude,
-            longitude: location.longitude,
-        
+            latitude: item.latitude,
+            longitude: item.longitude,
             direccion:
               `${info?.street || t.mapa.sin_calle} ${info?.streetNumber || ""}`,
-        
             barrio:
               info?.district &&
               info?.district !== info?.city
                 ? info.district
                 : t.mapa.sector_desconocido,
-        
             municipio:
               info?.city ||
               info?.district ||
               t.mapa.municipio_desconocido,
-        
             ciudad:
               info?.city ||
               info?.subregion ||
               info?.district ||
               t.mapa.ciudad_desconocida,
-        
             departamento:
               info?.region ||
               t.mapa.departamento_desconocido,
-        
             pais:
               info?.country ||
               t.mapa.pais_desconocido,
-        
             fecha: new Date().toISOString(),
-        
-            estado: t.mapa.activo,
-        
+            estado: "Activo" as "Activo" | "Inactivo",
             precision: t.mapa.precision_alta,
-        
             notas: t.mapa.nota_guardada,
           },
         });

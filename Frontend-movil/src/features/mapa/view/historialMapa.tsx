@@ -10,7 +10,7 @@ import { useTheme } from "../../../contexts/ThemeContext";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { styles } from "../styles/historialMapa.style";
 
-type HistorialRouteProp = RouteProp
+type HistorialRouteProp = RouteProp<
   MainStackParamList,
   "historialMapa"
 >;
@@ -23,9 +23,7 @@ export default function HistorialMapa() {
   const route = useRoute<HistorialRouteProp>();
 
   const navigation =
-    useNavigation
-      NativeStackNavigationProp<MainStackParamList>
-    >();
+    useNavigation<NativeStackNavigationProp<MainStackParamList>>();
 
   const { ubicacion } = route.params;
 
