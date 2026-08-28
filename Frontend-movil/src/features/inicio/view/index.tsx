@@ -156,53 +156,67 @@ export default function Inicio() {
     <View style={[styles.container, { backgroundColor: theme.background, paddingBottom: insets.bottom }]}>
 
       {/* Zona segura */}
-      <TouchableOpacity
-        style={[
-          styles.safeZoneCard,
-          { backgroundColor: theme.containerBackground, borderColor: "#27ae60" }
-        ]}
-        activeOpacity={0.8}
-      >
-        <MaterialIcons name="verified-user" size={22} color="#27ae60" />
-        <View style={styles.safeZoneInfo}>
-          <Text style={[styles.safeZoneTitle, { color: "#27ae60" }]}>{t.inicio.zona_segura}</Text>
-          <Text style={[styles.safeZoneSubtitle, { color: theme.text }]}>
-            {t.inicio.sin_incidentes}
-          </Text>
-        </View>
-        <MaterialIcons name="chevron-right" size={20} color={theme.text} />
-      </TouchableOpacity>
+<TouchableOpacity
+  style={[
+    styles.safeZoneCard,
+    {
+      backgroundColor: theme.containerBackground,
+      borderColor: "#27ae60",
+    },
+  ]}
+  activeOpacity={0.8}
+  onPress={goToMap}
+>
+  <MaterialIcons
+    name="verified-user"
+    size={26}
+    color="#27ae60"
+  />
 
-      {/* Ubicación */}
-      <TouchableOpacity
-        style={[styles.locationCard, { backgroundColor: theme.containerBackground, borderColor: theme.icono }]}
-        onPress={goToMap}
-        activeOpacity={0.8}
-      >
-        <MaterialIcons name="location-on" size={24} color={theme.icono} />
-        <View style={styles.locationInfo}>
-          <Text style={[styles.locationLabel, { color: theme.text }]}>{t.inicio.ubicacion_actual}</Text>
-          <Text style={[styles.locationValue, { color: theme.text }]} numberOfLines={1}>
-            {!vm.cargando && vm.ubicacionLista && (
-              <View style={styles.gpsRow}>
-                <View style={styles.gpsDot} />
-                <Text style={styles.gpsText}>{t.inicio.gps_activo}</Text>
-              </View>
-            )}
-            {vm.ubicacionNombre}
-          </Text>
-        </View>
-        <TouchableOpacity
-          onPress={(e) => { e.stopPropagation(); vm.obtenerUbicacion(); }}
-          disabled={vm.cargando}
-        >
-          {vm.cargando ? (
-            <ActivityIndicator size="small" color={theme.icono} />
-          ) : (
-            <MaterialIcons name="refresh" size={24} color={theme.icono} />
-          )}
-        </TouchableOpacity>
-      </TouchableOpacity>
+  <View style={styles.safeZoneInfo}>
+    <Text
+      style={[
+        styles.safeZoneTitle,
+        {
+          color: "#27ae60",
+        },
+      ]}
+    >
+      {t.inicio.zona_segura}
+    </Text>
+
+    <Text
+      style={[
+        styles.safeZoneSubtitle,
+        {
+  
+        },
+      ]}
+      numberOfLines={1}
+    >
+      {t.inicio.sin_incidentes} •{" "}
+      {vm.ubicacionLista ? t.inicio.gps_activo : "GPS inactivo"}
+    </Text>
+
+    <Text
+      style={[
+        styles.safeZoneLocation,
+        {
+          color: theme.text,
+        },
+      ]}
+      numberOfLines={1}
+    >
+      {vm.ubicacionNombre || "Ubicación no disponible"}
+    </Text>
+  </View>
+
+  <MaterialIcons
+    name="chevron-right"
+    size={24}
+    color={theme.text}
+  />
+</TouchableOpacity>
 
 
       {/* Indicadores cámara / micrófono */}
@@ -319,12 +333,15 @@ export default function Inicio() {
       <TouchableOpacity
         style={[
           styles.lastAlertCard,
-          { backgroundColor: theme.containerBackground, borderColor: theme.icono + "30" }
+          {
+            backgroundColor: theme.containerBackground,
+            borderColor: "#7B2CBF" + "20",
+          },
         ]}
         activeOpacity={0.8}
         onPress={goToHistorial}
       >
-        <MaterialIcons name="history" size={22} color={theme.icono} />
+        <MaterialIcons name="history" size={24} color="#7B2CBF" />
         <View style={styles.lastAlertInfo}>
           <Text style={[styles.lastAlertTitle, { color: theme.text }]}>
             <Text style={{ fontWeight: "bold" }}>{t.inicio.ultima_alerta}</Text> {tiempoTranscurrido}
@@ -333,7 +350,7 @@ export default function Inicio() {
             {t.inicio.ultima_ubicacion_enviada} {ultimaAlerta.hora} — {ultimaAlerta.ubicacion}
           </Text>
         </View>
-        <MaterialIcons name="chevron-right" size={20} color={theme.text} />
+        <MaterialIcons name="chevron-right" size={22} color={theme.text} />
       </TouchableOpacity>
 
     </View>
