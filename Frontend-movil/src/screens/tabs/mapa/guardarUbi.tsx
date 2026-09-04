@@ -271,12 +271,6 @@ export default function GuardarUbi() {
               <Text style={styles.maxCharText}>{t.historialMapa.max_caracteres}</Text>
             </View>
           )}
-          {maxNotasAlcanzado && (
-            <View style={styles.maxCharWarning}>
-              <MaterialIcons name="warning" size={13} color={COLORS.errorColor} />
-              <Text style={styles.maxCharText}>{t.historialMapa.max_caracteres}</Text>
-            </View>
-          )}
         </View>
 
         {/* Botón guardar */}

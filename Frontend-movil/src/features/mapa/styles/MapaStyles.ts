@@ -197,7 +197,10 @@ export const styles = StyleSheet.create({
   },
   tituloHistorial: {
     fontSize: 17,
-    fontWeight: "bold",
+    fontWeight: "800",
+    textAlign: "center",
+    paddingTop : 15,
+    paddingBottom : 15
   },
   verTodo: {
     fontSize: 13,

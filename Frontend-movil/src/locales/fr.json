@@ -146,7 +146,12 @@
     "nota_guardada": "Position enregistrée depuis la carte",
     "precision_alta": "Élevée (±5m)",
     "tu_ubicacion_marcador": "Votre position",
-    "direccion_alerta_marcador": "Adresse de l'alerte"
+    "direccion_alerta_marcador": "Adresse de l'alerte",
+    "acciones_adicionales": "Actions supplémentaires",
+    "clasificar_zonas": "Classer les zones",
+    "clasificar_zonas_desc": "Signaler et classer une zone selon son niveau de sécurité",
+    "ubicaciones_guardadas": "Lieux enregistrés",
+    "ubicaciones_guardadas_desc": "Consulter et gérer vos lieux enregistrés"
   },
   "historial": {
     "titulo": "Historique des Alertes",
