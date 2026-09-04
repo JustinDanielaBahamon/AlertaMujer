@@ -293,7 +293,7 @@ export const useMapaViewModel = () => {
       label: t.mapa.guardar,
       accion: async () => {
         if (!location) return;
-        navigation.navigate("guardarUbi", {
+        navigation.navigate("ClasificarZona", {
           latitude: location.latitude,
           longitude: location.longitude,
         });

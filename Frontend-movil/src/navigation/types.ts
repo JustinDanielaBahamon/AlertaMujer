@@ -64,6 +64,13 @@ export type MainStackParamList = {
     | {
         latitude?: number;
         longitude?: number;
+        editarUbicacion?: {
+          id: string;
+          nombre: string;
+          notas?: string;
+          nivelRiesgo: "muy_segura" | "moderada" | "muy_insegura";
+          descripcion: string;
+        };
       }
     | undefined; // Permite ir a ClasificarZona sin pasar parámetros
 
