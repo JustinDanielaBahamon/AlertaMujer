@@ -39,25 +39,18 @@ export type MainStackParamList = {
   historialMapa: {
     ubicacion: {
       id: string;
-
+      nombre?: string; // Modificado a opcional
       latitude: number;
       longitude: number;
-
       direccion: string;
       barrio: string;
-
       municipio: string;
-
       ciudad: string;
       departamento: string;
       pais: string;
-
       fecha: string;
-
       estado: "Activo" | "Inactivo";
-
       precision: string;
-
       notas?: string;
     };
   };
@@ -66,9 +59,16 @@ export type MainStackParamList = {
     latitude: number;
     longitude: number;
   };
+
+  ClasificarZona:
+    | {
+        latitude?: number;
+        longitude?: number;
+      }
+    | undefined; // Permite ir a ClasificarZona sin pasar parámetros
+
+  UbicacionesGuardadas: undefined;
 };
 
 /** @deprecated */
-export type RootStackParamList =
-  AuthStackParamList &
-  MainStackParamList;
+export type RootStackParamList = AuthStackParamList & MainStackParamList;

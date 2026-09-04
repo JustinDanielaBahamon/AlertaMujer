@@ -146,7 +146,12 @@
     "nota_guardada": "Location saved from the map",
     "precision_alta": "High (±5m)",
     "tu_ubicacion_marcador": "Your location",
-    "direccion_alerta_marcador": "Alert address"
+    "direccion_alerta_marcador": "Alert address",
+    "acciones_adicionales": "Additional actions",
+    "clasificar_zonas": "Classify zones",
+    "clasificar_zonas_desc": "Report and classify an area according to its safety level",
+    "ubicaciones_guardadas": "Saved locations",
+    "ubicaciones_guardadas_desc": "View and manage your saved locations"
   },
   "historial": {
     "titulo": "Alert History",

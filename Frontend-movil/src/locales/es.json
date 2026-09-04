@@ -146,7 +146,12 @@
   "nota_guardada": "Ubicación guardada desde el mapa",
   "precision_alta": "Alta (±5m)",
   "tu_ubicacion_marcador": "Tu ubicación",
-  "direccion_alerta_marcador": "Dirección de alerta"
+  "direccion_alerta_marcador": "Dirección de alerta",
+  "acciones_adicionales": "Acciones adicionales",
+  "clasificar_zonas": "Clasificar zonas",
+  "clasificar_zonas_desc": "Reporta y clasifica una zona según su nivel de seguridad",
+  "ubicaciones_guardadas": "Ubicaciones guardadas",
+  "ubicaciones_guardadas_desc": "Consulta y administra tus ubicaciones guardadas"
   },
   "historial": {
   "titulo": "Historial de Alertas",
