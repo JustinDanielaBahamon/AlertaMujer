@@ -585,6 +585,19 @@
   "item12_desc": "Para dudas o soporte, el usuario puede comunicarse a través de los canales oficiales disponibles dentro de la aplicación.",
   "volver": "Volver"
 },
+"alertaActiva": {
+  "titulo": "Alerta activa",
+  "subtitulo": "Tu red fue notificada",
+  "tiempoRestante": "Tiempo restante",
+  "serviciosTitulo": "Servicios de emergencia activos",
+  "serviciosDescripcion": "Cuando estés a salvo, presiona \"Estoy bien\" para notificar.",
+  "compartiendoUbicacion": "Compartiendo ubicación",
+  "enTiempoReal": "En tiempo real",
+  "vistas": "vistas",
+  "estoyBien": "Estoy bien",
+  "estoyBienDescripcion": "Notifica a tu red que estás a salvo",
+  "llamar911": "Llamar al 911"
+},
 "indexDemo": {
   "mensaje": "Bienvenido (pantalla de prueba)",
   "btn_demo": "Entrar como demo (home)",
