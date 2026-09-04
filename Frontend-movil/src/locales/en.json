@@ -583,6 +583,19 @@
     "item12_desc": "For questions or support, users can reach out through the official channels available within the app.",
     "volver": "Back"
   },
+  "alertaActiva": {
+  "titulo": "Active alert",
+  "subtitulo": "Your network was notified",
+  "tiempoRestante": "Time remaining",
+  "serviciosTitulo": "Emergency services active",
+  "serviciosDescripcion": "When you're safe, press \"I'm okay\" to notify them.",
+  "compartiendoUbicacion": "Sharing location",
+  "enTiempoReal": "Real time",
+  "vistas": "views",
+  "estoyBien": "I'm okay",
+  "estoyBienDescripcion": "Notify your network that you are safe",
+  "llamar911": "Call 911"
+},
   "indexDemo": {
     "mensaje": "Welcome (test screen)",
     "btn_demo": "Enter as demo (home)",

@@ -15,6 +15,7 @@ export type MainStackParamList = {
   Perfil: undefined;
 
   Activacion: undefined;
+  AlertaActiva: undefined;
 
   TutorialBienvenida: undefined;
   TutorialBoton: undefined;

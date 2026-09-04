@@ -19,6 +19,7 @@ import MetodosActivacionScreen from "../features/settings/view/metodosActivacion
 import GuardarUbi from "../screens/tabs/mapa/guardarUbi";
 import ClasificarZonaScreen from "../features/mapa/view/classifyZoneView"; // Ajusta la ruta a tu archivo real// Ajusta la ruta a tu archivo real
 import UbicacionesGuardadasScreen from "../features/mapa/view/UbicacionesGuardadas";
+import AlertaActivaScreen from "../features/AlertaActiva/view/AlertaActivaScreen";
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -40,6 +41,7 @@ export default function MainNavigator({ initialRouteName }: Props) {
     >
       <Stack.Screen name="DrawerHome" component={DrawerNavigator} />
       <Stack.Screen name="Activacion" component={ActivacionScreen} />
+      <Stack.Screen name="AlertaActiva" component={AlertaActivaScreen} />
       <Stack.Screen name="TutorialBienvenida" component={BienvenidaTutorialScreen} />
       <Stack.Screen name="TutorialBoton" component={BotonTutorialScreen} />
       <Stack.Screen name="TutorialMensaje" component={MensajeTutorialScreen} />
