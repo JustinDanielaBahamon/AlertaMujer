@@ -324,10 +324,7 @@ export default function Inicio() {
 
       </View>
 
-      {/* Texto de instrucción — fuente reducida para no pegarse al botón */}
-      <Text style={[styles.instructionText, { color: theme.text }]}>
-        {t.inicio.presiona_emergencia.replace("\n", " ")}
-      </Text>
+     
 
       {/* Ultima alerta, (esta conectada al historial) */}
       <TouchableOpacity

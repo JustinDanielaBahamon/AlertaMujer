@@ -1,11 +1,12 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { LinearGradient } from "expo-linear-gradient";
 import * as Location from "expo-location";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   Text,
   TextInput,
@@ -13,10 +14,11 @@ import {
   View,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
+import { MaterialIcons as MIcon } from "@expo/vector-icons";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { useLocale } from "../../../contexts/LocaleContext";
 import type { MainStackParamList } from "../../../navigation/types";
-import { styles } from "./guardar.Style";
+import { styles, COLORS } from "./guardar.Style";
 
 type GuardarUbiRouteProp = RouteProp<MainStackParamList, "guardarUbi">;
 
@@ -29,6 +31,12 @@ type DireccionInfo = {
   pais: string;
 };
 
+const SUGERENCIAS_NOMBRE = [
+  { label: "Casa", icon: "home" as const },
+  { label: "Trabajo", icon: "work" as const },
+  { label: "Otro", icon: "edit" as const },
+];
+
 export default function GuardarUbi() {
   const { theme } = useTheme();
   const { t } = useLocale();
@@ -40,7 +48,10 @@ export default function GuardarUbi() {
 
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
+  const [nombre, setNombre] = useState("");
   const [notas, setNotas] = useState("");
+  const [errorNombre, setErrorNombre] = useState(false);
+  const [maxNotasAlcanzado, setMaxNotasAlcanzado] = useState(false);
   const [direccionInfo, setDireccionInfo] = useState<DireccionInfo | null>(null);
 
   useEffect(() => {
@@ -97,12 +108,19 @@ export default function GuardarUbi() {
   const handleGuardar = async () => {
     if (!direccionInfo || guardando) return;
 
+    // Validación: name es obligatorio en frequent_location
+    if (!nombre.trim()) {
+      setErrorNombre(true);
+      return;
+    }
+
     setGuardando(true);
 
     try {
       navigation.replace("historialMapa", {
         ubicacion: {
           id: Date.now().toString(),
+          nombre: nombre.trim(),
           latitude,
           longitude,
           direccion: direccionInfo.direccion,
@@ -114,7 +132,7 @@ export default function GuardarUbi() {
           fecha: new Date().toISOString(),
           estado: "Activo",
           precision: t.mapa.precision_alta,
-          notas: notas.trim() || t.mapa.nota_guardada,
+          notas: notas.trim() || undefined,
         },
       });
     } finally {
@@ -124,8 +142,8 @@ export default function GuardarUbi() {
 
   if (cargando) {
     return (
-      <View style={[styles.loadingContainer, { backgroundColor: theme.background }]}>
-        <ActivityIndicator size="large" color="#6C2BD9" />
+      <View style={[styles.loadingContainer, { backgroundColor: COLORS.screenBg }]}>
+        <ActivityIndicator size="large" color={COLORS.accent} />
         <Text style={[styles.loadingText, { color: theme.text }]}>
           {t.mapa.cargando}
         </Text>
@@ -134,128 +152,161 @@ export default function GuardarUbi() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <KeyboardAvoidingView
+      style={[styles.container, { backgroundColor: COLORS.screenBg }]}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+    >
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={{ paddingHorizontal: 15, paddingBottom: 40 }}
+        keyboardShouldPersistTaps="handled"
       >
-        <LinearGradient
-          colors={[theme.headercolor1, theme.headercolor2]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.header}
-        >
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
-          >
-            <MaterialIcons name="arrow-back" size={26} color="#fff" />
+        {/* Header con degradado */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+            <MaterialIcons name="arrow-back" size={22} color={COLORS.white} />
           </TouchableOpacity>
-
           <Text style={styles.headerTitle}>{t.mapa.guardar}</Text>
-        </LinearGradient>
+        </View>
 
-        <View style={[styles.card, { backgroundColor: theme.card }]}>
-          <View style={styles.mapContainer}>
-            <MapView
-              style={styles.map}
-              initialRegion={{
-                latitude,
-                longitude,
-                latitudeDelta: 0.01,
-                longitudeDelta: 0.01,
-              }}
-              scrollEnabled={false}
-              zoomEnabled={false}
-              rotateEnabled={false}
-              pitchEnabled={false}
-            >
-              <Marker
-                coordinate={{ latitude, longitude }}
-                title={t.historialMapa.ubicacion_guardada_marcador}
-                pinColor="#6C2BD9"
-              />
-            </MapView>
+        {/* Preview del mapa */}
+        <View style={styles.mapContainer}>
+          <MapView
+            style={styles.map}
+            initialRegion={{
+              latitude,
+              longitude,
+              latitudeDelta: 0.01,
+              longitudeDelta: 0.01,
+            }}
+            scrollEnabled={false}
+            zoomEnabled={false}
+            rotateEnabled={false}
+            pitchEnabled={false}
+          >
+            <Marker
+              coordinate={{ latitude, longitude }}
+              title={t.historialMapa.ubicacion_guardada_marcador}
+              pinColor={COLORS.accent}
+            />
+          </MapView>
+        </View>
+
+        {/* Nombre de la ubicación — obligatorio */}
+        <View style={styles.fieldBlock}>
+          <View style={styles.fieldLabelRow}>
+            <Text style={styles.fieldLabel}>{t.historialMapa.nombre_ubicacion}</Text>
+            <Text style={styles.requiredMark}>*</Text>
           </View>
-
-          <InfoItem
-            icon="place"
-            label={t.historialMapa.direccion}
-            value={direccionInfo?.direccion ?? "—"}
-            theme={theme}
-          />
-          <InfoItem
-            icon="home"
-            label={t.historialMapa.barrio}
-            value={direccionInfo?.barrio ?? "—"}
-            theme={theme}
-          />
-          <InfoItem
-            icon="location-city"
-            label={t.historialMapa.municipio}
-            value={direccionInfo?.municipio ?? "—"}
-            theme={theme}
-          />
-          <InfoItem
-            icon="my-location"
-            label={t.historialMapa.latitud}
-            value={latitude.toFixed(5)}
-            theme={theme}
-          />
-          <InfoItem
-            icon="location-on"
-            label={t.historialMapa.longitud}
-            value={longitude.toFixed(5)}
-            theme={theme}
-          />
-
           <TextInput
-            style={[
-              styles.notasInput,
-              {
-                color: theme.text,
-                borderColor: theme.icono + "40",
-                backgroundColor: theme.background,
-              },
-            ]}
-            placeholder={t.mapa.nota_guardada}
-            placeholderTextColor={theme.contactSubtext}
+            style={[styles.nombreInput, errorNombre && styles.inputError]}
+            placeholder={t.historialMapa.nombre_placeholder}
+            placeholderTextColor={COLORS.placeholder}
+            value={nombre}
+            onChangeText={(val) => {
+              setNombre(val);
+              if (errorNombre) setErrorNombre(false);
+            }}
+            maxLength={100}
+            textAlignVertical="top"
+          />
+          {errorNombre && (
+            <View style={styles.errorRow}>
+              <MaterialIcons name="error-outline" size={13} color={COLORS.errorColor} />
+              <Text style={styles.errorText}>{t.historialMapa.nombre_requerido}</Text>
+            </View>
+          )}
+
+          <View style={styles.chipsRow}>
+            {SUGERENCIAS_NOMBRE.map((s) => (
+              <TouchableOpacity
+                key={s.label}
+                style={styles.chip}
+                onPress={() => {
+                  setNombre(s.label);
+                  setErrorNombre(false);
+                }}
+                activeOpacity={0.7}
+              >
+                <MIcon name={s.icon} size={13} color={COLORS.accent} />
+                <Text style={styles.chipText}>{s.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* Info geocodificada */}
+        <View style={styles.infoBlock}>
+          <InfoItem icon="place" label={t.historialMapa.direccion} value={direccionInfo?.direccion ?? "—"} />
+          <InfoItem icon="home" label={t.historialMapa.barrio} value={direccionInfo?.barrio ?? "—"} />
+          <View style={styles.infoDoubleRow}>
+            <InfoItem icon="my-location" label={t.historialMapa.latitud} value={latitude.toFixed(5)} compact />
+            <InfoItem icon="location-on" label={t.historialMapa.longitud} value={longitude.toFixed(5)} compact />
+          </View>
+        </View>
+
+        {/* Notas — opcional, con etiqueta clara */}
+        <View style={styles.fieldBlock}>
+          <View style={styles.notasLabelRow}>
+            <MaterialIcons name="notes" size={16} color={COLORS.accentDark} />
+            <Text style={styles.fieldLabel}>{t.historialMapa.notas_label}</Text>
+          </View>
+          <Text style={styles.notasHelper}>{t.historialMapa.notas_ayuda}</Text>
+          <TextInput
+            style={styles.notasInput}
+            placeholder={t.historialMapa.notas_placeholder}
+            placeholderTextColor={COLORS.placeholder}
             value={notas}
-            onChangeText={setNotas}
+            onChangeText={(val) => {
+              setNotas(val);
+              setMaxNotasAlcanzado(val.length >= 200);
+            }}
             multiline
             maxLength={200}
           />
-
-          <TouchableOpacity
-            style={[styles.primaryButton, guardando && { opacity: 0.7 }]}
-            onPress={handleGuardar}
-            disabled={guardando}
-            activeOpacity={0.85}
-          >
-            {guardando ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <>
-                <MaterialIcons name="bookmark" size={22} color="#fff" />
-                <Text style={styles.primaryButtonText}>
-                  {t.tutorial.ubicacion_guardar_boton}
-                </Text>
-              </>
-            )}
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.secondaryButton}
-            onPress={() => navigation.goBack()}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.secondaryButtonText}>
-              {t.permisos.btn_regresar}
-            </Text>
-          </TouchableOpacity>
+          {maxNotasAlcanzado && (
+            <View style={styles.maxCharWarning}>
+              <MaterialIcons name="warning" size={13} color={COLORS.errorColor} />
+              <Text style={styles.maxCharText}>{t.historialMapa.max_caracteres}</Text>
+            </View>
+          )}
+          {maxNotasAlcanzado && (
+            <View style={styles.maxCharWarning}>
+              <MaterialIcons name="warning" size={13} color={COLORS.errorColor} />
+              <Text style={styles.maxCharText}>{t.historialMapa.max_caracteres}</Text>
+            </View>
+          )}
         </View>
+
+        {/* Botón guardar */}
+        <TouchableOpacity
+          style={[styles.primaryButton, guardando && { opacity: 0.7 }]}
+          onPress={handleGuardar}
+          disabled={guardando}
+          activeOpacity={0.85}
+        >
+          {guardando ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <>
+              <MaterialIcons name="bookmark" size={18} color="#fff" />
+              <Text style={styles.primaryButtonText}>
+                {t.tutorial.ubicacion_guardar_boton}
+              </Text>
+            </>
+          )}
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.secondaryButton}
+          onPress={() => navigation.goBack()}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.secondaryButtonText}>{t.permisos.btn_regresar}</Text>
+        </TouchableOpacity>
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -263,18 +314,16 @@ type InfoItemProps = {
   icon: keyof typeof MaterialIcons.glyphMap;
   label: string;
   value: string;
-  theme: { text: string; contactSubtext: string };
+  compact?: boolean;
 };
 
-function InfoItem({ icon, label, value, theme }: InfoItemProps) {
+function InfoItem({ icon, label, value, compact }: InfoItemProps) {
   return (
-    <View style={styles.infoRow}>
-      <MaterialIcons name={icon} size={20} color="#6C2BD9" />
+    <View style={[styles.infoRow, compact && { flex: 1 }]}>
+      <MaterialIcons name={icon} size={16} color={COLORS.accent} />
       <View style={{ flex: 1 }}>
-        <Text style={[styles.infoLabel, { color: theme.contactSubtext }]}>
-          {label}
-        </Text>
-        <Text style={[styles.infoValue, { color: theme.text }]}>{value}</Text>
+        <Text style={styles.infoLabel}>{label}</Text>
+        <Text style={styles.infoValue}>{value}</Text>
       </View>
     </View>
   );

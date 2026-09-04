@@ -519,7 +519,14 @@
     "precision": "Accuracy",
     "estado": "Status",
     "cerrar_mapa": "Close map",
-    "ubicacion_guardada_marcador": "Saved location"
+    "ubicacion_guardada_marcador": "Saved location",
+    "nombre_ubicacion": "Location name",
+    "nombre_placeholder": "Eg: Home, Work...",
+    "nombre_requerido": "Name is required",
+    "notas_label": "Additional notes",
+    "notas_ayuda": "Add important details about this location",
+    "notas_placeholder": "Eg: Near the park, main entrance...",
+    "max_caracteres": "You have reached the maximum character limit (200)"
   },
   "politicaPrivacidad": {
     "encabezado": "Privacy Policy",
