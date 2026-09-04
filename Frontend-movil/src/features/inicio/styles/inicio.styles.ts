@@ -237,7 +237,7 @@ export const createStyles = (
       alignItems: "center",
       justifyContent: "center",
 
-      marginTop: 10,
+      marginTop: -95,
     },
 
     instructionText: {
@@ -272,7 +272,7 @@ export const createStyles = (
       left: 20,
       right: 20,
 
-      padding: 16,
+      padding: 9,
 
       borderWidth: 1,
       borderRadius: 20,

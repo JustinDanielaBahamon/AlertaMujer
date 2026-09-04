@@ -521,7 +521,14 @@
   "precision": "Precisión",
   "estado": "Estado",
   "cerrar_mapa": "Cerrar mapa",
-  "ubicacion_guardada_marcador": "Ubicación guardada"
+  "ubicacion_guardada_marcador": "Ubicación guardada",
+  "nombre_ubicacion": "Nombre de la ubicación",
+  "nombre_placeholder": "Ej: Casa, Trabajo...",
+  "nombre_requerido": "El nombre es obligatorio",
+  "notas_label": "Notas adicionales",
+  "notas_ayuda": "Agrega detalles importantes sobre esta ubicación",
+  "notas_placeholder": "Ej: Cerca del parque, entrada principal...",
+  "max_caracteres": "Has alcanzado el máximo de caracteres (200)"
 },
 "politicaPrivacidad": {
   "encabezado": "Política de Privacidad",
