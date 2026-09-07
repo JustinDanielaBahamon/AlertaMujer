@@ -1,25 +1,24 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useEffect } from "react";
-import type { MainStackParamList } from "./types";
 import { useAuth } from "../contexts/AuthContext";
-import DrawerNavigator from "./drawer/DrawerNavigator";
+import AlertaActivaScreen from "../features/AlertaActiva/view/AlertaActivaScreen";
 import ActivacionScreen from "../features/BotonActivacion/activacion";
-import BienvenidaTutorialScreen from "../screens/tutorial/bienvenida";
-import BotonTutorialScreen from "../screens/tutorial/boton";
-import MensajeTutorialScreen from "../screens/tutorial/mensaje";
-import UbicacionTutorialScreen from "../screens/tutorial/ubicacion";
-import ContactoTutorialScreen from "../screens/tutorial/contacto";
-import SeguridadTutorialScreen from "../screens/tutorial/seguridad";
-import NotificacionTutorialScreen from "../screens/tutorial/notificacion";
 import AgregarContactoScreen from "../features/contactos/view/agregarScreen";
 import DetalleAlertaScreen from "../features/historial/view/detallesAlerta"; // ← nuevo
-import PerfilScreen from "../features/perfil/view/perfilScreen";
 import HistorialMapa from "../features/historial/view/historial";
-import MetodosActivacionScreen from "../features/settings/view/metodosActivacionScreen";
-import GuardarUbi from "../screens/tabs/mapa/guardarUbi";
 import ClasificarZonaScreen from "../features/mapa/view/classifyZoneView"; // Ajusta la ruta a tu archivo real// Ajusta la ruta a tu archivo real
 import UbicacionesGuardadasScreen from "../features/mapa/view/UbicacionesGuardadas";
-import AlertaActivaScreen from "../features/AlertaActiva/view/AlertaActivaScreen";
+import PerfilScreen from "../features/perfil/view/perfilScreen";
+import MetodosActivacionScreen from "../features/settings/view/metodosActivacionScreen";
+import BienvenidaTutorialScreen from "../screens/tutorial/bienvenida";
+import BotonTutorialScreen from "../screens/tutorial/boton";
+import ContactoTutorialScreen from "../screens/tutorial/contacto";
+import MensajeTutorialScreen from "../screens/tutorial/mensaje";
+import NotificacionTutorialScreen from "../screens/tutorial/notificacion";
+import SeguridadTutorialScreen from "../screens/tutorial/seguridad";
+import UbicacionTutorialScreen from "../screens/tutorial/ubicacion";
+import DrawerNavigator from "./drawer/DrawerNavigator";
+import type { MainStackParamList } from "./types";
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -54,7 +53,6 @@ export default function MainNavigator({ initialRouteName }: Props) {
       <Stack.Screen name="Perfil" component={PerfilScreen} /> 
       <Stack.Screen name="historialMapa" component={HistorialMapa}/>
       <Stack.Screen name="MetodosActivacion" component={MetodosActivacionScreen} />
-      <Stack.Screen name="guardarUbi" component={GuardarUbi}/>
       <Stack.Screen name="ClasificarZona" component={ClasificarZonaScreen} />
       <Stack.Screen name="UbicacionesGuardadas" component={UbicacionesGuardadasScreen} />
     </Stack.Navigator>

@@ -1,3 +1,5 @@
+import { MaterialIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import {
   Animated,
@@ -10,8 +12,6 @@ import {
   View,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
-import { MaterialIcons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { styles } from "../styles/MapaStyles";
 import { useMapaViewModel } from "../viewModel/useMapaViewModel";
 
@@ -32,7 +32,6 @@ export default function MapaView() {
     handleMapPress,
     formatearHora,
     reintentarPermisos,
-    irAClasificarZona,
     irAUbicacionesGuardadas,
   } = useMapaViewModel();
 
@@ -164,24 +163,7 @@ export default function MapaView() {
           {t.mapa.acciones_adicionales}
         </Text>
 
-        {/* CLASIFICAR ZONAS */}
-        <TouchableOpacity
-          style={[styles.itemHistorial, { backgroundColor: theme.card }]}
-          onPress={irAClasificarZona}
-          activeOpacity={0.85}
-          
-        >
-          <View style={[styles.numeroBurbuja, { backgroundColor: "rgb(237, 231, 246)" }]}>
-            <MaterialIcons name="flag" size={18} color="#6A1B9A" />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.fechaItem, { color: theme.text }]}>{t.mapa.clasificar_zonas}</Text>
-            <Text style={[styles.coordItem, { color: theme.contactSubtext }]}>
-              {t.mapa.clasificar_zonas_desc}
-            </Text>
-          </View>
-          <MaterialIcons name="chevron-right" size={20} color={theme.contactSubtext} />
-        </TouchableOpacity>
+    
 
         {/* UBICACIONES GUARDADAS */}
         <TouchableOpacity

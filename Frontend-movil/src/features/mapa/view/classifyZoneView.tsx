@@ -1,24 +1,25 @@
-import React, { useState } from "react";
+import { MaterialIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import * as Location from "expo-location";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
 import MapView, { Marker } from "react-native-maps";
-import { useNavigation, useRoute } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import * as Location from "expo-location";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { useTheme } from "../../../contexts/ThemeContext";
 import { useLocale } from "../../../contexts/LocaleContext";
+import { useTheme } from "../../../contexts/ThemeContext";
 import type { MainStackParamList } from "../../../navigation/types";
 import { createStyles } from "../styles/classifyZone.style";
 
@@ -61,9 +62,15 @@ export default function ClasificarZonaView() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<ClasificarZonaRouteProp>();
 
-  const latitude = route.params?.latitude ?? 2.962828;
-  const longitude = route.params?.longitude ?? -75.2855952;
+  // Coordenadas actuales del estado para permitir actualizaciones al presionar "Mi ubicación"
   const editarUbicacion = route.params?.editarUbicacion;
+  const initialLat = route.params?.latitude ?? 2.962828;
+  const initialLng = route.params?.longitude ?? -75.2855952;
+
+  const [coords, setCoords] = useState({
+    latitude: initialLat,
+    longitude: initialLng,
+  });
 
   const styles = createStyles(theme);
 
@@ -82,22 +89,21 @@ export default function ClasificarZonaView() {
     editarUbicacion?.nivelRiesgo || null
   );
 
-  // Cargar información de dirección usando reverse geocoding
-  React.useEffect(() => {
-    let mounted = true;
+  const [isLocationHovered, setIsLocationHovered] = useState(false);
 
-    (async () => {
+  // Función reutilizable de Geocodificación Inversa
+  const fetchAddress = useCallback(
+    async (lat: number, lng: number) => {
       try {
+        setCargando(true);
         const reverse = await Location.reverseGeocodeAsync({
-          latitude,
-          longitude,
+          latitude: lat,
+          longitude: lng,
         });
-
-        if (!mounted) return;
 
         const info = reverse[0];
 
-        const direccionData = {
+        const direccionData: DireccionInfo = {
           direccion: `${info?.street || t.mapa.sin_calle} ${info?.streetNumber || ""}`.trim(),
           barrio:
             info?.district && info.district !== info?.city
@@ -119,42 +125,67 @@ export default function ClasificarZonaView() {
         setCiudad(direccionData.ciudad);
         setBarrio(direccionData.barrio);
       } catch {
-        if (mounted) {
-          const direccionData = {
-            direccion: t.mapa.sin_calle,
-            barrio: t.mapa.sector_desconocido,
-            municipio: t.mapa.municipio_desconocido,
-            ciudad: t.mapa.ciudad_desconocida,
-            departamento: t.mapa.departamento_desconocido,
-            pais: t.mapa.pais_desconocido,
-          };
-          setDireccionInfo(direccionData);
-          setDireccion(direccionData.direccion);
-          setCiudad(direccionData.ciudad);
-          setBarrio(direccionData.barrio);
-        }
+        const fallbackData: DireccionInfo = {
+          direccion: t.mapa.sin_calle,
+          barrio: t.mapa.sector_desconocido,
+          municipio: t.mapa.municipio_desconocido,
+          ciudad: t.mapa.ciudad_desconocida,
+          departamento: t.mapa.departamento_desconocido,
+          pais: t.mapa.pais_desconocido,
+        };
+        setDireccionInfo(fallbackData);
+        setDireccion(fallbackData.direccion);
+        setCiudad(fallbackData.ciudad);
+        setBarrio(fallbackData.barrio);
       } finally {
-        if (mounted) setCargando(false);
+        setCargando(false);
       }
-    })();
+    },
+    [t]
+  );
 
-    return () => {
-      mounted = false;
-    };
-  }, [latitude, longitude, t]);
+  // Carga inicial
+  useEffect(() => {
+    fetchAddress(coords.latitude, coords.longitude);
+  }, [coords, fetchAddress]);
+
+  // Handler para "Usar mi ubicación actual"
+  const handleUsarUbicacionActual = async () => {
+    try {
+      setCargando(true);
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permiso denegado", "Se requiere permiso de ubicación.");
+        setCargando(false);
+        return;
+      }
+
+      const currentLocation = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      });
+
+      setCoords({
+        latitude: currentLocation.coords.latitude,
+        longitude: currentLocation.coords.longitude,
+      });
+    } catch (err) {
+      Alert.alert("Error", "No se pudo obtener la ubicación actual.");
+      setCargando(false);
+    }
+  };
 
   const handleGuardar = async () => {
-    if (!direccionInfo || guardando) return;
+    if (guardando) return;
 
-    // Validación: nombre es obligatorio
+    // Validación: nombre obligatorio
     if (!nombre.trim()) {
       setErrorNombre(true);
       return;
     }
 
-    // Validación: nivel de seguridad es obligatorio
+    // Validación: nivel de seguridad obligatorio
     if (!nivelSeguridad) {
-      alert("Por favor selecciona el nivel de seguridad de la zona");
+      Alert.alert("Atención", "Por favor selecciona el nivel de seguridad de la zona.");
       return;
     }
 
@@ -164,15 +195,18 @@ export default function ClasificarZonaView() {
       const ubicacionGuardada = {
         id: editarUbicacion?.id || Date.now().toString(),
         nombre: nombre.trim(),
-        latitude,
-        longitude,
-        direccion: direccionInfo.direccion,
-        barrio: direccionInfo.barrio,
-        municipio: direccionInfo.municipio,
-        ciudad: direccionInfo.ciudad,
-        departamento: direccionInfo.departamento,
-        pais: direccionInfo.pais,
-        fecha: editarUbicacion ? new Date().toISOString() : new Date().toISOString(),
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+
+        // CORRECCIÓN: Se guardan las variables locales editadas en los TextInput
+        direccion: direccion.trim() || direccionInfo?.direccion || "",
+        barrio: barrio.trim() || direccionInfo?.barrio || "",
+        municipio: direccionInfo?.municipio || "",
+        ciudad: ciudad.trim() || direccionInfo?.ciudad || "",
+        departamento: direccionInfo?.departamento || "",
+        pais: direccionInfo?.pais || "",
+
+        fecha: new Date().toISOString(),
         estado: "Activo",
         precision: t.mapa.precision_alta,
         notas: notas.trim() || undefined,
@@ -184,15 +218,11 @@ export default function ClasificarZonaView() {
       const ubicacionesExistentes = await AsyncStorage.getItem("ubicaciones_guardadas");
       let ubicaciones = ubicacionesExistentes ? JSON.parse(ubicacionesExistentes) : [];
 
-      console.log("Ubicaciones existentes:", ubicaciones.length);
-      console.log("Nombre a guardar:", nombre.trim());
-
-      // Validación: verificar nombre duplicado (solo para nuevas ubicaciones)
+      // Validación: verificar nombre duplicado (solo al crear)
       if (!editarUbicacion) {
         const nombreDuplicado = ubicaciones.some(
           (u: any) => u.nombre.toLowerCase() === nombre.trim().toLowerCase()
         );
-        console.log("¿Nombre duplicado?", nombreDuplicado);
 
         if (nombreDuplicado) {
           Alert.alert(
@@ -205,26 +235,22 @@ export default function ClasificarZonaView() {
       }
 
       if (editarUbicacion) {
-        // Actualizar ubicación existente
         const index = ubicaciones.findIndex((u: any) => u.id === editarUbicacion.id);
         if (index !== -1) {
           ubicaciones[index] = ubicacionGuardada;
         }
       } else {
-        // Agregar nueva ubicación
         ubicaciones.push(ubicacionGuardada);
       }
 
       // Guardar en AsyncStorage
       await AsyncStorage.setItem("ubicaciones_guardadas", JSON.stringify(ubicaciones));
 
-      console.log(editarUbicacion ? "Ubicación actualizada:" : "Ubicación guardada:", ubicacionGuardada);
-
       // Navegar a la pantalla de ubicaciones guardadas
       navigation.navigate("UbicacionesGuardadas");
     } catch (error) {
       console.error("Error al guardar ubicación:", error);
-      alert("Error al guardar la ubicación");
+      Alert.alert("Error", "Error al guardar la ubicación");
     } finally {
       setGuardando(false);
     }
@@ -318,9 +344,9 @@ export default function ClasificarZonaView() {
         <View style={styles.mapContainer}>
           <MapView
             style={styles.map}
-            initialRegion={{
-              latitude,
-              longitude,
+            region={{
+              latitude: coords.latitude,
+              longitude: coords.longitude,
               latitudeDelta: 0.01,
               longitudeDelta: 0.01,
             }}
@@ -331,8 +357,8 @@ export default function ClasificarZonaView() {
           >
             <Marker
               coordinate={{
-                latitude,
-                longitude,
+                latitude: coords.latitude,
+                longitude: coords.longitude,
               }}
               pinColor="#7B1DB2"
             />
@@ -342,7 +368,10 @@ export default function ClasificarZonaView() {
             <View style={styles.mapCenterDot} />
           </View>
 
-          <TouchableOpacity style={styles.mapLocationButton}>
+          <TouchableOpacity 
+            style={styles.mapLocationButton}
+            onPress={handleUsarUbicacionActual}
+          >
             <MaterialIcons
               name="my-location"
               size={18}
@@ -352,11 +381,35 @@ export default function ClasificarZonaView() {
         </View>
 
         {/* USAR UBICACIÓN ACTUAL */}
-        <TouchableOpacity style={styles.useLocationButton}>
-          <Text style={styles.useLocationText}>
-            Usar mi ubicación actual
-          </Text>
-        </TouchableOpacity>
+        <Pressable
+          onPress={handleUsarUbicacionActual}
+          onHoverIn={() => setIsLocationHovered(true)}
+          onHoverOut={() => setIsLocationHovered(false)}
+          style={({ pressed }) => {
+            const isActive = pressed || isLocationHovered;
+            return [
+              styles.useLocationButton,
+              isActive && {
+                backgroundColor: "#7B1DB2",
+                borderColor: "#5A1387",
+              },
+            ];
+          }}
+        >
+          {({ pressed }) => {
+            const isActive = pressed || isLocationHovered;
+            return (
+              <Text
+                style={[
+                  styles.useLocationText,
+                  isActive && { color: "#FFFFFF", fontWeight: "bold" },
+                ]}
+              >
+                Usar mi ubicación actual
+              </Text>
+            );
+          }}
+        </Pressable>
 
         {/* NOMBRE DE LA UBICACIÓN */}
         <Text
@@ -456,28 +509,19 @@ export default function ClasificarZonaView() {
         <Text style={[styles.inputLabel, { color: theme.text }]}>
           Ciudad
         </Text>
-        <TouchableOpacity
+        <TextInput
           style={[
-            styles.selectInput,
+            styles.input,
             {
+              color: theme.text,
               backgroundColor: theme.card,
             },
           ]}
-        >
-          <Text
-            style={{
-              color: ciudad ? theme.text : theme.contactSubtext,
-              fontSize: 12,
-            }}
-          >
-            {ciudad || "Seleccione una ciudad"}
-          </Text>
-          <MaterialIcons
-            name="keyboard-arrow-down"
-            size={18}
-            color={theme.contactSubtext}
-          />
-        </TouchableOpacity>
+          placeholder="Ej: Neiva"
+          placeholderTextColor={theme.contactSubtext}
+          value={ciudad}
+          onChangeText={setCiudad}
+        />
 
         {/* BARRIO */}
         <Text style={[styles.inputLabel, { color: theme.text }]}>
@@ -592,8 +636,6 @@ export default function ClasificarZonaView() {
             <Text style={styles.securitySmallText}>Zona muy segura</Text>
           </TouchableOpacity>
 
-         
-
           {/* MODERADA */}
           <TouchableOpacity
             style={[
@@ -608,8 +650,6 @@ export default function ClasificarZonaView() {
             <Text style={styles.securitySmallText}>Riesgo medio</Text>
           </TouchableOpacity>
 
-         
-
           {/* MUY INSEGURA */}
           <TouchableOpacity
             style={[
@@ -623,10 +663,7 @@ export default function ClasificarZonaView() {
             <Text style={styles.veryUnsafeText}>Muy insegura</Text>
             <Text style={styles.securitySmallText}>Riesgo muy alto</Text>
           </TouchableOpacity>
-
-         
         </View>
-
 
         {/* GUARDAR UBICACIÓN */}
         <TouchableOpacity
