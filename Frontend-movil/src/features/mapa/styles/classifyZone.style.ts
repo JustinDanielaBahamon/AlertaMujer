@@ -13,7 +13,7 @@ export const createStyles = (theme: AppTheme) => {
     },
 
     scrollContent: {
-      paddingBottom: 35,
+      paddingBottom:42,
     },
 
 
@@ -22,10 +22,10 @@ export const createStyles = (theme: AppTheme) => {
     // =====================================================
 
     header: {
-      height: 75,
+      height: 125,
       flexDirection: "row",
       alignItems: "center",
-      paddingHorizontal: 18,
+      paddingHorizontal: 17,
       paddingTop: 8,
     },
 
@@ -42,15 +42,15 @@ export const createStyles = (theme: AppTheme) => {
     },
 
     headerTitle: {
-      fontSize: 17,
-      fontWeight: "700",
+      fontSize: 21,
+      fontWeight: "800",
     },
 
     securityHeaderIcon: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      backgroundColor: "#E8D5F5",
+      width: 45,
+      height: 45,
+      borderRadius: 30,
+      backgroundColor: "#dfafff",
       justifyContent: "center",
       alignItems: "center",
     },
@@ -62,9 +62,10 @@ export const createStyles = (theme: AppTheme) => {
 
     description: {
       fontSize: 11,
+      marginHorizontal :17,
       lineHeight: 17,
-      marginHorizontal: 18,
-      marginBottom: 15,
+      textAlign: "center",
+      marginBottom: 10,
     },
 
 
@@ -73,7 +74,7 @@ export const createStyles = (theme: AppTheme) => {
     // =====================================================
 
     sectionTitle: {
-      fontSize: 12,
+      fontSize: 15.7,
       fontWeight: "700",
       marginHorizontal: 18,
       marginTop: 13,
@@ -86,7 +87,7 @@ export const createStyles = (theme: AppTheme) => {
     // =====================================================
 
     mapContainer: {
-      height: 110,
+      height: 160,
       marginHorizontal: 18,
       borderRadius: 12,
       overflow: "hidden",
@@ -140,8 +141,12 @@ export const createStyles = (theme: AppTheme) => {
     // BOTÓN USAR UBICACIÓN
     // =====================================================
 
+  // =====================================================
+    // BOTÓN USAR UBICACIÓN
+    // =====================================================
+
     useLocationButton: {
-      height: 32,
+      height: 40,
       marginHorizontal: 18,
       marginTop: 8,
       borderWidth: 1,
@@ -149,21 +154,34 @@ export const createStyles = (theme: AppTheme) => {
       borderRadius: 6,
       justifyContent: "center",
       alignItems: "center",
+      backgroundColor: "transparent",
+    },
+
+    // Estado cuando el usuario presiona el botón
+    useLocationButtonActive: {
+      backgroundColor: "#7B1DB2",
+      borderColor: "#5A1387",
     },
 
     useLocationText: {
-      fontSize: 11,
+      fontSize: 13,
       fontWeight: "700",
       color: "#7B1DB2",
     },
 
+    // Texto cuando el botón está presionado
+    useLocationTextActive: {
+      color: "#FFFFFF",
+    },
+
+    
 
     // =====================================================
     // INPUTS
     // =====================================================
 
     inputLabel: {
-      fontSize: 10,
+      fontSize: 12.8,
       fontWeight: "600",
       marginHorizontal: 18,
       marginTop: 7,
@@ -171,17 +189,17 @@ export const createStyles = (theme: AppTheme) => {
     },
 
     input: {
-      height: 36,
+      height: 46,
       marginHorizontal: 18,
       borderRadius: 7,
       borderWidth: 1,
       borderColor: "#E6E6E6",
       paddingHorizontal: 11,
-      fontSize: 11,
+      fontSize: 13,
     },
 
     selectInput: {
-      height: 36,
+      height: 46,
       marginHorizontal: 18,
       borderRadius: 7,
       borderWidth: 1,
@@ -200,11 +218,11 @@ export const createStyles = (theme: AppTheme) => {
       borderColor: "#E6E6E6",
       paddingHorizontal: 11,
       paddingTop: 9,
-      fontSize: 11,
+      fontSize: 12.6,
     },
 
     characterCounter: {
-      fontSize: 8,
+      fontSize: 11.1,
       textAlign: "right",
       marginHorizontal: 20,
       marginTop: 2,
@@ -216,9 +234,9 @@ export const createStyles = (theme: AppTheme) => {
     // =====================================================
 
     securityDescription: {
-      fontSize: 9,
-      marginHorizontal: 18,
-      marginBottom: 7,
+      fontSize: 12.3,
+      marginHorizontal: 20,
+      marginBottom: 11,
     },
 
     securityGrid: {
@@ -276,98 +294,61 @@ export const createStyles = (theme: AppTheme) => {
     },
 
     verySafeText: {
-      fontSize: 9,
+      fontSize: 12.8,
       fontWeight: "700",
       color: "#27AE60",
       marginTop: 2,
     },
 
     safeText: {
-      fontSize: 9,
+      fontSize: 12.8,
       fontWeight: "700",
       color: "#27AE60",
       marginTop: 2,
     },
 
     moderateText: {
-      fontSize: 9,
+      fontSize: 12.8,
       fontWeight: "700",
       color: "#D89B00",
       marginTop: 2,
     },
 
     unsafeText: {
-      fontSize: 9,
+      fontSize: 12.8,
       fontWeight: "700",
       color: "#E67E22",
       marginTop: 2,
     },
 
     veryUnsafeText: {
-      fontSize: 9,
+      fontSize: 12.8,
       fontWeight: "700",
       color: "#E74C3C",
       marginTop: 2,
     },
 
     notApplicableText: {
-      fontSize: 9,
+      fontSize: 12.7,
       fontWeight: "700",
       color: "#777",
       marginTop: 2,
     },
 
     securitySmallText: {
-      fontSize: 7,
+      fontSize: 8.6,
       color: "#777",
       marginTop: 2,
     },
-
-
-    // =====================================================
-    // FOTO
-    // =====================================================
-
-    photoDescription: {
-      fontSize: 9,
-      marginHorizontal: 18,
-      marginBottom: 7,
-    },
-
-    photoButton: {
-      height: 62,
-      marginHorizontal: 18,
-      borderRadius: 9,
-      borderWidth: 1,
-      borderStyle: "dashed",
-      borderColor: "#D9BDE8",
-      backgroundColor: "#FBF5FF",
-      justifyContent: "center",
-      alignItems: "center",
-    },
-
-    photoButtonText: {
-      fontSize: 10,
-      fontWeight: "600",
-      color: "#7B1DB2",
-      marginTop: 2,
-    },
-
-    photoFormats: {
-      fontSize: 8,
-      color: "#999",
-      marginTop: 2,
-    },
-
 
     // =====================================================
     // ENVIAR
     // =====================================================
 
     submitButton: {
-      height: 35,
+      height: 43,
       marginHorizontal: 15,
-      marginTop: 10,
+      marginTop: 22,
       borderRadius: 7,
       backgroundColor: "#6F1BB5",
       justifyContent: "center",
@@ -378,14 +359,14 @@ export const createStyles = (theme: AppTheme) => {
 
     submitButtonText: {
       color: "#fff",
-      fontSize: 11,
+      fontSize: 15,
       fontWeight: "700",
     },
 
     footerText: {
-      fontSize: 8,
+      fontSize: 9.3,
       textAlign: "center",
-      marginTop: 5,
+      marginTop: 8,
     },
 
     // =====================================================
@@ -442,6 +423,7 @@ export const createStyles = (theme: AppTheme) => {
       fontWeight: "600",
       color: "#7B1DB2",
     },
+    
 
     // =====================================================
     // LOADING
