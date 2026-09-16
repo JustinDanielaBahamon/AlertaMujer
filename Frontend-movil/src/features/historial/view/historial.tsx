@@ -1,13 +1,15 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation, type NavigationProp, type ParamListBase } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FlatList, Image, RefreshControl, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useTheme } from "../../../../src/contexts/ThemeContext";
 import { useLocale } from "../../../../src/contexts/LocaleContext";
+import { useAuth } from "../../../../src/contexts/AuthContext";
 import { getMainStackNavigation } from "../../../navigation/navigationHelpers";
 import type { Alerta, EstadoAlerta } from "../models/Alerta";
 import { createStyles, getAsistenciaColors, getEmergenciaColors } from "../style/historial.style";
+import { getAlertasByUsuario } from "../../../../src/services/alerts.service";
 
 const mockAlerts: Alerta[] = [
   { id: "1", tipo: "Emergencia", fecha: "30 Mar, 2026", hora: "14:32", ubicacion: "Neiva, Huila",   estado: "Enviada"   as EstadoAlerta },
@@ -17,9 +19,31 @@ const mockAlerts: Alerta[] = [
   { id: "5", tipo: "Asistencia", fecha: "26 Mar, 2026", hora: "11:05", ubicacion: "Rivera, Huila",  estado: "En curso"  as EstadoAlerta },
 ];
 
+const transformarTipo = (apiTipo: string): string => {
+  if (apiTipo === 'SOS' || apiTipo === 'Robo' || apiTipo === 'Acoso') return 'Emergencia';
+  if (apiTipo === 'Medical') return 'Asistencia';
+  return apiTipo;
+};
+
+const transformarEstado = (apiEstado: string): EstadoAlerta => {
+  if (apiEstado === 'Atendida') return 'Enviada';
+  if (apiEstado === 'Pendiente') return 'En curso';
+  return 'En curso';
+};
+
+const transformarAlerta = (apiAlerta: any): Alerta => ({
+  id: String(apiAlerta.id),
+  tipo: transformarTipo(apiAlerta.tipo),
+  fecha: apiAlerta.tiempo,
+  hora: "",
+  ubicacion: apiAlerta.ubicacion,
+  estado: transformarEstado(apiAlerta.estado),
+});
+
 export default function Historial() {
   const { theme } = useTheme();
   const { t } = useLocale();
+  const { user } = useAuth();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   // Colores por tipo derivados del tema activo
@@ -28,25 +52,48 @@ export default function Historial() {
 
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const [searchQuery, setSearchQuery]           = useState("");
-  const [filteredAlerts, setFilteredAlerts]     = useState(mockAlerts);
+  const [filteredAlerts, setFilteredAlerts]     = useState<Alerta[]>(mockAlerts);
   const [refreshing, setRefreshing]             = useState(false);
+
+  const cargarAlertas = useCallback(async () => {
+    if (!user?.id) {
+      setFilteredAlerts(mockAlerts);
+      return;
+    }
+
+    try {
+      const apiAlertas = await getAlertasByUsuario(user.id);
+      const alertasTransformadas = apiAlertas.map(transformarAlerta);
+      setFilteredAlerts(alertasTransformadas);
+    } catch (error) {
+      console.error("Error al cargar alertas:", error);
+      setFilteredAlerts(mockAlerts);
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    cargarAlertas();
+  }, [cargarAlertas]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      setFilteredAlerts(mockAlerts);
+      await cargarAlertas();
       setSearchQuery("");
     } catch (error) {
       console.error("Error al refrescar:", error);
     } finally {
       setRefreshing(false);
     }
-  }, []);
+  }, [cargarAlertas]);
 
   const handleSearch = (text: string) => {
     setSearchQuery(text);
-    const filtered = mockAlerts.filter((item) => {
+    if (!text.trim()) {
+      cargarAlertas();
+      return;
+    }
+    const filtered = filteredAlerts.filter((item) => {
       const itemData =
         `${item.fecha} ${item.hora} ${item.ubicacion} ${item.estado} ${item.tipo}`.toLowerCase();
       return itemData.includes(text.toLowerCase());
@@ -61,12 +108,12 @@ export default function Historial() {
 
   const stats = useMemo(
     () => ({
-      total:     mockAlerts.length,
-      sent:      mockAlerts.filter((a) => a.estado === "Enviada").length,
-      cancelled: mockAlerts.filter((a) => a.estado === "Cancelada").length,
-      ongoing:   mockAlerts.filter((a) => a.estado === "En curso").length,
+      total:     filteredAlerts.length,
+      sent:      filteredAlerts.filter((a) => a.estado === "Enviada").length,
+      cancelled: filteredAlerts.filter((a) => a.estado === "Cancelada").length,
+      ongoing:   filteredAlerts.filter((a) => a.estado === "En curso").length,
     }),
-    []
+    [filteredAlerts]
   );
 
   // ─── Render de cada card ──────────────────────────────────────────────────

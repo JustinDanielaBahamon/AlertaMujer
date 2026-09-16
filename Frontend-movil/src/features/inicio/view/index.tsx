@@ -2,9 +2,8 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation, type NavigationProp, type ParamListBase } from "@react-navigation/native";
 import { Audio } from "expo-av";
 import { Camera } from "expo-camera";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  ActivityIndicator,
   Animated,
   Easing,
   Image,
@@ -17,11 +16,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useInicioViewModel } from "../viewModel/useInicioViewModel";
 import { useTheme } from "../../../../src/contexts/ThemeContext";
 import { useLocale } from "../../../../src/contexts/LocaleContext";
+import { useAuth } from "../../../../src/contexts/AuthContext";
 import type { Alerta, EstadoAlerta } from "../../../features/historial/models/Alerta";
 import { getMainStackNavigation } from "../../../navigation/navigationHelpers";
 import { createStyles } from "../styles/inicio.styles";
+import { getAlertasByUsuario } from "../../../../src/services/alerts.service";
 
-//  Mock de alertas (igual al historial) 
+//  Mock de alertas (igual al historial)
 const mockAlerts: Alerta[] = [
   { id: "1", tipo: "Emergencia", fecha: "30 Mar, 2026", hora: "14:32", ubicacion: "Neiva, Huila",   estado: "Enviada"   as EstadoAlerta },
   { id: "2", tipo: "Asistencia", fecha: "29 Mar, 2026", hora: "20:10", ubicacion: "Campoalegre",    estado: "Cancelada" as EstadoAlerta },
@@ -30,57 +31,70 @@ const mockAlerts: Alerta[] = [
   { id: "5", tipo: "Asistencia", fecha: "26 Mar, 2026", hora: "11:05", ubicacion: "Rivera, Huila",  estado: "En curso"  as EstadoAlerta },
 ];
 
-//  Utilidad: calcula "hace N días" desde la fecha del historial 
-function calcularTiempoTranscurrido(
-  fechaStr: string,
-  textos: { hoy: string; hace_1_dia: string; hace_dias: string }
-): string {
-  // Formato esperado: "30 Mar, 2026"
-  const meses: Record<string, number> = {
-    Ene: 0, Feb: 1, Mar: 2, Abr: 3, May: 4, Jun: 5,
-    Jul: 6, Ago: 7, Sep: 8, Oct: 9, Nov: 10, Dic: 11,
-  };
-  const partes = fechaStr.replace(",", "").split(" "); // ["30", "Mar", "2026"]
-  const dia = parseInt(partes[0], 10);
-  const mes = meses[partes[1]] ?? 0;
-  const anio = parseInt(partes[2], 10);
+const transformarTipo = (apiTipo: string): string => {
+  if (apiTipo === 'SOS' || apiTipo === 'Robo' || apiTipo === 'Acoso') return 'Emergencia';
+  if (apiTipo === 'Medical') return 'Asistencia';
+  return apiTipo;
+};
 
-  const fechaAlerta = new Date(anio, mes, dia);
-  const hoy = new Date();
-  hoy.setHours(0, 0, 0, 0);
-  const diffMs = hoy.getTime() - fechaAlerta.getTime();
-  const diffDias = Math.round(diffMs / (1000 * 60 * 60 * 24));
+const transformarEstado = (apiEstado: string): EstadoAlerta => {
+  if (apiEstado === 'Atendida') return 'Enviada';
+  if (apiEstado === 'Pendiente') return 'En curso';
+  return 'En curso';
+};
 
-  if (diffDias === 0) return textos.hoy;
-  if (diffDias === 1) return textos.hace_1_dia;
-  return textos.hace_dias.replace("{n}", String(diffDias));
-}
+const transformarAlerta = (apiAlerta: any): Alerta => ({
+  id: String(apiAlerta.id),
+  tipo: transformarTipo(apiAlerta.tipo),
+  fecha: apiAlerta.tiempo,
+  hora: "",
+  ubicacion: apiAlerta.ubicacion,
+  estado: transformarEstado(apiAlerta.estado),
+});
 
 export default function Inicio() {
   const vm = useInicioViewModel();
   const { theme } = useTheme();
   const { t } = useLocale();
+  const { user } = useAuth();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const { width, height } = useWindowDimensions();
   const styles = useMemo(() => createStyles(theme, width, height), [theme, width, height]);
 
-  //  Tamaño del botón ligeramente reducido para dar aire al texto 
+  //  Tamaño del botón ligeramente reducido para dar aire al texto
   const BUTTON_SIZE = width * 0.68;
 
   const [cameraActive, setCameraActive] = useState(false);
   const [micActive, setMicActive]       = useState(false);
+  const [alertas, setAlertas]           = useState<Alerta[]>(mockAlerts);
 
-  //  Última alerta derivada del historial 
-  const ultimaAlerta = useMemo(() => mockAlerts[0], []);
-  const tiempoTranscurrido = useMemo(
-    () => calcularTiempoTranscurrido(ultimaAlerta.fecha, {
-      hoy: t.inicio.hoy,
-      hace_1_dia: t.inicio.hace_1_dia,
-      hace_dias: t.inicio.hace_dias,
-    }),
-    [ultimaAlerta.fecha, t]
-  );
+  const cargarAlertas = useCallback(async () => {
+    if (!user?.id) {
+      setAlertas(mockAlerts);
+      return;
+    }
+
+    try {
+      const apiAlertas = await getAlertasByUsuario(user.id);
+      const alertasTransformadas = apiAlertas.map(transformarAlerta);
+      setAlertas(alertasTransformadas);
+    } catch (error) {
+      console.error("Error al cargar alertas:", error);
+      setAlertas(mockAlerts);
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    cargarAlertas();
+  }, [cargarAlertas]);
+
+  //  Última alerta derivada del historial
+  const ultimaAlerta = useMemo(() => alertas[0] || mockAlerts[0], [alertas]);
+
+  //  No usar calcularTiempoTranscurrido con formato de API
+  //  Usar directamente el valor de tiempo de la API
+  const tiempoTranscurrido = ultimaAlerta.fecha;
 
   //  Animaciones glow expansivo
   const glow1Scale   = useRef(new Animated.Value(1)).current;
