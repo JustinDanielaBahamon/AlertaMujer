@@ -23,8 +23,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [pendingMainRoute, setPendingMainRoute] = useState<keyof MainStackParamList | null>(null);
 
   const signIn = useCallback((nextUser: Usuario, options?: SignInOptions) => {
+    console.log('🔐 [AuthContext] signIn INICIADO');
+    console.log('🔐 [AuthContext] nextUser:', nextUser);
+    console.log('🔐 [AuthContext] nextUser.id:', nextUser.id);
+    console.log('🔐 [AuthContext] typeof nextUser.id:', typeof nextUser.id);
     setPendingMainRoute(options?.initialMainRoute ?? "DrawerHome");
     setUser(nextUser);
+    console.log('✅ [AuthContext] Usuario guardado en AuthContext');
   }, []);
 
   const signOut = useCallback(() => {
