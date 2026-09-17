@@ -4,6 +4,7 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { AuthStackParamList } from "../../../navigation/types";
 import { useAuth } from "../../../contexts/AuthContext";
+import { authService } from "../../../services/auth.service";
 
 type ErroresType = {
   nombre?: string;
@@ -151,7 +152,7 @@ export function useRegistroViewModel() {
     setMostrarLista(false);
   }, []);
 
-  const registrarYContinuar = useCallback(() => {
+  const registrarYContinuar = useCallback(async () => {
     if (!aceptaTerminos || !aceptaPrivacidad) {
       setErrorTerminos("Debes aceptar términos y privacidad");
       return;
@@ -159,20 +160,36 @@ export function useRegistroViewModel() {
 
     if (!validarFormulario()) return;
 
-    signIn(
-      {
-        id: Date.now(),
-        nombre: nombre.trim() || "Usuario",
+    try {
+      const response = await authService.register({
+        nombre: nombre.trim(),
         correo: correo.trim(),
-      },
-      { initialMainRoute: "TutorialBienvenida" },
-    );
+        password: password,
+        telefono: telefono,
+        fechaNacimiento: fechaNacimiento,
+        municipio: "Neiva",
+      });
+
+      signIn(
+        {
+          id: response.usuario.id,
+          nombre: response.usuario.nombre,
+          correo: response.usuario.correo || response.usuario.email,
+        },
+        { initialMainRoute: "TutorialBienvenida" },
+      );
+    } catch (error) {
+      setErrorTerminos("Error al registrar. Intenta nuevamente.");
+    }
   }, [
     aceptaTerminos,
     aceptaPrivacidad,
     validarFormulario,
     nombre,
     correo,
+    password,
+    telefono,
+    fechaNacimiento,
     signIn,
   ]);
 

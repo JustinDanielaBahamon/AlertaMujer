@@ -11,13 +11,7 @@ import type { Alerta, EstadoAlerta } from "../models/Alerta";
 import { createStyles, getAsistenciaColors, getEmergenciaColors } from "../style/historial.style";
 import { getAlertasByUsuario } from "../../../../src/services/alerts.service";
 
-const mockAlerts: Alerta[] = [
-  { id: "1", tipo: "Emergencia", fecha: "30 Mar, 2026", hora: "14:32", ubicacion: "Neiva, Huila",   estado: "Enviada"   as EstadoAlerta },
-  { id: "2", tipo: "Asistencia", fecha: "29 Mar, 2026", hora: "20:10", ubicacion: "Campoalegre",    estado: "Cancelada" as EstadoAlerta },
-  { id: "3", tipo: "Emergencia", fecha: "28 Mar, 2026", hora: "09:15", ubicacion: "Neiva, Huila",   estado: "Enviada"   as EstadoAlerta },
-  { id: "4", tipo: "Asistencia", fecha: "27 Mar, 2026", hora: "18:40", ubicacion: "Palermo, Huila", estado: "Cancelada" as EstadoAlerta },
-  { id: "5", tipo: "Asistencia", fecha: "26 Mar, 2026", hora: "11:05", ubicacion: "Rivera, Huila",  estado: "En curso"  as EstadoAlerta },
-];
+
 
 const transformarTipo = (apiTipo: string): string => {
   if (apiTipo === 'SOS' || apiTipo === 'Robo' || apiTipo === 'Acoso') return 'Emergencia';
@@ -52,22 +46,30 @@ export default function Historial() {
 
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const [searchQuery, setSearchQuery]           = useState("");
-  const [filteredAlerts, setFilteredAlerts]     = useState<Alerta[]>(mockAlerts);
+  const [filteredAlerts, setFilteredAlerts]     = useState<Alerta[]>([]);
   const [refreshing, setRefreshing]             = useState(false);
+  const [loading, setLoading]                   = useState(false);
+  const [error, setError]                       = useState<string | null>(null);
 
   const cargarAlertas = useCallback(async () => {
     if (!user?.id) {
-      setFilteredAlerts(mockAlerts);
+      setFilteredAlerts([]);
+      setError("No hay usuario autenticado");
       return;
     }
 
+    setLoading(true);
+    setError(null);
     try {
       const apiAlertas = await getAlertasByUsuario(user.id);
       const alertasTransformadas = apiAlertas.map(transformarAlerta);
       setFilteredAlerts(alertasTransformadas);
     } catch (error) {
       console.error("Error al cargar alertas:", error);
-      setFilteredAlerts(mockAlerts);
+      setError("Error al cargar alertas. Verifica tu conexión.");
+      setFilteredAlerts([]);
+    } finally {
+      setLoading(false);
     }
   }, [user?.id]);
 
@@ -289,9 +291,19 @@ export default function Historial() {
           />
         }
         ListEmptyComponent={
-          <View style={{ alignItems: "center", marginTop: 50 }}>
-            <Text style={styles.emptyText}>{t.historial.sin_alertas}</Text>
-          </View>
+          loading ? (
+            <View style={{ alignItems: "center", marginTop: 50 }}>
+              <Text style={styles.emptyText}>Cargando alertas...</Text>
+            </View>
+          ) : error ? (
+            <View style={{ alignItems: "center", marginTop: 50 }}>
+              <Text style={styles.emptyText}>{error}</Text>
+            </View>
+          ) : (
+            <View style={{ alignItems: "center", marginTop: 50 }}>
+              <Text style={styles.emptyText}>{t.historial.sin_alertas}</Text>
+            </View>
+          )
         }
       />
     </View>
