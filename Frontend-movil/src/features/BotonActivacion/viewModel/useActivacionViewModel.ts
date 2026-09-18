@@ -14,8 +14,9 @@ export function useActivacionViewModel() {
       const timer = setTimeout(() => setContador((c) => c - 1), 1000);
       return () => clearTimeout(timer);
     }
+    navigation.replace("AlertaActiva");
     return undefined;
-  }, [contador]);
+  }, [contador, navigation]);
 
   const cancelar = useCallback(() => {
     navigation.goBack();
