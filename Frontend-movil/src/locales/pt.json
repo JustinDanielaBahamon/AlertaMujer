@@ -146,7 +146,12 @@
     "nota_guardada": "Localização salva a partir do mapa",
     "precision_alta": "Alta (±5m)",
     "tu_ubicacion_marcador": "Sua localização",
-    "direccion_alerta_marcador": "Endereço do alerta"
+    "direccion_alerta_marcador": "Endereço do alerta",
+    "acciones_adicionales": "Ações adicionais",
+    "clasificar_zonas": "Classificar zonas",
+    "clasificar_zonas_desc": "Relate e classifique uma área de acordo com seu nível de segurança",
+    "ubicaciones_guardadas": "Locais salvos",
+    "ubicaciones_guardadas_desc": "Consulte e gerencie seus locais salvos"
   },
   "historial": {
     "titulo": "Histórico de Alertas",

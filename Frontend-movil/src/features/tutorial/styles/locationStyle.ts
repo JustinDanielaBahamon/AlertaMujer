@@ -1,209 +1,169 @@
 import { StyleSheet } from "react-native";
 
-// ─── Paleta del módulo Ubicación ──────────────────────────────────────────────
+// ─── Paleta del módulo Ubicación (alineada con el resto de la app) ───────────
 export const UBIC_COLORS = {
-  accent:      "#8309b3",   // verde esmeralda
-  accentLight: "#f2e4fc",
-  accentDark:  "#8c0491",
+  accent:      "#6A1B9A",
+  accentDark:  "#4A148C",
+  accentLight: "#F3EEFB",
+  screenBg:    "#EDE7F6",
+  border:      "#D6C7EF",
+  placeholder: "#A98FC7",
+  text:        "#2b1a3d",
+  textMuted:   "#8e7ba8",
+  badgeBg:     "#E4D4F5",
 
-  circle1: "#a939c0",
-  circle2: "#7c3fc2",
-  circle3: "#da0ff5",
-  circle4: "#7e34d3",
-
-  screenBg:     "#EDFAF4",
-  sectionLabel: "#740596",
-  sectionLine:  "#ac72f0",
-  divider:      "#D1FAE5",
-
-  pickerBg:     "#FFFFFF",
-  pickerBorder: "#c398ec",
-  pickerLabel:  "#a60fe2",
-
-  warningBg:    "#FEF3C7",
-  warningBorder:"#FCD34D",
-  warningText:  "#92400E",
-  warningIcon:  "#F59E0B",
+  warningBg:     "#FEF3C7",
+  warningBorder: "#FCD34D",
+  warningText:   "#92400E",
+  errorColor:    "#EF4444",
 };
 
 export const locationStyle = StyleSheet.create({
-  // ── Fondo ──────────────────────────────────────────────────────────────────
   screenBg: {
     flex: 1,
-    
+    backgroundColor: UBIC_COLORS.screenBg,
   },
 
-  // ── Círculos de fondo ──────────────────────────────────────────────────────
-  bgCircleBase: {
-    position: "absolute",
-  },
-  bgRingBase: {
-    position: "absolute",
-    borderWidth: 2,
-    backgroundColor: "transparent",
-  },
-
-  // ── Lottie ─────────────────────────────────────────────────────────────────
   lottieSection: {
     width: "100%",
-    height: 200,
+    height: 160,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: -6,
-    marginBottom: -16,
+    marginBottom: -8,
   },
   lottie: {
     width: "100%",
-    height: 200,
+    height: 160,
   },
 
-  // ── ScrollView ─────────────────────────────────────────────────────────────
   cardScroll: {
     flex: 1,
   },
   cardScrollContent: {
-    paddingBottom: 8,
+    paddingHorizontal: 16,
+    paddingBottom: 12,
   },
 
-  // ── Etiqueta de sección ────────────────────────────────────────────────────
-  sectionRow: {
-    flexDirection: "row",
+  // ── Encabezado del ícono circular ─────────────────────────────────────────
+  headerIconWrap: {
+    alignSelf: "center",
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: UBIC_COLORS.accentLight,
+    borderWidth: 2,
+    borderColor: UBIC_COLORS.border,
     alignItems: "center",
-    marginBottom: 12,
-    gap: 8,
-  },
-  sectionLabel: {
-    fontSize: 10,
-    fontWeight: "700",
-    color: UBIC_COLORS.sectionLabel,
-    letterSpacing: 1.4,
-  },
-  sectionLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: UBIC_COLORS.sectionLine,
+    justifyContent: "center",
+    marginBottom: 10,
   },
 
-  // ── Info card superior ─────────────────────────────────────────────────────
+  // ── Info card ──────────────────────────────────────────────────────────────
   infoCard: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 18,
-    padding: 13,
-    gap: 12,
-    marginBottom: 14,
+    borderRadius: 14,
+    padding: 12,
+    gap: 10,
+    marginBottom: 16,
     borderWidth: 1.5,
-    borderColor: UBIC_COLORS.pickerBorder,
-    backgroundColor: UBIC_COLORS.accentLight,
-    shadowColor: UBIC_COLORS.accent,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 2,
-    overflow: "hidden",
-  },
-  infoCardAccent: {
-    position: "absolute",
-    top: 0, left: 0, right: 0,
-    height: 3,
-    backgroundColor: UBIC_COLORS.accent,
-    borderTopLeftRadius: 18,
-    borderTopRightRadius: 18,
-  },
-  infoIconWrap: {
-    width: 46,
-    height: 46,
-    borderRadius: 15,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: UBIC_COLORS.accent + "25",
-    borderWidth: 1.5,
-    borderColor: UBIC_COLORS.accent + "40",
-    flexShrink: 0,
-  },
-  infoIcon: {
-    fontSize: 24,
-  },
-  infoTextContainer: {
-    flex: 1,
-  },
-  infoTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: UBIC_COLORS.accent,
-    marginBottom: 2,
+    borderColor: UBIC_COLORS.border,
+    backgroundColor: "#FFFFFF",
   },
   infoDesc: {
-    fontSize: 12,
-    color: "#7a808b",
-    lineHeight: 18,
+    flex: 1,
+    fontSize: 11.5,
+    color: UBIC_COLORS.textMuted,
+    lineHeight: 16,
   },
 
-  // ── Picker group ───────────────────────────────────────────────────────────
-  pickerGroup: {
-    marginBottom: 12,
-  },
-  pickerLabelRow: {
+  // ── Etiqueta de sección ("DEPARTAMENTO" / "MUNICIPIO") ─────────────────────
+  fieldLabelRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: 8,
     marginBottom: 6,
-    paddingHorizontal: 2,
   },
-  pickerLabelDot: {
+  fieldLabelDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
     backgroundColor: UBIC_COLORS.accent,
   },
-  pickerLabel: {
+  fieldLabel: {
     fontSize: 12,
-    fontWeight: "700",
-    color: UBIC_COLORS.pickerLabel,
+    fontWeight: "500",
+    color: UBIC_COLORS.accentDark,
     letterSpacing: 0.3,
   },
-  pickerWrap: {
-    borderRadius: 16,
+
+  // ── Departamento (fijo, no interactivo) ────────────────────────────────────
+  fixedField: {
+    backgroundColor: UBIC_COLORS.accentLight,
     borderWidth: 1.5,
-    borderColor: UBIC_COLORS.pickerBorder,
-    backgroundColor: UBIC_COLORS.pickerBg,
+    borderColor: UBIC_COLORS.border,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  fixedFieldValue: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: UBIC_COLORS.text,
+  },
+  fixedBadge: {
+    fontSize: 10,
+    fontWeight: "600",
+    color: UBIC_COLORS.accent,
+    backgroundColor: UBIC_COLORS.badgeBg,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
     overflow: "hidden",
-    shadowColor: UBIC_COLORS.accent,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
+  },
+
+  // ── Picker de municipio ─────────────────────────────────────────────────────
+  pickerWrap: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: UBIC_COLORS.accent,
+    overflow: "hidden",
+    marginBottom: 6,
   },
   pickerWrapError: {
-    borderColor: "#EF4444",
-    borderWidth: 2,
+    borderColor: UBIC_COLORS.errorColor,
   },
   picker: {
     height: 50,
     width: "100%",
+    color: UBIC_COLORS.text,
   },
 
-  // ── Error inline ───────────────────────────────────────────────────────────
   errorRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
-    marginTop: 5,
-    paddingHorizontal: 4,
+    marginBottom: 12,
+    paddingHorizontal: 2,
   },
   errorText: {
     fontSize: 11,
-    fontWeight: "600",
-    color: "#EF4444",
+    fontWeight: "500",
+    color: UBIC_COLORS.errorColor,
   },
 
-  // ── Toast / banner de validación ───────────────────────────────────────────
+  // ── Banner de validación ────────────────────────────────────────────────────
   validationBanner: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    borderRadius: 16,
-    padding: 13,
+    borderRadius: 14,
+    padding: 12,
     marginBottom: 14,
     borderWidth: 1.5,
     borderColor: UBIC_COLORS.warningBorder,
@@ -212,96 +172,73 @@ export const locationStyle = StyleSheet.create({
   validationBannerText: {
     flex: 1,
     fontSize: 12.5,
-    fontWeight: "600",
+    fontWeight: "500",
     color: UBIC_COLORS.warningText,
-    lineHeight: 18,
+    lineHeight: 17,
   },
 
-  // ── Divisor ────────────────────────────────────────────────────────────────
   divider: {
     height: 1,
-    backgroundColor: UBIC_COLORS.divider,
-    marginVertical: 14,
+    backgroundColor: UBIC_COLORS.border,
+    marginVertical: 16,
   },
 
-  // ── Selección actual (resumen visual) ─────────────────────────────────────
+  // ── Tarjeta de resumen ("TU SELECCIÓN") ─────────────────────────────────────
   seleccionCard: {
-    borderRadius: 18,
-    padding: 14,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: UBIC_COLORS.pickerBorder,
-    backgroundColor: UBIC_COLORS.accentLight,
-    gap: 8,
+    borderColor: UBIC_COLORS.border,
+    padding: 12,
+    gap: 10,
+    marginBottom: 18,
   },
   seleccionRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
   },
-  seleccionBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
-    backgroundColor: UBIC_COLORS.accent + "20",
-  },
-  seleccionBadgeText: {
-    fontSize: 10,
-    fontWeight: "700",
-    color: UBIC_COLORS.accent,
-    letterSpacing: 0.4,
+  seleccionRowDivider: {
+    height: 1,
+    backgroundColor: UBIC_COLORS.screenBg,
   },
   seleccionLabel: {
     fontSize: 12,
-    color: "#6B7280",
+    color: UBIC_COLORS.textMuted,
+    flex: 1,
   },
   seleccionValue: {
     fontSize: 13,
-    fontWeight: "700",
-    color: UBIC_COLORS.accentDark,
+    fontWeight: "500",
+    color: UBIC_COLORS.text,
   },
 
-  // ── Botón guardar ──────────────────────────────────────────────────────────
+  // ── Botón guardar ───────────────────────────────────────────────────────────
   btnGuardar: {
-    marginTop: 16,
-    borderRadius: 20,
-    paddingVertical: 15,
-    paddingHorizontal: 32,
+    flexDirection: "row",
+    gap: 8,
+    borderRadius: 14,
+    paddingVertical: 14,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: UBIC_COLORS.accent,
-    shadowColor: UBIC_COLORS.accentDark,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.30,
-    shadowRadius: 10,
-    elevation: 6,
-    flexDirection: "row",
-    gap: 8,
+    marginBottom: 12,
   },
   btnGuardarText: {
-    fontSize: 15,
-    fontWeight: "800",
+    fontSize: 14,
+    fontWeight: "500",
     color: "#FFFFFF",
-    letterSpacing: 0.3,
   },
 
-  // ── Badge inferior ─────────────────────────────────────────────────────────
+  // ── Insignia inferior ────────────────────────────────────────────────────────
   bottomBadge: {
     alignSelf: "center",
-    marginTop: 16,
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: UBIC_COLORS.accentLight,
-    paddingHorizontal: 20,
-    paddingVertical: 9,
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: UBIC_COLORS.pickerBorder,
   },
   bottomBadgeText: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: UBIC_COLORS.accent,
-    letterSpacing: 0.2,
+    fontSize: 11,
+    color: UBIC_COLORS.textMuted,
   },
 });

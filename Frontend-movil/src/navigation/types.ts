@@ -15,6 +15,7 @@ export type MainStackParamList = {
   Perfil: undefined;
 
   Activacion: undefined;
+  AlertaActiva: undefined;
 
   TutorialBienvenida: undefined;
   TutorialBoton: undefined;
@@ -39,25 +40,18 @@ export type MainStackParamList = {
   historialMapa: {
     ubicacion: {
       id: string;
-
+      nombre?: string; // Modificado a opcional
       latitude: number;
       longitude: number;
-
       direccion: string;
       barrio: string;
-
       municipio: string;
-
       ciudad: string;
       departamento: string;
       pais: string;
-
       fecha: string;
-
       estado: "Activo" | "Inactivo";
-
       precision: string;
-
       notas?: string;
     };
   };
@@ -66,9 +60,23 @@ export type MainStackParamList = {
     latitude: number;
     longitude: number;
   };
+
+  ClasificarZona:
+    | {
+        latitude?: number;
+        longitude?: number;
+        editarUbicacion?: {
+          id: string;
+          nombre: string;
+          notas?: string;
+          nivelRiesgo: "muy_segura" | "moderada" | "muy_insegura";
+          descripcion: string;
+        };
+      }
+    | undefined; // Permite ir a ClasificarZona sin pasar parámetros
+
+  UbicacionesGuardadas: undefined;
 };
 
 /** @deprecated */
-export type RootStackParamList =
-  AuthStackParamList &
-  MainStackParamList;
+export type RootStackParamList = AuthStackParamList & MainStackParamList;

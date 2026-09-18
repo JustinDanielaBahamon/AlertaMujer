@@ -146,7 +146,12 @@
     "nota_guardada": "Location saved from the map",
     "precision_alta": "High (±5m)",
     "tu_ubicacion_marcador": "Your location",
-    "direccion_alerta_marcador": "Alert address"
+    "direccion_alerta_marcador": "Alert address",
+    "acciones_adicionales": "Additional actions",
+    "clasificar_zonas": "Classify zones",
+    "clasificar_zonas_desc": "Report and classify an area according to its safety level",
+    "ubicaciones_guardadas": "Saved locations",
+    "ubicaciones_guardadas_desc": "View and manage your saved locations"
   },
   "historial": {
     "titulo": "Alert History",
@@ -519,7 +524,14 @@
     "precision": "Accuracy",
     "estado": "Status",
     "cerrar_mapa": "Close map",
-    "ubicacion_guardada_marcador": "Saved location"
+    "ubicacion_guardada_marcador": "Saved location",
+    "nombre_ubicacion": "Location name",
+    "nombre_placeholder": "Eg: Home, Work...",
+    "nombre_requerido": "Name is required",
+    "notas_label": "Additional notes",
+    "notas_ayuda": "Add important details about this location",
+    "notas_placeholder": "Eg: Near the park, main entrance...",
+    "max_caracteres": "You have reached the maximum character limit (200)"
   },
   "politicaPrivacidad": {
     "encabezado": "Privacy Policy",
@@ -571,6 +583,19 @@
     "item12_desc": "For questions or support, users can reach out through the official channels available within the app.",
     "volver": "Back"
   },
+  "alertaActiva": {
+  "titulo": "Active alert",
+  "subtitulo": "Your network was notified",
+  "tiempoRestante": "Time remaining",
+  "serviciosTitulo": "Emergency services active",
+  "serviciosDescripcion": "When you're safe, press \"I'm okay\" to notify them.",
+  "compartiendoUbicacion": "Sharing location",
+  "enTiempoReal": "Real time",
+  "vistas": "views",
+  "estoyBien": "I'm okay",
+  "estoyBienDescripcion": "Notify your network that you are safe",
+  "llamar911": "Call 911"
+},
   "indexDemo": {
     "mensaje": "Welcome (test screen)",
     "btn_demo": "Enter as demo (home)",
