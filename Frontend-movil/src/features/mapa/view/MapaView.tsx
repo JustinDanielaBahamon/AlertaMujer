@@ -305,13 +305,12 @@ export default function MapaView() {
       label: t.mapa.actualizar,
       accion: refrescarUbicacion,
     },
-    {
+      {
       icono: "navigation",
       label: t.mapa.navegar,
       accion: () => {
         if (location) {
-          const url = `https://www.google.com/maps/dir/?api=1&destination=${location.latitude},${location.longitude}`;
-          Linking.openURL(url);
+          setFullscreen(true);
         }
       },
     },
