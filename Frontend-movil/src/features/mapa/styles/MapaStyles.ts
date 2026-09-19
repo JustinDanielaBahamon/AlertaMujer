@@ -196,17 +196,13 @@ export const styles = StyleSheet.create({
     marginBottom: 10,
   },
   tituloHistorial: {
-    fontSize: 17,
+    fontSize: 19,
     fontWeight: "800",
     textAlign: "center",
     paddingTop : 15,
     paddingBottom : 15
   },
-  verTodo: {
-    fontSize: 13,
-    color: "#7B1DB2",
-    fontWeight: "600",
-  },
+  
   itemHistorial: {
     flexDirection: "row",
     alignItems: "center",
@@ -214,8 +210,8 @@ export const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginBottom: 10,
     borderRadius: 14,
-    padding: 14,
-    elevation: 2,
+    padding: 17,
+    elevation: 4,
     shadowColor: "#9e83cf",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -235,11 +231,11 @@ export const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   fechaItem: {
-    fontSize: 13,
+    fontSize: 14.7,
     fontWeight: "600",
   },
   coordItem: {
-    fontSize: 12,
+    fontSize: 12.3,
     marginTop: 2,
   },
   sinHistorial: {
@@ -247,7 +243,7 @@ export const styles = StyleSheet.create({
     marginTop: 20,
   },
   textoSinHistorial: {
-    fontSize: 14,
+    fontSize: 14
   },
 
   /* MODAL CERRAR */

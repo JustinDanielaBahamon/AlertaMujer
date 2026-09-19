@@ -164,8 +164,8 @@ export default function HistorialRecorridos() {
                 </Text>
               </View>
 
-              <Text style={[styles.addressText, { color: theme.text }]}>
-                {item.direccion}
+              <Text style={[styles.locationText, { color: "black" }]}>
+                {item.barrio}, {item.municipio}
               </Text>
 
               <View style={styles.locationRow}>
@@ -174,8 +174,8 @@ export default function HistorialRecorridos() {
                   size={14}
                   color={theme.contactSubtext}
                 />
-                <Text style={[styles.locationText, { color: theme.contactSubtext }]}>
-                  {item.barrio}, {item.municipio}
+                <Text style={[styles.addressText, { color: "black" }]}>
+                  {item.direccion}
                 </Text>
               </View>
             </View>
