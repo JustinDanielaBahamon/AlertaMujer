@@ -36,6 +36,8 @@ export default function MapaView() {
     formatearHora,
     reintentarPermisos,
     irAUbicacionesGuardadas,
+    irAZonasAuxiliares,
+    irAHistorialRecorridos,
   } = useMapaViewModel() as any;
 
   // ─── PANTALLA DE CARGA ────────────────────────────────────────────────────
@@ -217,6 +219,42 @@ export default function MapaView() {
             <Text style={[styles.fechaItem, { color: theme.text }]}>{t.mapa.ubicaciones_guardadas}</Text>
             <Text style={[styles.coordItem, { color: theme.contactSubtext }]}>
               {t.mapa.ubicaciones_guardadas_desc}
+            </Text>
+          </View>
+          <MaterialIcons name="chevron-right" size={20} color={theme.contactSubtext} />
+        </TouchableOpacity>
+
+        {/* ZONAS AUXILIARES */}
+        <TouchableOpacity
+          style={[styles.itemHistorial, { backgroundColor: theme.card }]}
+          onPress={irAZonasAuxiliares}
+          activeOpacity={0.85}
+        >
+          <View style={[styles.numeroBurbuja, { backgroundColor: "rgb(237, 231, 246)" }]}>
+            <MaterialIcons name="shield" size={18} color="#6A1B9A" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.fechaItem, { color: theme.text }]}>{t.mapa.zonas_auxiliares}</Text>
+            <Text style={[styles.coordItem, { color: theme.contactSubtext }]}>
+              {t.mapa.zonas_auxiliares_desc}
+            </Text>
+          </View>
+          <MaterialIcons name="chevron-right" size={20} color={theme.contactSubtext} />
+        </TouchableOpacity>
+
+        {/* HISTORIAL DE RECORRIDOS */}
+        <TouchableOpacity
+          style={[styles.itemHistorial, { backgroundColor: theme.card }]}
+          onPress={irAHistorialRecorridos}
+          activeOpacity={0.85}
+        >
+          <View style={[styles.numeroBurbuja, { backgroundColor: "rgb(237, 231, 246)" }]}>
+            <MaterialIcons name="history" size={18} color="#6A1B9A" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.fechaItem, { color: theme.text }]}>{t.mapa.historial_recorridos}</Text>
+            <Text style={[styles.coordItem, { color: theme.contactSubtext }]}>
+              {t.mapa.historial_recorridos_desc}
             </Text>
           </View>
           <MaterialIcons name="chevron-right" size={20} color={theme.contactSubtext} />
