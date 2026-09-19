@@ -239,7 +239,7 @@ export default function MapaView() {
               {t.mapa.zonas_auxiliares_desc}
             </Text>
           </View>
-          <MaterialIcons name="chevron-right" size={20} color={theme.contactSubtext} />
+          <MaterialIcons name="chevron-right" size={20} color={theme.contactSubtext}/>
         </TouchableOpacity>
 
         {/* HISTORIAL DE RECORRIDOS */}

@@ -5,13 +5,13 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingTop: 50,
+    paddingTop: 40,
     paddingBottom: 20,
-    paddingHorizontal: 20,
+    paddingHorizontal: 70,
   },
   backButton: {
     position: "absolute",
-    top: 50,
+    top: 70,
     left: 20,
     zIndex: 1,
   },

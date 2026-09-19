@@ -5,13 +5,13 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingTop: 50,
+    paddingTop: 40,
     paddingBottom: 20,
-    paddingHorizontal: 20,
+    paddingHorizontal: 58,
   },
   backButton: {
-    position: "absolute" as const,
-    top: 50,
+    position: "absolute",
+    top: 70,
     left: 20,
     zIndex: 1,
   },
@@ -28,123 +28,189 @@ export const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.9)",
     marginTop: 5,
   },
+
+  /* =========================
+     SECTION
+  ========================= */
+
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 21,
     fontWeight: "bold" as const,
-    marginHorizontal: 20,
-    marginBottom: 15,
-    marginTop: 20,
+    marginHorizontal: 25,
+    marginBottom: 16,
+    marginTop: 26,
   },
+
+  /* =========================
+     HISTORY CARD
+  ========================= */
+
   historyCard: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
-    padding: 16,
-    marginHorizontal: 20,
+    paddingVertical: 16,
+    paddingHorizontal: 15,
+    marginHorizontal: 18,
     marginBottom: 12,
-    borderRadius: 12,
+    borderRadius: 18,
+
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
   },
+
   historyIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "rgb(237, 231, 246)",
+    width: 52,
+    height: 52,
+    borderRadius: 17,
+    backgroundColor: "#F0E7FF",
     justifyContent: "center" as const,
     alignItems: "center" as const,
     marginRight: 14,
   },
+
   historyInfo: {
     flex: 1,
+    minWidth: 0,
   },
+
   dateRow: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
-    gap: 6,
-    marginBottom: 4,
+    gap: 5,
+    marginBottom: 6,
   },
+
   dateText: {
-    fontSize: 13,
+    fontSize: 12,
+    fontWeight: "500" as const,
   },
+
   timeText: {
-    fontSize: 13,
-  },
-  addressText: {
-    fontSize: 15,
+    fontSize: 12,
     fontWeight: "600" as const,
-    marginBottom: 4,
   },
+
+  addressText: {
+    fontSize: 13.5,
+    flexShrink: 1,
+  },
+
   locationRow: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
     gap: 4,
   },
+
   locationText: {
-    fontSize: 12,
+    fontSize: 16,
+    fontWeight: "700" as const,
+    marginBottom: 5,
+    
   },
+
+  /* =========================
+     MODAL
+  ========================= */
+
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center" as const,
-    alignItems: "center" as const,
-    padding: 20,
+    backgroundColor: "rgba(0,0,0,0.58)",
+    justifyContent: "flex-end",
   },
+
   modalContent: {
     width: "100%",
-    maxWidth: 400,
-    borderRadius: 20,
-    padding: 24,
+    maxHeight: "88%",
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 25,
   },
+
   modalHeader: {
     alignItems: "center" as const,
-    marginBottom: 20,
+    marginBottom: 18,
   },
+
   modalIcon: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: "rgb(237, 231, 246)",
+    width: 58,
+    height: 58,
+    borderRadius: 18,
+    backgroundColor: "#F0E7FF",
     justifyContent: "center" as const,
     alignItems: "center" as const,
-    marginBottom: 12,
+    marginBottom: 10,
   },
+
   modalTitle: {
-    fontSize: 20,
+    fontSize: 21,
     fontWeight: "bold" as const,
     textAlign: "center" as const,
   },
+
   modalBody: {
-    marginBottom: 20,
+    marginBottom: 16,
   },
+
+  /* =========================
+     INFORMATION ROWS
+  ========================= */
+
   infoRow: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
-    paddingVertical: 10,
+    minHeight: 52,
+    paddingVertical: 9,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(0,0,0,0.05)",
+    borderBottomColor: "rgba(128,128,128,0.12)",
   },
+
   infoLabel: {
     flex: 1,
-    fontSize: 14,
-    marginLeft: 12,
+    fontSize: 13,
+    marginLeft: 11,
   },
+
   infoValue: {
-    fontSize: 14,
+    maxWidth: "52%",
+    fontSize: 13,
     fontWeight: "600" as const,
+    textAlign: "right" as const,
   },
+
+  /* =========================
+     MAP
+  ========================= */
+
   mapPreview: {
-    height: 150,
-    borderRadius: 12,
+    height: 170,
+    borderRadius: 18,
     overflow: "hidden" as const,
-    marginBottom: 20,
+    marginBottom: 18,
   },
+
   map: {
     flex: 1,
   },
+
+  /* =========================
+     BUTTON
+  ========================= */
+
   modalCloseButton: {
     backgroundColor: "#7B1DB2",
-    paddingVertical: 14,
-    borderRadius: 12,
+    minHeight: 54,
+    borderRadius: 16,
     alignItems: "center" as const,
+    justifyContent: "center" as const,
   },
+
   modalCloseText: {
     color: "#fff",
     fontWeight: "bold" as const,
