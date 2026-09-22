@@ -314,6 +314,14 @@ export const useMapaViewModel = () => {
     navigation.navigate("UbicacionesGuardadas");
   };
 
+  const irAZonasAuxiliares = () => {
+    navigation.navigate("ZonasAuxiliares");
+  };
+
+  const irAHistorialRecorridos = () => {
+    navigation.navigate("HistorialRecorridos");
+  };
+
   // ─── PROCESAMIENTO FINAL Y RETORNO ────────────────────────────────────────
   const rawCoordenada = destinoAlerta?.coordenada ?? location;
   const coordenadaCentro: Coordenada = rawCoordenada ?? {
@@ -345,7 +353,9 @@ export const useMapaViewModel = () => {
     reintentarPermisos: () => setIntentosPermiso((prev) => prev + 1),
     irAClasificarZona,
     irAUbicacionesGuardadas,
-    irClasificarZona
+    irClasificarZona,
+    irAZonasAuxiliares,
+    irAHistorialRecorridos
 
   };
 };

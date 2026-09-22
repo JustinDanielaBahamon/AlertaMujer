@@ -76,6 +76,10 @@ export type MainStackParamList = {
     | undefined; // Permite ir a ClasificarZona sin pasar parámetros
 
   UbicacionesGuardadas: undefined;
+
+  ZonasAuxiliares: undefined;
+
+  HistorialRecorridos: undefined;
 };
 
 /** @deprecated */

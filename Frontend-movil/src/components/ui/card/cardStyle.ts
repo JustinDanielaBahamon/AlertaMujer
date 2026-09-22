@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { COLORS } from "../../../../features/tutorial/universalStyle";
+import { COLORS } from "../../../features/tutorial/styles/universalStyle";
 
 export const styles = StyleSheet.create({
   // Solo para texto dentro del contenido de la card
