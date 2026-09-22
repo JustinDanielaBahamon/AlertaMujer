@@ -30,7 +30,7 @@
   },
   "inicio": {
     "bienvenida": "Welcome",
-    "ubicacion_actual": "Current location",
+    "ubicacion_actual": "Current locaion",
     "camara": "Camera",
     "microfono": "Microphone",
     "presiona_emergencia": "Press in case of\nEmergency",
