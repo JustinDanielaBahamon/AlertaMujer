@@ -1,4 +1,5 @@
 import { MaterialIcons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import {
@@ -16,6 +17,8 @@ import { styles } from "../styles/MapaStyles";
 import { useMapaViewModel } from "../viewModel/useMapaViewModel";
 
 export default function MapaView() {
+  const navigation = useNavigation<any>();
+
   const {
     theme,
     t,
@@ -27,13 +30,15 @@ export default function MapaView() {
     destinoAlerta,
     coordenadaCentro,
     closeOpacity,
-    ultimaActualizacion,
-    acciones,
+    抓actualizacion: ultimaActualizacion, // O 'ultimaActualizacion' según tu ViewModel
+    acciones: accionesViewModel,
     handleMapPress,
     formatearHora,
     reintentarPermisos,
     irAUbicacionesGuardadas,
-  } = useMapaViewModel();
+    irAZonasAuxiliares,
+    irAHistorialRecorridos,
+  } = useMapaViewModel() as any;
 
   // ─── PANTALLA DE CARGA ────────────────────────────────────────────────────
   if (!location) {
@@ -50,13 +55,51 @@ export default function MapaView() {
     );
   }
 
-  // ─── COMPONENTE MAPA ──────────────────────────────────────────────────────
+  // ─── COORDENADA CENTRO Y ACCIONES LOCALES ─────────────────────────────────
+  const centroCalculado = coordenadaCentro ?? destinoAlerta?.coordenada ?? location;
+
+  const acciones = [
+    {
+      icono: "share",
+      label: t.mapa.compartir,
+      accion: () => {
+        console.log("Compartir ubicación");
+      },
+    },
+    {
+      icono: "refresh",
+      label: t.mapa.actualizar,
+      accion: reintentarPermisos, // Usamos la función disponible en el ViewModel
+    },
+    {
+      icono: "navigation",
+      label: t.mapa.navegar,
+      accion: () => {
+        if (location) {
+          setFullscreen(true);
+        }
+      },
+    },
+    {
+      icono: "bookmark",
+      label: t.mapa.guardar,
+      accion: () => {
+        if (!location) return;
+        navigation.navigate("guardarUbi", {
+          latitude: location.latitude,
+          longitude: location.longitude,
+        });
+      },
+    },
+  ] as const;
+
+  // ─── COMPONENTE DEL MAPA ──────────────────────────────────────────────────
   const mapComponent = (
     <MapView
       style={styles.map}
       initialRegion={{
-        latitude: coordenadaCentro.latitude,
-        longitude: coordenadaCentro.longitude,
+        latitude: centroCalculado.latitude,
+        longitude: centroCalculado.longitude,
         latitudeDelta: 0.01,
         longitudeDelta: 0.01,
       }}
@@ -77,7 +120,7 @@ export default function MapaView() {
         />
       )}
 
-      {historial.map((pos, index) => (
+      {historial?.map((pos: any, index: number) => (
         <Marker key={index} coordinate={pos} title={`${t.mapa.historial} ${index + 1}`} pinColor="#7B1DB2" />
       ))}
     </MapView>
@@ -163,8 +206,6 @@ export default function MapaView() {
           {t.mapa.acciones_adicionales}
         </Text>
 
-    
-
         {/* UBICACIONES GUARDADAS */}
         <TouchableOpacity
           style={[styles.itemHistorial, { backgroundColor: theme.card }]}
@@ -183,6 +224,41 @@ export default function MapaView() {
           <MaterialIcons name="chevron-right" size={20} color={theme.contactSubtext} />
         </TouchableOpacity>
 
+        {/* ZONAS AUXILIARES */}
+        <TouchableOpacity
+          style={[styles.itemHistorial, { backgroundColor: theme.card }]}
+          onPress={irAZonasAuxiliares}
+          activeOpacity={0.85}
+        >
+          <View style={[styles.numeroBurbuja, { backgroundColor: "rgb(237, 231, 246)" }]}>
+            <MaterialIcons name="shield" size={18} color="#6A1B9A" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.fechaItem, { color: theme.text }]}>{t.mapa.zonas_auxiliares}</Text>
+            <Text style={[styles.coordItem, { color: theme.contactSubtext }]}>
+              {t.mapa.zonas_auxiliares_desc}
+            </Text>
+          </View>
+          <MaterialIcons name="chevron-right" size={20} color={theme.contactSubtext}/>
+        </TouchableOpacity>
+
+        {/* HISTORIAL DE RECORRIDOS */}
+        <TouchableOpacity
+          style={[styles.itemHistorial, { backgroundColor: theme.card }]}
+          onPress={irAHistorialRecorridos}
+          activeOpacity={0.85}
+        >
+          <View style={[styles.numeroBurbuja, { backgroundColor: "rgb(237, 231, 246)" }]}>
+            <MaterialIcons name="history" size={18} color="#6A1B9A" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.fechaItem, { color: theme.text }]}>{t.mapa.historial_recorridos}</Text>
+            <Text style={[styles.coordItem, { color: theme.contactSubtext }]}>
+              {t.mapa.historial_recorridos_desc}
+            </Text>
+          </View>
+          <MaterialIcons name="chevron-right" size={20} color={theme.contactSubtext} />
+        </TouchableOpacity>
       </ScrollView>
 
       {/* MODAL PANTALLA COMPLETA */}

@@ -8,6 +8,8 @@ import DetalleAlertaScreen from "../features/historial/view/detallesAlerta"; // 
 import HistorialMapa from "../features/historial/view/historial";
 import ClasificarZonaScreen from "../features/mapa/view/classifyZoneView"; // Ajusta la ruta a tu archivo real// Ajusta la ruta a tu archivo real
 import UbicacionesGuardadasScreen from "../features/mapa/view/UbicacionesGuardadas";
+import ZonasAuxiliaresScreen from "../features/mapa/view/ZonasAuxiliares";
+import HistorialRecorridosScreen from "../features/mapa/view/HistorialRecorridos";
 import PerfilScreen from "../features/perfil/view/perfilScreen";
 import MetodosActivacionScreen from "../features/settings/view/metodosActivacionScreen";
 import BienvenidaTutorialScreen from "../screens/tutorial/bienvenida";
@@ -55,6 +57,8 @@ export default function MainNavigator({ initialRouteName }: Props) {
       <Stack.Screen name="MetodosActivacion" component={MetodosActivacionScreen} />
       <Stack.Screen name="ClasificarZona" component={ClasificarZonaScreen} />
       <Stack.Screen name="UbicacionesGuardadas" component={UbicacionesGuardadasScreen} />
+      <Stack.Screen name="ZonasAuxiliares" component={ZonasAuxiliaresScreen} />
+      <Stack.Screen name="HistorialRecorridos" component={HistorialRecorridosScreen} />
     </Stack.Navigator>
   );
 }
