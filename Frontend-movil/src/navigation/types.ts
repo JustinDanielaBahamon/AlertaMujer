@@ -80,6 +80,8 @@ export type MainStackParamList = {
   ZonasAuxiliares: undefined;
 
   HistorialRecorridos: undefined;
+
+  GuardarRecorrido: undefined;
 };
 
 /** @deprecated */
