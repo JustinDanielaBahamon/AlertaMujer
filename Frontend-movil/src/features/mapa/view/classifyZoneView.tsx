@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import * as Location from "expo-location";
+import { LinearGradient } from "expo-linear-gradient"; // <-- NUEVA IMPORTACIÓN
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -283,48 +284,28 @@ export default function ClasificarZonaView() {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        {/* HEADER */}
-        <View style={styles.header}>
+        {/* ================= HEADER ACTUALIZADO ================= */}
+        <LinearGradient
+          colors={[theme.headercolor1, theme.headercolor2]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.header}
+        >
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => navigation.goBack()}
           >
-            <MaterialIcons
-              name="arrow-back"
-              size={22}
-              color={theme.text}
-            />
+            <MaterialIcons name="arrow-back" size={26} color="#fff" />
           </TouchableOpacity>
 
-          <View style={styles.headerTitleContainer}>
-            <Text
-              style={[
-                styles.headerTitle,
-                { color: theme.text },
-              ]}
-            >
-              Clasificar zona
+          <View style={styles.headerContent}>
+            <Text style={styles.headerTitle}>Clasificar zona</Text>
+            <Text style={styles.headerSubtitle}>
+              Ayuda a otras mujeres reportando la seguridad
             </Text>
           </View>
-
-          <View style={styles.securityHeaderIcon}>
-            <MaterialIcons
-              name="security"
-              size={22}
-              color="#7B1DB2"
-            />
-          </View>
-        </View>
-
-        {/* DESCRIPCIÓN */}
-        <Text
-          style={[
-            styles.description,
-            { color: theme.contactSubtext },
-          ]}
-        >
-          Ayuda a otras mujeres reportando el nivel de seguridad de esta zona.
-        </Text>
+        </LinearGradient>
+        {/* ======================================================= */}
 
         {/* UBICACIÓN EN EL MAPA */}
         <Text
