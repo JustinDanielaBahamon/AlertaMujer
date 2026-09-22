@@ -99,6 +99,88 @@ export const styles = StyleSheet.create({
     borderColor:'white',
     borderWidth:3
   },
+
+  /* SWITCH DE RECORRIDOS */
+  switchRecorridosContainer: {
+    flexDirection: "row" as const,
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginHorizontal: 16,
+    marginTop: 12,
+    padding: 16,
+    borderRadius: 16,
+    elevation: 2,
+    shadowColor: "#9e83cf",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+
+  switchRecorridosInfo: {
+    flexDirection: "row" as const,
+    alignItems: "center",
+    gap: 12,
+    flex: 1,
+  },
+
+  switchRecorridosText: {
+    flex: 1,
+  },
+
+  switchRecorridosTitle: {
+    fontSize: 15,
+    fontWeight: "600",
+  },
+
+  switchRecorridosSubtitle: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+
+  /* CALLOUTS DE MARCADORES */
+  calloutContainer: {
+    backgroundColor: "white",
+    padding: 8,
+    borderRadius: 8,
+    minWidth: 120,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+
+  calloutTitle: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 2,
+  },
+
+  calloutSubtitle: {
+    fontSize: 10,
+    color: "#666",
+  },
+
+  /* ETIQUETAS DE RUTA */
+  routeLabelContainer: {
+    backgroundColor: "rgba(123, 27, 178, 0.9)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+
+  routeLabelText: {
+    color: "white",
+    fontSize: 10,
+    fontWeight: "600",
+    textAlign: "center" as const,
+  },
   map: {
     flex: 1,
   },

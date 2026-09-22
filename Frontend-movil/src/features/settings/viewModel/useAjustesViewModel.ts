@@ -17,6 +17,10 @@ export const useAjustesViewModel = () => {
   // Controla si el modal de seleccion de idioma esta visible
   const [modalIdiomaVisible, setModalIdiomaVisible] = useState(false);
 
+  // Opciones de recorridos
+  const [guardarRecorridos, setGuardarRecorridos] = useState(true);
+  const [mostrarRecorridos, setMostrarRecorridos] = useState(true);
+
   const abrirModalIdioma = () => setModalIdiomaVisible(true);
   const cerrarModalIdioma = () => setModalIdiomaVisible(false);
 
@@ -48,5 +52,9 @@ export const useAjustesViewModel = () => {
     seleccionarIdioma,
     obtenerTextoIdioma,
     obtenerIconoTema,
+    guardarRecorridos,
+    setGuardarRecorridos,
+    mostrarRecorridos,
+    setMostrarRecorridos,
   };
 };
