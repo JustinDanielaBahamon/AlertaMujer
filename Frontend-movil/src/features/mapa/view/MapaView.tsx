@@ -1,23 +1,30 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
-import React from "react";
+import React, { useState } from "react";
 import {
   Animated,
   Image,
   Modal,
   ScrollView,
+  Switch,
   Text,
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker, Polyline } from "react-native-maps";
 import { styles } from "../styles/MapaStyles";
 import { useMapaViewModel } from "../viewModel/useMapaViewModel";
+import { useAjustesViewModel } from "../../settings/viewModel/useAjustesViewModel";
+import { useRecorridos } from "../../../contexts/RecorridosContext";
 
 export default function MapaView() {
   const navigation = useNavigation<any>();
+  const { mostrarRecorridos } = useAjustesViewModel();
+  const { recorridos } = useRecorridos();
+  const [mostrarRecorridosEnMapa, setMostrarRecorridosEnMapa] = useState(true); // Activado por defecto
+  const [soloImportantes, setSoloImportantes] = useState(false); // Mostrar todos por defecto
 
   const {
     theme,
@@ -30,15 +37,20 @@ export default function MapaView() {
     destinoAlerta,
     coordenadaCentro,
     closeOpacity,
-    抓actualizacion: ultimaActualizacion, // O 'ultimaActualizacion' según tu ViewModel
+    ultimaActualizacion,
     acciones: accionesViewModel,
     handleMapPress,
     formatearHora,
+    refrescarUbicacion,
     reintentarPermisos,
     irAUbicacionesGuardadas,
     irAZonasAuxiliares,
     irAHistorialRecorridos,
   } = useMapaViewModel() as any;
+
+  const irAGuardarRecorrido = () => {
+    navigation.navigate("GuardarRecorrido");
+  };
 
   // ─── PANTALLA DE CARGA ────────────────────────────────────────────────────
   if (!location) {
@@ -58,6 +70,29 @@ export default function MapaView() {
   // ─── COORDENADA CENTRO Y ACCIONES LOCALES ─────────────────────────────────
   const centroCalculado = coordenadaCentro ?? destinoAlerta?.coordenada ?? location;
 
+  // ─── DATOS DE RECORRIDOS SIMULADOS PARA EL MAPA PRINCIPAL ─────────────────
+  const recorridosSimulados = [
+    {
+      id: "1",
+      puntos: [
+        { latitude: 2.9271, longitude: -75.2874 },
+        { latitude: 2.9285, longitude: -75.2859 },
+        { latitude: 2.9302, longitude: -75.2841 },
+        { latitude: 2.9320, longitude: -75.2825 },
+        { latitude: 2.9335, longitude: -75.2808 },
+      ],
+    },
+    {
+      id: "2",
+      puntos: [
+        { latitude: 2.9200, longitude: -75.2900 },
+        { latitude: 2.9215, longitude: -75.2883 },
+        { latitude: 2.9230, longitude: -75.2866 },
+        { latitude: 2.9245, longitude: -75.2849 },
+      ],
+    },
+  ];
+
   const acciones = [
     {
       icono: "share",
@@ -69,7 +104,7 @@ export default function MapaView() {
     {
       icono: "refresh",
       label: t.mapa.actualizar,
-      accion: reintentarPermisos, // Usamos la función disponible en el ViewModel
+      accion: refrescarUbicacion,
     },
     {
       icono: "navigation",
@@ -85,7 +120,7 @@ export default function MapaView() {
       label: t.mapa.guardar,
       accion: () => {
         if (!location) return;
-        navigation.navigate("guardarUbi", {
+        navigation.navigate("ClasificarZona", {
           latitude: location.latitude,
           longitude: location.longitude,
         });
@@ -123,6 +158,53 @@ export default function MapaView() {
       {historial?.map((pos: any, index: number) => (
         <Marker key={index} coordinate={pos} title={`${t.mapa.historial} ${index + 1}`} pinColor="#7B1DB2" />
       ))}
+
+      {/* Polylines de recorridos guardados cuando están activados */}
+      {mostrarRecorridosEnMapa && recorridos.length > 0 && (
+        recorridos
+          .filter((recorrido: any) => !soloImportantes || recorrido.importante)
+          .map((recorrido: any) => (
+            <React.Fragment key={recorrido.id}>
+              <Polyline
+                coordinates={recorrido.puntos.map((punto: any) => ({
+                  latitude: punto.latitude,
+                  longitude: punto.longitude,
+                }))}
+                strokeWidth={2}
+                strokeColor="#7B1DB2"
+                lineCap="round"
+                lineJoin="round"
+              />
+              
+              {/* Texto del nombre del recorrido en el punto medio */}
+              <Marker
+                coordinate={recorrido.puntos[Math.floor(recorrido.puntos.length / 2)]}
+                title={recorrido.nombrePersonalizado || `${recorrido.barrioInicio} → ${recorrido.barrioFin}`}
+                description="Recorrido guardado"
+              >
+                <View style={styles.routeLabelContainer}>
+                  <Text style={styles.routeLabelText}>
+                    {recorrido.nombrePersonalizado || `${recorrido.barrioInicio} → ${recorrido.barrioFin}`}
+                  </Text>
+                </View>
+              </Marker>
+              
+              {/* Marcador de inicio pequeño */}
+              <Marker
+                coordinate={recorrido.puntos[0]}
+                pinColor="#4CAF50"
+                title="Inicio"
+              />
+              
+              {/* Marcador de fin pequeño */}
+              <Marker
+                coordinate={recorrido.puntos[recorrido.puntos.length - 1]}
+                pinColor="#F44336"
+                title="Fin"
+              />
+            </React.Fragment>
+          ))
+      )}
     </MapView>
   );
 
@@ -163,6 +245,53 @@ export default function MapaView() {
 
         {/* MAPA */}
         <View style={styles.contenedorMapa}>{mapComponent}</View>
+
+        {/* SWITCH DE RECORRIDOS */}
+        <View style={[styles.switchRecorridosContainer, { backgroundColor: theme.card }]}>
+          <View style={styles.switchRecorridosInfo}>
+            <MaterialIcons name="route" size={20} color="#7B1DB2" />
+            <View style={styles.switchRecorridosText}>
+              <Text style={[styles.switchRecorridosTitle, { color: theme.text }]}>
+                Mostrar recorridos
+              </Text>
+              <Text style={[styles.switchRecorridosSubtitle, { color: theme.contactSubtext }]}>
+                {recorridos.length} recorridos guardados
+              </Text>
+            </View>
+          </View>
+          <Switch
+            value={mostrarRecorridosEnMapa}
+            onValueChange={(value) => {
+              setMostrarRecorridosEnMapa(value);
+              console.log('Switch cambiado:', value);
+            }}
+            trackColor={{ false: '#ccc', true: theme.tabActiveColor }}
+            thumbColor="#fff"
+          />
+        </View>
+
+        {/* SWITCH DE SOLO IMPORTANTES */}
+        {mostrarRecorridosEnMapa && (
+          <View style={[styles.switchRecorridosContainer, { backgroundColor: theme.card }]}>
+            <View style={styles.switchRecorridosInfo}>
+              <MaterialIcons name="star" size={20} color="#FFD700" />
+              <View style={styles.switchRecorridosText}>
+                <Text style={[styles.switchRecorridosTitle, { color: theme.text }]}>
+                  Solo importantes
+                </Text>
+                <Text style={[styles.switchRecorridosSubtitle, { color: theme.contactSubtext }]}>
+                  {recorridos.filter((r: any) => r.importante).length} importantes
+                </Text>
+              </View>
+            </View>
+            <Switch
+              value={soloImportantes}
+              onValueChange={setSoloImportantes}
+              trackColor={{ false: '#ccc', true: theme.tabActiveColor }}
+              thumbColor="#fff"
+            />
+          </View>
+        )}
 
         {/* BOTONES DE ACCIÓN */}
         <View style={styles.filaBotones}>
@@ -255,6 +384,24 @@ export default function MapaView() {
             <Text style={[styles.fechaItem, { color: theme.text }]}>{t.mapa.historial_recorridos}</Text>
             <Text style={[styles.coordItem, { color: theme.contactSubtext }]}>
               {t.mapa.historial_recorridos_desc}
+            </Text>
+          </View>
+          <MaterialIcons name="chevron-right" size={20} color={theme.contactSubtext} />
+        </TouchableOpacity>
+
+        {/* GUARDAR RECORRIDO */}
+        <TouchableOpacity
+          style={[styles.itemHistorial, { backgroundColor: theme.card }]}
+          onPress={irAGuardarRecorrido}
+          activeOpacity={0.85}
+        >
+          <View style={[styles.numeroBurbuja, { backgroundColor: "rgb(237, 231, 246)" }]}>
+            <MaterialIcons name="add-location-alt" size={18} color="#6A1B9A" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.fechaItem, { color: theme.text }]}>Guardar Recorrido</Text>
+            <Text style={[styles.coordItem, { color: theme.contactSubtext }]}>
+              Crea rutas de punto A a punto B
             </Text>
           </View>
           <MaterialIcons name="chevron-right" size={20} color={theme.contactSubtext} />

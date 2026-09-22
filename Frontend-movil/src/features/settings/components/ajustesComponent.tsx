@@ -18,6 +18,10 @@ export default function AjustesComponent({ navigation }: any) {
     seleccionarIdioma,
     obtenerTextoIdioma,
     obtenerIconoTema,
+    guardarRecorridos,
+    setGuardarRecorridos,
+    mostrarRecorridos,
+    setMostrarRecorridos,
   } = useAjustesViewModel();
 
   const { t } = useLocale();
@@ -109,6 +113,57 @@ export default function AjustesComponent({ navigation }: any) {
           <Ionicons name="chevron-forward" size={15} color={theme.tabActiveColor} />
         </View>
       </TouchableOpacity>
+
+      {/* opciones de recorridos */}
+      <View style={styles.item}>
+        <Text style={[styles.tituloSeccion, { color: theme.text }]}>
+          Recorridos
+        </Text>
+      </View>
+
+      {/* guardar recorridos */}
+      <View style={styles.item}>
+        <View style={styles.filaSwitch}>
+          <Ionicons
+            name="save-outline"
+            size={18}
+            color={theme.text}
+            style={{ marginRight: 8 }}
+          />
+          <Text style={[styles.textoSwitch, { color: theme.text }]}>
+            Guardar recorridos
+          </Text>
+          <Switch
+            value={guardarRecorridos}
+            onValueChange={setGuardarRecorridos}
+            trackColor={{ false: '#ccc', true: theme.tabActiveColor }}
+            thumbColor="#fff"
+            style={{ marginLeft: 'auto' }}
+          />
+        </View>
+      </View>
+
+      {/* mostrar recorridos */}
+      <View style={styles.item}>
+        <View style={styles.filaSwitch}>
+          <Ionicons
+            name="map-outline"
+            size={18}
+            color={theme.text}
+            style={{ marginRight: 8 }}
+          />
+          <Text style={[styles.textoSwitch, { color: theme.text }]}>
+            Mostrar recorridos en mapa
+          </Text>
+          <Switch
+            value={mostrarRecorridos}
+            onValueChange={setMostrarRecorridos}
+            trackColor={{ false: '#ccc', true: theme.tabActiveColor }}
+            thumbColor="#fff"
+            style={{ marginLeft: 'auto' }}
+          />
+        </View>
+      </View>
 
       {/* tutoriales */}
       <TouchableOpacity
