@@ -10,6 +10,7 @@ import ClasificarZonaScreen from "../features/mapa/view/classifyZoneView"; // Aj
 import UbicacionesGuardadasScreen from "../features/mapa/view/UbicacionesGuardadas";
 import ZonasAuxiliaresScreen from "../features/mapa/view/ZonasAuxiliares";
 import HistorialRecorridosScreen from "../features/mapa/view/HistorialRecorridos";
+import GuardarRecorridoScreen from "../features/mapa/view/GuardarRecorrido";
 import PerfilScreen from "../features/perfil/view/perfilScreen";
 import MetodosActivacionScreen from "../features/settings/view/metodosActivacionScreen";
 import BienvenidaTutorialScreen from "../screens/tutorial/bienvenida";
@@ -59,6 +60,7 @@ export default function MainNavigator({ initialRouteName }: Props) {
       <Stack.Screen name="UbicacionesGuardadas" component={UbicacionesGuardadasScreen} />
       <Stack.Screen name="ZonasAuxiliares" component={ZonasAuxiliaresScreen} />
       <Stack.Screen name="HistorialRecorridos" component={HistorialRecorridosScreen} />
+      <Stack.Screen name="GuardarRecorrido" component={GuardarRecorridoScreen} />
     </Stack.Navigator>
   );
 }
