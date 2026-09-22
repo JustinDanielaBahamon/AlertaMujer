@@ -229,11 +229,9 @@ export default function MapaView() {
               <Text style={styles.SubtituloHeader}>{t.mapa.subtitulo}</Text>
               <View style={styles.filaUbicacion}>
                 <MaterialIcons name="place" size={14} color="rgba(255,255,255,0.9)" />
-                <Text style={styles.subtituloHeader}>
-                  {location
-                    ? `${location.latitude.toFixed(3)}, ${location.longitude.toFixed(3)}`
-                    : t.mapa.obteniendo}
-                </Text>
+                {location
+                  ? `${location.latitude.toFixed(3)}, ${location.longitude.toFixed(3)}`
+                  : t.mapa.obteniendo}
               </View>
             </View>
             <Image
@@ -371,6 +369,24 @@ export default function MapaView() {
           <MaterialIcons name="chevron-right" size={20} color={theme.contactSubtext}/>
         </TouchableOpacity>
 
+           {/* GUARDAR RECORRIDO */}
+        <TouchableOpacity
+          style={[styles.itemHistorial, { backgroundColor: theme.card }]}
+          onPress={irAGuardarRecorrido}
+          activeOpacity={0.85}
+        >
+          <View style={[styles.numeroBurbuja, { backgroundColor: "rgb(237, 231, 246)" }]}>
+            <MaterialIcons name="add-location-alt" size={18} color="#6A1B9A" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.fechaItem, { color: theme.text }]}>Guardar Recorrido</Text>
+            <Text style={[styles.coordItem, { color: theme.contactSubtext }]}>
+              Crea rutas de punto A a punto B
+            </Text>
+          </View>
+          <MaterialIcons name="chevron-right" size={20} color={theme.contactSubtext} />
+        </TouchableOpacity>
+
         {/* HISTORIAL DE RECORRIDOS */}
         <TouchableOpacity
           style={[styles.itemHistorial, { backgroundColor: theme.card }]}
@@ -389,23 +405,7 @@ export default function MapaView() {
           <MaterialIcons name="chevron-right" size={20} color={theme.contactSubtext} />
         </TouchableOpacity>
 
-        {/* GUARDAR RECORRIDO */}
-        <TouchableOpacity
-          style={[styles.itemHistorial, { backgroundColor: theme.card }]}
-          onPress={irAGuardarRecorrido}
-          activeOpacity={0.85}
-        >
-          <View style={[styles.numeroBurbuja, { backgroundColor: "rgb(237, 231, 246)" }]}>
-            <MaterialIcons name="add-location-alt" size={18} color="#6A1B9A" />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.fechaItem, { color: theme.text }]}>Guardar Recorrido</Text>
-            <Text style={[styles.coordItem, { color: theme.contactSubtext }]}>
-              Crea rutas de punto A a punto B
-            </Text>
-          </View>
-          <MaterialIcons name="chevron-right" size={20} color={theme.contactSubtext} />
-        </TouchableOpacity>
+       
       </ScrollView>
 
       {/* MODAL PANTALLA COMPLETA */}
