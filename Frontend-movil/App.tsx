@@ -4,6 +4,7 @@ import { AuthProvider } from "./src/contexts/AuthContext";
 import { ThemeProvider } from "./src/contexts/ThemeContext";
 import { LocaleProvider } from "./src/contexts/LocaleContext";
 import { ContactosProvider } from "./src/contexts/ContactosContext";
+import { RecorridosProvider } from "./src/contexts/RecorridosContext";
 
 export default function App() {
   return (
@@ -11,7 +12,9 @@ export default function App() {
       <LocaleProvider>
         <AuthProvider>
           <ContactosProvider>
-            <AppNavigator />
+            <RecorridosProvider>
+              <AppNavigator />
+            </RecorridosProvider>
           </ContactosProvider>
         </AuthProvider>
       </LocaleProvider>

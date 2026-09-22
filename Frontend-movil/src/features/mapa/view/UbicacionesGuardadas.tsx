@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Alert,
   ScrollView,
@@ -11,6 +11,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { LinearGradient } from "expo-linear-gradient";
 
 import { useTheme } from "../../../contexts/ThemeContext";
 import { useLocale } from "../../../contexts/LocaleContext";
@@ -44,12 +45,10 @@ export default function UbicacionesGuardadas() {
   const navigation = useNavigation<NavigationProp>();
   const styles = createStyles(theme);
 
-  // Estado para las ubicaciones guardadas
   const [ubicaciones, setUbicaciones] = useState<UbicacionGuardada[]>([]);
   const [filtroRiesgo, setFiltroRiesgo] = useState<string | null>(null);
   const [busqueda, setBusqueda] = useState("");
 
-  // Cargar ubicaciones cuando la pantalla gana foco
   useFocusEffect(
     React.useCallback(() => {
       cargarUbicaciones();
@@ -110,7 +109,6 @@ export default function UbicacionesGuardadas() {
   };
 
   const handleCardPress = (ubicacion: UbicacionGuardada) => {
-    // Navegar a la pantalla de edición con los datos de la ubicación
     navigation.navigate("ClasificarZona", {
       latitude: ubicacion.latitude,
       longitude: ubicacion.longitude,
@@ -126,30 +124,19 @@ export default function UbicacionesGuardadas() {
 
   const handleDelete = async (id: string) => {
     try {
-      // Confirmar eliminación usando Alert de React Native
       Alert.alert(
         "Eliminar ubicación",
         "¿Estás segura de eliminar esta ubicación?",
         [
-          {
-            text: "Cancelar",
-            style: "cancel",
-          },
+          { text: "Cancelar", style: "cancel" },
           {
             text: "Eliminar",
             style: "destructive",
             onPress: async () => {
-              // Obtener ubicaciones actuales
               const ubicacionesGuardadas = await AsyncStorage.getItem("ubicaciones_guardadas");
               let ubicaciones = ubicacionesGuardadas ? JSON.parse(ubicacionesGuardadas) : [];
-
-              // Filtrar para eliminar la ubicación
               ubicaciones = ubicaciones.filter((u: UbicacionGuardada) => u.id !== id);
-
-              // Guardar la lista actualizada
               await AsyncStorage.setItem("ubicaciones_guardadas", JSON.stringify(ubicaciones));
-
-              // Actualizar estado
               setUbicaciones(ubicaciones);
             },
           },
@@ -161,14 +148,11 @@ export default function UbicacionesGuardadas() {
     }
   };
 
-  // Filtrar ubicaciones
   const ubicacionesFiltradas = ubicaciones.filter((ubicacion) => {
-    // Filtro por nivel de riesgo
     if (filtroRiesgo && ubicacion.nivelRiesgo !== filtroRiesgo) {
       return false;
     }
 
-    // Filtro por búsqueda (nombre o dirección)
     if (busqueda.trim()) {
       const terminoBusqueda = busqueda.toLowerCase();
       return (
@@ -183,46 +167,28 @@ export default function UbicacionesGuardadas() {
 
   if (ubicaciones.length === 0) {
     return (
-      <View
-        style={[
-          styles.container,
-          {
-            backgroundColor: theme.background,
-          },
-        ]}
-      >
-        {/* HEADER */}
-        <View style={styles.header}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
+        {/* HEADER CON DEGRADADO (ESTADO VACÍO) */}
+        <LinearGradient
+          colors={[theme.headercolor1, theme.headercolor2]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.header}
+        >
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => navigation.goBack()}
           >
-            <MaterialIcons
-              name="arrow-back"
-              size={22}
-              color={theme.text}
-            />
+            <MaterialIcons name="arrow-back" size={26} color="#fff" />
           </TouchableOpacity>
 
-          <View style={styles.headerTitleContainer}>
-            <Text
-              style={[
-                styles.headerTitle,
-                { color: theme.text },
-              ]}
-            >
-              Ubicaciones guardadas
+          <View style={styles.headerContent}>
+            <Text style={styles.headerTitle}>Ubicaciones guardadas</Text>
+            <Text style={styles.headerSubtitle}>
+              Tus lugares guardados y clasificados
             </Text>
           </View>
-
-          <View style={styles.headerIcon}>
-            <MaterialIcons
-              name="bookmark"
-              size={22}
-              color="#7B1DB2"
-            />
-          </View>
-        </View>
+        </LinearGradient>
 
         {/* ESTADO VACÍO */}
         <View style={styles.emptyContainer}>
@@ -231,20 +197,10 @@ export default function UbicacionesGuardadas() {
             size={64}
             color={theme.contactSubtext}
           />
-          <Text
-            style={[
-              styles.emptyTitle,
-              { color: theme.text },
-            ]}
-          >
+          <Text style={[styles.emptyTitle, { color: theme.text }]}>
             No hay ubicaciones guardadas
           </Text>
-          <Text
-            style={[
-              styles.emptyDescription,
-              { color: theme.contactSubtext },
-            ]}
-          >
+          <Text style={[styles.emptyDescription, { color: theme.contactSubtext }]}>
             Guarda tus ubicaciones favoritas y clasifica su nivel de seguridad
           </Text>
         </View>
@@ -253,50 +209,32 @@ export default function UbicacionesGuardadas() {
   }
 
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          backgroundColor: theme.background,
-        },
-      ]}
-    >
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* HEADER */}
-        <View style={styles.header}>
+        {/* HEADER CON DEGRADADO */}
+        <LinearGradient
+          colors={[theme.headercolor1, theme.headercolor2]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.header}
+        >
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => navigation.goBack()}
           >
-            <MaterialIcons
-              name="arrow-back"
-              size={22}
-              color={theme.text}
-            />
+            <MaterialIcons name="arrow-back" size={26} color="#fff" />
           </TouchableOpacity>
 
-          <View style={styles.headerTitleContainer}>
-            <Text
-              style={[
-                styles.headerTitle,
-                { color: theme.text },
-              ]}
-            >
-              Ubicaciones guardadas
+          <View style={styles.headerContent}>
+            <Text style={styles.headerTitle}>Ubicaciones guardadas</Text>
+            <Text style={styles.headerSubtitle}>
+              Tus lugares guardados y clasificados
             </Text>
           </View>
-
-          <View style={styles.headerIcon}>
-            <MaterialIcons
-              name="bookmark"
-              size={22}
-              color="#7B1DB2"
-            />
-          </View>
-        </View>
+        </LinearGradient>
 
         {/* BARRA DE BÚSQUEDA */}
         <View style={styles.searchContainer}>
@@ -427,12 +365,7 @@ export default function UbicacionesGuardadas() {
           {ubicacionesFiltradas.map((ubicacion) => (
             <TouchableOpacity
               key={ubicacion.id}
-              style={[
-                styles.card,
-                {
-                  backgroundColor: theme.card,
-                },
-              ]}
+              style={[styles.card, { backgroundColor: theme.card }]}
               onPress={() => handleCardPress(ubicacion)}
               activeOpacity={0.85}
             >
@@ -474,32 +407,17 @@ export default function UbicacionesGuardadas() {
               </View>
 
               {/* NOMBRE */}
-              <Text
-                style={[
-                  styles.cardTitle,
-                  { color: theme.text },
-                ]}
-              >
+              <Text style={[styles.cardTitle, { color: theme.text }]}>
                 {ubicacion.nombre}
               </Text>
 
               {/* DIRECCIÓN */}
-              <Text
-                style={[
-                  styles.cardAddress,
-                  { color: theme.contactSubtext },
-                ]}
-              >
+              <Text style={[styles.cardAddress, { color: theme.contactSubtext }]}>
                 {ubicacion.direccion}
               </Text>
 
               {/* CIUDAD */}
-              <Text
-                style={[
-                  styles.cardCity,
-                  { color: theme.contactSubtext },
-                ]}
-              >
+              <Text style={[styles.cardCity, { color: theme.contactSubtext }]}>
                 {ubicacion.ciudad}, {ubicacion.departamento}
               </Text>
 
@@ -511,12 +429,7 @@ export default function UbicacionesGuardadas() {
                     size={12}
                     color={theme.contactSubtext}
                   />
-                  <Text
-                    style={[
-                      styles.cardCoords,
-                      { color: theme.contactSubtext },
-                    ]}
-                  >
+                  <Text style={[styles.cardCoords, { color: theme.contactSubtext }]}>
                     {ubicacion.latitude.toFixed(5)}, {ubicacion.longitude.toFixed(5)}
                   </Text>
                 </View>

@@ -3,7 +3,7 @@ import { AppTheme } from "../../../contexts/ThemeContext";
 
 export const createStyles = (theme: AppTheme) => {
   return StyleSheet.create({
-    // =====================================================
+// =====================================================
     // CONTENEDOR
     // =====================================================
 
@@ -16,41 +16,46 @@ export const createStyles = (theme: AppTheme) => {
     },
 
     // =====================================================
-    // HEADER
+    // HEADER (ACTUALIZADO PARA GRADIENTE)
     // =====================================================
 
     header: {
-      height: 75,
       flexDirection: "row",
       alignItems: "center",
-      paddingHorizontal: 18,
-      paddingTop: 8,
+      paddingBottom: 20,
+      paddingTop: 45,
+      paddingHorizontal: 20,
+      elevation: 5,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.2,
+      shadowRadius: 4,
     },
 
     backButton: {
-      width: 38,
-      height: 38,
-      justifyContent: "center",
-      alignItems: "center",
-    },
-
-    headerTitleContainer: {
-      flex: 1,
-      alignItems: "center",
-    },
-
-    headerTitle: {
-      fontSize: 17,
-      fontWeight: "700",
-    },
-
-    headerIcon: {
       width: 40,
       height: 40,
       borderRadius: 20,
-      backgroundColor: "#E8D5F5",
+      backgroundColor: "rgba(255, 255, 255, 0.2)",
       justifyContent: "center",
       alignItems: "center",
+      marginRight: 15,
+    },
+
+    headerContent: {
+      flex: 1,
+    },
+
+    headerTitle: {
+      fontSize: 22,
+      fontWeight: "bold",
+      color: "#ffffff",
+    },
+
+    headerSubtitle: {
+      fontSize: 14,
+      color: "rgba(255, 255, 255, 0.8)",
+      marginTop: 4,
     },
 
     // =====================================================
