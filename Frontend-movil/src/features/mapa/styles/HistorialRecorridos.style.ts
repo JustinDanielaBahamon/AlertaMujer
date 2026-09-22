@@ -73,6 +73,13 @@ export const styles = StyleSheet.create({
     marginRight: 14,
   },
 
+  rutaText: {
+    fontSize: 14,
+    fontWeight: "600" as const,
+    color: "#7B1DB2",
+    marginTop: 4,
+  },
+
   historyInfo: {
     flex: 1,
     minWidth: 0,
@@ -110,7 +117,21 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700" as const,
     marginBottom: 5,
-    
+  },
+
+  /* =========================
+     CARD ACTIONS
+  ========================= */
+
+  cardActions: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 8,
+  },
+
+  actionButton: {
+    padding: 8,
+    borderRadius: 8,
   },
 
   /* =========================
@@ -189,7 +210,7 @@ export const styles = StyleSheet.create({
   ========================= */
 
   mapPreview: {
-    height: 170,
+    height: 250,
     borderRadius: 18,
     overflow: "hidden" as const,
     marginBottom: 18,
@@ -215,5 +236,31 @@ export const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold" as const,
     fontSize: 16,
+  },
+
+  /* =========================
+     EMPTY STATE
+  ========================= */
+
+  emptyState: {
+    marginHorizontal: 18,
+    padding: 30,
+    borderRadius: 18,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    minHeight: 200,
+  },
+
+  emptyStateText: {
+    fontSize: 16,
+    fontWeight: "600" as const,
+    marginTop: 12,
+    textAlign: "center" as const,
+  },
+
+  emptyStateSubtext: {
+    fontSize: 14,
+    marginTop: 6,
+    textAlign: "center" as const,
   },
 });

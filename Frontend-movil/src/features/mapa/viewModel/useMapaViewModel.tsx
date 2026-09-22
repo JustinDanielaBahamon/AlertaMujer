@@ -350,6 +350,7 @@ export const useMapaViewModel = () => {
     acciones,
     handleMapPress,
     formatearHora,
+    refrescarUbicacion,
     reintentarPermisos: () => setIntentosPermiso((prev) => prev + 1),
     irAClasificarZona,
     irAUbicacionesGuardadas,
