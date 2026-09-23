@@ -30,13 +30,13 @@ export function ContactosProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
 
   const cargarContactos = useCallback(async () => {
-    console.log('🔍 [ContactosContext] cargarContactos INICIADO');
-    console.log('🔍 [ContactosContext] user:', user);
-    console.log('🔍 [ContactosContext] user.id:', user?.id);
-    console.log('🔍 [ContactosContext] typeof user.id:', typeof user?.id);
+    console.log('[ContactosContext] cargarContactos INICIADO');
+    console.log('[ContactosContext] user:', user);
+    console.log('[ContactosContext] user.id:', user?.id);
+    console.log('[ContactosContext] typeof user.id:', typeof user?.id);
 
     if (!user?.id) {
-      console.log('❌ [ContactosContext] user.id no existe, retornando con contactos vacíos');
+      console.log('[ContactosContext] user.id no existe, retornando con contactos vacíos');
       setContactos([]);
       return;
     }
@@ -44,17 +44,17 @@ export function ContactosProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
     setError(null);
     try {
-      console.log('📡 [ContactosContext] Llamando a contactosService.getContactos con user.id:', user.id);
+      console.log('[ContactosContext] Llamando a contactosService.getContactos con user.id:', user.id);
       const emergencyContacts = await contactosService.getContactos(user.id);
-      console.log('✅ [ContactosContext] Respuesta recibida de getContactos:', emergencyContacts);
-      console.log('📊 [ContactosContext] Cantidad de contactos recibidos:', emergencyContacts.length);
+      console.log('[ContactosContext] Respuesta recibida de getContactos:', emergencyContacts);
+      console.log('[ContactosContext] Cantidad de contactos recibidos:', emergencyContacts.length);
 
       const contactosMapeados = emergencyContacts.map(mapearEmergencyContactAContacto);
-      console.log('🔄 [ContactosContext] Contactos mapeados:', contactosMapeados);
+      console.log('[ContactosContext] Contactos mapeados:', contactosMapeados);
       setContactos(contactosMapeados);
-      console.log('💾 [ContactosContext] Contactos guardados en estado:', contactosMapeados.length);
+      console.log('[ContactosContext] Contactos guardados en estado:', contactosMapeados.length);
     } catch (err) {
-      console.error('❌ [ContactosContext] Error al cargar contactos:', err);
+      console.error('[ContactosContext] Error al cargar contactos:', err);
       setError("Error al cargar contactos");
       setContactos([]);
     } finally {
@@ -63,17 +63,17 @@ export function ContactosProvider({ children }: { children: React.ReactNode }) {
   }, [user?.id]);
 
   useEffect(() => {
-    console.log('🔄 [ContactosContext] useEffect ejecutado, llamando a cargarContactos');
+    console.log('[ContactosContext] useEffect ejecutado, llamando a cargarContactos');
     cargarContactos();
   }, [cargarContactos]);
 
   const agregarContacto = useCallback(async (payload: Omit<Contacto, "id">) => {
-    console.log('➕ [ContactosContext] agregarContacto INICIADO');
-    console.log('➕ [ContactosContext] payload:', payload);
-    console.log('➕ [ContactosContext] user.id:', user?.id);
+    console.log('[ContactosContext] agregarContacto INICIADO');
+    console.log('[ContactosContext] payload:', payload);
+    console.log('[ContactosContext] user.id:', user?.id);
 
     if (!user?.id) {
-      console.log('❌ [ContactosContext] user.id no existe, no se puede agregar contacto');
+      console.log('[ContactosContext] user.id no existe, no se puede agregar contacto');
       return;
     }
 
@@ -91,12 +91,12 @@ export function ContactosProvider({ children }: { children: React.ReactNode }) {
       console.log('✅ [ContactosContext] nuevoContacto recibido:', nuevoContacto);
 
       const contactoMapeado = mapearEmergencyContactAContacto(nuevoContacto);
-      console.log('🔄 [ContactosContext] contactoMapeado:', contactoMapeado);
+      console.log('[ContactosContext] contactoMapeado:', contactoMapeado);
 
       setContactos((prev) => [...prev, contactoMapeado]);
-      console.log('💾 [ContactosContext] Contacto agregado al estado');
+      console.log('[ContactosContext] Contacto agregado al estado');
     } catch (err) {
-      console.error('❌ [ContactosContext] Error al agregar contacto:', err);
+      console.error('[ContactosContext] Error al agregar contacto:', err);
       setError("Error al agregar contacto");
       throw err;
     } finally {
@@ -105,27 +105,27 @@ export function ContactosProvider({ children }: { children: React.ReactNode }) {
   }, [user?.id]);
 
   const actualizarContacto = useCallback(async (id: string, cambios: Omit<Contacto, "id">) => {
-    console.log('🔄 [ContactosContext] actualizarContacto INICIADO');
-    console.log('🔄 [ContactosContext] id:', id);
-    console.log('🔄 [ContactosContext] cambios:', cambios);
+    console.log('[ContactosContext] actualizarContacto INICIADO');
+    console.log('[ContactosContext] id:', id);
+    console.log('[ContactosContext] cambios:', cambios);
 
     setLoading(true);
     setError(null);
     try {
-      await contactosService.updateContacto(Number(id), {
+      await contactosService.updateContacto(id, {
         contact_name: cambios.nombre,
         telephone: cambios.telefono,
         relationship: cambios.parentesco,
       });
 
-      console.log('✅ [ContactosContext] Contacto actualizado en servidor');
+      console.log('✅[ContactosContext] Contacto actualizado en servidor');
 
       setContactos((prev) =>
         prev.map((contacto) => (contacto.id === id ? { ...contacto, ...cambios } : contacto)),
       );
-      console.log('💾 [ContactosContext] Contacto actualizado en estado');
+      console.log('[ContactosContext] Contacto actualizado en estado');
     } catch (err) {
-      console.error('❌ [ContactosContext] Error al actualizar contacto:', err);
+      console.error('[ContactosContext] Error al actualizar contacto:', err);
       setError("Error al actualizar contacto");
       throw err;
     } finally {
@@ -137,7 +137,7 @@ export function ContactosProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
     setError(null);
     try {
-      await contactosService.deleteContacto(Number(id));
+      await contactosService.deleteContacto(id);
       setContactos((prev) => prev.filter((contacto) => contacto.id !== id));
     } catch (err) {
       setError("Error al eliminar contacto");

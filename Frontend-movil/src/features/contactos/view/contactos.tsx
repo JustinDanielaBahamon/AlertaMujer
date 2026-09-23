@@ -1,14 +1,14 @@
-import React from "react";
-import {Image,Text,TouchableOpacity,View,Linking,Platform,TextInput,} from "react-native";
-import {MaterialIcons,Feather,MaterialCommunityIcons,AntDesign,} from "@expo/vector-icons";
-import { SwipeListView } from "react-native-swipe-list-view";
+import { AntDesign, Feather, MaterialCommunityIcons, MaterialIcons, } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import React from "react";
+import { Image, Linking, Platform, RefreshControl, Text, TextInput, TouchableOpacity, View, } from "react-native";
+import { SwipeListView } from "react-native-swipe-list-view";
 
+import { useTheme } from "../../../../src/contexts/ThemeContext";
+import ModalAccionesContacto from "../../../components/ui/modalAccionesContacto/modalAccionesContacto";
+import { useLocale } from "../../../contexts/LocaleContext";
 import { createStyles } from "../style/contactos.styles";
 import { useContactosTabViewModel } from "../viewModel/useContactosViewModel";
-import ModalAccionesContacto from "../../../components/ui/modalAccionesContacto/modalAccionesContacto";
-import { useTheme } from "../../../../src/contexts/ThemeContext";
-import { useLocale } from "../../../contexts/LocaleContext";
 
 type Contacto = ReturnType<typeof useContactosTabViewModel>["contactos"][0];
 
@@ -104,6 +104,13 @@ export default function Contactos() {
         disableRightSwipe
         bounces={false}
         overScrollMode="never"
+        refreshControl={
+          <RefreshControl
+            refreshing={vm.refreshing}
+            onRefresh={vm.onRefresh}
+            colors={[theme.contactAccent]}
+          />
+        }
 
         renderItem={({ item: c }) => (
           <View style={styles.cardWrapper}>

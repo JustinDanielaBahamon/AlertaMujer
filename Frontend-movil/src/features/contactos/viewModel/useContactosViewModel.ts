@@ -11,7 +11,7 @@
  */
 
 import { useCallback, useState ,useMemo} from "react";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import type { NavigationProp, ParamListBase } from "@react-navigation/native";
 import { Alert } from "react-native";
 import type { Contacto } from "../models/Contacto";
@@ -31,8 +31,35 @@ function formatearTelefonoMostrar(telefono: string): string {
 
 export function useContactosTabViewModel() {
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
-  const { contactos, eliminarContacto } = useContactosContext();
+  const { contactos, eliminarContacto, refrescarContactos, loading } = useContactosContext();
   const [busqueda, setBusqueda] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+
+  /**
+   * RECARGAR AL ENFOCAR LA PANTALLA
+   * Igual que en Historial: cada vez que el usuario entra a la pestaña
+   * de Contactos, se vuelve a pedir la lista al backend. Así, si el
+   * contacto se creó/editó/borró en otro lado (web, u otra sesión),
+   * la móvil siempre muestra lo último al abrir la pantalla.
+   */
+  useFocusEffect(
+    useCallback(() => {
+      refrescarContactos();
+    }, [refrescarContactos]),
+  );
+
+  /**
+   * PULL TO REFRESH (deslizar hacia abajo para recargar)
+   * Mismo comportamiento que tiene el módulo de Historial.
+   */
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await refrescarContactos();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refrescarContactos]);
 
   const contactosFiltrados = useMemo(() =>
     contactos.filter(c =>
@@ -152,6 +179,9 @@ export function useContactosTabViewModel() {
     modalVisible,
     contactoSeleccionado,
     busqueda,
+    loading,
+    refreshing,
+    onRefresh,
     
     // Funciones de utilidad
     formatearTelefonoMostrar,
