@@ -1,8 +1,8 @@
 import api from './api';
 
 export interface EmergencyContact {
-  id: number;
-  user_profile_id: number;
+  id: number | string;
+  user_profile_id: number | string;
   contact_name: string;
   telephone: string;
   email?: string;
@@ -12,7 +12,7 @@ export interface EmergencyContact {
 }
 
 export interface CreateContactData {
-  user_profile_id: number;
+  user_profile_id: number | string;
   contact_name: string;
   telephone: string;
   email?: string;
@@ -21,67 +21,70 @@ export interface CreateContactData {
 
 export const contactosService = {
   async getContactos(userProfileId: number | string): Promise<EmergencyContact[]> {
-    console.log('🔍 [contactos.service] getContactos INICIADO');
-    console.log('🔍 [contactos.service] userProfileId recibido:', userProfileId);
-    console.log('🔍 [contactos.service] typeof userProfileId:', typeof userProfileId);
+    console.log('[contactos.service] getContactos INICIADO');
+    console.log('[contactos.service] userProfileId recibido:', userProfileId);
+    console.log('[contactos.service] typeof userProfileId:', typeof userProfileId);
 
-    // Asegurar que el ID sea numérico para que JSON Server filtre correctamente
-    const numericId = typeof userProfileId === 'string' ? parseInt(userProfileId, 10) : userProfileId;
-    console.log('🔢 [contactos.service] numericId después de conversión:', numericId);
-    console.log('🔢 [contactos.service] typeof numericId:', typeof numericId);
-
-    const url = `/emergency_contact?user_profile_id=${numericId}`;
-    console.log('📡 [contactos.service] URL del GET:', url);
+    // YA NO filtramos con "?user_profile_id=" en la URL.
+    // En la base de datos falsa (json-server), el campo "user_profile_id"
+    // a veces quedó guardado como número (9) y a veces como texto ("9").
+    // El filtro por query string del servidor solo encuentra un tipo a la vez,
+    // así que los contactos nuevos (guardados como texto) "desaparecían" al
+    // recargar. Trayendo todos y comparando como texto acá en el cliente,
+    // siempre los encontramos sin importar cómo hayan quedado guardados.
+    const url = '/emergency_contact';
+    console.log('[contactos.service] URL del GET:', url);
 
     const response = await api.get<EmergencyContact[]>(url);
-    console.log('✅ [contactos.service] Respuesta del servidor:', response.data);
-    console.log('📊 [contactos.service] Cantidad de contactos en respuesta:', response.data.length);
+    const targetId = String(userProfileId);
+    const contactosDelUsuario = response.data.filter(
+      (ec) => String(ec.user_profile_id) === targetId
+    );
 
-    return response.data;
+    console.log('✅ [contactos.service] Respuesta del servidor (todos):', response.data);
+    console.log('[contactos.service] Cantidad total en servidor:', response.data.length);
+    console.log('[contactos.service] Cantidad filtrada para este usuario:', contactosDelUsuario.length);
+
+    return contactosDelUsuario;
   },
 
   async addContacto(data: CreateContactData): Promise<EmergencyContact> {
-    console.log('➕ [contactos.service] addContacto INICIADO');
-    console.log('➕ [contactos.service] data:', data);
+    console.log('[contactos.service] addContacto INICIADO');
+    console.log('[contactos.service] data:', data);
 
-    // Obtener el ID numérico más alto actual
-    const response = await api.get<EmergencyContact[]>('/emergency_contact');
-    const existingContacts = response.data;
-    console.log('📊 [contactos.service] Contactos existentes:', existingContacts.length);
-
-    const maxId = existingContacts.length > 0
-      ? Math.max(...existingContacts.map(c => typeof c.id === 'number' ? c.id : 0))
-      : 0;
-    console.log('🔢 [contactos.service] maxId actual:', maxId);
-
-    // Crear el nuevo contacto con ID numérico
+    // Ya NO calculamos ni mandamos "id" a mano. json-server siempre guarda
+    // los ids como texto (ej: "1", "2"...) y los genera él solo. El cálculo
+    // anterior (maxId) comparaba "typeof id === 'number'", pero TODOS los
+    // ids en la base falsa son texto, así que maxId siempre daba 0 y
+    // siempre se mandaba id:1 — que ya existía (Juan Pérez). El servidor lo
+    // ignoraba y ponía un id aleatorio raro por su cuenta. Dejamos que el
+    // servidor genere el id siempre, así no hay choques.
     const nuevoContacto = {
       ...data,
-      id: maxId + 1,
       created_at: new Date().toISOString(),
     };
-    console.log('➕ [contactos.service] nuevoContacto a enviar:', nuevoContacto);
+    console.log('[contactos.service] nuevoContacto a enviar:', nuevoContacto);
 
     const postResponse = await api.post<EmergencyContact>('/emergency_contact', nuevoContacto);
-    console.log('✅ [contactos.service] Respuesta POST:', postResponse.data);
+    console.log('✅[contactos.service] Respuesta POST:', postResponse.data);
     return postResponse.data;
   },
 
-  async updateContacto(id: number, data: Partial<CreateContactData>): Promise<EmergencyContact> {
-    console.log('🔄 [contactos.service] updateContacto INICIADO');
-    console.log('🔄 [contactos.service] id:', id);
-    console.log('🔄 [contactos.service] data:', data);
+  async updateContacto(id: number | string, data: Partial<CreateContactData>): Promise<EmergencyContact> {
+    console.log('[contactos.service] updateContacto INICIADO');
+    console.log('[contactos.service] id:', id);
+    console.log('[contactos.service] data:', data);
 
     const response = await api.put<EmergencyContact>(`/emergency_contact/${id}`, data);
-    console.log('✅ [contactos.service] Respuesta PUT:', response.data);
+    console.log('✅[contactos.service] Respuesta PUT:', response.data);
     return response.data;
   },
 
-  async deleteContacto(id: number): Promise<void> {
-    console.log('🗑️ [contactos.service] deleteContacto INICIADO');
-    console.log('🗑️ [contactos.service] id:', id);
+  async deleteContacto(id: number | string): Promise<void> {
+    console.log('[contactos.service] deleteContacto INICIADO');
+    console.log('[contactos.service] id:', id);
 
     await api.delete(`/emergency_contact/${id}`);
-    console.log('✅ [contactos.service] Contacto eliminado');
+    console.log('✅[contactos.service] Contacto eliminado');
   },
 };
