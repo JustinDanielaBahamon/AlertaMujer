@@ -2,6 +2,7 @@ import {
   Animated,
   Modal,
   ScrollView,
+  StyleSheet,
   Text,
   TouchableOpacity,
   TouchableWithoutFeedback,
@@ -32,37 +33,45 @@ export default function AlertaActivaScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <TouchableOpacity style={styles.headerIconButton}>
-            <MaterialIcons name="menu" size={22} color={theme.icono} />
-          </TouchableOpacity>
-
           {/* Mini-mapa con la ubicacion actual. Al tocarlo, abre el mismo mapa en pantalla completa. */}
-          <TouchableOpacity
-            style={styles.headerMapButton}
-            onPress={vm.abrirMapaCompleto}
-            activeOpacity={0.85}
-          >
+          <View style={styles.headerMapButton}>
             {vm.location ? (
-              <MapView
-                style={styles.headerMap}
-                pointerEvents="none"
-                scrollEnabled={false}
-                zoomEnabled={false}
-                rotateEnabled={false}
-                pitchEnabled={false}
-                initialRegion={{
-                  latitude: vm.location.latitude,
-                  longitude: vm.location.longitude,
-                  latitudeDelta: 0.01,
-                  longitudeDelta: 0.01,
-                }}
-              >
-                <Marker coordinate={vm.location} pinColor={theme.icono} />
-              </MapView>
+              <>
+                <MapView
+                  style={styles.headerMap}
+                  pointerEvents="none"
+                  scrollEnabled={false}
+                  zoomEnabled={false}
+                  rotateEnabled={false}
+                  pitchEnabled={false}
+                  toolbarEnabled={false}
+                  initialRegion={{
+                    latitude: vm.location.latitude,
+                    longitude: vm.location.longitude,
+                    latitudeDelta: 0.01,
+                    longitudeDelta: 0.01,
+                  }}
+                >
+                  <Marker coordinate={vm.location} pinColor={theme.icono} />
+                </MapView>
+                {/* Capa transparente que intercepta el toque antes de que llegue al mapa nativo,
+                    asi se evita que Android abra la app de Google Maps al presionarlo. */}
+                <TouchableOpacity
+                  style={StyleSheet.absoluteFillObject}
+                  onPress={vm.abrirMapaCompleto}
+                  activeOpacity={0.85}
+                />
+              </>
             ) : (
-              <MaterialIcons name="my-location" size={22} color={theme.icono} />
+              <TouchableOpacity
+                style={[StyleSheet.absoluteFillObject, styles.headerMapFallback]}
+                onPress={vm.abrirMapaCompleto}
+                activeOpacity={0.85}
+              >
+                <MaterialIcons name="my-location" size={22} color={theme.icono} />
+              </TouchableOpacity>
             )}
-          </TouchableOpacity>
+          </View>
         </View>
 
         <Text style={styles.title}>{t.alertaActiva.titulo}</Text>
@@ -129,6 +138,7 @@ export default function AlertaActivaScreen() {
               zoomEnabled
               rotateEnabled
               pitchEnabled
+              toolbarEnabled={false}
               onPress={vm.handleMapPress}
             >
               <Marker coordinate={vm.location} title={t.mapa.tu_ubicacion_marcador} pinColor={theme.icono} />
