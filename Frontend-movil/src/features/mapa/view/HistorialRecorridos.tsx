@@ -28,8 +28,8 @@ type PuntoGPS = {
 type Recorrido = {
   id: string;
   fecha: string;
-  horaInicio: string;
-  horaFin: string;
+  tiempoEstimado: string;
+  distanciaEstimada: string;
   barrioInicio: string;
   barrioFin: string;
   municipio: string;
@@ -37,10 +37,9 @@ type Recorrido = {
   pais: string;
   puntos: PuntoGPS[];
   cantidadPuntos: number;
-  distanciaEstimada?: string; // Opcional para futuro
-  esManual?: boolean; // Para distinguir recorridos manuales de automáticos
-  nombrePersonalizado?: string; // Para recorridos manuales
-  importante: boolean; // Para mostrar en el mapa principal
+  esManual: boolean;
+  nombrePersonalizado?: string;
+  importante: boolean;
 };
 
 export default function HistorialRecorridos() {
@@ -57,100 +56,104 @@ export default function HistorialRecorridos() {
   const recorridosSimulados: Recorrido[] = [
     {
       id: "sim-1",
-      fecha: "2024-09-10",
-      horaInicio: "10:35",
-      horaFin: "11:20",
+      fecha: "10/09/2024",
+      tiempoEstimado: "45 min",
+      distanciaEstimada: "3.75 km",
       barrioInicio: "Centro",
       barrioFin: "Altico",
       municipio: "Neiva",
       departamento: "Huila",
       pais: "Colombia",
       puntos: [
-        { latitude: 2.9271, longitude: -75.2874, timestamp: "10:35" },
-        { latitude: 2.9285, longitude: -75.2859, timestamp: "10:40" },
-        { latitude: 2.9302, longitude: -75.2841, timestamp: "10:45" },
-        { latitude: 2.9320, longitude: -75.2825, timestamp: "10:50" },
-        { latitude: 2.9335, longitude: -75.2808, timestamp: "10:55" },
-        { latitude: 2.9350, longitude: -75.2792, timestamp: "11:00" },
-        { latitude: 2.9365, longitude: -75.2775, timestamp: "11:05" },
-        { latitude: 2.9380, longitude: -75.2758, timestamp: "11:10" },
-        { latitude: 2.9395, longitude: -75.2741, timestamp: "11:15" },
-        { latitude: 2.9410, longitude: -75.2724, timestamp: "11:20" },
+        { latitude: 2.9271, longitude: -75.2874, timestamp: "" },
+        { latitude: 2.9285, longitude: -75.2859, timestamp: "" },
+        { latitude: 2.9302, longitude: -75.2841, timestamp: "" },
+        { latitude: 2.9320, longitude: -75.2825, timestamp: "" },
+        { latitude: 2.9335, longitude: -75.2808, timestamp: "" },
+        { latitude: 2.9350, longitude: -75.2792, timestamp: "" },
+        { latitude: 2.9365, longitude: -75.2775, timestamp: "" },
+        { latitude: 2.9380, longitude: -75.2758, timestamp: "" },
+        { latitude: 2.9395, longitude: -75.2741, timestamp: "" },
+        { latitude: 2.9410, longitude: -75.2724, timestamp: "" },
       ],
       cantidadPuntos: 10,
+      esManual: false,
       importante: true,
     },
     {
       id: "sim-2",
-      fecha: "2024-09-10",
-      horaInicio: "14:10",
-      horaFin: "14:45",
+      fecha: "10/09/2024",
+      tiempoEstimado: "35 min",
+      distanciaEstimada: "2.92 km",
       barrioInicio: "Altico",
       barrioFin: "El Jardín",
       municipio: "Neiva",
       departamento: "Huila",
       pais: "Colombia",
       puntos: [
-        { latitude: 2.9410, longitude: -75.2724, timestamp: "14:10" },
-        { latitude: 2.9425, longitude: -75.2707, timestamp: "14:15" },
-        { latitude: 2.9440, longitude: -75.2690, timestamp: "14:20" },
-        { latitude: 2.9455, longitude: -75.2673, timestamp: "14:25" },
-        { latitude: 2.9470, longitude: -75.2656, timestamp: "14:30" },
-        { latitude: 2.9485, longitude: -75.2639, timestamp: "14:35" },
-        { latitude: 2.9500, longitude: -75.2622, timestamp: "14:40" },
-        { latitude: 2.9515, longitude: -75.2605, timestamp: "14:45" },
+        { latitude: 2.9410, longitude: -75.2724, timestamp: "" },
+        { latitude: 2.9425, longitude: -75.2707, timestamp: "" },
+        { latitude: 2.9440, longitude: -75.2690, timestamp: "" },
+        { latitude: 2.9455, longitude: -75.2673, timestamp: "" },
+        { latitude: 2.9470, longitude: -75.2656, timestamp: "" },
+        { latitude: 2.9485, longitude: -75.2639, timestamp: "" },
+        { latitude: 2.9500, longitude: -75.2622, timestamp: "" },
+        { latitude: 2.9515, longitude: -75.2605, timestamp: "" },
       ],
       cantidadPuntos: 8,
+      esManual: false,
       importante: true,
     },
     {
       id: "sim-3",
-      fecha: "2024-09-09",
-      horaInicio: "08:20",
-      horaFin: "09:05",
+      fecha: "09/09/2024",
+      tiempoEstimado: "40 min",
+      distanciaEstimada: "3.33 km",
       barrioInicio: "La Libertad",
       barrioFin: "Centro",
       municipio: "Neiva",
       departamento: "Huila",
       pais: "Colombia",
       puntos: [
-        { latitude: 2.9200, longitude: -75.2900, timestamp: "08:20" },
-        { latitude: 2.9215, longitude: -75.2883, timestamp: "08:25" },
-        { latitude: 2.9230, longitude: -75.2866, timestamp: "08:30" },
-        { latitude: 2.9245, longitude: -75.2849, timestamp: "08:35" },
-        { latitude: 2.9260, longitude: -75.2832, timestamp: "08:40" },
-        { latitude: 2.9275, longitude: -75.2815, timestamp: "08:45" },
-        { latitude: 2.9290, longitude: -75.2798, timestamp: "08:50" },
-        { latitude: 2.9305, longitude: -75.2781, timestamp: "08:55" },
-        { latitude: 2.9320, longitude: -75.2764, timestamp: "09:00" },
-        { latitude: 2.9335, longitude: -75.2747, timestamp: "09:05" },
+        { latitude: 2.9200, longitude: -75.2900, timestamp: "" },
+        { latitude: 2.9215, longitude: -75.2883, timestamp: "" },
+        { latitude: 2.9230, longitude: -75.2866, timestamp: "" },
+        { latitude: 2.9245, longitude: -75.2849, timestamp: "" },
+        { latitude: 2.9260, longitude: -75.2832, timestamp: "" },
+        { latitude: 2.9275, longitude: -75.2815, timestamp: "" },
+        { latitude: 2.9290, longitude: -75.2798, timestamp: "" },
+        { latitude: 2.9305, longitude: -75.2781, timestamp: "" },
+        { latitude: 2.9320, longitude: -75.2764, timestamp: "" },
+        { latitude: 2.9335, longitude: -75.2747, timestamp: "" },
       ],
       cantidadPuntos: 10,
+      esManual: false,
       importante: false,
     },
     {
       id: "sim-4",
-      fecha: "2024-09-08",
-      horaInicio: "16:30",
-      horaFin: "17:15",
+      fecha: "08/09/2024",
+      tiempoEstimado: "30 min",
+      distanciaEstimada: "2.50 km",
       barrioInicio: "San Jorge",
       barrioFin: "Santa Inés",
       municipio: "Neiva",
       departamento: "Huila",
       pais: "Colombia",
       puntos: [
-        { latitude: 2.9150, longitude: -75.2950, timestamp: "16:30" },
-        { latitude: 2.9165, longitude: -75.2933, timestamp: "16:35" },
-        { latitude: 2.9180, longitude: -75.2916, timestamp: "16:40" },
-        { latitude: 2.9195, longitude: -75.2899, timestamp: "16:45" },
-        { latitude: 2.9210, longitude: -75.2882, timestamp: "16:50" },
-        { latitude: 2.9225, longitude: -75.2865, timestamp: "16:55" },
-        { latitude: 2.9240, longitude: -75.2848, timestamp: "17:00" },
-        { latitude: 2.9255, longitude: -75.2831, timestamp: "17:05" },
-        { latitude: 2.9270, longitude: -75.2814, timestamp: "17:10" },
-        { latitude: 2.9285, longitude: -75.2797, timestamp: "17:15" },
+        { latitude: 2.9150, longitude: -75.2950, timestamp: "" },
+        { latitude: 2.9165, longitude: -75.2933, timestamp: "" },
+        { latitude: 2.9180, longitude: -75.2916, timestamp: "" },
+        { latitude: 2.9195, longitude: -75.2899, timestamp: "" },
+        { latitude: 2.9210, longitude: -75.2882, timestamp: "" },
+        { latitude: 2.9225, longitude: -75.2865, timestamp: "" },
+        { latitude: 2.9240, longitude: -75.2848, timestamp: "" },
+        { latitude: 2.9255, longitude: -75.2831, timestamp: "" },
+        { latitude: 2.9270, longitude: -75.2814, timestamp: "" },
+        { latitude: 2.9285, longitude: -75.2797, timestamp: "" },
       ],
       cantidadPuntos: 10,
+      esManual: false,
       importante: false,
     },
   ];
@@ -265,13 +268,27 @@ export default function HistorialRecorridos() {
                   size={16}
                   color={theme.contactSubtext}
                 />
+                <Text style={[styles.timeText, { color: theme.contactSubtext }]}>
+                  {item.fecha}
+                </Text>
+              </View>
+
+              <View style={styles.dateRow}>
                 <MaterialIcons
-                  name="access-time"
+                  name="schedule"
                   size={16}
                   color={theme.contactSubtext}
                 />
                 <Text style={[styles.timeText, { color: theme.contactSubtext }]}>
-                  {item.horaInicio} → {item.horaFin}
+                  {item.tiempoEstimado}
+                </Text>
+                <MaterialIcons
+                  name="straighten"
+                  size={16}
+                  color={theme.contactSubtext}
+                />
+                <Text style={[styles.timeText, { color: theme.contactSubtext }]}>
+                  {item.distanciaEstimada}
                 </Text>
               </View>
 
@@ -364,8 +381,14 @@ export default function HistorialRecorridos() {
                       />
                       <InfoRow
                         icon="schedule"
-                        label="Duración"
-                        value={`${selectedItem.horaInicio} - ${selectedItem.horaFin}`}
+                        label="Tiempo estimado"
+                        value={selectedItem.tiempoEstimado}
+                        theme={theme}
+                      />
+                      <InfoRow
+                        icon="straighten"
+                        label="Distancia"
+                        value={selectedItem.distanciaEstimada}
                         theme={theme}
                       />
                       <InfoRow

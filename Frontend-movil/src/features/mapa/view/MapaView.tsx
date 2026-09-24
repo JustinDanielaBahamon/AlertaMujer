@@ -595,16 +595,16 @@ Compartido desde AlertaMujer`;
                     </View>
                     <View style={styles.infoRow}>
                       <MaterialIcons name="schedule" size={20} color="#7B1DB2" />
-                      <Text style={[styles.infoLabel, { color: theme.contactSubtext }]}>Hora:</Text>
+                      <Text style={[styles.infoLabel, { color: theme.contactSubtext }]}>Tiempo estimado:</Text>
                       <Text style={[styles.infoValue, { color: theme.text }]}>
-                        {recorridoInfo.horaInicio} - {recorridoInfo.horaFin}
+                        {recorridoInfo.tiempoEstimado}
                       </Text>
                     </View>
                     <View style={styles.infoRow}>
-                      <MaterialIcons name="timeline" size={20} color="#7B1DB2" />
-                      <Text style={[styles.infoLabel, { color: theme.contactSubtext }]}>Puntos:</Text>
+                      <MaterialIcons name="straighten" size={20} color="#7B1DB2" />
+                      <Text style={[styles.infoLabel, { color: theme.contactSubtext }]}>Distancia:</Text>
                       <Text style={[styles.infoValue, { color: theme.text }]}>
-                        {recorridoInfo.cantidadPuntos}
+                        {recorridoInfo.distanciaEstimada}
                       </Text>
                     </View>
                   </View>
