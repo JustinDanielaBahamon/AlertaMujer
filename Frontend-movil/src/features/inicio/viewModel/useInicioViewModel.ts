@@ -2,10 +2,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Vibration } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import * as Location from "expo-location";
 import type { MainStackParamList } from "../../../navigation/types";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useLocale } from "../../../contexts/LocaleContext";
+import { LocationService, type UbicacionDetallada } from "../../../services/location.service";
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
 
@@ -20,6 +20,7 @@ export function useInicioViewModel() {
   const [pressed, setPressed] = useState(false);
   const [estadoUbicacion, setEstadoUbicacion] = useState<EstadoUbicacion>("cargando");
   const [ubicacionResuelta, setUbicacionResuelta] = useState("");
+  const [ubicacionDetallada, setUbicacionDetallada] = useState<UbicacionDetallada | null>(null);
   const [cargando, setCargando] = useState(false);
 
   const obtenerUbicacion = useCallback(async () => {
@@ -27,25 +28,29 @@ export function useInicioViewModel() {
       setCargando(true);
       setEstadoUbicacion("cargando");
 
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        setEstadoUbicacion("denegado");
-        return;
-      }
+      // Usar el servicio centralizado de ubicación con alta precisión
+      const ubicacion = await LocationService.getFullLocation();
 
-      const location = await Location.getCurrentPositionAsync({});
-      const direccion = await Location.reverseGeocodeAsync({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      });
+      if (ubicacion) {
+        setUbicacionDetallada(ubicacion);
 
-      if (direccion.length > 0) {
-        const lugar = direccion[0];
-        const nombreFinal = lugar.name || lugar.street || t.inicio.ubicacion_desconocida;
-        setUbicacionResuelta(`${nombreFinal}, ${lugar.city}`);
+        // Para compatibilidad con código existente
+        const nombreCorto = LocationService.formatShortAddress(ubicacion);
+        const nombreCompleto = LocationService.formatAddress(ubicacion);
+        setUbicacionResuelta(nombreCompleto);
         setEstadoUbicacion("lista");
+
+        console.log("Ubicación mejorada obtenida:", {
+          direccion: ubicacion.direccionCompleta,
+          barrio: ubicacion.barrio,
+          ciudad: ubicacion.ciudad,
+          precision: ubicacion.precision,
+        });
+      } else {
+        setEstadoUbicacion("error");
       }
-    } catch {
+    } catch (error) {
+      console.error("Error al obtener ubicación mejorada:", error);
       setEstadoUbicacion("error");
     } finally {
       setCargando(false);
@@ -94,6 +99,7 @@ export function useInicioViewModel() {
     pressed,
     ubicacionNombre,
     ubicacionLista,
+    ubicacionDetallada,
     cargando,
     obtenerUbicacion,
     activarAlerta,

@@ -100,10 +100,29 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
+    position: "relative",
   },
 
   map: {
     flex: 1,
+  },
+
+  openMapButton: {
+    position: "absolute",
+    bottom: 15,
+    right: 15,
+    backgroundColor: "#7B1DB2",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 14,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 6,
+  },
+  openMapText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 12,
   },
 
   instructionOverlay: {
@@ -189,6 +208,12 @@ export const styles = StyleSheet.create({
   nombreInput: {
     flex: 1,
     fontSize: 14,
+  },
+
+  helperText: {
+    fontSize: 12,
+    marginTop: 4,
+    fontStyle: "italic" as const,
   },
 
   /* =========================
@@ -302,5 +327,17 @@ export const styles = StyleSheet.create({
 
   ubicacionDireccion: {
     fontSize: 13,
+  },
+
+  fullscreenCloseButton: {
+    position: "absolute",
+    top: 60,
+    right: 20,
+    backgroundColor: "#7B1DB2",
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
   },
 });

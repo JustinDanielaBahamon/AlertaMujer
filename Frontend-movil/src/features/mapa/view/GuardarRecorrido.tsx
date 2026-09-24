@@ -36,9 +36,11 @@ export default function GuardarRecorrido() {
   const [puntoB, setPuntoB] = useState<PuntoSeleccionado | null>(null);
   const [nombrePuntoA, setNombrePuntoA] = useState("");
   const [nombrePuntoB, setNombrePuntoB] = useState("");
+  const [nombreRecorrido, setNombreRecorrido] = useState("");
   const [metodoSeleccion, setMetodoSeleccion] = useState<MetodoSeleccion>("mapa");
   const [modalUbicacionesVisible, setModalUbicacionesVisible] = useState(false);
   const [puntoSeleccionando, setPuntoSeleccionando] = useState<"A" | "B" | null>(null);
+  const [mapFullscreen, setMapFullscreen] = useState(false);
 
   // Ubicaciones guardadas simuladas
   const ubicacionesGuardadas = [
@@ -119,7 +121,7 @@ export default function GuardarRecorrido() {
         },
       ],
       cantidadPuntos: 2,
-      nombrePersonalizado: `Ruta ${nombrePuntoA || puntoA.nombre || "A"} → ${nombrePuntoB || puntoB.nombre || "B"}`,
+      nombrePersonalizado: nombreRecorrido || `Ruta ${nombrePuntoA || puntoA.nombre || "A"} → ${nombrePuntoB || puntoB.nombre || "B"}`,
       importante: true, // Por defecto importantes
     };
 
@@ -223,6 +225,10 @@ export default function GuardarRecorrido() {
               latitudeDelta: 0.02,
               longitudeDelta: 0.02,
             }}
+            scrollEnabled={false}
+            zoomEnabled={false}
+            rotateEnabled={false}
+            pitchEnabled={false}
             onPress={handleMapPress}
           >
             {puntoA && (
@@ -251,6 +257,14 @@ export default function GuardarRecorrido() {
               </Text>
             </View>
           )}
+
+          <TouchableOpacity
+            style={styles.openMapButton}
+            onPress={() => setMapFullscreen(true)}
+          >
+            <MaterialIcons name="open-in-full" size={18} color="#fff" />
+            <Text style={styles.openMapText}>Abrir mapa completo</Text>
+          </TouchableOpacity>
         </View>
 
         {/* SELECCIÓN DE PUNTOS */}
@@ -346,6 +360,26 @@ export default function GuardarRecorrido() {
           )}
         </View>
 
+        {/* NOMBRE DEL RECORRIDO */}
+        <View style={[styles.sectionContainer, { backgroundColor: theme.card }]}>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>
+            Nombre del recorrido
+          </Text>
+          <View style={[styles.nombreInputContainer, { backgroundColor: theme.background }]}>
+            <MaterialIcons name="route" size={18} color={theme.contactSubtext} style={{ marginRight: 8 }} />
+            <TextInput
+              style={[styles.nombreInput, { color: theme.text }]}
+              placeholder="Ej: Camino seguro Sanjuan - Plaza, Recorrido de la tarde..."
+              placeholderTextColor={theme.contactSubtext}
+              value={nombreRecorrido}
+              onChangeText={setNombreRecorrido}
+            />
+          </View>
+          <Text style={[styles.helperText, { color: theme.contactSubtext }]}>
+            Si no ingresas un nombre, se generará uno automáticamente
+          </Text>
+        </View>
+
         {/* ACCIONES */}
         <View style={styles.actionsContainer}>
           <TouchableOpacity
@@ -410,6 +444,47 @@ export default function GuardarRecorrido() {
             </TouchableWithoutFeedback>
           </View>
         </TouchableWithoutFeedback>
+      </Modal>
+
+      {/* MODAL MAPA COMPLETO */}
+      <Modal visible={mapFullscreen} animationType="slide">
+        <View style={{ flex: 1 }}>
+          <MapView
+            style={{ flex: 1 }}
+            initialRegion={{
+              latitude: 2.9271,
+              longitude: -75.2874,
+              latitudeDelta: 0.02,
+              longitudeDelta: 0.02,
+            }}
+            onPress={handleMapPress}
+          >
+            {puntoA && (
+              <Marker
+                coordinate={puntoA}
+                title="Punto A - Inicio"
+                description={puntoA.nombre || puntoA.direccion}
+                pinColor="#4CAF50"
+              />
+            )}
+            
+            {puntoB && (
+              <Marker
+                coordinate={puntoB}
+                title="Punto B - Fin"
+                description={puntoB.nombre || puntoB.direccion}
+                pinColor="#F44336"
+              />
+            )}
+          </MapView>
+
+          <TouchableOpacity
+            style={styles.fullscreenCloseButton}
+            onPress={() => setMapFullscreen(false)}
+          >
+            <MaterialIcons name="close" size={24} color="#fff" />
+          </TouchableOpacity>
+        </View>
       </Modal>
     </View>
   );

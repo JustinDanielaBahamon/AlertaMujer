@@ -92,7 +92,7 @@ export default function ClasificarZonaView() {
 
   const [isLocationHovered, setIsLocationHovered] = useState(false);
 
-  // Función reutilizable de Geocodificación Inversa
+  // Función reutilizable de Geocodificación Inversa mejorada
   const fetchAddress = useCallback(
     async (lat: number, lng: number) => {
       try {
@@ -104,27 +104,37 @@ export default function ClasificarZonaView() {
 
         const info = reverse[0];
 
+        // Extracción mejorada de datos con múltiples fallbacks (solo propiedades válidas)
+        const calle = info?.street || info?.name || t.mapa.sin_calle;
+        const numero = info?.streetNumber || "";
+        const barrioDetectado = info?.district || info?.subregion || t.mapa.sector_desconocido;
+        const ciudadDetectada = info?.city || info?.region || t.mapa.ciudad_desconocida;
+        const municipioDetectado = info?.subregion || info?.city || t.mapa.municipio_desconocido;
+        const departamentoDetectado = info?.region || t.mapa.departamento_desconocido;
+        const paisDetectado = info?.country || t.mapa.pais_desconocido;
+        const codigoPostal = info?.postalCode || "";
+
+        // Construcción de dirección más completa
+        const direccionCompleta = `${calle} ${numero}`.trim();
+        const ciudadCompleta = ciudadDetectada !== t.mapa.ciudad_desconocida
+          ? `${ciudadDetectada}, ${departamentoDetectado}`
+          : ciudadDetectada;
+
         const direccionData: DireccionInfo = {
-          direccion: `${info?.street || t.mapa.sin_calle} ${info?.streetNumber || ""}`.trim(),
-          barrio:
-            info?.district && info.district !== info?.city
-              ? info.district
-              : t.mapa.sector_desconocido,
-          municipio:
-            info?.city || info?.district || t.mapa.municipio_desconocido,
-          ciudad:
-            info?.city ||
-            info?.subregion ||
-            info?.district ||
-            t.mapa.ciudad_desconocida,
-          departamento: info?.region || t.mapa.departamento_desconocido,
-          pais: info?.country || t.mapa.pais_desconocido,
+          direccion: direccionCompleta,
+          barrio: barrioDetectado,
+          municipio: municipioDetectado,
+          ciudad: ciudadCompleta,
+          departamento: departamentoDetectado,
+          pais: paisDetectado,
         };
 
         setDireccionInfo(direccionData);
         setDireccion(direccionData.direccion);
         setCiudad(direccionData.ciudad);
         setBarrio(direccionData.barrio);
+
+        console.log("Dirección mejorada obtenida:", direccionData);
       } catch {
         const fallbackData: DireccionInfo = {
           direccion: t.mapa.sin_calle,

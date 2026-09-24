@@ -5,28 +5,42 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingTop: 40,
-    paddingBottom: 20,
-    paddingHorizontal: 58,
+    paddingTop: 45,
+    paddingBottom: 22,
+    paddingHorizontal: 20,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "space-between" as const,
   },
   backButton: {
-    position: "absolute",
-    top: 70,
-    left: 20,
-    zIndex: 1,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
   },
   headerContent: {
-    marginTop: 20,
+    flex: 1,
+    marginLeft: 12,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: "bold" as const,
     color: "#fff",
   },
   headerSubtitle: {
     fontSize: 14,
-    color: "rgba(255,255,255,0.9)",
-    marginTop: 5,
+    color: "rgba(255,255,255,0.85)",
+    marginTop: 4,
+  },
+  mapButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
   },
 
   /* =========================
@@ -95,6 +109,7 @@ export const styles = StyleSheet.create({
   dateText: {
     fontSize: 12,
     fontWeight: "500" as const,
+    marginBottom: 4,
   },
 
   timeText: {
@@ -146,7 +161,7 @@ export const styles = StyleSheet.create({
 
   modalContent: {
     width: "100%",
-    maxHeight: "88%",
+    maxHeight: "100%",
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     paddingHorizontal: 20,
@@ -157,6 +172,26 @@ export const styles = StyleSheet.create({
   modalHeader: {
     alignItems: "center" as const,
     marginBottom: 18,
+  },
+
+  modalHeaderImproved: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "space-between" as const,
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 18,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(128,128,128,0.12)",
+  },
+
+  modalBackButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(0,0,0,0.05)",
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
   },
 
   modalIcon: {
@@ -173,6 +208,8 @@ export const styles = StyleSheet.create({
     fontSize: 21,
     fontWeight: "bold" as const,
     textAlign: "center" as const,
+    flex: 1,
+    marginLeft: 12,
   },
 
   modalBody: {
@@ -236,6 +273,43 @@ export const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold" as const,
     fontSize: 16,
+  },
+
+  /* =========================
+     MODAL ACTIONS
+     ========================= */
+
+  modalActions: {
+    flexDirection: "row" as const,
+    gap: 12,
+    paddingHorizontal: 20,
+    marginBottom: 10,
+  },
+
+  modalActionButton: {
+    flex: 1,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    paddingVertical: 14,
+    borderRadius: 14,
+    gap: 8,
+  },
+
+  modalButtonSecondary: {
+    backgroundColor: "rgba(0,0,0,0.05)",
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.1)",
+  },
+
+  modalButtonPrimary: {
+    backgroundColor: "#7B1DB2",
+  },
+
+  modalActionText: {
+    fontSize: 15,
+    fontWeight: "600" as const,
+    color: "#fff",
   },
 
   /* =========================

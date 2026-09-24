@@ -4,17 +4,17 @@ export const styles = StyleSheet.create({
 
   container: {
     backgroundColor: 'rgb(202,171,222)', // tu color
-    height: 110,
+    minHeight: 80,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: 30,
+    paddingBottom: 10,
   },
 
   logo: {
     width: 80,
-    height: 80,
+    height: 64,
     resizeMode: 'contain',
   },
 

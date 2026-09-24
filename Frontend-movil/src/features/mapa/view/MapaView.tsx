@@ -1,7 +1,10 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useState } from "react";
+import * as Location from "expo-location";
+import React, { useEffect, useState } from "react";
+import { Alert, Share } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   Animated,
   Image,
@@ -23,8 +26,12 @@ export default function MapaView() {
   const navigation = useNavigation<any>();
   const { mostrarRecorridos } = useAjustesViewModel();
   const { recorridos } = useRecorridos();
+  const insets = useSafeAreaInsets();
   const [mostrarRecorridosEnMapa, setMostrarRecorridosEnMapa] = useState(true); // Activado por defecto
   const [soloImportantes, setSoloImportantes] = useState(false); // Mostrar todos por defecto
+  const [direccionActual, setDireccionActual] = useState<string>("");
+  const [recorridoInfoVisible, setRecorridoInfoVisible] = useState(false);
+  const [recorridoInfo, setRecorridoInfo] = useState<any>(null);
 
   const {
     theme,
@@ -46,22 +53,122 @@ export default function MapaView() {
     irAUbicacionesGuardadas,
     irAZonasAuxiliares,
     irAHistorialRecorridos,
+    permisoDenegado,
+    serviciosDesactivados,
+    cargando,
   } = useMapaViewModel() as any;
 
   const irAGuardarRecorrido = () => {
     navigation.navigate("GuardarRecorrido");
   };
 
+  // Obtener dirección actual usando reverse geocoding
+  useEffect(() => {
+    if (!location) return;
+
+    const obtenerDireccion = async () => {
+      try {
+        const reverse = await Location.reverseGeocodeAsync({
+          latitude: location.latitude,
+          longitude: location.longitude,
+        });
+
+        if (reverse && reverse.length > 0) {
+          const info = reverse[0];
+          const barrio = info?.district || info?.subregion || "";
+          const calle = info?.street || info?.name || "";
+          const numero = info?.streetNumber || "";
+          const direccion = `${calle} ${numero}`.trim() || "";
+          
+          setDireccionActual(barrio ? `${barrio}, ${direccion}` : direccion);
+        }
+      } catch (error) {
+        console.error("Error al obtener dirección:", error);
+      }
+    };
+
+    obtenerDireccion();
+  }, [location]);
+
+  const handleCompartir = async () => {
+    if (!location) return;
+
+    try {
+      const reverse = await Location.reverseGeocodeAsync({
+        latitude: location.latitude,
+        longitude: location.longitude,
+      });
+
+      const info = reverse[0];
+      const calle = info?.street || info?.name || "";
+      const numero = info?.streetNumber || "";
+      const barrio = info?.district || info?.subregion || "No disponible";
+      const direccion = `${calle} ${numero}`.trim() || "No disponible";
+
+      const ahora = new Date();
+      const fecha = ahora.toLocaleDateString("es-CO", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+      const hora = ahora.toLocaleTimeString("es-CO", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
+      const mensaje = `📍 MI UBICACIÓN ACTUAL
+
+🏠 Barrio: ${barrio}
+📍 Dirección: ${direccion}
+📍 Coordenadas:
+   Latitud: ${location.latitude.toFixed(6)}
+   Longitud: ${location.longitude.toFixed(6)}
+
+📅 Fecha de envío: ${fecha}
+🕐 Hora de envío: ${hora}
+
+Compartido desde AlertaMujer`;
+
+      await Share.share({
+        title: "Mi ubicación actual",
+        message: mensaje,
+      });
+    } catch (error) {
+      console.error("Error al compartir ubicación:", error);
+      Alert.alert("Error", "No fue posible compartir la ubicación. Inténtalo nuevamente.");
+    }
+  };
+
   // ─── PANTALLA DE CARGA ────────────────────────────────────────────────────
   if (!location) {
+    const esError = permisoDenegado || serviciosDesactivados;
+    
     return (
       <View style={[styles.loadingContainer, { backgroundColor: theme.background }]}>
-        <MaterialIcons name="location-searching" size={48} color="#7B1DB2" />
+        <MaterialIcons 
+          name={serviciosDesactivados ? "settings" : (permisoDenegado ? "location-off" : "location-searching")} 
+          size={48} 
+          color={esError ? "#E74C3C" : "#7B1DB2"} 
+        />
         <Text style={[styles.loadingText, { color: theme.text }]}>
-          {t.mapa.cargando}
+          {serviciosDesactivados 
+            ? "Ubicación desactivada" 
+            : (permisoDenegado 
+              ? "Permiso de ubicación denegado" 
+              : (cargando ? t.mapa.cargando : "No se pudo obtener la ubicación"))}
         </Text>
+        {serviciosDesactivados && (
+          <Text style={[styles.loadingText, { color: theme.contactSubtext, fontSize: 13, marginTop: 4, textAlign: "center" }]}>
+            Activa los servicios de ubicación en la configuración de tu dispositivo
+          </Text>
+        )}
+        {permisoDenegado && (
+          <Text style={[styles.loadingText, { color: theme.contactSubtext, fontSize: 13, marginTop: 4, textAlign: "center" }]}>
+            AlertaMujer necesita acceso a tu ubicación para mostrarte el mapa y garantizar tu seguridad
+          </Text>
+        )}
         <TouchableOpacity style={styles.botonReintentar} onPress={reintentarPermisos}>
-          <Text style={styles.botonReintentarTexto}>{t.mapa.intentar_nuevo}</Text>
+          <Text style={styles.botonReintentarTexto}>{serviciosDesactivados ? "Verificar de nuevo" : t.mapa.intentar_nuevo}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -97,9 +204,7 @@ export default function MapaView() {
     {
       icono: "share",
       label: t.mapa.compartir,
-      accion: () => {
-        console.log("Compartir ubicación");
-      },
+      accion: handleCompartir,
     },
     {
       icono: "refresh",
@@ -159,51 +264,63 @@ export default function MapaView() {
         <Marker key={index} coordinate={pos} title={`${t.mapa.historial} ${index + 1}`} pinColor="#7B1DB2" />
       ))}
 
-      {/* Polylines de recorridos guardados cuando están activados */}
-      {mostrarRecorridosEnMapa && recorridos.length > 0 && (
+      {/* Polylines de recorridos guardados - solo mostrar en pantalla completa */}
+      {fullscreen && mostrarRecorridosEnMapa && recorridos.length > 0 && (
         recorridos
           .filter((recorrido: any) => !soloImportantes || recorrido.importante)
-          .map((recorrido: any) => (
-            <React.Fragment key={recorrido.id}>
-              <Polyline
-                coordinates={recorrido.puntos.map((punto: any) => ({
-                  latitude: punto.latitude,
-                  longitude: punto.longitude,
-                }))}
-                strokeWidth={2}
-                strokeColor="#7B1DB2"
-                lineCap="round"
-                lineJoin="round"
-              />
-              
-              {/* Texto del nombre del recorrido en el punto medio */}
-              <Marker
-                coordinate={recorrido.puntos[Math.floor(recorrido.puntos.length / 2)]}
-                title={recorrido.nombrePersonalizado || `${recorrido.barrioInicio} → ${recorrido.barrioFin}`}
-                description="Recorrido guardado"
-              >
-                <View style={styles.routeLabelContainer}>
-                  <Text style={styles.routeLabelText}>
-                    {recorrido.nombrePersonalizado || `${recorrido.barrioInicio} → ${recorrido.barrioFin}`}
-                  </Text>
-                </View>
-              </Marker>
-              
-              {/* Marcador de inicio pequeño */}
-              <Marker
-                coordinate={recorrido.puntos[0]}
-                pinColor="#4CAF50"
-                title="Inicio"
-              />
-              
-              {/* Marcador de fin pequeño */}
-              <Marker
-                coordinate={recorrido.puntos[recorrido.puntos.length - 1]}
-                pinColor="#F44336"
-                title="Fin"
-              />
-            </React.Fragment>
-          ))
+          .map((recorrido: any, index: number) => {
+            // Colores diferentes para cada ruta para evitar amontonamiento
+            const routeColors = [
+              "#7B1DB2", // Púrpura
+              "#2196F3", // Azul
+              "#FF9800", // Naranja
+              "#00BCD4", // Cyan
+              "#9C27B0", // Violeta
+              "#FF5722", // Naranja oscuro
+              "#4CAF50", // Verde
+              "#E91E63", // Rosa
+            ];
+            const routeColor = routeColors[index % routeColors.length];
+            
+            return (
+              <React.Fragment key={recorrido.id}>
+                <Polyline
+                  coordinates={recorrido.puntos.map((punto: any) => ({
+                    latitude: punto.latitude,
+                    longitude: punto.longitude,
+                  }))}
+                  strokeWidth={4}
+                  strokeColor={routeColor}
+                  lineCap="round"
+                  lineJoin="round"
+                  tappable
+                  onPress={() => {
+                    setRecorridoInfo(recorrido);
+                    setRecorridoInfoVisible(true);
+                  }}
+                />
+                
+                {/* Marcador de inicio */}
+                <Marker
+                  coordinate={recorrido.puntos[0]}
+                  pinColor={routeColor}
+                  title={recorrido.nombrePersonalizado || `${recorrido.barrioInicio} → ${recorrido.barrioFin}`}
+                  description="Inicio del recorrido"
+                  onPress={() => {
+                    setRecorridoInfo(recorrido);
+                    setRecorridoInfoVisible(true);
+                  }}
+                />
+                
+                {/* Marcador de fin */}
+                <Marker
+                  coordinate={recorrido.puntos[recorrido.puntos.length - 1]}
+                  pinColor="#F44336"
+                  title="Fin"
+                />
+              </React.Fragment>
+            );
+          })
       )}
     </MapView>
   );
@@ -221,7 +338,7 @@ export default function MapaView() {
           colors={[theme.headercolor1, theme.headercolor2]}
           start={{ x: 1, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={styles.gradiente}
+          style={[styles.gradiente, { paddingTop: insets.top + 20 }]}
         >
           <View style={styles.headerContenido}>
             <View style={{ flex: 1 }}>
@@ -229,9 +346,9 @@ export default function MapaView() {
               <Text style={styles.SubtituloHeader}>{t.mapa.subtitulo}</Text>
               <View style={styles.filaUbicacion}>
                 <MaterialIcons name="place" size={14} color="rgba(255,255,255,0.9)" />
-                {location
-                  ? `${location.latitude.toFixed(3)}, ${location.longitude.toFixed(3)}`
-                  : t.mapa.obteniendo}
+                <Text style={styles.subtituloHeader}>
+                  {direccionActual || t.mapa.obteniendo}
+                </Text>
               </View>
             </View>
             <Image
@@ -242,7 +359,16 @@ export default function MapaView() {
         </LinearGradient>
 
         {/* MAPA */}
-        <View style={styles.contenedorMapa}>{mapComponent}</View>
+        <View style={styles.contenedorMapa}>
+          {mapComponent}
+          <TouchableOpacity
+            style={styles.openMapButton}
+            onPress={() => setFullscreen(true)}
+          >
+            <MaterialIcons name="open-in-full" size={18} color="#fff" />
+            <Text style={styles.openMapText}>{t.mapa.abrir_mapa_completo}</Text>
+          </TouchableOpacity>
+        </View>
 
         {/* SWITCH DE RECORRIDOS */}
         <View style={[styles.switchRecorridosContainer, { backgroundColor: theme.card }]}>
@@ -420,6 +546,80 @@ export default function MapaView() {
             </Animated.View>
           )}
         </View>
+      </Modal>
+
+      {/* MODAL INFORMACIÓN DE RECORRIDO */}
+      <Modal visible={recorridoInfoVisible} animationType="slide" transparent>
+        <TouchableWithoutFeedback onPress={() => setRecorridoInfoVisible(false)}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
+                <View style={styles.modalHeader}>
+                  <Text style={[styles.modalTitle, { color: theme.text }]}>
+                    Información del Recorrido
+                  </Text>
+                  <TouchableOpacity onPress={() => setRecorridoInfoVisible(false)}>
+                    <MaterialIcons name="close" size={24} color={theme.text} />
+                  </TouchableOpacity>
+                </View>
+                
+                {recorridoInfo && (
+                  <View style={styles.modalBody}>
+                    <View style={styles.infoRow}>
+                      <MaterialIcons name="route" size={20} color="#7B1DB2" />
+                      <Text style={[styles.infoLabel, { color: theme.contactSubtext }]}>Nombre:</Text>
+                      <Text style={[styles.infoValue, { color: theme.text }]}>
+                        {recorridoInfo.nombrePersonalizado || `${recorridoInfo.barrioInicio} → ${recorridoInfo.barrioFin}`}
+                      </Text>
+                    </View>
+                    <View style={styles.infoRow}>
+                      <MaterialIcons name="place" size={20} color="#7B1DB2" />
+                      <Text style={[styles.infoLabel, { color: theme.contactSubtext }]}>Inicio:</Text>
+                      <Text style={[styles.infoValue, { color: theme.text }]}>
+                        {recorridoInfo.barrioInicio}
+                      </Text>
+                    </View>
+                    <View style={styles.infoRow}>
+                      <MaterialIcons name="flag" size={20} color="#7B1DB2" />
+                      <Text style={[styles.infoLabel, { color: theme.contactSubtext }]}>Fin:</Text>
+                      <Text style={[styles.infoValue, { color: theme.text }]}>
+                        {recorridoInfo.barrioFin}
+                      </Text>
+                    </View>
+                    <View style={styles.infoRow}>
+                      <MaterialIcons name="calendar-today" size={20} color="#7B1DB2" />
+                      <Text style={[styles.infoLabel, { color: theme.contactSubtext }]}>Fecha:</Text>
+                      <Text style={[styles.infoValue, { color: theme.text }]}>
+                        {recorridoInfo.fecha}
+                      </Text>
+                    </View>
+                    <View style={styles.infoRow}>
+                      <MaterialIcons name="schedule" size={20} color="#7B1DB2" />
+                      <Text style={[styles.infoLabel, { color: theme.contactSubtext }]}>Hora:</Text>
+                      <Text style={[styles.infoValue, { color: theme.text }]}>
+                        {recorridoInfo.horaInicio} - {recorridoInfo.horaFin}
+                      </Text>
+                    </View>
+                    <View style={styles.infoRow}>
+                      <MaterialIcons name="timeline" size={20} color="#7B1DB2" />
+                      <Text style={[styles.infoLabel, { color: theme.contactSubtext }]}>Puntos:</Text>
+                      <Text style={[styles.infoValue, { color: theme.text }]}>
+                        {recorridoInfo.cantidadPuntos}
+                      </Text>
+                    </View>
+                  </View>
+                )}
+
+                <TouchableOpacity
+                  style={styles.modalCloseButton}
+                  onPress={() => setRecorridoInfoVisible(false)}
+                >
+                  <Text style={styles.modalCloseText}>Cerrar</Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
       </Modal>
     </View>
   );

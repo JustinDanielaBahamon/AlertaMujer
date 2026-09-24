@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
+  SafeAreaView,
 } from "react-native";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import { useTheme } from "../../../contexts/ThemeContext";
@@ -189,32 +190,46 @@ export default function HistorialRecorridos() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      {/* HEADER MEJORADO */}
+      <LinearGradient
+        colors={[theme.headercolor1, theme.headercolor2]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.header}
+      >
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <MaterialIcons name="arrow-back" size={28} color="#fff" />
+        </TouchableOpacity>
+
+        <View style={styles.headerContent}>
+          <Text style={styles.headerTitle}>{t.mapa.historial_recorridos}</Text>
+          <Text style={styles.headerSubtitle}>
+            {t.mapa.historial_recorridos_desc}
+          </Text>
+        </View>
+
+        <TouchableOpacity
+          style={styles.mapButton}
+          onPress={() => {
+            // Navegar al mapa principal para ver recorridos
+            navigation.navigate("DrawerHome", {
+              screen: "Inicio",
+              params: { screen: "Mapa" },
+            } as never);
+          }}
+        >
+          <MaterialIcons name="map" size={24} color="#fff" />
+        </TouchableOpacity>
+      </LinearGradient>
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
       >
-        {/* HEADER */}
-        <LinearGradient
-          colors={[theme.headercolor1, theme.headercolor2]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.header}
-        >
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
-          >
-            <MaterialIcons name="arrow-back" size={26} color="#fff" />
-          </TouchableOpacity>
-
-          <View style={styles.headerContent}>
-            <Text style={styles.headerTitle}>{t.mapa.historial_recorridos}</Text>
-            <Text style={styles.headerSubtitle}>
-              Historial de tus recorridos completos
-            </Text>
-          </View>
-        </LinearGradient>
 
         {/* LISTA DE HISTORIAL */}
         <Text style={[styles.sectionTitle, { color: theme.text }]}>
@@ -250,9 +265,6 @@ export default function HistorialRecorridos() {
                   size={16}
                   color={theme.contactSubtext}
                 />
-                <Text style={[styles.dateText, { color: theme.contactSubtext }]}>
-                  {formatearFecha(item.fecha)}
-                </Text>
                 <MaterialIcons
                   name="access-time"
                   size={16}
@@ -273,9 +285,10 @@ export default function HistorialRecorridos() {
                   size={14}
                   color={theme.contactSubtext}
                 />
-                <Text style={[styles.addressText, { color: "black" }]}>
-                  {item.municipio}, {item.departamento}
+                <Text style={[styles.dateText, { color: theme.contactSubtext }]}>
+                  {formatearFecha(item.fecha)}
                 </Text>
+                
               </View>
 
               <View style={styles.locationRow}>
@@ -284,8 +297,8 @@ export default function HistorialRecorridos() {
                   size={14}
                   color={theme.contactSubtext}
                 />
-                <Text style={[styles.addressText, { color: theme.contactSubtext }]}>
-                  {item.cantidadPuntos} puntos
+                <Text style={[styles.addressText, { color: "black" }]}>
+                  {item.municipio}, {item.departamento}
                 </Text>
               </View>
             </View>
@@ -324,7 +337,7 @@ export default function HistorialRecorridos() {
         )}
       </ScrollView>
 
-      {/* MODAL DETALLE */}
+      {/* MODAL DETALLE MEJORADO */}
       <Modal visible={!!selectedItem} animationType="slide" transparent>
         <TouchableWithoutFeedback onPress={() => setSelectedItem(null)}>
           <View style={styles.modalOverlay}>
@@ -332,12 +345,13 @@ export default function HistorialRecorridos() {
               <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
                 {selectedItem && (
                   <>
-                    <View style={styles.modalHeader}>
+                    {/* HEADER DEL MODAL */}
+                    <View style={styles.modalHeaderImproved}>
                       <View style={styles.modalIcon}>
                         <MaterialIcons name="route" size={32} color="#7B1DB2" />
                       </View>
                       <Text style={[styles.modalTitle, { color: theme.text }]}>
-                        Recorrido #{selectedItem.id}
+                        {selectedItem.nombrePersonalizado || `Recorrido #${selectedItem.id}`}
                       </Text>
                     </View>
 
@@ -421,12 +435,20 @@ export default function HistorialRecorridos() {
                       </MapView>
                     </View>
 
-                    <TouchableOpacity
-                      style={styles.modalCloseButton}
-                      onPress={() => setSelectedItem(null)}
-                    >
-                      <Text style={styles.modalCloseText}>{t.mapa.cerrar}</Text>
-                    </TouchableOpacity>
+                    {/* BOTONES DE ACCIÓN */}
+                    <View style={styles.modalActions}>
+                      <TouchableOpacity
+                        style={[styles.modalActionButton, styles.modalButtonSecondary]}
+                        onPress={() => setSelectedItem(null)}
+                      >
+                        <MaterialIcons name="close" size={20} color={theme.text} />
+                        <Text style={[styles.modalActionText, { color: theme.text }]}>
+                          {t.modal.cerrar}
+                        </Text>
+                      </TouchableOpacity>
+
+                     
+                    </View>
                   </>
                 )}
               </View>
@@ -434,7 +456,7 @@ export default function HistorialRecorridos() {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 }
 
