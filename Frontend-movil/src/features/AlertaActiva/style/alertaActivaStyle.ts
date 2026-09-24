@@ -24,7 +24,7 @@ export const createStyles = (theme: AppTheme, width: number) => {
     },
     header: {
       flexDirection: "row" as const,
-      justifyContent: "space-between" as const,
+      justifyContent: "flex-end" as const,
       alignItems: "center" as const,
       marginBottom: 10,
     },
@@ -37,9 +37,9 @@ export const createStyles = (theme: AppTheme, width: number) => {
       alignItems: "center" as const,
     },
     headerMapButton: {
-      width: 52,
-      height: 52,
-      borderRadius: 26,
+      width: 70,
+      height: 70,
+      borderRadius: 50,
       overflow: "hidden" as const,
       backgroundColor: theme.card,
       justifyContent: "center" as const,
@@ -51,11 +51,15 @@ export const createStyles = (theme: AppTheme, width: number) => {
       width: "100%" as const,
       height: "100%" as const,
     },
+    headerMapFallback: {
+      justifyContent: "center" as const,
+      alignItems: "center" as const,
+    },
     title: {
       fontSize: isCompact ? 26 : isWide ? 36 : 32,
       fontWeight: "800" as const,
       color: theme.icono,
-      marginTop: 10,
+      marginTop: 1,
     },
     subtitle: {
       fontSize: isCompact ? 14 : 16,
@@ -65,7 +69,7 @@ export const createStyles = (theme: AppTheme, width: number) => {
     circleWrapper: {
       alignItems: "center" as const,
       justifyContent: "center" as const,
-      marginVertical: 20,
+      marginVertical: 10,
     },
     circle: {
       width: circleSize,
@@ -176,20 +180,22 @@ export const createStyles = (theme: AppTheme, width: number) => {
       color: theme.icono,
       fontSize: 15,
       fontWeight: "600" as const,
-    },
+   },
+
     botonCerrarMapa: {
-      position: "absolute" as const,
-      bottom: 40,
-      alignSelf: "center" as const,
-      backgroundColor: "rgba(0,0,0,0.75)",
-      paddingHorizontal: 24,
-      paddingVertical: 12,
-      borderRadius: 24,
-    },
+    position: "absolute" as const,
+    bottom: 750,
+    right: 20, // derecha
+    alignSelf: "center" as const,
+    backgroundColor: "rgba(0,0,0,0.75)",
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    borderRadius: 24,
+},
     textoCerrarMapa: {
-      color: "#ffffff",
-      fontWeight: "700" as const,
-      fontSize: 14,
-    },
+    color: "#ffffff",
+    fontWeight: "700" as const,
+    fontSize: 14,
+},
   };
 };
