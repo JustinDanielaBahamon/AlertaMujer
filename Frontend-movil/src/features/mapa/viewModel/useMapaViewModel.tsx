@@ -29,6 +29,9 @@ export const useMapaViewModel = () => {
   const [showClose, setShowClose] = useState(false);
   const [historial, setHistorial] = useState<Coordenada[]>([]);
   const [intentosPermiso, setIntentosPermiso] = useState(0);
+  const [permisoDenegado, setPermisoDenegado] = useState(false);
+  const [serviciosDesactivados, setServiciosDesactivados] = useState(false);
+  const [cargando, setCargando] = useState(true);
   const [ultimaActualizacion, setUltimaActualizacion] = useState<Date | null>(
     null
   );
@@ -102,107 +105,149 @@ export const useMapaViewModel = () => {
     let historialInterval: ReturnType<typeof setInterval>;
 
     const iniciarUbicacion = async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-
-      if (status !== "granted") {
-        if (intentosPermiso === 0) {
-          alert(t.mapa.permiso_denegado);
+      try {
+        setCargando(true);
+        setPermisoDenegado(false);
+        
+        // Verificar si los servicios de ubicación están activados
+        const servicioHabilitado = await Location.hasServicesEnabledAsync();
+        if (!servicioHabilitado) {
+          setCargando(false);
+          setServiciosDesactivados(true);
+          alert(
+            "⚠️ UBICACIÓN DESACTIVADA\n\n" +
+            "Para usar el mapa, necesitas activar los servicios de ubicación de tu dispositivo.\n\n" +
+            "Por favor:\n" +
+            "1. Ve a Configuración de tu dispositivo\n" +
+            "2. Busca 'Ubicación' o 'Location'\n" +
+            "3. Activa los servicios de ubicación\n\n" +
+            "Luego regresa e intenta nuevamente."
+          );
           return;
         }
-        if (intentosPermiso === 1) {
-          alert(t.mapa.permiso_denegado2);
-          return;
+        
+        const { status } = await Location.requestForegroundPermissionsAsync();
+
+        if (status !== "granted") {
+          setCargando(false);
+          setPermisoDenegado(true);
+          
+          if (intentosPermiso === 0) {
+            alert(
+              "⚠️ PERMISO DE UBICACIÓN REQUERIDO\n\n" +
+              "AlertaMujer necesita acceso a tu ubicación para mostrarte el mapa y garantizar tu seguridad.\n\n" +
+              "Por favor concede el permiso de ubicación para continuar."
+            );
+            return;
+          }
+          if (intentosPermiso === 1) {
+            alert(
+              "⚠️ PERMISO DE UBICACIÓN NECESARIO\n\n" +
+              "Sin acceso a tu ubicación, no podemos mostrarte el mapa ni garantizar tu seguridad.\n\n" +
+              "Por favor habilita el permiso de ubicación en Configuración."
+            );
+            return;
+          }
+          if (intentosPermiso >= 2) {
+            alert(
+              "⚠️ CONFIGURACIÓN DE UBICACIÓN\n\n" +
+              "Para usar el mapa, debes habilitar el permiso de ubicación desde la configuración de la aplicación.\n\n" +
+              "Serás redirigido a Configuración."
+            );
+            Linking.openSettings();
+            return;
+          }
         }
-        if (intentosPermiso >= 2) {
-          alert(t.mapa.permiso_configuracion);
-          Linking.openSettings();
-          return;
-        }
-      }
 
-      const currentLocation = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
-      });
-
-      const firstLoc: Coordenada = {
-        latitude: currentLocation.coords.latitude,
-        longitude: currentLocation.coords.longitude,
-      };
-
-      setLocation(firstLoc);
-      setUltimaActualizacion(new Date());
-      setHistorial([firstLoc]);
-
-      subscription = await Location.watchPositionAsync(
-        {
+        const currentLocation = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.Balanced,
-          timeInterval: 15000,
-          distanceInterval: 30,
-        },
-        (loc) => {
-          const newLoc: Coordenada = {
-            latitude: loc.coords.latitude,
-            longitude: loc.coords.longitude,
-          };
+        });
 
-          setLocation(newLoc);
-          setUltimaActualizacion(new Date());
+        const firstLoc: Coordenada = {
+          latitude: currentLocation.coords.latitude,
+          longitude: currentLocation.coords.longitude,
+        };
 
-          setHistorial((prev) => {
-            const ultimo = prev[prev.length - 1];
-            if (!ultimo) return [newLoc];
+        setLocation(firstLoc);
+        setUltimaActualizacion(new Date());
+        setHistorial([firstLoc]);
+        setCargando(false);
 
-            const distancia = getDistanceFromLatLonInMeters(
-              ultimo.latitude,
-              ultimo.longitude,
-              newLoc.latitude,
-              newLoc.longitude
-            );
-
-            if (distancia >= 10) {
-              return [...prev, newLoc].slice(-20);
-            }
-
-            return prev;
-          });
-        }
-      );
-
-      historialInterval = setInterval(async () => {
-        try {
-          const current = await Location.getCurrentPositionAsync({
+        subscription = await Location.watchPositionAsync(
+          {
             accuracy: Location.Accuracy.Balanced,
-          });
+            timeInterval: 15000,
+            distanceInterval: 30,
+          },
+          (loc) => {
+            const newLoc: Coordenada = {
+              latitude: loc.coords.latitude,
+              longitude: loc.coords.longitude,
+            };
 
-          const newLoc: Coordenada = {
-            latitude: current.coords.latitude,
-            longitude: current.coords.longitude,
-          };
+            setLocation(newLoc);
+            setUltimaActualizacion(new Date());
 
-          setLocation(newLoc);
-          setUltimaActualizacion(new Date());
+            setHistorial((prev) => {
+              const ultimo = prev[prev.length - 1];
+              if (!ultimo) return [newLoc];
 
-          setHistorial((prev) => {
-            const ultimo = prev[prev.length - 1];
-            if (!ultimo) return [newLoc];
+              const distancia = getDistanceFromLatLonInMeters(
+                ultimo.latitude,
+                ultimo.longitude,
+                newLoc.latitude,
+                newLoc.longitude
+              );
 
-            const distancia = getDistanceFromLatLonInMeters(
-              ultimo.latitude,
-              ultimo.longitude,
-              newLoc.latitude,
-              newLoc.longitude
-            );
+              if (distancia >= 10) {
+                return [...prev, newLoc].slice(-20);
+              }
 
-            if (distancia >= 10) {
-              return [...prev, newLoc].slice(-20);
-            }
+              return prev;
+            });
+          }
+        );
 
-            return prev;
-          });
-        } catch (error) {
-          console.error("Error en refresh automático:", error);
-        }
-      }, 60000);
+        historialInterval = setInterval(async () => {
+          try {
+            const current = await Location.getCurrentPositionAsync({
+              accuracy: Location.Accuracy.Balanced,
+            });
+
+            const newLoc: Coordenada = {
+              latitude: current.coords.latitude,
+              longitude: current.coords.longitude,
+            };
+
+            setLocation(newLoc);
+            setUltimaActualizacion(new Date());
+
+            setHistorial((prev) => {
+              const ultimo = prev[prev.length - 1];
+              if (!ultimo) return [newLoc];
+
+              const distancia = getDistanceFromLatLonInMeters(
+                ultimo.latitude,
+                ultimo.longitude,
+                newLoc.latitude,
+                newLoc.longitude
+              );
+
+              if (distancia >= 10) {
+                return [...prev, newLoc].slice(-20);
+              }
+
+              return prev;
+            });
+          } catch (error) {
+            console.error("Error en refresh automático:", error);
+          }
+        }, 60000);
+      } catch (error) {
+        console.error("Error al obtener ubicación:", error);
+        setCargando(false);
+        setPermisoDenegado(true);
+      }
     };
 
     iniciarUbicacion();
@@ -351,7 +396,14 @@ export const useMapaViewModel = () => {
     handleMapPress,
     formatearHora,
     refrescarUbicacion,
-    reintentarPermisos: () => setIntentosPermiso((prev) => prev + 1),
+    reintentarPermisos: () => {
+      setIntentosPermiso((prev) => prev + 1);
+      setPermisoDenegado(false);
+      setServiciosDesactivados(false);
+    },
+    permisoDenegado,
+    serviciosDesactivados,
+    cargando,
     irAClasificarZona,
     irAUbicacionesGuardadas,
     irClasificarZona,

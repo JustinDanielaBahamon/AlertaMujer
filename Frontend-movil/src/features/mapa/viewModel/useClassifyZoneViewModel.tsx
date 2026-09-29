@@ -1,6 +1,7 @@
 import * as Location from "expo-location";
 import { useCallback, useMemo, useState } from "react";
 import { Alert } from "react-native";
+import { LocationService, type UbicacionDetallada } from "../../../services/location.service";
 
 export type NivelRiesgo =
   | "muy_seguro"
@@ -64,45 +65,32 @@ export function useClasificarZonaViewModel(
     setDescripcion(texto.slice(0, MAX_DESCRIPTION_LENGTH));
   }, []);
 
-  //  Obtener la ubicación actual mediante GPS y reverse geocoding
+  //  Obtener la ubicación actual mediante GPS y reverse geocoding con alta precisión
   const obtenerUbicacionActual = useCallback(async () => {
     try {
       setObtenerUbicacionCargando(true);
 
-      // 1. Solicitar permisos de ubicación
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
+      // Usar el servicio centralizado de ubicación con alta precisión
+      const ubicacion = await LocationService.getFullLocation();
+
+      if (ubicacion) {
+        setLatitude(ubicacion.latitud);
+        setLongitude(ubicacion.longitud);
+        setDireccion(ubicacion.direccionCompleta);
+        setBarrio(ubicacion.barrio);
+        setCiudad(ubicacion.ciudad);
+
+        console.log("Ubicación mejorada obtenida:", {
+          direccion: ubicacion.direccionCompleta,
+          barrio: ubicacion.barrio,
+          ciudad: ubicacion.ciudad,
+          precision: ubicacion.precision,
+        });
+      } else {
         Alert.alert(
-          "Permiso denegado",
-          "Necesitamos permisos de ubicación para obtener tu posición actual."
+          "Error de ubicación",
+          "No se pudo obtener la ubicación actual. Verifica que el GPS esté encendido."
         );
-        return;
-      }
-
-      // 2. Obtener posición GPS actual
-      const location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.High,
-      });
-
-      const { latitude: lat, longitude: lng } = location.coords;
-      setLatitude(lat);
-      setLongitude(lng);
-
-      // 3. Obtener dirección/barrio/ciudad mediante Geocodificación Inversa
-      const reverse = await Location.reverseGeocodeAsync({
-        latitude: lat,
-        longitude: lng,
-      });
-
-      if (reverse.length > 0) {
-        const info = reverse[0];
-        const calle = `${info.street || "Calle desconocida"} ${info.streetNumber || ""}`.trim();
-        const barrioDetectado = info.district || info.subregion || "Sector desconocido";
-        const ciudadDetectada = info.city || info.region || "Ciudad desconocida";
-
-        setDireccion(calle);
-        setBarrio(barrioDetectado);
-        setCiudad(ciudadDetectada);
       }
     } catch (err) {
       console.error("Error al obtener ubicación actual:", err);
