@@ -32,7 +32,7 @@ export const styles = StyleSheet.create({
 
   /* HEADER */
   gradiente: {
-    paddingTop: 20,
+    paddingTop: 10,
     paddingHorizontal: 20,
     paddingBottom: 30,
     borderBottomLeftRadius: 50,
@@ -86,11 +86,11 @@ export const styles = StyleSheet.create({
 
   /* MAPA */
   contenedorMapa: {
-    height: 200,
-    marginHorizontal: 16,
-    marginTop: 16,
-    borderRadius: 18,
+    height: 250,
+    margin: 20,
+    borderRadius: 16,
     overflow: "hidden",
+    position: "relative",
     elevation: 4,
     shadowColor: "#9e83cf",
     shadowOffset: { width: 0, height: 3 },
@@ -98,6 +98,23 @@ export const styles = StyleSheet.create({
     shadowRadius: 6,
     borderColor:'white',
     borderWidth:3
+  },
+  openMapButton: {
+    position: "absolute",
+    bottom: 15,
+    right: 15,
+    backgroundColor: "#7B1DB2",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  openMapText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 12,
   },
 
   /* SWITCH DE RECORRIDOS */
@@ -300,17 +317,11 @@ export const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   numeroBurbuja: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#7B1DB2",
-    alignItems: "center",
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     justifyContent: "center",
-  },
-  numeroTexto: {
-    color: "white",
-    fontSize: 13,
-    fontWeight: "bold",
+    alignItems: "center",
   },
   fechaItem: {
     fontSize: 14.7,
@@ -319,6 +330,16 @@ export const styles = StyleSheet.create({
   coordItem: {
     fontSize: 12.3,
     marginTop: 2,
+  },
+  recorridoMeta: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 4,
+  },
+  metaText: {
+    fontSize: 11,
+    fontStyle: "italic",
   },
   sinHistorial: {
     alignItems: "center",
@@ -340,6 +361,60 @@ export const styles = StyleSheet.create({
   textoCerrar: {
     color: "white",
     fontWeight: "bold",
+  },
+
+  /* MODAL INFORMACIÓN DE RECORRIDO */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  modalContent: {
+    width: "100%",
+    maxWidth: 400,
+    borderRadius: 20,
+    padding: 24,
+  },
+  modalHeader: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  modalBody: {
+    marginBottom: 20,
+  },
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(0,0,0,0.05)",
+  },
+  infoLabel: {
+    flex: 1,
+    fontSize: 14,
+    marginLeft: 12,
+  },
+  infoValue: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  modalCloseButton: {
+    backgroundColor: "#7B1DB2",
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  modalCloseText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
   },
 
   // Legacy — se mantienen por si algún otro componente los referencia

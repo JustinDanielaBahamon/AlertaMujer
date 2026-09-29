@@ -36,9 +36,11 @@ export default function GuardarRecorrido() {
   const [puntoB, setPuntoB] = useState<PuntoSeleccionado | null>(null);
   const [nombrePuntoA, setNombrePuntoA] = useState("");
   const [nombrePuntoB, setNombrePuntoB] = useState("");
+  const [nombreRecorrido, setNombreRecorrido] = useState("");
   const [metodoSeleccion, setMetodoSeleccion] = useState<MetodoSeleccion>("mapa");
   const [modalUbicacionesVisible, setModalUbicacionesVisible] = useState(false);
   const [puntoSeleccionando, setPuntoSeleccionando] = useState<"A" | "B" | null>(null);
+  const [mapFullscreen, setMapFullscreen] = useState(false);
 
   // Ubicaciones guardadas simuladas
   const ubicacionesGuardadas = [
@@ -89,18 +91,42 @@ export default function GuardarRecorrido() {
       return;
     }
 
-    // Crear un recorrido manual con los puntos seleccionados
-    const hoy = new Date();
-    const fecha = hoy.toISOString().split('T')[0];
-    const horaInicio = hoy.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+    // Calcular distancia entre punto A y B usando fórmula Haversine
+    const calcularDistancia = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+      const R = 6371; // Radio de la Tierra en km
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c; // Distancia en km
+    };
+
+    const distanciaKm = calcularDistancia(puntoA.latitude, puntoA.longitude, puntoB.latitude, puntoB.longitude);
     
-    // Simular hora fin (5 minutos después)
-    const horaFin = new Date(hoy.getTime() + 5 * 60000).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+    // Calcular tiempo estimado (asumiendo velocidad promedio de 5 km/h para caminar)
+    const velocidadPromedioKmH = 5; // 5 km/h caminando
+    const tiempoHoras = distanciaKm / velocidadPromedioKmH;
+    const tiempoMinutos = Math.round(tiempoHoras * 60);
+    
+    // Formatear tiempo estimado
+    let tiempoEstimado = "";
+    if (tiempoMinutos < 60) {
+      tiempoEstimado = `${tiempoMinutos} min`;
+    } else {
+      const horas = Math.floor(tiempoMinutos / 60);
+      const mins = tiempoMinutos % 60;
+      tiempoEstimado = `${horas}h ${mins}min`;
+    }
+
+    const hoy = new Date();
+    const fecha = hoy.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
     const nuevoRecorrido = {
       fecha,
-      horaInicio,
-      horaFin,
+      tiempoEstimado,
+      distanciaEstimada: `${distanciaKm.toFixed(2)} km`,
       barrioInicio: nombrePuntoA || puntoA.nombre || "Punto seleccionado",
       barrioFin: nombrePuntoB || puntoB.nombre || "Punto seleccionado",
       municipio: "Neiva",
@@ -110,16 +136,16 @@ export default function GuardarRecorrido() {
         {
           latitude: puntoA.latitude,
           longitude: puntoA.longitude,
-          timestamp: horaInicio,
+          timestamp: "",
         },
         {
           latitude: puntoB.latitude,
           longitude: puntoB.longitude,
-          timestamp: horaFin,
+          timestamp: "",
         },
       ],
       cantidadPuntos: 2,
-      nombrePersonalizado: `Ruta ${nombrePuntoA || puntoA.nombre || "A"} → ${nombrePuntoB || puntoB.nombre || "B"}`,
+      nombrePersonalizado: nombreRecorrido || `Ruta ${nombrePuntoA || puntoA.nombre || "A"} → ${nombrePuntoB || puntoB.nombre || "B"}`,
       importante: true, // Por defecto importantes
     };
 
@@ -223,6 +249,10 @@ export default function GuardarRecorrido() {
               latitudeDelta: 0.02,
               longitudeDelta: 0.02,
             }}
+            scrollEnabled={false}
+            zoomEnabled={false}
+            rotateEnabled={false}
+            pitchEnabled={false}
             onPress={handleMapPress}
           >
             {puntoA && (
@@ -251,6 +281,14 @@ export default function GuardarRecorrido() {
               </Text>
             </View>
           )}
+
+          <TouchableOpacity
+            style={styles.openMapButton}
+            onPress={() => setMapFullscreen(true)}
+          >
+            <MaterialIcons name="open-in-full" size={18} color="#fff" />
+            <Text style={styles.openMapText}>Abrir mapa completo</Text>
+          </TouchableOpacity>
         </View>
 
         {/* SELECCIÓN DE PUNTOS */}
@@ -346,6 +384,26 @@ export default function GuardarRecorrido() {
           )}
         </View>
 
+        {/* NOMBRE DEL RECORRIDO */}
+        <View style={[styles.sectionContainer, { backgroundColor: theme.card }]}>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>
+            Nombre del recorrido
+          </Text>
+          <View style={[styles.nombreInputContainer, { backgroundColor: theme.background }]}>
+            <MaterialIcons name="route" size={18} color={theme.contactSubtext} style={{ marginRight: 8 }} />
+            <TextInput
+              style={[styles.nombreInput, { color: theme.text }]}
+              placeholder="Ej: Camino seguro Sanjuan - Plaza, Recorrido de la tarde..."
+              placeholderTextColor={theme.contactSubtext}
+              value={nombreRecorrido}
+              onChangeText={setNombreRecorrido}
+            />
+          </View>
+          <Text style={[styles.helperText, { color: theme.contactSubtext }]}>
+            Si no ingresas un nombre, se generará uno automáticamente
+          </Text>
+        </View>
+
         {/* ACCIONES */}
         <View style={styles.actionsContainer}>
           <TouchableOpacity
@@ -410,6 +468,47 @@ export default function GuardarRecorrido() {
             </TouchableWithoutFeedback>
           </View>
         </TouchableWithoutFeedback>
+      </Modal>
+
+      {/* MODAL MAPA COMPLETO */}
+      <Modal visible={mapFullscreen} animationType="slide">
+        <View style={{ flex: 1 }}>
+          <MapView
+            style={{ flex: 1 }}
+            initialRegion={{
+              latitude: 2.9271,
+              longitude: -75.2874,
+              latitudeDelta: 0.02,
+              longitudeDelta: 0.02,
+            }}
+            onPress={handleMapPress}
+          >
+            {puntoA && (
+              <Marker
+                coordinate={puntoA}
+                title="Punto A - Inicio"
+                description={puntoA.nombre || puntoA.direccion}
+                pinColor="#4CAF50"
+              />
+            )}
+            
+            {puntoB && (
+              <Marker
+                coordinate={puntoB}
+                title="Punto B - Fin"
+                description={puntoB.nombre || puntoB.direccion}
+                pinColor="#F44336"
+              />
+            )}
+          </MapView>
+
+          <TouchableOpacity
+            style={styles.fullscreenCloseButton}
+            onPress={() => setMapFullscreen(false)}
+          >
+            <MaterialIcons name="close" size={24} color="#fff" />
+          </TouchableOpacity>
+        </View>
       </Modal>
     </View>
   );

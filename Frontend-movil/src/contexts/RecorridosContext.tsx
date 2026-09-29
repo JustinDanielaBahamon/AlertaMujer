@@ -9,8 +9,8 @@ type PuntoGPS = {
 type Recorrido = {
   id: string;
   fecha: string;
-  horaInicio: string;
-  horaFin: string;
+  tiempoEstimado: string; // Tiempo estimado de viaje
+  distanciaEstimada: string; // Distancia en km
   barrioInicio: string;
   barrioFin: string;
   municipio: string;
@@ -18,7 +18,6 @@ type Recorrido = {
   pais: string;
   puntos: PuntoGPS[];
   cantidadPuntos: number;
-  distanciaEstimada?: string;
   esManual: boolean; // Para distinguir recorridos manuales de automáticos
   nombrePersonalizado?: string; // Para recorridos manuales
   importante: boolean; // Para mostrar en el mapa principal
@@ -49,20 +48,20 @@ export const RecorridosProvider = ({ children }: { children: ReactNode }) => {
     const recorridosIniciales: Recorrido[] = [
       {
         id: "demo-1",
-        fecha: "2024-09-10",
-        horaInicio: "10:35",
-        horaFin: "11:20",
+        fecha: "10/09/2024",
+        tiempoEstimado: "45 min",
+        distanciaEstimada: "3.75 km",
         barrioInicio: "Centro",
         barrioFin: "Altico",
         municipio: "Neiva",
         departamento: "Huila",
         pais: "Colombia",
         puntos: [
-          { latitude: 2.9271, longitude: -75.2874, timestamp: "10:35" },
-          { latitude: 2.9285, longitude: -75.2859, timestamp: "10:40" },
-          { latitude: 2.9302, longitude: -75.2841, timestamp: "10:45" },
-          { latitude: 2.9320, longitude: -75.2825, timestamp: "10:50" },
-          { latitude: 2.9335, longitude: -75.2808, timestamp: "10:55" },
+          { latitude: 2.9271, longitude: -75.2874, timestamp: "" },
+          { latitude: 2.9285, longitude: -75.2859, timestamp: "" },
+          { latitude: 2.9302, longitude: -75.2841, timestamp: "" },
+          { latitude: 2.9320, longitude: -75.2825, timestamp: "" },
+          { latitude: 2.9335, longitude: -75.2808, timestamp: "" },
         ],
         cantidadPuntos: 5,
         esManual: true,
@@ -71,19 +70,19 @@ export const RecorridosProvider = ({ children }: { children: ReactNode }) => {
       },
       {
         id: "demo-2",
-        fecha: "2024-09-10",
-        horaInicio: "14:10",
-        horaFin: "14:45",
+        fecha: "10/09/2024",
+        tiempoEstimado: "35 min",
+        distanciaEstimada: "2.92 km",
         barrioInicio: "Altico",
         barrioFin: "El Jardín",
         municipio: "Neiva",
         departamento: "Huila",
         pais: "Colombia",
         puntos: [
-          { latitude: 2.9200, longitude: -75.2900, timestamp: "14:10" },
-          { latitude: 2.9215, longitude: -75.2883, timestamp: "14:15" },
-          { latitude: 2.9230, longitude: -75.2866, timestamp: "14:20" },
-          { latitude: 2.9245, longitude: -75.2849, timestamp: "14:25" },
+          { latitude: 2.9200, longitude: -75.2900, timestamp: "" },
+          { latitude: 2.9215, longitude: -75.2883, timestamp: "" },
+          { latitude: 2.9230, longitude: -75.2866, timestamp: "" },
+          { latitude: 2.9245, longitude: -75.2849, timestamp: "" },
         ],
         cantidadPuntos: 4,
         esManual: true,
@@ -92,19 +91,19 @@ export const RecorridosProvider = ({ children }: { children: ReactNode }) => {
       },
       {
         id: "demo-3",
-        fecha: "2024-09-09",
-        horaInicio: "08:20",
-        horaFin: "09:05",
+        fecha: "09/09/2024",
+        tiempoEstimado: "40 min",
+        distanciaEstimada: "3.33 km",
         barrioInicio: "La Libertad",
         barrioFin: "Centro",
         municipio: "Neiva",
         departamento: "Huila",
         pais: "Colombia",
         puntos: [
-          { latitude: 2.9150, longitude: -75.2950, timestamp: "08:20" },
-          { latitude: 2.9165, longitude: -75.2933, timestamp: "08:25" },
-          { latitude: 2.9180, longitude: -75.2916, timestamp: "08:30" },
-          { latitude: 2.9195, longitude: -75.2899, timestamp: "08:35" },
+          { latitude: 2.9150, longitude: -75.2950, timestamp: "" },
+          { latitude: 2.9165, longitude: -75.2933, timestamp: "" },
+          { latitude: 2.9180, longitude: -75.2916, timestamp: "" },
+          { latitude: 2.9195, longitude: -75.2899, timestamp: "" },
         ],
         cantidadPuntos: 4,
         esManual: true,
@@ -113,19 +112,19 @@ export const RecorridosProvider = ({ children }: { children: ReactNode }) => {
       },
       {
         id: "demo-4",
-        fecha: "2024-09-08",
-        horaInicio: "16:30",
-        horaFin: "17:15",
+        fecha: "08/09/2024",
+        tiempoEstimado: "30 min",
+        distanciaEstimada: "2.50 km",
         barrioInicio: "San Jorge",
         barrioFin: "Santa Inés",
         municipio: "Neiva",
         departamento: "Huila",
         pais: "Colombia",
         puntos: [
-          { latitude: 2.9100, longitude: -75.3000, timestamp: "16:30" },
-          { latitude: 2.9115, longitude: -75.2983, timestamp: "16:35" },
-          { latitude: 2.9130, longitude: -75.2966, timestamp: "16:40" },
-          { latitude: 2.9145, longitude: -75.2949, timestamp: "16:45" },
+          { latitude: 2.9100, longitude: -75.3000, timestamp: "" },
+          { latitude: 2.9115, longitude: -75.2983, timestamp: "" },
+          { latitude: 2.9130, longitude: -75.2966, timestamp: "" },
+          { latitude: 2.9145, longitude: -75.2949, timestamp: "" },
         ],
         cantidadPuntos: 4,
         esManual: true,
