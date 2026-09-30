@@ -64,7 +64,7 @@ export const authService = {
     console.log('✅ [auth.service] typeof usuarioSeguro.id:', typeof usuarioSeguro.id);
 
     return {
-      token: `mock-jwt-${usuarioSeguro.id}-${Date.now()}`,
+      token: "",
       usuario: usuarioSeguro,
     };
   },
@@ -122,7 +122,7 @@ export const authService = {
     const { password: _pwd, ...usuarioSeguro } = response.data;
 
     return {
-      token: `mock-jwt-${usuarioSeguro.id}-${Date.now()}`,
+      token: "",
       usuario: usuarioSeguro,
     };
   },

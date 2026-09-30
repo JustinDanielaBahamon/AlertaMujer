@@ -22,14 +22,7 @@ import { getMainStackNavigation } from "../../../navigation/navigationHelpers";
 import { createStyles } from "../styles/inicio.styles";
 import { getAlertasByUsuario } from "../../../../src/services/alerts.service";
 
-//  Mock de alertas (igual al historial)
-const mockAlerts: Alerta[] = [
-  { id: "1", tipo: "Emergencia", fecha: "30 Mar, 2026", hora: "14:32", ubicacion: "Neiva, Huila",   estado: "Enviada"   as EstadoAlerta },
-  { id: "2", tipo: "Asistencia", fecha: "29 Mar, 2026", hora: "20:10", ubicacion: "Campoalegre",    estado: "Cancelada" as EstadoAlerta },
-  { id: "3", tipo: "Emergencia", fecha: "28 Mar, 2026", hora: "09:15", ubicacion: "Neiva, Huila",   estado: "Enviada"   as EstadoAlerta },
-  { id: "4", tipo: "Asistencia", fecha: "27 Mar, 2026", hora: "18:40", ubicacion: "Palermo, Huila", estado: "Cancelada" as EstadoAlerta },
-  { id: "5", tipo: "Asistencia", fecha: "26 Mar, 2026", hora: "11:05", ubicacion: "Rivera, Huila",  estado: "En curso"  as EstadoAlerta },
-];
+
 
 const transformarTipo = (apiTipo: string): string => {
   if (apiTipo === 'SOS' || apiTipo === 'Robo' || apiTipo === 'Acoso') return 'Emergencia';
@@ -67,11 +60,11 @@ export default function Inicio() {
 
   const [cameraActive, setCameraActive] = useState(false);
   const [micActive, setMicActive]       = useState(false);
-  const [alertas, setAlertas]           = useState<Alerta[]>(mockAlerts);
+  const [alertas, setAlertas]           = useState<Alerta[]>([]);
 
   const cargarAlertas = useCallback(async () => {
     if (!user?.id) {
-      setAlertas(mockAlerts);
+      setAlertas([]);
       return;
     }
 
@@ -81,7 +74,7 @@ export default function Inicio() {
       setAlertas(alertasTransformadas);
     } catch (error) {
       console.error("Error al cargar alertas:", error);
-      setAlertas(mockAlerts);
+      setAlertas([]);
     }
   }, [user?.id]);
 
@@ -90,7 +83,7 @@ export default function Inicio() {
   }, [cargarAlertas]);
 
   //  Última alerta derivada del historial
-  const ultimaAlerta = useMemo(() => alertas[0] || mockAlerts[0], [alertas]);
+  const ultimaAlerta = useMemo(() => alertas[0], [alertas]);
 
   //  No usar calcularTiempoTranscurrido con formato de API
   //  Usar directamente el valor de tiempo de la API
