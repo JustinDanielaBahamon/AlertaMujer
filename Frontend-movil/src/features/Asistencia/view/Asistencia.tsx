@@ -1,14 +1,48 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Image, Linking, Platform } from 'react-native';
 import { styles } from '../style/Asistencia.style';
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from "../../../../src/contexts/ThemeContext";
 import { useLocale } from "../../../../src/contexts/LocaleContext";
+import api from "../../../../src/services/api";
+
+interface EmergencyResource {
+  id: number;
+  name: string;
+  resource_type: string;
+  telephone: string;
+  secondary_telephone: string;
+  email: string;
+  address: string;
+  city: string;
+  latitude: number;
+  longitude: number;
+  description: string;
+  is_active: boolean;
+}
 
 export default function Asistencia() {
   const { theme } = useTheme();
   const { t } = useLocale();
+  const [recursos, setRecursos] = useState<EmergencyResource[]>([]);
+  const [cargando, setCargando] = useState(true);
+
+  useEffect(() => {
+    cargarRecursos();
+  }, []);
+
+  const cargarRecursos = async () => {
+    try {
+      setCargando(true);
+      const response = await api.get('/api/resources/emergency-resources');
+      setRecursos(response.data);
+    } catch (error) {
+      console.error('Error cargando recursos:', error);
+    } finally {
+      setCargando(false);
+    }
+  };
 
   const llamar = (numero: string) => {
     const url = Platform.OS === 'android' ? `tel:${numero}` : `telprompt:${numero}`;
@@ -16,18 +50,17 @@ export default function Asistencia() {
   };
 
   const gradienteHeader: [string, string]     = [theme.headercolor1, theme.headercolor2];
-  const gradienteEmergencia: [string, string] = theme.asistenciaEmergenciaGradiente;
-  const gradienteDefensoria: [string, string] = [theme.headercolor1, theme.headercolor2];
-  const gradienteViolencia                    = theme.asistenciaViolenciaGradiente;
-  const gradienteMental                       = theme.asistenciaMentalGradiente;
-  const iconoUserBg                           = theme.asistenciaIconoUserBg;
-  const iconoBombilloBg                       = theme.asistenciaIconoBombilloBg;
-  const iconoBombilloColor                    = theme.asistenciaIconoBombilloColor;
-  const iconoEstrellaBg                       = theme.asistenciaIconoEstrellaBg;
+
+  const recursosPorTipo = recursos.reduce((acc, recurso) => {
+    if (!acc[recurso.resource_type]) {
+      acc[recurso.resource_type] = [];
+    }
+    acc[recurso.resource_type].push(recurso);
+    return acc;
+  }, {} as Record<string, EmergencyResource[]>);
 
   return (
     <View style={[styles.ContenedorPrincipal, { backgroundColor: theme.background }]}>
-
       {/* HEADER */}
       <View style={styles.Header}>
         <LinearGradient
@@ -59,102 +92,40 @@ export default function Asistencia() {
         bounces={false}
         overScrollMode="never"
       >
-        <View style={styles.ContenedorCuadros}>
-
-          {/* EMERGENCIA 123 */}
-          <LinearGradient
-            colors={gradienteEmergencia}
-            start={{ x: 1, y: 0 }} end={{ x: 1, y: 1 }}
-            style={{ borderRadius: 22, padding: 20, marginBottom: 15 }}
-          >
-            <Text style={{ color: 'white', fontSize: 21, fontWeight: '600' }}>
-              {t.asistencia.emergencia_titulo}
-            </Text>
-            <Text style={{ color: 'white', fontSize: 42, fontWeight: 'bold', marginVertical: 2 }}>
-              123
-            </Text>
-            <Text style={{ color: 'white', fontSize: 14, marginBottom: 15 }}>
-              {t.asistencia.emergencia_desc}
-            </Text>
-            <TouchableOpacity onPress={() => llamar('123')} style={styles.BotonPolicia}>
-              <View style={styles.LlamarIcono}>
-                <Feather name="phone" size={20} color="white" />
-                <Text style={styles.llamarTexto}>{t.asistencia.llamar_ahora}</Text>
-              </View>
-            </TouchableOpacity>
-          </LinearGradient>
-
-          {/* SECCIÓN DOBLE: VIOLENCIA Y SALUD MENTAL */}
-          <View style={styles.SegundaSeccion}>
-
-            <LinearGradient
-              colors={gradienteViolencia}
-              start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }}
-              style={styles.ContenedorViolencia}
-            >
-              <View style={[styles.iconoUser, { backgroundColor: iconoUserBg }]}>
-                <Feather name="user" size={24} color="white" />
-              </View>
-              <Text style={{ color: 'white', fontSize: 14, fontWeight: 'bold' }}>{t.asistencia.violencia}</Text>
-              <Text style={{ color: 'white', fontSize: 32, fontWeight: 'bold' }}>156</Text>
-              <Text style={{ color: 'white', fontSize: 12, marginBottom: 15, height: 40 }}>
-                {t.asistencia.violencia_desc}
-              </Text>
-              <TouchableOpacity onPress={() => llamar('156')} style={styles.llamarViolencia}>
-                <Text style={styles.llamadaSegundaSeccion}>{t.asistencia.llamar}</Text>
-              </TouchableOpacity>
-            </LinearGradient>
-
-            <LinearGradient
-              colors={gradienteMental}
-              start={{ x: 1, y: 0 }} end={{ x: 1, y: 2 }}
-              style={styles.ContenedorMental}
-            >
-              <View style={[styles.iconoBombillo, { backgroundColor: iconoBombilloBg }]}>
-                <MaterialIcons name="lightbulb-outline" size={26} color={iconoBombilloColor} />
-              </View>
-              <Text style={{ color: 'white', fontSize: 14, fontWeight: 'bold' }}>{t.asistencia.salud_mental}</Text>
-              <Text style={{ color: 'white', fontSize: 32, fontWeight: 'bold' }}>106</Text>
-              <Text style={{ textAlign: 'right', color: 'white', fontSize: 12, marginBottom: 15, height: 40 }}>
-                {t.asistencia.salud_desc}
-              </Text>
-              <TouchableOpacity onPress={() => llamar('106')} style={styles.llamarMental}>
-                <Text style={styles.llamadaSegundaSeccion}>{t.asistencia.llamar}</Text>
-              </TouchableOpacity>
-            </LinearGradient>
-
+        {cargando ? (
+          <View style={{ alignItems: 'center', marginTop: 50 }}>
+            <Text style={{ color: theme.text }}>Cargando recursos...</Text>
           </View>
-
-          {/* TERCERA SECCIÓN: DEFENSORÍA */}
-          <View style={styles.TerceraSeccion}>
-            <LinearGradient
-              colors={gradienteDefensoria}
-              start={{ x: 1, y: 0 }} end={{ x: 1, y: 1 }}
-              style={{ borderRadius: 22, padding: 15 }}
-            >
-              <View style={styles.ContenedorPueblo}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-                  <View style={[styles.iconoEstrella, { backgroundColor: iconoEstrellaBg }]}>
-                    <Feather name="star" size={22} color="orange" />
-                  </View>
-                  <View>
-                    <Text style={{ color: 'white', fontSize: 13, fontWeight: '600' }}>
-                      {t.asistencia.defensoria}
-                    </Text>
-                    <Text style={{ color: 'white', fontSize: 13 }}>01 8000 914814</Text>
-                  </View>
-                </View>
-                <TouchableOpacity
-                  onPress={() => llamar('018000914814')}
-                  style={[styles.llamarMental, { width: 80 }]}
+        ) : (
+          Object.entries(recursosPorTipo).map(([tipo, recursosTipo]) => (
+            <View key={tipo} style={styles.ContenedorCuadros}>
+              {recursosTipo.map((recurso) => (
+                <LinearGradient
+                  key={recurso.id}
+                  colors={theme.asistenciaEmergenciaGradiente}
+                  start={{ x: 1, y: 0 }} end={{ x: 1, y: 1 }}
+                  style={{ borderRadius: 22, padding: 20, marginBottom: 15 }}
                 >
-                  <Text style={styles.llamadaSegundaSeccion}>{t.asistencia.llamar}</Text>
-                </TouchableOpacity>
-              </View>
-            </LinearGradient>
-          </View>
-
-        </View>
+                  <Text style={{ color: 'white', fontSize: 21, fontWeight: '600' }}>
+                    {recurso.name}
+                  </Text>
+                  <Text style={{ color: 'white', fontSize: 42, fontWeight: 'bold', marginVertical: 2 }}>
+                    {recurso.telephone}
+                  </Text>
+                  <Text style={{ color: 'white', fontSize: 14, marginBottom: 15 }}>
+                    {recurso.description}
+                  </Text>
+                  <TouchableOpacity onPress={() => llamar(recurso.telephone)} style={styles.BotonPolicia}>
+                    <View style={styles.LlamarIcono}>
+                      <Feather name="phone" size={20} color="white" />
+                      <Text style={styles.llamarTexto}>{t.asistencia.llamar_ahora}</Text>
+                    </View>
+                  </TouchableOpacity>
+                </LinearGradient>
+              ))}
+            </View>
+          ))
+        )}
       </ScrollView>
     </View>
   );
