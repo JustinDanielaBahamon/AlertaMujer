@@ -103,7 +103,7 @@ export default function Historial() {
     setFilteredAlerts(filtered);
   };
 
-  const goToDetail = (alert: (typeof mockAlerts)[0]) => {
+  const goToDetail = (alert: Alerta) => {
     const main = getMainStackNavigation(navigation);
     main?.navigate("DetalleAlerta", { alerta: alert });
   };
@@ -120,7 +120,7 @@ export default function Historial() {
 
   // ─── Render de cada card ──────────────────────────────────────────────────
 
-  const renderItem = ({ item }: { item: (typeof mockAlerts)[0] }) => {
+  const renderItem = ({ item }: { item: Alerta }) => {
     const isEmergency = item.tipo === "Emergencia";
     const colors = isEmergency ? emergencyColors : assistanceColors;
 
