@@ -126,7 +126,7 @@ export default function Contactos() {
                       source={{ uri: c.foto }}
                       style={[styles.profilePhoto, { borderColor: theme.contactAvatarBorder }]}
                     />
-                  ) : c.nombre.trim() ? (
+                  ) : (c.nombre || '').trim() ? (
                     // Nivel 2: inicial del nombre sobre fondo de color
                     <View style={[
                       styles.profilePhoto,
@@ -143,7 +143,7 @@ export default function Contactos() {
                         fontWeight: "800",
                         color: theme.contactAccent,
                       }}>
-                        {c.nombre.trim().charAt(0).toUpperCase()}
+                        {(c.nombre || '').trim().charAt(0).toUpperCase()}
                       </Text>
                     </View>
                   ) : (
@@ -159,7 +159,7 @@ export default function Contactos() {
 
                 <View style={styles.contactInfo}>
                   <Text style={[styles.contactName, { color: theme.contactNombre }]}>
-                    {c.nombre}
+                    {c.nombre || ''}
                   </Text>
                   <View style={[styles.relationBadge, {
                     backgroundColor: theme.contactBadgeBg,
