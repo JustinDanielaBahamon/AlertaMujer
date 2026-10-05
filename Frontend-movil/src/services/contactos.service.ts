@@ -2,18 +2,18 @@ import api from './api';
 
 export interface EmergencyContact {
   id: number | string;
-  user_profile_id: number | string;
-  contact_name: string;
+  userProfileId: number | string;
+  contactName: string;
   telephone: string;
   email?: string;
   relationship?: string;
-  created_at: string;
-  updated_at?: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export interface CreateContactData {
-  user_profile_id: number | string;
-  contact_name: string;
+  userProfileId: number | string;
+  contactName: string;
   telephone: string;
   email?: string;
   relationship?: string;
@@ -38,10 +38,13 @@ export const contactosService = {
     console.log('[contactos.service] addContacto INICIADO');
     console.log('[contactos.service] data:', data);
 
-    // Conectar al backend Spring Boot
+    // Conectar al backend Spring Boot (los campos van en camelCase)
     const nuevoContacto = {
-      ...data,
-      created_at: new Date().toISOString(),
+      userProfileId: Number(data.userProfileId),
+      contactName: data.contactName,
+      telephone: data.telephone,
+      email: data.email,
+      relationship: data.relationship,
     };
     console.log('[contactos.service] nuevoContacto a enviar:', nuevoContacto);
 

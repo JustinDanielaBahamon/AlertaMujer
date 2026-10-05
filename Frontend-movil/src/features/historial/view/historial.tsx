@@ -1,5 +1,5 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { useNavigation, type NavigationProp, type ParamListBase } from "@react-navigation/native";
+import { useNavigation, useFocusEffect, useIsFocused, type NavigationProp, type ParamListBase } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FlatList, Image, RefreshControl, Text, TextInput, TouchableOpacity, View } from "react-native";
@@ -7,32 +7,9 @@ import { useTheme } from "../../../../src/contexts/ThemeContext";
 import { useLocale } from "../../../../src/contexts/LocaleContext";
 import { useAuth } from "../../../../src/contexts/AuthContext";
 import { getMainStackNavigation } from "../../../navigation/navigationHelpers";
-import type { Alerta, EstadoAlerta } from "../models/Alerta";
+import type { Alerta } from "../models/Alerta";
 import { createStyles, getAsistenciaColors, getEmergenciaColors } from "../style/historial.style";
-import { getAlertasByUsuario } from "../../../../src/services/alerts.service";
-
-
-
-const transformarTipo = (apiTipo: string): string => {
-  if (apiTipo === 'SOS' || apiTipo === 'Robo' || apiTipo === 'Acoso') return 'Emergencia';
-  if (apiTipo === 'Medical') return 'Asistencia';
-  return apiTipo;
-};
-
-const transformarEstado = (apiEstado: string): EstadoAlerta => {
-  if (apiEstado === 'Atendida') return 'Enviada';
-  if (apiEstado === 'Pendiente') return 'En curso';
-  return 'En curso';
-};
-
-const transformarAlerta = (apiAlerta: any): Alerta => ({
-  id: String(apiAlerta.id),
-  tipo: transformarTipo(apiAlerta.tipo),
-  fecha: apiAlerta.tiempo,
-  hora: "",
-  ubicacion: apiAlerta.ubicacion,
-  estado: transformarEstado(apiAlerta.estado),
-});
+import { getAlertasByUsuario, transformarAlerta } from "../../../../src/services/alerts.service";
 
 export default function Historial() {
   const { theme } = useTheme();
@@ -73,9 +50,20 @@ export default function Historial() {
     }
   }, [user?.id]);
 
+  // Cargar al montar y cada vez que la pantalla recibe foco (para ver alertas creadas fuera de aquí).
+  const isFocused = useIsFocused();
+  useFocusEffect(
+    useCallback(() => {
+      cargarAlertas();
+    }, [cargarAlertas]),
+  );
+
+  // Respaldo: vuelve a cargar cuando el componente está montado y gana foco visible.
   useEffect(() => {
-    cargarAlertas();
-  }, [cargarAlertas]);
+    if (isFocused) {
+      cargarAlertas();
+    }
+  }, [isFocused, cargarAlertas]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);

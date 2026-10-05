@@ -1,5 +1,5 @@
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { useNavigation, type NavigationProp, type ParamListBase } from "@react-navigation/native";
+import { useNavigation, useFocusEffect, useIsFocused, type NavigationProp, type ParamListBase } from "@react-navigation/native";
 import { Audio } from "expo-av";
 import { Camera } from "expo-camera";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -17,31 +17,10 @@ import { useInicioViewModel } from "../viewModel/useInicioViewModel";
 import { useTheme } from "../../../../src/contexts/ThemeContext";
 import { useLocale } from "../../../../src/contexts/LocaleContext";
 import { useAuth } from "../../../../src/contexts/AuthContext";
-import type { Alerta, EstadoAlerta } from "../../../features/historial/models/Alerta";
+import type { Alerta } from "../../../features/historial/models/Alerta";
 import { getMainStackNavigation } from "../../../navigation/navigationHelpers";
 import { createStyles } from "../styles/inicio.styles";
-import { getAlertasByUsuario } from "../../../../src/services/alerts.service";
-
-const transformarTipo = (apiTipo: string): string => {
-  if (apiTipo === 'SOS' || apiTipo === 'Robo' || apiTipo === 'Acoso') return 'Emergencia';
-  if (apiTipo === 'Medical') return 'Asistencia';
-  return apiTipo;
-};
-
-const transformarEstado = (apiEstado: string): EstadoAlerta => {
-  if (apiEstado === 'Atendida') return 'Enviada';
-  if (apiEstado === 'Pendiente') return 'En curso';
-  return 'En curso';
-};
-
-const transformarAlerta = (apiAlerta: any): Alerta => ({
-  id: String(apiAlerta.id),
-  tipo: transformarTipo(apiAlerta.tipo),
-  fecha: apiAlerta.tiempo,
-  hora: "",
-  ubicacion: apiAlerta.ubicacion,
-  estado: transformarEstado(apiAlerta.estado),
-});
+import { getAlertasByUsuario, transformarAlerta } from "../../../../src/services/alerts.service";
 
 export default function Inicio() {
   const vm = useInicioViewModel();
@@ -76,9 +55,19 @@ export default function Inicio() {
     }
   }, [user?.id]);
 
+  useFocusEffect(
+    useCallback(() => {
+      cargarAlertas();
+    }, [cargarAlertas]),
+  );
+
+  // Respaldo: vuelve a cargar cuando el componente está montado y gana foco visible.
+  const isFocused = useIsFocused();
   useEffect(() => {
-    cargarAlertas();
-  }, [cargarAlertas]);
+    if (isFocused) {
+      cargarAlertas();
+    }
+  }, [isFocused, cargarAlertas]);
 
   //  Última alerta derivada del historial
   const ultimaAlerta = useMemo(() => alertas[0], [alertas]);
