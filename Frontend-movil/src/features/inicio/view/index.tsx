@@ -1,5 +1,5 @@
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { useNavigation, type NavigationProp, type ParamListBase } from "@react-navigation/native";
+import { useNavigation, useFocusEffect, type NavigationProp, type ParamListBase } from "@react-navigation/native";
 import { Audio } from "expo-av";
 import { Camera } from "expo-camera";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -55,9 +55,11 @@ export default function Inicio() {
     }
   }, [user?.id]);
 
-  useEffect(() => {
-    cargarAlertas();
-  }, [cargarAlertas]);
+  useFocusEffect(
+    useCallback(() => {
+      cargarAlertas();
+    }, [cargarAlertas]),
+  );
 
   //  Última alerta derivada del historial
   const ultimaAlerta = useMemo(() => alertas[0], [alertas]);
