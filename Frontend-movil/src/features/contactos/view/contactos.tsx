@@ -126,7 +126,11 @@ export default function Contactos() {
                       source={{ uri: c.foto }}
                       style={[styles.profilePhoto, { borderColor: theme.contactAvatarBorder }]}
                     />
+<<<<<<< HEAD
+                  ) : c.nombre.trim() ? (
+=======
                   ) : (c.nombre || '').trim() ? (
+>>>>>>> 70683e7b870279ef31a5156ad22c299d5a71c05c
                     // Nivel 2: inicial del nombre sobre fondo de color
                     <View style={[
                       styles.profilePhoto,
@@ -143,7 +147,11 @@ export default function Contactos() {
                         fontWeight: "800",
                         color: theme.contactAccent,
                       }}>
+<<<<<<< HEAD
+                        {c.nombre.trim().charAt(0).toUpperCase()}
+=======
                         {(c.nombre || '').trim().charAt(0).toUpperCase()}
+>>>>>>> 70683e7b870279ef31a5156ad22c299d5a71c05c
                       </Text>
                     </View>
                   ) : (
@@ -159,7 +167,11 @@ export default function Contactos() {
 
                 <View style={styles.contactInfo}>
                   <Text style={[styles.contactName, { color: theme.contactNombre }]}>
+<<<<<<< HEAD
+                    {c.nombre}
+=======
                     {c.nombre || ''}
+>>>>>>> 70683e7b870279ef31a5156ad22c299d5a71c05c
                   </Text>
                   <View style={[styles.relationBadge, {
                     backgroundColor: theme.contactBadgeBg,

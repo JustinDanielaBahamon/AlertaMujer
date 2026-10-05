@@ -54,7 +54,7 @@ export default function Historial() {
   const cargarAlertas = useCallback(async () => {
     if (!user?.id) {
       setFilteredAlerts([]);
-      setError("No hay usuario autenticado");
+      setError("No hay usuario autenticated");
       return;
     }
 

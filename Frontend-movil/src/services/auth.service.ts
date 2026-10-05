@@ -50,10 +50,10 @@ export const authService = {
 
     // Conectar al backend Spring Boot
     const response = await api.post<LoginResponse>('/api/auth/register', {
-      nombre: data.nombre,
+      firstName: data.nombre,
       email: data.correo,
       password: data.password,
-      telefono: data.telefono
+      telephone: data.telefono
     });
 
     console.log('✅ [auth.service] Registro exitoso:', response.data);
