@@ -1,13 +1,20 @@
 import type { Usuario } from "../models/Usuario";
 import { authService } from "../../../services/auth.service";
 
+export interface RegisterData {
+  nombre: string;
+  correo: string;
+  password: string;
+  telefono?: string;
+}
+
 /**
- * Capa de acceso a datos / API para autenticación.
+ * Capa de acceso a datos / API para registro.
  * Utiliza el servicio de autenticación que conecta al backend Spring Boot.
  */
-export async function loginWithEmail(correo: string, password: string): Promise<{ usuario: Usuario; token: string }> {
+export async function registerWithEmail(data: RegisterData): Promise<Usuario> {
   try {
-    const response = await authService.login(correo, password);
+    const response = await authService.register(data);
     // El backend devuelve {token, user}, necesitamos adaptar al modelo Usuario del móvil
     const backendUser = response.user;
     
@@ -25,11 +32,8 @@ export async function loginWithEmail(correo: string, password: string): Promise<
       last_name: backendUser.lastName,
     };
     
-    return {
-      usuario,
-      token: response.token
-    };
+    return usuario;
   } catch (error) {
-    throw new Error("Error al iniciar sesión. Verifica tus credenciales.");
+    throw new Error("Error al registrar usuario. Intenta de nuevo.");
   }
 }

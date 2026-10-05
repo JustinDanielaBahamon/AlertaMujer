@@ -5,6 +5,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { AuthStackParamList } from "../../../navigation/types";
 import { useAuth } from "../../../contexts/AuthContext";
 import { authService } from "../../../services/auth.service";
+import type { Usuario } from "../models/Usuario";
 
 type ErroresType = {
   nombre?: string;
@@ -170,14 +171,22 @@ export function useRegistroViewModel() {
         municipio: "Neiva",
       });
 
-      signIn(
-        {
-          id: response.usuario.id,
-          nombre: response.usuario.nombre,
-          correo: response.usuario.correo || response.usuario.email,
-        },
-        { initialMainRoute: "TutorialBienvenida" },
-      );
+      // Adaptar la respuesta del backend al modelo Usuario del móvil
+      const backendUser = response.user;
+      const usuario: Usuario = {
+        id: backendUser.id,
+        nombre: `${backendUser.firstName} ${backendUser.lastName}`,
+        correo: backendUser.email,
+        email: backendUser.email,
+        telefono: backendUser.telephone,
+        rol: backendUser.roleId === 2 ? 'Admin' : 'Usuaria',
+        estado: 'Activa',
+        role_id: backendUser.roleId,
+        first_name: backendUser.firstName,
+        last_name: backendUser.lastName,
+      };
+
+      signIn(usuario, response.token, { initialMainRoute: "TutorialBienvenida" });
     } catch (error) {
       setErrorTerminos("Error al registrar. Intenta nuevamente.");
     }

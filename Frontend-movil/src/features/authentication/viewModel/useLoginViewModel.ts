@@ -80,24 +80,27 @@ export function useLoginViewModel() {
       }
     }
 
-    if (password.length < 6) {
-      setErrorPassword("La contraseña debe tener al menos 6 caracteres");
+    if (password.length < 8) {
+      setErrorPassword("La contraseña debe tener al menos 8 caracteres");
       hayError = true;
     }
 
     if (hayError) return;
 
     setCargando(true);
+    console.log('Intentando login móvil con:', correo.trim());
     try {
-      const user = await loginWithEmail(correo.trim(), password);
-      signIn(user);
+      const { usuario, token } = await loginWithEmail(correo.trim(), password);
+      console.log('Login móvil exitoso:', usuario);
+      signIn(usuario, token);
     } catch (e: any) {
       const msg = e?.message ?? "";
       if (
         msg.includes("user-not-found") ||
         msg.includes("no encontrado")  ||
         msg.includes("invalid-credential") ||
-        msg.includes("EMAIL_NOT_FOUND")
+        msg.includes("EMAIL_NOT_FOUND") ||
+        msg.includes("Invalid credentials")
       ) {
         setErrorCorreo("Este correo no está registrado.");
         setErrorGeneral("¿Eres nueva? Regístrate para continuar.");
