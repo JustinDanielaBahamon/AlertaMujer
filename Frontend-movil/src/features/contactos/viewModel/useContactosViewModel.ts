@@ -62,10 +62,11 @@ export function useContactosTabViewModel() {
   }, [refrescarContactos]);
 
   const contactosFiltrados = useMemo(() =>
-    contactos.filter(c =>
-      c.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-      c.telefono.includes(busqueda)
-    ),
+    contactos.filter(c => {
+      const nombreStr = (c.nombre || '').toLowerCase();
+      const telefonoStr = c.telefono || '';
+      return nombreStr.includes(busqueda.toLowerCase()) || telefonoStr.includes(busqueda);
+    }),
     [contactos, busqueda]  // ← solo recalcula cuando estos dos cambian
   );
   // Estado: ¿Está abierto el modal de acciones?
