@@ -1,5 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useAuth } from "../../../contexts/AuthContext";
+import { frequentLocationsService } from "../../../services/frequent-locations.service";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import * as Location from "expo-location";
@@ -62,6 +63,7 @@ export default function ClasificarZonaView() {
   const { t } = useLocale();
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<ClasificarZonaRouteProp>();
+  const { user } = useAuth();
 
   // Coordenadas actuales del estado para permitir actualizaciones al presionar "Mi ubicación"
   const editarUbicacion = route.params?.editarUbicacion;
@@ -203,59 +205,42 @@ export default function ClasificarZonaView() {
     setGuardando(true);
 
     try {
-      const ubicacionGuardada = {
-        id: editarUbicacion?.id || Date.now().toString(),
-        nombre: nombre.trim(),
-        latitude: coords.latitude,
-        longitude: coords.longitude,
-
-        // CORRECCIÓN: Se guardan las variables locales editadas en los TextInput
-        direccion: direccion.trim() || direccionInfo?.direccion || "",
-        barrio: barrio.trim() || direccionInfo?.barrio || "",
-        municipio: direccionInfo?.municipio || "",
-        ciudad: ciudad.trim() || direccionInfo?.ciudad || "",
-        departamento: direccionInfo?.departamento || "",
-        pais: direccionInfo?.pais || "",
-
-        fecha: new Date().toISOString(),
-        estado: "Activo",
-        precision: t.mapa.precision_alta,
-        notas: notas.trim() || undefined,
-        nivelRiesgo: nivelSeguridad,
-        descripcion: descripcion.trim(),
-      };
-
-      // Obtener ubicaciones existentes
-      const ubicacionesExistentes = await AsyncStorage.getItem("ubicaciones_guardadas");
-      let ubicaciones = ubicacionesExistentes ? JSON.parse(ubicacionesExistentes) : [];
+      if (!user?.id) {
+        Alert.alert("Error", "Debes iniciar sesión para guardar ubicaciones.");
+        return;
+      }
 
       // Validación: verificar nombre duplicado (solo al crear)
       if (!editarUbicacion) {
-        const nombreDuplicado = ubicaciones.some(
-          (u: any) => u.nombre.toLowerCase() === nombre.trim().toLowerCase()
+        const existentes = await frequentLocationsService.getByUser(user.id);
+        const nombreDuplicado = existentes.some(
+          (u) => u.name.toLowerCase() === nombre.trim().toLowerCase()
         );
-
         if (nombreDuplicado) {
           Alert.alert(
             "Nombre duplicado",
             "Ya existe una ubicación con este nombre. Por favor usa un nombre diferente."
           );
-          setGuardando(false);
           return;
         }
       }
 
-      if (editarUbicacion) {
-        const index = ubicaciones.findIndex((u: any) => u.id === editarUbicacion.id);
-        if (index !== -1) {
-          ubicaciones[index] = ubicacionGuardada;
-        }
-      } else {
-        ubicaciones.push(ubicacionGuardada);
-      }
+      const payload = {
+        user_profile_id: user.id,
+        name: nombre.trim(),
+        address: direccion.trim() || direccionInfo?.direccion || "",
+        city: ciudad.trim() || direccionInfo?.ciudad || "",
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+        notes: notas.trim() || descripcion.trim() || undefined,
+        risk_level: nivelSeguridad,
+      };
 
-      // Guardar en AsyncStorage
-      await AsyncStorage.setItem("ubicaciones_guardadas", JSON.stringify(ubicaciones));
+      if (editarUbicacion) {
+        await frequentLocationsService.update(editarUbicacion.id, payload);
+      } else {
+        await frequentLocationsService.create(payload);
+      }
 
       // Navegar a la pantalla de ubicaciones guardadas
       navigation.navigate("UbicacionesGuardadas");

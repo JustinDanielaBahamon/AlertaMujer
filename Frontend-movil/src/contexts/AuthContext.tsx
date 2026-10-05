@@ -1,4 +1,5 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { Usuario } from "../features/authentication/models/Usuario";
 import type { MainStackParamList } from "../navigation/types";
 import { setAuthToken } from "../services/api";
@@ -16,25 +17,50 @@ type AuthContextType = {
   signIn: (user: Usuario, token: string, options?: SignInOptions) => void;
   signOut: () => void;
   clearPendingMainRoute: () => void;
+  /** true mientras se restaura la sesión guardada al iniciar la app. */
+  restoring: boolean;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
+
+const STORAGE_KEY_AUTH = "@alerta_mujer:auth";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<Usuario | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [pendingMainRoute, setPendingMainRoute] = useState<keyof MainStackParamList | null>(null);
+  const [restoring, setRestoring] = useState(true);
+
+  // Restaurar sesión guardada al iniciar la app
+  useEffect(() => {
+    (async () => {
+      try {
+        const raw = await AsyncStorage.getItem(STORAGE_KEY_AUTH);
+        if (raw) {
+          const { user: savedUser, token: savedToken } = JSON.parse(raw);
+          if (savedUser && savedToken) {
+            setUser(savedUser);
+            setToken(savedToken);
+            setAuthToken(savedToken);
+          }
+        }
+      } catch (error) {
+        console.error("Error al restaurar la sesión:", error);
+      } finally {
+        setRestoring(false);
+      }
+    })();
+  }, []);
 
   const signIn = useCallback((nextUser: Usuario, nextToken: string, options?: SignInOptions) => {
     console.log('🔐 [AuthContext] signIn INICIADO');
-    console.log('🔐 [AuthContext] nextUser:', nextUser);
-    console.log('🔐 [AuthContext] nextUser.id:', nextUser.id);
-    console.log('🔐 [AuthContext] typeof nextUser.id:', typeof nextUser.id);
-    console.log('🔐 [AuthContext] nextToken:', nextToken);
     setPendingMainRoute(options?.initialMainRoute ?? "DrawerHome");
     setUser(nextUser);
     setToken(nextToken);
     setAuthToken(nextToken); // Actualizar el token en el interceptor de axios
+    AsyncStorage.setItem(STORAGE_KEY_AUTH, JSON.stringify({ user: nextUser, token: nextToken })).catch((e) =>
+      console.error("No se pudo guardar la sesión:", e),
+    );
     console.log('✅ [AuthContext] Usuario y token guardados en AuthContext');
   }, []);
 
@@ -43,6 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(null);
     setAuthToken(null); // Limpiar el token en el interceptor de axios
     setPendingMainRoute(null);
+    AsyncStorage.removeItem(STORAGE_KEY_AUTH).catch(() => {});
   }, []);
 
   const clearPendingMainRoute = useCallback(() => {
@@ -57,8 +84,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signIn,
       signOut,
       clearPendingMainRoute,
+      restoring,
     }),
-    [user, token, pendingMainRoute, signIn, signOut, clearPendingMainRoute],
+    [user, token, pendingMainRoute, signIn, signOut, clearPendingMainRoute, restoring],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

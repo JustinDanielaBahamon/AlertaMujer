@@ -11,9 +11,24 @@ import {
   View,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
+import * as Location from "expo-location";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { styles } from "../styles/ZonasAuxiliares.style";
+import { getZonas } from "../../../services/zones.service";
+import { LocationService } from "../../../services/location.service";
+
+const mapearTipoZona = (zoneType?: string, riskLevel?: string): ZonaAuxiliar["tipo"] => {
+  const zt = (zoneType || "").toLowerCase();
+  if (zt.includes("polic")) return "policia";
+  if (zt.includes("asist")) return "asistencia";
+  if (zt === "safe" || zt.includes("segura")) return "segura";
+  if (zt === "risk" || zt.includes("riesgo")) return "riesgo";
+  const rl = (riskLevel || "").toLowerCase();
+  if (rl === "high" || rl === "alto") return "riesgo";
+  if (rl === "low" || rl === "bajo") return "segura";
+  return "riesgo";
+};
 
 type ZonaAuxiliar = {
   id: string;
@@ -35,49 +50,68 @@ export default function ZonasAuxiliares() {
   const [fullscreen, setFullscreen] = useState(false);
   const [selectedZone, setSelectedZone] = useState<ZonaAuxiliar | null>(null);
 
-  // Datos de ejemplo de zonas auxiliares
-  const zonasAuxiliares: ZonaAuxiliar[] = [
-    {
-      id: "1",
-      nombre: "CAI Centro",
-      tipo: "policia",
-      coordenada: { latitude: 2.962828, longitude: -75.2855952 },
-      direccion: "Calle 5 #10-20",
-      distancia: 350,
-    },
-    {
-      id: "2",
-      nombre: "Estación de Policía Norte",
-      tipo: "policia",
-      coordenada: { latitude: 2.965, longitude: -75.28 },
-      direccion: "Carrera 8 #15-30",
-      distancia: 520,
-    },
-    {
-      id: "3",
-      nombre: "Punto de Asistencia Mujer",
-      tipo: "asistencia",
-      coordenada: { latitude: 2.96, longitude: -75.29 },
-      direccion: "Calle 3 #8-15",
-      distancia: 280,
-    },
-    {
-      id: "4",
-      nombre: "Zona Segura Comercial",
-      tipo: "segura",
-      coordenada: { latitude: 2.958, longitude: -75.288 },
-      direccion: "Carrera 10 #5-40",
-      distancia: 410,
-    },
-    {
-      id: "5",
-      nombre: "Zona de Alto Riesgo",
-      tipo: "riesgo",
-      coordenada: { latitude: 2.967, longitude: -75.275 },
-      direccion: "Calle 7 #12-50",
-      distancia: 620,
-    },
-  ];
+  const [zonasAuxiliares, setZonasAuxiliares] = useState<ZonaAuxiliar[]>([]);
+  const [cargandoZonas, setCargandoZonas] = useState(true);
+  const [errorZonas, setErrorZonas] = useState<string | null>(null);
+
+  // Cargar zonas reales desde el backend
+  React.useEffect(() => {
+    let mounted = true;
+    const cargar = async () => {
+      setCargandoZonas(true);
+      setErrorZonas(null);
+      try {
+        const zonas = await getZonas();
+        if (!mounted) return;
+
+        // Intentar obtener la ubicación actual para calcular distancias
+        let miPosicion: { latitude: number; longitude: number } | null = null;
+        try {
+          const loc = await Location.getCurrentPositionAsync({});
+          miPosicion = { latitude: loc.coords.latitude, longitude: loc.coords.longitude };
+        } catch {
+          miPosicion = null;
+        }
+
+        const mapeadas: ZonaAuxiliar[] = zonas
+          .filter((z) => z.isActive !== false && z.latitude != null && z.longitude != null)
+          .map((z) => {
+            const tipo = mapearTipoZona(z.zoneType, z.riskLevel);
+            let distancia: number | undefined;
+            if (miPosicion) {
+              distancia = Math.round(
+                LocationService.calculateDistance(
+                  miPosicion.latitude,
+                  miPosicion.longitude,
+                  Number(z.latitude),
+                  Number(z.longitude)
+                )
+              );
+            } else if (z.radiusMeters != null) {
+              distancia = Math.round(Number(z.radiusMeters));
+            }
+            return {
+              id: String(z.id),
+              nombre: z.name,
+              tipo,
+              coordenada: { latitude: Number(z.latitude), longitude: Number(z.longitude) },
+              direccion: z.address ? `${z.address}${z.city ? ", " + z.city : ""}` : (z.city ?? ""),
+              distancia,
+            };
+          });
+        setZonasAuxiliares(mapeadas);
+      } catch (err) {
+        console.error("Error al cargar zonas:", err);
+        if (mounted) setErrorZonas("No se pudieron cargar las zonas");
+      } finally {
+        if (mounted) setCargandoZonas(false);
+      }
+    };
+    cargar();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const getZoneColor = (tipo: string) => {
     switch (tipo) {
@@ -210,7 +244,13 @@ export default function ZonasAuxiliares() {
           {t.mapa.zonas_cercanas}
         </Text>
 
-        {zonasAuxiliares.map((zona) => (
+        {cargandoZonas ? (
+          <Text style={[styles.zoneAddress, { color: theme.contactSubtext }]}>Cargando zonas...</Text>
+        ) : errorZonas ? (
+          <Text style={[styles.zoneAddress, { color: "#E74C3C" }]}>{errorZonas}</Text>
+        ) : zonasAuxiliares.length === 0 ? (
+          <Text style={[styles.zoneAddress, { color: theme.contactSubtext }]}>No hay zonas disponibles.</Text>
+        ) : zonasAuxiliares.map((zona) => (
           <TouchableOpacity
             key={zona.id}
             style={[styles.zoneCard, { backgroundColor: theme.card }]}
@@ -244,7 +284,7 @@ export default function ZonasAuxiliares() {
                   color={theme.contactSubtext}
                 />
                 <Text style={[styles.zoneDistance, { color: theme.contactSubtext }]}>
-                  {zona.distancia}m
+                  {zona.distancia != null ? `${zona.distancia}m` : "--"}
                 </Text>
               </View>
             </View>
@@ -300,7 +340,7 @@ export default function ZonasAuxiliares() {
                       <InfoRow
                         icon="directions-walk"
                         label={t.mapa.distancia}
-                        value={`${selectedZone.distancia}m`}
+                        value={selectedZone.distancia != null ? `${selectedZone.distancia}m` : "--"}
                         theme={theme}
                       />
                       <InfoRow

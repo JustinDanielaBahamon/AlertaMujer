@@ -7,4 +7,5 @@ export interface Alerta {
   hora: string;
   ubicacion: string;
   estado: EstadoAlerta;
+  coords?: { latitude: number; longitude: number };
 }

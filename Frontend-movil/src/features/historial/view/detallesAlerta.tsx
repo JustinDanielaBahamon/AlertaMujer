@@ -48,6 +48,17 @@ export default function DetalleAlerta() {
     let mounted = true;
     (async () => {
       try {
+        // Si la alerta ya tiene coordenadas del backend, usarlas directamente
+        if (alerta.coords) {
+          setCoordenadaAlerta(alerta.coords);
+          const geocodigos = await Location.reverseGeocodeAsync(alerta.coords);
+          if (mounted && geocodigos.length > 0) {
+            console.log("Ubicación de la alerta:", geocodigos[0].district || geocodigos[0].city);
+          }
+          if (mounted) setCargandoMapa(false);
+          return;
+        }
+
         const direccion = alerta.ubicacion?.trim();
         if (!direccion) {
           if (mounted) setCoordenadaAlerta(null);
@@ -70,7 +81,7 @@ export default function DetalleAlerta() {
     return () => {
       mounted = false;
     };
-  }, [alerta.ubicacion]);
+  }, [alerta.ubicacion, alerta.coords]);
 
   const accionLlamar = () => Alert.alert(t.detalle.alert_llamar_titulo, t.detalle.alert_llamar_msg);
   const accionReportar = () => Alert.alert(t.detalle.alert_reportar_titulo, t.detalle.alert_reportar_msg);

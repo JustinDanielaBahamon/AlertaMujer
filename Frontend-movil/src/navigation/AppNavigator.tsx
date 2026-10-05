@@ -6,7 +6,7 @@ import AuthNavigator from "./AuthNavigator";
 import MainNavigator from "./MainNavigator";
 
 export default function AppNavigator() {
-  const { user, pendingMainRoute } = useAuth();
+  const { user, pendingMainRoute, restoring } = useAuth();
   const mainEntryRef = useRef<keyof MainStackParamList | null>(null);
 
   if (user && mainEntryRef.current === null) {
@@ -14,6 +14,11 @@ export default function AppNavigator() {
   }
   if (!user) {
     mainEntryRef.current = null;
+  }
+
+  // Evitar parpadeo de la pantalla de login mientras se restaura la sesión
+  if (restoring) {
+    return null;
   }
 
   return (
