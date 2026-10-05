@@ -1,5 +1,5 @@
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { useNavigation, useFocusEffect, type NavigationProp, type ParamListBase } from "@react-navigation/native";
+import { useNavigation, useFocusEffect, useIsFocused, type NavigationProp, type ParamListBase } from "@react-navigation/native";
 import { Audio } from "expo-av";
 import { Camera } from "expo-camera";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -60,6 +60,14 @@ export default function Inicio() {
       cargarAlertas();
     }, [cargarAlertas]),
   );
+
+  // Respaldo: vuelve a cargar cuando el componente está montado y gana foco visible.
+  const isFocused = useIsFocused();
+  useEffect(() => {
+    if (isFocused) {
+      cargarAlertas();
+    }
+  }, [isFocused, cargarAlertas]);
 
   //  Última alerta derivada del historial
   const ultimaAlerta = useMemo(() => alertas[0], [alertas]);

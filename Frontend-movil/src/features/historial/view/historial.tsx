@@ -1,5 +1,5 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { useNavigation, useFocusEffect, type NavigationProp, type ParamListBase } from "@react-navigation/native";
+import { useNavigation, useFocusEffect, useIsFocused, type NavigationProp, type ParamListBase } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FlatList, Image, RefreshControl, Text, TextInput, TouchableOpacity, View } from "react-native";
@@ -51,11 +51,19 @@ export default function Historial() {
   }, [user?.id]);
 
   // Cargar al montar y cada vez que la pantalla recibe foco (para ver alertas creadas fuera de aquí).
+  const isFocused = useIsFocused();
   useFocusEffect(
     useCallback(() => {
       cargarAlertas();
     }, [cargarAlertas]),
   );
+
+  // Respaldo: vuelve a cargar cuando el componente está montado y gana foco visible.
+  useEffect(() => {
+    if (isFocused) {
+      cargarAlertas();
+    }
+  }, [isFocused, cargarAlertas]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
