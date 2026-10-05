@@ -6,6 +6,7 @@ import type { MainStackParamList } from "../../../navigation/types";
 import { useAuth } from "../../../contexts/AuthContext";
 import * as ImagePicker from "expo-image-picker";
 import { STORAGE_KEY_UBICACION } from "../../tutorial/viewModel/useLocationTutorialViewModel";
+import { getMe, updateMe } from "../../../services/users.service";
 
 type PerfilNavigation = NativeStackNavigationProp<MainStackParamList, "Perfil">;
 
@@ -14,7 +15,7 @@ const STORAGE_KEY_PERFIL = "@alerta_mujer:perfil";
 
 export function usePerfilViewModel() {
   const navigation = useNavigation<PerfilNavigation>();
-  const { user, signIn } = useAuth();
+  const { user, token, signIn } = useAuth();
 
   const [nombre,          setNombre]          = useState(user?.nombre        ?? "");
   const [correo,          setCorreo]          = useState(user?.correo        ?? "");
@@ -29,19 +30,32 @@ export function usePerfilViewModel() {
   const [cargando, setCargando] = useState(false);
   const [mensaje,  setMensaje]  = useState("");
 
-  // ── Al montar: carga datos guardados de AsyncStorage ──────────────────────
+  // ── Al montar: carga datos reales del backend ─────────────────────────────
   useEffect(() => {
     const cargarDatos = async () => {
       try {
-        // Datos del perfil (nombre, correo, teléfono, fecha, foto)
+        if (user?.id) {
+          const me = await getMe();
+          const nombreCompleto = `${me.firstName ?? ""} ${me.lastName ?? ""}`.trim();
+          if (nombreCompleto) setNombre(nombreCompleto);
+          if (me.email)       setCorreo(me.email);
+          if (me.telephone)   setTelefono(me.telephone);
+          if (me.birthdate) {
+            // Backend devuelve "yyyy-MM-dd"; el perfil usa "DD/MM/YYYY"
+            const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(me.birthdate));
+            if (m) setFechaNacimiento(`${m[3]}/${m[2]}/${m[1]}`);
+          }
+        }
+      } catch (error) {
+        console.error("Error al cargar el perfil desde el backend:", error);
+      }
+
+      try {
+        // Foto de perfil local (sin endpoint de imagen en el backend)
         const perfilRaw = await AsyncStorage.getItem(STORAGE_KEY_PERFIL);
         if (perfilRaw) {
           const perfil = JSON.parse(perfilRaw);
-          if (perfil.nombre)          setNombre(perfil.nombre);
-          if (perfil.correo)          setCorreo(perfil.correo);
-          if (perfil.telefono)        setTelefono(perfil.telefono);
-          if (perfil.fechaNacimiento) setFechaNacimiento(perfil.fechaNacimiento);
-          if (perfil.fotoPerfil)      setFotoPerfil(perfil.fotoPerfil);
+          if (perfil.fotoPerfil) setFotoPerfil(perfil.fotoPerfil);
         }
 
         // Municipio del tutorial de ubicación
@@ -56,7 +70,7 @@ export function usePerfilViewModel() {
       }
     };
     cargarDatos();
-  }, []);
+  }, [user?.id]);
 
   // ── Selección de foto ─────────────────────────────────────────────────────
   const seleccionarFoto = useCallback(async () => {
@@ -127,15 +141,28 @@ export function usePerfilViewModel() {
 
     setCargando(true);
     try {
-      // Guarda en AsyncStorage
-      const datosPerfil = {
-        nombre:          nombre.trim(),
-        correo:          correo.trim(),
-        telefono:        telefono.trim(),
-        fechaNacimiento: fechaNacimiento.trim(),
-        fotoPerfil,
-      };
-      await AsyncStorage.setItem(STORAGE_KEY_PERFIL, JSON.stringify(datosPerfil));
+      // Guarda la foto localmente (sin endpoint de imagen en el backend)
+      await AsyncStorage.setItem(
+        STORAGE_KEY_PERFIL,
+        JSON.stringify({ fotoPerfil })
+      );
+
+      // Persiste en el backend
+      const partes = nombre.trim().split(/\s+/);
+      const firstName = partes[0] ?? "";
+      const lastName = partes.slice(1).join(" ");
+
+      // Convierte DD/MM/YYYY a yyyy-MM-dd para el backend
+      let birthdate: string | undefined;
+      const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(fechaNacimiento.trim());
+      if (m) birthdate = `${m[3]}-${m[2]}-${m[1]}`;
+
+      await updateMe({
+        firstName,
+        lastName,
+        telephone: telefono.trim(),
+        birthdate,
+      });
 
       // Actualiza el contexto de auth
       if (user) {
@@ -147,7 +174,7 @@ export function usePerfilViewModel() {
           fechaNacimiento: fechaNacimiento.trim(),
           fotoPerfil:      fotoPerfil ?? undefined,
           municipio,
-        });
+        }, token ?? "");
       }
       setMensaje("¡Perfil actualizado correctamente!");
     } catch {

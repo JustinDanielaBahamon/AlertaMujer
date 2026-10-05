@@ -48,7 +48,7 @@ export function useAgregarContactoViewModel() {
    */
   useEffect(() => {
     if (contactoParam) {
-      setNombre(contactoParam.nombre);
+      setNombre(contactoParam.nombre ?? '');
       setParentesco(contactoParam.parentesco ?? "");
       setTelefono(contactoParam.telefono);
       setFotoUri(contactoParam.foto ?? null);
@@ -213,7 +213,7 @@ export function useAgregarContactoViewModel() {
           )
           .replace(
             "{nombre}",
-            duplicado.nombre
+            duplicado.nombre ?? ""
           ),
         [
           {

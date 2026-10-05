@@ -15,6 +15,8 @@ import MapView, { Marker } from "react-native-maps";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { useRecorridos } from "../../../contexts/RecorridosContext";
+import { useAuth } from "../../../contexts/AuthContext";
+import { frequentLocationsService } from "../../../services/frequent-locations.service";
 import { styles } from "../styles/GuardarRecorrido.style";
 
 type PuntoSeleccionado = {
@@ -42,13 +44,34 @@ export default function GuardarRecorrido() {
   const [puntoSeleccionando, setPuntoSeleccionando] = useState<"A" | "B" | null>(null);
   const [mapFullscreen, setMapFullscreen] = useState(false);
 
-  // Ubicaciones guardadas simuladas
-  const ubicacionesGuardadas = [
-    { id: "1", nombre: "Casa", latitude: 2.9271, longitude: -75.2874, direccion: "Calle 10 #5-20" },
-    { id: "2", nombre: "Trabajo", latitude: 2.9285, longitude: -75.2859, direccion: "Carrera 8 #15-30" },
-    { id: "3", nombre: "Gimnasio", latitude: 2.9302, longitude: -75.2841, direccion: "Calle 3 #8-15" },
-    { id: "4", nombre: "Supermercado", latitude: 2.9320, longitude: -75.2825, direccion: "Carrera 10 #5-40" },
-  ];
+  // Ubicaciones guardadas reales desde el backend
+  const [ubicacionesGuardadas, setUbicacionesGuardadas] = useState<Array<{ id: string; nombre: string; latitude: number; longitude: number; direccion: string }>>([]);
+  const { user } = useAuth();
+
+  React.useEffect(() => {
+    let mounted = true;
+    (async () => {
+      if (!user?.id) return;
+      try {
+        const ubicaciones = await frequentLocationsService.getByUser(user.id);
+        if (!mounted) return;
+        setUbicacionesGuardadas(
+          ubicaciones.map((u) => ({
+            id: String(u.id),
+            nombre: u.name,
+            latitude: Number(u.latitude),
+            longitude: Number(u.longitude),
+            direccion: u.address ?? u.city ?? "",
+          }))
+        );
+      } catch (err) {
+        console.error("Error al cargar ubicaciones guardadas:", err);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [user?.id]);
 
   const handleMapPress = (event: any) => {
     const { latitude, longitude } = event.nativeEvent.coordinate;

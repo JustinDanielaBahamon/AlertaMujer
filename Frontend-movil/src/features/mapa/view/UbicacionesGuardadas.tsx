@@ -10,13 +10,17 @@ import {
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { useTheme } from "../../../contexts/ThemeContext";
 import { useLocale } from "../../../contexts/LocaleContext";
+import { useAuth } from "../../../contexts/AuthContext";
 import type { MainStackParamList } from "../../../navigation/types";
 import { createStyles } from "../styles/UbicacionesGuardadas.style";
+import {
+  frequentLocationsService,
+  type FrequentLocationApi,
+} from "../../../services/frequent-locations.service";
 
 type NavigationProp = NativeStackNavigationProp<MainStackParamList>;
 
@@ -44,6 +48,7 @@ export default function UbicacionesGuardadas() {
   const { t } = useLocale();
   const navigation = useNavigation<NavigationProp>();
   const styles = createStyles(theme);
+  const { user } = useAuth();
 
   const [ubicaciones, setUbicaciones] = useState<UbicacionGuardada[]>([]);
   const [filtroRiesgo, setFiltroRiesgo] = useState<string | null>(null);
@@ -57,17 +62,37 @@ export default function UbicacionesGuardadas() {
 
   const cargarUbicaciones = async () => {
     try {
-      const ubicacionesGuardadas = await AsyncStorage.getItem("ubicaciones_guardadas");
-      if (ubicacionesGuardadas) {
-        setUbicaciones(JSON.parse(ubicacionesGuardadas));
-      } else {
+      if (!user?.id) {
         setUbicaciones([]);
+        return;
       }
+      const ubicacionesApi = await frequentLocationsService.getByUser(user.id);
+      setUbicaciones(ubicacionesApi.map(mapearFrecuenteAUbicacion));
     } catch (error) {
       console.error("Error al cargar ubicaciones:", error);
       setUbicaciones([]);
     }
   };
+
+  const mapearFrecuenteAUbicacion = (u: FrequentLocationApi): UbicacionGuardada => ({
+    id: String(u.id),
+    nombre: u.name,
+    latitude: Number(u.latitude),
+    longitude: Number(u.longitude),
+    direccion: u.address ?? "",
+    barrio: "",
+    municipio: u.city ?? "",
+    ciudad: u.city ?? "",
+    departamento: "",
+    pais: "",
+    fecha: u.createdAt,
+    estado: u.isActive ? "Activo" : "Inactivo",
+    precision: "Alta",
+    notas: u.notes,
+    nivelRiesgo:
+      u.riskLevel === "muy_segura" || u.riskLevel === "muy_insegura" ? u.riskLevel : "moderada",
+    descripcion: u.notes ?? "",
+  });
 
   const getRiskColor = (nivel: string) => {
     switch (nivel) {
@@ -133,11 +158,14 @@ export default function UbicacionesGuardadas() {
             text: "Eliminar",
             style: "destructive",
             onPress: async () => {
-              const ubicacionesGuardadas = await AsyncStorage.getItem("ubicaciones_guardadas");
-              let ubicaciones = ubicacionesGuardadas ? JSON.parse(ubicacionesGuardadas) : [];
-              ubicaciones = ubicaciones.filter((u: UbicacionGuardada) => u.id !== id);
-              await AsyncStorage.setItem("ubicaciones_guardadas", JSON.stringify(ubicaciones));
-              setUbicaciones(ubicaciones);
+              // delete via API (no local storage)
+              try {
+                await frequentLocationsService.remove(id);
+                setUbicaciones((prev) => prev.filter((u) => u.id !== id));
+              } catch (apiErr) {
+                console.error("Error al eliminar en backend:", apiErr);
+                Alert.alert("Error", "No se pudo eliminar la ubicación");
+              }
             },
           },
         ]
