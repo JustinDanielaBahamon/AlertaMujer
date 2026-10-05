@@ -17,7 +17,7 @@ const ContactosContext = createContext<ContactosContextType | null>(null);
 
 const mapearEmergencyContactAContacto = (ec: EmergencyContact): Contacto => ({
   id: String(ec.id),
-  nombre: ec.contact_name || '',
+  nombre: ec.contactName || '',
   parentesco: ec.relationship,
   telefono: ec.telephone,
   foto: undefined,
@@ -81,8 +81,8 @@ export function ContactosProvider({ children }: { children: React.ReactNode }) {
     setError(null);
     try {
       const nuevoContacto = await contactosService.addContacto({
-        user_profile_id: user.id,
-        contact_name: payload.nombre,
+        userProfileId: user.id,
+        contactName: payload.nombre ?? '',
         telephone: payload.telefono,
         email: undefined,
         relationship: payload.parentesco,
@@ -113,7 +113,7 @@ export function ContactosProvider({ children }: { children: React.ReactNode }) {
     setError(null);
     try {
       await contactosService.updateContacto(id, {
-        contact_name: cambios.nombre || '',
+        contactName: cambios.nombre || '',
         telephone: cambios.telefono,
         relationship: cambios.parentesco,
       });
