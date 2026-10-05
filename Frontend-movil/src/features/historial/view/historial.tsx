@@ -7,32 +7,9 @@ import { useTheme } from "../../../../src/contexts/ThemeContext";
 import { useLocale } from "../../../../src/contexts/LocaleContext";
 import { useAuth } from "../../../../src/contexts/AuthContext";
 import { getMainStackNavigation } from "../../../navigation/navigationHelpers";
-import type { Alerta, EstadoAlerta } from "../models/Alerta";
+import type { Alerta } from "../models/Alerta";
 import { createStyles, getAsistenciaColors, getEmergenciaColors } from "../style/historial.style";
-import { getAlertasByUsuario } from "../../../../src/services/alerts.service";
-
-
-
-const transformarTipo = (apiTipo: string): string => {
-  if (apiTipo === 'SOS' || apiTipo === 'Robo' || apiTipo === 'Acoso') return 'Emergencia';
-  if (apiTipo === 'Medical') return 'Asistencia';
-  return apiTipo;
-};
-
-const transformarEstado = (apiEstado: string): EstadoAlerta => {
-  if (apiEstado === 'Atendida') return 'Enviada';
-  if (apiEstado === 'Pendiente') return 'En curso';
-  return 'En curso';
-};
-
-const transformarAlerta = (apiAlerta: any): Alerta => ({
-  id: String(apiAlerta.id),
-  tipo: transformarTipo(apiAlerta.tipo),
-  fecha: apiAlerta.tiempo,
-  hora: "",
-  ubicacion: apiAlerta.ubicacion,
-  estado: transformarEstado(apiAlerta.estado),
-});
+import { getAlertasByUsuario, transformarAlerta } from "../../../../src/services/alerts.service";
 
 export default function Historial() {
   const { theme } = useTheme();

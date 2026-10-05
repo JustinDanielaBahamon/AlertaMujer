@@ -4,6 +4,9 @@ import * as Location from "expo-location";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { MainStackParamList } from "../../../navigation/types";
+import { useAuth } from "../../../contexts/AuthContext";
+import { createAlert, finalizarAlerta } from "../../../services/alerts.service";
+import { getOrCreateDevice } from "../../../services/devices.service";
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
 
@@ -17,7 +20,13 @@ const INITIAL_SECONDS = 182;
 
 export function useAlertaActivaViewModel() {
   const navigation = useNavigation<Nav>();
+  const { user } = useAuth();
 
+  // Referencia al id de la alerta creada en el backend (para poder cerrarla).
+  const alertaCreadaIdRef = useRef<number | null>(null);
+  const [errorAlerta, setErrorAlerta] = useState<string | null>(null);
+
+  // Crea la alerta en el backend al activar el SOS (una sola vez, incluyendo la ubicación).
   // Generico useState<number>: TypeScript garantiza que este estado solo puede contener un numero.
   const [secondsLeft, setSecondsLeft] = useState<number>(INITIAL_SECONDS);
 
@@ -36,6 +45,39 @@ export function useAlertaActivaViewModel() {
     const timer = setTimeout(() => setSecondsLeft((s) => s - 1), 1000);
     return () => clearTimeout(timer);
   }, [secondsLeft]);
+
+  const alertaCreacionIniciadaRef = useRef(false);
+
+  // Crea la alerta en el backend al activar el SOS (una sola vez, incluyendo la ubicación).
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      if (!user?.id || alertaCreacionIniciadaRef.current || !location) return;
+      alertaCreacionIniciadaRef.current = true;
+      try {
+        const device = await getOrCreateDevice(user.id);
+        const alerta = await createAlert({
+          userProfileId: user.id,
+          deviceId: device.id,
+          alertType: "main",
+          activationMethod: "panic_button",
+          status: "active",
+          message: "Alerta SOS activada desde la app",
+          latitude: location?.latitude,
+          longitude: location?.longitude,
+        });
+        if (mounted) {
+          alertaCreadaIdRef.current = alerta.id;
+        }
+      } catch (err) {
+        console.error("No se pudo crear la alerta en el backend:", err);
+        if (mounted) setErrorAlerta("No se pudo registrar la alerta en el servidor");
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [user?.id, location]);
 
   // Obtiene y sigue la ubicacion en tiempo real.
   useEffect(() => {
@@ -85,7 +127,12 @@ export function useAlertaActivaViewModel() {
 
   // Se ejecuta cuando el usuario presiona "Estoy bien".
   const marcarEstoyBien = useCallback(() => {
-    // TODO: llamar aqui a la capa de alertas/servicios para cerrar la alerta activa en el backend.
+    // Cerrar la alerta activa en el backend (estado cancelada)
+    if (alertaCreadaIdRef.current) {
+      finalizarAlerta(alertaCreadaIdRef.current, 'cancelled').catch((err) =>
+        console.error('No se pudo cerrar la alerta en el backend:', err)
+      );
+    }
     navigation.replace("DrawerHome");
   }, [navigation]);
 
@@ -134,5 +181,6 @@ export function useAlertaActivaViewModel() {
     abrirMapaCompleto,
     handleMapPress,
     cerrarMapaCompleto,
+    errorAlerta,
   };
 }
