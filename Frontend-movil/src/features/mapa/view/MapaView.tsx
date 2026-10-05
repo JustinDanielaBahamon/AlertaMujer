@@ -177,29 +177,6 @@ Compartido desde AlertaMujer`;
   // ─── COORDENADA CENTRO Y ACCIONES LOCALES ─────────────────────────────────
   const centroCalculado = coordenadaCentro ?? destinoAlerta?.coordenada ?? location;
 
-  // ─── DATOS DE RECORRIDOS SIMULADOS PARA EL MAPA PRINCIPAL ─────────────────
-  const recorridosSimulados = [
-    {
-      id: "1",
-      puntos: [
-        { latitude: 2.9271, longitude: -75.2874 },
-        { latitude: 2.9285, longitude: -75.2859 },
-        { latitude: 2.9302, longitude: -75.2841 },
-        { latitude: 2.9320, longitude: -75.2825 },
-        { latitude: 2.9335, longitude: -75.2808 },
-      ],
-    },
-    {
-      id: "2",
-      puntos: [
-        { latitude: 2.9200, longitude: -75.2900 },
-        { latitude: 2.9215, longitude: -75.2883 },
-        { latitude: 2.9230, longitude: -75.2866 },
-        { latitude: 2.9245, longitude: -75.2849 },
-      ],
-    },
-  ];
-
   const acciones = [
     {
       icono: "share",
