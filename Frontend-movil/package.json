@@ -3,10 +3,15 @@
   "main": "expo/AppEntry.js",
   "version": "1.0.0",
   "scripts": {
+    "env": "node ./scripts/update-env.js",
+    "prestart": "node ./scripts/update-env.js",
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
+    "preandroid": "node ./scripts/update-env.js",
     "android": "expo run:android",
+    "preios": "node ./scripts/update-env.js",
     "ios": "expo run:ios",
+    "preweb": "node ./scripts/update-env.js",
     "web": "expo start --web",
     "lint": "expo lint"
   },
