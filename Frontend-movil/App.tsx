@@ -5,6 +5,7 @@ import { ThemeProvider } from "./src/contexts/ThemeContext";
 import { LocaleProvider } from "./src/contexts/LocaleContext";
 import { ContactosProvider } from "./src/contexts/ContactosContext";
 import { RecorridosProvider } from "./src/contexts/RecorridosContext";
+import { EvidenciaProvider } from "./src/contexts/EvidenciaContext";
 
 export default function App() {
   return (
@@ -13,7 +14,9 @@ export default function App() {
         <AuthProvider>
           <ContactosProvider>
             <RecorridosProvider>
-              <AppNavigator />
+              <EvidenciaProvider>
+                <AppNavigator />
+              </EvidenciaProvider>
             </RecorridosProvider>
           </ContactosProvider>
         </AuthProvider>
