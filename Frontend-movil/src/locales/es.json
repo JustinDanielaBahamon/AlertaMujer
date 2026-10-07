@@ -494,6 +494,7 @@
   "slogan": "Juntas somos más fuertes"
 },
 "activacion": {
+  "activar_ahora": "Activar ahora",
   "titulo": "Activando Alerta SOS...",
   "enviando_ubicacion": "Enviando ubicación en tiempo real",
   "iniciando_grabacion": "Iniciando grabación de video",

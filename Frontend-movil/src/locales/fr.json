@@ -489,6 +489,7 @@
     "slogan": "Ensemble nous sommes plus fortes"
   },
   "activacion": {
+    "activar_ahora": "Activer maintenant",
     "titulo": "Activation de l'Alerte SOS...",
     "enviando_ubicacion": "Envoi de la position en temps réel",
     "iniciando_grabacion": "Démarrage de l'enregistrement vidéo",
@@ -623,6 +624,11 @@
   "confirmarDescripcion": "Vos contacts recevront une notification automatique les informant que vous êtes en sécurité et que l'alerte a été désactivée.",
   "confirmarSi": "Oui, annuler",
   "confirmarNo": "Non, garder l'alerte",
+  "serviciosTitulo": "Services d'urgence actifs",
+  "serviciosDescripcion": "Quand vous serez en sécurité, appuyez sur « Je vais bien » pour notifier.",
+  "compartiendoUbicacion": "Partage de la position",
+  "enTiempoReal": "En temps réel",
+  "vistas": "vues",
   "cancelar": "Annuler l'alerte",
   "llamar911": "Appeler le 911"
 },
