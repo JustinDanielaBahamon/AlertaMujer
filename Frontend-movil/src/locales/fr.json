@@ -597,13 +597,20 @@
     "item12_desc": "Pour toute question ou assistance, l'utilisatrice peut nous contacter via les canaux officiels disponibles dans l'application.",
     "volver": "Retour"
   },
-  "alertaActiva": {
-    "titulo": "Alerte active",
-    "subtitulo": "Votre réseau a été notifié",
-    "tiempoRestante": "Temps restant",
-    "cancelar": "Annuler l'alerte",
-    "llamar911": "Appeler le 911"
-  },
+"alertaActiva": {
+  "titulo": "Alerte active",
+  "subtitulo": "Votre réseau a été notifié",
+  "tiempoRestante": "Temps restant",
+  "mensajeReenvio": "À la fin du temps imparti, l'alerte sera renvoyée à vos contacts avec votre nouvelle position. Pour annuler l'alerte, appuyez sur « Je vais bien » puis sur « Oui, annuler ».",
+  "estoyBien": "Je vais bien",
+  "estoyBienDescripcion": "Informez votre réseau que vous êtes en sécurité",
+  "confirmarTitulo": "Annuler l'alerte ?",
+  "confirmarDescripcion": "Vos contacts recevront une notification automatique les informant que vous êtes en sécurité et que l'alerte a été désactivée.",
+  "confirmarSi": "Oui, annuler",
+  "confirmarNo": "Non, garder l'alerte",
+  "cancelar": "Annuler l'alerte",
+  "llamar911": "Appeler le 911"
+},
   "indexDemo": {
     "mensaje": "Bienvenue (écran de test)",
     "btn_demo": "Entrer en démo (accueil)",

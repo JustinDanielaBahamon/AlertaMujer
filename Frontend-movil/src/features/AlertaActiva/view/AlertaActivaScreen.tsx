@@ -79,10 +79,16 @@ export default function AlertaActivaScreen() {
 
         <View style={styles.circleWrapper}>
           <View style={styles.circle}>
-            <MaterialIcons name="notifications-active" size={28} color={theme.icono} />
+            <MaterialIcons name="notifications-active" size={22} color={theme.icono} />
             <Text style={styles.number}>{vm.formattedTime}</Text>
             <Text style={styles.timeLabel}>{t.alertaActiva.tiempoRestante}</Text>
           </View>
+        </View>
+
+        {/* Mensaje informativo sobre lo que pasa al terminar el tiempo y como cancelar. */}
+        <View style={styles.mensajeCard}>
+          <MaterialIcons name="info-outline" size={20} color={theme.icono} />
+          <Text style={styles.mensajeText}>{t.alertaActiva.mensajeReenvio}</Text>
         </View>
 
         <View style={styles.infoCard}>
@@ -110,7 +116,7 @@ export default function AlertaActivaScreen() {
           </View>
         </View>
 
-        <TouchableOpacity style={styles.okButton} onPress={vm.marcarEstoyBien}>
+        <TouchableOpacity style={styles.okButton} onPress={vm.abrirConfirmacion}>
           <MaterialIcons name="favorite" size={22} color={theme.headerText} />
           <Text style={styles.okButtonText}>{t.alertaActiva.estoyBien}</Text>
           <Text style={styles.okButtonSubtext}>{t.alertaActiva.estoyBienDescripcion}</Text>
@@ -121,6 +127,32 @@ export default function AlertaActivaScreen() {
           <Text style={styles.callText}>{t.alertaActiva.llamar911}</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      {/* Ventana de verificacion para cancelar la alerta. */}
+      <Modal
+        visible={vm.confirmarVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={vm.cerrarConfirmacion}
+      >
+        <View style={styles.confirmOverlay}>
+          <View style={styles.confirmCard}>
+            <View style={styles.confirmIconCircle}>
+              <MaterialIcons name="favorite" size={28} color={theme.icono} />
+            </View>
+            <Text style={styles.confirmTitle}>{t.alertaActiva.confirmarTitulo}</Text>
+            <Text style={styles.confirmDescription}>{t.alertaActiva.confirmarDescripcion}</Text>
+
+            <TouchableOpacity style={styles.confirmButtonYes} onPress={vm.marcarEstoyBien}>
+              <Text style={styles.confirmButtonYesText}>{t.alertaActiva.confirmarSi}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.confirmButtonNo} onPress={vm.cerrarConfirmacion}>
+              <Text style={styles.confirmButtonNoText}>{t.alertaActiva.confirmarNo}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       {/* Mapa en pantalla completa (equivalente al "navegar" del modulo Mapa). Al cerrar, sigue en AlertaActiva. */}
       <Modal visible={vm.fullscreen} animationType="slide">

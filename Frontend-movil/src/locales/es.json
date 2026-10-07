@@ -609,10 +609,12 @@
   "item12_desc": "Para dudas o soporte, el usuario puede comunicarse a través de los canales oficiales disponibles dentro de la aplicación.",
   "volver": "Volver"
 },
+
 "alertaActiva": {
   "titulo": "Alerta activa",
   "subtitulo": "Tu red fue notificada",
   "tiempoRestante": "Tiempo restante",
+  "mensajeReenvio": "Al terminar el tiempo se enviará nuevamente la alerta a tus contactos con tu nueva ubicación. Para cancelar la alerta toca \"Estoy bien\" y luego \"Sí, cancelar\".",
   "serviciosTitulo": "Servicios de emergencia activos",
   "serviciosDescripcion": "Cuando estés a salvo, presiona \"Estoy bien\" para notificar.",
   "compartiendoUbicacion": "Compartiendo ubicación",
@@ -620,6 +622,10 @@
   "vistas": "vistas",
   "estoyBien": "Estoy bien",
   "estoyBienDescripcion": "Notifica a tu red que estás a salvo",
+  "confirmarTitulo": "¿Cancelar la alerta?",
+  "confirmarDescripcion": "Tus contactos recibirán una notificación automática informándoles que te encuentras a salvo y que la alerta ha sido desactivada.",
+  "confirmarSi": "Sí, cancelar",
+  "confirmarNo": "No, mantener alerta",
   "llamar911": "Llamar al 911"
 },
 "indexDemo": {

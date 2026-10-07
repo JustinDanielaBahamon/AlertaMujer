@@ -607,10 +607,11 @@
     "item12_desc": "For questions or support, users can reach out through the official channels available within the app.",
     "volver": "Back"
   },
-  "alertaActiva": {
+ "alertaActiva": {
   "titulo": "Active alert",
   "subtitulo": "Your network was notified",
   "tiempoRestante": "Time remaining",
+  "mensajeReenvio": "When the time runs out, the alert will be sent again to your contacts with your new location. To cancel the alert, tap \"I'm okay\" and then \"Yes, cancel\".",
   "serviciosTitulo": "Emergency services active",
   "serviciosDescripcion": "When you're safe, press \"I'm okay\" to notify them.",
   "compartiendoUbicacion": "Sharing location",
@@ -618,6 +619,10 @@
   "vistas": "views",
   "estoyBien": "I'm okay",
   "estoyBienDescripcion": "Notify your network that you are safe",
+  "confirmarTitulo": "Cancel the alert?",
+  "confirmarDescripcion": "Your contacts will receive an automatic notification letting them know you are safe and the alert has been deactivated.",
+  "confirmarSi": "Yes, cancel",
+  "confirmarNo": "No, keep alert",
   "llamar911": "Call 911"
 },
   "indexDemo": {

@@ -600,12 +600,19 @@
     "item12_desc": "Para dúvidas ou suporte, o usuário pode entrar em contato através dos canais oficiais disponíveis dentro do aplicativo.",
     "volver": "Voltar"
   },
-  "alertaActiva": {
-    "titulo": "Alerta ativa",
-    "subtitulo": "Sua rede foi notificada",
-    "tiempoRestante": "Tempo restante",
-    "cancelar": "Cancelar alerta",
-    "llamar911": "Chamar 911"
+"alertaActiva": {
+  "titulo": "Alerta ativa",
+  "subtitulo": "Sua rede foi notificada",
+  "tiempoRestante": "Tempo restante",
+  "mensajeReenvio": "Ao terminar o tempo, o alerta será enviado novamente aos seus contatos com sua nova localização. Para cancelar o alerta, toque em \"Estou bem\" e depois em \"Sim, cancelar\".",
+  "estoyBien": "Estou bem",
+  "estoyBienDescripcion": "Avise sua rede que você está a salvo",
+  "confirmarTitulo": "Cancelar o alerta?",
+  "confirmarDescripcion": "Seus contatos receberão uma notificação automática informando que você está a salvo e que o alerta foi desativado.",
+  "confirmarSi": "Sim, cancelar",
+  "confirmarNo": "Não, manter alerta",
+  "cancelar": "Cancelar alerta",
+  "llamar911": "Chamar 911"
   },
   "indexDemo": {
     "mensaje": "Bem-vinda (tela de teste)",
