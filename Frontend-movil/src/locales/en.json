@@ -29,6 +29,8 @@
     "ya_cuenta": "Already have an account? Sign in"
   },
   "inicio": {
+    "sin_alertas": "No alerts",
+    "sin_ubicacion": "No location",
     "bienvenida": "Welcome",
     "ubicacion_actual": "Current location",
     "camara": "Camera",
@@ -196,6 +198,18 @@
     "stats_alertas": "alerts"
   },
   "ajustes": {
+    "grabar_video": "Automatically record video when an emergency is activated",
+    "grabar_video_desc": "Uses your camera to record up to 1 minute of video when you trigger an alert. If you don't want your camera used, turn this option off.",
+    "grabar_audio": "Automatically record audio when an emergency is activated",
+    "grabar_audio_desc": "Uses your microphone to record up to 5 minutes of audio when you trigger an alert. If you don't want your microphone used, turn this option off.",
+    "permiso_camara_msg": "To turn on video, allow camera access from your phone settings.",
+    "permiso_microfono_msg": "To turn on audio, allow microphone access from your phone settings.",
+    "evidencias_privacidad": "Evidence & privacy",
+    "grabar_evidencia": "Automatically record video and audio when an emergency is activated",
+    "grabar_evidencia_desc": "Up to 1 minute is recorded with your camera and microphone when you trigger an alert. If you never want your camera used, turn this option off.",
+    "permiso_requerido_titulo": "Permissions required",
+    "permiso_requerido_msg": "To turn this on, allow camera and microphone access from your phone settings.",
+    "abrir_ajustes": "Open settings",
     "titulo": "Settings",
     "idioma": "Language",
     "temas": "Default Themes",
@@ -519,6 +533,7 @@
     "btn_cambiar": "Change details"
   },
   "permisos": {
+    "divulgacion_grabacion": "AlertaMujer needs access to your camera and microphone to automatically record up to 1 minute of video and audio when you activate an emergency alert.",
     "sms_titulo": "Allow Alerta Mujer to access messages",
     "sms_desc": "This feature will send a text message with your location to your emergency contacts.",
     "contacto_titulo": "Allow Alerta Mujer to access your contacts",

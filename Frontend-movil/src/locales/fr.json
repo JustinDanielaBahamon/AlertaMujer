@@ -29,6 +29,8 @@
     "ya_cuenta": "Vous avez déjà un compte ? Connectez-vous"
   },
   "inicio": {
+    "sin_alertas": "Aucune alerte",
+    "sin_ubicacion": "Aucune position",
     "bienvenida": "Bienvenue",
     "ubicacion_actual": "Position actuelle",
     "camara": "Caméra",
@@ -193,6 +195,18 @@
     "stats_alertas": "alertes"
   },
   "ajustes": {
+    "grabar_video": "Enregistrer automatiquement la vidéo lors d'une urgence",
+    "grabar_video_desc": "Utilise votre caméra pour enregistrer jusqu'à 1 minute de vidéo lorsque vous activez une alerte. Si vous ne souhaitez pas que votre caméra soit utilisée, désactivez cette option.",
+    "grabar_audio": "Enregistrer automatiquement l'audio lors d'une urgence",
+    "grabar_audio_desc": "Utilise votre microphone pour enregistrer jusqu'à 5 minutes d'audio lorsque vous activez une alerte. Si vous ne souhaitez pas que votre microphone soit utilisé, désactivez cette option.",
+    "permiso_camara_msg": "Pour activer la vidéo, autorisez l'accès à la caméra dans les paramètres du téléphone.",
+    "permiso_microfono_msg": "Pour activer l'audio, autorisez l'accès au microphone dans les paramètres du téléphone.",
+    "evidencias_privacidad": "Preuves et confidentialité",
+    "grabar_evidencia": "Enregistrer automatiquement la vidéo et l'audio lors d'une urgence",
+    "grabar_evidencia_desc": "Jusqu'à 1 minute est enregistrée avec votre caméra et votre microphone lorsque vous activez une alerte. Si vous ne souhaitez pas que votre caméra soit utilisée, désactivez cette option.",
+    "permiso_requerido_titulo": "Autorisations requises",
+    "permiso_requerido_msg": "Pour activer cette option, autorisez l'accès à la caméra et au microphone dans les paramètres du téléphone.",
+    "abrir_ajustes": "Ouvrir les paramètres",
     "titulo": "Paramètres",
     "idioma": "Langue",
     "temas": "Thèmes par défaut",
@@ -516,6 +530,7 @@
     "btn_cambiar": "Modifier les données"
   },
   "permisos": {
+    "divulgacion_grabacion": "AlertaMujer a besoin d'accéder à votre caméra et à votre microphone pour enregistrer automatiquement jusqu'à 1 minute de vidéo et d'audio lorsque vous activez une alerte d'urgence.",
     "sms_titulo": "Autoriser Alerta Mujer à accéder aux messages",
     "sms_desc": "Cette fonction enverra un message texte avec votre position à vos contacts d'urgence.",
     "contacto_titulo": "Autoriser Alerta Mujer à accéder à vos contacts",

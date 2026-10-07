@@ -1,7 +1,5 @@
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation, useFocusEffect, useIsFocused, type NavigationProp, type ParamListBase } from "@react-navigation/native";
-import { Audio } from "expo-av";
-import { Camera } from "expo-camera";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
@@ -35,9 +33,7 @@ export default function Inicio() {
   //  Tamaño del botón ligeramente reducido para dar aire al texto
   const BUTTON_SIZE = width * 0.68;
 
-  const [cameraActive, setCameraActive] = useState(false);
-  const [micActive, setMicActive]       = useState(false);
-  const [alertas, setAlertas]           = useState<Alerta[]>([]);
+  const [alertas, setAlertas] = useState<Alerta[]>([]);
 
   const cargarAlertas = useCallback(async () => {
     if (!user?.id) {
@@ -135,110 +131,71 @@ export default function Inicio() {
     } as never);
   };
 
-  // Permisos 
-  const toggleCamera = async () => {
-    const { status } = await Camera.requestCameraPermissionsAsync();
-    if (status === "granted") setCameraActive(prev => !prev);
-  };
-
-  const toggleMic = async () => {
-    const { status } = await Audio.requestPermissionsAsync();
-    if (status === "granted") setMicActive(prev => !prev);
-  };
-
   return (
     <View style={[styles.container, { backgroundColor: theme.background, paddingBottom: insets.bottom }]}>
 
       {/* Zona segura */}
-<TouchableOpacity
-  style={[
-    styles.safeZoneCard,
-    {
-      backgroundColor: theme.containerBackground,
-      borderColor: "#27ae60",
-    },
-  ]}
-  activeOpacity={0.8}
-  onPress={goToMap}
->
-  <MaterialIcons
-    name="verified-user"
-    size={26}
-    color="#27ae60"
-  />
+      <TouchableOpacity
+        style={[
+          styles.safeZoneCard,
+          {
+            backgroundColor: theme.containerBackground,
+            borderColor: "#27ae60",
+          },
+        ]}
+        activeOpacity={0.8}
+        onPress={goToMap}
+      >
+        <MaterialIcons
+          name="verified-user"
+          size={26}
+          color="#27ae60"
+        />
 
-  <View style={styles.safeZoneInfo}>
-    <Text
-      style={[
-        styles.safeZoneTitle,
-        {
-          color: "#27ae60",
-        },
-      ]}
-    >
-      {t.inicio.zona_segura}
-    </Text>
-
-    <Text
-      style={[
-        styles.safeZoneSubtitle,
-        {
-  
-        },
-      ]}
-      numberOfLines={1}
-    >
-      {t.inicio.sin_incidentes} •{" "}
-      {vm.ubicacionLista ? t.inicio.gps_activo : "GPS inactivo"}
-    </Text>
-
-    <Text
-      style={[
-        styles.safeZoneLocation,
-        {
-          color: theme.text,
-        },
-      ]}
-      numberOfLines={1}
-    >
-      {vm.ubicacionNombre || "Ubicación no disponible"}
-    </Text>
-  </View>
-
-  <MaterialIcons
-    name="chevron-right"
-    size={24}
-    color={theme.text}
-  />
-</TouchableOpacity>
-
-
-      {/* Indicadores cámara / micrófono */}
-      <View style={styles.indicatorsRow}>
-        <TouchableOpacity style={styles.indicator} onPress={toggleCamera} activeOpacity={0.7}>
-          <View style={[styles.dot, cameraActive ? { backgroundColor: theme.icono } : styles.dotRed]} />
-          <Ionicons
-            name="camera"
-            size={20}
-            color={cameraActive ? theme.icono : "#e74c3c"}
-          />
-          <Text style={[styles.indicatorText, { color: cameraActive ? theme.icono : "#e74c3c" }]}>
-            {t.inicio.camara}
+        <View style={styles.safeZoneInfo}>
+          <Text
+            style={[
+              styles.safeZoneTitle,
+              {
+                color: "#27ae60",
+              },
+            ]}
+          >
+            {t.inicio.zona_segura}
           </Text>
-        </TouchableOpacity>
 
-        <TouchableOpacity style={styles.indicator} onPress={toggleMic} activeOpacity={0.7}>
-          <View style={[styles.dot, micActive ? { backgroundColor: theme.icono } : styles.dotRed]} />
-          <Ionicons
-            name="mic"
-            size={20}
-            color={micActive ? theme.icono : "#e74c3c"}
-          />
-          <Text style={[styles.indicatorText, { color: micActive ? theme.icono : "#e74c3c" }]}>
-            {t.inicio.microfono}
+          <Text
+            style={[
+              styles.safeZoneSubtitle,
+              {
+
+              },
+            ]}
+            numberOfLines={1}
+          >
+            {t.inicio.sin_incidentes} •{" "}
+            {vm.ubicacionLista ? t.inicio.gps_activo : "GPS inactivo"}
           </Text>
-        </TouchableOpacity>
-      </View>
+
+          <Text
+            style={[
+              styles.safeZoneLocation,
+              {
+                color: theme.text,
+              },
+            ]}
+            numberOfLines={1}
+          >
+            {vm.ubicacionNombre || "Ubicación no disponible"}
+          </Text>
+        </View>
+
+        <MaterialIcons
+          name="chevron-right"
+          size={24}
+          color={theme.text}
+        />
+      </TouchableOpacity>
 
       {/* Botón central con glow expansivo */}
       <View style={[styles.centerSection, { paddingVertical: BUTTON_SIZE * 0.40 }]}>
@@ -317,8 +274,6 @@ export default function Inicio() {
         </TouchableOpacity>
 
       </View>
-
-     
 
       {/* Ultima alerta, (esta conectada al historial) */}
       <TouchableOpacity

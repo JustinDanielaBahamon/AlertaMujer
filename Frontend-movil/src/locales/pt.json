@@ -29,6 +29,8 @@
     "ya_cuenta": "Já tem uma conta? Entrar"
   },
   "inicio": {
+    "sin_alertas": "Sem alertas",
+    "sin_ubicacion": "Sem localização",
     "bienvenida": "Bem-vinda",
     "ubicacion_actual": "Localização atual",
     "camara": "Câmera",
@@ -196,6 +198,18 @@
     "stats_alertas": "alertas"
   },
   "ajustes": {
+    "grabar_video": "Gravar vídeo automaticamente ao ativar uma emergência",
+    "grabar_video_desc": "Usa sua câmera para gravar até 1 minuto de vídeo quando você ativa um alerta. Se não quiser que sua câmera seja usada, desative esta opção.",
+    "grabar_audio": "Gravar áudio automaticamente ao ativar uma emergência",
+    "grabar_audio_desc": "Usa seu microfone para gravar até 5 minutos de áudio quando você ativa um alerta. Se não quiser que seu microfone seja usado, desative esta opção.",
+    "permiso_camara_msg": "Para ativar o vídeo, permita o acesso à câmera nas configurações do telefone.",
+    "permiso_microfono_msg": "Para ativar o áudio, permita o acesso ao microfone nas configurações do telefone.",
+    "evidencias_privacidad": "Evidências e privacidade",
+    "grabar_evidencia": "Gravar vídeo e áudio automaticamente ao ativar uma emergência",
+    "grabar_evidencia_desc": "Até 1 minuto é gravado com sua câmera e microfone quando você ativa um alerta. Se não quiser que sua câmera seja usada, desative esta opção.",
+    "permiso_requerido_titulo": "Permissões necessárias",
+    "permiso_requerido_msg": "Para ativar esta opção, permita o acesso à câmera e ao microfone nas configurações do telefone.",
+    "abrir_ajustes": "Abrir configurações",
     "titulo": "Configurações",
     "idioma": "Idioma",
     "temas": "Temas Padrão",
@@ -519,6 +533,7 @@
     "btn_cambiar": "Alterar dados"
   },
   "permisos": {
+    "divulgacion_grabacion": "O AlertaMujer precisa de acesso à sua câmera e ao seu microfone para gravar automaticamente até 1 minuto de vídeo e áudio quando você ativar um alerta de emergência.",
     "sms_titulo": "Permitir que o Alerta Mujer acesse as mensagens",
     "sms_desc": "Esta função enviará uma mensagem de texto com sua localização aos seus contatos de emergência.",
     "contacto_titulo": "Permitir que o Alerta Mujer acesse seus contatos",

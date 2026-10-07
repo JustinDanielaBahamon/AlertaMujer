@@ -29,6 +29,8 @@
   "ya_cuenta": "¿Ya tienes cuenta? Inicia sesión"
   },
   "inicio": {
+  "sin_alertas": "Sin alertas",
+  "sin_ubicacion": "Sin ubicación",
   "bienvenida": "Bienvenida",
   "ubicacion_actual": "Ubicación actual",
   "camara": "Cámara",
@@ -196,6 +198,18 @@
   "stats_alertas": "alertas"
   },
   "ajustes": {
+  "grabar_video": "Grabar video automáticamente al activar una emergencia",
+  "grabar_video_desc": "Usa tu cámara para grabar hasta 1 minuto de video cuando activas una alerta. Si no quieres que se use tu cámara, apaga esta opción.",
+  "grabar_audio": "Grabar audio automáticamente al activar una emergencia",
+  "grabar_audio_desc": "Usa tu micrófono para grabar hasta 5 minutos de audio cuando activas una alerta. Si no quieres que se use tu micrófono, apaga esta opción.",
+  "permiso_camara_msg": "Para activar el video debes permitir el acceso a la cámara desde los ajustes del teléfono.",
+  "permiso_microfono_msg": "Para activar el audio debes permitir el acceso al micrófono desde los ajustes del teléfono.",
+  "evidencias_privacidad": "Evidencias y privacidad",
+  "grabar_evidencia": "Grabar video y audio automáticamente al activar una emergencia",
+  "grabar_evidencia_desc": "Se graba hasta 1 minuto con tu cámara y micrófono cuando activas una alerta. Si no quieres que se use tu cámara, apaga esta opción.",
+  "permiso_requerido_titulo": "Permisos necesarios",
+  "permiso_requerido_msg": "Para activar esta opción debes permitir el acceso a la cámara y al micrófono desde los ajustes del teléfono.",
+  "abrir_ajustes": "Abrir ajustes",
   "titulo": "Ajustes",
   "idioma": "Idioma",
   "temas": "Temas Predeterminados",
@@ -521,6 +535,7 @@
   "btn_cambiar": "Cambiar datos"
 },
 "permisos": {
+  "divulgacion_grabacion": "AlertaMujer requiere acceso a tu cámara y micrófono para grabar automáticamente hasta 1 minuto de video y audio cuando actives una alerta de emergencia.",
   "sms_titulo": "Permitir que Alerta Mujer acceda a los mensajes",
   "sms_desc": "Esta función enviará un mensaje de texto con tu ubicación a tus contactos de emergencia.",
   "contacto_titulo": "Permitir que Alerta Mujer acceda a tus contactos",
