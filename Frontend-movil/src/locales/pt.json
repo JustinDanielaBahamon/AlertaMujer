@@ -492,6 +492,7 @@
     "slogan": "Juntas somos mais fortes"
   },
   "activacion": {
+    "activar_ahora": "Ativar agora",
     "titulo": "Ativando Alerta SOS...",
     "enviando_ubicacion": "Enviando localização em tempo real",
     "iniciando_grabacion": "Iniciando gravação de vídeo",
@@ -625,6 +626,11 @@
   "confirmarTitulo": "Cancelar o alerta?",
   "confirmarDescripcion": "Seus contatos receberão uma notificação automática informando que você está a salvo e que o alerta foi desativado.",
   "confirmarSi": "Sim, cancelar",
+  "serviciosTitulo": "Serviços de emergência ativos",
+  "serviciosDescripcion": "Quando estiver a salvo, pressione \"Estou bem\" para notificar.",
+  "compartiendoUbicacion": "Compartilhando localização",
+  "enTiempoReal": "Em tempo real",
+  "vistas": "visualizações",
   "confirmarNo": "Não, manter alerta",
   "cancelar": "Cancelar alerta",
   "llamar911": "Chamar 911"

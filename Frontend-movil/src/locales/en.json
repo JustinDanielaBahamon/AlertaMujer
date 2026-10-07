@@ -492,6 +492,7 @@
     "slogan": "Together we are stronger"
   },
   "activacion": {
+    "activar_ahora": "Activate now",
     "titulo": "Activating SOS Alert...",
     "enviando_ubicacion": "Sending real-time location",
     "iniciando_grabacion": "Starting video recording",
