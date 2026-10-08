@@ -1,11 +1,12 @@
 import "react-native-gesture-handler";
-import AppNavigator from "./src/navigation/AppNavigator";
 import { AuthProvider } from "./src/contexts/AuthContext";
-import { ThemeProvider } from "./src/contexts/ThemeContext";
-import { LocaleProvider } from "./src/contexts/LocaleContext";
 import { ContactosProvider } from "./src/contexts/ContactosContext";
-import { RecorridosProvider } from "./src/contexts/RecorridosContext";
 import { EvidenciaProvider } from "./src/contexts/EvidenciaContext";
+import { LocaleProvider } from "./src/contexts/LocaleContext";
+import { NotificacionesProvider } from "./src/contexts/NotificacionesContext";
+import { RecorridosProvider } from "./src/contexts/RecorridosContext";
+import { ThemeProvider } from "./src/contexts/ThemeContext";
+import AppNavigator from "./src/navigation/AppNavigator";
 
 export default function App() {
   return (
@@ -15,7 +16,9 @@ export default function App() {
           <ContactosProvider>
             <RecorridosProvider>
               <EvidenciaProvider>
-                <AppNavigator />
+                <NotificacionesProvider>
+                  <AppNavigator />
+                </NotificacionesProvider>
               </EvidenciaProvider>
             </RecorridosProvider>
           </ContactosProvider>

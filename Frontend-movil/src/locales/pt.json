@@ -198,6 +198,8 @@
     "stats_alertas": "alertas"
   },
   "ajustes": {
+   "notificaciones": "Notificações",
+    "privacidad_app": "Privacidade do aplicativo",
     "grabar_video": "Gravar vídeo automaticamente ao ativar uma emergência",
     "grabar_video_desc": "Usa sua câmera para gravar até 1 minuto de vídeo quando você ativa um alerta. Se não quiser que sua câmera seja usada, desative esta opção.",
     "grabar_audio": "Gravar áudio automaticamente ao ativar uma emergência",
@@ -634,6 +636,34 @@
   "confirmarNo": "Não, manter alerta",
   "cancelar": "Cancelar alerta",
   "llamar911": "Chamar 911"
+  },
+    "notificaciones": {
+    "titulo_header": "Notificações",
+    "intro": "Escolha como e quando quer receber os avisos do aplicativo.",
+    "activar": "Ativar notificações",
+    "activar_desc": "Receba avisos do aplicativo no seu telefone. Se desativar, nenhuma notificação será exibida.",
+    "vibracion": "Vibração",
+    "vibracion_desc": "O telefone vibra quando chega uma notificação.",
+    "no_molestar": "Horas silenciosas (não perturbe)",
+    "no_molestar_desc": "Durante este horário você não receberá notificações.",
+    "desde": "De",
+    "hasta": "Até"
+  },
+  "privacidadApp": {
+    "titulo_header": "Privacidade do aplicativo",
+    "intro": "Aqui você pode saber como cuidamos das suas informações e que controle você tem sobre elas.",
+    "retencion_titulo": "Política de retenção de dados",
+    "retencion_desc": "Por quanto tempo guardamos suas informações."
+  },
+  "retencion": {
+    "titulo_header": "Retenção de dados",
+    "intro": "Estes são os prazos em que o aplicativo mantém suas informações nos servidores seguros.",
+    "ubicaciones_titulo": "Histórico de localizações",
+    "ubicaciones_desc": "As rotas de GPS registradas durante seus alertas são mantidas por 30 dias. Depois disso são excluídas automaticamente, ou antes se você apagar sua conta.",
+    "evidencias_titulo": "Evidências (vídeos e áudios)",
+    "evidencias_desc": "As gravações feitas em uma emergência ficam na nuvem por 60 dias para que você possa baixá-las. Depois são excluídas de forma definitiva.",
+    "perfil_titulo": "Dados de perfil",
+    "perfil_desc": "Seus dados pessoais são usados apenas para o funcionamento dos alertas de segurança e nunca são vendidos a terceiros."
   },
   "indexDemo": {
     "mensaje": "Bem-vinda (tela de teste)",

@@ -118,6 +118,18 @@ export default function AjustesComponent({ navigation }: any) {
         </View>
       </TouchableOpacity>
 
+      {/* notificaciones */}
+      <TouchableOpacity
+        onPress={() => navigation.navigate("Notificaciones")}
+        style={styles.item}
+      >
+        <View style={styles.filaConChevron}>
+          <Ionicons name="notifications-outline" size={17} color={theme.text} style={{ marginRight: 8 }} />
+          <Text style={{ color: theme.text, flex: 1, fontSize: 14 }}>{t.ajustes.notificaciones}</Text>
+          <Ionicons name="chevron-forward" size={15} color={theme.tabActiveColor} />
+        </View>
+      </TouchableOpacity>
+
       {/* opciones de recorridos */}
       <View style={styles.item}>
         <Text style={[styles.tituloSeccion, { color: theme.text }]}>
@@ -223,6 +235,18 @@ export default function AjustesComponent({ navigation }: any) {
           {t.ajustes.grabar_audio_desc}
         </Text>
       </View>
+
+      {/* privacidad de la aplicacion */}
+      <TouchableOpacity
+        onPress={() => navigation.navigate("PrivacidadApp")}
+        style={styles.item}
+      >
+        <View style={styles.filaConChevron}>
+          <Ionicons name="lock-closed-outline" size={17} color={theme.text} style={{ marginRight: 8 }} />
+          <Text style={{ color: theme.text, flex: 1, fontSize: 14 }}>{t.ajustes.privacidad_app}</Text>
+          <Ionicons name="chevron-forward" size={15} color={theme.tabActiveColor} />
+        </View>
+      </TouchableOpacity>
 
       {/* tutoriales */}
       <TouchableOpacity

@@ -198,6 +198,8 @@
   "stats_alertas": "alertas"
   },
   "ajustes": {
+  "notificaciones": "Notificaciones",
+  "privacidad_app": "Privacidad de la aplicación",
   "grabar_video": "Grabar video automáticamente al activar una emergencia",
   "grabar_video_desc": "Usa tu cámara para grabar hasta 1 minuto de video cuando activas una alerta. Si no quieres que se use tu cámara, apaga esta opción.",
   "grabar_audio": "Grabar audio automáticamente al activar una emergencia",
@@ -644,6 +646,34 @@
   "confirmarNo": "No, mantener alerta",
   "llamar911": "Llamar al 911"
 },
+  "notificaciones": {
+    "titulo_header": "Notificaciones",
+    "intro": "Elige cómo y cuándo quieres recibir los avisos de la aplicación.",
+    "activar": "Activar notificaciones",
+    "activar_desc": "Recibe avisos de la aplicación en tu teléfono. Si las desactivas, no se mostrará ninguna notificación.",
+    "vibracion": "Vibración",
+    "vibracion_desc": "El teléfono vibra cuando llega una notificación.",
+    "no_molestar": "Horas silenciosas (no molestar)",
+    "no_molestar_desc": "Durante este horario no recibirás notificaciones.",
+    "desde": "Desde",
+    "hasta": "Hasta"
+  },
+  "privacidadApp": {
+    "titulo_header": "Privacidad de la aplicación",
+    "intro": "Aquí puedes conocer cómo cuidamos tu información y qué control tienes sobre ella.",
+    "retencion_titulo": "Política de retención de datos",
+    "retencion_desc": "Cuánto tiempo guardamos tu información."
+  },
+  "retencion": {
+    "titulo_header": "Retención de datos",
+    "intro": "Estos son los plazos durante los cuales la aplicación conserva tu información en sus servidores seguros.",
+    "ubicaciones_titulo": "Historial de ubicaciones",
+    "ubicaciones_desc": "Las rutas de GPS registradas durante tus alertas se conservan 30 días. Pasado ese tiempo se eliminan automáticamente, o antes si borras tu cuenta.",
+    "evidencias_titulo": "Evidencias (videos y audios)",
+    "evidencias_desc": "Las grabaciones tomadas en una emergencia permanecen en la nube 60 días para que puedas descargarlas. Después se eliminan de forma definitiva.",
+    "perfil_titulo": "Datos de perfil",
+    "perfil_desc": "Tus datos personales se usan únicamente para el funcionamiento de las alertas de seguridad y nunca se venden a terceros."
+  },
 "indexDemo": {
   "mensaje": "Bienvenido (pantalla de prueba)",
   "btn_demo": "Entrar como demo (home)",

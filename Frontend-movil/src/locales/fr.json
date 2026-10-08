@@ -195,6 +195,8 @@
     "stats_alertas": "alertes"
   },
   "ajustes": {
+    "notificaciones": "Notifications",
+    "privacidad_app": "Confidentialité de l'application",
     "grabar_video": "Enregistrer automatiquement la vidéo lors d'une urgence",
     "grabar_video_desc": "Utilise votre caméra pour enregistrer jusqu'à 1 minute de vidéo lorsque vous activez une alerte. Si vous ne souhaitez pas que votre caméra soit utilisée, désactivez cette option.",
     "grabar_audio": "Enregistrer automatiquement l'audio lors d'une urgence",
@@ -632,6 +634,34 @@
   "cancelar": "Annuler l'alerte",
   "llamar911": "Appeler le 911"
 },
+  "notificaciones": {
+    "titulo_header": "Notifications",
+    "intro": "Choisissez comment et quand vous souhaitez recevoir les avis de l'application.",
+    "activar": "Activer les notifications",
+    "activar_desc": "Recevez les avis de l'application sur votre téléphone. Si vous les désactivez, aucune notification ne s'affichera.",
+    "vibracion": "Vibration",
+    "vibracion_desc": "Le téléphone vibre lorsqu'une notification arrive.",
+    "no_molestar": "Heures silencieuses (ne pas déranger)",
+    "no_molestar_desc": "Pendant cette plage horaire, vous ne recevrez aucune notification.",
+    "desde": "De",
+    "hasta": "À"
+  },
+  "privacidadApp": {
+    "titulo_header": "Confidentialité de l'application",
+    "intro": "Ici, vous pouvez savoir comment nous protégeons vos informations et le contrôle que vous avez sur elles.",
+    "retencion_titulo": "Politique de conservation des données",
+    "retencion_desc": "Combien de temps nous conservons vos informations."
+  },
+  "retencion": {
+    "titulo_header": "Conservation des données",
+    "intro": "Voici les durées pendant lesquelles l'application conserve vos informations sur ses serveurs sécurisés.",
+    "ubicaciones_titulo": "Historique des positions",
+    "ubicaciones_desc": "Les itinéraires GPS enregistrés pendant vos alertes sont conservés 30 jours. Ils sont ensuite supprimés automatiquement, ou plus tôt si vous supprimez votre compte.",
+    "evidencias_titulo": "Preuves (vidéos et audios)",
+    "evidencias_desc": "Les enregistrements réalisés lors d'une urgence restent dans le cloud 60 jours pour que vous puissiez les télécharger. Ils sont ensuite supprimés définitivement.",
+    "perfil_titulo": "Données de profil",
+    "perfil_desc": "Vos données personnelles servent uniquement au fonctionnement des alertes de sécurité et ne sont jamais vendues à des tiers."
+  },
   "indexDemo": {
     "mensaje": "Bienvenue (écran de test)",
     "btn_demo": "Entrer en démo (accueil)",
