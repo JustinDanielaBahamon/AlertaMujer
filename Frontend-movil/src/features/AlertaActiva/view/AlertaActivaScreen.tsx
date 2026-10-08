@@ -1,21 +1,24 @@
-import {
-  Animated,
-  Modal,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  useWindowDimensions,
-  View,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native"; // TEMPORAL
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack"; // TEMPORAL
+import {
+    Animated,
+    Modal,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+    useWindowDimensions,
+    View,
+} from "react-native";
 import MapView, { Marker } from "react-native-maps";
-import { useAlertaActivaViewModel } from "../viewModel/useAlertaActivaViewModel";
-import { useTheme } from "../../../contexts/ThemeContext";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocale } from "../../../contexts/LocaleContext";
+import { useTheme } from "../../../contexts/ThemeContext";
+import type { MainStackParamList } from "../../../navigation/types"; // TEMPORAL
 import { createStyles } from "../style/alertaActivaStyle";
+import { useAlertaActivaViewModel } from "../viewModel/useAlertaActivaViewModel";
 
 export default function AlertaActivaScreen() {
   const vm = useAlertaActivaViewModel();
@@ -24,6 +27,8 @@ export default function AlertaActivaScreen() {
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const styles = createStyles(theme, width);
+  const navigation =
+    useNavigation<NativeStackNavigationProp<MainStackParamList>>(); // TEMPORAL
 
   return (
     <View style={styles.scrollContainer}>
@@ -126,6 +131,39 @@ export default function AlertaActivaScreen() {
           <MaterialIcons name="call" size={18} color={theme.icono} />
           <Text style={styles.callText}>{t.alertaActiva.llamar911}</Text>
         </TouchableOpacity>
+
+        {/* ===== TEMPORAL: quitar este bloque cuando la alerta ya se envíe a los contactos ===== */}
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() =>
+            navigation.navigate("AlertaContacto", {
+              alertaId: 0,
+              nombreUsuaria: "Usuaria de prueba",
+              latitude: vm.location?.latitude,
+              longitude: vm.location?.longitude,
+              demo: true,
+            })
+          }
+          style={{
+            alignSelf: "center",
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 6,
+            marginTop: 16,
+            paddingHorizontal: 12,
+            paddingVertical: 6,
+            borderRadius: 14,
+            borderWidth: 1,
+            borderStyle: "dashed",
+            borderColor: theme.icono,
+          }}
+        >
+          <MaterialIcons name="visibility" size={14} color={theme.icono} />
+          <Text style={{ fontSize: 11, fontWeight: "600", color: theme.icono }}>
+            Ver pantalla de contacto (temporal)
+          </Text>
+        </TouchableOpacity>
+        {/* ===== FIN TEMPORAL ===== */}
       </ScrollView>
 
       {/* Ventana de verificacion para cancelar la alerta. */}
