@@ -31,6 +31,10 @@ export type MainStackParamList = {
   PrivacidadApp: undefined;
   RetencionDatos: undefined;
 
+  AcercaDe: undefined;
+  PoliticaTerminos: undefined;
+  PoliticaPrivacidad: undefined;
+
   AgregarContacto:
     | {
         contacto?: Contacto;

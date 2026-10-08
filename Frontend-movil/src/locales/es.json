@@ -198,12 +198,13 @@
   "stats_alertas": "alertas"
   },
   "ajustes": {
+  "acerca_de": "Acerca de",
   "notificaciones": "Notificaciones",
   "privacidad_app": "Privacidad de la aplicación",
   "grabar_video": "Grabar video automáticamente al activar una emergencia",
-  "grabar_video_desc": "Usa tu cámara para grabar hasta 1 minuto de video cuando activas una alerta. Si no quieres que se use tu cámara, apaga esta opción.",
+  "grabar_video_desc": "Graba hasta 1 minuto de video con tu cámara al activar una alerta. Apágalo si no quieres usarla.",
   "grabar_audio": "Grabar audio automáticamente al activar una emergencia",
-  "grabar_audio_desc": "Usa tu micrófono para grabar hasta 5 minutos de audio cuando activas una alerta. Si no quieres que se use tu micrófono, apaga esta opción.",
+  "grabar_audio_desc": "Graba hasta 5 minutos de audio con tu micrófono al activar una alerta. Apágalo si no quieres usarlo.",
   "permiso_camara_msg": "Para activar el video debes permitir el acceso a la cámara desde los ajustes del teléfono.",
   "permiso_microfono_msg": "Para activar el audio debes permitir el acceso al micrófono desde los ajustes del teléfono.",
   "evidencias_privacidad": "Evidencias y privacidad",
@@ -225,6 +226,13 @@
   "metodos_activacion": "Métodos de activación",
   "tema_personalizado": "Tema Personalizado"
 
+  },
+    "acercaDe": {
+    "titulo_header": "Acerca de",
+    "intro": "Información sobre la aplicación y sus documentos legales.",
+    "version": "Versión de la aplicación",
+    "terminos": "Términos y condiciones",
+    "politica_privacidad": "Política de privacidad"
   },
   "recuperar": {
   "titulo_paso1": "¿Olvidaste tu contraseña?",
