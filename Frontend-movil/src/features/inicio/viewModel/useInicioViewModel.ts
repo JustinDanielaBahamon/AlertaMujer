@@ -1,11 +1,15 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Vibration } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import type { MainStackParamList } from "../../../navigation/types";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Vibration } from "react-native";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useLocale } from "../../../contexts/LocaleContext";
-import { LocationService, type UbicacionDetallada } from "../../../services/location.service";
+import { useNotificaciones } from "../../../contexts/NotificacionesContext";
+import type { MainStackParamList } from "../../../navigation/types";
+import {
+  LocationService,
+  type UbicacionDetallada,
+} from "../../../services/location.service";
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
 
@@ -16,11 +20,14 @@ export function useInicioViewModel() {
   const navigation = useNavigation<Nav>();
   const { signOut } = useAuth();
   const { t } = useLocale();
+  const { config } = useNotificaciones();
 
   const [pressed, setPressed] = useState(false);
-  const [estadoUbicacion, setEstadoUbicacion] = useState<EstadoUbicacion>("cargando");
+  const [estadoUbicacion, setEstadoUbicacion] =
+    useState<EstadoUbicacion>("cargando");
   const [ubicacionResuelta, setUbicacionResuelta] = useState("");
-  const [ubicacionDetallada, setUbicacionDetallada] = useState<UbicacionDetallada | null>(null);
+  const [ubicacionDetallada, setUbicacionDetallada] =
+    useState<UbicacionDetallada | null>(null);
   const [cargando, setCargando] = useState(false);
 
   const obtenerUbicacion = useCallback(async () => {
@@ -79,14 +86,16 @@ export function useInicioViewModel() {
   const ubicacionLista = estadoUbicacion === "lista";
 
   const activarAlerta = useCallback(() => {
-    Vibration.vibrate(200);
+    if (config.vibracion) Vibration.vibrate(200);
     const stackNav = navigation.getParent()?.getParent();
     if (stackNav && "navigate" in stackNav) {
-      (stackNav as { navigate: (name: keyof MainStackParamList) => void }).navigate("Activacion");
+      (
+        stackNav as { navigate: (name: keyof MainStackParamList) => void }
+      ).navigate("Activacion");
       return;
     }
     navigation.navigate("Activacion");
-  }, [navigation]);
+  }, [navigation, config.vibracion]);
 
   const onPressInBoton = useCallback(() => setPressed(true), []);
   const onPressOutBoton = useCallback(() => setPressed(false), []);
