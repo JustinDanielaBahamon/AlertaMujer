@@ -29,6 +29,8 @@
     "ya_cuenta": "Already have an account? Sign in"
   },
   "inicio": {
+    "sin_alertas": "No alerts",
+    "sin_ubicacion": "No location",
     "bienvenida": "Welcome",
     "ubicacion_actual": "Current location",
     "camara": "Camera",
@@ -196,18 +198,40 @@
     "stats_alertas": "alerts"
   },
   "ajustes": {
-    "titulo": "Settings",
-    "idioma": "Language",
-    "temas": "Default Themes",
-    "ver_tutoriales": "View Tutorials",
-    "tema": "Theme",
-    "oscuro": "Dark mode",
-    "claro": "Light mode",
-    "cerrar_sesion": "Log out",
+  "acerca_de": "About",
+  "notificaciones": "Notifications",
+  "privacidad_app": "App privacy",
+  "grabar_video": "Automatically record video when an emergency is activated",
+  "grabar_video_desc": "Records up to 1 minute of video with your camera when you trigger an alert. Turn off if you don't want it used.",
+  "grabar_audio": "Automatically record audio when an emergency is activated",
+  "grabar_audio_desc": "Records up to 5 minutes of audio with your microphone when you trigger an alert. Turn off if you don't want it used.",
+  "permiso_camara_msg": "To turn on video, allow camera access from your phone settings.",
+  "permiso_microfono_msg": "To turn on audio, allow microphone access from your phone settings.",
+  "evidencias_privacidad": "Evidence & privacy",
+  "grabar_evidencia": "Automatically record video and audio when an emergency is activated",
+  "grabar_evidencia_desc": "Up to 1 minute is recorded with your camera and microphone when you trigger an alert. If you never want your camera used, turn this option off.",
+  "permiso_requerido_titulo": "Permissions required",
+  "permiso_requerido_msg": "To turn this on, allow camera and microphone access from your phone settings.",
+  "abrir_ajustes": "Open settings",
+  "titulo": "Settings",
+  "idioma": "Language",
+  "temas": "Default Themes",
+  "ver_tutoriales": "View Tutorials",
+  "tema": "Theme",
+  "oscuro": "Dark mode",
+  "claro": "Light mode",
+  "cerrar_sesion": "Log out",
+  "terminos": "Terms and conditions",
+  "privacidad": "Privacy policy",
+  "metodos_activacion": "Activation methods",
+  "tema_personalizado": "Custom Theme"
+},
+    "acercaDe": {
+    "titulo_header": "About",
+    "intro": "Information about the app and its legal documents.",
+    "version": "App version",
     "terminos": "Terms and conditions",
-    "privacidad": "Privacy policy",
-    "metodos_activacion": "Activation methods",
-    "tema_personalizado": "Custom Theme"
+    "politica_privacidad": "Privacy policy"
   },
   "recuperar": {
     "titulo_paso1": "Forgot your password?",
@@ -478,6 +502,7 @@
     "slogan": "Together we are stronger"
   },
   "activacion": {
+    "activar_ahora": "Activate now",
     "titulo": "Activating SOS Alert...",
     "enviando_ubicacion": "Sending real-time location",
     "iniciando_grabacion": "Starting video recording",
@@ -519,6 +544,7 @@
     "btn_cambiar": "Change details"
   },
   "permisos": {
+    "divulgacion_grabacion": "AlertaMujer needs access to your camera and microphone to automatically record up to 1 minute of video and audio when you activate an emergency alert.",
     "sms_titulo": "Allow Alerta Mujer to access messages",
     "sms_desc": "This feature will send a text message with your location to your emergency contacts.",
     "contacto_titulo": "Allow Alerta Mujer to access your contacts",
@@ -607,10 +633,11 @@
     "item12_desc": "For questions or support, users can reach out through the official channels available within the app.",
     "volver": "Back"
   },
-  "alertaActiva": {
+ "alertaActiva": {
   "titulo": "Active alert",
   "subtitulo": "Your network was notified",
   "tiempoRestante": "Time remaining",
+  "mensajeReenvio": "When the time runs out, the alert will be sent again to your contacts with your new location. To cancel the alert, tap \"I'm okay\" and then \"Yes, cancel\".",
   "serviciosTitulo": "Emergency services active",
   "serviciosDescripcion": "When you're safe, press \"I'm okay\" to notify them.",
   "compartiendoUbicacion": "Sharing location",
@@ -618,8 +645,40 @@
   "vistas": "views",
   "estoyBien": "I'm okay",
   "estoyBienDescripcion": "Notify your network that you are safe",
+  "confirmarTitulo": "Cancel the alert?",
+  "confirmarDescripcion": "Your contacts will receive an automatic notification letting them know you are safe and the alert has been deactivated.",
+  "confirmarSi": "Yes, cancel",
+  "confirmarNo": "No, keep alert",
   "llamar911": "Call 911"
 },
+  "notificaciones": {
+    "titulo_header": "Notifications",
+    "intro": "Choose how and when you want to receive the app's notices.",
+    "activar": "Enable notifications",
+    "activar_desc": "Receive app notices on your phone. If you turn them off, no notification will be shown.",
+    "vibracion": "Vibration",
+    "vibracion_desc": "The phone vibrates when a notification arrives.",
+    "no_molestar": "Quiet hours (do not disturb)",
+    "no_molestar_desc": "During this time you will not receive notifications.",
+    "desde": "From",
+    "hasta": "To"
+  },
+  "privacidadApp": {
+    "titulo_header": "App privacy",
+    "intro": "Here you can learn how we protect your information and what control you have over it.",
+    "retencion_titulo": "Data retention policy",
+    "retencion_desc": "How long we keep your information."
+  },
+  "retencion": {
+    "titulo_header": "Data retention",
+    "intro": "These are the periods during which the app keeps your information on its secure servers.",
+    "ubicaciones_titulo": "Location history",
+    "ubicaciones_desc": "GPS routes recorded during your alerts are kept for 30 days. After that they are deleted automatically, or sooner if you delete your account.",
+    "evidencias_titulo": "Evidence (videos and audio)",
+    "evidencias_desc": "Recordings made during an emergency stay in the cloud for 60 days so you can download them. After that they are permanently deleted.",
+    "perfil_titulo": "Profile data",
+    "perfil_desc": "Your personal data is used only for the operation of the safety alerts and is never sold to third parties."
+  },
   "indexDemo": {
     "mensaje": "Welcome (test screen)",
     "btn_demo": "Enter as demo (home)",

@@ -29,6 +29,8 @@
     "ya_cuenta": "Já tem uma conta? Entrar"
   },
   "inicio": {
+    "sin_alertas": "Sem alertas",
+    "sin_ubicacion": "Sem localização",
     "bienvenida": "Bem-vinda",
     "ubicacion_actual": "Localização atual",
     "camara": "Câmera",
@@ -196,18 +198,40 @@
     "stats_alertas": "alertas"
   },
   "ajustes": {
-    "titulo": "Configurações",
-    "idioma": "Idioma",
-    "temas": "Temas Padrão",
-    "ver_tutoriales": "Ver Tutoriais",
-    "tema": "Tema",
-    "oscuro": "Modo escuro",
-    "claro": "Modo claro",
-    "cerrar_sesion": "Sair",
+  "acerca_de": "Sobre",
+  "notificaciones": "Notificações",
+  "privacidad_app": "Privacidade do aplicativo",
+  "grabar_video": "Gravar vídeo automaticamente ao ativar uma emergência",
+  "grabar_video_desc": "Grava até 1 minuto de vídeo com sua câmera ao ativar um alerta. Desative se não quiser usá-la.",
+  "grabar_audio": "Gravar áudio automaticamente ao ativar uma emergência",
+  "grabar_audio_desc": "Grava até 5 minutos de áudio com seu microfone ao ativar um alerta. Desative se não quiser usá-lo.",
+  "permiso_camara_msg": "Para ativar o vídeo, permita o acesso à câmera nas configurações do telefone.",
+  "permiso_microfono_msg": "Para ativar o áudio, permita o acesso ao microfone nas configurações do telefone.",
+  "evidencias_privacidad": "Evidências e privacidade",
+  "grabar_evidencia": "Gravar vídeo e áudio automaticamente ao ativar uma emergência",
+  "grabar_evidencia_desc": "Até 1 minuto é gravado com sua câmera e microfone quando você ativa um alerta. Se não quiser que sua câmera seja usada, desative esta opção.",
+  "permiso_requerido_titulo": "Permissões necessárias",
+  "permiso_requerido_msg": "Para ativar esta opção, permita o acesso à câmera e ao microfone nas configurações do telefone.",
+  "abrir_ajustes": "Abrir configurações",
+  "titulo": "Configurações",
+  "idioma": "Idioma",
+  "temas": "Temas Padrão",
+  "ver_tutoriales": "Ver Tutoriais",
+  "tema": "Tema",
+  "oscuro": "Modo escuro",
+  "claro": "Modo claro",
+  "cerrar_sesion": "Sair",
+  "terminos": "Termos e condições",
+  "privacidad": "Política de privacidade",
+  "metodos_activacion": "Métodos de ativação",
+  "tema_personalizado": "Tema Personalizado"
+},
+    "acercaDe": {
+    "titulo_header": "Sobre",
+    "intro": "Informações sobre o aplicativo e seus documentos legais.",
+    "version": "Versão do aplicativo",
     "terminos": "Termos e condições",
-    "privacidad": "Política de privacidade",
-    "metodos_activacion": "Métodos de ativação",
-    "tema_personalizado": "Tema Personalizado"
+    "politica_privacidad": "Política de privacidade"
   },
   "recuperar": {
     "titulo_paso1": "Esqueceu sua senha?",
@@ -478,6 +502,7 @@
     "slogan": "Juntas somos mais fortes"
   },
   "activacion": {
+    "activar_ahora": "Ativar agora",
     "titulo": "Ativando Alerta SOS...",
     "enviando_ubicacion": "Enviando localização em tempo real",
     "iniciando_grabacion": "Iniciando gravação de vídeo",
@@ -519,6 +544,7 @@
     "btn_cambiar": "Alterar dados"
   },
   "permisos": {
+    "divulgacion_grabacion": "O AlertaMujer precisa de acesso à sua câmera e ao seu microfone para gravar automaticamente até 1 minuto de vídeo e áudio quando você ativar um alerta de emergência.",
     "sms_titulo": "Permitir que o Alerta Mujer acesse as mensagens",
     "sms_desc": "Esta função enviará uma mensagem de texto com sua localização aos seus contatos de emergência.",
     "contacto_titulo": "Permitir que o Alerta Mujer acesse seus contatos",
@@ -600,12 +626,52 @@
     "item12_desc": "Para dúvidas ou suporte, o usuário pode entrar em contato através dos canais oficiais disponíveis dentro do aplicativo.",
     "volver": "Voltar"
   },
-  "alertaActiva": {
-    "titulo": "Alerta ativa",
-    "subtitulo": "Sua rede foi notificada",
-    "tiempoRestante": "Tempo restante",
-    "cancelar": "Cancelar alerta",
-    "llamar911": "Chamar 911"
+"alertaActiva": {
+  "titulo": "Alerta ativa",
+  "subtitulo": "Sua rede foi notificada",
+  "tiempoRestante": "Tempo restante",
+  "mensajeReenvio": "Ao terminar o tempo, o alerta será enviado novamente aos seus contatos com sua nova localização. Para cancelar o alerta, toque em \"Estou bem\" e depois em \"Sim, cancelar\".",
+  "estoyBien": "Estou bem",
+  "estoyBienDescripcion": "Avise sua rede que você está a salvo",
+  "confirmarTitulo": "Cancelar o alerta?",
+  "confirmarDescripcion": "Seus contatos receberão uma notificação automática informando que você está a salvo e que o alerta foi desativado.",
+  "confirmarSi": "Sim, cancelar",
+  "serviciosTitulo": "Serviços de emergência ativos",
+  "serviciosDescripcion": "Quando estiver a salvo, pressione \"Estou bem\" para notificar.",
+  "compartiendoUbicacion": "Compartilhando localização",
+  "enTiempoReal": "Em tempo real",
+  "vistas": "visualizações",
+  "confirmarNo": "Não, manter alerta",
+  "cancelar": "Cancelar alerta",
+  "llamar911": "Chamar 911"
+  },
+    "notificaciones": {
+    "titulo_header": "Notificações",
+    "intro": "Escolha como e quando quer receber os avisos do aplicativo.",
+    "activar": "Ativar notificações",
+    "activar_desc": "Receba avisos do aplicativo no seu telefone. Se desativar, nenhuma notificação será exibida.",
+    "vibracion": "Vibração",
+    "vibracion_desc": "O telefone vibra quando chega uma notificação.",
+    "no_molestar": "Horas silenciosas (não perturbe)",
+    "no_molestar_desc": "Durante este horário você não receberá notificações.",
+    "desde": "De",
+    "hasta": "Até"
+  },
+  "privacidadApp": {
+    "titulo_header": "Privacidade do aplicativo",
+    "intro": "Aqui você pode saber como cuidamos das suas informações e que controle você tem sobre elas.",
+    "retencion_titulo": "Política de retenção de dados",
+    "retencion_desc": "Por quanto tempo guardamos suas informações."
+  },
+  "retencion": {
+    "titulo_header": "Retenção de dados",
+    "intro": "Estes são os prazos em que o aplicativo mantém suas informações nos servidores seguros.",
+    "ubicaciones_titulo": "Histórico de localizações",
+    "ubicaciones_desc": "As rotas de GPS registradas durante seus alertas são mantidas por 30 dias. Depois disso são excluídas automaticamente, ou antes se você apagar sua conta.",
+    "evidencias_titulo": "Evidências (vídeos e áudios)",
+    "evidencias_desc": "As gravações feitas em uma emergência ficam na nuvem por 60 dias para que você possa baixá-las. Depois são excluídas de forma definitiva.",
+    "perfil_titulo": "Dados de perfil",
+    "perfil_desc": "Seus dados pessoais são usados apenas para o funcionamento dos alertas de segurança e nunca são vendidos a terceiros."
   },
   "indexDemo": {
     "mensaje": "Bem-vinda (tela de teste)",

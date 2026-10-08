@@ -29,11 +29,12 @@ export default function PermisosModal({ visible, tipo, onConfirmar, onCancelar }
     tipo === 'notificacion' ? t.permisos.notificacion_titulo :
     t.permisos.llamada_titulo;
 
+  // Cámara y micrófono muestran la divulgación clara (Prominent Disclosure)
   const descripcion =
     tipo === 'sms'          ? t.permisos.sms_desc :
     tipo === 'contacto'     ? t.permisos.contacto_desc :
-    tipo === 'camara'       ? t.permisos.camara_desc :
-    tipo === 'audio'        ? t.permisos.audio_desc :
+    tipo === 'camara'       ? t.permisos.divulgacion_grabacion :
+    tipo === 'audio'        ? t.permisos.divulgacion_grabacion :
     tipo === 'notificacion' ? t.permisos.notificacion_desc :
     t.permisos.llamada_desc;
 

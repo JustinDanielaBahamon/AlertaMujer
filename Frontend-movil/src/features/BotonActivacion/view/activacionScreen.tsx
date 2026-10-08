@@ -52,6 +52,12 @@ export default function Activacion() {
           </View>
         </View>
 
+        {/* Salta el conteo y pasa directo a la alerta activa */}
+        <TouchableOpacity style={styles.activateButton} onPress={vm.activarAhora}>
+          <MaterialIcons name="flash-on" size={20} color="#ffffff" />
+          <Text style={styles.activateText}>{t.activacion.activar_ahora}</Text>
+        </TouchableOpacity>
+
         <TouchableOpacity style={styles.cancelButton} onPress={vm.cancelar}>
           <Text style={styles.cancelText}>{t.activacion.cancelar}</Text>
         </TouchableOpacity>

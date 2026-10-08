@@ -38,6 +38,9 @@ export function useAlertaActivaViewModel() {
   const [showClose, setShowClose] = useState(false);
   const closeOpacity = useRef(new Animated.Value(0)).current;
 
+  // Modal de confirmacion para cancelar la alerta ("Estoy bien" -> "Si, cancelar").
+  const [confirmarVisible, setConfirmarVisible] = useState(false);
+
   // Efecto de cuenta regresiva: se ejecuta cada segundo y limpia su propio temporizador.
   useEffect(() => {
     if (secondsLeft <= 0) return undefined;
@@ -71,7 +74,8 @@ export function useAlertaActivaViewModel() {
         }
       } catch (err) {
         console.error("No se pudo crear la alerta en el backend:", err);
-        if (mounted) setErrorAlerta("No se pudo registrar la alerta en el servidor");
+        if (mounted)
+          setErrorAlerta("No se pudo registrar la alerta en el servidor");
       }
     })();
     return () => {
@@ -100,14 +104,18 @@ export function useAlertaActivaViewModel() {
         });
 
         subscription = await Location.watchPositionAsync(
-          { accuracy: Location.Accuracy.Balanced, timeInterval: 15000, distanceInterval: 30 },
+          {
+            accuracy: Location.Accuracy.Balanced,
+            timeInterval: 15000,
+            distanceInterval: 30,
+          },
           (loc) => {
             if (!mounted) return;
             setLocation({
               latitude: loc.coords.latitude,
               longitude: loc.coords.longitude,
             });
-          }
+          },
         );
       } catch {
         // Silenciar: si falla, el header simplemente muestra el icono de respaldo.
@@ -125,12 +133,23 @@ export function useAlertaActivaViewModel() {
   const seconds = secondsLeft % 60;
   const formattedTime = `${minutes}:${String(seconds).padStart(2, "0")}`;
 
-  // Se ejecuta cuando el usuario presiona "Estoy bien".
+  // Al tocar "Estoy bien" solo se abre la ventana de verificacion.
+  const abrirConfirmacion = useCallback(() => {
+    setConfirmarVisible(true);
+  }, []);
+
+  // Cierra la ventana de verificacion sin cancelar la alerta.
+  const cerrarConfirmacion = useCallback(() => {
+    setConfirmarVisible(false);
+  }, []);
+
+  // Se ejecuta cuando el usuario confirma "Si, cancelar".
   const marcarEstoyBien = useCallback(() => {
+    setConfirmarVisible(false);
     // Cerrar la alerta activa en el backend (estado cancelada)
     if (alertaCreadaIdRef.current) {
-      finalizarAlerta(alertaCreadaIdRef.current, 'cancelled').catch((err) =>
-        console.error('No se pudo cerrar la alerta en el backend:', err)
+      finalizarAlerta(alertaCreadaIdRef.current, "cancelled").catch((err) =>
+        console.error("No se pudo cerrar la alerta en el backend:", err),
       );
     }
     navigation.replace("DrawerHome");
@@ -155,12 +174,18 @@ export function useAlertaActivaViewModel() {
     if (showClose) return;
 
     setShowClose(true);
-    Animated.timing(closeOpacity, { toValue: 1, duration: 300, useNativeDriver: true }).start();
+    Animated.timing(closeOpacity, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
 
     setTimeout(() => {
-      Animated.timing(closeOpacity, { toValue: 0, duration: 300, useNativeDriver: true }).start(() =>
-        setShowClose(false)
-      );
+      Animated.timing(closeOpacity, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start(() => setShowClose(false));
     }, 15000);
   }, [showClose, closeOpacity]);
 
@@ -173,6 +198,9 @@ export function useAlertaActivaViewModel() {
   return {
     formattedTime,
     marcarEstoyBien,
+    abrirConfirmacion,
+    cerrarConfirmacion,
+    confirmarVisible,
     llamarEmergencias,
     location,
     fullscreen,

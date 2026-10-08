@@ -29,6 +29,8 @@
     "ya_cuenta": "Vous avez déjà un compte ? Connectez-vous"
   },
   "inicio": {
+    "sin_alertas": "Aucune alerte",
+    "sin_ubicacion": "Aucune position",
     "bienvenida": "Bienvenue",
     "ubicacion_actual": "Position actuelle",
     "camara": "Caméra",
@@ -193,18 +195,40 @@
     "stats_alertas": "alertes"
   },
   "ajustes": {
-    "titulo": "Paramètres",
-    "idioma": "Langue",
-    "temas": "Thèmes par défaut",
-    "ver_tutoriales": "Voir les tutoriels",
-    "tema": "Thème",
-    "oscuro": "Mode sombre",
-    "claro": "Mode clair",
-    "cerrar_sesion": "Se déconnecter",
-    "terminos": "Termes et conditions",
-    "privacidad": "Politique de confidentialité",
-    "metodos_activacion": "Méthodes d'activation",
-    "tema_personalizado": "Thème personnalisé"
+  "acerca_de": "À propos",
+  "notificaciones": "Notifications",
+  "privacidad_app": "Confidentialité de l'application",
+  "grabar_video": "Enregistrer automatiquement la vidéo lors d'une urgence",
+  "grabar_video_desc": "Enregistre jusqu'à 1 minute de vidéo avec votre caméra lors d'une alerte. Désactivez si vous ne souhaitez pas l'utiliser.",
+  "grabar_audio": "Enregistrer automatiquement l'audio lors d'une urgence",
+  "grabar_audio_desc": "Enregistre jusqu'à 5 minutes d'audio avec votre microphone lors d'une alerte. Désactivez si vous ne souhaitez pas l'utiliser.",
+  "permiso_camara_msg": "Pour activer la vidéo, autorisez l'accès à la caméra dans les paramètres du téléphone.",
+  "permiso_microfono_msg": "Pour activer l'audio, autorisez l'accès au microphone dans les paramètres du téléphone.",
+  "evidencias_privacidad": "Preuves et confidentialité",
+  "grabar_evidencia": "Enregistrer automatiquement la vidéo et l'audio lors d'une urgence",
+  "grabar_evidencia_desc": "Jusqu'à 1 minute est enregistrée avec votre caméra et votre microphone lorsque vous activez une alerte. Si vous ne souhaitez pas que votre caméra soit utilisée, désactivez cette option.",
+  "permiso_requerido_titulo": "Autorisations requises",
+  "permiso_requerido_msg": "Pour activer cette option, autorisez l'accès à la caméra et au microphone dans les paramètres du téléphone.",
+  "abrir_ajustes": "Ouvrir les paramètres",
+  "titulo": "Paramètres",
+  "idioma": "Langue",
+  "temas": "Thèmes par défaut",
+  "ver_tutoriales": "Voir les tutoriels",
+  "tema": "Thème",
+  "oscuro": "Mode sombre",
+  "claro": "Mode clair",
+  "cerrar_sesion": "Se déconnecter",
+  "terminos": "Termes et conditions",
+  "privacidad": "Politique de confidentialité",
+  "metodos_activacion": "Méthodes d'activation",
+  "tema_personalizado": "Thème personnalisé"
+},
+    "acercaDe": {
+    "titulo_header": "À propos",
+    "intro": "Informations sur l'application et ses documents légaux.",
+    "version": "Version de l'application",
+    "terminos": "Conditions générales",
+    "politica_privacidad": "Politique de confidentialité"
   },
   "recuperar": {
     "titulo_paso1": "Mot de passe oublié ?",
@@ -475,6 +499,7 @@
     "slogan": "Ensemble nous sommes plus fortes"
   },
   "activacion": {
+    "activar_ahora": "Activer maintenant",
     "titulo": "Activation de l'Alerte SOS...",
     "enviando_ubicacion": "Envoi de la position en temps réel",
     "iniciando_grabacion": "Démarrage de l'enregistrement vidéo",
@@ -516,6 +541,7 @@
     "btn_cambiar": "Modifier les données"
   },
   "permisos": {
+    "divulgacion_grabacion": "AlertaMujer a besoin d'accéder à votre caméra et à votre microphone pour enregistrer automatiquement jusqu'à 1 minute de vidéo et d'audio lorsque vous activez une alerte d'urgence.",
     "sms_titulo": "Autoriser Alerta Mujer à accéder aux messages",
     "sms_desc": "Cette fonction enverra un message texte avec votre position à vos contacts d'urgence.",
     "contacto_titulo": "Autoriser Alerta Mujer à accéder à vos contacts",
@@ -597,12 +623,52 @@
     "item12_desc": "Pour toute question ou assistance, l'utilisatrice peut nous contacter via les canaux officiels disponibles dans l'application.",
     "volver": "Retour"
   },
-  "alertaActiva": {
-    "titulo": "Alerte active",
-    "subtitulo": "Votre réseau a été notifié",
-    "tiempoRestante": "Temps restant",
-    "cancelar": "Annuler l'alerte",
-    "llamar911": "Appeler le 911"
+"alertaActiva": {
+  "titulo": "Alerte active",
+  "subtitulo": "Votre réseau a été notifié",
+  "tiempoRestante": "Temps restant",
+  "mensajeReenvio": "À la fin du temps imparti, l'alerte sera renvoyée à vos contacts avec votre nouvelle position. Pour annuler l'alerte, appuyez sur « Je vais bien » puis sur « Oui, annuler ».",
+  "estoyBien": "Je vais bien",
+  "estoyBienDescripcion": "Informez votre réseau que vous êtes en sécurité",
+  "confirmarTitulo": "Annuler l'alerte ?",
+  "confirmarDescripcion": "Vos contacts recevront une notification automatique les informant que vous êtes en sécurité et que l'alerte a été désactivée.",
+  "confirmarSi": "Oui, annuler",
+  "confirmarNo": "Non, garder l'alerte",
+  "serviciosTitulo": "Services d'urgence actifs",
+  "serviciosDescripcion": "Quand vous serez en sécurité, appuyez sur « Je vais bien » pour notifier.",
+  "compartiendoUbicacion": "Partage de la position",
+  "enTiempoReal": "En temps réel",
+  "vistas": "vues",
+  "cancelar": "Annuler l'alerte",
+  "llamar911": "Appeler le 911"
+},
+  "notificaciones": {
+    "titulo_header": "Notifications",
+    "intro": "Choisissez comment et quand vous souhaitez recevoir les avis de l'application.",
+    "activar": "Activer les notifications",
+    "activar_desc": "Recevez les avis de l'application sur votre téléphone. Si vous les désactivez, aucune notification ne s'affichera.",
+    "vibracion": "Vibration",
+    "vibracion_desc": "Le téléphone vibre lorsqu'une notification arrive.",
+    "no_molestar": "Heures silencieuses (ne pas déranger)",
+    "no_molestar_desc": "Pendant cette plage horaire, vous ne recevrez aucune notification.",
+    "desde": "De",
+    "hasta": "À"
+  },
+  "privacidadApp": {
+    "titulo_header": "Confidentialité de l'application",
+    "intro": "Ici, vous pouvez savoir comment nous protégeons vos informations et le contrôle que vous avez sur elles.",
+    "retencion_titulo": "Politique de conservation des données",
+    "retencion_desc": "Combien de temps nous conservons vos informations."
+  },
+  "retencion": {
+    "titulo_header": "Conservation des données",
+    "intro": "Voici les durées pendant lesquelles l'application conserve vos informations sur ses serveurs sécurisés.",
+    "ubicaciones_titulo": "Historique des positions",
+    "ubicaciones_desc": "Les itinéraires GPS enregistrés pendant vos alertes sont conservés 30 jours. Ils sont ensuite supprimés automatiquement, ou plus tôt si vous supprimez votre compte.",
+    "evidencias_titulo": "Preuves (vidéos et audios)",
+    "evidencias_desc": "Les enregistrements réalisés lors d'une urgence restent dans le cloud 60 jours pour que vous puissiez les télécharger. Ils sont ensuite supprimés définitivement.",
+    "perfil_titulo": "Données de profil",
+    "perfil_desc": "Vos données personnelles servent uniquement au fonctionnement des alertes de sécurité et ne sont jamais vendues à des tiers."
   },
   "indexDemo": {
     "mensaje": "Bienvenue (écran de test)",

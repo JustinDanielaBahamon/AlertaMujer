@@ -95,6 +95,21 @@ export const createStyles = (theme: AppTheme) => ({
     fontSize: 14,
     fontWeight: "500" as const,
   },
+  activateButton: {
+    backgroundColor: theme.icono,
+    width: "100%" as const,
+    paddingVertical: 15,
+    borderRadius: 15,
+    alignItems: "center" as const,
+    flexDirection: "row" as const,
+    justifyContent: "center" as const,
+    marginBottom: 10,
+  },
+  activateText: {
+    color: "#ffffff",
+    fontWeight: "700" as const,
+    marginLeft: 8,
+  },
   cancelButton: {
     backgroundColor: theme.tabBackground,
     width: "100%" as const,
