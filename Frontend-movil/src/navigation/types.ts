@@ -16,6 +16,13 @@ export type MainStackParamList = {
 
   Activacion: undefined;
   AlertaActiva: undefined;
+  AlertaContacto: {
+    alertaId: number;
+    nombreUsuaria?: string;
+    latitude?: number;
+    longitude?: number;
+    demo?: boolean; // TEMPORAL: modo de prueba con puntos simulados
+  };
 
   TutorialBienvenida: undefined;
   TutorialBoton: undefined;

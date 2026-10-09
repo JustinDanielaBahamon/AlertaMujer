@@ -12,7 +12,7 @@ export interface EmergencyContact {
 }
 
 export interface CreateContactData {
-  userProfileId: number | string;
+  userProfileId?: number | string;
   contactName: string;
   telephone: string;
   email?: string;
@@ -24,8 +24,8 @@ export const contactosService = {
     console.log('[contactos.service] getContactos INICIADO');
     console.log('[contactos.service] userProfileId recibido:', userProfileId);
 
-    // Conectar al backend Spring Boot
-    const url = `/api/contacts/user/${userProfileId}`;
+    // Conectar al backend Spring Boot usando el nuevo endpoint
+    const url = `/api/contacts/user-id/${userProfileId}`;
     console.log('[contactos.service] URL del GET:', url);
 
     const response = await api.get<EmergencyContact[]>(url);
@@ -38,9 +38,8 @@ export const contactosService = {
     console.log('[contactos.service] addContacto INICIADO');
     console.log('[contactos.service] data:', data);
 
-    // Conectar al backend Spring Boot (los campos van en camelCase)
+    // Conectar al backend Spring Boot (NO enviamos userProfileId, el backend lo establece automáticamente)
     const nuevoContacto = {
-      userProfileId: Number(data.userProfileId),
       contactName: data.contactName,
       telephone: data.telephone,
       email: data.email,

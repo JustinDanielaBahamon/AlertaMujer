@@ -80,8 +80,8 @@ export function ContactosProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
     setError(null);
     try {
+      // NO enviamos userProfileId, el backend lo establece automáticamente
       const nuevoContacto = await contactosService.addContacto({
-        userProfileId: user.id,
         contactName: payload.nombre ?? '',
         telephone: payload.telefono,
         email: undefined,

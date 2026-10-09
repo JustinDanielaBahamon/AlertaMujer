@@ -11,10 +11,18 @@ export default function AppHeader() {
   const { t } = useLocale();
   const insets = useSafeAreaInsets();
 
+  const handleMenuPress = () => {
+    try {
+      navigation.dispatch(DrawerActions.toggleDrawer());
+    } catch (error) {
+      console.warn('No se puede toggleDrawer - pantalla no está en un Drawer Navigator');
+    }
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: theme.headerBackground, paddingTop: insets.top + 10 }]}>
       <TouchableOpacity
-        onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())}
+        onPress={handleMenuPress}
         accessibilityRole="button"
         accessibilityLabel={t.menu.abrir_menu}
       >

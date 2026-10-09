@@ -15,7 +15,7 @@ export interface DeviceApi {
 }
 
 export const getDevices = async (): Promise<DeviceApi[]> => {
-  const response = await api.get<DeviceApi[]>('/api/devices');
+  const response = await api.get<DeviceApi[]>('/api/devices/user');
   return response.data;
 };
 

@@ -9,7 +9,12 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "La app necesita acceso a tu ubicación para enviar alertas de emergencia con tu posición exacta.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "La app necesita acceso a tu ubicación incluso en segundo plano para enviar alertas de emergencia."
+      },
+      "bundleIdentifier": "com.anonymous.Frontedmovil"
     },
     "android": {
       "adaptiveIcon": {
@@ -20,7 +25,14 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.Frontedmovil"
+      "package": "com.anonymous.Frontedmovil",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
     },
     "web": {
       "output": "single",
