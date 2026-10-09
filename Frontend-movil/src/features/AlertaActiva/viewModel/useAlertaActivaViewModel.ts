@@ -15,6 +15,15 @@ export type Coordenada = {
   longitude: number;
 };
 
+// Ciclo de actualizacion de la ubicacion: cada 30 s (10 veces) y luego 5 min de reposo.
+const INTERVALO_ACTUALIZACION_MS = 30 * 1000;
+const ACTUALIZACIONES_POR_CICLO = 10;
+const REPOSO_MS = 5 * 60 * 1000;
+
+// Cuanto esperar antes de la siguiente actualizacion, segun cuantas van en el ciclo actual.
+const esperaTrasActualizacion = (hechas: number) =>
+  hechas % ACTUALIZACIONES_POR_CICLO === 0 ? REPOSO_MS : INTERVALO_ACTUALIZACION_MS;
+
 // Tiempo total de la cuenta regresiva en segundos. 182s = 3:02, coincidiendo con el diseno de referencia.
 const INITIAL_SECONDS = 182;
 
@@ -83,48 +92,40 @@ export function useAlertaActivaViewModel() {
     };
   }, [user?.id, location]);
 
-  // Obtiene y sigue la ubicacion en tiempo real.
+  // Actualiza la ubicacion en ciclos para ahorrar bateria: cada 30 s (10 veces) y luego
+  // 5 min de reposo, en los que el GPS no se consulta. Despues repite el ciclo.
   useEffect(() => {
-    let subscription: Location.LocationSubscription | null = null;
     let mounted = true;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let hechas = 0;
 
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") return;
+      if (status !== "granted" || !mounted) return;
 
-      try {
-        const current = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.Balanced,
-        });
-        if (!mounted) return;
-
-        setLocation({
-          latitude: current.coords.latitude,
-          longitude: current.coords.longitude,
-        });
-
-        subscription = await Location.watchPositionAsync(
-          {
+      const actualizar = async () => {
+        hechas += 1;
+        try {
+          const current = await Location.getCurrentPositionAsync({
             accuracy: Location.Accuracy.Balanced,
-            timeInterval: 15000,
-            distanceInterval: 30,
-          },
-          (loc) => {
-            if (!mounted) return;
-            setLocation({
-              latitude: loc.coords.latitude,
-              longitude: loc.coords.longitude,
-            });
-          },
-        );
-      } catch {
-        // Silenciar: si falla, el header simplemente muestra el icono de respaldo.
-      }
+          });
+          if (!mounted) return;
+          setLocation({
+            latitude: current.coords.latitude,
+            longitude: current.coords.longitude,
+          });
+        } catch {
+          // Silenciar: si falla, el header muestra el icono de respaldo o la ultima ubicacion.
+        }
+        if (mounted) timer = setTimeout(actualizar, esperaTrasActualizacion(hechas));
+      };
+
+      actualizar();
     })();
 
     return () => {
       mounted = false;
-      if (subscription) subscription.remove();
+      if (timer) clearTimeout(timer);
     };
   }, []);
 

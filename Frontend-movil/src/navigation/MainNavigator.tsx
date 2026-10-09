@@ -2,6 +2,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import AlertaActivaScreen from "../features/AlertaActiva/view/AlertaActivaScreen";
+import AlertaContactoScreen from "../features/AlertaContacto/view/AlertaContactoScreen";
 import ActivacionScreen from "../features/BotonActivacion/activacion";
 import AgregarContactoScreen from "../features/contactos/view/agregarScreen";
 import DetalleAlertaScreen from "../features/historial/view/detallesAlerta"; // ← nuevo
@@ -50,6 +51,7 @@ export default function MainNavigator({ initialRouteName }: Props) {
       <Stack.Screen name="DrawerHome" component={DrawerNavigator} />
       <Stack.Screen name="Activacion" component={ActivacionScreen} />
       <Stack.Screen name="AlertaActiva" component={AlertaActivaScreen} />
+      <Stack.Screen name="AlertaContacto" component={AlertaContactoScreen} />
       <Stack.Screen name="TutorialBienvenida" component={BienvenidaTutorialScreen} />
       <Stack.Screen name="TutorialBoton" component={BotonTutorialScreen} />
       <Stack.Screen name="TutorialMensaje" component={MensajeTutorialScreen} />
