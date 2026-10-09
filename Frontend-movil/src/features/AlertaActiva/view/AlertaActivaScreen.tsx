@@ -1,44 +1,109 @@
+import { useEffect, useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native"; // TEMPORAL
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"; // TEMPORAL
 import {
-    Animated,
     Modal,
     ScrollView,
     StyleSheet,
     Text,
     TouchableOpacity,
-    TouchableWithoutFeedback,
     useWindowDimensions,
     View,
 } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker, Polyline } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { useTheme } from "../../../contexts/ThemeContext";
 import type { MainStackParamList } from "../../../navigation/types"; // TEMPORAL
+import type { PuntoUbicacion } from "../../../services/alert-tracking.service";
 import { createStyles } from "../style/alertaActivaStyle";
 import { useAlertaActivaViewModel } from "../viewModel/useAlertaActivaViewModel";
+
+type Estilos = ReturnType<typeof createStyles>;
+
+// Linea de recorrido + pines numerados. Se usa en el mapa de la ventana emergente.
+function PinesMapa({
+  puntos,
+  colorLinea,
+  styles,
+  trackear,
+  etiqueta,
+}: {
+  puntos: PuntoUbicacion[];
+  colorLinea: string;
+  styles: Estilos;
+  trackear: boolean;
+  etiqueta: string;
+}) {
+  return (
+    <>
+      {puntos.length > 1 && (
+        <Polyline
+          coordinates={puntos.map((p) => ({ latitude: p.latitude, longitude: p.longitude }))}
+          strokeColor={colorLinea}
+          strokeWidth={3}
+          lineDashPattern={[6, 4]}
+          lineCap="round"
+          lineJoin="round"
+        />
+      )}
+
+      {puntos.map((p, i) => {
+        const esUltimo = i === puntos.length - 1;
+        return (
+          <Marker
+            // La key cambia cuando un pin deja de ser el ultimo, para que se redibuje.
+            key={`${p.id}-${esUltimo ? "a" : "p"}`}
+            coordinate={{ latitude: p.latitude, longitude: p.longitude }}
+            anchor={{ x: 0.5, y: 0.5 }}
+            tracksViewChanges={trackear}
+            zIndex={esUltimo ? 999 : i}
+            title={`${etiqueta} ${i + 1}`}
+          >
+            <View style={esUltimo ? styles.pinActual : styles.pin}>
+              <Text style={esUltimo ? styles.pinActualText : styles.pinText}>{i + 1}</Text>
+            </View>
+          </Marker>
+        );
+      })}
+    </>
+  );
+}
 
 export default function AlertaActivaScreen() {
   const vm = useAlertaActivaViewModel();
   const { theme } = useTheme();
   const { t } = useLocale();
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
-  const styles = createStyles(theme, width);
+  const styles = createStyles(theme, width, height, insets);
   const navigation =
     useNavigation<NativeStackNavigationProp<MainStackParamList>>(); // TEMPORAL
+  const tx = t.alertaContacto; // textos del mapa (los mismos de "Alerta de emergencia")
+
+  // Los pines personalizados se redibujan unos instantes cuando llega un punto nuevo
+  // o cuando se abre la ventana emergente.
+  const [trackear, setTrackear] = useState(true);
+  useEffect(() => {
+    setTrackear(true);
+    const id = setTimeout(() => setTrackear(false), 600);
+    return () => clearTimeout(id);
+  }, [vm.puntos.length, vm.fullscreen]);
+
+  // "hace 5s" / "5s ago" / "há 5s" / "il y a 5s": el orden lo define el texto de cada idioma.
+  const hace = tx.hace.replace("{{tiempo}}", vm.tiempoDesdeUltimo);
 
   return (
     <View style={styles.scrollContainer}>
       <ScrollView
         style={styles.scrollContainer}
-        contentContainerStyle={[styles.mainContainer, { paddingTop: insets.top + 12 }]}
+        contentContainerStyle={styles.mainContainer}
         showsVerticalScrollIndicator={false}
       >
+        <View style={styles.wrap}>
         <View style={styles.header}>
-          {/* Mini-mapa con la ubicacion actual. Al tocarlo, abre el mismo mapa en pantalla completa. */}
+          {/* Mini-mapa con la ubicacion actual. Al tocarlo, abre el mapa completo con el diseno de "Alerta de emergencia". */}
           <View style={styles.headerMapButton}>
             {vm.location ? (
               <>
@@ -164,6 +229,7 @@ export default function AlertaActivaScreen() {
           </Text>
         </TouchableOpacity>
         {/* ===== FIN TEMPORAL ===== */}
+        </View>
       </ScrollView>
 
       {/* Ventana de verificacion para cancelar la alerta. */}
@@ -192,35 +258,84 @@ export default function AlertaActivaScreen() {
         </View>
       </Modal>
 
-      {/* Mapa en pantalla completa (equivalente al "navegar" del modulo Mapa). Al cerrar, sigue en AlertaActiva. */}
-      <Modal visible={vm.fullscreen} animationType="slide">
-        <View style={{ flex: 1 }}>
-          {vm.location && (
+      {/* Mapa en pantalla completa (mismo diseno que la ventana de "Alerta de emergencia"). Al cerrar, sigue en AlertaActiva. */}
+      <Modal
+        visible={vm.fullscreen}
+        animationType="slide"
+        statusBarTranslucent
+        onRequestClose={vm.cerrarMapaCompleto}
+      >
+        <View style={styles.modalContainer}>
+          {vm.ultimo && (
             <MapView
-              style={{ flex: 1 }}
-              initialRegion={{
-                latitude: vm.location.latitude,
-                longitude: vm.location.longitude,
-                latitudeDelta: 0.01,
-                longitudeDelta: 0.01,
-              }}
-              scrollEnabled
-              zoomEnabled
-              rotateEnabled
-              pitchEnabled
+              ref={vm.mapaCompletoRef}
+              style={styles.modalMap}
+              onMapReady={vm.onMapaCompletoReady}
               toolbarEnabled={false}
-              onPress={vm.handleMapPress}
+              initialRegion={{
+                latitude: vm.ultimo.latitude,
+                longitude: vm.ultimo.longitude,
+                latitudeDelta: 0.005,
+                longitudeDelta: 0.005,
+              }}
             >
-              <Marker coordinate={vm.location} title={t.mapa.tu_ubicacion_marcador} pinColor={theme.icono} />
+              <PinesMapa
+                puntos={vm.puntos}
+                colorLinea={theme.icono}
+                styles={styles}
+                trackear={trackear}
+                etiqueta={tx.punto}
+              />
             </MapView>
           )}
-          {vm.showClose && (
-            <Animated.View style={[styles.botonCerrarMapa, { opacity: vm.closeOpacity }]}>
-              <TouchableWithoutFeedback onPress={vm.cerrarMapaCompleto}>
-                <Text style={styles.textoCerrarMapa}>{t.mapa.cerrar_mapa}</Text>
-              </TouchableWithoutFeedback>
-            </Animated.View>
+
+          {/* Barra superior: cerrar + estado de la ubicacion */}
+          <View style={styles.modalTopBar} pointerEvents="box-none">
+            <TouchableOpacity
+              style={styles.modalCloseBtn}
+              onPress={vm.cerrarMapaCompleto}
+              activeOpacity={0.85}
+              accessibilityRole="button"
+              accessibilityLabel={tx.cerrarMapa}
+            >
+              <MaterialIcons name="close" size={20} color={theme.icono} />
+              <Text style={styles.modalCloseText}>{tx.cerrarMapa}</Text>
+            </TouchableOpacity>
+
+            <View style={styles.modalTitlePill} pointerEvents="none">
+              <Text style={styles.modalTitle} numberOfLines={1}>
+                {tx.ubicacionActual}
+              </Text>
+              <Text style={styles.modalSub} numberOfLines={1}>
+                {tx.actualizada} {hace}
+              </Text>
+            </View>
+          </View>
+
+          {/* Ultima coordenada */}
+          {vm.ultimo && (
+            <View style={styles.modalInfo} pointerEvents="none">
+              <Text style={styles.modalInfoText} numberOfLines={1}>
+                {tx.punto} {vm.puntos.length} · {vm.coordsUltimo}
+              </Text>
+              {vm.barrioUltimo && (
+                <Text style={styles.modalInfoBarrio} numberOfLines={2}>
+                  {vm.barrioUltimo}
+                </Text>
+              )}
+            </View>
           )}
+
+          {/* Encuadrar todos los puntos */}
+          <TouchableOpacity
+            style={styles.modalFitBtn}
+            onPress={vm.verTodosLosPuntos}
+            activeOpacity={0.85}
+            accessibilityRole="button"
+            accessibilityLabel={tx.verTodosPuntos}
+          >
+            <MaterialIcons name="zoom-out-map" size={22} color={theme.icono} />
+          </TouchableOpacity>
         </View>
       </Modal>
     </View>

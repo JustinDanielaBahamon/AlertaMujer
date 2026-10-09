@@ -1,16 +1,30 @@
 import { AppTheme } from "../../../contexts/ThemeContext";
 
 // Fabrica de estilos para la pantalla AlertaActiva.
-// Recibe el tema actual y el ancho de pantalla (useWindowDimensions) para adaptarse
-// a moviles pequenos, grandes y tablets, y se recalcula ante rotaciones.
-// El padding superior contra el notch/barra de notificaciones se aplica aparte con
-// useSafeAreaInsets() directamente en la screen (insets.top), no aqui.
-export const createStyles = (theme: AppTheme, width: number) => {
+// Recibe el tema, el tamano de pantalla (useWindowDimensions) y los insets (notch, barra de
+// gestos, bordes laterales) para adaptarse a moviles pequenos, grandes y tablets, y que nada
+// quede pegado a los bordes del celular ni tapado por el sistema.
+type Insets = { top: number; bottom: number; left: number; right: number };
+
+export const createStyles = (
+  theme: AppTheme,
+  width: number,
+  height: number,
+  insets: Insets,
+) => {
   const isCompact = width < 360; // moviles chicos (ej. iPhone SE)
   const isWide = width >= 500; // tablets / pantallas grandes
 
   const horizontalPadding = Math.max(16, Math.min(width * 0.06, 32));
   const circleSize = Math.round(Math.min(Math.max(width * 0.42, 130), 190));
+
+  const sombra = {
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+  };
 
   return {
     scrollContainer: {
@@ -19,22 +33,22 @@ export const createStyles = (theme: AppTheme, width: number) => {
     },
     mainContainer: {
       flexGrow: 1,
-      paddingHorizontal: horizontalPadding,
-      paddingBottom: 30,
+      paddingTop: insets.top + 12,
+      paddingBottom: insets.bottom + 30,
+      paddingLeft: horizontalPadding + insets.left,
+      paddingRight: horizontalPadding + insets.right,
+    },
+    // Limita el ancho en tablets / horizontal y centra el contenido.
+    wrap: {
+      width: "100%" as const,
+      maxWidth: 560,
+      alignSelf: "center" as const,
     },
     header: {
       flexDirection: "row" as const,
       justifyContent: "flex-end" as const,
       alignItems: "center" as const,
       marginBottom: 10,
-    },
-    headerIconButton: {
-      width: 44,
-      height: 44,
-      borderRadius: 22,
-      backgroundColor: theme.card,
-      justifyContent: "center" as const,
-      alignItems: "center" as const,
     },
     headerMapButton: {
       width: 70,
@@ -55,16 +69,52 @@ export const createStyles = (theme: AppTheme, width: number) => {
       justifyContent: "center" as const,
       alignItems: "center" as const,
     },
+
+    // Pines numerados (mapa de la ventana emergente)
+    pin: {
+      width: 26,
+      height: 26,
+      borderRadius: 13,
+      backgroundColor: theme.icono,
+      opacity: 0.65,
+      borderWidth: 2,
+      borderColor: "#FFFFFF",
+      justifyContent: "center" as const,
+      alignItems: "center" as const,
+    },
+    pinText: {
+      color: "#FFFFFF",
+      fontSize: 11,
+      fontWeight: "800" as const,
+    },
+    pinActual: {
+      width: 38,
+      height: 38,
+      borderRadius: 19,
+      backgroundColor: theme.icono,
+      borderWidth: 3,
+      borderColor: "#FFFFFF",
+      justifyContent: "center" as const,
+      alignItems: "center" as const,
+      elevation: 6,
+    },
+    pinActualText: {
+      color: "#FFFFFF",
+      fontSize: 15,
+      fontWeight: "900" as const,
+    },
     title: {
       fontSize: isCompact ? 20 : isWide ? 28 : 24,
       fontWeight: "800" as const,
       color: theme.icono,
       marginTop: 1,
+      textAlign: "center" as const,
     },
     subtitle: {
       fontSize: isCompact ? 12 : 14,
       color: theme.text,
       marginBottom: 12,
+      textAlign: "center" as const,
     },
     circleWrapper: {
       alignItems: "center" as const,
@@ -262,20 +312,91 @@ export const createStyles = (theme: AppTheme, width: number) => {
       fontWeight: "700" as const,
     },
 
-    botonCerrarMapa: {
-      position: "absolute" as const,
-      bottom: 750,
-      right: 20, // derecha
-      alignSelf: "center" as const,
-      backgroundColor: "rgba(0,0,0,0.75)",
-      paddingHorizontal: 20,
-      paddingVertical: 20,
-      borderRadius: 24,
+    // Ventana emergente del mapa (mismo diseno que "Alerta de emergencia")
+    modalContainer: {
+      flex: 1,
+      backgroundColor: theme.background,
     },
-    textoCerrarMapa: {
-      color: "#ffffff",
+    modalMap: {
+      flex: 1,
+    },
+    modalTopBar: {
+      position: "absolute" as const,
+      top: insets.top + 10,
+      left: insets.left + 12,
+      right: insets.right + 12,
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+      gap: 10,
+    },
+    modalCloseBtn: {
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+      gap: 6,
+      height: 46,
+      paddingHorizontal: 16,
+      borderRadius: 23,
+      backgroundColor: theme.containerBackground,
+      ...sombra,
+    },
+    modalCloseText: {
+      fontSize: 13,
       fontWeight: "700" as const,
-      fontSize: 14,
+      color: theme.icono,
+    },
+    modalTitlePill: {
+      flex: 1,
+      minHeight: 46,
+      justifyContent: "center" as const,
+      paddingHorizontal: 14,
+      paddingVertical: 6,
+      borderRadius: 23,
+      backgroundColor: theme.containerBackground,
+      ...sombra,
+    },
+    modalTitle: {
+      fontSize: 12,
+      fontWeight: "800" as const,
+      color: theme.text,
+    },
+    modalSub: {
+      fontSize: 10.5,
+      color: theme.text,
+      opacity: 0.65,
+    },
+    modalFitBtn: {
+      position: "absolute" as const,
+      bottom: insets.bottom + 16,
+      right: insets.right + 16,
+      width: 50,
+      height: 50,
+      borderRadius: 25,
+      backgroundColor: theme.containerBackground,
+      justifyContent: "center" as const,
+      alignItems: "center" as const,
+      ...sombra,
+    },
+    modalInfo: {
+      position: "absolute" as const,
+      bottom: insets.bottom + 16,
+      left: insets.left + 16,
+      right: insets.right + 82,
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      borderRadius: 18,
+      backgroundColor: theme.containerBackground,
+      ...sombra,
+    },
+    modalInfoText: {
+      fontSize: 12,
+      fontWeight: "700" as const,
+      color: theme.text,
+    },
+    modalInfoBarrio: {
+      fontSize: 12,
+      fontWeight: "600" as const,
+      color: theme.icono,
+      marginTop: 2,
     },
   };
 };

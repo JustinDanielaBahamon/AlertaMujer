@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { RefObject } from "react";
 import { Linking, Platform } from "react-native";
+import * as Location from "expo-location";
 import type MapView from "react-native-maps";
 import { useRoute } from "@react-navigation/native";
 import type { RouteProp } from "@react-navigation/native";
@@ -168,7 +169,7 @@ export function useAlertaContactoViewModel() {
     };
   }, [params.alertaId, DEMO]);
 
-  // ===== TEMPORAL (modo demo): simula un punto nuevo caminando desde la ubicación base =====
+  // ===== TEMPORAL (modo demo): agrega un punto nuevo con la ubicación real del teléfono =====
   useEffect(() => {
     if (!DEMO) return undefined;
 
@@ -176,23 +177,37 @@ export function useAlertaContactoViewModel() {
       latitude: params.latitude ?? DEMO_COORDS.latitude,
       longitude: params.longitude ?? DEMO_COORDS.longitude,
     };
+    let mounted = true;
     let hechas = 0;
     let timer: ReturnType<typeof setTimeout> | undefined;
 
-    const agregarPunto = () => {
+    const agregarPunto = async () => {
       hechas += 1;
+
+      // Primer punto: la ubicación con la que se abrió la pantalla. Los siguientes: el GPS real,
+      // así que si no te mueves el punto se queda en el mismo lugar (si falla, se usa la base).
+      let coords = base;
+      if (hechas > 1) {
+        try {
+          const { status } = await Location.getForegroundPermissionsAsync();
+          if (status === "granted") {
+            const actual = await Location.getCurrentPositionAsync({
+              accuracy: Location.Accuracy.Balanced,
+            });
+            coords = {
+              latitude: actual.coords.latitude,
+              longitude: actual.coords.longitude,
+            };
+          }
+        } catch {
+          // Sin GPS: se queda con la ubicación base.
+        }
+      }
+      if (!mounted) return;
+
       demoContador.current += 1;
       const id = `demo-${demoContador.current}`;
-      setPuntos((prev) => {
-        const last = prev.length > 0 ? prev[prev.length - 1] : null;
-        const latitude = last
-          ? last.latitude + 0.00018 + (Math.random() - 0.5) * 0.00008
-          : base.latitude;
-        const longitude = last
-          ? last.longitude + 0.00022 + (Math.random() - 0.5) * 0.00008
-          : base.longitude;
-        return [...prev, { id, latitude, longitude, recordedAt: new Date() }];
-      });
+      setPuntos((prev) => [...prev, { id, ...coords, recordedAt: new Date() }]);
       setCargando(false);
       // Mismo ciclo que el real: 30 s entre puntos y reposo de 5 min cada 10.
       timer = setTimeout(agregarPunto, esperaTrasActualizacion(hechas));
@@ -200,6 +215,7 @@ export function useAlertaContactoViewModel() {
 
     agregarPunto();
     return () => {
+      mounted = false;
       if (timer) clearTimeout(timer);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
