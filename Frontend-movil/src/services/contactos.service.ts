@@ -25,7 +25,7 @@ export const contactosService = {
     console.log('[contactos.service] userProfileId recibido:', userProfileId);
 
     // Conectar al backend Spring Boot usando el nuevo endpoint
-    const url = `/api/contacts/user-id/${userProfileId}`;
+    const url = `/api/contacts/user/${userProfileId}`;
     console.log('[contactos.service] URL del GET:', url);
 
     const response = await api.get<EmergencyContact[]>(url);
