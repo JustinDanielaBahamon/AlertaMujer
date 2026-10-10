@@ -1,7 +1,13 @@
 import {StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
-        ContenedorPrincipal : {
+    // Fondo morado que cubre toda la pantalla (incluye barra de estado y zona inferior)
+    Pantalla: {
+        flex: 1,
+        backgroundColor: 'rgb(202, 171, 222)',
+    },
+
+    ContenedorPrincipal : {
         flex : 1,
         backgroundColor : 'rgb(202 ,171, 222)',
         paddingTop : 13,
@@ -127,10 +133,17 @@ textoSession:{
   fontSize  : 16,
   fontWeight : 'bold',
 },
+
+// Tarjeta de términos y privacidad (mismos colores de los inputs y el botón)
 contenedorChecks:{
   marginTop: 20,
-  marginHorizontal: 30,
-
+  marginHorizontal: 20,
+  padding: 16,
+  paddingBottom: 6,
+  borderRadius: 20,
+  borderWidth: 1,
+  borderColor: '#BC27BE',
+  backgroundColor: 'rgba(243, 232, 255, 0.85)',
 },
 
 filaCheck:{
@@ -140,18 +153,26 @@ filaCheck:{
 },
 
 cuadroCheck:{
-  width: 20,
-  height: 20,
+  width: 22,
+  height: 22,
   borderWidth: 2,
-  borderColor: '#000',
+  borderColor: '#6A3FC9',
+  backgroundColor: '#FFF',
   marginRight: 10,
-  borderRadius: 4,
+  borderRadius: 6,
+  alignItems: 'center',
+  justifyContent: 'center',
+},
+
+cuadroCheckActivo:{
+  backgroundColor: '#6A3FC9',
+  borderColor: '#6A3FC9',
 },
 
 textoCheck:{
   flex: 1,
   fontSize: 14,
-  color: '#000',
+  color: '#2E1065',
 },
 
 textoBold:{
