@@ -233,13 +233,20 @@
   "recuperar": {
     "titulo_paso1": "Mot de passe oublié ?",
     "titulo_paso2": "Vérifiez votre identité",
+    "titulo_paso3": "Créez votre nouveau mot de passe",
     "subtitulo_paso1": "Saisissez votre e-mail enregistré pour recevoir un code de sécurité.",
     "subtitulo_paso2": "Saisissez le code à 4 chiffres que nous avons envoyé dans votre boîte de réception.",
+    "subtitulo_paso3": "Saisissez votre nouveau mot de passe et confirmez-le pour terminer.",
     "placeholder_correo": "email@exemple.com",
+    "placeholder_nueva": "Nouveau mot de passe",
+    "placeholder_confirmar": "Confirmer le mot de passe",
     "boton_paso1": "Envoyer le code",
     "boton_paso2": "Confirmer le code",
+    "boton_paso3": "Enregistrer le mot de passe",
     "volver": "Retour à la connexion",
-    "nuevo_codigo": "Demander un nouveau code"
+    "nuevo_codigo": "Demander un nouveau code",
+    "tiempo_restante": "Le code expire dans",
+    "codigo_expirado": "Le code a expiré. Demandez-en un nouveau."
   },
   "tutorial": {
     "bienvenida": "Bienvenue sur AlertaMujer",

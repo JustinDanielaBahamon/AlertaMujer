@@ -237,13 +237,20 @@
   "recuperar": {
   "titulo_paso1": "¿Olvidaste tu contraseña?",
   "titulo_paso2": "Verifica tu identidad",
+  "titulo_paso3": "Crea tu nueva contraseña",
   "subtitulo_paso1": "Ingresa tu correo registrado para recibir un código de seguridad.",
   "subtitulo_paso2": "Ingresa el código de 4 dígitos que enviamos a tu bandeja de entrada.",
+  "subtitulo_paso3": "Escribe tu nueva contraseña y confírmala para terminar.",
   "placeholder_correo": "correo@ejemplo.com",
+  "placeholder_nueva": "Nueva contraseña",
+  "placeholder_confirmar": "Confirmar contraseña",
   "boton_paso1": "Enviar Código",
   "boton_paso2": "Confirmar Código",
+  "boton_paso3": "Guardar contraseña",
   "volver": "Volver al inicio de sesión",
-  "nuevo_codigo": "Solicitar un nuevo código"
+  "nuevo_codigo": "Solicitar un nuevo código",
+  "tiempo_restante": "El código vence en",
+  "codigo_expirado": "El código expiró. Solicita uno nuevo."
   },
   "tutorial": {
   "bienvenida": "Bienvenida a AlertaMujer",
