@@ -5,10 +5,18 @@ import { useTheme } from "../../../contexts/ThemeContext";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { createStyles } from "../style/activacionStyle";
 
+// Texto de la grabación de audio (el de video ya existe en los idiomas como "iniciando_grabacion")
+const TEXTO_AUDIO = {
+  es: "Iniciando grabación de audio",
+  en: "Starting audio recording",
+  fr: "Démarrage de l'enregistrement audio",
+  pt: "Iniciando gravação de áudio",
+};
+
 export default function Activacion() {
   const vm = useActivacionViewModel();
   const { theme } = useTheme();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   
   const backgroundColor = theme.mode === "dark" ? "#4a4a50" : theme.background;
   const styles = createStyles(theme);
@@ -38,18 +46,23 @@ export default function Activacion() {
             </View>
             <Text style={styles.itemText}>{t.activacion.enviando_ubicacion}</Text>
           </View>
-          <View style={styles.itemRow}>
-            <View style={styles.iconBackground}>
-              <MaterialIcons name="videocam" size={18} color={theme.icono} />
+          {/* Solo se muestra lo que la usuaria activó en Ajustes (video, audio o ambos) */}
+          {vm.grabarVideo && (
+            <View style={styles.itemRow}>
+              <View style={styles.iconBackground}>
+                <MaterialIcons name="videocam" size={18} color={theme.icono} />
+              </View>
+              <Text style={styles.itemText}>{t.activacion.iniciando_grabacion}</Text>
             </View>
-            <Text style={styles.itemText}>{t.activacion.iniciando_grabacion}</Text>
-          </View>
-          <View style={styles.itemRow}>
-            <View style={styles.iconBackground}>
-              <MaterialIcons name="call" size={18} color={theme.icono} />
+          )}
+          {vm.grabarAudio && (
+            <View style={styles.itemRow}>
+              <View style={styles.iconBackground}>
+                <MaterialIcons name="mic" size={18} color={theme.icono} />
+              </View>
+              <Text style={styles.itemText}>{TEXTO_AUDIO[locale]}</Text>
             </View>
-            <Text style={styles.itemText}>{t.activacion.llamando_contactos}</Text>
-          </View>
+          )}
         </View>
 
         {/* Salta el conteo y pasa directo a la alerta activa */}
