@@ -1,37 +1,15 @@
 import { StyleSheet } from "react-native";
+import { TUTORIAL_PALETTE } from "./tutorialTheme";
 
 
 // ─── Paleta mejorada: rojo · morado · verde ───────────────────────────────────
 export const BUTTON_COLORS = {
-  accent:       "#b826dc",
-  accentLight:  "#FEE2E2",
-  accentDark:   "#8e1b99",
-
-  row1Color:    "#5e03a8",
-  row1Light:    "#fdfdff",
-  row1Border:   "#d78cfa",
-  row1Gradient: ["#7C3AED", "#9e17c0"],
-
-  row2Color:    "#590a7e",
-  row2Light:    "#f7fffb",
-  row2Border:   "#e00abd",
-  row2Gradient: ["#6f0385", "#9710b9"],
-
-  row3Color:    "#9326dc",
-  row3Light:    "#f6eef7",
-  row3Border:   "#FECDD3",
-  row3Gradient: ["#be60e4", "#9c44ef"],
-
-  circle1: "#be0bf5",
-  circle2: "#5b0881",
-  circle3: "#f70bf7",
-  circle4: "#fdfdfd",
+  ...TUTORIAL_PALETTE,
   circle5: "#a010f3",
-
-  sectionLabel: "#7C3AED",
-  sectionLine:  "#8e25b8",
-  divider:      "#F3F0FF",
-  badgeBg:      "#F5F3FF",
+  row1Gradient: ["#7C3AED", "#6006aa"],
+  row2Gradient: ["#6006aa", "#9326DC"],
+  row3Gradient: ["#9326DC", "#7C3AED"],
+  badgeBg: "#F5F3FF",
 };
 
 export const buttonStyle = StyleSheet.create({
@@ -218,9 +196,9 @@ export const buttonStyle = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 7,
     borderRadius: 24,
-    backgroundColor: "#FEE2E2",
+    backgroundColor: "#F3E8FF",
     borderWidth: 1,
-    borderColor: "#FECDD3",
+    borderColor: "#E3C6F5",
   },
   feedbackText: {
     fontSize: 13,
@@ -235,12 +213,12 @@ export const buttonStyle = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: "#FEE2E2",
+    backgroundColor: "#F3E8FF",
     paddingHorizontal: 20,
     paddingVertical: 9,
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: "#FECDD3",
+    borderColor: "#E3C6F5",
   },
   bottomBadgeText: {
     fontSize: 13,

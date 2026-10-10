@@ -1,32 +1,9 @@
 import { StyleSheet } from "react-native";
+import { TUTORIAL_PALETTE } from "./tutorialTheme";
 
 // ─── Paleta del módulo Notificación — alerta & atención ──────────────────────
 export const NOTIF_COLORS = {
-  accent:      "#b715cc",   // dorado
-  accentLight: "#FFFBEB",
-  accentDark:  "#fefbff",
-
-  row1Color:  "#7C3AED",   // Alertas SOS – rojo urgente
-  row1Light:  "#ffffff",
-  row1Border: "#620985",
-
-  row2Color:  "#c706d9",   // Red de apoyo – dorado
-  row2Light:  "#fffdff",
-  row2Border: "#80079e",
-
-  row3Color:  "#7C3AED",   // Rapidez – morado
-  row3Light:  "#fffdff",
-  row3Border: "#80079e",
-
-  circle1: "#3b087e",
-  circle2: "#9b05bd",
-  circle3: "#a108af",
-  circle4: "#db17ec",
-
-  screenBg:     "#d85ad2",
-  sectionLabel: "#b605da",
-  sectionLine:  "#8e1ecf",
-  divider:      "#c879d3",
+  ...TUTORIAL_PALETTE,
 };
 
 export const notificationStyle = StyleSheet.create({

@@ -1,32 +1,9 @@
 import { StyleSheet } from "react-native";
+import { TUTORIAL_PALETTE } from "./tutorialTheme";
 
 // ─── Paleta del módulo Contactos — familia & confianza ────────────────────────
 export const CONTACT_COLORS = {
-  accent:      "#ea0ccc",   // ámbar cálido
-  accentLight: "#FFFBEB",
-  accentDark:  "#ea0ccc",
-
-  row1Color:  "#ea0ccc",   // Confianza – ámbar
-  row1Light:  "#fbebff",
-  row1Border: "#f08afd",
-
-  row2Color:  "#ea0ccc",   // Notificaciones – naranja
-  row2Light:  "#f5e4f5",
-  row2Border: "#f08afd",
-
-  row3Color:  "#ea0ccc",   // Gestión – ámbar oscuro
-  row3Light:  "#f3ebf1",
-  row3Border: "#f08afd",
-
-  circle1: "#8a07aa",
-  circle2: "#d00cea",
-  circle3: "#6d27dd",
-  circle4: "#f5eacf",
-
-  screenBg:     "#f0d7ee",
-  sectionLabel: "#a806d9",
-  sectionLine:  "#d749f3",
-  divider:      "#eec7fe",
+  ...TUTORIAL_PALETTE,
 };
 
 export const contactStyle = StyleSheet.create({

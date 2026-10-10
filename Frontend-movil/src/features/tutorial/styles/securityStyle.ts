@@ -1,32 +1,9 @@
 import { StyleSheet } from "react-native";
+import { TUTORIAL_PALETTE } from "./tutorialTheme";
 
 // ─── Paleta del módulo Seguridad — protección & confianza ─────────────────────
 export const SECURITY_COLORS = {
-  accent:      "#1D4ED8",   // azul seguridad
-  accentLight: "#EFF6FF",
-  accentDark:  "#1E3A8A",
-
-  row1Color:  "#1D4ED8",   // Registro – azul
-  row1Light:  "#EFF6FF",
-  row1Border: "#BFDBFE",
-
-  row2Color:  "#6D28D9",   // Respaldo – violeta
-  row2Light:  "#F5F3FF",
-  row2Border: "#DDD6FE",
-
-  row3Color:  "#0F766E",   // Privacidad – teal
-  row3Light:  "#F0FDFA",
-  row3Border: "#99F6E4",
-
-  circle1: "#1D4ED8",
-  circle2: "#6D28D9",
-  circle3: "#0F766E",
-  circle4: "#3B82F6",
-
-  screenBg:     "#F0F4FF",
-  sectionLabel: "#1D4ED8",
-  sectionLine:  "#BFDBFE",
-  divider:      "#DBEAFE",
+  ...TUTORIAL_PALETTE,
 };
 
 export const securityStyle  = StyleSheet.create({
@@ -222,7 +199,7 @@ export const securityStyle  = StyleSheet.create({
   permisosTitle: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#1E3A8A",
+    color: "#4A148C",
   },
   permisosDesc: {
     fontSize: 12,

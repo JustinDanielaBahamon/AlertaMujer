@@ -1,32 +1,9 @@
 import { StyleSheet } from "react-native";
+import { TUTORIAL_PALETTE } from "./tutorialTheme";
 
 // ─── Paleta del módulo Mensajes ───────────────────────────────────────────────
 export const MSG_COLORS = {
-  accent:      "#7C3AED",
-  accentLight: "#F5F3FF",
-  accentDark:  "#5B21B6",
-
-  row1Color:  "#7C3AED",   // SMS – morado
-  row1Light:  "#F5F3FF",
-  row1Border: "#DDD6FE",
-
-  row2Color:  "#DB2777",   // Llamada – rosa
-  row2Light:  "#FDF2F8",
-  row2Border: "#FBCFE8",
-
-  row3Color:  "#0891B2",   // Confirmación – azul
-  row3Light:  "#ECFEFF",
-  row3Border: "#A5F3FC",
-
-  circle1: "#7C3AED",
-  circle2: "#b727db",
-  circle3: "#a00bf7",
-  circle4: "#A78BFA",
-
-  screenBg:     "#F5F0FF",
-  sectionLabel: "#7C3AED",
-  sectionLine:  "#EDE9FE",
-  divider:      "#F3F0FF",
+  ...TUTORIAL_PALETTE,
 };
 
 export const messageStyle = StyleSheet.create({
