@@ -64,10 +64,17 @@ export const styles = StyleSheet.create({
         borderWidth: 1.5,
         borderColor: '#EEE'
     },
+    // Texto dentro de los inputs con icono (correo y contraseñas)
+    inputTexto: {
+        flex: 1,
+        height: 50,
+        marginLeft: 10,
+        color: '#333',
+    },
     codigoContainer: { 
         flexDirection: 'row', 
         justifyContent: 'space-between', 
-        marginBottom: 35,
+        marginBottom: 15,
         paddingHorizontal: 5,
     },
     inputCuadro: {
@@ -82,6 +89,23 @@ export const styles = StyleSheet.create({
         color: '#6B3FA0',
         backgroundColor: '#FDFDFF'
     },
+    // Cuadros del código cuando ya venció el tiempo
+    inputCuadroExpirado: {
+        borderColor: '#D32F2F',
+        backgroundColor: '#F5F5F5',
+        opacity: 0.6,
+    },
+    // Temporizador del código (1:30)
+    timerTexto: {
+        textAlign: 'center',
+        color: '#6B3FA0',
+        fontSize: 15,
+        fontWeight: '600',
+        marginBottom: 25,
+    },
+    timerExpirado: {
+        color: '#D32F2F',
+    },
     botonPrincipal: {
         backgroundColor: '#6B3FA0', 
         height: 60, 
@@ -94,6 +118,9 @@ export const styles = StyleSheet.create({
         shadowOpacity: 0.3,
         shadowRadius: 5,
         elevation: 4,
+    },
+    botonDeshabilitado: {
+        opacity: 0.5,
     },
     botonTexto: { 
         color: '#FFF', 

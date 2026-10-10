@@ -236,13 +236,20 @@
   "recuperar": {
     "titulo_paso1": "Esqueceu sua senha?",
     "titulo_paso2": "Verifique sua identidade",
+    "titulo_paso3": "Crie sua nova senha",
     "subtitulo_paso1": "Digite seu e-mail cadastrado para receber um código de segurança.",
     "subtitulo_paso2": "Digite o código de 4 dígitos que enviamos para sua caixa de entrada.",
+    "subtitulo_paso3": "Digite sua nova senha e confirme-a para finalizar.",
     "placeholder_correo": "email@exemplo.com",
+    "placeholder_nueva": "Nova senha",
+    "placeholder_confirmar": "Confirmar senha",
     "boton_paso1": "Enviar Código",
     "boton_paso2": "Confirmar Código",
+    "boton_paso3": "Salvar senha",
     "volver": "Voltar ao login",
-    "nuevo_codigo": "Solicitar um novo código"
+    "nuevo_codigo": "Solicitar um novo código",
+    "tiempo_restante": "O código expira em",
+    "codigo_expirado": "O código expirou. Solicite um novo."
   },
   "tutorial": {
     "bienvenida": "Bem-vinda ao AlertaMujer",

@@ -236,13 +236,20 @@
   "recuperar": {
     "titulo_paso1": "Forgot your password?",
     "titulo_paso2": "Verify your identity",
+    "titulo_paso3": "Create your new password",
     "subtitulo_paso1": "Enter your registered email to receive a security code.",
     "subtitulo_paso2": "Enter the 4-digit code we sent to your inbox.",
+    "subtitulo_paso3": "Enter your new password and confirm it to finish.",
     "placeholder_correo": "email@example.com",
+    "placeholder_nueva": "New password",
+    "placeholder_confirmar": "Confirm password",
     "boton_paso1": "Send Code",
     "boton_paso2": "Confirm Code",
+    "boton_paso3": "Save password",
     "volver": "Back to sign in",
-    "nuevo_codigo": "Request a new code"
+    "nuevo_codigo": "Request a new code",
+    "tiempo_restante": "Code expires in",
+    "codigo_expirado": "The code expired. Request a new one."
   },
   "tutorial": {
     "bienvenida": "Welcome to AlertaMujer",
