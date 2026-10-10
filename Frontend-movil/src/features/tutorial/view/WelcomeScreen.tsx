@@ -1,5 +1,5 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import LottieView from 'lottie-react-native';
+import TutorialLottie from "../component/TutorialLottie";
 import { useEffect, useRef } from "react";
 import { Animated, StatusBar, StyleSheet, Text, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
@@ -67,10 +67,8 @@ export default function Welcome() {
 
               {/* Lottie animation */}
               <View style={localStyles.lottieSection}>
-                <LottieView
+                <TutorialLottie
                   source={require('@assets/imagesAlertaMujer/ScTutorial/forwomensday.json')}
-                  autoPlay
-                  loop
                   resizeMode="cover"
                   style={localStyles.lottie}
                 />

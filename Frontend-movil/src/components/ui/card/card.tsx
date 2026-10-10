@@ -17,7 +17,7 @@ export default function CardBase({
   titleHighlight,
   children,
   style,
-  gradientColors = ["#edfaf8", "#f8f8f8", "#f3e2fa"], // ← default igual que bienvenida
+  gradientColors = ["#ffffff", "#f8f8f8", "#e3aee7"], // ← default igual que bienvenida
 }: Props) {
   return (
     <View style={[localStyles.cardWrapper, style]}>

@@ -1,5 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import LottieView from "lottie-react-native";
+import { TUTORIAL_GRADIENT } from "../styles/tutorialTheme";
+import TutorialLottie from "../component/TutorialLottie";
 import React, { useEffect, useRef } from "react";
 import { Animated, ScrollView, Text, TouchableOpacity, View, } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -51,7 +52,6 @@ function BackgroundCircles() {
     </>
   );
 }
-
 // ─── Fila de característica animada ──────────────────────────────────────────
 function FeatureRow({ item, enterDelay }: { item: SecurityFeatureItem; enterDelay: number }) {
   const slideAnim   = useRef(new Animated.Value(28)).current;
@@ -123,7 +123,7 @@ export default function CameraAndMicrophoneTutorial({ externalVm }: Props) {
   return (
     <View style={securityStyle.screenBg}>
       <LinearGradient
-        colors={["#f3afed", "#FCE7F3", "#b026bd"]}
+        colors={[...TUTORIAL_GRADIENT]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={{ flex: 1 }}
@@ -134,10 +134,8 @@ export default function CameraAndMicrophoneTutorial({ externalVm }: Props) {
 
         {/* Lottie */}
         <View style={securityStyle.lottieSection}>
-          <LottieView
+          <TutorialLottie
             source={require("@assets/imagesAlertaMujer/ScTutorial/seguridad.json")}
-            autoPlay
-            loop
             resizeMode="contain"
             style={securityStyle.lottie}
           />

@@ -1,4 +1,4 @@
-import LottieView from "lottie-react-native";
+import TutorialLottie from "../component/TutorialLottie";
 import React, { useEffect, useRef } from "react";
 import { Animated, Pressable, ScrollView, Text, TouchableOpacity, View, } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -6,6 +6,7 @@ import Card from "../../../components/ui/card/card";
 import { BUTTON_COLORS, buttonStyle } from "../styles/buttonStyle";
 import { useButtonTutorialViewModel, type TapOption, } from "../viewModel/useButtonTutorialViewModel";
 import { LinearGradient } from 'expo-linear-gradient';
+import { TUTORIAL_GRADIENT } from "../styles/tutorialTheme";
 import { useLocale } from "../../../contexts/LocaleContext";
 
 // ─── Decorative background circles ───────────────────────────────────────────
@@ -193,7 +194,7 @@ export default function ActivationTutorial() {
     <View style={buttonStyle.screenBg}>
 
       <LinearGradient
-        colors={["#f3afed", "#fff7f7", "#b026bd"]}
+        colors={[...TUTORIAL_GRADIENT]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={{ flex: 1 }}
@@ -204,10 +205,8 @@ export default function ActivationTutorial() {
 
           {/* Lottie animation */}
           <View style={buttonStyle.lottieSection}>
-            <LottieView
+            <TutorialLottie
               source={require("@assets/imagesAlertaMujer/ScTutorial/Alerta.json")}
-              autoPlay
-              loop
               resizeMode="contain"
               style={buttonStyle.lottie}
             />

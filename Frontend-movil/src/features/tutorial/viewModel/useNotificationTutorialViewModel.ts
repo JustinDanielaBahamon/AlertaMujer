@@ -77,7 +77,20 @@ export function useNotificationTutorialViewModel() {
 
   const resolvePermission = useRef<(value: boolean) => void>(() => {});
 
-  const requestPermissions = useCallback((): Promise<boolean> => {
+  // Android 12 o menor no pide permiso de notificaciones; en Android 13+ se revisa si ya está concedido
+  const yaTienePermiso = async (): Promise<boolean> => {
+    if (Platform.OS !== "android") return false;
+    if (Platform.Version < 33) return true;
+    try {
+      return await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+    } catch {
+      return false;
+    }
+  };
+
+  const requestPermissions = useCallback(async (): Promise<boolean> => {
+    if (await yaTienePermiso()) return true;
+
     return new Promise((resolve) => {
       resolvePermission.current = resolve;
       setModalVisible(true);
@@ -85,10 +98,15 @@ export function useNotificationTutorialViewModel() {
     });
   }, []);
 
-  const openModal = useCallback(() => {
+  // Si ya tiene el permiso, entra directo a la app sin mostrar el aviso
+  const openModal = useCallback(async () => {
     setShowWarning(false);
+    if (await yaTienePermiso()) {
+      navigation.replace("DrawerHome");
+      return;
+    }
     setModalVisible(true);
-  }, []);
+  }, [navigation]);
 
   const confirmModal = useCallback(async () => {
     setModalVisible(false);

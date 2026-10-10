@@ -1,4 +1,4 @@
-import LottieView from "lottie-react-native";
+import TutorialLottie from "../component/TutorialLottie";
 import React, { useEffect, useRef } from "react";
 import { Animated, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -7,6 +7,7 @@ import CustomePermisos from "../../../components/ui/modalMesanje/permisosMLL";
 import { messageStyle, MSG_COLORS } from "../styles/messageStyle";
 import { useMessagesTutorialViewModel, type FeatureItem } from "../viewModel/useMessagesTutorialViewModel";
 import { LinearGradient } from 'expo-linear-gradient';
+import { TUTORIAL_GRADIENT } from "../styles/tutorialTheme";
 import { useLocale } from "../../../contexts/LocaleContext";
 
 // ─── Círculos de fondo decorativos ───────────────────────────────────────────
@@ -125,7 +126,7 @@ export default function MessagesScreen({ externalVm }: Props) {
 
       {/* 2️⃣ LinearGradient cubre todo el interior */}
       <LinearGradient
-        colors={["#f3afed", "#FCE7F3", "#b026bd"]}
+        colors={[...TUTORIAL_GRADIENT]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={{ flex: 1 }}
@@ -137,10 +138,8 @@ export default function MessagesScreen({ externalVm }: Props) {
 
           {/* Lottie animation */}
           <View style={messageStyle.lottieSection}>
-            <LottieView
+            <TutorialLottie
               source={require("@assets/imagesAlertaMujer/ScTutorial/Message.json")}
-              autoPlay
-              loop
               resizeMode="contain"
               style={messageStyle.lottie}
             />
