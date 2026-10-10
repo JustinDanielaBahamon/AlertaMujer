@@ -17,7 +17,7 @@
     "num_documento": "Número do documento",
     "tipo_documento": "Tipo de documento",
     "doc_extranjero": "Documento estrangeiro",
-    "fecha": "DD/MM/AAAA",
+    "fecha": "Nascimento (DD/MM/AAAA)",
     "correo": "Digite seu e-mail",
     "contrasena": "Digite sua senha",
     "confirmar_contrasena": "Confirmar senha",

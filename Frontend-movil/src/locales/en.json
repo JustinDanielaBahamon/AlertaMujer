@@ -17,7 +17,7 @@
     "num_documento": "Document number",
     "tipo_documento": "Document type",
     "doc_extranjero": "Foreign document",
-    "fecha": "DD/MM/YYYY",
+    "fecha": "Birth date (DD/MM/YYYY)",
     "correo": "Enter your email",
     "contrasena": "Enter your password",
     "confirmar_contrasena": "Confirm password",

@@ -17,7 +17,7 @@
     "num_documento": "Numéro de document",
     "tipo_documento": "Type de document",
     "doc_extranjero": "Document étranger",
-    "fecha": "JJ/MM/AAAA",
+    "fecha": "Naissance (JJ/MM/AAAA)",
     "correo": "Entrez votre e-mail",
     "contrasena": "Entrez votre mot de passe",
     "confirmar_contrasena": "Confirmer le mot de passe",
