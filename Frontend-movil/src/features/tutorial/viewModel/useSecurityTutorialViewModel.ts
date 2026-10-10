@@ -81,11 +81,30 @@ export function useSecurityTutorialViewModel() {
     setPermissionType(type);
   };
 
-  const requestPermissions = useCallback((): Promise<boolean> => {
+  // Revisa qué permisos faltan para arrancar desde el paso que corresponde.
+  // Devuelve null si ya tiene cámara y micrófono (no se pide nada).
+  const pasoPendiente = async (): Promise<"camara" | "audio" | null> => {
+    try {
+      const cam = await Camera.getCameraPermissionsAsync();
+      const mic = await Audio.getPermissionsAsync();
+      const camOk = cam.granted || cam.status === "granted";
+      const micOk = mic.granted || mic.status === "granted";
+      if (camOk && micOk) return null;
+      return camOk ? "audio" : "camara";
+    } catch (e) {
+      console.log("[Seguridad] Error revisando permisos:", e);
+      return "camara";
+    }
+  };
+
+  const requestPermissions = useCallback(async (): Promise<boolean> => {
+    const paso = await pasoPendiente();
+    if (paso === null) return true;
+
     return new Promise((resolve) => {
       resolvePermission.current = resolve;
       flowStateRef.current = 0;
-      updatePermissionType("camara");
+      updatePermissionType(paso);
       setShowWarning(false);
       setModalVisible(true);
     });
@@ -103,9 +122,17 @@ export function useSecurityTutorialViewModel() {
         if (flowStateRef.current === 2) return;
 
         if (cameraOk) {
-          // ← Cámara concedida → pide audio
           flowStateRef.current = 0;
-          updatePermissionType("audio");
+          const mic = await Audio.getPermissionsAsync();
+          if (mic.granted || mic.status === "granted") {
+            // ← Cámara concedida y micrófono ya concedido → no se pide otra vez
+            setShowWarning(false);
+            setModalVisible(false);
+            resolvePermission.current(true);
+          } else {
+            // ← Cámara concedida → pide audio
+            updatePermissionType("audio");
+          }
         } else {
           // ← Cámara denegada por el sistema → advertencia
           flowStateRef.current = 0;
@@ -149,10 +176,11 @@ export function useSecurityTutorialViewModel() {
     setShowWarning(true); // ← aquí sí se muestra
   }, []);
 
-  const retryPermissions = useCallback(() => {
+  const retryPermissions = useCallback(async () => {
     flowStateRef.current = 0;
     setShowWarning(false);
-    updatePermissionType("camara");
+    const paso = await pasoPendiente();
+    updatePermissionType(paso ?? "camara");
     setModalVisible(true);
   }, []);
 

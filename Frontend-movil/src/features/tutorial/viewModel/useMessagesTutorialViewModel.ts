@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SMS from "expo-sms";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { MSG_COLORS } from "../styles/messageStyle";
@@ -20,10 +21,13 @@ export interface FeatureItem {
 
 type LocaleT = ReturnType<typeof useLocale>["t"];
 
+// Se guarda cuando el usuario ya aceptó el aviso de mensajes, para no pedirlo otra vez
+const STORAGE_KEY_MENSAJES = "@alerta_mujer:permiso_mensajes";
+
 // ─── Datos (ahora dependen del idioma activo) ─────────────────────────────────
 const getFeatureRows = (t: LocaleT): FeatureItem[] => [
   {
-    id: "sms",
+    id: "rcs",
     emoji: "💬",
     title: t.tutorial.mensaje_sms_titulo,
     badge: t.tutorial.mensaje_sms_badge,
@@ -36,8 +40,8 @@ const getFeatureRows = (t: LocaleT): FeatureItem[] => [
     colorBorder: MSG_COLORS.row1Border,
   },
   {
-    id: "call",
-    emoji: "📞",
+    id: "tiempoReal",
+    emoji: "📍",
     title: t.tutorial.mensaje_llamada_titulo,
     badge: t.tutorial.mensaje_llamada_badge,
     desc: t.tutorial.mensaje_llamada_desc,
@@ -68,31 +72,32 @@ export function useMessagesTutorialViewModel() {
   const { t } = useLocale();
   const featureRows = useMemo(() => getFeatureRows(t), [t]);
 
-  const [modalVisible, setModalVisible]   = useState(false);
-  const [permissionType, setPermissionType] = useState<"sms" | "llamada">("sms");
-  const [showWarning, setShowWarning]     = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [showWarning, setShowWarning]   = useState(false);
 
   const resolvePermission = useRef<(value: boolean) => void>(() => {});
 
-  // ── Handlers permisos (lógica original intacta) ──────────────────────────
-  const requestPermissions = useCallback((): Promise<boolean> => {
+  // ── Handlers permisos ─────────────────────────────────────────────────────
+  // Si el usuario ya aceptó el aviso antes, no se vuelve a mostrar
+  const requestPermissions = useCallback(async (): Promise<boolean> => {
+    try {
+      const yaAceptado = await AsyncStorage.getItem(STORAGE_KEY_MENSAJES);
+      if (yaAceptado === "true") return true;
+    } catch (e) { console.log("Error leyendo permiso de mensajes:", e); }
+
     return new Promise((resolve) => {
       resolvePermission.current = resolve;
-      setPermissionType("sms");
       setModalVisible(true);
       setShowWarning(false);
     });
   }, []);
 
   const confirmModal = useCallback(async () => {
-    if (permissionType === "sms") {
-      try { await SMS.isAvailableAsync(); } catch (e) { console.log("Error SMS:", e); }
-      setPermissionType("llamada");
-    } else {
-      setModalVisible(false);
-      resolvePermission.current(true);
-    }
-  }, [permissionType]);
+    try { await SMS.isAvailableAsync(); } catch (e) { console.log("Error mensajes:", e); }
+    try { await AsyncStorage.setItem(STORAGE_KEY_MENSAJES, "true"); } catch {}
+    setModalVisible(false);
+    resolvePermission.current(true);
+  }, []);
 
   const cancelModal = useCallback(() => {
     setModalVisible(false);
@@ -101,7 +106,6 @@ export function useMessagesTutorialViewModel() {
 
   const retryPermissions = useCallback(() => {
     setShowWarning(false);
-    setPermissionType("sms");
     setModalVisible(true);
   }, []);
 
@@ -113,7 +117,7 @@ export function useMessagesTutorialViewModel() {
   return {
     featureRows,
     modalVisible,
-    permissionType,
+    permissionType: "sms" as const,
     showWarning,
     requestPermissions,
     confirmModal,

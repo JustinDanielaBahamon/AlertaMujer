@@ -63,7 +63,7 @@ const getContactFeatureRows = (t: LocaleT): ContactFeatureItem[] => [
   },
 ];
 
-// ─── ViewModel — lógica original 100% intacta ─────────────────────────────────
+// ─── ViewModel ────────────────────────────────────────────────────────────────
 export function useContactTutorialViewModel() {
   const { t } = useLocale();
   const featureRows = useMemo(() => getContactFeatureRows(t), [t]);
@@ -73,8 +73,14 @@ export function useContactTutorialViewModel() {
 
   const permissionResolver = useRef<(value: boolean) => void>(() => {});
 
-  // ── Permisos (lógica original sin cambios) ───────────────────────────────
-  const requestPermissions = useCallback((): Promise<boolean> => {
+  // ── Permisos ──────────────────────────────────────────────────────────────
+  // Si ya tiene el permiso de contactos, no se pide otra vez
+  const requestPermissions = useCallback(async (): Promise<boolean> => {
+    try {
+      const { status } = await Contacts.getPermissionsAsync();
+      if (status === "granted") return true;
+    } catch (e) { console.log("Error revisando permiso de contactos:", e); }
+
     return new Promise((resolve) => {
       permissionResolver.current = resolve;
       setModalVisible(true);

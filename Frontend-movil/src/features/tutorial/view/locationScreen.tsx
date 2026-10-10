@@ -1,4 +1,4 @@
-import LottieView from "lottie-react-native";
+import TutorialLottie from "../component/TutorialLottie";
 import React, { useEffect, useRef } from "react";
 import { Animated, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -63,11 +63,8 @@ export default function LocationScreen({ externalVm }: LocationScreenProps) {
 
         {/* Lottie */}
         <View style={locationStyle.lottieSection}>
-          <LottieView
-            ref={vm.lottieRef}
+          <TutorialLottie
             source={require("@assets/imagesAlertaMujer/ScTutorial/ubicacion.json")}
-            autoPlay
-            loop
             resizeMode="contain"
             style={locationStyle.lottie}
           />

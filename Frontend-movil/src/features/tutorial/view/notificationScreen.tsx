@@ -1,12 +1,13 @@
 import React, { useEffect, useRef } from "react";
 import { View, Text, Animated, TouchableOpacity, ScrollView, } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import LottieView from "lottie-react-native";
+import TutorialLottie from "../component/TutorialLottie";
 import Card from "../../../components/ui/card/card";
 import PermisosModal from "../../../components/ui/modalMesanje/permisosMLL";
 import { useNotificationTutorialViewModel, type NotifFeatureItem, } from "../viewModel/useNotificationTutorialViewModel";
 import { notificationStyle, NOTIF_COLORS } from "../styles/notificationStyle";
 import { LinearGradient } from 'expo-linear-gradient';
+import { TUTORIAL_GRADIENT } from "../styles/tutorialTheme";
 import { useLocale } from "../../../contexts/LocaleContext";
 
 // ─── Decorative background circles ───────────────────────────────────────────
@@ -123,7 +124,7 @@ export default function NotificationTutorial({ externalVm }: NotificationTutoria
   return (
     <View style={notificationStyle.screenBg}>
       <LinearGradient
-        colors={["#f3afed", "#f8e0f8", "#b026bd"]}
+        colors={[...TUTORIAL_GRADIENT]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={{ flex: 1 }}
@@ -134,10 +135,8 @@ export default function NotificationTutorial({ externalVm }: NotificationTutoria
 
           {/* Lottie animation */}
           <View style={notificationStyle.lottieSection}>
-            <LottieView
+            <TutorialLottie
               source={require("@assets/imagesAlertaMujer/ScTutorial/Notificacion.json")}
-              autoPlay
-              loop
               resizeMode="contain"
               style={notificationStyle.lottie}
             />

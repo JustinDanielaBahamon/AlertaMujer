@@ -4,7 +4,7 @@ import { BUTTON_COLORS } from "../styles/buttonStyle";
 import { useLocale } from "../../../contexts/LocaleContext";
 
 // ─── Tipos públicos ───────────────────────────────────────────────────────────
-export type TapType = "short" | "double" | "hold" | null;
+export type TapType = "widget" | "acelerometro" | "pantalla" | null;
 
 export interface TapOption {
   id: TapType;
@@ -22,11 +22,11 @@ export interface TapOption {
 
 type LocaleT = ReturnType<typeof useLocale>["t"];
 
-// ─── Datos de gestos (ahora dependen del idioma activo) ───────────────────────
+// ─── Datos de métodos de activación (dependen del idioma activo) ──────────────
 const getTapOptions = (t: LocaleT): TapOption[] => [
   {
-    id: "short",
-    emoji: "👆",
+    id: "widget",
+    emoji: "🧩",
     title: t.tutorial.boton_toque_corto_titulo,
     badge: t.tutorial.boton_toque_corto_badge,
     highlightLabel: t.tutorial.boton_toque_corto_highlight,
@@ -38,8 +38,8 @@ const getTapOptions = (t: LocaleT): TapOption[] => [
     colorBorder: BUTTON_COLORS.row1Border,
   },
   {
-    id: "double",
-    emoji: "✌️",
+    id: "acelerometro",
+    emoji: "📳",
     title: t.tutorial.boton_doble_titulo,
     badge: t.tutorial.boton_doble_badge,
     highlightLabel: t.tutorial.boton_doble_highlight,
@@ -51,8 +51,8 @@ const getTapOptions = (t: LocaleT): TapOption[] => [
     colorBorder: BUTTON_COLORS.row2Border,
   },
   {
-    id: "hold",
-    emoji: "✊",
+    id: "pantalla",
+    emoji: "🔘",
     title: t.tutorial.boton_mantener_titulo,
     badge: t.tutorial.boton_mantener_badge,
     highlightLabel: t.tutorial.boton_mantener_highlight,
@@ -121,10 +121,10 @@ export function useButtonTutorialViewModel() {
     setActiveRow((prev) => (id === prev ? null : id));
   };
 
-  /** Cicla entre las 3 filas al presionar el botón SOS demo */
+  /** Cicla entre los 3 métodos al presionar el botón SOS demo */
   const handleSOSTap = (msg: string) => {
     const next = tapCount + 1;
-    const types: TapType[] = ["short", "double", "hold"];
+    const types: TapType[] = ["widget", "acelerometro", "pantalla"];
     const type = types[(next - 1) % 3];
     setActiveRow(type);
     showFeedback(msg);

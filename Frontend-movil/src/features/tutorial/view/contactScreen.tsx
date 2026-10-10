@@ -1,5 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import LottieView from "lottie-react-native";
+import { TUTORIAL_GRADIENT } from "../styles/tutorialTheme";
+import TutorialLottie from "../component/TutorialLottie";
 import React, { useEffect, useRef } from "react";
 import { Animated, ScrollView, Text, TouchableOpacity, View, } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -125,7 +126,7 @@ export default function ContactosScreen({  externalVm }: Props) {
      <View style={contactStyle.screenBg}>
 
       <LinearGradient
-        colors={["#f3afed", "#FCE7F3", "#b026bd"]}
+        colors={[...TUTORIAL_GRADIENT]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={{ flex: 1 }}
@@ -137,10 +138,8 @@ export default function ContactosScreen({  externalVm }: Props) {
 
         {/* Lottie */}
         <View style={contactStyle.lottieSection}>
-          <LottieView
+          <TutorialLottie
             source={require("@assets/imagesAlertaMujer/ScTutorial/Contacto.json")}
-            autoPlay
-            loop
             resizeMode="contain"
             style={contactStyle.lottie}
           />
