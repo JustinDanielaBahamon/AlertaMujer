@@ -5,7 +5,7 @@ import { useLocale } from '../../../contexts/LocaleContext';
 
 interface PermisosModalProps {
   visible: boolean;
-  tipo: 'sms' | 'llamada' | 'contacto' | 'camara' | 'audio' | 'notificacion'; // 🆕
+  tipo: 'sms' | 'contacto' | 'camara' | 'audio' | 'notificacion'; // 🆕
   onConfirmar: () => void;
   onCancelar: () => void;
 }
@@ -18,16 +18,14 @@ export default function PermisosModal({ visible, tipo, onConfirmar, onCancelar }
     tipo === 'contacto'     ? "👥" :
     tipo === 'camara'       ? "📷" :
     tipo === 'audio'        ? "🎙️" :
-    tipo === 'notificacion' ? "🔔" :
-                              "📞";
+                              "🔔";
 
   const titulo =
     tipo === 'sms'          ? t.permisos.sms_titulo :
     tipo === 'contacto'     ? t.permisos.contacto_titulo :
     tipo === 'camara'       ? t.permisos.camara_titulo :
     tipo === 'audio'        ? t.permisos.audio_titulo :
-    tipo === 'notificacion' ? t.permisos.notificacion_titulo :
-    t.permisos.llamada_titulo;
+    t.permisos.notificacion_titulo;
 
   // Cámara y micrófono muestran la divulgación clara (Prominent Disclosure)
   const descripcion =
@@ -35,8 +33,7 @@ export default function PermisosModal({ visible, tipo, onConfirmar, onCancelar }
     tipo === 'contacto'     ? t.permisos.contacto_desc :
     tipo === 'camara'       ? t.permisos.divulgacion_grabacion :
     tipo === 'audio'        ? t.permisos.divulgacion_grabacion :
-    tipo === 'notificacion' ? t.permisos.notificacion_desc :
-    t.permisos.llamada_desc;
+    t.permisos.notificacion_desc;
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancelar}>

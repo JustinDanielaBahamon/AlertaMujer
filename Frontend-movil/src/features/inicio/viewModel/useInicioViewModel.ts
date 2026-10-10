@@ -97,8 +97,18 @@ export function useInicioViewModel() {
     navigation.navigate("Activacion");
   }, [navigation, config.vibracion]);
 
-  const onPressInBoton = useCallback(() => setPressed(true), []);
-  const onPressOutBoton = useCallback(() => setPressed(false), []);
+  // Vibra mientras el botón está presionado y se detiene al soltarlo
+  const onPressInBoton = useCallback(() => {
+    setPressed(true);
+    if (config.vibracion) Vibration.vibrate([0, 400, 200], true);
+  }, [config.vibracion]);
+  const onPressOutBoton = useCallback(() => {
+    setPressed(false);
+    Vibration.cancel();
+  }, []);
+
+  // Si se sale de la pantalla con el botón presionado, no deja el teléfono vibrando
+  useEffect(() => () => Vibration.cancel(), []);
 
   const cerrarSesion = useCallback(() => {
     signOut();
