@@ -1,32 +1,31 @@
 import axios from "axios";
-import { Platform } from "react-native";
 import Constants from "expo-constants";
 
 function getApiBaseUrl(): string {
-  // Prioridad: Variable de entorno > app.json > detección automática
+  // 1) Variable de entorno explícita (seteada por update-env.js al hacer npm start)
   const envApiUrl = process.env.EXPO_PUBLIC_API_URL;
   if (envApiUrl) {
     console.log(" [api.ts] Usando EXPO_PUBLIC_API_URL:", envApiUrl);
     return envApiUrl;
   }
 
-  // Emulador Android: 10.0.2.2 apunta al localhost del PC anfitrión
-  if (Platform.OS === "android" && __DEV__ && Constants.executionEnvironment === "storeClient" && false) {
-    // (dejar en false: normalmente usamos dispositivo físico, no emulador)
-    return "http://10.0.2.2:8080";
-  }
-
-  // Dispositivo físico / Expo Go: usar la misma IP que Expo usó para servir la app
+  // 2) Dispositivo físico / Expo Go: derivar la IP del hostUri de Expo
+  //    Constants.expoConfig.hostUri tiene el formato "192.168.x.x:8081"
+  //    manifest.debuggerHost es el equivalente en SDK antiguo
   const hostUri =
     Constants.expoConfig?.hostUri ??
+    (Constants as any).manifest?.debuggerHost ??
     (Constants as any).manifest2?.extra?.expoClient?.hostUri;
 
   if (hostUri) {
     const host = hostUri.split(":")[0];
-    return `http://${host}:8080`;
+    const url = `http://${host}:8080`;
+    console.log(" [api.ts] Usando hostUri detectado:", url);
+    return url;
   }
 
-  // Fallback (versión web de Expo, o si no se detecta hostUri)
+  // 3) Fallback final (solo funciona en web o emulador Android con 10.0.2.2)
+  console.warn(" [api.ts] No se detectó IP — usando localhost");
   return "http://localhost:8080";
 }
 

@@ -7,14 +7,16 @@ import { useLocale } from "../../../contexts/LocaleContext";
 import { useNotificaciones } from "../../../contexts/NotificacionesContext";
 import type { MainStackParamList } from "../../../navigation/types";
 import {
+  LocationPermissionDeniedError,
   LocationService,
+  LocationServicesDisabledError,
   type UbicacionDetallada,
 } from "../../../services/location.service";
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
 
 // Estado de la ubicacion, independiente del idioma (el texto se traduce aparte)
-type EstadoUbicacion = "cargando" | "lista" | "denegado" | "error";
+type EstadoUbicacion = "cargando" | "lista" | "denegado" | "gps_apagado" | "error";
 
 export function useInicioViewModel() {
   const navigation = useNavigation<Nav>();
@@ -41,8 +43,6 @@ export function useInicioViewModel() {
       if (ubicacion) {
         setUbicacionDetallada(ubicacion);
 
-        // Para compatibilidad con código existente
-        const nombreCorto = LocationService.formatShortAddress(ubicacion);
         const nombreCompleto = LocationService.formatAddress(ubicacion);
         setUbicacionResuelta(nombreCompleto);
         setEstadoUbicacion("lista");
@@ -57,8 +57,18 @@ export function useInicioViewModel() {
         setEstadoUbicacion("error");
       }
     } catch (error) {
-      console.error("Error al obtener ubicación mejorada:", error);
-      setEstadoUbicacion("error");
+      if (error instanceof LocationServicesDisabledError) {
+        // GPS / servicios de ubicación del dispositivo apagados
+        console.warn("GPS del dispositivo desactivado:", error.message);
+        setEstadoUbicacion("gps_apagado");
+      } else if (error instanceof LocationPermissionDeniedError) {
+        // El usuario negó el permiso a la app
+        console.warn("Permiso de ubicación denegado:", error.message);
+        setEstadoUbicacion("denegado");
+      } else {
+        console.error("Error al obtener ubicación mejorada:", error);
+        setEstadoUbicacion("error");
+      }
     } finally {
       setCargando(false);
     }
@@ -75,6 +85,8 @@ export function useInicioViewModel() {
         return t.mapa.cargando;
       case "denegado":
         return t.inicio.permiso_denegado;
+      case "gps_apagado":
+        return "Activa el GPS del dispositivo";
       case "error":
         return t.inicio.error_actualizar;
       default:
