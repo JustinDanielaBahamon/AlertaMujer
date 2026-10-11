@@ -2,14 +2,15 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Location from "expo-location";
-import React, { useEffect, useState } from "react";
-import { Alert, Share } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Animated,
+  ActivityIndicator,
+  Alert,
   Image,
   Modal,
   ScrollView,
+  Share,
+  StyleSheet,
   Switch,
   Text,
   TouchableOpacity,
@@ -17,21 +18,145 @@ import {
   View,
 } from "react-native";
 import MapView, { Marker, Polyline } from "react-native-maps";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "../styles/MapaStyles";
+import { createMapaModalStyles } from "../styles/MapaModal.style";
 import { useMapaViewModel } from "../viewModel/useMapaViewModel";
-import { useAjustesViewModel } from "../../settings/viewModel/useAjustesViewModel";
 import { useRecorridos } from "../../../contexts/RecorridosContext";
+
+type Coord = { latitude: number; longitude: number };
+
+type InfoDireccion = {
+  zona: string; // barrio, o la ciudad si no hay barrio (se usa en el encabezado)
+  barrio: string;
+  ciudad: string;
+  direccion: string;
+};
+
+// Colores distintos para cada recorrido guardado, para que no se amontonen
+const COLORES_RUTAS = [
+  "#7B1DB2", // Púrpura
+  "#2196F3", // Azul
+  "#FF9800", // Naranja
+  "#00BCD4", // Cyan
+  "#9C27B0", // Violeta
+  "#FF5722", // Naranja oscuro
+  "#4CAF50", // Verde
+  "#E91E63", // Rosa
+];
+
+const distanciaMetros = (a: Coord, b: Coord) => {
+  const R = 6371000;
+  const dLat = ((b.latitude - a.latitude) * Math.PI) / 180;
+  const dLon = ((b.longitude - a.longitude) * Math.PI) / 180;
+  const x =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((a.latitude * Math.PI) / 180) *
+      Math.cos((b.latitude * Math.PI) / 180) *
+      Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
+};
+
+// Consulta la dirección de unas coordenadas (barrio, ciudad y calle)
+const obtenerInfoDireccion = async (coord: Coord): Promise<InfoDireccion> => {
+  const reverse = await Location.reverseGeocodeAsync(coord);
+  const info = reverse?.[0];
+
+  const calle = info?.street || info?.name || "";
+  const numero = info?.streetNumber || "";
+  const barrio = info?.district || "";
+  const municipio = info?.city || info?.subregion || "";
+
+  return {
+    zona: barrio || municipio,
+    barrio,
+    ciudad: [municipio, info?.region].filter(Boolean).join(", "),
+    direccion: `${calle} ${numero}`.trim(),
+  };
+};
+
+type EstilosMapa = ReturnType<typeof createMapaModalStyles>;
+
+// Línea punteada + pines numerados del recorrido (mismo diseño que "Alerta de emergencia")
+function PinesHistorial({
+  puntos,
+  actual,
+  colorLinea,
+  styles: ms,
+  trackear,
+  etiqueta,
+  tituloActual,
+}: {
+  puntos: Coord[];
+  actual: Coord;
+  colorLinea: string;
+  styles: EstilosMapa;
+  trackear: boolean;
+  etiqueta: string;
+  tituloActual: string;
+}) {
+  // La línea termina en la posición actual
+  const linea = [...puntos, actual];
+
+  return (
+    <>
+      {linea.length > 1 && (
+        <Polyline
+          coordinates={linea}
+          strokeColor={colorLinea}
+          strokeWidth={3}
+          lineDashPattern={[6, 4]}
+          lineCap="round"
+          lineJoin="round"
+        />
+      )}
+
+      {puntos.map((p, i) => (
+        <Marker
+          key={`hist-${i}`}
+          coordinate={p}
+          anchor={{ x: 0.5, y: 0.5 }}
+          tracksViewChanges={trackear}
+          zIndex={i}
+          title={`${etiqueta} ${i + 1}`}
+        >
+          <View style={ms.pin}>
+            <Text style={ms.pinText}>{i + 1}</Text>
+          </View>
+        </Marker>
+      ))}
+
+      {/* Posición actual: pin grande al frente */}
+      <Marker
+        coordinate={actual}
+        anchor={{ x: 0.5, y: 0.5 }}
+        tracksViewChanges={trackear}
+        zIndex={999}
+        title={tituloActual}
+      >
+        <View style={ms.pinActual}>
+          <MaterialIcons name="my-location" size={18} color="#FFFFFF" />
+        </View>
+      </Marker>
+    </>
+  );
+}
 
 export default function MapaView() {
   const navigation = useNavigation<any>();
-  const { mostrarRecorridos } = useAjustesViewModel();
   const { recorridos } = useRecorridos();
   const insets = useSafeAreaInsets();
+  const mapaRef = useRef<MapView>(null);
+  const montado = useRef(true);
+  const ultimaGeocodificada = useRef<Coord | null>(null);
+
   const [mostrarRecorridosEnMapa, setMostrarRecorridosEnMapa] = useState(true); // Activado por defecto
   const [soloImportantes, setSoloImportantes] = useState(false); // Mostrar todos por defecto
-  const [direccionActual, setDireccionActual] = useState<string>("");
+  const [infoDireccion, setInfoDireccion] = useState<InfoDireccion | null>(null);
   const [recorridoInfoVisible, setRecorridoInfoVisible] = useState(false);
   const [recorridoInfo, setRecorridoInfo] = useState<any>(null);
+  const [mapaListo, setMapaListo] = useState(false); // el mapa grande se dibuja cuando termina la animación del modal
+  const [trackear, setTrackear] = useState(true); // los pines personalizados se redibujan solo unos instantes
 
   const {
     theme,
@@ -39,14 +164,10 @@ export default function MapaView() {
     location,
     fullscreen,
     setFullscreen,
-    showClose,
     historial,
     destinoAlerta,
     coordenadaCentro,
-    closeOpacity,
     ultimaActualizacion,
-    acciones: accionesViewModel,
-    handleMapPress,
     formatearHora,
     refrescarUbicacion,
     reintentarPermisos,
@@ -58,52 +179,84 @@ export default function MapaView() {
     cargando,
   } = useMapaViewModel() as any;
 
+  const ms = useMemo(() => createMapaModalStyles(theme, insets), [theme, insets]);
+
+  const direccionActual = infoDireccion
+    ? infoDireccion.zona
+      ? `${infoDireccion.zona}, ${infoDireccion.direccion}`.replace(/, $/, "")
+      : infoDireccion.direccion
+    : "";
+
+  // Recorridos guardados que se dibujan en el mapa grande (misma lógica de siempre)
+  const recorridosVisibles = useMemo(
+    () =>
+      !mostrarRecorridosEnMapa
+        ? []
+        : (recorridos as any[]).filter(
+            (r) => r?.puntos?.length > 0 && (!soloImportantes || r.importante)
+          ),
+    [recorridos, mostrarRecorridosEnMapa, soloImportantes]
+  );
+
   const irAGuardarRecorrido = () => {
     navigation.navigate("GuardarRecorrido");
   };
 
-  // Obtener dirección actual usando reverse geocoding
+  useEffect(() => {
+    montado.current = true;
+    return () => {
+      montado.current = false;
+    };
+  }, []);
+
+  // El mapa grande se monta al terminar de deslizar el modal para que la animación no se trabe
+  useEffect(() => {
+    if (!fullscreen) {
+      setMapaListo(false);
+      return;
+    }
+    const id = setTimeout(() => setMapaListo(true), 300);
+    return () => clearTimeout(id);
+  }, [fullscreen]);
+
+  // Los pines personalizados se redibujan unos instantes cuando cambian o se abre el mapa
+  useEffect(() => {
+    setTrackear(true);
+    const id = setTimeout(() => setTrackear(false), 600);
+    return () => clearTimeout(id);
+  }, [historial?.length, fullscreen, mapaListo, recorridosVisibles.length]);
+
+  // Dirección actual (reverse geocoding). Solo se consulta al inicio o si se movió más de 40 m,
+  // así no se hace una petición de red en cada actualización del GPS.
   useEffect(() => {
     if (!location) return;
 
-    const obtenerDireccion = async () => {
-      try {
-        const reverse = await Location.reverseGeocodeAsync({
-          latitude: location.latitude,
-          longitude: location.longitude,
-        });
+    const anterior = ultimaGeocodificada.current;
+    if (anterior && distanciaMetros(anterior, location) < 40) return;
+    ultimaGeocodificada.current = location;
 
-        if (reverse && reverse.length > 0) {
-          const info = reverse[0];
-          const barrio = info?.district || info?.subregion || "";
-          const calle = info?.street || info?.name || "";
-          const numero = info?.streetNumber || "";
-          const direccion = `${calle} ${numero}`.trim() || "";
-          
-          setDireccionActual(barrio ? `${barrio}, ${direccion}` : direccion);
-        }
+    (async () => {
+      try {
+        const info = await obtenerInfoDireccion(location);
+        if (montado.current) setInfoDireccion(info);
       } catch (error) {
         console.error("Error al obtener dirección:", error);
       }
-    };
-
-    obtenerDireccion();
+    })();
   }, [location]);
 
   const handleCompartir = async () => {
     if (!location) return;
 
     try {
-      const reverse = await Location.reverseGeocodeAsync({
-        latitude: location.latitude,
-        longitude: location.longitude,
-      });
-
-      const info = reverse[0];
-      const calle = info?.street || info?.name || "";
-      const numero = info?.streetNumber || "";
-      const barrio = info?.district || info?.subregion || "No disponible";
-      const direccion = `${calle} ${numero}`.trim() || "No disponible";
+      let info = infoDireccion;
+      if (!info) {
+        try {
+          info = await obtenerInfoDireccion(location);
+        } catch {
+          info = null;
+        }
+      }
 
       const ahora = new Date();
       const fecha = ahora.toLocaleDateString("es-CO", {
@@ -116,26 +269,32 @@ export default function MapaView() {
         minute: "2-digit",
       });
 
-      const mensaje = `📍 MI UBICACIÓN ACTUAL
+      const lat = location.latitude.toFixed(6);
+      const lng = location.longitude.toFixed(6);
 
-🏠 Barrio: ${barrio}
-📍 Dirección: ${direccion}
-📍 Coordenadas:
-   Latitud: ${location.latitude.toFixed(6)}
-   Longitud: ${location.longitude.toFixed(6)}
-
-📅 Fecha de envío: ${fecha}
-🕐 Hora de envío: ${hora}
-
-Compartido desde AlertaMujer`;
+      // Solo se incluyen las líneas de las que realmente hay dato
+      const lineas = [
+        t.mapa.mensaje_ubicacion,
+        "",
+        info?.barrio ? `🏘️ Barrio: ${info.barrio}` : null,
+        info?.ciudad ? `🏙️ Ciudad: ${info.ciudad}` : null,
+        info?.direccion ? `🛣️ Dirección: ${info.direccion}` : null,
+        `🧭 Coordenadas: ${lat}, ${lng}`,
+        "",
+        "🗺️ Ábrela en el mapa:",
+        `https://www.google.com/maps?q=${lat},${lng}`,
+        "",
+        `🕐 Enviado el ${fecha} a las ${hora}`,
+        "💜 Compartido desde AlertaMujer",
+      ].filter((linea): linea is string => linea !== null);
 
       await Share.share({
-        title: "Mi ubicación actual",
-        message: mensaje,
+        title: t.mapa.compartir_ubicacion,
+        message: lineas.join("\n"),
       });
     } catch (error) {
       console.error("Error al compartir ubicación:", error);
-      Alert.alert("Error", "No fue posible compartir la ubicación. Inténtalo nuevamente.");
+      Alert.alert("Error", `${t.mapa.compartir_error}. Inténtalo nuevamente.`);
     }
   };
 
@@ -210,97 +369,46 @@ Compartido desde AlertaMujer`;
     },
   ] as const;
 
-  // ─── COMPONENTE DEL MAPA ──────────────────────────────────────────────────
-  const mapComponent = (
-    <MapView
-      style={styles.map}
-      initialRegion={{
-        latitude: centroCalculado.latitude,
-        longitude: centroCalculado.longitude,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      }}
-      scrollEnabled={fullscreen}
-      zoomEnabled={fullscreen}
-      rotateEnabled={fullscreen}
-      pitchEnabled={fullscreen}
-      onPress={fullscreen ? handleMapPress : () => setFullscreen(true)}
-    >
-      <Marker coordinate={location} title={t.mapa.tu_ubicacion_marcador} pinColor="red" />
+  // ─── ENCUADRE DEL MAPA GRANDE ─────────────────────────────────────────────
+  // Todos los puntos que están visibles: ubicación, dirección de alerta, historial y recorridos.
+  const puntosVisibles = (): Coord[] => {
+    const pts: Coord[] = [location];
+    if (destinoAlerta) pts.push(destinoAlerta.coordenada);
+    (historial ?? []).forEach((p: Coord) => pts.push(p));
+    recorridosVisibles.forEach((r: any) =>
+      r.puntos.forEach((p: any) => pts.push({ latitude: p.latitude, longitude: p.longitude }))
+    );
+    return pts;
+  };
 
-      {destinoAlerta && (
-        <Marker
-          coordinate={destinoAlerta.coordenada}
-          title={t.mapa.direccion_alerta_marcador}
-          description={destinoAlerta.direccion}
-          pinColor="#7B1DB2"
-        />
-      )}
+  const verTodo = () => {
+    const pts = puntosVisibles();
+    if (pts.length < 2) {
+      centrarEnMi();
+      return;
+    }
+    mapaRef.current?.fitToCoordinates(pts, {
+      edgePadding: { top: insets.top + 90, right: 60, bottom: insets.bottom + 130, left: 60 },
+      animated: true,
+    });
+  };
 
-      {historial?.map((pos: any, index: number) => (
-        <Marker key={index} coordinate={pos} title={`${t.mapa.historial} ${index + 1}`} pinColor="#7B1DB2" />
-      ))}
+  const centrarEnMi = () => {
+    mapaRef.current?.animateToRegion(
+      {
+        latitude: location.latitude,
+        longitude: location.longitude,
+        latitudeDelta: 0.005,
+        longitudeDelta: 0.005,
+      },
+      400
+    );
+  };
 
-      {/* Polylines de recorridos guardados - solo mostrar en pantalla completa */}
-      {fullscreen && mostrarRecorridosEnMapa && recorridos.length > 0 && (
-        recorridos
-          .filter((recorrido: any) => !soloImportantes || recorrido.importante)
-          .map((recorrido: any, index: number) => {
-            // Colores diferentes para cada ruta para evitar amontonamiento
-            const routeColors = [
-              "#7B1DB2", // Púrpura
-              "#2196F3", // Azul
-              "#FF9800", // Naranja
-              "#00BCD4", // Cyan
-              "#9C27B0", // Violeta
-              "#FF5722", // Naranja oscuro
-              "#4CAF50", // Verde
-              "#E91E63", // Rosa
-            ];
-            const routeColor = routeColors[index % routeColors.length];
-            
-            return (
-              <React.Fragment key={recorrido.id}>
-                <Polyline
-                  coordinates={recorrido.puntos.map((punto: any) => ({
-                    latitude: punto.latitude,
-                    longitude: punto.longitude,
-                  }))}
-                  strokeWidth={4}
-                  strokeColor={routeColor}
-                  lineCap="round"
-                  lineJoin="round"
-                  tappable
-                  onPress={() => {
-                    setRecorridoInfo(recorrido);
-                    setRecorridoInfoVisible(true);
-                  }}
-                />
-                
-                {/* Marcador de inicio */}
-                <Marker
-                  coordinate={recorrido.puntos[0]}
-                  pinColor={routeColor}
-                  title={recorrido.nombrePersonalizado || `${recorrido.barrioInicio} → ${recorrido.barrioFin}`}
-                  description="Inicio del recorrido"
-                  onPress={() => {
-                    setRecorridoInfo(recorrido);
-                    setRecorridoInfoVisible(true);
-                  }}
-                />
-                
-                {/* Marcador de fin */}
-                <Marker
-                  coordinate={recorrido.puntos[recorrido.puntos.length - 1]}
-                  pinColor="#F44336"
-                  title="Fin"
-                />
-              </React.Fragment>
-            );
-          })
-      )}
-    </MapView>
-  );
+  const abrirInfoRecorrido = (recorrido: any) => {
+    setRecorridoInfo(recorrido);
+    setRecorridoInfoVisible(true);
+  };
 
   return (
     <View style={[styles.contenedorPrincipal, { backgroundColor: theme.background }]}>
@@ -336,14 +444,48 @@ Compartido desde AlertaMujer`;
         </LinearGradient>
 
         {/* MAPA */}
-        <View style={styles.contenedorMapa}>
-          {mapComponent}
-          <TouchableOpacity
-            style={styles.openMapButton}
-            onPress={() => setFullscreen(true)}
+        <View style={ms.mapaCard}>
+          <MapView
+            style={ms.miniMapa}
+            liteMode
+            pointerEvents="none"
+            toolbarEnabled={false}
+            region={{
+              latitude: centroCalculado.latitude,
+              longitude: centroCalculado.longitude,
+              latitudeDelta: 0.01,
+              longitudeDelta: 0.01,
+            }}
+            scrollEnabled={false}
+            zoomEnabled={false}
+            rotateEnabled={false}
+            pitchEnabled={false}
           >
-            <MaterialIcons name="open-in-full" size={18} color="#fff" />
-            <Text style={styles.openMapText}>{t.mapa.abrir_mapa_completo}</Text>
+            <Marker coordinate={location} title={t.mapa.tu_ubicacion_marcador} pinColor={theme.icono} />
+            {destinoAlerta && (
+              <Marker
+                coordinate={destinoAlerta.coordenada}
+                title={t.mapa.direccion_alerta_marcador}
+                description={destinoAlerta.direccion}
+                pinColor="#7B1DB2"
+              />
+            )}
+          </MapView>
+
+          {/* Capa transparente: intercepta el toque para que Android no abra la app de Google Maps */}
+          <TouchableOpacity
+            style={StyleSheet.absoluteFillObject}
+            onPress={() => setFullscreen(true)}
+            activeOpacity={0.9}
+          >
+            <View style={ms.miniBadge}>
+              <View style={ms.miniBadgePunto} />
+              <Text style={ms.miniBadgeTexto}>{t.mapa.activo}</Text>
+            </View>
+            <View style={ms.abrirBtn}>
+              <MaterialIcons name="open-in-full" size={16} color={theme.icono} />
+              <Text style={ms.abrirTexto}>{t.mapa.abrir_mapa_completo}</Text>
+            </View>
           </TouchableOpacity>
         </View>
 
@@ -511,17 +653,165 @@ Compartido desde AlertaMujer`;
        
       </ScrollView>
 
-      {/* MODAL PANTALLA COMPLETA */}
-      <Modal visible={fullscreen} animationType="slide">
-        <View style={{ flex: 1 }}>
-          {mapComponent}
-          {showClose && (
-            <Animated.View style={[styles.botonCerrarMapa, { opacity: closeOpacity }]}>
-              <TouchableWithoutFeedback onPress={() => setFullscreen(false)}>
-                <Text style={styles.textoCerrar}>{t.mapa.cerrar_mapa}</Text>
-              </TouchableWithoutFeedback>
-            </Animated.View>
+      {/* MODAL PANTALLA COMPLETA (mismo diseño que "Alerta de emergencia") */}
+      <Modal
+        visible={fullscreen}
+        animationType="slide"
+        statusBarTranslucent
+        onRequestClose={() => setFullscreen(false)}
+      >
+        <View style={ms.modalContainer}>
+          {mapaListo ? (
+            <MapView
+              ref={mapaRef}
+              style={ms.modalMap}
+              toolbarEnabled={false}
+              initialRegion={{
+                latitude: centroCalculado.latitude,
+                longitude: centroCalculado.longitude,
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
+              }}
+            >
+              <PinesHistorial
+                puntos={historial ?? []}
+                actual={location}
+                colorLinea={theme.icono}
+                styles={ms}
+                trackear={trackear}
+                etiqueta={t.mapa.historial}
+                tituloActual={t.mapa.tu_ubicacion_marcador}
+              />
+
+              {destinoAlerta && (
+                <Marker
+                  coordinate={destinoAlerta.coordenada}
+                  anchor={{ x: 0.5, y: 0.5 }}
+                  tracksViewChanges={trackear}
+                  zIndex={998}
+                  title={t.mapa.direccion_alerta_marcador}
+                  description={destinoAlerta.direccion}
+                >
+                  <View style={ms.pinActual}>
+                    <MaterialIcons name="place" size={20} color="#FFFFFF" />
+                  </View>
+                </Marker>
+              )}
+
+              {/* Recorridos guardados (misma lógica: interruptores de la pantalla y toque para ver información) */}
+              {recorridosVisibles.map((recorrido: any, index: number) => {
+                const routeColor = COLORES_RUTAS[index % COLORES_RUTAS.length];
+                const puntos = recorrido.puntos.map((punto: any) => ({
+                  latitude: punto.latitude,
+                  longitude: punto.longitude,
+                }));
+
+                return (
+                  <React.Fragment key={recorrido.id}>
+                    {puntos.length > 1 && (
+                      <Polyline
+                        coordinates={puntos}
+                        strokeWidth={4}
+                        strokeColor={routeColor}
+                        lineDashPattern={[6, 4]}
+                        lineCap="round"
+                        lineJoin="round"
+                        tappable
+                        onPress={() => abrirInfoRecorrido(recorrido)}
+                      />
+                    )}
+
+                    {/* Marcador de inicio */}
+                    <Marker
+                      coordinate={puntos[0]}
+                      anchor={{ x: 0.5, y: 0.5 }}
+                      tracksViewChanges={trackear}
+                      title={
+                        recorrido.nombrePersonalizado ||
+                        `${recorrido.barrioInicio} → ${recorrido.barrioFin}`
+                      }
+                      description="Inicio del recorrido"
+                      onPress={() => abrirInfoRecorrido(recorrido)}
+                    >
+                      <View style={[ms.pinRuta, { backgroundColor: routeColor }]}>
+                        <MaterialIcons name="trip-origin" size={14} color="#FFFFFF" />
+                      </View>
+                    </Marker>
+
+                    {/* Marcador de fin */}
+                    <Marker
+                      coordinate={puntos[puntos.length - 1]}
+                      anchor={{ x: 0.5, y: 0.5 }}
+                      tracksViewChanges={trackear}
+                      title="Fin"
+                    >
+                      <View style={[ms.pinRuta, { backgroundColor: "#F44336" }]}>
+                        <MaterialIcons name="flag" size={14} color="#FFFFFF" />
+                      </View>
+                    </Marker>
+                  </React.Fragment>
+                );
+              })}
+            </MapView>
+          ) : (
+            <View style={ms.modalLoading}>
+              <ActivityIndicator size="large" color={theme.icono} />
+            </View>
           )}
+
+          {/* Barra superior: cerrar + estado de la ubicación */}
+          <View style={ms.modalTopBar} pointerEvents="box-none">
+            <TouchableOpacity
+              style={ms.modalCloseBtn}
+              onPress={() => setFullscreen(false)}
+              activeOpacity={0.85}
+              accessibilityRole="button"
+              accessibilityLabel={t.mapa.cerrar_mapa}
+            >
+              <MaterialIcons name="close" size={20} color={theme.icono} />
+              <Text style={ms.modalCloseText}>{t.mapa.cerrar_mapa}</Text>
+            </TouchableOpacity>
+
+            <View style={ms.modalTitlePill} pointerEvents="none">
+              <Text style={ms.modalTitle} numberOfLines={1}>
+                {t.mapa.tu_ubicacion_marcador}
+              </Text>
+              <Text style={ms.modalSub} numberOfLines={1}>
+                {t.mapa.ultima_actualizacion}{" "}
+                {ultimaActualizacion ? formatearHora(ultimaActualizacion) : "--"}
+              </Text>
+            </View>
+          </View>
+
+          {/* Coordenadas y dirección actual */}
+          <View style={ms.modalInfo} pointerEvents="none">
+            <Text style={ms.modalInfoText} numberOfLines={1}>
+              {location.latitude.toFixed(5)}, {location.longitude.toFixed(5)}
+            </Text>
+            {!!direccionActual && (
+              <Text style={ms.modalInfoBarrio} numberOfLines={2}>
+                {direccionActual}
+              </Text>
+            )}
+          </View>
+
+          {/* Ir a mi ubicación / encuadrar todos los puntos */}
+          <TouchableOpacity
+            style={ms.modalLocBtn}
+            onPress={centrarEnMi}
+            activeOpacity={0.85}
+            accessibilityRole="button"
+          >
+            <MaterialIcons name="my-location" size={22} color={theme.icono} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={ms.modalFitBtn}
+            onPress={verTodo}
+            activeOpacity={0.85}
+            accessibilityRole="button"
+          >
+            <MaterialIcons name="zoom-out-map" size={22} color={theme.icono} />
+          </TouchableOpacity>
         </View>
       </Modal>
 

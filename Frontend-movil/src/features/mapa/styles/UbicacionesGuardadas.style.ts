@@ -16,20 +16,17 @@ export const createStyles = (theme: AppTheme) => {
     },
 
     // =====================================================
-    // HEADER (ACTUALIZADO PARA GRADIENTE)
+    // HEADER (REDONDEADO, IGUAL AL DE "TU UBICACIÓN")
     // =====================================================
 
     header: {
       flexDirection: "row",
       alignItems: "center",
-      paddingBottom: 20,
-      paddingTop: 45,
+      paddingTop: 10,
       paddingHorizontal: 20,
-      elevation: 5,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.2,
-      shadowRadius: 4,
+      paddingBottom: 30,
+      borderBottomLeftRadius: 50,
+      borderBottomRightRadius: 50,
     },
 
     backButton: {
@@ -47,15 +44,25 @@ export const createStyles = (theme: AppTheme) => {
     },
 
     headerTitle: {
-      fontSize: 22,
+      fontSize: 24,
       fontWeight: "bold",
       color: "#ffffff",
     },
 
     headerSubtitle: {
-      fontSize: 14,
-      color: "rgba(255, 255, 255, 0.8)",
+      fontSize: 13,
+      color: "rgba(255, 255, 255, 0.85)",
       marginTop: 4,
+    },
+
+    headerIcon: {
+      width: 52,
+      height: 52,
+      borderRadius: 26,
+      backgroundColor: "rgba(255, 255, 255, 0.2)",
+      justifyContent: "center",
+      alignItems: "center",
+      marginLeft: 10,
     },
 
     // =====================================================
@@ -181,7 +188,7 @@ export const createStyles = (theme: AppTheme) => {
 
     searchContainer: {
       paddingHorizontal: 18,
-      marginTop: 10,
+      marginTop: 18,
       marginBottom: 12,
     },
 
