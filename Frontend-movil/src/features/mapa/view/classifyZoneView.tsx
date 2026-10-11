@@ -24,6 +24,7 @@ import { useLocale } from "../../../contexts/LocaleContext";
 import { useTheme } from "../../../contexts/ThemeContext";
 import type { MainStackParamList } from "../../../navigation/types";
 import { createStyles } from "../styles/classifyZone.style";
+import BarraBusquedaDireccion from "./BarraBusquedaDireccion";
 
 type NavigationProp = NativeStackNavigationProp<MainStackParamList>;
 
@@ -93,6 +94,7 @@ export default function ClasificarZonaView() {
   );
 
   const [isLocationHovered, setIsLocationHovered] = useState(false);
+  const [textoBusqueda, setTextoBusqueda] = useState("");
 
   // Función reutilizable de Geocodificación Inversa mejorada
   const fetchAddress = useCallback(
@@ -252,7 +254,7 @@ export default function ClasificarZonaView() {
     }
   };
 
-  if (cargando) {
+    if (cargando && !direccionInfo) {
     return (
       <View style={[styles.loadingContainer, { backgroundColor: theme.background }]}>
         <ActivityIndicator size="large" color="#7B1DB2" />
@@ -316,6 +318,18 @@ export default function ClasificarZonaView() {
           />{" "}
           Ubicación en el mapa
         </Text>
+
+        {/* BUSCAR DIRECCIÓN */}
+        <BarraBusquedaDireccion
+          style={{ marginHorizontal: 18, marginBottom: 12 }}
+          value={textoBusqueda}
+          onChangeText={setTextoBusqueda}
+          onResultado={(coord) => setCoords(coord)}
+          ciudad={
+            ciudad && ciudad !== t.mapa.ciudad_desconocida ? ciudad : undefined
+          }
+          placeholder="Buscar dirección (ej: Carrera 5 #12-30)"
+        />
 
         <View style={styles.mapContainer}>
           <MapView

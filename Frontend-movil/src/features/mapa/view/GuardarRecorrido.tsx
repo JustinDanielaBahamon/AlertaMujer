@@ -172,7 +172,11 @@ export default function GuardarRecorrido() {
       importante: true, // Por defecto importantes
     };
 
-    agregarRecorridoManual(nuevoRecorrido);
+    const resultado = agregarRecorridoManual(nuevoRecorrido);
+    if (!resultado.ok) {
+      alert(resultado.motivo ?? "No se pudo guardar el recorrido");
+      return;
+    }
     alert("Recorrido guardado exitosamente");
     navigation.goBack();
   };

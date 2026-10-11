@@ -1,8 +1,8 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Location from "expo-location";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -17,12 +17,19 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import MapView, { Marker, Polyline } from "react-native-maps";
+import MapView, { Circle, Marker, Polyline } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "../styles/MapaStyles";
 import { createMapaModalStyles } from "../styles/MapaModal.style";
 import { useMapaViewModel } from "../viewModel/useMapaViewModel";
-import { useRecorridos } from "../../../contexts/RecorridosContext";
+import {
+  MAX_IMPORTANTES,
+  MAX_RECORRIDOS,
+  useRecorridos,
+} from "../../../contexts/RecorridosContext";
+import { useAuth } from "../../../contexts/AuthContext";
+import { frequentLocationsService } from "../../../services/frequent-locations.service";
+import BarraBusquedaDireccion from "./BarraBusquedaDireccion";
 
 type Coord = { latitude: number; longitude: number };
 
@@ -44,6 +51,23 @@ const COLORES_RUTAS = [
   "#4CAF50", // Verde
   "#E91E63", // Rosa
 ];
+
+// Zonas clasificadas por la usuaria (pantalla "Clasificar zona"), dibujadas como círculo en el mapa
+type ZonaClasificada = {
+  id: string;
+  nombre: string;
+  latitude: number;
+  longitude: number;
+  nivelRiesgo: "muy_segura" | "moderada" | "muy_insegura";
+};
+
+const RADIO_ZONA_METROS = 150;
+
+const COLOR_NIVEL: Record<ZonaClasificada["nivelRiesgo"], string> = {
+  muy_segura: "#27AE60",
+  moderada: "#D89B00",
+  muy_insegura: "#E74C3C",
+};
 
 const distanciaMetros = (a: Coord, b: Coord) => {
   const R = 6371000;
@@ -145,6 +169,7 @@ function PinesHistorial({
 export default function MapaView() {
   const navigation = useNavigation<any>();
   const { recorridos } = useRecorridos();
+  const { user } = useAuth();
   const insets = useSafeAreaInsets();
   const mapaRef = useRef<MapView>(null);
   const montado = useRef(true);
@@ -157,6 +182,12 @@ export default function MapaView() {
   const [recorridoInfo, setRecorridoInfo] = useState<any>(null);
   const [mapaListo, setMapaListo] = useState(false); // el mapa grande se dibuja cuando termina la animación del modal
   const [trackear, setTrackear] = useState(true); // los pines personalizados se redibujan solo unos instantes
+  const [zonasClasificadas, setZonasClasificadas] = useState<ZonaClasificada[]>([]);
+  const [textoBusqueda, setTextoBusqueda] = useState("");
+  const [resultadoBusqueda, setResultadoBusqueda] = useState<{
+    coord: Coord;
+    texto: string;
+  } | null>(null);
 
   const {
     theme,
@@ -200,6 +231,68 @@ export default function MapaView() {
 
   const irAGuardarRecorrido = () => {
     navigation.navigate("GuardarRecorrido");
+  };
+
+  // Zonas clasificadas (seguras / moderadas / inseguras): se recargan cada vez que se vuelve al mapa
+  useFocusEffect(
+    useCallback(() => {
+      let activo = true;
+      (async () => {
+        try {
+          if (!user?.id) {
+            if (activo) setZonasClasificadas([]);
+            return;
+          }
+          const guardadas = await frequentLocationsService.getByUser(user.id);
+          if (!activo) return;
+          setZonasClasificadas(
+            guardadas
+              .filter(
+                (u) => u.isActive !== false && u.latitude != null && u.longitude != null
+              )
+              .map((u) => ({
+                id: String(u.id),
+                nombre: u.name,
+                latitude: Number(u.latitude),
+                longitude: Number(u.longitude),
+                nivelRiesgo:
+                  u.riskLevel === "muy_segura" || u.riskLevel === "muy_insegura"
+                    ? u.riskLevel
+                    : "moderada",
+              }))
+          );
+        } catch (error) {
+          console.error("Error al cargar zonas clasificadas:", error);
+        }
+      })();
+      return () => {
+        activo = false;
+      };
+    }, [user?.id])
+  );
+
+  // Al buscar una dirección con el mapa grande abierto, la cámara se mueve hasta ahí
+  useEffect(() => {
+    if (!fullscreen || !mapaListo || !resultadoBusqueda) return;
+    mapaRef.current?.animateToRegion(
+      {
+        latitude: resultadoBusqueda.coord.latitude,
+        longitude: resultadoBusqueda.coord.longitude,
+        latitudeDelta: 0.006,
+        longitudeDelta: 0.006,
+      },
+      500
+    );
+  }, [resultadoBusqueda, fullscreen, mapaListo]);
+
+  const manejarResultadoBusqueda = (coord: Coord, texto: string) => {
+    setResultadoBusqueda({ coord, texto });
+    setFullscreen(true);
+  };
+
+  const limpiarBusqueda = () => {
+    setTextoBusqueda("");
+    setResultadoBusqueda(null);
   };
 
   useEffect(() => {
@@ -335,6 +428,23 @@ export default function MapaView() {
 
   // ─── COORDENADA CENTRO Y ACCIONES LOCALES ─────────────────────────────────
   const centroCalculado = coordenadaCentro ?? destinoAlerta?.coordenada ?? location;
+  const centroMapa: Coord = resultadoBusqueda?.coord ?? centroCalculado;
+
+  // Círculo del color del nivel de seguridad de cada zona clasificada
+  const renderZonasClasificadas = () =>
+    zonasClasificadas.map((zona) => {
+      const color = COLOR_NIVEL[zona.nivelRiesgo];
+      return (
+        <Circle
+          key={`zona-${zona.id}`}
+          center={{ latitude: zona.latitude, longitude: zona.longitude }}
+          radius={RADIO_ZONA_METROS}
+          strokeColor={color}
+          strokeWidth={2}
+          fillColor={`${color}33`}
+        />
+      );
+    });
 
   const acciones = [
     {
@@ -374,6 +484,7 @@ export default function MapaView() {
   const puntosVisibles = (): Coord[] => {
     const pts: Coord[] = [location];
     if (destinoAlerta) pts.push(destinoAlerta.coordenada);
+    if (resultadoBusqueda) pts.push(resultadoBusqueda.coord);
     (historial ?? []).forEach((p: Coord) => pts.push(p));
     recorridosVisibles.forEach((r: any) =>
       r.puntos.forEach((p: any) => pts.push({ latitude: p.latitude, longitude: p.longitude }))
@@ -443,6 +554,16 @@ export default function MapaView() {
           </View>
         </LinearGradient>
 
+        {/* BARRA DE BÚSQUEDA DE DIRECCIÓN */}
+        <BarraBusquedaDireccion
+          style={{ marginHorizontal: 20, marginTop: 20 }}
+          value={textoBusqueda}
+          onChangeText={setTextoBusqueda}
+          onResultado={manejarResultadoBusqueda}
+          onLimpiar={limpiarBusqueda}
+          ciudad={infoDireccion?.ciudad}
+        />
+
         {/* MAPA */}
         <View style={ms.mapaCard}>
           <MapView
@@ -451,8 +572,8 @@ export default function MapaView() {
             pointerEvents="none"
             toolbarEnabled={false}
             region={{
-              latitude: centroCalculado.latitude,
-              longitude: centroCalculado.longitude,
+              latitude: centroMapa.latitude,
+              longitude: centroMapa.longitude,
               latitudeDelta: 0.01,
               longitudeDelta: 0.01,
             }}
@@ -461,7 +582,15 @@ export default function MapaView() {
             rotateEnabled={false}
             pitchEnabled={false}
           >
+            {renderZonasClasificadas()}
             <Marker coordinate={location} title={t.mapa.tu_ubicacion_marcador} pinColor={theme.icono} />
+            {resultadoBusqueda && (
+              <Marker
+                coordinate={resultadoBusqueda.coord}
+                title={resultadoBusqueda.texto}
+                pinColor="#E91E63"
+              />
+            )}
             {destinoAlerta && (
               <Marker
                 coordinate={destinoAlerta.coordenada}
@@ -498,7 +627,7 @@ export default function MapaView() {
                 Mostrar recorridos
               </Text>
               <Text style={[styles.switchRecorridosSubtitle, { color: theme.contactSubtext }]}>
-                {recorridos.length} recorridos guardados
+                {recorridos.length}/{MAX_RECORRIDOS} recorridos guardados
               </Text>
             </View>
           </View>
@@ -523,7 +652,7 @@ export default function MapaView() {
                   Solo importantes
                 </Text>
                 <Text style={[styles.switchRecorridosSubtitle, { color: theme.contactSubtext }]}>
-                  {recorridos.filter((r: any) => r.importante).length} importantes
+                  {recorridos.filter((r: any) => r.importante).length}/{MAX_IMPORTANTES} importantes
                 </Text>
               </View>
             </View>
@@ -667,12 +796,15 @@ export default function MapaView() {
               style={ms.modalMap}
               toolbarEnabled={false}
               initialRegion={{
-                latitude: centroCalculado.latitude,
-                longitude: centroCalculado.longitude,
-                latitudeDelta: 0.01,
-                longitudeDelta: 0.01,
+                latitude: centroMapa.latitude,
+                longitude: centroMapa.longitude,
+                latitudeDelta: resultadoBusqueda ? 0.006 : 0.01,
+                longitudeDelta: resultadoBusqueda ? 0.006 : 0.01,
               }}
             >
+              {/* Zonas clasificadas: círculo del color de su nivel de seguridad */}
+              {renderZonasClasificadas()}
+
               <PinesHistorial
                 puntos={historial ?? []}
                 actual={location}
@@ -682,6 +814,14 @@ export default function MapaView() {
                 etiqueta={t.mapa.historial}
                 tituloActual={t.mapa.tu_ubicacion_marcador}
               />
+
+              {resultadoBusqueda && (
+                <Marker
+                  coordinate={resultadoBusqueda.coord}
+                  title={resultadoBusqueda.texto}
+                  pinColor="#E91E63"
+                />
+              )}
 
               {destinoAlerta && (
                 <Marker
@@ -782,6 +922,62 @@ export default function MapaView() {
               </Text>
             </View>
           </View>
+
+          {/* Búsqueda de dirección dentro del mapa grande */}
+          <BarraBusquedaDireccion
+            style={{
+              position: "absolute",
+              top: insets.top + 66,
+              left: insets.left + 12,
+              right: insets.right + 12,
+            }}
+            value={textoBusqueda}
+            onChangeText={setTextoBusqueda}
+            onResultado={(coord, texto) => setResultadoBusqueda({ coord, texto })}
+            onLimpiar={limpiarBusqueda}
+            ciudad={infoDireccion?.ciudad}
+          />
+
+          {/* Leyenda de niveles de seguridad */}
+          {zonasClasificadas.length > 0 && (
+            <View
+              pointerEvents="none"
+              style={{
+                position: "absolute",
+                top: insets.top + 126,
+                left: insets.left + 12,
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 10,
+                paddingHorizontal: 12,
+                height: 30,
+                borderRadius: 15,
+                backgroundColor: theme.containerBackground,
+              }}
+            >
+              {(
+                [
+                  ["muy_segura", "Segura"],
+                  ["moderada", "Moderada"],
+                  ["muy_insegura", "Insegura"],
+                ] as const
+              ).map(([nivel, etiqueta]) => (
+                <View key={nivel} style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                  <View
+                    style={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: 5,
+                      backgroundColor: COLOR_NIVEL[nivel],
+                    }}
+                  />
+                  <Text style={{ fontSize: 10.5, fontWeight: "700", color: theme.text }}>
+                    {etiqueta}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          )}
 
           {/* Coordenadas y dirección actual */}
           <View style={ms.modalInfo} pointerEvents="none">
