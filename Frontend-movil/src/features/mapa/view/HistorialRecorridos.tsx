@@ -10,6 +10,7 @@ import {
   TouchableWithoutFeedback,
   View,
   SafeAreaView,
+  StyleSheet,
 } from "react-native";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import { useTheme } from "../../../contexts/ThemeContext";
@@ -42,6 +43,35 @@ type Recorrido = {
   importante: boolean;
 };
 
+// Estilos extra: acciones en vertical (estrella arriba, borrar abajo) y botón de borrar más grande
+const extra = StyleSheet.create({
+  accionesVertical: {
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    marginLeft: 8,
+  },
+  botonEstrella: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  botonBorrar: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: "rgba(244,67,54,0.12)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});
+
+const formatearCoordenada = (p?: { latitude: number; longitude: number }) =>
+  p ? `${p.latitude.toFixed(5)}, ${p.longitude.toFixed(5)}` : "--";
+
 export default function HistorialRecorridos() {
   const { theme } = useTheme();
   const { t } = useLocale();
@@ -54,8 +84,15 @@ export default function HistorialRecorridos() {
 
   const todosLosRecorridos: Recorrido[] = recorridosManuales;
 
+  // La fecha se guarda como "dd/mm/aaaa": se lee tal cual para evitar "Invalid Date"
   const formatearFecha = (fecha: string) => {
-    const date = new Date(fecha);
+    const partes = /^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(fecha ?? "");
+    const date = partes
+      ? new Date(Number(partes[3]), Number(partes[2]) - 1, Number(partes[1]))
+      : new Date(fecha);
+
+    if (isNaN(date.getTime())) return fecha || "--";
+
     return date.toLocaleDateString("es-CO", {
       day: "2-digit",
       month: "short",
@@ -82,7 +119,10 @@ export default function HistorialRecorridos() {
   };
 
   const toggleImportanteHandler = (id: string) => {
-    toggleImportante(id);
+    const resultado = toggleImportante(id);
+    if (!resultado.ok && resultado.motivo) {
+      Alert.alert("Límite alcanzado", resultado.motivo);
+    }
   };
 
   return (
@@ -107,19 +147,6 @@ export default function HistorialRecorridos() {
             {t.mapa.historial_recorridos_desc}
           </Text>
         </View>
-
-        <TouchableOpacity
-          style={styles.mapButton}
-          onPress={() => {
-            // Navegar al mapa principal para ver recorridos
-            navigation.navigate("DrawerHome", {
-              screen: "Inicio",
-              params: { screen: "Mapa" },
-            } as never);
-          }}
-        >
-          <MaterialIcons name="map" size={24} color="#fff" />
-        </TouchableOpacity>
       </LinearGradient>
 
       <ScrollView
@@ -155,6 +182,10 @@ export default function HistorialRecorridos() {
               </View>
 
             <View style={styles.historyInfo}>
+              <Text style={[styles.locationText, { color: theme.text }]} numberOfLines={2}>
+                {item.nombrePersonalizado || `${item.barrioInicio} → ${item.barrioFin}`}
+              </Text>
+
               <View style={styles.dateRow}>
                 <MaterialIcons
                   name="calendar-today"
@@ -162,18 +193,7 @@ export default function HistorialRecorridos() {
                   color={theme.contactSubtext}
                 />
                 <Text style={[styles.timeText, { color: theme.contactSubtext }]}>
-                  {item.fecha}
-                </Text>
-              </View>
-
-              <View style={styles.dateRow}>
-                <MaterialIcons
-                  name="schedule"
-                  size={16}
-                  color={theme.contactSubtext}
-                />
-                <Text style={[styles.timeText, { color: theme.contactSubtext }]}>
-                  {item.tiempoEstimado}
+                  {formatearFecha(item.fecha)}
                 </Text>
                 <MaterialIcons
                   name="straighten"
@@ -185,62 +205,53 @@ export default function HistorialRecorridos() {
                 </Text>
               </View>
 
-              <Text style={[styles.locationText, { color: "black" }]}>
-                {item.nombrePersonalizado || `${item.barrioInicio} → ${item.barrioFin}`}
-              </Text>
-
               <View style={styles.locationRow}>
-                <MaterialIcons
-                  name="place"
-                  size={14}
-                  color={theme.contactSubtext}
-                />
-                <Text style={[styles.dateText, { color: theme.contactSubtext }]}>
-                  {formatearFecha(item.fecha)}
+                <MaterialIcons name="trip-origin" size={14} color="#4CAF50" />
+                <Text
+                  style={[styles.addressText, { color: theme.text }]}
+                  numberOfLines={1}
+                >
+                  {formatearCoordenada(item.puntos[0])}
                 </Text>
-                
               </View>
 
-              <View style={styles.locationRow}>
-                <MaterialIcons
-                  name="my-location"
-                  size={14}
-                  color={theme.contactSubtext}
-                />
-                <Text style={[styles.addressText, { color: "black" }]}>
-                  {item.municipio}, {item.departamento}
+              <View style={[styles.locationRow, { marginTop: 4 }]}>
+                <MaterialIcons name="flag" size={14} color="#F44336" />
+                <Text
+                  style={[styles.addressText, { color: theme.text }]}
+                  numberOfLines={1}
+                >
+                  {formatearCoordenada(item.puntos[item.puntos.length - 1])}
                 </Text>
               </View>
             </View>
 
-            <View style={styles.cardActions}>
+            {/* ACCIONES: estrella y borrar, una debajo de la otra */}
+            <View style={extra.accionesVertical}>
               <TouchableOpacity
-                style={styles.actionButton}
+                style={extra.botonEstrella}
                 onPress={() => toggleImportanteHandler(item.id)}
+                activeOpacity={0.7}
               >
                 <MaterialIcons
                   name={item.importante ? "star" : "star-border"}
-                  size={20}
+                  size={28}
                   color={item.importante ? "#FFD700" : theme.contactSubtext}
                 />
               </TouchableOpacity>
-              
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={() => confirmarEliminar(item.id, item.nombrePersonalizado || `${item.barrioInicio} → ${item.barrioFin}`)}
-              >
-                <MaterialIcons
-                  name="delete"
-                  size={20}
-                  color="#F44336"
-                />
-              </TouchableOpacity>
 
-              <MaterialIcons
-                name="chevron-right"
-                size={20}
-                color={theme.contactSubtext}
-              />
+              <TouchableOpacity
+                style={extra.botonBorrar}
+                onPress={() =>
+                  confirmarEliminar(
+                    item.id,
+                    item.nombrePersonalizado || `${item.barrioInicio} → ${item.barrioFin}`
+                  )
+                }
+                activeOpacity={0.7}
+              >
+                <MaterialIcons name="delete" size={30} color="#F44336" />
+              </TouchableOpacity>
             </View>
             </TouchableOpacity>
           ))
@@ -273,21 +284,23 @@ export default function HistorialRecorridos() {
                         theme={theme}
                       />
                       <InfoRow
-                        icon="schedule"
-                        label="Tiempo estimado"
-                        value={selectedItem.tiempoEstimado}
-                        theme={theme}
-                      />
-                      <InfoRow
                         icon="straighten"
                         label="Distancia"
                         value={selectedItem.distanciaEstimada}
                         theme={theme}
                       />
                       <InfoRow
-                        icon="my-location"
-                        label="Puntos registrados"
-                        value={selectedItem.cantidadPuntos.toString()}
+                        icon="trip-origin"
+                        label="Coordenada inicial"
+                        value={formatearCoordenada(selectedItem.puntos[0])}
+                        theme={theme}
+                      />
+                      <InfoRow
+                        icon="flag"
+                        label="Coordenada final"
+                        value={formatearCoordenada(
+                          selectedItem.puntos[selectedItem.puntos.length - 1]
+                        )}
                         theme={theme}
                       />
                       <InfoRow

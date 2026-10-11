@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   Alert,
+  BackHandler,
   ScrollView,
   Text,
   TextInput,
@@ -11,6 +12,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { LinearGradient } from "expo-linear-gradient";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTheme } from "../../../contexts/ThemeContext";
 import { useLocale } from "../../../contexts/LocaleContext";
@@ -43,24 +45,50 @@ type UbicacionGuardada = {
   descripcion: string;
 };
 
+const mapearFrecuenteAUbicacion = (u: FrequentLocationApi): UbicacionGuardada => ({
+  id: String(u.id),
+  nombre: u.name,
+  latitude: Number(u.latitude),
+  longitude: Number(u.longitude),
+  direccion: u.address ?? "",
+  barrio: "",
+  municipio: u.city ?? "",
+  ciudad: u.city ?? "",
+  departamento: "",
+  pais: "",
+  fecha: u.createdAt,
+  estado: u.isActive ? "Activo" : "Inactivo",
+  precision: "Alta",
+  notas: u.notes,
+  nivelRiesgo:
+    u.riskLevel === "muy_segura" || u.riskLevel === "muy_insegura" ? u.riskLevel : "moderada",
+  descripcion: u.notes ?? "",
+});
+
 export default function UbicacionesGuardadas() {
   const { theme } = useTheme();
   const { t } = useLocale();
   const navigation = useNavigation<NavigationProp>();
   const styles = createStyles(theme);
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
 
   const [ubicaciones, setUbicaciones] = useState<UbicacionGuardada[]>([]);
   const [filtroRiesgo, setFiltroRiesgo] = useState<string | null>(null);
   const [busqueda, setBusqueda] = useState("");
 
-  useFocusEffect(
-    React.useCallback(() => {
-      cargarUbicaciones();
-    }, [])
-  );
+  // Volver siempre lleva al módulo de Mapa (también justo después de guardar una ubicación,
+  // cuando por detrás todavía está la pantalla de "Clasificar zona").
+  const irAlMapa = useCallback(() => {
+    const destino = { screen: "Inicio", params: { screen: "Mapa" } } as never;
+    try {
+      (navigation as any).popTo("DrawerHome", destino);
+    } catch {
+      navigation.navigate("DrawerHome", destino);
+    }
+  }, [navigation]);
 
-  const cargarUbicaciones = async () => {
+  const cargarUbicaciones = useCallback(async () => {
     try {
       if (!user?.id) {
         setUbicaciones([]);
@@ -72,27 +100,20 @@ export default function UbicacionesGuardadas() {
       console.error("Error al cargar ubicaciones:", error);
       setUbicaciones([]);
     }
-  };
+  }, [user?.id]);
 
-  const mapearFrecuenteAUbicacion = (u: FrequentLocationApi): UbicacionGuardada => ({
-    id: String(u.id),
-    nombre: u.name,
-    latitude: Number(u.latitude),
-    longitude: Number(u.longitude),
-    direccion: u.address ?? "",
-    barrio: "",
-    municipio: u.city ?? "",
-    ciudad: u.city ?? "",
-    departamento: "",
-    pais: "",
-    fecha: u.createdAt,
-    estado: u.isActive ? "Activo" : "Inactivo",
-    precision: "Alta",
-    notas: u.notes,
-    nivelRiesgo:
-      u.riskLevel === "muy_segura" || u.riskLevel === "muy_insegura" ? u.riskLevel : "moderada",
-    descripcion: u.notes ?? "",
-  });
+  useFocusEffect(
+    useCallback(() => {
+      cargarUbicaciones();
+
+      // Botón "atrás" del celular: mismo comportamiento que la flecha del encabezado
+      const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+        irAlMapa();
+        return true;
+      });
+      return () => sub.remove();
+    }, [cargarUbicaciones, irAlMapa])
+  );
 
   const getRiskColor = (nivel: string) => {
     switch (nivel) {
@@ -193,30 +214,33 @@ export default function UbicacionesGuardadas() {
     return true;
   });
 
+  // Encabezado redondeado (mismo diseño que el de "Tu ubicación")
+  const encabezado = (
+    <LinearGradient
+      colors={[theme.headercolor1, theme.headercolor2]}
+      start={{ x: 1, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={[styles.header, { paddingTop: insets.top + 20 }]}
+    >
+      <TouchableOpacity style={styles.backButton} onPress={irAlMapa}>
+        <MaterialIcons name="arrow-back" size={26} color="#fff" />
+      </TouchableOpacity>
+
+      <View style={styles.headerContent}>
+        <Text style={styles.headerTitle}>{t.mapa.ubicaciones_guardadas}</Text>
+        <Text style={styles.headerSubtitle}>Tus lugares guardados y clasificados</Text>
+      </View>
+
+      <View style={styles.headerIcon}>
+        <MaterialIcons name="bookmark" size={30} color="#fff" />
+      </View>
+    </LinearGradient>
+  );
+
   if (ubicaciones.length === 0) {
     return (
       <View style={[styles.container, { backgroundColor: theme.background }]}>
-        {/* HEADER CON DEGRADADO (ESTADO VACÍO) */}
-        <LinearGradient
-          colors={[theme.headercolor1, theme.headercolor2]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.header}
-        >
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
-          >
-            <MaterialIcons name="arrow-back" size={26} color="#fff" />
-          </TouchableOpacity>
-
-          <View style={styles.headerContent}>
-            <Text style={styles.headerTitle}>Ubicaciones guardadas</Text>
-            <Text style={styles.headerSubtitle}>
-              Tus lugares guardados y clasificados
-            </Text>
-          </View>
-        </LinearGradient>
+        {encabezado}
 
         {/* ESTADO VACÍO */}
         <View style={styles.emptyContainer}>
@@ -242,27 +266,7 @@ export default function UbicacionesGuardadas() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* HEADER CON DEGRADADO */}
-        <LinearGradient
-          colors={[theme.headercolor1, theme.headercolor2]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.header}
-        >
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
-          >
-            <MaterialIcons name="arrow-back" size={26} color="#fff" />
-          </TouchableOpacity>
-
-          <View style={styles.headerContent}>
-            <Text style={styles.headerTitle}>Ubicaciones guardadas</Text>
-            <Text style={styles.headerSubtitle}>
-              Tus lugares guardados y clasificados
-            </Text>
-          </View>
-        </LinearGradient>
+        {encabezado}
 
         {/* BARRA DE BÚSQUEDA */}
         <View style={styles.searchContainer}>

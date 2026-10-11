@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import {
   Modal,
   ScrollView,
+  StyleSheet,
   Text,
   TouchableOpacity,
   TouchableWithoutFeedback,
@@ -30,6 +31,42 @@ const mapearTipoZona = (zoneType?: string, riskLevel?: string): ZonaAuxiliar["ti
   return "riesgo";
 };
 
+type FiltroZona = "todas" | ZonaAuxiliar["tipo"];
+
+const FILTROS: { clave: FiltroZona; etiqueta: string; color: string }[] = [
+  { clave: "todas", etiqueta: "Todas", color: "#7B1DB2" },
+  { clave: "segura", etiqueta: "Segura", color: "#27AE60" },
+  { clave: "riesgo", etiqueta: "Riesgo", color: "#E74C3C" },
+  { clave: "asistencia", etiqueta: "Asistencia", color: "#3498DB" },
+  { clave: "policia", etiqueta: "Policía", color: "#9B59B6" },
+];
+
+const filtroStyles = StyleSheet.create({
+  fila: {
+    paddingHorizontal: 20,
+    paddingBottom: 14,
+    gap: 8,
+  },
+  chip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 14,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1.5,
+  },
+  chipPunto: {
+    width: 9,
+    height: 9,
+    borderRadius: 5,
+  },
+  chipTexto: {
+    fontSize: 13,
+    fontWeight: "700",
+  },
+});
+
 type ZonaAuxiliar = {
   id: string;
   nombre: string;
@@ -49,6 +86,7 @@ export default function ZonasAuxiliares() {
 
   const [fullscreen, setFullscreen] = useState(false);
   const [selectedZone, setSelectedZone] = useState<ZonaAuxiliar | null>(null);
+  const [filtro, setFiltro] = useState<FiltroZona>("todas");
 
   const [zonasAuxiliares, setZonasAuxiliares] = useState<ZonaAuxiliar[]>([]);
   const [cargandoZonas, setCargandoZonas] = useState(true);
@@ -112,6 +150,12 @@ export default function ZonasAuxiliares() {
       mounted = false;
     };
   }, []);
+
+  // Zonas que se muestran según el filtro elegido (afecta la lista y los marcadores del mapa)
+  const zonasFiltradas =
+    filtro === "todas"
+      ? zonasAuxiliares
+      : zonasAuxiliares.filter((z) => z.tipo === filtro);
 
   const getZoneColor = (tipo: string) => {
     switch (tipo) {
@@ -186,7 +230,7 @@ export default function ZonasAuxiliares() {
             rotateEnabled={false}
             pitchEnabled={false}
           >
-            {zonasAuxiliares.map((zona) => (
+            {zonasFiltradas.map((zona) => (
               <Marker
                 key={zona.id}
                 coordinate={zona.coordenada}
@@ -244,13 +288,57 @@ export default function ZonasAuxiliares() {
           {t.mapa.zonas_cercanas}
         </Text>
 
+        {/* FILTRO POR TIPO DE ZONA */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={filtroStyles.fila}
+        >
+          {FILTROS.map((f) => {
+            const activo = filtro === f.clave;
+            return (
+              <TouchableOpacity
+                key={f.clave}
+                onPress={() => setFiltro(f.clave)}
+                activeOpacity={0.8}
+                style={[
+                  filtroStyles.chip,
+                  {
+                    borderColor: f.color,
+                    backgroundColor: activo ? f.color : theme.card,
+                  },
+                ]}
+              >
+                {f.clave !== "todas" && (
+                  <View
+                    style={[
+                      filtroStyles.chipPunto,
+                      { backgroundColor: activo ? "#fff" : f.color },
+                    ]}
+                  />
+                )}
+                <Text
+                  style={[
+                    filtroStyles.chipTexto,
+                    { color: activo ? "#fff" : theme.text },
+                  ]}
+                >
+                  {f.etiqueta}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+
         {cargandoZonas ? (
           <Text style={[styles.zoneAddress, { color: theme.contactSubtext }]}>Cargando zonas...</Text>
         ) : errorZonas ? (
           <Text style={[styles.zoneAddress, { color: "#E74C3C" }]}>{errorZonas}</Text>
-        ) : zonasAuxiliares.length === 0 ? (
-          <Text style={[styles.zoneAddress, { color: theme.contactSubtext }]}>No hay zonas disponibles.</Text>
-        ) : zonasAuxiliares.map((zona) => (
+        ) : zonasFiltradas.length === 0 ? (
+          <Text style={[styles.zoneAddress, { color: theme.contactSubtext, marginHorizontal: 20 }]}>
+            No hay zonas disponibles.
+          </Text>
+        ) : zonasFiltradas.map((zona) => (
           <TouchableOpacity
             key={zona.id}
             style={[styles.zoneCard, { backgroundColor: theme.card }]}
@@ -361,7 +449,7 @@ export default function ZonasAuxiliares() {
                       style={styles.modalCloseButton}
                       onPress={() => setSelectedZone(null)}
                     >
-                      <Text style={styles.modalCloseText}>{t.mapa.cerrar}</Text>
+                      <Text style={styles.modalCloseText}>{t.modal?.cerrar ?? "Cerrar"}</Text>
                     </TouchableOpacity>
                   </>
                 )}
@@ -383,7 +471,7 @@ export default function ZonasAuxiliares() {
               longitudeDelta: 0.02,
             }}
           >
-            {zonasAuxiliares.map((zona) => (
+            {zonasFiltradas.map((zona) => (
               <Marker
                 key={zona.id}
                 coordinate={zona.coordenada}
