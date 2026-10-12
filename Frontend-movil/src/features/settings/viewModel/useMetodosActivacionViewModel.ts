@@ -1,57 +1,70 @@
 import { useNavigation } from "@react-navigation/native";
 import { useLocale } from "../../../contexts/LocaleContext";
+import {
+  MetodoId,
+  useMetodosActivacion,
+} from "../../../contexts/MetodosActivacionContext";
 
 export interface PasoMetodo {
   texto: string;
 }
 
 export interface MetodoActivacion {
-  id: string;
+  id: MetodoId;
   icono: string;
   titulo: string;
   descripcion: string;
   pasos: PasoMetodo[];
+  activo: boolean;
+  // true = por ahora solo se guarda la preferencia (la función llega en una próxima versión)
+  pendiente: boolean;
 }
 
-function getMetodosActivacion(t: ReturnType<typeof useLocale>["t"]): MetodoActivacion[] {
-  return [
-    {
-      id: "agitar",
-      icono: "phone-portrait-outline",
-      titulo: t.metodosActivacion.agitar_titulo,
-      descripcion: t.metodosActivacion.agitar_desc,
-      pasos: [
-        { texto: t.metodosActivacion.agitar_paso1 },
-        { texto: t.metodosActivacion.agitar_paso2 },
-        { texto: t.metodosActivacion.agitar_paso3 },
-        { texto: t.metodosActivacion.agitar_paso4 },
-      ],
-    },
-    {
-      id: "popup",
-      icono: "notifications-outline",
-      titulo: t.metodosActivacion.popup_titulo,
-      descripcion: t.metodosActivacion.popup_desc,
-      pasos: [
-        { texto: t.metodosActivacion.popup_paso1 },
-        { texto: t.metodosActivacion.popup_paso2 },
-        { texto: t.metodosActivacion.popup_paso3 },
-        { texto: t.metodosActivacion.popup_paso4 },
-      ],
-    },
-  ];
+function armarMetodo(
+  m: Record<string, string>,
+  id: MetodoId,
+  icono: string,
+  prefijo: string,
+  totalPasos: number,
+  activo: boolean,
+  pendiente: boolean,
+): MetodoActivacion {
+  return {
+    id,
+    icono,
+    titulo: m[`${prefijo}_titulo`],
+    descripcion: m[`${prefijo}_desc`],
+    pasos: Array.from({ length: totalPasos }, (_, i) => ({
+      texto: m[`${prefijo}_paso${i + 1}`],
+    })),
+    activo,
+    pendiente,
+  };
 }
 
 export function useMetodosActivacionViewModel() {
   const navigation = useNavigation();
   const { t } = useLocale();
+  const { config, cambiar } = useMetodosActivacion();
+  const m = t.metodosActivacion as unknown as Record<string, string>;
+
+  const metodos: MetodoActivacion[] = [
+    armarMetodo(m, "boton", "radio-button-on-outline", "boton", 3, config.boton, false),
+    armarMetodo(m, "contacto", "person-circle-outline", "contacto", 3, config.contacto, false),
+    armarMetodo(m, "agitar", "phone-portrait-outline", "agitar", 4, config.agitar, true),
+    armarMetodo(m, "bloqueo", "lock-closed-outline", "popup", 4, config.bloqueo, true),
+    armarMetodo(m, "widget", "apps-outline", "widget", 3, config.widget, true),
+  ];
+
+  const activos = metodos.filter((x) => x.activo).length;
+
+  const cambiarMetodo = (id: MetodoId, valor: boolean) => {
+    cambiar(id, valor);
+  };
 
   const volver = () => {
     navigation.goBack();
   };
 
-  return {
-    metodos: getMetodosActivacion(t),
-    volver,
-  };
+  return { metodos, activos, total: metodos.length, cambiarMetodo, volver };
 }
