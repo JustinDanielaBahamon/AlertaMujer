@@ -2,6 +2,7 @@ import { View, Text, TouchableOpacity } from "react-native";
 import { useIndexViewModel } from "./useIndexViewModel";
 import { useLocale } from "../contexts/LocaleContext";
 
+
 export default function Index() {
   const vm = useIndexViewModel();
   const { t } = useLocale();

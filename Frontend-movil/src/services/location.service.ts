@@ -16,6 +16,21 @@ export interface UbicacionDetallada {
   precision: number;
 }
 
+// Errores tipados para distinguir la causa del fallo de ubicación
+export class LocationServicesDisabledError extends Error {
+  constructor() {
+    super("Los servicios de ubicación del dispositivo están desactivados");
+    this.name = "LocationServicesDisabledError";
+  }
+}
+
+export class LocationPermissionDeniedError extends Error {
+  constructor() {
+    super("Permisos de ubicación denegados");
+    this.name = "LocationPermissionDeniedError";
+  }
+}
+
 // Configuración de alta precisión para GPS
 const HIGH_ACCURACY_CONFIG = {
   accuracy: Location.Accuracy.BestForNavigation, // Máxima precisión para navegación
@@ -42,19 +57,46 @@ export class LocationService {
   }
 
   /**
-   * Obtiene la ubicación actual con máxima precisión
+   * Verifica si los servicios de ubicación del dispositivo están activos
+   */
+  static async hasServicesEnabled(): Promise<boolean> {
+    try {
+      return await Location.hasServicesEnabledAsync();
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Obtiene la ubicación actual con máxima precisión.
+   * Verifica servicios del sistema antes de pedir permisos.
+   * Lanza errores tipados para que el llamador pueda distinguir la causa.
    */
   static async getCurrentPosition(): Promise<Location.LocationObject | null> {
     try {
+      // 1) Servicios de ubicación del dispositivo (GPS/red) habilitados?
+      const serviciosActivos = await Location.hasServicesEnabledAsync();
+      if (!serviciosActivos) {
+        throw new LocationServicesDisabledError();
+      }
+
+      // 2) La app tiene permiso?
       const hasPermission = await this.requestPermissions();
       if (!hasPermission) {
-        throw new Error("Permisos de ubicación denegados");
+        throw new LocationPermissionDeniedError();
       }
 
       const location = await Location.getCurrentPositionAsync(HIGH_ACCURACY_CONFIG);
       console.log("Ubicación GPS obtenida con precisión:", location.coords.accuracy, "metros");
       return location;
     } catch (error) {
+      // Re-lanzar errores tipados para que el ViewModel los clasifique
+      if (
+        error instanceof LocationServicesDisabledError ||
+        error instanceof LocationPermissionDeniedError
+      ) {
+        throw error;
+      }
       console.error("Error al obtener ubicación GPS:", error);
       return null;
     }
@@ -119,26 +161,24 @@ export class LocationService {
   }
 
   /**
-   * Obtiene ubicación completa (GPS + geocoding) con máxima precisión
+   * Obtiene ubicación completa (GPS + geocoding) con máxima precisión.
+   * Propaga LocationServicesDisabledError y LocationPermissionDeniedError
+   * para que el llamador muestre el mensaje apropiado.
    */
   static async getFullLocation(): Promise<UbicacionDetallada | null> {
-    try {
-      const location = await this.getCurrentPosition();
-      if (!location) return null;
+    // No capturamos errores tipados — los dejamos subir al ViewModel
+    const location = await this.getCurrentPosition();
+    if (!location) return null;
 
-      const { latitude, longitude, accuracy } = location.coords;
+    const { latitude, longitude, accuracy } = location.coords;
 
-      const geocoding = await this.reverseGeocode(latitude, longitude);
-      if (!geocoding) return null;
+    const geocoding = await this.reverseGeocode(latitude, longitude);
+    if (!geocoding) return null;
 
-      // Actualizar precisión con valor real del GPS (manejar null)
-      geocoding.precision = accuracy || 0;
+    // Actualizar precisión con valor real del GPS (manejar null)
+    geocoding.precision = accuracy || 0;
 
-      return geocoding;
-    } catch (error) {
-      console.error("Error al obtener ubicación completa:", error);
-      return null;
-    }
+    return geocoding;
   }
 
   /**

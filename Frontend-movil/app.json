@@ -1,31 +1,30 @@
 {
   "expo": {
-    "name": "Fronted-movil",
-    "slug": "Fronted-movil",
+    "name": "AlertaMujer",
+    "slug": "AlertaMujer",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "frontedmovil",
+    "icon": "./assets/icon.png",
+    "scheme": "alertamujer",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "La app necesita acceso a tu ubicación para enviar alertas de emergencia con tu posición exacta.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "La app necesita acceso a tu ubicación incluso en segundo plano para enviar alertas de emergencia."
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "La app necesita acceso a la ubicación incluso en segundo plano para enviar alertas de emergencia."
       },
-      "bundleIdentifier": "com.anonymous.Frontedmovil"
+      "bundleIdentifier": "com.alertamujer.app"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#E6F4FE",
+        "backgroundImage": "./assets/images/android-icon-background.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.Frontedmovil",
+      "package": "com.alertamujer.app",
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
@@ -51,13 +50,17 @@
           }
         }
       ],
-      "react-native-video",
       "expo-video",
       "expo-audio",
       "expo-web-browser"
     ],
     "experiments": {
       "reactCompiler": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "a896369d-3e5b-4b6c-853b-f4f06e592591"
+      }
     }
   }
 }
