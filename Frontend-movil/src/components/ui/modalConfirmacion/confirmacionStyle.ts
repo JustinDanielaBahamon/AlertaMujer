@@ -4,7 +4,7 @@ export const localStyles = StyleSheet.create({
   // Estilos de la Pantalla de Selección (Imagen 1)
   overlay: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.6)', // Fondo oscuro semitransparente
+        backgroundColor: 'rgba(46, 16, 101, 0.55)', // morado oscuro translúcido
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -12,8 +12,11 @@ export const localStyles = StyleSheet.create({
         width: '85%',
         backgroundColor: '#FFF',
         borderRadius: 30,
-        padding: 25,
+        paddingHorizontal: 25,
+        paddingVertical: 30,
         alignItems: 'center',
+        borderWidth: 1.5,
+        borderColor: '#BC27BE',
         elevation: 10,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 5 },
@@ -21,16 +24,18 @@ export const localStyles = StyleSheet.create({
         shadowRadius: 10,
     },
     iconCircle: {
-        width: 70,
-        height: 70,
-        borderRadius: 35,
-        backgroundColor: '#F3E5F5',
+        width: 84,
+        height: 84,
+        borderRadius: 42,
+        borderWidth: 2,
+        borderColor: '#BC27BE',
+        backgroundColor: '#FBE9FB',
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 15,
+        marginBottom: 18,
     },
     iconText: {
-        fontSize: 35,
+        fontSize: 40,
     },
     modalTitle: {
         fontSize: 22,

@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, Image, Linking, Platform } fr
 import { styles } from '../style/Asistencia.style';
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from "../../../../src/contexts/ThemeContext";
 import { useLocale } from "../../../../src/contexts/LocaleContext";
 import { getRecursosEmergencia, type EmergencyResourceApi } from '../../../../src/services/resources.service';
@@ -10,6 +11,7 @@ import { getRecursosEmergencia, type EmergencyResourceApi } from '../../../../sr
 export default function Asistencia() {
   const { theme } = useTheme();
   const { t } = useLocale();
+  const insets = useSafeAreaInsets();
 
   const [recursos, setRecursos] = useState<EmergencyResourceApi[]>([]);
   const [cargando, setCargando] = useState(true);
@@ -74,7 +76,7 @@ export default function Asistencia() {
         <LinearGradient
           colors={gradienteHeader}
           start={{ x: 1, y: 0 }} end={{ x: 1, y: 1 }}
-          style={styles.Gradiente}
+          style={[styles.Gradiente, { paddingTop: insets.top + 20 }]}
         >
           <View style={styles.HeaderContenido}>
             <View style={{ flex: 1 }}>
@@ -119,7 +121,7 @@ export default function Asistencia() {
             <Text style={{ color: 'white', fontSize: 21, fontWeight: '600' }}>
               {t.asistencia.emergencia_titulo}
             </Text>
-            <Text style={{ color: 'white', fontSize: 42, fontWeight: 'bold', marginVertical: 2 }}>
+            <Text style={{ color: 'white', fontSize: 32, fontWeight: 'bold', marginVertical: 2 }}>
               {recursoEmergencia.telephone}
             </Text>
             <Text style={{ color: 'white', fontSize: 14, marginBottom: 15 }}>
@@ -147,7 +149,7 @@ export default function Asistencia() {
                 <Feather name="user" size={24} color="white" />
               </View>
               <Text style={{ color: 'white', fontSize: 14, fontWeight: 'bold' }}>{recursoViolencia.name || t.asistencia.violencia}</Text>
-              <Text style={{ color: 'white', fontSize: 32, fontWeight: 'bold' }}>{recursoViolencia.telephone}</Text>
+              <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold' }}>{recursoViolencia.telephone}</Text>
               <Text style={{ color: 'white', fontSize: 12, marginBottom: 15, height: 40 }}>
                 {recursoViolencia.description || t.asistencia.violencia_desc}
               </Text>
@@ -167,7 +169,7 @@ export default function Asistencia() {
                 <MaterialIcons name="lightbulb-outline" size={26} color={iconoBombilloColor} />
               </View>
               <Text style={{ color: 'white', fontSize: 14, fontWeight: 'bold' }}>{recursoSaludMental.name || t.asistencia.salud_mental}</Text>
-              <Text style={{ color: 'white', fontSize: 32, fontWeight: 'bold' }}>{recursoSaludMental.telephone}</Text>
+              <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold' }}>{recursoSaludMental.telephone}</Text>
               <Text style={{ textAlign: 'right', color: 'white', fontSize: 12, marginBottom: 15, height: 40 }}>
                 {recursoSaludMental.description || t.asistencia.salud_desc}
               </Text>

@@ -41,7 +41,7 @@ export default function PermisosModal({ visible, tipo, onConfirmar, onCancelar }
         <View style={localStyles.modalCard}>
 
           <View style={localStyles.iconContainer}>
-            <Text style={{ fontSize: 50 }}>{icono}</Text>
+            <Text style={{ fontSize: 40 }}>{icono}</Text>
           </View>
 
           <Text style={localStyles.modalTitle}>{titulo}</Text>
