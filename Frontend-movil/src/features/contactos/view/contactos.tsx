@@ -2,6 +2,7 @@ import { AntDesign, Feather, MaterialCommunityIcons, MaterialIcons, } from "@exp
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import { Image, Linking, Platform, RefreshControl, Text, TextInput, TouchableOpacity, View, } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SwipeListView } from "react-native-swipe-list-view";
 
 import { useTheme } from "../../../../src/contexts/ThemeContext";
@@ -17,6 +18,7 @@ export default function Contactos() {
   const { theme } = useTheme();
   const { t } = useLocale();
   const styles = createStyles(theme);
+  const insets = useSafeAreaInsets();
 
   const headerGradient: [string, string] = [theme.headercolor1, theme.headercolor2];
 
@@ -51,7 +53,7 @@ export default function Contactos() {
           colors={headerGradient}
           start={{ x: 1, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={styles.gradient}
+          style={[styles.gradient, { paddingTop: insets.top + 20 }]}
         >
           <View style={styles.headerContent}>
             <View style={{ flex: 1 }}>

@@ -1,4 +1,5 @@
 import "react-native-gesture-handler";
+import AlertaGlobalHost from "./src/components/ui/alertaGlobal/alertaGlobal";
 import { AuthProvider } from "./src/contexts/AuthContext";
 import { ContactosProvider } from "./src/contexts/ContactosContext";
 import { EvidenciaProvider } from "./src/contexts/EvidenciaContext";
@@ -18,6 +19,7 @@ export default function App() {
               <EvidenciaProvider>
                 <NotificacionesProvider>
                   <AppNavigator />
+                  <AlertaGlobalHost />
                 </NotificacionesProvider>
               </EvidenciaProvider>
             </RecorridosProvider>

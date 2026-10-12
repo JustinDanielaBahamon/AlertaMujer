@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, Image, Linking, Platform } fr
 import { styles } from '../style/Asistencia.style';
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from "../../../../src/contexts/ThemeContext";
 import { useLocale } from "../../../../src/contexts/LocaleContext";
 import { getRecursosEmergencia, type EmergencyResourceApi } from '../../../../src/services/resources.service';
@@ -10,6 +11,7 @@ import { getRecursosEmergencia, type EmergencyResourceApi } from '../../../../sr
 export default function Asistencia() {
   const { theme } = useTheme();
   const { t } = useLocale();
+  const insets = useSafeAreaInsets();
 
   const [recursos, setRecursos] = useState<EmergencyResourceApi[]>([]);
   const [cargando, setCargando] = useState(true);
@@ -74,7 +76,7 @@ export default function Asistencia() {
         <LinearGradient
           colors={gradienteHeader}
           start={{ x: 1, y: 0 }} end={{ x: 1, y: 1 }}
-          style={styles.Gradiente}
+          style={[styles.Gradiente, { paddingTop: insets.top + 20 }]}
         >
           <View style={styles.HeaderContenido}>
             <View style={{ flex: 1 }}>
