@@ -108,11 +108,14 @@ export default function GuardarRecorrido() {
     }
   };
 
-  const guardarRecorrido = () => {
+  const [guardando, setGuardando] = useState(false);
+
+  const guardarRecorrido = async () => {
     if (!puntoA || !puntoB) {
       alert("Por favor selecciona ambos puntos del recorrido");
       return;
     }
+    if (guardando) return;
 
     // Calcular distancia entre punto A y B usando fórmula Haversine
     const calcularDistancia = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -127,52 +130,26 @@ export default function GuardarRecorrido() {
     };
 
     const distanciaKm = calcularDistancia(puntoA.latitude, puntoA.longitude, puntoB.latitude, puntoB.longitude);
-    
-    // Calcular tiempo estimado (asumiendo velocidad promedio de 5 km/h para caminar)
-    const velocidadPromedioKmH = 5; // 5 km/h caminando
-    const tiempoHoras = distanciaKm / velocidadPromedioKmH;
-    const tiempoMinutos = Math.round(tiempoHoras * 60);
-    
-    // Formatear tiempo estimado
-    let tiempoEstimado = "";
-    if (tiempoMinutos < 60) {
-      tiempoEstimado = `${tiempoMinutos} min`;
-    } else {
-      const horas = Math.floor(tiempoMinutos / 60);
-      const mins = tiempoMinutos % 60;
-      tiempoEstimado = `${horas}h ${mins}min`;
-    }
+    // Tiempo estimado caminando a 5 km/h (igual que en la web)
+    const minutosEstimados = Math.round((distanciaKm / 5) * 60);
 
-    const hoy = new Date();
-    const fecha = hoy.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const inicio = nombrePuntoA || puntoA.nombre || "Punto A";
+    const fin = nombrePuntoB || puntoB.nombre || "Punto B";
 
-    const nuevoRecorrido = {
-      fecha,
-      tiempoEstimado,
-      distanciaEstimada: `${distanciaKm.toFixed(2)} km`,
-      barrioInicio: nombrePuntoA || puntoA.nombre || "Punto seleccionado",
-      barrioFin: nombrePuntoB || puntoB.nombre || "Punto seleccionado",
-      municipio: "Neiva",
-      departamento: "Huila",
-      pais: "Colombia",
+    setGuardando(true);
+    const resultado = await agregarRecorridoManual({
+      nombre: nombreRecorrido || `Ruta ${inicio} → ${fin}`,
+      inicio,
+      fin,
       puntos: [
-        {
-          latitude: puntoA.latitude,
-          longitude: puntoA.longitude,
-          timestamp: "",
-        },
-        {
-          latitude: puntoB.latitude,
-          longitude: puntoB.longitude,
-          timestamp: "",
-        },
+        { latitude: puntoA.latitude, longitude: puntoA.longitude, timestamp: "" },
+        { latitude: puntoB.latitude, longitude: puntoB.longitude, timestamp: "" },
       ],
-      cantidadPuntos: 2,
-      nombrePersonalizado: nombreRecorrido || `Ruta ${nombrePuntoA || puntoA.nombre || "A"} → ${nombrePuntoB || puntoB.nombre || "B"}`,
-      importante: true, // Por defecto importantes
-    };
+      distanciaKm,
+      minutosEstimados,
+    });
+    setGuardando(false);
 
-    const resultado = agregarRecorridoManual(nuevoRecorrido);
     if (!resultado.ok) {
       alert(resultado.motivo ?? "No se pudo guardar el recorrido");
       return;

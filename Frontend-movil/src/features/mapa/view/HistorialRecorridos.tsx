@@ -112,14 +112,19 @@ export default function HistorialRecorridos() {
         {
           text: "Eliminar",
           style: "destructive",
-          onPress: () => eliminarRecorrido(id),
+          onPress: async () => {
+            const resultado = await eliminarRecorrido(id);
+            if (!resultado.ok && resultado.motivo) {
+              Alert.alert("No se pudo eliminar", resultado.motivo);
+            }
+          },
         },
       ]
     );
   };
 
-  const toggleImportanteHandler = (id: string) => {
-    const resultado = toggleImportante(id);
+  const toggleImportanteHandler = async (id: string) => {
+    const resultado = await toggleImportante(id);
     if (!resultado.ok && resultado.motivo) {
       Alert.alert("Límite alcanzado", resultado.motivo);
     }
