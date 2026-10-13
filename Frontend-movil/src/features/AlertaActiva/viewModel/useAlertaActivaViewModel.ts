@@ -11,6 +11,7 @@ import { createAlert, finalizarAlerta } from "../../../services/alerts.service";
 import { getOrCreateDevice } from "../../../services/devices.service";
 import type { PuntoUbicacion } from "../../../services/alert-tracking.service";
 import { descripcionLugar, obtenerLugar } from "../../../services/geocoding.service";
+import { reportarUbicacion } from "../../../services/location-reporter.service";
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
 
@@ -156,6 +157,8 @@ export function useAlertaActivaViewModel() {
             longitude: current.coords.longitude,
           };
           setLocation(coords);
+          // Durante la alerta cada punto se envía al backend asociado a la alerta
+          reportarUbicacion({ ...coords, accuracy: current.coords.accuracy, alertId: alertaCreadaIdRef.current });
 
           // Cada ubicacion obtenida tambien se registra como un punto del recorrido.
           puntoContador.current += 1;
