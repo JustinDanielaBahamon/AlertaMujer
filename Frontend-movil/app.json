@@ -52,7 +52,16 @@
       ],
       "expo-video",
       "expo-audio",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-asset",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ]
     ],
     "experiments": {
       "reactCompiler": true
