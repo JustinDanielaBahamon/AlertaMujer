@@ -42,3 +42,6 @@ app-example
 /ios
 /android
 .env
+
+# Editor swap files
+*.swp
