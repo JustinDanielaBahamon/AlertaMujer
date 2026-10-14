@@ -171,6 +171,12 @@ export function useRegistroViewModel() {
         municipio: "Neiva",
       });
 
+      // Verificar si la respuesta contiene un error
+      if ('error' in response) {
+        setErrorTerminos(response.error);
+        return;
+      }
+
       // Adaptar la respuesta del backend al modelo Usuario del móvil
       const backendUser = response.user;
       const usuario: Usuario = {

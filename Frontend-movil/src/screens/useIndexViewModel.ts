@@ -17,6 +17,7 @@ export function useIndexViewModel() {
   const entrarComoDemo = useCallback(() => {
     signIn(
       { id: 0, nombre: "Demo", correo: "demo@alertamujer.app" },
+      "demo-token",
       { initialMainRoute: "DrawerHome" },
     );
   }, [signIn]);
