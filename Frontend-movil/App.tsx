@@ -10,12 +10,14 @@ import { NotificacionesProvider } from "./src/contexts/NotificacionesContext";
 import { RecorridosProvider } from "./src/contexts/RecorridosContext";
 import { ThemeProvider } from "./src/contexts/ThemeContext";
 import AppNavigator from "./src/navigation/AppNavigator";
+import ReporteUbicacion from "./src/components/ReporteUbicacion";
 
 export default function App() {
   return (
     <ThemeProvider>
       <LocaleProvider>
         <AuthProvider>
+          <ReporteUbicacion />
           <ContactosProvider>
             <RecorridosProvider>
               <EvidenciaProvider>
