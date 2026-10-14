@@ -103,6 +103,14 @@ const activacionAzul   = require("../../assets/imagesAlertaMujer/ScActivacion/Az
 const activacionVino   = require("../../assets/imagesAlertaMujer/ScActivacion/vino.png");
 const activacionLogo   = require("../../assets/imagesAlertaMujer/ScActivacion/LOGO.png");
 
+// ─── Imágenes que se precargan al abrir la app (evita la demora al cambiar de tema) ───
+
+export const IMAGENES_PRECARGA: ImageSourcePropType[] = [
+  logoActual, logoMorado, logoAzul, logorosa, logovino, logonegro,
+  botonmorado, botonAzul, botonrosa, botonvino, botondorado,
+  activacionMorado, activacionRosa, activacionAzul, activacionVino, activacionLogo,
+];
+
 // ─── Temas ────────────────────────────────────────────────────────────────────
 
 const THEMES: Record<AppMode, AppTheme> = {

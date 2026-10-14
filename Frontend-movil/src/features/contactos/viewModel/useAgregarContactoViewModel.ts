@@ -12,6 +12,7 @@ import { Alert } from "react-native";
 import type { MainStackParamList } from "../../../navigation/types";
 import { useContactosContext } from "../../../contexts/ContactosContext";
 import { useLocale } from "../../../contexts/LocaleContext";
+import { esCorreoValido, textosContactoExtra } from "../contactosExtra";
 
 type AgregarNav = NativeStackNavigationProp<
   MainStackParamList,
@@ -33,7 +34,7 @@ export function useAgregarContactoViewModel() {
     actualizarContacto,
   } = useContactosContext();
 
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
 
   const contactoParam = route.params?.contacto;
   const esEdicion = Boolean(contactoParam);
@@ -41,7 +42,15 @@ export function useAgregarContactoViewModel() {
   const [nombre, setNombre] = useState("");
   const [parentesco, setParentesco] = useState("");
   const [telefono, setTelefono] = useState("");
+  const [correo, setCorreoState] = useState("");
   const [fotoUri, setFotoUri] = useState<string | null>(null);
+
+  /**
+   * El correo no admite espacios: se eliminan mientras se escribe.
+   */
+  const setCorreo = useCallback((valor: string) => {
+    setCorreoState(valor.replace(/\s/g, ""));
+  }, []);
 
   /**
    * Cargar datos cuando estamos editando un contacto
@@ -51,11 +60,13 @@ export function useAgregarContactoViewModel() {
       setNombre(contactoParam.nombre ?? '');
       setParentesco(contactoParam.parentesco ?? "");
       setTelefono(contactoParam.telefono);
+      setCorreoState(contactoParam.email ?? "");
       setFotoUri(contactoParam.foto ?? null);
     } else {
       setNombre("");
       setParentesco("");
       setTelefono("");
+      setCorreoState("");
       setFotoUri(null);
     }
   }, [
@@ -63,6 +74,7 @@ export function useAgregarContactoViewModel() {
     contactoParam?.nombre,
     contactoParam?.telefono,
     contactoParam?.parentesco,
+    contactoParam?.email,
     contactoParam?.foto,
   ]);
 
@@ -162,9 +174,12 @@ export function useAgregarContactoViewModel() {
    * Guardar o actualizar contacto
    */
   const guardar = useCallback(() => {
+    const extra = textosContactoExtra[locale];
+
     const nombreNormalizado = nombre.trim();
     const parentescoNormalizado = parentesco.trim();
     const telefonoNormalizado = telefono.replace(/\D/g, "");
+    const correoNormalizado = correo.trim().toLowerCase();
 
     if (!nombreNormalizado || !telefonoNormalizado) {
       Alert.alert(
@@ -178,6 +193,25 @@ export function useAgregarContactoViewModel() {
       Alert.alert(
         t.agregar.telefono_invalido,
         t.agregar.telefono_invalido_desc
+      );
+      return;
+    }
+
+    /**
+     * Validación del correo electrónico (obligatorio y con formato válido)
+     */
+    if (!correoNormalizado) {
+      Alert.alert(
+        extra.correo_requerido_titulo,
+        extra.correo_requerido_desc
+      );
+      return;
+    }
+
+    if (!esCorreoValido(correoNormalizado)) {
+      Alert.alert(
+        extra.correo_invalido_titulo,
+        extra.correo_invalido_desc
       );
       return;
     }
@@ -231,6 +265,7 @@ export function useAgregarContactoViewModel() {
       parentesco:
         parentescoNormalizado || undefined,
       telefono: telefonoNormalizado,
+      email: correoNormalizado,
       foto: fotoUri ?? undefined,
     };
 
@@ -255,6 +290,8 @@ export function useAgregarContactoViewModel() {
     nombre,
     parentesco,
     telefono,
+    correo,
+    locale,
     t,
   ]);
 
@@ -274,6 +311,9 @@ export function useAgregarContactoViewModel() {
 
     telefono,
     setTelefono,
+
+    correo,
+    setCorreo,
 
     fotoUri,
 

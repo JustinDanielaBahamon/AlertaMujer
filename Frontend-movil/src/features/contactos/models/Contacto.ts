@@ -3,5 +3,6 @@ export type Contacto = {
   nombre?: string;
   parentesco?: string;
   telefono: string;
+  email?: string;
   foto?: string;   // ← URI local (galería o agenda)
 };

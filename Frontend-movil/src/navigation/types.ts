@@ -14,8 +14,16 @@ export type MainStackParamList = {
   DrawerHome: undefined;
   Perfil: undefined;
 
-  Activacion: undefined;
-  AlertaActiva: undefined;
+  Activacion:
+    | {
+        contacto?: Contacto; // si viene, la alerta es solo para este contacto
+      }
+    | undefined;
+  AlertaActiva:
+    | {
+        contacto?: Contacto; // si viene, la alerta es solo para este contacto
+      }
+    | undefined;
   AlertaContacto: {
     alertaId: number;
     nombreUsuaria?: string;

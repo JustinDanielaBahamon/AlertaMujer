@@ -125,6 +125,21 @@ export function useContactosTabViewModel() {
   }, [navegarAgregarOEditar]);
 
   /**
+   * ALERTA INDIVIDUAL
+   * Inicia la alerta normal (pantalla de 5 segundos) pero solo para este contacto.
+   */
+  const alertarContacto = useCallback(
+    (contacto: Contacto) => {
+      const main = getMainStackNavigation(navigation);
+      if (!main) {
+        return;
+      }
+      main.navigate("Activacion", { contacto });
+    },
+    [navigation],
+  );
+
+  /**
    * CONFIRMAR BORRADO
    * Muestra un Alert nativo de confirmación antes de borrar.
    */
@@ -193,6 +208,7 @@ export function useContactosTabViewModel() {
     handleActualizar,
     handleBorrar,
     irAgregarContacto,
+    alertarContacto,
     borrarConSwipe,
     setBusqueda
   };

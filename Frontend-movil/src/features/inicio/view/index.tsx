@@ -265,6 +265,7 @@ export default function Inicio() {
         >
           <Image
             source={theme.imagenBoton}
+            fadeDuration={0}
             style={{
               width: BUTTON_SIZE * 1.1,
               height: BUTTON_SIZE * 1.1,

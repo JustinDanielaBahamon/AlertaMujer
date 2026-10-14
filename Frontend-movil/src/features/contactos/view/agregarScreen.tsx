@@ -16,12 +16,14 @@ import { useAgregarContactoViewModel } from "../viewModel/useAgregarContactoView
 import { useLocale } from "../../../contexts/LocaleContext";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { LinearGradient } from "expo-linear-gradient";
+import { esCorreoValido, textosContactoExtra } from "../contactosExtra";
 
 export default function AgregarContacto() {
   const vm = useAgregarContactoViewModel();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const { theme } = useTheme();
   const styles = createStyles(theme);
+  const extra = textosContactoExtra[locale];
 
   const headerGradient: [string, string] = [theme.headercolor1, theme.headercolor2];
 
@@ -33,6 +35,7 @@ export default function AgregarContacto() {
   const isNameValid = vm.nombre.trim().length > 0;
   const isRelationValid = vm.parentesco.trim().length > 0;
   const isPhoneValid = vm.telefono.replace(/\D/g, "").length >= 10;
+  const isEmailValid = esCorreoValido(vm.correo);
 
   return (
     <KeyboardAvoidingView
@@ -245,6 +248,29 @@ export default function AgregarContacto() {
               <TouchableOpacity onPress={vm.abrirAgenda} style={styles.contactIconButton}>
                 <Ionicons name="add" size={16} color={theme.contactAccent} />
               </TouchableOpacity>
+            </View>
+
+            {/* INPUT CORREO ELECTRÓNICO */}
+            <View style={styles.inputCard}>
+              <Ionicons name="mail-outline" size={20} color={theme.contactAccent} />
+              <View style={styles.inputTextWrap}>
+                <Text style={styles.inputLabel}>{extra.label_correo}</Text>
+                <TextInput
+                  style={styles.inputValue}
+                  placeholder={extra.placeholder_correo}
+                  placeholderTextColor={theme.contactSubtext}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  autoComplete="email"
+                  maxLength={254}
+                  value={vm.correo}
+                  onChangeText={vm.setCorreo}
+                />
+              </View>
+              {isEmailValid && (
+                <Ionicons name="checkmark-circle" size={20} color="#46B987" />
+              )}
             </View>
 
             <View style={styles.infoBox}>

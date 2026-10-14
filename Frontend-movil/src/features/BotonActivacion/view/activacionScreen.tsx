@@ -29,6 +29,7 @@ export default function Activacion() {
           <Image
             source={theme.imagenActivacion}
             style={styles.logo}
+            fadeDuration={0}
           />
         </View>
 
