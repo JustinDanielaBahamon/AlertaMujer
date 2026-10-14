@@ -1,56 +1,102 @@
 import { StyleSheet } from "react-native";
 import type { AppTheme } from "../../../contexts/ThemeContext";
 
-export function createMetodosActivacionStyles(theme: AppTheme) {
-  const accent      = theme.icono;
-  const header1     = theme.headercolor1;
-  const cardBg      = theme.containerBackground;
-  const textPrimary = theme.text;
-  const textHeader  = theme.headerText;
+// Colores del header: los mismos que la barra lateral en su estado normal
+export function obtenerColoresHeader(theme: AppTheme): {
+  fondo: string;
+  texto: string;
+} {
+  return { fondo: theme.headerBackground, texto: theme.headerText };
+}
 
+export function createMetodosActivacionStyles(theme: AppTheme) {
+  const accent = theme.icono;
   const accentSoft = accent + "25";
+  const { fondo, texto } = obtenerColoresHeader(theme);
 
   return StyleSheet.create({
     contenedor: {
       flex: 1,
-      backgroundColor: header1,
+      backgroundColor: theme.background,
     },
+
+    // Header (mismo color plano que la barra lateral)
     header: {
+      backgroundColor: fondo,
+      paddingHorizontal: 20,
+      paddingBottom: 22,
+      borderBottomLeftRadius: 28,
+      borderBottomRightRadius: 28,
+      gap: 16,
+    },
+    headerFila: {
       flexDirection: "row",
       alignItems: "center",
-      paddingHorizontal: 20,
-      paddingVertical: 14,
       gap: 12,
     },
     btnVolver: {
-      width: 36,
-      height: 36,
-      borderRadius: 18,
-      backgroundColor: "rgba(255,255,255,0.18)",
+      width: 38,
+      height: 38,
+      borderRadius: 19,
+      backgroundColor: texto + "26",
       alignItems: "center",
       justifyContent: "center",
     },
+    headerTextos: { flex: 1 },
     tituloHeader: {
-      color: textHeader,
+      color: texto,
       fontSize: 20,
-      fontWeight: "600",
-      flex: 1,
+      fontWeight: "700",
     },
+    subtituloHeader: {
+      color: texto,
+      opacity: 0.85,
+      fontSize: 12.5,
+      marginTop: 2,
+    },
+    headerIcono: {
+      width: 42,
+      height: 42,
+      borderRadius: 21,
+      backgroundColor: texto + "26",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    resumenFila: { gap: 8 },
+    resumenTexto: {
+      color: texto,
+      fontSize: 12.5,
+      fontWeight: "600",
+    },
+    barraFondo: {
+      height: 6,
+      borderRadius: 3,
+      backgroundColor: texto + "33",
+      overflow: "hidden",
+    },
+    barraRelleno: {
+      height: 6,
+      borderRadius: 3,
+      backgroundColor: texto,
+    },
+
+    // Contenido
     scrollContent: {
       paddingHorizontal: 20,
+      paddingTop: 18,
       paddingBottom: 48,
-      paddingTop: 4,
       gap: 14,
     },
     intro: {
-      color: cardBg === header1 ? textPrimary : "rgba(255,255,255,0.85)",
+      color: theme.text,
+      opacity: 0.8,
       fontSize: 13,
       lineHeight: 19,
-      marginBottom: 4,
     },
 
+    // Tarjeta de método
     tarjeta: {
-      backgroundColor: cardBg,
+      backgroundColor: theme.containerBackground,
       borderRadius: 18,
       padding: 16,
       borderWidth: 1,
@@ -61,6 +107,7 @@ export function createMetodosActivacionStyles(theme: AppTheme) {
       shadowRadius: 8,
       elevation: 3,
     },
+    tarjetaInactiva: { opacity: 0.8 },
     filaTitulo: {
       flexDirection: "row",
       alignItems: "center",
@@ -75,14 +122,28 @@ export function createMetodosActivacionStyles(theme: AppTheme) {
       justifyContent: "center",
       backgroundColor: accentSoft,
     },
+    tituloWrap: { flex: 1, gap: 4 },
     tituloMetodo: {
-      color: textPrimary,
+      color: theme.text,
       fontSize: 15,
       fontWeight: "700",
-      flex: 1,
     },
+    chipEstado: {
+      alignSelf: "flex-start",
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      borderRadius: 10,
+      backgroundColor: accentSoft,
+    },
+    chipEstadoActivo: { backgroundColor: accent },
+    chipTexto: {
+      color: theme.text,
+      fontSize: 10.5,
+      fontWeight: "700",
+    },
+    chipTextoActivo: { color: "#ffffff" },
     descripcionMetodo: {
-      color: textPrimary,
+      color: theme.text,
       opacity: 0.75,
       fontSize: 13,
       lineHeight: 19,
@@ -90,6 +151,8 @@ export function createMetodosActivacionStyles(theme: AppTheme) {
     },
 
     // Pasos
+    pasos: { opacity: 1 },
+    pasosInactivos: { opacity: 0.55 },
     pasoFila: {
       flexDirection: "row",
       alignItems: "flex-start",
@@ -106,16 +169,34 @@ export function createMetodosActivacionStyles(theme: AppTheme) {
       marginTop: 1,
     },
     pasoNumeroTexto: {
-      color: textPrimary,
+      color: theme.text,
       fontSize: 11,
       fontWeight: "700",
     },
     pasoTexto: {
-      color: textPrimary,
+      color: theme.text,
       opacity: 0.85,
       fontSize: 12.5,
       lineHeight: 18,
       flex: 1,
+    },
+
+    // Aviso dentro de la tarjeta (métodos que llegan en una próxima versión)
+    avisoWrap: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      gap: 8,
+      backgroundColor: accentSoft,
+      borderRadius: 12,
+      padding: 10,
+      marginTop: 4,
+    },
+    avisoTexto: {
+      color: theme.text,
+      fontSize: 11.5,
+      lineHeight: 16,
+      flex: 1,
+      opacity: 0.85,
     },
 
     notaWrap: {
@@ -128,7 +209,7 @@ export function createMetodosActivacionStyles(theme: AppTheme) {
       marginTop: 4,
     },
     notaTexto: {
-      color: textPrimary,
+      color: theme.text,
       fontSize: 12,
       lineHeight: 17,
       flex: 1,

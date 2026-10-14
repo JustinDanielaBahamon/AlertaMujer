@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import type { RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Vibration } from "react-native";
 import { useEvidencia } from "../../../contexts/EvidenciaContext";
@@ -7,9 +8,13 @@ import { useNotificaciones } from "../../../contexts/NotificacionesContext";
 import type { MainStackParamList } from "../../../navigation/types";
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
+type ActivacionRoute = RouteProp<MainStackParamList, "Activacion">;
 
 export function useActivacionViewModel() {
   const navigation = useNavigation<Nav>();
+  const route = useRoute<ActivacionRoute>();
+  // Si viene un contacto, la alerta es solo para esa persona (no para todos)
+  const contacto = route.params?.contacto;
   const { config } = useNotificaciones();
   const { grabarVideo, grabarAudio } = useEvidencia();
   const [contador, setContador] = useState(5);
@@ -20,8 +25,8 @@ export function useActivacionViewModel() {
   const irAAlertaActiva = useCallback(() => {
     if (yaNavegoRef.current) return;
     yaNavegoRef.current = true;
-    navigation.replace("AlertaActiva");
-  }, [navigation]);
+    navigation.replace("AlertaActiva", contacto ? { contacto } : undefined);
+  }, [navigation, contacto]);
 
   useEffect(() => {
     if (contador > 0) {

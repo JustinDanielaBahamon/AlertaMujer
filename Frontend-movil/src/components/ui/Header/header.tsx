@@ -34,6 +34,7 @@ export default function AppHeader() {
         source={theme.logo}
         style={styles.logo}
         resizeMode="contain"
+        fadeDuration={0}
       />
     </View>
   );

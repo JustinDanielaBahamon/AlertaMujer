@@ -2,11 +2,13 @@ import { AntDesign, Feather, MaterialCommunityIcons, MaterialIcons, } from "@exp
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import { Image, Linking, Platform, RefreshControl, Text, TextInput, TouchableOpacity, View, } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SwipeListView } from "react-native-swipe-list-view";
 
 import { useTheme } from "../../../../src/contexts/ThemeContext";
 import ModalAccionesContacto from "../../../components/ui/modalAccionesContacto/modalAccionesContacto";
 import { useLocale } from "../../../contexts/LocaleContext";
+import { textosContactoExtra } from "../contactosExtra";
 import { createStyles } from "../style/contactos.styles";
 import { useContactosTabViewModel } from "../viewModel/useContactosViewModel";
 
@@ -15,8 +17,10 @@ type Contacto = ReturnType<typeof useContactosTabViewModel>["contactos"][0];
 export default function Contactos() {
   const vm = useContactosTabViewModel();
   const { theme } = useTheme();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const styles = createStyles(theme);
+  const insets = useSafeAreaInsets();
+  const extra = textosContactoExtra[locale];
 
   const headerGradient: [string, string] = [theme.headercolor1, theme.headercolor2];
 
@@ -51,7 +55,7 @@ export default function Contactos() {
           colors={headerGradient}
           start={{ x: 1, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={styles.gradient}
+          style={[styles.gradient, { paddingTop: insets.top + 20 }]}
         >
           <View style={styles.headerContent}>
             <View style={{ flex: 1 }}>
@@ -198,7 +202,7 @@ export default function Contactos() {
                 </View>
               </View>
 
-              {/* Sección acciones: Llamar, WhatsApp, Ubicación */}
+              {/* Sección acciones: Llamar, WhatsApp, Alerta individual */}
               <View style={[styles.actionsSection, { borderTopColor: theme.contactDivider }]}>
                 <TouchableOpacity
                   style={styles.actionItem}
@@ -220,11 +224,14 @@ export default function Contactos() {
                   <Text style={styles.actionText}>{t.contactos.whatsapp}</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.actionItem}>
+                <TouchableOpacity
+                  style={styles.actionItem}
+                  onPress={() => vm.alertarContacto(c)}
+                >
                   <View style={[styles.actionCircle, { backgroundColor: theme.contactIconLocBg }]}>
-                    <Feather name="map-pin" size={20} color={theme.contactIconLocColor} />
+                    <Feather name="alert-triangle" size={20} color={theme.contactIconLocColor} />
                   </View>
-                  <Text style={styles.actionText}>{t.contactos.ubicacion_boton}</Text>
+                  <Text style={styles.actionText}>{extra.alerta_boton}</Text>
                 </TouchableOpacity>
               </View>
             </View>

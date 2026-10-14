@@ -20,6 +20,7 @@ const mapearEmergencyContactAContacto = (ec: EmergencyContact): Contacto => ({
   nombre: ec.contactName || '',
   parentesco: ec.relationship,
   telefono: ec.telephone,
+  email: ec.email,
   foto: undefined,
 });
 
@@ -84,7 +85,7 @@ export function ContactosProvider({ children }: { children: React.ReactNode }) {
       const nuevoContacto = await contactosService.addContacto({
         contactName: payload.nombre ?? '',
         telephone: payload.telefono,
-        email: undefined,
+        email: payload.email,
         relationship: payload.parentesco,
       });
 
@@ -115,6 +116,7 @@ export function ContactosProvider({ children }: { children: React.ReactNode }) {
       await contactosService.updateContacto(id, {
         contactName: cambios.nombre || '',
         telephone: cambios.telefono,
+        email: cambios.email,
         relationship: cambios.parentesco,
       });
 

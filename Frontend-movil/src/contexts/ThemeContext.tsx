@@ -103,6 +103,14 @@ const activacionAzul   = require("../../assets/imagesAlertaMujer/ScActivacion/Az
 const activacionVino   = require("../../assets/imagesAlertaMujer/ScActivacion/vino.png");
 const activacionLogo   = require("../../assets/imagesAlertaMujer/ScActivacion/LOGO.png");
 
+// ─── Imágenes que se precargan al abrir la app (evita la demora al cambiar de tema) ───
+
+export const IMAGENES_PRECARGA: ImageSourcePropType[] = [
+  logoActual, logoMorado, logoAzul, logorosa, logovino, logonegro,
+  botonmorado, botonAzul, botonrosa, botonvino, botondorado,
+  activacionMorado, activacionRosa, activacionAzul, activacionVino, activacionLogo,
+];
+
 // ─── Temas ────────────────────────────────────────────────────────────────────
 
 const THEMES: Record<AppMode, AppTheme> = {
@@ -152,8 +160,8 @@ const THEMES: Record<AppMode, AppTheme> = {
     contactBuscadorBg: "#F3EEF8",
     contactBuscadorText: "#2a0045",
     asistenciaEmergenciaGradiente: ["#c4a8d6", "#7b1db2"],
-    asistenciaViolenciaGradiente: ["rgb(240, 87, 87)", "rgb(132, 0, 255)"],
-    asistenciaMentalGradiente:    ["rgb(142, 189, 255)", "rgb(255, 0, 191)"],
+    asistenciaViolenciaGradiente: ["#b891d0", "#6a14a6"],
+    asistenciaMentalGradiente:    ["#c4a8d6", "#9a2fcf"],
     asistenciaIconoUserBg:        "purple",
     asistenciaIconoBombilloBg:    "rgba(205, 117, 230, 0.29)",
     asistenciaIconoBombilloColor: "#1E1228",

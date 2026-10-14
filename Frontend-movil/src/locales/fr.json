@@ -92,10 +92,27 @@
     "hint_municipio": "Configure ta commune dans le tutoriel de localisation",
     "btn_guardar": "Enregistrer les modifications"
   },
-  "metodosActivacion": {
+   "metodosActivacion": {
     "titulo_header": "Méthodes d'activation",
+    "subtitulo_header": "Choisis comment déclencher ton alerte",
+    "resumen_activos": "actifs",
+    "estado_activo": "Actif",
+    "estado_inactivo": "Inactif",
+    "aviso_pendiente": "Ta préférence est enregistrée. Cette fonction sera activée dans une prochaine version de l'application.",
+    "boton_off_titulo": "Bouton désactivé",
+    "boton_off_msg": "Active le bouton d'alerte dans Paramètres > Méthodes d'activation.",
     "intro": "En plus du bouton d'alerte principal, tu peux déclencher une alerte avec ces méthodes alternatives. Apprends à les connaître pour réagir plus vite en cas de besoin.",
     "nota": "De nouvelles façons d'activation rapide seront bientôt ajoutées. Cette section se mettra à jour automatiquement lorsqu'elles seront disponibles.",
+    "boton_titulo": "Bouton d'alerte principal",
+    "boton_desc": "Le grand bouton de l'écran d'accueil. Si tu le désactives, l'appuyer n'enverra aucune alerte.",
+    "boton_paso1": "Va sur l'écran d'accueil de l'application.",
+    "boton_paso2": "Appuie sur le bouton d'alerte.",
+    "boton_paso3": "Un compte à rebours de 5 secondes commence ; tu peux annuler ou la déclencher immédiatement.",
+    "contacto_titulo": "Alerte à un seul contact",
+    "contacto_desc": "Affiche le bouton « Alerter » sur chaque contact pour envoyer l'alerte uniquement à cette personne.",
+    "contacto_paso1": "Ouvre le module Contacts.",
+    "contacto_paso2": "Appuie sur le bouton Alerter du contact à prévenir.",
+    "contacto_paso3": "Le compte à rebours commence et l'alerte n'est envoyée qu'à cette personne.",
     "agitar_titulo": "Secouer le téléphone",
     "agitar_desc": "Déclenche une alerte d'urgence en secouant fort ton téléphone, sans avoir besoin d'ouvrir l'application ni de déverrouiller l'écran.",
     "agitar_paso1": "Active cette fonction depuis Paramètres > Méthodes d'activation > Activer",
@@ -107,7 +124,12 @@
     "popup_paso1": "Accorde l'autorisation d'afficher des notifications par-dessus les autres applications.",
     "popup_paso2": "Lorsque le téléphone est verrouillé, la notification apparaîtra au premier plan.",
     "popup_paso3": "Appuie sur le bouton d'alerte dans la notification pour l'activer immédiatement",
-    "popup_paso4": "Il n'est pas nécessaire de saisir ton mot de passe ni de déverrouiller le téléphone"
+    "popup_paso4": "Il n'est pas nécessaire de saisir ton mot de passe ni de déverrouiller le téléphone",
+    "widget_titulo": "Widget sur l'écran d'accueil",
+    "widget_desc": "Ajoute à l'écran d'accueil de ton téléphone un widget avec un bouton d'alerte pour la déclencher d'une seule pression.",
+    "widget_paso1": "Maintiens appuyé l'écran d'accueil du téléphone et choisis Widgets.",
+    "widget_paso2": "Cherche AlertaMujer et fais glisser le widget où tu veux.",
+    "widget_paso3": "Appuie sur le bouton du widget pour lancer l'alerte."
   },
   "mapa": {
     "titulo": "Ta position",

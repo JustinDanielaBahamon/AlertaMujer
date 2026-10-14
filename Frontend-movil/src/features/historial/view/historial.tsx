@@ -1,6 +1,7 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation, useFocusEffect, useIsFocused, type NavigationProp, type ParamListBase } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FlatList, Image, RefreshControl, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useTheme } from "../../../../src/contexts/ThemeContext";
@@ -15,6 +16,7 @@ export default function Historial() {
   const { theme } = useTheme();
   const { t } = useLocale();
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   // Colores por tipo derivados del tema activo
@@ -190,7 +192,7 @@ export default function Historial() {
             colors={[theme.headercolor1, theme.headercolor2]}
             start={{ x: 1, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={styles.gradient}
+            style={[styles.gradient, { paddingTop: insets.top + 20 }]}
           >
             <View style={styles.headerContent}>
               <View style={{ flex: 1 }}>
@@ -257,7 +259,7 @@ export default function Historial() {
         </View>
       </View>
     ),
-    [searchQuery, stats, theme, emergencyColors, assistanceColors, styles, t]
+    [searchQuery, stats, theme, emergencyColors, assistanceColors, styles, t, insets.top]
   );
 
   return (

@@ -3,7 +3,8 @@ import type { RefObject } from "react";
 import { Animated, Linking, Platform } from "react-native";
 import type MapView from "react-native-maps";
 import * as Location from "expo-location";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import type { RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { MainStackParamList } from "../../../navigation/types";
 import { useAuth } from "../../../contexts/AuthContext";
@@ -14,6 +15,7 @@ import { descripcionLugar, obtenerLugar } from "../../../services/geocoding.serv
 import { reportarUbicacion } from "../../../services/location-reporter.service";
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
+type AlertaActivaRoute = RouteProp<MainStackParamList, "AlertaActiva">;
 
 export type Coordenada = {
   latitude: number;
@@ -48,6 +50,10 @@ const PADDING_MAPA_COMPLETO: Padding = { top: 130, right: 60, bottom: 120, left:
 export function useAlertaActivaViewModel() {
   const navigation = useNavigation<Nav>();
   const { user } = useAuth();
+  const route = useRoute<AlertaActivaRoute>();
+
+  // Si viene un contacto, la alerta es solo para esa persona (no para todos).
+  const contactoDestino = route.params?.contacto;
 
   // Referencia al id de la alerta creada en el backend (para poder cerrarla).
   const alertaCreadaIdRef = useRef<number | null>(null);
@@ -108,6 +114,7 @@ export function useAlertaActivaViewModel() {
     (async () => {
       if (!user?.id || alertaCreacionIniciadaRef.current || !location) return;
       alertaCreacionIniciadaRef.current = true;
+
       try {
         const device = await getOrCreateDevice(user.id);
         const alerta = await createAlert({
@@ -116,7 +123,10 @@ export function useAlertaActivaViewModel() {
           alertType: "main",
           activationMethod: "panic_button",
           status: "active",
-          message: "Alerta SOS activada desde la app",
+          // Alerta normal; si es individual, el mensaje indica el contacto destinatario.
+          message: contactoDestino
+            ? `Alerta SOS activada desde la app solo para: ${contactoDestino.nombre ?? ""} (${contactoDestino.telefono})`
+            : "Alerta SOS activada desde la app",
           latitude: location?.latitude,
           longitude: location?.longitude,
         });
@@ -132,7 +142,7 @@ export function useAlertaActivaViewModel() {
     return () => {
       mounted = false;
     };
-  }, [user?.id, location]);
+  }, [user?.id, location, contactoDestino]);
 
   // Actualiza la ubicacion en ciclos para ahorrar bateria: cada 30 s (10 veces) y luego
   // 5 min de reposo, en los que el GPS no se consulta. Despues repite el ciclo.
