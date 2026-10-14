@@ -1,6 +1,5 @@
 import { StyleSheet } from "react-native";
 import { AppTheme } from "../../../../src/contexts/ThemeContext";
-import { black } from "react-native-paper/lib/typescript/styles/themes/v2/colors";
 
 export const createStyles = (
   theme: AppTheme,

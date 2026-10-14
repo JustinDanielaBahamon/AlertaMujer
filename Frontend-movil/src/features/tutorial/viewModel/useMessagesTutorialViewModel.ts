@@ -1,5 +1,4 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as SMS from "expo-sms";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { MSG_COLORS } from "../styles/messageStyle";
 import { useLocale } from "../../../contexts/LocaleContext";
@@ -93,7 +92,6 @@ export function useMessagesTutorialViewModel() {
   }, []);
 
   const confirmModal = useCallback(async () => {
-    try { await SMS.isAvailableAsync(); } catch (e) { console.log("Error mensajes:", e); }
     try { await AsyncStorage.setItem(STORAGE_KEY_MENSAJES, "true"); } catch {}
     setModalVisible(false);
     resolvePermission.current(true);

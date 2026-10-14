@@ -1,5 +1,4 @@
 import {StyleSheet } from 'react-native';
-import { black } from 'react-native-paper/lib/typescript/styles/themes/v2/colors';
 import { rgbaColor } from 'react-native-reanimated/lib/typescript/Colors';
 
 export const styles = StyleSheet.create({
