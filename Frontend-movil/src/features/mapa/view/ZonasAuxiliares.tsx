@@ -1,9 +1,11 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
+  Linking,
   Modal,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -11,7 +13,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import MapView, { Marker } from "../../../components/mapa/MapaLibre";
+import MapView, { Circle, Marker, Polyline, type LatLng } from "../../../components/mapa/MapaLibre";
 import * as Location from "expo-location";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { useLocale } from "../../../contexts/LocaleContext";
@@ -76,8 +78,20 @@ type ZonaAuxiliar = {
     longitude: number;
   };
   direccion: string;
+  /** Radio de la zona en metros (viene del backend). */
+  radio: number;
+  /** Distancia en metros desde la ubicación actual, si se conoce. */
   distancia?: number;
 };
+
+// Centro de Neiva, usado si no hay ubicación ni zonas.
+const CENTRO_POR_DEFECTO: LatLng = { latitude: 2.9273, longitude: -75.2819 };
+
+const formatearDistancia = (metros: number) =>
+  metros < 1000 ? `${Math.round(metros)} m` : `${(metros / 1000).toFixed(1).replace(".", ",")} km`;
+
+// Unos 80 m por minuto a pie.
+const minutosCaminando = (metros: number) => Math.max(1, Math.round(metros / 80));
 
 export default function ZonasAuxiliares() {
   const { theme } = useTheme();
@@ -89,6 +103,8 @@ export default function ZonasAuxiliares() {
   const [filtro, setFiltro] = useState<FiltroZona>("todas");
 
   const [zonasAuxiliares, setZonasAuxiliares] = useState<ZonaAuxiliar[]>([]);
+  const [miPosicion, setMiPosicion] = useState<LatLng | null>(null);
+  const mapaCompletoRef = useRef<MapView>(null);
   const [cargandoZonas, setCargandoZonas] = useState(true);
   const [errorZonas, setErrorZonas] = useState<string | null>(null);
 
@@ -102,14 +118,18 @@ export default function ZonasAuxiliares() {
         const zonas = await getZonas();
         if (!mounted) return;
 
-        // Intentar obtener la ubicación actual para calcular distancias
-        let miPosicion: { latitude: number; longitude: number } | null = null;
+        // Ubicación actual para mostrarla en el mapa y calcular distancias
+        let miPosicion: LatLng | null = null;
         try {
-          const loc = await Location.getCurrentPositionAsync({});
-          miPosicion = { latitude: loc.coords.latitude, longitude: loc.coords.longitude };
+          const { status } = await Location.requestForegroundPermissionsAsync();
+          if (status === "granted") {
+            const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+            miPosicion = { latitude: loc.coords.latitude, longitude: loc.coords.longitude };
+          }
         } catch {
           miPosicion = null;
         }
+        if (mounted) setMiPosicion(miPosicion);
 
         const mapeadas: ZonaAuxiliar[] = zonas
           .filter((z) => z.isActive !== false && z.latitude != null && z.longitude != null)
@@ -125,8 +145,6 @@ export default function ZonasAuxiliares() {
                   Number(z.longitude)
                 )
               );
-            } else if (z.radiusMeters != null) {
-              distancia = Math.round(Number(z.radiusMeters));
             }
             return {
               id: String(z.id),
@@ -134,9 +152,12 @@ export default function ZonasAuxiliares() {
               tipo,
               coordenada: { latitude: Number(z.latitude), longitude: Number(z.longitude) },
               direccion: z.address ? `${z.address}${z.city ? ", " + z.city : ""}` : (z.city ?? ""),
+              radio: Number(z.radiusMeters) > 0 ? Number(z.radiusMeters) : 100,
               distancia,
             };
-          });
+          })
+          // Las más cercanas primero
+          .sort((a, b) => (a.distancia ?? Infinity) - (b.distancia ?? Infinity));
         setZonasAuxiliares(mapeadas);
       } catch (err) {
         console.error("Error al cargar zonas:", err);
@@ -171,6 +192,72 @@ export default function ZonasAuxiliares() {
         return "#7B1DB2";
     }
   };
+
+  // El mapa se centra en la usuaria; si no hay ubicación, en la zona más cercana o en Neiva.
+  const centroMapa = useMemo(() => {
+    const centro = miPosicion ?? zonasFiltradas[0]?.coordenada ?? CENTRO_POR_DEFECTO;
+    return { ...centro, latitudeDelta: 0.03, longitudeDelta: 0.03 };
+  }, [miPosicion, zonasFiltradas[0]?.id]);
+
+  const centrarEnMi = () => {
+    if (!miPosicion) return;
+    mapaCompletoRef.current?.animateToRegion({ ...miPosicion, latitudeDelta: 0.015, longitudeDelta: 0.015 });
+  };
+
+  const abrirComoLlegar = (zona: ZonaAuxiliar) => {
+    const { latitude, longitude } = zona.coordenada;
+    const etiqueta = encodeURIComponent(zona.nombre);
+    const url =
+      Platform.OS === "android"
+        ? `geo:${latitude},${longitude}?q=${latitude},${longitude}(${etiqueta})`
+        : `http://maps.apple.com/?daddr=${latitude},${longitude}&q=${etiqueta}`;
+    Linking.openURL(url).catch(() =>
+      Linking.openURL(`https://www.openstreetmap.org/directions?to=${latitude}%2C${longitude}`),
+    );
+  };
+
+  // Círculos de cada zona, sus marcadores, el punto de la usuaria y la línea hasta la zona elegida.
+  const capasMapa = () => (
+    <>
+      {zonasFiltradas.map((zona) => (
+        <Circle
+          key={`c-${zona.id}`}
+          center={zona.coordenada}
+          radius={zona.radio}
+          fillColor={getZoneColor(zona.tipo) + "33"}
+          strokeColor={getZoneColor(zona.tipo)}
+          strokeWidth={2}
+        />
+      ))}
+      {miPosicion && selectedZone && (
+        <Polyline
+          coordinates={[miPosicion, selectedZone.coordenada]}
+          strokeColor="#1E88E5"
+          strokeWidth={3}
+          lineDashPattern={[8, 6]}
+        />
+      )}
+      {zonasFiltradas.map((zona) => (
+        <Marker
+          key={`m-${zona.id}`}
+          coordinate={zona.coordenada}
+          anchor={{ x: 0.5, y: 0.5 }}
+          onPress={() => setSelectedZone(zona)}
+        >
+          <View style={[marcadorStyles.zona, { backgroundColor: getZoneColor(zona.tipo) }]}>
+            <MaterialIcons name={getZoneIcon(zona.tipo) as any} size={16} color="#fff" />
+          </View>
+        </Marker>
+      ))}
+      {miPosicion && (
+        <Marker coordinate={miPosicion} anchor={{ x: 0.5, y: 0.5 }} title={t.mapa.tu_ubicacion_marcador}>
+          <View style={marcadorStyles.yoHalo}>
+            <View style={marcadorStyles.yo} />
+          </View>
+        </Marker>
+      )}
+    </>
+  );
 
   const getZoneIcon = (tipo: string) => {
     switch (tipo) {
@@ -219,26 +306,13 @@ export default function ZonasAuxiliares() {
         <View style={styles.mapContainer}>
           <MapView
             style={styles.map}
-            initialRegion={{
-              latitude: 2.962828,
-              longitude: -75.2855952,
-              latitudeDelta: 0.02,
-              longitudeDelta: 0.02,
-            }}
+            region={centroMapa}
             scrollEnabled={false}
             zoomEnabled={false}
             rotateEnabled={false}
             pitchEnabled={false}
           >
-            {zonasFiltradas.map((zona) => (
-              <Marker
-                key={zona.id}
-                coordinate={zona.coordenada}
-                title={zona.nombre}
-                description={zona.direccion}
-                pinColor={getZoneColor(zona.tipo)}
-              />
-            ))}
+            {capasMapa()}
           </MapView>
 
           <TouchableOpacity
@@ -280,6 +354,14 @@ export default function ZonasAuxiliares() {
                 {t.mapa.policia}
               </Text>
             </View>
+            {miPosicion && (
+              <View style={styles.legendItem}>
+                <View style={[styles.legendDot, { backgroundColor: "#1E88E5" }]} />
+                <Text style={[styles.legendText, { color: theme.text }]}>
+                  {t.mapa.tu_ubicacion_marcador}
+                </Text>
+              </View>
+            )}
           </View>
         </View>
 
@@ -372,7 +454,9 @@ export default function ZonasAuxiliares() {
                   color={theme.contactSubtext}
                 />
                 <Text style={[styles.zoneDistance, { color: theme.contactSubtext }]}>
-                  {zona.distancia != null ? `${zona.distancia}m` : "--"}
+                  {zona.distancia != null
+                    ? `${formatearDistancia(zona.distancia)} · ${t.mapa.min_caminando.replace("{n}", String(minutosCaminando(zona.distancia)))}`
+                    : "--"}
                 </Text>
               </View>
             </View>
@@ -428,7 +512,19 @@ export default function ZonasAuxiliares() {
                       <InfoRow
                         icon="directions-walk"
                         label={t.mapa.distancia}
-                        value={selectedZone.distancia != null ? `${selectedZone.distancia}m` : "--"}
+                        value={
+                          selectedZone.distancia == null
+                            ? t.mapa.sin_ubicacion
+                            : selectedZone.distancia <= selectedZone.radio
+                              ? t.mapa.dentro_de_zona
+                              : `${formatearDistancia(selectedZone.distancia)} · ${t.mapa.min_caminando.replace("{n}", String(minutosCaminando(selectedZone.distancia)))}`
+                        }
+                        theme={theme}
+                      />
+                      <InfoRow
+                        icon="radio-button-checked"
+                        label={t.mapa.radio_zona}
+                        value={formatearDistancia(selectedZone.radio)}
                         theme={theme}
                       />
                       <InfoRow
@@ -446,6 +542,13 @@ export default function ZonasAuxiliares() {
                     </View>
 
                     <TouchableOpacity
+                      style={[styles.modalCloseButton, marcadorStyles.botonLlegar]}
+                      onPress={() => abrirComoLlegar(selectedZone)}
+                    >
+                      <MaterialIcons name="directions" size={18} color="#fff" />
+                      <Text style={styles.modalCloseText}>{t.mapa.como_llegar}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
                       style={styles.modalCloseButton}
                       onPress={() => setSelectedZone(null)}
                     >
@@ -462,25 +565,20 @@ export default function ZonasAuxiliares() {
       {/* MODAL MAPA COMPLETO */}
       <Modal visible={fullscreen} animationType="slide">
         <View style={{ flex: 1 }}>
-          <MapView
-            style={{ flex: 1 }}
-            initialRegion={{
-              latitude: 2.962828,
-              longitude: -75.2855952,
-              latitudeDelta: 0.02,
-              longitudeDelta: 0.02,
-            }}
-          >
-            {zonasFiltradas.map((zona) => (
-              <Marker
-                key={zona.id}
-                coordinate={zona.coordenada}
-                title={zona.nombre}
-                description={zona.direccion}
-                pinColor={getZoneColor(zona.tipo)}
-              />
-            ))}
+          <MapView ref={mapaCompletoRef} style={{ flex: 1 }} initialRegion={centroMapa}>
+            {capasMapa()}
           </MapView>
+
+          {miPosicion && (
+            <TouchableOpacity
+              style={marcadorStyles.botonCentrar}
+              onPress={centrarEnMi}
+              accessibilityRole="button"
+              accessibilityLabel={t.mapa.centrar_en_mi}
+            >
+              <MaterialIcons name="my-location" size={24} color="#1E88E5" />
+            </TouchableOpacity>
+          )}
 
           <TouchableOpacity
             style={styles.fullscreenCloseButton}
@@ -512,3 +610,51 @@ function InfoRow({ icon, label, value, theme }: InfoRowProps) {
     </View>
   );
 }
+
+const marcadorStyles = StyleSheet.create({
+  zona: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: "#fff",
+    elevation: 3,
+  },
+  yoHalo: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: "rgba(30,136,229,0.25)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  yo: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: "#1E88E5",
+    borderWidth: 2,
+    borderColor: "#fff",
+  },
+  botonCentrar: {
+    position: "absolute",
+    right: 16,
+    bottom: 40,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 4,
+  },
+  botonLlegar: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: "#1E88E5",
+    marginBottom: 10,
+  },
+});
