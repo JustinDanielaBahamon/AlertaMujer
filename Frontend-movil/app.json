@@ -61,7 +61,8 @@
           }
         }
       ],
-      "@maplibre/maplibre-react-native"
+      "@maplibre/maplibre-react-native",
+      "./plugins/withPointerTaggingDisabled"
     ],
     "experiments": {
       "reactCompiler": true

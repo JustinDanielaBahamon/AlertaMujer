@@ -181,14 +181,23 @@ export function Marker({ coordinate, pinColor = "#E53935", title, description, a
 
   return (
     <MarkerLibre lngLat={lngLat(coordinate)} anchor={children && centrado ? "center" : "bottom"}>
-      <TouchableOpacity activeOpacity={0.8} onPress={tocar} style={[styles.marcador, zIndex != null && { zIndex }]}>
+      {/* Tamaño fijo: si la vista no tiene ancho propio, Android la recorta al acercarse al borde del mapa. */}
+      <TouchableOpacity
+        activeOpacity={0.8}
+        onPress={tocar}
+        style={[styles.marcador, mostrarTitulo && tieneTexto && styles.marcadorConBurbuja, zIndex != null && { zIndex }]}
+      >
         {mostrarTitulo && tieneTexto && (
           <View style={styles.burbuja}>
             {title ? <Text style={styles.burbujaTitulo} numberOfLines={2}>{title}</Text> : null}
             {description ? <Text style={styles.burbujaTexto} numberOfLines={3}>{description}</Text> : null}
           </View>
         )}
-        {children ?? <Ionicons name="location-sharp" size={38} color={pinColor} style={styles.pin} />}
+        {children ?? (
+          <View style={styles.pinCaja}>
+            <Ionicons name="location-sharp" size={38} color={pinColor} style={styles.pin} />
+          </View>
+        )}
       </TouchableOpacity>
     </MarkerLibre>
   );
@@ -291,6 +300,8 @@ export function Circle({ center, radius, fillColor = "rgba(233,30,99,0.2)", stro
 const styles = StyleSheet.create({
   mapa: { flex: 1 },
   marcador: { alignItems: "center" },
+  marcadorConBurbuja: { width: 210 },
+  pinCaja: { width: 44, height: 44, alignItems: "center", justifyContent: "flex-end" },
   pin: {
     textShadowColor: "rgba(0,0,0,0.35)",
     textShadowOffset: { width: 0, height: 1 },
