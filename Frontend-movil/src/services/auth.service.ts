@@ -49,6 +49,15 @@ export const authService = {
   },
 
   /**
+   * Inicio de sesión con Google: el backend valida el ID token de Google y devuelve el JWT de la app.
+   * Si el correo no está registrado, el backend crea la cuenta.
+   */
+  async loginWithGoogle(idToken: string): Promise<LoginResponse> {
+    const response = await api.post<LoginResponse>('/api/auth/google', { idToken });
+    return response.data;
+  },
+
+  /**
    * Registro de nuevo usuario con manejo de errores mejorado
    * Muestra mensajes amigables en lugar de "API error"
    */

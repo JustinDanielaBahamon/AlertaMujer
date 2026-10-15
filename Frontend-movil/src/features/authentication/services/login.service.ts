@@ -7,14 +7,30 @@ import { authService } from "../../../services/auth.service";
  */
 export async function loginWithEmail(correo: string, password: string): Promise<{ usuario: Usuario; token: string }> {
   try {
-    const response = await authService.login(correo, password);
-    // El backend devuelve {token, user}, necesitamos adaptar al modelo Usuario del móvil
+    return aSesion(await authService.login(correo, password));
+  } catch (error) {
+    throw new Error("Error al iniciar sesión. Verifica tus credenciales.");
+  }
+}
+
+/** Inicio de sesión con el ID token que entrega Google. */
+export async function loginWithGoogleIdToken(idToken: string): Promise<{ usuario: Usuario; token: string }> {
+  try {
+    return aSesion(await authService.loginWithGoogle(idToken));
+  } catch (error: any) {
+    if (error?.response?.data?.message === "Account blocked") {
+      throw new Error("Tu cuenta está bloqueada. Contacta al administrador.");
+    }
+    throw new Error("No se pudo iniciar sesión con Google. Intenta de nuevo.");
+  }
+}
+
+// El backend devuelve {token, user}; se adapta al modelo Usuario del móvil
+function aSesion(response: Awaited<ReturnType<typeof authService.login>>): { usuario: Usuario; token: string } {
     const backendUser = response.user;
-    
-    // Adaptar el formato del backend al modelo del móvil
     const usuario: Usuario = {
       id: backendUser.id,
-      nombre: `${backendUser.firstName} ${backendUser.lastName}`,
+      nombre: `${backendUser.firstName} ${backendUser.lastName}`.trim(),
       correo: backendUser.email,
       email: backendUser.email,
       telefono: backendUser.telephone,
@@ -29,7 +45,4 @@ export async function loginWithEmail(correo: string, password: string): Promise<
       usuario,
       token: response.token
     };
-  } catch (error) {
-    throw new Error("Error al iniciar sesión. Verifica tus credenciales.");
-  }
 }

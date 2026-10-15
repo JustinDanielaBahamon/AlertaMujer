@@ -3,10 +3,9 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { AuthStackParamList } from "../../../navigation/types";
 import { useAuth } from "../../../contexts/AuthContext";
-import { loginWithEmail } from "../services/login.service";
+import { loginWithEmail, loginWithGoogleIdToken } from "../services/login.service";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
-import { makeRedirectUri } from "expo-auth-session";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -25,27 +24,30 @@ export function useLoginViewModel() {
   const [errorPassword, setErrorPassword] = useState("");
   const [errorGeneral, setErrorGeneral]   = useState("");
 
-  // Google OAuth con redirectUri correcto
-   const [, response, promptAsync] = Google.useAuthRequest({
-  clientId:        "266164512214-a48icf7ct4140gor9pq64iq04ebvp4ta.apps.googleusercontent.com",
-  androidClientId: "266164512214-u4jqsko28es0lns9ubpes0vrnr3hgjqv.apps.googleusercontent.com",
-  redirectUri: makeRedirectUri({
-    scheme: "frontedmovil",
-    native: "frontedmovil://",
-  }),
-});
+  // Google: se pide el ID token (identidad verificable) y se envía al backend.
+  // Sin redirectUri manual: en el APK Expo usa el que Google espera para la app Android
+  // (paquete com.alertamujer.app). El Client ID de Android debe tener registrado el SHA-1 de EAS.
+  const [, response, promptAsync] = Google.useIdTokenAuthRequest({
+    clientId: "266164512214-a48icf7ct4140gor9pq64iq04ebvp4ta.apps.googleusercontent.com",
+    androidClientId: "266164512214-u4jqsko28es0lns9ubpes0vrnr3hgjqv.apps.googleusercontent.com",
+  });
 
   useEffect(() => {
     if (response?.type === "success") {
-      const token = response.authentication?.accessToken;
-      if (token) {
-        console.log("Token Google:", token);
-        // signInWithGoogleToken(token) cuando tengas el endpoint
+      const idToken = response.params?.id_token ?? response.authentication?.idToken;
+      if (!idToken) {
+        setErrorGeneral("Google no devolvió la identidad. Intenta de nuevo.");
+        return;
       }
+      setCargando(true);
+      loginWithGoogleIdToken(idToken)
+        .then(({ usuario, token }) => signIn(usuario, token))
+        .catch((e: Error) => setErrorGeneral(e.message))
+        .finally(() => setCargando(false));
     } else if (response?.type === "error") {
       setErrorGeneral("No se pudo iniciar sesión con Google. Intenta de nuevo.");
     }
-  }, [response]);
+  }, [response, signIn]);
 
   const toggleMostrarPassword = useCallback(() => {
     setMostrarPassword((v) => !v);
