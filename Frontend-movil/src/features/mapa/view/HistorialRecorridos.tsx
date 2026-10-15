@@ -12,7 +12,7 @@ import {
   SafeAreaView,
   StyleSheet,
 } from "react-native";
-import MapView, { Marker, Polyline } from "react-native-maps";
+import MapView, { Marker, Polyline } from "../../../components/mapa/MapaLibre";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { useAjustesViewModel } from "../../settings/viewModel/useAjustesViewModel";

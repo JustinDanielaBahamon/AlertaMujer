@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
-import MapView, { Marker, Polyline } from "react-native-maps";
+import MapView, { Marker, Polyline } from "../../../components/mapa/MapaLibre";
 import { useAlertaContactoViewModel } from "../viewModel/useAlertaContactoViewModel";
 import type { PuntoUbicacion } from "../../../services/alert-tracking.service";
 import { useTheme } from "../../../contexts/ThemeContext";

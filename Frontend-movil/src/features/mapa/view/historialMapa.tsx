@@ -3,7 +3,7 @@ import { RouteProp, useNavigation, useRoute,} from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React, { useState } from "react";
 import {Modal,ScrollView,Text,TouchableOpacity,TouchableWithoutFeedback,View,} from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker } from "../../../components/mapa/MapaLibre";
 import { LinearGradient } from "expo-linear-gradient";
 import type { MainStackParamList } from "../../../navigation/types";
 import { useTheme } from "../../../contexts/ThemeContext";

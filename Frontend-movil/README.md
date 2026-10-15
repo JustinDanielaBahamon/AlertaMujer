@@ -13,7 +13,7 @@ Comparte backend (Spring Boot + PostgreSQL) con el panel web, por lo que los dat
 | TypeScript (modo estricto) | 5.9 |
 | React Navigation (stack, tabs, drawer) | 7 |
 | Axios | 1.x |
-| react-native-maps (Google Maps) | 1.20 |
+| MapLibre React Native (teselas OpenFreeMap / OpenStreetMap) | 11.5 |
 | expo-location | 19 |
 | Jest + jest-expo + React Native Testing Library | 29 / 54 / 13 |
 | EAS Build | — |
@@ -56,9 +56,7 @@ eas build -p android --profile preview
 | `preview` | APK para probar en celulares | backend en la red local |
 | `production` | AAB para Play Store | backend desplegado |
 
-Variables de entorno en EAS (no se guardan en el repositorio):
-
-- `GOOGLE_MAPS_API_KEY` (visibilidad *Sensitive*): la lee `app.config.js` para `react-native-maps`. La clave debe tener habilitado **Maps SDK for Android**, facturación activa en Google Cloud y la restricción de app Android con el paquete `com.alertamujer.app` y el SHA-1 del keystore de EAS (`eas credentials`).
+Los mapas usan **MapLibre** con el estilo gratuito de [OpenFreeMap](https://openfreemap.org) (datos de OpenStreetMap): no necesitan clave de API ni cuenta de facturación. El componente `src/components/mapa/MapaLibre.tsx` ofrece `MapView`, `Marker`, `Polyline` y `Circle` con la misma forma de uso que tenía `react-native-maps`. Como MapLibre es un módulo nativo, los cambios en el mapa requieren generar un APK nuevo (no funcionan en Expo Go).
 
 Para probar el APK contra el backend local, el celular y el computador deben estar en la misma Wi-Fi; `app.json` permite tráfico HTTP (`expo-build-properties` → `usesCleartextTraffic`) para ese caso.
 

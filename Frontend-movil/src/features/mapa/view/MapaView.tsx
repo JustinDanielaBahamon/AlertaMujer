@@ -17,7 +17,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import MapView, { Circle, Marker, Polyline } from "react-native-maps";
+import MapView, { Circle, Marker, Polyline } from "../../../components/mapa/MapaLibre";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "../styles/MapaStyles";
 import { createMapaModalStyles } from "../styles/MapaModal.style";

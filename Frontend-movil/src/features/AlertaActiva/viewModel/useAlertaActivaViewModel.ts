@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
 import { Animated, Linking, Platform } from "react-native";
-import type MapView from "react-native-maps";
+import type MapView from "../../../components/mapa/MapaLibre";
 import * as Location from "expo-location";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { RouteProp } from "@react-navigation/native";
