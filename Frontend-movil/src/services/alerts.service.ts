@@ -99,3 +99,24 @@ export const transformarAlerta = (apiAlerta: AlertaApi): Alerta => {
         : undefined,
   };
 };
+
+/** Canal por el que se avisó a un contacto y su estado (GET /api/alerts/{id}/contacts). */
+export interface CanalNotificacion {
+  channel: "email" | "push" | string;
+  destination?: string | null;
+  status: "pending" | "sent" | "delivered" | "failed" | "expired" | string;
+  sentAt?: string | null;
+  deliveredAt?: string | null;
+}
+
+export interface ContactoNotificado {
+  contactId: number;
+  name: string;
+  relationship?: string | null;
+  channels: CanalNotificacion[];
+}
+
+export const getContactosNotificados = async (alertaId: number | string): Promise<ContactoNotificado[]> => {
+  const response = await api.get<ContactoNotificado[]>(`/api/alerts/${alertaId}/contacts`);
+  return response.data;
+};

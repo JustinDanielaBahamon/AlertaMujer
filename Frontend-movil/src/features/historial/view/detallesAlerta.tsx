@@ -6,6 +6,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Alert, Image, Modal, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import MapView, { Marker } from "../../../components/mapa/MapaLibre";
 import { useDetalleAlertaViewModel } from "../viewModel/useDetalleAlertaViewModel";
+import ContactosNotificadosModal from "./ContactosNotificadosModal";
 import { useTheme } from "../../../../src/contexts/ThemeContext";
 import { useLocale } from "../../../../src/contexts/LocaleContext";
 import { getMainStackNavigation } from "../../../navigation/navigationHelpers";
@@ -24,7 +25,9 @@ export default function DetalleAlerta() {
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const route = useRoute<DetalleAlertaRouteProp>();
   const { alerta } = route.params;
-  const { esEmergencia, compartiendo, compartirReporte } = useDetalleAlertaViewModel(alerta);
+  const { esEmergencia, compartiendo, compartirReporte, contactosNotificados, cargandoContactos, errorContactos } =
+    useDetalleAlertaViewModel(alerta);
+  const [verNotificados, setVerNotificados] = useState(false);
   const [coordenadaAlerta, setCoordenadaAlerta] = useState<Coordenada | null>(null);
   const [cargandoMapa, setCargandoMapa] = useState(true);
   const [mapaPantallaCompleta, setMapaPantallaCompleta] = useState(false);
@@ -230,13 +233,25 @@ export default function DetalleAlerta() {
               </View>
               <Text style={styles.InfoValue}>{alerta.estado}</Text>
             </View>
-            <View style={styles.InfoCard}>
+            <TouchableOpacity
+              style={styles.InfoCard}
+              onPress={() => setVerNotificados(true)}
+              accessibilityRole="button"
+              accessibilityLabel={t.detalle.notificados_titulo}
+            >
               <View style={styles.InfoHeader}>
                 <MaterialIcons name="groups" size={18} color={theme.contactAccent} />
                 <Text style={styles.InfoLabel}>{t.detalle.contactos}</Text>
+                <MaterialIcons name="chevron-right" size={18} color={theme.contactSubtext} style={{ marginLeft: "auto" }} />
               </View>
-              <Text style={styles.InfoValue}>{t.detalle.contactos_notificados.replace("{n}", "3")}</Text>
-            </View>
+              {cargandoContactos ? (
+                <ActivityIndicator size="small" color={theme.contactAccent} style={{ alignSelf: "flex-start" }} />
+              ) : (
+                <Text style={styles.InfoValue}>
+                  {t.detalle.contactos_notificados.replace("{n}", String(contactosNotificados.length))}
+                </Text>
+              )}
+            </TouchableOpacity>
           </View>
 
           <View style={styles.TarjetaDescripcion}>
@@ -311,6 +326,13 @@ export default function DetalleAlerta() {
           </TouchableOpacity>
         </View>
       </Modal>
+      <ContactosNotificadosModal
+        visible={verNotificados}
+        onCerrar={() => setVerNotificados(false)}
+        contactos={contactosNotificados}
+        cargando={cargandoContactos}
+        error={errorContactos}
+      />
     </>
   );
 }

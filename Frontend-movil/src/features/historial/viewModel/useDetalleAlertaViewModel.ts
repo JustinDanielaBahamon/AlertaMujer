@@ -1,17 +1,39 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, Share } from "react-native";
 import type { Alerta } from "../models/Alerta";
+import { getContactosNotificados, type ContactoNotificado } from "../../../services/alerts.service";
 
 interface UseDetalleAlertaViewModelResult {
   esEmergencia: boolean;
   compartiendo: boolean;
   compartirReporte: () => Promise<void>;
+  contactosNotificados: ContactoNotificado[];
+  cargandoContactos: boolean;
+  errorContactos: boolean;
 }
 
 export function useDetalleAlertaViewModel(alerta: Alerta): UseDetalleAlertaViewModelResult {
   const [compartiendo, setCompartiendo] = useState(false);
 
   const esEmergencia = useMemo(() => alerta.tipo === "Emergencia", [alerta.tipo]);
+
+  // Contactos avisados en esta alerta y el estado de cada canal.
+  const [contactosNotificados, setContactosNotificados] = useState<ContactoNotificado[]>([]);
+  const [cargandoContactos, setCargandoContactos] = useState(true);
+  const [errorContactos, setErrorContactos] = useState(false);
+
+  useEffect(() => {
+    let activo = true;
+    setCargandoContactos(true);
+    setErrorContactos(false);
+    getContactosNotificados(alerta.id)
+      .then((lista) => activo && setContactosNotificados(lista))
+      .catch(() => activo && setErrorContactos(true))
+      .finally(() => activo && setCargandoContactos(false));
+    return () => {
+      activo = false;
+    };
+  }, [alerta.id]);
 
   const mensajeCompartir = useMemo(
     () =>
@@ -47,5 +69,8 @@ export function useDetalleAlertaViewModel(alerta: Alerta): UseDetalleAlertaViewM
     esEmergencia,
     compartiendo,
     compartirReporte,
+    contactosNotificados,
+    cargandoContactos,
+    errorContactos,
   };
 }
