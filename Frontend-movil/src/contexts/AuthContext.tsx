@@ -4,6 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { Usuario } from "../features/authentication/models/Usuario";
 import type { MainStackParamList } from "../navigation/types";
 import { escucharSesion, setAuthToken, setRefreshToken } from "../services/api";
+import { borrarTokens, guardarTokens, leerTokens } from "../services/tokenStorage";
 
 export type SignInOptions = {
   /** Primera pantalla del stack principal tras iniciar sesión (p. ej. tutorial tras registro). */
@@ -43,13 +44,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const raw = await AsyncStorage.getItem(STORAGE_KEY_AUTH);
         if (raw) {
-          const { user: savedUser, token: savedToken, refreshToken: savedRefresh } = JSON.parse(raw);
-          if (savedUser && savedToken) {
-            setUser(savedUser);
-            setToken(savedToken);
-            setAuthToken(savedToken);
-            refreshRef.current = savedRefresh ?? null;
-            setRefreshToken(savedRefresh ?? null);
+          const guardado = JSON.parse(raw);
+          let tokens = await leerTokens();
+          // Sesiones guardadas antes de usar el almacén cifrado: los tokens se mudan allá
+          if (!tokens && guardado.token) {
+            tokens = { token: guardado.token, refreshToken: guardado.refreshToken ?? null };
+            await guardarTokens(tokens);
+            await AsyncStorage.setItem(STORAGE_KEY_AUTH, JSON.stringify({ user: guardado.user }));
+          }
+          if (guardado.user && tokens) {
+            setUser(guardado.user);
+            setToken(tokens.token);
+            setAuthToken(tokens.token);
+            refreshRef.current = tokens.refreshToken;
+            setRefreshToken(tokens.refreshToken);
           }
         }
       } catch (error) {
@@ -60,11 +68,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })();
   }, []);
 
+  // Los datos de la usuaria van en AsyncStorage; los tokens, en el almacén cifrado del sistema
   const guardar = (nextUser: Usuario, nextToken: string) => {
-    AsyncStorage.setItem(
-      STORAGE_KEY_AUTH,
-      JSON.stringify({ user: nextUser, token: nextToken, refreshToken: refreshRef.current }),
-    ).catch((e) => console.error("No se pudo guardar la sesión:", e));
+    Promise.all([
+      AsyncStorage.setItem(STORAGE_KEY_AUTH, JSON.stringify({ user: nextUser })),
+      guardarTokens({ token: nextToken, refreshToken: refreshRef.current }),
+    ]).catch((e) => console.error("No se pudo guardar la sesión:", e));
   };
 
   const signIn = useCallback((nextUser: Usuario, nextToken: string, options?: SignInOptions) => {
@@ -87,6 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setRefreshToken(null);
     setPendingMainRoute(null);
     AsyncStorage.removeItem(STORAGE_KEY_AUTH).catch(() => {});
+    borrarTokens().catch(() => {});
   }, []);
 
   // El interceptor de api.ts avisa cuando renovó el token o cuando la sesión ya no es válida

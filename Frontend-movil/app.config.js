@@ -32,6 +32,7 @@ module.exports = ({ config }) => {
 
   if (conFirebase) plugins.push("@react-native-firebase/app");
   plugins.push("./plugins/withAlarmSound");
+  plugins.push("expo-secure-store");
 
   const permisos = new Set([
     ...(config.android?.permissions ?? []),
