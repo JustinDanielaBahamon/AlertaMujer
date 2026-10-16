@@ -126,6 +126,27 @@ export default function MetodosActivacionScreen() {
               ))}
             </View>
 
+            {(!!metodo.recomendacionMarca || !!metodo.recomendaciones?.length) && (
+              <View style={styles.recomendacionesWrap}>
+                <View style={styles.recomendacionesTituloFila}>
+                  <Ionicons name="bulb-outline" size={16} color={theme.icono} />
+                  <Text style={styles.recomendacionesTitulo}>{m.recomendaciones_titulo}</Text>
+                </View>
+                {!!metodo.recomendacionMarca && (
+                  <View style={styles.recomendacionMarca}>
+                    <Ionicons name="warning-outline" size={16} color="#b45309" />
+                    <Text style={styles.recomendacionMarcaTexto}>{metodo.recomendacionMarca}</Text>
+                  </View>
+                )}
+                {metodo.recomendaciones?.map((texto, i) => (
+                  <View key={i} style={styles.recomendacionFila}>
+                    <Text style={styles.recomendacionVineta}>•</Text>
+                    <Text style={styles.recomendacionTexto}>{texto}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+
             {metodo.pendiente && (
               <View style={styles.avisoWrap}>
                 <Ionicons

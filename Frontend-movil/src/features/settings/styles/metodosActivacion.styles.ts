@@ -182,6 +182,54 @@ export function createMetodosActivacionStyles(theme: AppTheme) {
     },
 
     // Aviso dentro de la tarjeta (métodos que llegan en una próxima versión)
+    recomendacionesWrap: {
+      backgroundColor: accentSoft,
+      borderRadius: 12,
+      padding: 10,
+      marginTop: 4,
+      gap: 6,
+    },
+    recomendacionesTituloFila: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+    },
+    recomendacionesTitulo: {
+      color: theme.text,
+      fontSize: 12.5,
+      fontWeight: "700",
+    },
+    recomendacionMarca: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      gap: 6,
+      backgroundColor: "#fef3c7",
+      borderRadius: 8,
+      padding: 8,
+    },
+    recomendacionMarcaTexto: {
+      color: "#78350f",
+      fontSize: 11.5,
+      lineHeight: 16,
+      flex: 1,
+    },
+    recomendacionFila: {
+      flexDirection: "row",
+      gap: 6,
+    },
+    recomendacionVineta: {
+      color: theme.icono,
+      fontSize: 12,
+      lineHeight: 16,
+    },
+    recomendacionTexto: {
+      color: theme.text,
+      fontSize: 11.5,
+      lineHeight: 16,
+      flex: 1,
+      opacity: 0.85,
+    },
+
     avisoWrap: {
       flexDirection: "row",
       alignItems: "flex-start",
