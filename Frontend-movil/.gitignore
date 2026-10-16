@@ -45,3 +45,6 @@ app-example
 
 # Editor swap files
 *.swp
+
+# Configuración de Firebase para Android (se descarga de la consola; en EAS va como variable de archivo)
+google-services.json
