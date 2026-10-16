@@ -51,7 +51,7 @@ export function useMetodosActivacionViewModel() {
   const metodos: MetodoActivacion[] = [
     armarMetodo(m, "boton", "radio-button-on-outline", "boton", 3, config.boton, false),
     armarMetodo(m, "contacto", "person-circle-outline", "contacto", 3, config.contacto, false),
-    armarMetodo(m, "agitar", "phone-portrait-outline", "agitar", 4, config.agitar, true),
+    armarMetodo(m, "agitar", "phone-portrait-outline", "agitar", 4, config.agitar, false),
     armarMetodo(m, "bloqueo", "lock-closed-outline", "popup", 4, config.bloqueo, true),
     armarMetodo(m, "widget", "apps-outline", "widget", 3, config.widget, true),
   ];
