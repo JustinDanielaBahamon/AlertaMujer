@@ -277,7 +277,7 @@
   "titulo_paso2": "Verifica tu identidad",
   "titulo_paso3": "Crea tu nueva contraseña",
   "subtitulo_paso1": "Ingresa tu correo registrado para recibir un código de seguridad.",
-  "subtitulo_paso2": "Ingresa el código de 4 dígitos que enviamos a tu bandeja de entrada.",
+  "subtitulo_paso2": "Ingresa el código de 6 dígitos que enviamos a tu correo. Si no lo ves, revisa la carpeta de spam.",
   "subtitulo_paso3": "Escribe tu nueva contraseña y confírmala para terminar.",
   "placeholder_correo": "correo@ejemplo.com",
   "placeholder_nueva": "Nueva contraseña",

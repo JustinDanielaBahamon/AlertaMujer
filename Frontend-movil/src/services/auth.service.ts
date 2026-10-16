@@ -35,6 +35,19 @@ export interface RegisterError {
 }
 
 export const authService = {
+  /** Recuperación de contraseña: el backend envía un código de 6 dígitos al correo. */
+  async pedirCodigoRecuperacion(email: string): Promise<void> {
+    await api.post('/api/auth/forgot-password', { email });
+  },
+
+  async verificarCodigoRecuperacion(email: string, code: string): Promise<void> {
+    await api.post('/api/auth/verify-reset-code', { email, code });
+  },
+
+  async restablecerContrasena(email: string, code: string, newPassword: string): Promise<void> {
+    await api.post('/api/auth/reset-password', { email, code, newPassword });
+  },
+
   async login(correo: string, password: string): Promise<LoginResponse> {
 
     // Conectar al backend Spring Boot

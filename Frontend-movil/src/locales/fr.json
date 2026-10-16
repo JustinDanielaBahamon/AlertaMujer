@@ -276,7 +276,7 @@
     "titulo_paso2": "Vérifie ton identité",
     "titulo_paso3": "Crée ton nouveau mot de passe",
     "subtitulo_paso1": "Saisis ton e-mail enregistré pour recevoir un code de sécurité.",
-    "subtitulo_paso2": "Saisis le code à 4 chiffres que nous avons envoyé dans ta boîte de réception.",
+    "subtitulo_paso2": "Saisis le code à 6 chiffres que nous avons envoyé à ton e-mail. Si tu ne le vois pas, vérifie tes spams.",
     "subtitulo_paso3": "Écris ton nouveau mot de passe et confirme-le pour terminer.",
     "placeholder_correo": "email@exemple.com",
     "placeholder_nueva": "Nouveau mot de passe",

@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Image, ScrollView } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useRecuperarContrasenaViewModel } from '../viewModel/useRecuperarContrasenaViewModel';
+import { DIGITOS_CODIGO, useRecuperarContrasenaViewModel } from '../viewModel/useRecuperarContrasenaViewModel';
 import { styles } from "../styles/recuperarPassword.style";
 // Traemos el hook del idioma para usar los textos del JSON
 import { useLocale } from "../../../contexts/LocaleContext";
@@ -34,10 +34,14 @@ export default function RecuperarContrasenaScreen() {
     vm.paso === 2 ? vm.verificarCodigo :
     vm.guardarNuevaContrasena;
 
-  const textoLink = vm.paso === 2 ? t.recuperar.nuevo_codigo : t.recuperar.volver;
+  const textoLink =
+    vm.paso !== 2 ? t.recuperar.volver :
+    vm.puedeReenviar ? t.recuperar.nuevo_codigo :
+    `${t.recuperar.nuevo_codigo} (${vm.esperaReenvio} s)`;
 
   const accionLink = () => {
     if (vm.paso === 2) {
+      if (!vm.puedeReenviar) return;
       vm.reenviarCodigo();
       setTimeout(() => inputs.current[0]?.focus(), 100); // vuelve al primer cuadro
     } else {
@@ -92,15 +96,18 @@ export default function RecuperarContrasenaScreen() {
                   key={index}
                   ref={(el) => { inputs.current[index] = el; }}
                   style={[styles.inputCuadro, vm.expirado && styles.inputCuadroExpirado]}
-                  maxLength={1}
+                  maxLength={DIGITOS_CODIGO}
                   keyboardType="number-pad"
+                  textContentType="oneTimeCode"
+                  autoComplete="sms-otp"
                   autoFocus={index === 0}
                   editable={!vm.expirado}
                   value={digito}
                   onChangeText={(text) => {
                     const limpio = text.replace(/\D/g, '');
-                    vm.handleCodigoChange(limpio, index);
-                    if (limpio && index < 3) inputs.current[index + 1]?.focus();
+                    // Si se pega el código completo en una casilla, se reparte entre las siguientes
+                    const ultimo = vm.handleCodigoChange(limpio, index);
+                    if (limpio && ultimo < DIGITOS_CODIGO - 1) inputs.current[ultimo + 1]?.focus();
                   }}
                   onKeyPress={({ nativeEvent }) => {
                     // Borrar en un cuadro vacío regresa al anterior

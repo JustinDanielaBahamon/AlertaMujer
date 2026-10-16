@@ -277,7 +277,7 @@
   "titulo_paso2": "Verifique sua identidade",
   "titulo_paso3": "Crie sua nova senha",
   "subtitulo_paso1": "Digite seu e-mail cadastrado para receber um código de segurança.",
-  "subtitulo_paso2": "Digite o código de 4 dígitos que enviamos para sua caixa de entrada.",
+  "subtitulo_paso2": "Digite o código de 6 dígitos que enviamos para o seu e-mail. Se não o encontrar, verifique a pasta de spam.",
   "subtitulo_paso3": "Escreva sua nova senha e confirme-a para terminar.",
   "placeholder_correo": "email@exemplo.com",
   "placeholder_nueva": "Nova senha",

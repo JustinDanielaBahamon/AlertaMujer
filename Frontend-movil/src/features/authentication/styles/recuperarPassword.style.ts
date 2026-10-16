@@ -78,8 +78,8 @@ export const styles = StyleSheet.create({
         paddingHorizontal: 5,
     },
     inputCuadro: {
-        width: 60, 
-        height: 65, 
+        width: 46,
+        height: 56,
         borderWidth: 2, 
         borderColor: '#6B3FA0',
         borderRadius: 15, 
@@ -91,7 +91,7 @@ export const styles = StyleSheet.create({
     },
     // Cuadros del código cuando ya venció el tiempo
     inputCuadroExpirado: {
-        borderColor: '#D32F2F',
+        borderColor: '#9333EA',
         backgroundColor: '#F5F5F5',
         opacity: 0.6,
     },
@@ -104,7 +104,7 @@ export const styles = StyleSheet.create({
         marginBottom: 25,
     },
     timerExpirado: {
-        color: '#D32F2F',
+        color: '#9333EA',
     },
     botonPrincipal: {
         backgroundColor: '#6B3FA0', 
