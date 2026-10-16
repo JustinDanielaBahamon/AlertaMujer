@@ -31,13 +31,8 @@ export function ContactosProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
 
   const cargarContactos = useCallback(async () => {
-    console.log('[ContactosContext] cargarContactos INICIADO');
-    console.log('[ContactosContext] user:', user);
-    console.log('[ContactosContext] user.id:', user?.id);
-    console.log('[ContactosContext] typeof user.id:', typeof user?.id);
 
     if (!user?.id) {
-      console.log('[ContactosContext] user.id no existe, retornando con contactos vacíos');
       setContactos([]);
       return;
     }
@@ -45,15 +40,10 @@ export function ContactosProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
     setError(null);
     try {
-      console.log('[ContactosContext] Llamando a contactosService.getContactos con user.id:', user.id);
       const emergencyContacts = await contactosService.getContactos(user.id);
-      console.log('[ContactosContext] Respuesta recibida de getContactos:', emergencyContacts);
-      console.log('[ContactosContext] Cantidad de contactos recibidos:', emergencyContacts.length);
 
       const contactosMapeados = emergencyContacts.map(mapearEmergencyContactAContacto);
-      console.log('[ContactosContext] Contactos mapeados:', contactosMapeados);
       setContactos(contactosMapeados);
-      console.log('[ContactosContext] Contactos guardados en estado:', contactosMapeados.length);
     } catch (err) {
       console.error('[ContactosContext] Error al cargar contactos:', err);
       setError("Error al cargar contactos");
@@ -64,17 +54,12 @@ export function ContactosProvider({ children }: { children: React.ReactNode }) {
   }, [user?.id]);
 
   useEffect(() => {
-    console.log('[ContactosContext] useEffect ejecutado, llamando a cargarContactos');
     cargarContactos();
   }, [cargarContactos]);
 
   const agregarContacto = useCallback(async (payload: Omit<Contacto, "id">) => {
-    console.log('[ContactosContext] agregarContacto INICIADO');
-    console.log('[ContactosContext] payload:', payload);
-    console.log('[ContactosContext] user.id:', user?.id);
 
     if (!user?.id) {
-      console.log('[ContactosContext] user.id no existe, no se puede agregar contacto');
       return;
     }
 
@@ -89,13 +74,10 @@ export function ContactosProvider({ children }: { children: React.ReactNode }) {
         relationship: payload.parentesco,
       });
 
-      console.log('✅ [ContactosContext] nuevoContacto recibido:', nuevoContacto);
 
       const contactoMapeado = mapearEmergencyContactAContacto(nuevoContacto);
-      console.log('[ContactosContext] contactoMapeado:', contactoMapeado);
 
       setContactos((prev) => [...prev, contactoMapeado]);
-      console.log('[ContactosContext] Contacto agregado al estado');
     } catch (err) {
       console.error('[ContactosContext] Error al agregar contacto:', err);
       setError("Error al agregar contacto");
@@ -106,9 +88,6 @@ export function ContactosProvider({ children }: { children: React.ReactNode }) {
   }, [user?.id]);
 
   const actualizarContacto = useCallback(async (id: string, cambios: Omit<Contacto, "id">) => {
-    console.log('[ContactosContext] actualizarContacto INICIADO');
-    console.log('[ContactosContext] id:', id);
-    console.log('[ContactosContext] cambios:', cambios);
 
     setLoading(true);
     setError(null);
@@ -120,12 +99,10 @@ export function ContactosProvider({ children }: { children: React.ReactNode }) {
         relationship: cambios.parentesco,
       });
 
-      console.log('✅[ContactosContext] Contacto actualizado en servidor');
 
       setContactos((prev) =>
         prev.map((contacto) => (contacto.id === id ? { ...contacto, ...cambios } : contacto)),
       );
-      console.log('[ContactosContext] Contacto actualizado en estado');
     } catch (err) {
       console.error('[ContactosContext] Error al actualizar contacto:', err);
       setError("Error al actualizar contacto");

@@ -635,7 +635,6 @@ export default function MapaView() {
             value={mostrarRecorridosEnMapa}
             onValueChange={(value) => {
               setMostrarRecorridosEnMapa(value);
-              console.log('Switch cambiado:', value);
             }}
             trackColor={{ false: '#ccc', true: theme.tabActiveColor }}
             thumbColor="#fff"

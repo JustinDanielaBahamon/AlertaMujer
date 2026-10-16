@@ -79,7 +79,7 @@ export function useContactTutorialViewModel() {
     try {
       const { status } = await Contacts.getPermissionsAsync();
       if (status === "granted") return true;
-    } catch (e) { console.log("Error revisando permiso de contactos:", e); }
+    } catch (e) { console.warn("Error revisando permiso de contactos:", e); }
 
     return new Promise((resolve) => {
       permissionResolver.current = resolve;

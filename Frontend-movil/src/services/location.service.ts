@@ -87,7 +87,6 @@ export class LocationService {
       }
 
       const location = await Location.getCurrentPositionAsync(HIGH_ACCURACY_CONFIG);
-      console.log("Ubicación GPS obtenida con precisión:", location.coords.accuracy, "metros");
       return location;
     } catch (error) {
       // Re-lanzar errores tipados para que el ViewModel los clasifique
@@ -149,7 +148,6 @@ export class LocationService {
           precision: 0, // Se actualiza cuando se obtiene del GPS
         };
 
-        console.log("Geocoding inverso mejorado:", ubicacionDetallada);
         return ubicacionDetallada;
       }
 

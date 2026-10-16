@@ -47,12 +47,6 @@ export function useInicioViewModel() {
         setUbicacionResuelta(nombreCompleto);
         setEstadoUbicacion("lista");
 
-        console.log("Ubicación mejorada obtenida:", {
-          direccion: ubicacion.direccionCompleta,
-          barrio: ubicacion.barrio,
-          ciudad: ubicacion.ciudad,
-          precision: ubicacion.precision,
-        });
       } else {
         setEstadoUbicacion("error");
       }

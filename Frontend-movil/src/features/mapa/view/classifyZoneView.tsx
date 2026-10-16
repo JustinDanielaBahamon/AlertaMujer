@@ -138,7 +138,6 @@ export default function ClasificarZonaView() {
         setCiudad(direccionData.ciudad);
         setBarrio(direccionData.barrio);
 
-        console.log("Dirección mejorada obtenida:", direccionData);
       } catch {
         const fallbackData: DireccionInfo = {
           direccion: t.mapa.sin_calle,

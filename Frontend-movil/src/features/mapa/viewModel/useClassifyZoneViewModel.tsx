@@ -80,12 +80,6 @@ export function useClasificarZonaViewModel(
         setBarrio(ubicacion.barrio);
         setCiudad(ubicacion.ciudad);
 
-        console.log("Ubicación mejorada obtenida:", {
-          direccion: ubicacion.direccionCompleta,
-          barrio: ubicacion.barrio,
-          ciudad: ubicacion.ciudad,
-          precision: ubicacion.precision,
-        });
       } else {
         Alert.alert(
           "Error de ubicación",
@@ -109,7 +103,6 @@ export function useClasificarZonaViewModel(
       return false;
     }
 
-    console.log("Reporte listo para enviar:", form);
     setError("");
     return true;
   }, [form, isFormValid]);

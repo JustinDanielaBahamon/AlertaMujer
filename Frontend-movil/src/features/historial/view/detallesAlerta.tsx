@@ -54,10 +54,6 @@ export default function DetalleAlerta() {
         // Si la alerta ya tiene coordenadas del backend, usarlas directamente
         if (alerta.coords) {
           setCoordenadaAlerta(alerta.coords);
-          const geocodigos = await Location.reverseGeocodeAsync(alerta.coords);
-          if (mounted && geocodigos.length > 0) {
-            console.log("Ubicación de la alerta:", geocodigos[0].district || geocodigos[0].city);
-          }
           if (mounted) setCargandoMapa(false);
           return;
         }

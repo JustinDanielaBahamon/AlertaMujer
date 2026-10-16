@@ -82,7 +82,7 @@ export function useMessagesTutorialViewModel() {
     try {
       const yaAceptado = await AsyncStorage.getItem(STORAGE_KEY_MENSAJES);
       if (yaAceptado === "true") return true;
-    } catch (e) { console.log("Error leyendo permiso de mensajes:", e); }
+    } catch (e) { console.warn("Error leyendo permiso de mensajes:", e); }
 
     return new Promise((resolve) => {
       resolvePermission.current = resolve;

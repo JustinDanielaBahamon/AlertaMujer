@@ -92,7 +92,6 @@ export function useSecurityTutorialViewModel() {
       if (camOk && micOk) return null;
       return camOk ? "audio" : "camara";
     } catch (e) {
-      console.log("[Seguridad] Error revisando permisos:", e);
       return "camara";
     }
   };
@@ -168,7 +167,6 @@ export function useSecurityTutorialViewModel() {
   // ← Advertencia SOLO cuando el usuario cancela manualmente
   const cancelModal = useCallback(() => {
     if (flowStateRef.current === 1) {
-      console.log("[Seguridad] Ignorando cancelación durante diálogo nativo");
       return;
     }
     flowStateRef.current = 2; // user_cancelled
