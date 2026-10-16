@@ -30,6 +30,7 @@ export type MainStackParamList = {
     latitude?: number;
     longitude?: number;
     demo?: boolean; // TEMPORAL: modo de prueba con puntos simulados
+    codigo?: string; // código de seguimiento público (llega en el push a los contactos)
   };
 
   TutorialBienvenida: undefined;

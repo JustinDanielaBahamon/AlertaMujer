@@ -1,6 +1,6 @@
 {
   "name": "fronted-movil",
-  "main": "expo/AppEntry.js",
+  "main": "index.ts",
   "version": "1.0.0",
   "scripts": {
     "env": "node ./scripts/update-env.js",
