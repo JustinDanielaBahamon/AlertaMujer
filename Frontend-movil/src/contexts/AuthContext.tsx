@@ -53,7 +53,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = useCallback((nextUser: Usuario, nextToken: string, options?: SignInOptions) => {
-    console.log('🔐 [AuthContext] signIn INICIADO');
     setPendingMainRoute(options?.initialMainRoute ?? "DrawerHome");
     setUser(nextUser);
     setToken(nextToken);
@@ -61,7 +60,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     AsyncStorage.setItem(STORAGE_KEY_AUTH, JSON.stringify({ user: nextUser, token: nextToken })).catch((e) =>
       console.error("No se pudo guardar la sesión:", e),
     );
-    console.log('✅ [AuthContext] Usuario y token guardados en AuthContext');
   }, []);
 
   const signOut = useCallback(() => {

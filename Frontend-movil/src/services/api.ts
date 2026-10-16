@@ -1,11 +1,16 @@
 import axios from "axios";
 import Constants from "expo-constants";
 
+// La URL del backend no es secreta, pero el log solo interesa en desarrollo
+const registrarInicio = (...partes: unknown[]) => {
+  if (__DEV__) console.log(...partes);
+};
+
 function getApiBaseUrl(): string {
   // 1) Variable de entorno explícita (seteada por update-env.js al hacer npm start)
   const envApiUrl = process.env.EXPO_PUBLIC_API_URL;
   if (envApiUrl) {
-    console.log(" [api.ts] Usando EXPO_PUBLIC_API_URL:", envApiUrl);
+    registrarInicio(" [api.ts] Usando EXPO_PUBLIC_API_URL:", envApiUrl);
     return envApiUrl;
   }
 
@@ -20,7 +25,7 @@ function getApiBaseUrl(): string {
   if (hostUri) {
     const host = hostUri.split(":")[0];
     const url = `http://${host}:8080`;
-    console.log(" [api.ts] Usando hostUri detectado:", url);
+    registrarInicio(" [api.ts] Usando hostUri detectado:", url);
     return url;
   }
 
@@ -30,26 +35,35 @@ function getApiBaseUrl(): string {
 }
 
 const API_BASE_URL = getApiBaseUrl();
-console.log(" [api.ts] API_BASE_URL:", API_BASE_URL);
+registrarInicio(" [api.ts] API_BASE_URL:", API_BASE_URL);
+
+// Sin tiempo de espera, si el backend no responde (p. ej. dormido en Render) la app se quedaba
+// esperando indefinidamente. 20 s alcanzan para que el servidor despierte en la mayoría de los casos.
+export const TIEMPO_ESPERA_MS = 20000;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
+  timeout: TIEMPO_ESPERA_MS,
 });
+
+// Registro de peticiones solo en desarrollo, y nunca el contenido: el cuerpo trae contraseñas
+// (inicio de sesión) y las respuestas traen tokens; en un APK quedaría en el log de Android.
+const registrar = (...partes: unknown[]) => {
+  if (__DEV__) console.log(...partes);
+};
 
 // Variable para almacenar el token (se puede actualizar desde AuthContext)
 let authToken: string | null = null;
 
 export const setAuthToken = (token: string | null) => {
   authToken = token;
-  console.log(" [api.ts] Token actualizado:", token ? "***" : "null");
+  registrar(" [api.ts] Token actualizado:", token ? "***" : "null");
 };
 
 // Interceptor para agregar el token a las peticiones
 api.interceptors.request.use((config) => {
-  console.log(" [api] Request:", config.method?.toUpperCase(), config.url);
-  console.log(" [api] Request params:", config.params);
-  console.log(" [api] Request data:", config.data);
-  
+  registrar(" [api] Request:", config.method?.toUpperCase(), config.url);
+
   if (authToken) {
     config.headers.Authorization = `Bearer ${authToken}`;
   }
@@ -59,13 +73,11 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
   (response) => {
-    console.log("✅ [api] Response:", response.config.url, "Status:", response.status);
-    console.log("✅ [api] Response data:", response.data);
+    registrar("✅ [api] Response:", response.config.url, "Status:", response.status);
     return response;
   },
   (error) => {
-    console.error("❌ [api] Error:", error.config?.url, error.message);
-    console.error("❌ [api] Error response:", error.response?.data);
+    registrar("❌ [api] Error:", error.config?.url, error.response?.status ?? error.message);
     return Promise.reject(error);
   }
 );

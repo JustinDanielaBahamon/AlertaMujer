@@ -90,10 +90,8 @@ export function useLoginViewModel() {
     if (hayError) return;
 
     setCargando(true);
-    console.log('Intentando login móvil con:', correo.trim());
     try {
       const { usuario, token } = await loginWithEmail(correo.trim(), password);
-      console.log('Login móvil exitoso:', usuario);
       signIn(usuario, token);
     } catch (e: any) {
       const msg = e?.message ?? "";

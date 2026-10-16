@@ -35,8 +35,6 @@ export interface RegisterError {
 
 export const authService = {
   async login(correo: string, password: string): Promise<LoginResponse> {
-    console.log('🔐 [auth.service] login INICIADO');
-    console.log('🔐 [auth.service] correo:', correo);
 
     // Conectar al backend Spring Boot
     const response = await api.post<LoginResponse>('/api/auth/login', {
@@ -44,7 +42,6 @@ export const authService = {
       password: password
     });
 
-    console.log('✅ [auth.service] Login exitoso:', response.data);
     return response.data;
   },
 
@@ -62,8 +59,6 @@ export const authService = {
    * Muestra mensajes amigables en lugar de "API error"
    */
   async register(data: RegisterData): Promise<LoginResponse | { error: string }> {
-    console.log('🔐 [auth.service] register INICIADO');
-    console.log('🔐 [auth.service] data:', data);
 
     try {
       // Conectar al backend Spring Boot
@@ -75,11 +70,11 @@ export const authService = {
         telefono: data.telefono
       });
 
-      console.log('✅ [auth.service] Registro exitoso:', response.data);
       return response.data;
     } catch (error: any) {
       // Manejo mejorado de errores
-      console.error('❌ [auth.service] Error en registro:', error);
+      // Solo el estado: el error de axios incluye el cuerpo enviado, con la contraseña
+      if (__DEV__) console.warn('❌ [auth.service] Error en registro:', error?.response?.status ?? error?.message);
       
       // Verificar si el error es por correo duplicado (código 409 Conflict)
       if (error.response) {
