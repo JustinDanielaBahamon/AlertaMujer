@@ -12,7 +12,15 @@ import {
   pushDisponible,
   registrarPush,
 } from "../services/push.service";
-import { abrirAlertaSos, alAbrirAlertaSos, datosDeNotificacion, esAlertaSos, mostrarAlarmaSos } from "./alarmaSos";
+import {
+  abrirAlertaSos,
+  alAbrirAlertaSos,
+  datosDeNotificacion,
+  esAlertaFinalizada,
+  esAlertaSos,
+  mostrarAlarmaSos,
+  mostrarAlertaFinalizada,
+} from "./alarmaSos";
 
 /**
  * Con sesión iniciada: registra el token push, muestra la alarma si llega una alerta con la app
@@ -76,6 +84,8 @@ export function useAlertasSos(
           if (esAlertaSos(mensaje.data)) {
             await mostrarAlarmaSos(mensaje.data);
             abrirAlertaSos(mensaje.data);
+          } else if (esAlertaFinalizada(mensaje.data)) {
+            await mostrarAlertaFinalizada(mensaje.data);
           }
         });
       } catch (error) {

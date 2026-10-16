@@ -26,6 +26,42 @@ export function esAlertaSos(data: Record<string, unknown> | undefined): data is 
   return !!data && data.tipo === "ALERTA_SOS" && typeof data.alertaId === "string" && typeof data.codigo === "string";
 }
 
+/** Push que llega cuando la alerta termina (atendida, cancelada o expirada). */
+export type DatosAlertaFinalizada = {
+  tipo: "ALERTA_FINALIZADA";
+  alertaId: string;
+  nombre: string;
+  estado: string;
+};
+
+export function esAlertaFinalizada(data: Record<string, unknown> | undefined): data is DatosAlertaFinalizada {
+  return !!data && data.tipo === "ALERTA_FINALIZADA" && typeof data.alertaId === "string";
+}
+
+const CANAL_AVISOS = "avisos_alertas";
+
+/** Apaga la alarma de esa alerta y deja un aviso silencioso de que terminó. */
+export async function mostrarAlertaFinalizada(datos: DatosAlertaFinalizada): Promise<void> {
+  await detenerAlarmaSos(datos.alertaId);
+  await notifee.createChannel({
+    id: CANAL_AVISOS,
+    name: "Avisos de alertas",
+    description: "Cuando termina una alerta de un contacto",
+    importance: AndroidImportance.DEFAULT,
+  });
+  const nombre = datos.nombre?.trim() || "tu contacto";
+  const que =
+    datos.estado === "resolved" ? "fue marcada como atendida"
+    : datos.estado === "cancelled" ? "fue cancelada"
+    : "terminó";
+  await notifee.displayNotification({
+    id: `fin-${datos.alertaId}`,
+    title: "✅ Alerta terminada",
+    body: `La alerta de ${nombre} ${que}.`,
+    android: { channelId: CANAL_AVISOS, pressAction: { id: "default", launchActivity: "default" } },
+  });
+}
+
 export async function crearCanalSos(): Promise<void> {
   await notifee.createChannel({
     id: CANAL_SOS,

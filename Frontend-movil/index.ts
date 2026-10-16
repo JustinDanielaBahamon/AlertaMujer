@@ -7,13 +7,22 @@ import notifee, { EventType } from "@notifee/react-native";
 import { getApp } from "@react-native-firebase/app";
 import { getMessaging, setBackgroundMessageHandler } from "@react-native-firebase/messaging";
 import App from "./App";
-import { abrirAlertaSos, datosDeNotificacion, esAlertaSos, mostrarAlarmaSos } from "./src/notifications/alarmaSos";
+import {
+  abrirAlertaSos,
+  datosDeNotificacion,
+  esAlertaFinalizada,
+  esAlertaSos,
+  mostrarAlarmaSos,
+  mostrarAlertaFinalizada,
+} from "./src/notifications/alarmaSos";
 
 if (Constants.expoConfig?.extra?.pushConfigurado === true) {
   try {
     setBackgroundMessageHandler(getMessaging(getApp()), async (mensaje) => {
       if (esAlertaSos(mensaje.data)) {
         await mostrarAlarmaSos(mensaje.data);
+      } else if (esAlertaFinalizada(mensaje.data)) {
+        await mostrarAlertaFinalizada(mensaje.data);
       }
     });
   } catch (error) {
