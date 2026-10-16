@@ -7,6 +7,10 @@ module.exports = ({ config }) => {
   // google-services.json: archivo local (no se sube a git) o variable de archivo de EAS
   const googleServices = process.env.GOOGLE_SERVICES_JSON ?? "./google-services.json";
   const conFirebase = fs.existsSync(path.resolve(__dirname, googleServices));
+  // HTTP sin cifrar solo para desarrollo local (backend en la IP del PC); los APK de EAS hablan
+  // con Render por HTTPS y no deben permitir tráfico en claro
+  const perfilEas = process.env.EAS_BUILD_PROFILE;
+  const permitirHttp = !perfilEas || perfilEas === "development";
 
   const plugins = (config.plugins ?? []).map((p) => {
     // Notifee publica su librería Android en un repositorio Maven local dentro de node_modules
@@ -19,6 +23,7 @@ module.exports = ({ config }) => {
           ...opciones,
           android: {
             ...android,
+            usesCleartextTraffic: permitirHttp,
             extraMavenRepos: [
               ...(android.extraMavenRepos ?? []),
               "../../node_modules/@notifee/react-native/android/libs",
