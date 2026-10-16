@@ -8,8 +8,10 @@ import type { RouteProp } from "@react-navigation/native";
 import type { MainStackParamList } from "../../../navigation/types";
 import {
   getSeguimientoAlerta,
+  getSeguimientoPublico,
   type PuntoUbicacion,
 } from "../../../services/alert-tracking.service";
+import { detenerAlarmaSos } from "../../../notifications/alarmaSos";
 import { descripcionLugar, obtenerLugar } from "../../../services/geocoding.service";
 
 // Ciclo de actualización: cada 30 s se actualiza la ubicación; tras 10 actualizaciones
@@ -144,7 +146,10 @@ export function useAlertaContactoViewModel() {
     const cargar = async () => {
       hechas += 1;
       try {
-        const seguimiento = await getSeguimientoAlerta(params.alertaId);
+        // Contacto de emergencia (llega por push): endpoint público con el código de seguimiento
+        const seguimiento = params.codigo
+          ? await getSeguimientoPublico(params.codigo)
+          : await getSeguimientoAlerta(params.alertaId);
         if (!mounted) return;
 
         setErrorConexion(false);
@@ -167,6 +172,11 @@ export function useAlertaContactoViewModel() {
       mounted = false;
       if (timer) clearTimeout(timer);
     };
+  }, [params.alertaId, params.codigo, DEMO]);
+
+  // Al abrir la pantalla de la alerta se apaga la alarma
+  useEffect(() => {
+    if (!DEMO) detenerAlarmaSos(params.alertaId).catch(() => undefined);
   }, [params.alertaId, DEMO]);
 
   // ===== TEMPORAL (modo demo): agrega un punto nuevo con la ubicación real del teléfono =====

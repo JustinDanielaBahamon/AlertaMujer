@@ -57,3 +57,20 @@ export const getSeguimientoAlerta = async (
 
   return { estado: (alerta.status || "").toLowerCase(), puntos };
 };
+
+/**
+ * Seguimiento para un contacto de emergencia: usa el endpoint público con el código que llega en
+ * el push (un contacto no puede leer la alerta de otra persona por /api/alerts/{id}).
+ */
+export const getSeguimientoPublico = async (codigo: string): Promise<SeguimientoAlerta> => {
+  const { data } = await api.get<any>(`/api/public/tracking/${encodeURIComponent(codigo)}`);
+  const puntos: PuntoUbicacion[] = (data?.route ?? [])
+    .filter((p: any) => p?.latitude != null && p?.longitude != null)
+    .map((p: any, i: number) => ({
+      id: `t-${i}-${p.recordedAt}`,
+      latitude: Number(p.latitude),
+      longitude: Number(p.longitude),
+      recordedAt: aFecha(p.recordedAt),
+    }));
+  return { estado: String(data?.status ?? "").toLowerCase(), puntos };
+};
