@@ -121,7 +121,7 @@ export function useAlertaActivaViewModel() {
           userProfileId: user.id,
           deviceId: device.id,
           alertType: "main",
-          activationMethod: "panic_button",
+          activationMethod: contactoDestino ? "contact" : "panic_button",
           status: "active",
           // Alerta normal; si es individual, el mensaje indica el contacto destinatario.
           message: contactoDestino
