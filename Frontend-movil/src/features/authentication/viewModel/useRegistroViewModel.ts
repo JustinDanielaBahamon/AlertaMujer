@@ -94,8 +94,8 @@ export function useRegistroViewModel() {
 
     if (!password) {
       nuevosErrores.password = "La contraseña es obligatoria";
-    } else if (password.length < 6) {
-      nuevosErrores.password = "Mínimo 6 caracteres";
+    } else if (password.length < 8) {
+      nuevosErrores.password = "Mínimo 8 caracteres";
     }
 
     if (password !== confirmPassword) {

@@ -141,11 +141,11 @@ export function useRecuperarContrasenaViewModel() {
   };
 
   const guardarNuevaContrasena = () => {
-    if (nuevaPassword.length < 6) {
+    if (nuevaPassword.length < 8) {
       mostrarAlerta(
         'error',
         'Contraseña muy corta',
-        'Usa mínimo 6 caracteres para proteger tu cuenta.'
+        'Usa mínimo 8 caracteres para proteger tu cuenta.'
       );
       return;
     }
