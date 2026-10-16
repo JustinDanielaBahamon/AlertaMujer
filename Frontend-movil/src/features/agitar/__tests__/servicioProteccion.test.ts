@@ -1,0 +1,122 @@
+jest.mock("@notifee/react-native", () => ({
+  __esModule: true,
+  default: {
+    registerForegroundService: jest.fn(),
+    displayNotification: jest.fn(async () => "id"),
+    cancelNotification: jest.fn(async () => {}),
+    createChannel: jest.fn(async () => "canal"),
+    requestPermission: jest.fn(async () => ({})),
+    stopForegroundService: jest.fn(async () => {}),
+  },
+  AndroidCategory: { ALARM: "alarm" },
+  AndroidForegroundServiceType: { FOREGROUND_SERVICE_TYPE_LOCATION: 8 },
+  AndroidImportance: { HIGH: 4, LOW: 2 },
+  AndroidVisibility: { PUBLIC: 1 },
+  EventType: { PRESS: 1, ACTION_PRESS: 2 },
+}));
+
+let mockLector: ((m: { x: number; y: number; z: number }) => void) | null = null;
+jest.mock("expo-sensors", () => ({
+  Accelerometer: {
+    isAvailableAsync: jest.fn(async () => true),
+    setUpdateInterval: jest.fn(),
+    addListener: jest.fn((l) => {
+      mockLector = l;
+      return { remove: () => (mockLector = null) };
+    }),
+  },
+}));
+
+jest.mock("expo-location", () => ({ requestForegroundPermissionsAsync: jest.fn(async () => ({ status: "granted" })) }));
+
+jest.mock("../alertaEnSegundoPlano", () => ({
+  alertaEnSegundoPlano: jest.fn(() => null),
+  crearAlertaPorSacudida: jest.fn(async () => 77),
+}));
+
+import notifee from "@notifee/react-native";
+import { AppState } from "react-native";
+import * as Location from "expo-location";
+import { crearAlertaPorSacudida } from "../alertaEnSegundoPlano";
+import {
+  alAbrirAlertaPorSacudida,
+  alSacudirEnPantalla,
+  detenerProteccion,
+  iniciarProteccion,
+  manejarEventoProteccion,
+  registrarServicioProteccion,
+} from "../servicioProteccion";
+
+// Cuatro picos fuertes separados, como una sacudida real
+function sacudir() {
+  for (let i = 0; i < 4; i++) {
+    jest.setSystemTime(Date.now() + 200);
+    mockLector?.({ x: 3, y: 0, z: 0 });
+  }
+}
+
+async function encender() {
+  registrarServicioProteccion();
+  const correr = (notifee.registerForegroundService as jest.Mock).mock.calls.at(-1)[0];
+  expect(await iniciarProteccion()).toBe("activa");
+  correr(); // Notifee ejecuta la tarea al mostrar la notificación del servicio
+}
+
+describe("servicioProteccion", () => {
+  beforeEach(async () => {
+    jest.useFakeTimers();
+    jest.clearAllMocks();
+    jest.spyOn(console, "warn").mockImplementation(() => {});
+    await detenerProteccion();
+  });
+
+  afterEach(() => jest.useRealTimers());
+
+  it("sin permiso de ubicación no enciende el servicio", async () => {
+    (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValueOnce({ status: "denied" });
+    expect(await iniciarProteccion()).toBe("sin_ubicacion");
+    expect(notifee.displayNotification).not.toHaveBeenCalled();
+  });
+
+  it("con la app en pantalla abre la cuenta regresiva de la app", async () => {
+    Object.defineProperty(AppState, "currentState", { value: "active", configurable: true });
+    const oyente = jest.fn();
+    const quitar = alSacudirEnPantalla(oyente);
+    await encender();
+
+    sacudir();
+
+    expect(oyente).toHaveBeenCalledTimes(1);
+    expect(crearAlertaPorSacudida).not.toHaveBeenCalled();
+    quitar();
+  });
+
+  it("en segundo plano envía la alerta tras 5 s y permite abrirla", async () => {
+    Object.defineProperty(AppState, "currentState", { value: "background", configurable: true });
+    await encender();
+
+    sacudir();
+    await jest.advanceTimersByTimeAsync(6000);
+
+    expect(crearAlertaPorSacudida).toHaveBeenCalledTimes(1);
+    const enviada = (notifee.displayNotification as jest.Mock).mock.calls.at(-1)[0];
+    expect(enviada.title).toContain("Alerta enviada");
+
+    const abrir = jest.fn();
+    manejarEventoProteccion({ type: 1, detail: { notification: enviada } } as never);
+    alAbrirAlertaPorSacudida(abrir);
+    expect(abrir).toHaveBeenCalledWith(77);
+  });
+
+  it("si se toca Cancelar no se envía nada", async () => {
+    Object.defineProperty(AppState, "currentState", { value: "background", configurable: true });
+    await encender();
+
+    sacudir();
+    await jest.advanceTimersByTimeAsync(2000);
+    manejarEventoProteccion({ type: 2, detail: { pressAction: { id: "cancelar_agitar" } } } as never);
+    await jest.advanceTimersByTimeAsync(6000);
+
+    expect(crearAlertaPorSacudida).not.toHaveBeenCalled();
+  });
+});

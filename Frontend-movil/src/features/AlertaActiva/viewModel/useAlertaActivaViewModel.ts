@@ -13,6 +13,7 @@ import { getOrCreateDevice } from "../../../services/devices.service";
 import type { PuntoUbicacion } from "../../../services/alert-tracking.service";
 import { descripcionLugar, obtenerLugar } from "../../../services/geocoding.service";
 import { reportarUbicacion } from "../../../services/location-reporter.service";
+import { tomarControlDeLaAlerta } from "../../agitar/alertaEnSegundoPlano";
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
 type AlertaActivaRoute = RouteProp<MainStackParamList, "AlertaActiva">;
@@ -54,6 +55,9 @@ export function useAlertaActivaViewModel() {
 
   // Si viene un contacto, la alerta es solo para esa persona (no para todos).
   const contactoDestino = route.params?.contacto;
+  const metodo = route.params?.metodo;
+  // Alerta que ya se creó en segundo plano al agitar el teléfono
+  const alertaExistente = route.params?.alertaId;
 
   // Referencia al id de la alerta creada en el backend (para poder cerrarla).
   const alertaCreadaIdRef = useRef<number | null>(null);
@@ -108,6 +112,14 @@ export function useAlertaActivaViewModel() {
 
   const alertaCreacionIniciadaRef = useRef(false);
 
+  // Si la alerta ya existe, esta pantalla toma el seguimiento que hacía el servicio en segundo plano
+  useEffect(() => {
+    if (!alertaExistente) return;
+    alertaCreacionIniciadaRef.current = true;
+    alertaCreadaIdRef.current = alertaExistente;
+    tomarControlDeLaAlerta();
+  }, [alertaExistente]);
+
   // Crea la alerta en el backend al activar el SOS (una sola vez, incluyendo la ubicación).
   useEffect(() => {
     let mounted = true;
@@ -121,12 +133,14 @@ export function useAlertaActivaViewModel() {
           userProfileId: user.id,
           deviceId: device.id,
           alertType: "main",
-          activationMethod: contactoDestino ? "contact" : "panic_button",
+          activationMethod: contactoDestino ? "contact" : metodo === "agitar" ? "suspicious_movement" : "panic_button",
           status: "active",
           // Alerta normal; si es individual, el mensaje indica el contacto destinatario.
           message: contactoDestino
             ? `Alerta SOS activada desde la app solo para: ${contactoDestino.nombre ?? ""} (${contactoDestino.telefono})`
-            : "Alerta SOS activada desde la app",
+            : metodo === "agitar"
+              ? "Alerta SOS activada al agitar el teléfono"
+              : "Alerta SOS activada desde la app",
           latitude: location?.latitude,
           longitude: location?.longitude,
         });
@@ -142,7 +156,7 @@ export function useAlertaActivaViewModel() {
     return () => {
       mounted = false;
     };
-  }, [user?.id, location, contactoDestino]);
+  }, [user?.id, location, contactoDestino, metodo]);
 
   // Actualiza la ubicacion en ciclos para ahorrar bateria: cada 30 s (10 veces) y luego
   // 5 min de reposo, en los que el GPS no se consulta. Despues repite el ciclo.

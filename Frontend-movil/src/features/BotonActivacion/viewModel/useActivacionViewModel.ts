@@ -15,6 +15,7 @@ export function useActivacionViewModel() {
   const route = useRoute<ActivacionRoute>();
   // Si viene un contacto, la alerta es solo para esa persona (no para todos)
   const contacto = route.params?.contacto;
+  const metodo = route.params?.metodo;
   const { config } = useNotificaciones();
   const { grabarVideo, grabarAudio } = useEvidencia();
   const [contador, setContador] = useState(5);
@@ -25,8 +26,8 @@ export function useActivacionViewModel() {
   const irAAlertaActiva = useCallback(() => {
     if (yaNavegoRef.current) return;
     yaNavegoRef.current = true;
-    navigation.replace("AlertaActiva", contacto ? { contacto } : undefined);
-  }, [navigation, contacto]);
+    navigation.replace("AlertaActiva", contacto || metodo ? { contacto, metodo } : undefined);
+  }, [navigation, contacto, metodo]);
 
   useEffect(() => {
     if (contador > 0) {

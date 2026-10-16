@@ -21,6 +21,7 @@ import {
   mostrarAlarmaSos,
   mostrarAlertaFinalizada,
 } from "./alarmaSos";
+import { manejarEventoProteccion } from "../features/agitar/servicioProteccion";
 
 /**
  * Con sesión iniciada: registra el token push, muestra la alarma si llega una alerta con la app
@@ -67,11 +68,14 @@ export function useAlertasSos(
 
     // App abierta desde la notificación o la pantalla completa
     notifee.getInitialNotification().then((inicial) => {
+      // Notifee la entrega una sola vez: también puede ser la de "Alerta enviada" al agitar
+      if (inicial && manejarEventoProteccion({ type: EventType.PRESS, detail: inicial })) return;
       const datos = datosDeNotificacion(inicial?.notification);
       if (datos) abrirAlertaSos(datos);
     });
 
     const dejarDeOirToques = notifee.onForegroundEvent(({ type, detail }) => {
+      if (manejarEventoProteccion({ type, detail })) return;
       const datos = datosDeNotificacion(detail.notification);
       if (datos && (type === EventType.PRESS || type === EventType.ACTION_PRESS)) abrirAlertaSos(datos);
     });

@@ -7,6 +7,7 @@ import notifee, { EventType } from "@notifee/react-native";
 import { getApp } from "@react-native-firebase/app";
 import { getMessaging, setBackgroundMessageHandler } from "@react-native-firebase/messaging";
 import App from "./App";
+import { manejarEventoProteccion, registrarServicioProteccion } from "./src/features/agitar/servicioProteccion";
 import {
   abrirAlertaSos,
   datosDeNotificacion,
@@ -30,7 +31,11 @@ if (Constants.expoConfig?.extra?.pushConfigurado === true) {
   }
 }
 
+// Servicio de "agitar el teléfono" (notificación fija "Protección activa")
+registrarServicioProteccion();
+
 notifee.onBackgroundEvent(async ({ type, detail }) => {
+  if (manejarEventoProteccion({ type, detail })) return;
   const datos = datosDeNotificacion(detail.notification);
   if (datos && (type === EventType.PRESS || type === EventType.ACTION_PRESS)) {
     abrirAlertaSos(datos);
