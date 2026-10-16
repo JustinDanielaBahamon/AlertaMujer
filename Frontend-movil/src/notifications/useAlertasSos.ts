@@ -22,6 +22,7 @@ import {
   mostrarAlertaFinalizada,
 } from "./alarmaSos";
 import { manejarEventoProteccion } from "../features/agitar/servicioProteccion";
+import { esPedidoUbicacion, responderPedidoUbicacion } from "../services/pedidoUbicacion";
 
 /**
  * Con sesión iniciada: registra el token push, muestra la alarma si llega una alerta con la app
@@ -90,6 +91,8 @@ export function useAlertasSos(
             abrirAlertaSos(mensaje.data);
           } else if (esAlertaFinalizada(mensaje.data)) {
             await mostrarAlertaFinalizada(mensaje.data);
+          } else if (esPedidoUbicacion(mensaje.data)) {
+            await responderPedidoUbicacion();
           }
         });
       } catch (error) {
