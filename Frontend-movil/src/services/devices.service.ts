@@ -27,17 +27,17 @@ export const createDevice = async (device: Partial<DeviceApi>): Promise<DeviceAp
 /**
  * Obtiene el device del usuario autenticado; si no existe, crea uno nuevo en el backend.
  * Es necesario porque POST /api/alerts exige un deviceId válido.
+ * /api/devices/user ya devuelve solo los dispositivos de la cuenta en sesión (antes se comparaba
+ * accountId con el id de la usuaria, que es otro número, y se creaba un dispositivo por alerta).
  */
-export const getOrCreateDevice = async (accountId: number): Promise<DeviceApi> => {
+export const getOrCreateDevice = async (): Promise<DeviceApi> => {
   const devices = await getDevices();
-  const existente = devices.find((d) => d.accountId === accountId);
-  if (existente) {
-    return existente;
+  if (devices.length > 0) {
+    return devices[0];
   }
 
   return createDevice({
-    accountId,
-    deviceUuid: `expo-${accountId}-${Date.now()}`,
+    deviceUuid: `expo-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     brand: Platform.OS === 'android' ? 'Android' : Platform.OS === 'ios' ? 'iPhone' : 'Web',
     model: 'Dispositivo Expo',
     osName: Platform.OS,

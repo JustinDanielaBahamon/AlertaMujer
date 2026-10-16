@@ -116,7 +116,7 @@ export function useAlertaActivaViewModel() {
       alertaCreacionIniciadaRef.current = true;
 
       try {
-        const device = await getOrCreateDevice(user.id);
+        const device = await getOrCreateDevice();
         const alerta = await createAlert({
           userProfileId: user.id,
           deviceId: device.id,
