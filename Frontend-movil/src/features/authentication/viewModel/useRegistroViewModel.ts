@@ -192,7 +192,7 @@ export function useRegistroViewModel() {
         last_name: backendUser.lastName,
       };
 
-      signIn(usuario, response.token, { initialMainRoute: "TutorialBienvenida" });
+      signIn(usuario, response.token, { initialMainRoute: "TutorialBienvenida", refreshToken: response.refreshToken });
     } catch (error) {
       setErrorTerminos("Error al registrar. Intenta nuevamente.");
     }

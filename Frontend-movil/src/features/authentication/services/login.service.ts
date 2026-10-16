@@ -1,11 +1,13 @@
 import type { Usuario } from "../models/Usuario";
+
+export type Sesion = { usuario: Usuario; token: string; refreshToken?: string };
 import { authService } from "../../../services/auth.service";
 
 /**
  * Capa de acceso a datos / API para autenticación.
  * Utiliza el servicio de autenticación que conecta al backend Spring Boot.
  */
-export async function loginWithEmail(correo: string, password: string): Promise<{ usuario: Usuario; token: string }> {
+export async function loginWithEmail(correo: string, password: string): Promise<Sesion> {
   try {
     return aSesion(await authService.login(correo, password));
   } catch (error) {
@@ -14,7 +16,7 @@ export async function loginWithEmail(correo: string, password: string): Promise<
 }
 
 /** Inicio de sesión con el ID token que entrega Google. */
-export async function loginWithGoogleIdToken(idToken: string): Promise<{ usuario: Usuario; token: string }> {
+export async function loginWithGoogleIdToken(idToken: string): Promise<Sesion> {
   try {
     return aSesion(await authService.loginWithGoogle(idToken));
   } catch (error: any) {
@@ -26,7 +28,7 @@ export async function loginWithGoogleIdToken(idToken: string): Promise<{ usuario
 }
 
 // El backend devuelve {token, user}; se adapta al modelo Usuario del móvil
-function aSesion(response: Awaited<ReturnType<typeof authService.login>>): { usuario: Usuario; token: string } {
+function aSesion(response: Awaited<ReturnType<typeof authService.login>>): Sesion {
     const backendUser = response.user;
     const usuario: Usuario = {
       id: backendUser.id,
@@ -43,6 +45,7 @@ function aSesion(response: Awaited<ReturnType<typeof authService.login>>): { usu
     
     return {
       usuario,
-      token: response.token
+      token: response.token,
+      refreshToken: response.refreshToken,
     };
 }

@@ -41,7 +41,7 @@ export function useLoginViewModel() {
       }
       setCargando(true);
       loginWithGoogleIdToken(idToken)
-        .then(({ usuario, token }) => signIn(usuario, token))
+        .then(({ usuario, token, refreshToken }) => signIn(usuario, token, { refreshToken }))
         .catch((e: Error) => setErrorGeneral(e.message))
         .finally(() => setCargando(false));
     } else if (response?.type === "error") {
@@ -91,8 +91,8 @@ export function useLoginViewModel() {
 
     setCargando(true);
     try {
-      const { usuario, token } = await loginWithEmail(correo.trim(), password);
-      signIn(usuario, token);
+      const { usuario, token, refreshToken } = await loginWithEmail(correo.trim(), password);
+      signIn(usuario, token, { refreshToken });
     } catch (e: any) {
       const msg = e?.message ?? "";
       if (

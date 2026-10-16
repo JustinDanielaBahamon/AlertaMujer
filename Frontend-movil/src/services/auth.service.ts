@@ -2,6 +2,7 @@ import api from './api';
 
 export interface LoginResponse {
   token: string;
+  refreshToken?: string;
   user: Usuario;
 }
 

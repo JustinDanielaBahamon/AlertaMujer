@@ -52,12 +52,30 @@ const registrar = (...partes: unknown[]) => {
   if (__DEV__) console.log(...partes);
 };
 
-// Variable para almacenar el token (se puede actualizar desde AuthContext)
+// Tokens de la sesión (los actualiza AuthContext)
 let authToken: string | null = null;
+let refreshToken: string | null = null;
 
 export const setAuthToken = (token: string | null) => {
   authToken = token;
   registrar(" [api.ts] Token actualizado:", token ? "***" : "null");
+};
+
+export const setRefreshToken = (token: string | null) => {
+  refreshToken = token;
+};
+
+// AuthContext se suscribe para guardar el token renovado y para cerrar la sesión cuando ya no es válida
+let alRenovarToken: ((token: string) => void) | null = null;
+let alExpirarSesion: (() => void) | null = null;
+
+export const escucharSesion = (oyentes: { renovado: (token: string) => void; expirada: () => void }) => {
+  alRenovarToken = oyentes.renovado;
+  alExpirarSesion = oyentes.expirada;
+  return () => {
+    alRenovarToken = null;
+    alExpirarSesion = null;
+  };
 };
 
 // Interceptor para agregar el token a las peticiones
@@ -71,13 +89,52 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Una sola renovación a la vez aunque fallen varias peticiones juntas
+let renovando: Promise<string | null> | null = null;
+
+async function renovarToken(): Promise<string | null> {
+  if (!refreshToken) return null;
+  renovando ??= axios
+    .post<{ token: string }>(`${API_BASE_URL}/api/auth/refresh`, { refreshToken }, { timeout: TIEMPO_ESPERA_MS })
+    .then((r) => r.data.token ?? null)
+    .catch((e) => {
+      // Sin conexión o servidor caído: no es motivo para cerrar la sesión
+      if (!e?.response) throw e;
+      return null;
+    })
+    .finally(() => {
+      renovando = null;
+    });
+  return renovando;
+}
+
 api.interceptors.response.use(
   (response) => {
     registrar("✅ [api] Response:", response.config.url, "Status:", response.status);
     return response;
   },
-  (error) => {
+  async (error) => {
     registrar("❌ [api] Error:", error.config?.url, error.response?.status ?? error.message);
+    const original = error.config;
+    const esDeAutenticacion = String(original?.url ?? "").startsWith("/api/auth/");
+
+    // Token vencido: se renueva con el refresh token y se repite la petición una vez
+    if (error.response?.status === 401 && authToken && original && !original._reintento && !esDeAutenticacion) {
+      original._reintento = true;
+      let nuevo: string | null = null;
+      try {
+        nuevo = await renovarToken();
+      } catch {
+        return Promise.reject(error);
+      }
+      if (nuevo) {
+        setAuthToken(nuevo);
+        alRenovarToken?.(nuevo);
+        original.headers.Authorization = `Bearer ${nuevo}`;
+        return api(original);
+      }
+      alExpirarSesion?.();
+    }
     return Promise.reject(error);
   }
 );
