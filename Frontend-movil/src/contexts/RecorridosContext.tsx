@@ -66,6 +66,24 @@ export const useRecorridos = () => {
   return context;
 };
 
+/**
+ * Fecha de un recorrido para mostrar ("16 oct 2026" o, con hora, "16 oct 2026, 9:54 p. m.").
+ * Acepta la fecha ISO del backend y la antigua "dd/mm/aaaa" de los recorridos locales.
+ */
+export const formatearFechaRecorrido = (fecha: string, conHora = false): string => {
+  const partes = /^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(fecha ?? "");
+  const date = partes
+    ? new Date(Number(partes[3]), Number(partes[2]) - 1, Number(partes[1]))
+    : new Date(fecha);
+  if (isNaN(date.getTime())) return fecha || "--";
+  return date.toLocaleString("es-CO", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    ...(conHora && !partes ? { hour: "numeric", minute: "2-digit" } : {}),
+  });
+};
+
 const formatearMinutos = (minutos?: number) => {
   if (minutos == null) return "—";
   if (minutos < 60) return `${minutos} min`;

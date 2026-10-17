@@ -277,11 +277,11 @@ export const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#4CAF50",
+    backgroundColor: "#D946EF",
   },
   textoActivo: {
     fontSize: 12,
-    color: "#4CAF50",
+    color: "#C026D3",
     fontWeight: "600",
   },
 

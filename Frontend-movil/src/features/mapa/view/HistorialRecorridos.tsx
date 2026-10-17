@@ -1,7 +1,7 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Modal,
   ScrollView,
@@ -16,7 +16,9 @@ import MapView, { Marker, Polyline } from "../../../components/mapa/MapaLibre";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { useAjustesViewModel } from "../../settings/viewModel/useAjustesViewModel";
-import { useRecorridos } from "../../../contexts/RecorridosContext";
+import { formatearFechaRecorrido, useRecorridos } from "../../../contexts/RecorridosContext";
+import { descripcionLugar, obtenerLugar } from "../../../services/geocoding.service";
+import { COLOR_PUNTO_A, COLOR_PUNTO_B } from "../coloresRecorrido";
 import { styles } from "../styles/HistorialRecorridos.style";
 import { Alert } from "react-native";
 
@@ -63,7 +65,7 @@ const extra = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: "rgba(244,67,54,0.12)",
+    backgroundColor: "rgba(217,70,239,0.12)",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -71,6 +73,44 @@ const extra = StyleSheet.create({
 
 const formatearCoordenada = (p?: { latitude: number; longitude: number }) =>
   p ? `${p.latitude.toFixed(5)}, ${p.longitude.toFixed(5)}` : "--";
+
+// Recorridos guardados antes de que se guardara la dirección: su etiqueta es genérica
+const ETIQUETA_GENERICA = /^(punto [ab]|inicio|fin)$/i;
+
+type Direcciones = Record<string, { inicio?: string; fin?: string }>;
+
+/**
+ * Dirección y barrio de inicio y fin de cada recorrido. Si la etiqueta guardada ya los tiene se usa
+ * tal cual; si es genérica ("Punto A") se buscan con las coordenadas, una consulta por segundo.
+ */
+function useDireccionesRecorridos(recorridos: Recorrido[]): Direcciones {
+  const [direcciones, setDirecciones] = useState<Direcciones>({});
+
+  useEffect(() => {
+    let vivo = true;
+    (async () => {
+      for (const r of recorridos) {
+        if (r.puntos.length === 0 || direcciones[r.id]) continue;
+        const buscar = async (texto: string, p: PuntoGPS) => {
+          if (!ETIQUETA_GENERICA.test(texto.trim())) return texto;
+          const lugar = await obtenerLugar(p.latitude, p.longitude);
+          await new Promise((res) => setTimeout(res, 1100));
+          return lugar ? descripcionLugar(lugar) || undefined : undefined;
+        };
+        const inicio = await buscar(r.barrioInicio, r.puntos[0]);
+        const fin = await buscar(r.barrioFin, r.puntos[r.puntos.length - 1]);
+        if (!vivo) return;
+        setDirecciones((prev) => ({ ...prev, [r.id]: { inicio, fin } }));
+      }
+    })();
+    return () => {
+      vivo = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recorridos]);
+
+  return direcciones;
+}
 
 export default function HistorialRecorridos() {
   const { theme } = useTheme();
@@ -83,21 +123,15 @@ export default function HistorialRecorridos() {
   const [selectedItem, setSelectedItem] = useState<Recorrido | null>(null);
 
   const todosLosRecorridos: Recorrido[] = recorridosManuales;
+  const direcciones = useDireccionesRecorridos(todosLosRecorridos);
 
-  // La fecha se guarda como "dd/mm/aaaa": se lee tal cual para evitar "Invalid Date"
-  const formatearFecha = (fecha: string) => {
-    const partes = /^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(fecha ?? "");
-    const date = partes
-      ? new Date(Number(partes[3]), Number(partes[2]) - 1, Number(partes[1]))
-      : new Date(fecha);
-
-    if (isNaN(date.getTime())) return fecha || "--";
-
-    return date.toLocaleDateString("es-CO", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
+  // Dirección de inicio o fin para mostrar; mientras se busca, la etiqueta guardada
+  const direccionDe = (r: Recorrido, extremo: "inicio" | "fin") => {
+    const encontrada = direcciones[r.id]?.[extremo];
+    if (encontrada) return encontrada;
+    const guardada = extremo === "inicio" ? r.barrioInicio : r.barrioFin;
+    if (!ETIQUETA_GENERICA.test(guardada.trim())) return guardada;
+    return direcciones[r.id] ? "Dirección no disponible" : "Buscando dirección…";
   };
 
   const confirmarEliminar = (id: string, nombre: string) => {
@@ -198,35 +232,27 @@ export default function HistorialRecorridos() {
                   color={theme.contactSubtext}
                 />
                 <Text style={[styles.timeText, { color: theme.contactSubtext }]}>
-                  {formatearFecha(item.fecha)}
-                </Text>
-                <MaterialIcons
-                  name="straighten"
-                  size={16}
-                  color={theme.contactSubtext}
-                />
-                <Text style={[styles.timeText, { color: theme.contactSubtext }]}>
-                  {item.distanciaEstimada}
+                  {formatearFechaRecorrido(item.fecha)}
                 </Text>
               </View>
 
               <View style={styles.locationRow}>
-                <MaterialIcons name="trip-origin" size={14} color="#4CAF50" />
+                <MaterialIcons name="trip-origin" size={14} color={COLOR_PUNTO_A} />
                 <Text
                   style={[styles.addressText, { color: theme.text }]}
-                  numberOfLines={1}
+                  numberOfLines={2}
                 >
-                  {formatearCoordenada(item.puntos[0])}
+                  {direccionDe(item, "inicio")}
                 </Text>
               </View>
 
               <View style={[styles.locationRow, { marginTop: 4 }]}>
-                <MaterialIcons name="flag" size={14} color="#F44336" />
+                <MaterialIcons name="flag" size={14} color={COLOR_PUNTO_B} />
                 <Text
                   style={[styles.addressText, { color: theme.text }]}
-                  numberOfLines={1}
+                  numberOfLines={2}
                 >
-                  {formatearCoordenada(item.puntos[item.puntos.length - 1])}
+                  {direccionDe(item, "fin")}
                 </Text>
               </View>
             </View>
@@ -255,7 +281,7 @@ export default function HistorialRecorridos() {
                 }
                 activeOpacity={0.7}
               >
-                <MaterialIcons name="delete" size={30} color="#F44336" />
+                <MaterialIcons name="delete" size={30} color={COLOR_PUNTO_B} />
               </TouchableOpacity>
             </View>
             </TouchableOpacity>
@@ -285,9 +311,29 @@ export default function HistorialRecorridos() {
                       <InfoRow
                         icon="calendar-today"
                         label="Fecha"
-                        value={formatearFecha(selectedItem.fecha)}
+                        value={formatearFechaRecorrido(selectedItem.fecha, true)}
                         theme={theme}
                       />
+                      <InfoRow
+                        icon="trip-origin"
+                        label="Inicio"
+                        value={direccionDe(selectedItem, "inicio")}
+                        theme={theme}
+                      />
+                      <InfoRow
+                        icon="flag"
+                        label="Fin"
+                        value={direccionDe(selectedItem, "fin")}
+                        theme={theme}
+                      />
+                      {!!selectedItem.municipio && (
+                        <InfoRow
+                          icon="location-city"
+                          label="Municipio"
+                          value={[selectedItem.municipio, selectedItem.departamento].filter(Boolean).join(", ")}
+                          theme={theme}
+                        />
+                      )}
                       <InfoRow
                         icon="straighten"
                         label="Distancia"
@@ -295,35 +341,17 @@ export default function HistorialRecorridos() {
                         theme={theme}
                       />
                       <InfoRow
-                        icon="trip-origin"
-                        label="Coordenada inicial"
-                        value={formatearCoordenada(selectedItem.puntos[0])}
+                        icon="schedule"
+                        label="Tiempo a pie"
+                        value={selectedItem.tiempoEstimado}
                         theme={theme}
                       />
                       <InfoRow
-                        icon="flag"
-                        label="Coordenada final"
-                        value={formatearCoordenada(
-                          selectedItem.puntos[selectedItem.puntos.length - 1]
-                        )}
-                        theme={theme}
-                      />
-                      <InfoRow
-                        icon="home"
-                        label="Barrio inicial"
-                        value={selectedItem.barrioInicio}
-                        theme={theme}
-                      />
-                      <InfoRow
-                        icon="location-on"
-                        label="Barrio final"
-                        value={selectedItem.barrioFin}
-                        theme={theme}
-                      />
-                      <InfoRow
-                        icon="location-city"
-                        label="Municipio"
-                        value={`${selectedItem.municipio}, ${selectedItem.departamento}`}
+                        icon="my-location"
+                        label="Coordenadas"
+                        value={`${formatearCoordenada(selectedItem.puntos[0])} → ${formatearCoordenada(
+                          selectedItem.puntos[selectedItem.puntos.length - 1],
+                        )}`}
                         theme={theme}
                       />
                     </View>
@@ -357,14 +385,14 @@ export default function HistorialRecorridos() {
                         <Marker
                           coordinate={selectedItem.puntos[0]}
                           title="Inicio"
-                          pinColor="#4CAF50"
+                          pinColor={COLOR_PUNTO_A}
                         />
 
                         {/* Marcador de fin */}
                         <Marker
                           coordinate={selectedItem.puntos[selectedItem.puntos.length - 1]}
                           title="Fin"
-                          pinColor="#F44336"
+                          pinColor={COLOR_PUNTO_B}
                         />
                       </MapView>
                     </View>

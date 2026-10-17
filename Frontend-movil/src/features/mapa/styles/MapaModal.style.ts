@@ -47,7 +47,7 @@ export const createMapaModalStyles = (theme: AppTheme, insets: Insets) => {
       width: 8,
       height: 8,
       borderRadius: 4,
-      backgroundColor: "#4CAF50",
+      backgroundColor: "#D946EF",
     },
     miniBadgeTexto: {
       fontSize: 11,

@@ -23,10 +23,12 @@ import { styles } from "../styles/MapaStyles";
 import { createMapaModalStyles } from "../styles/MapaModal.style";
 import { useMapaViewModel } from "../viewModel/useMapaViewModel";
 import {
+  formatearFechaRecorrido,
   MAX_IMPORTANTES,
   MAX_RECORRIDOS,
   useRecorridos,
 } from "../../../contexts/RecorridosContext";
+import { COLOR_PUNTO_B } from "../coloresRecorrido";
 import { useAuth } from "../../../contexts/AuthContext";
 import { frequentLocationsService } from "../../../services/frequent-locations.service";
 import BarraBusquedaDireccion from "./BarraBusquedaDireccion";
@@ -41,15 +43,16 @@ type InfoDireccion = {
 };
 
 // Colores distintos para cada recorrido guardado, para que no se amontonen
+// Solo la paleta de la app: violetas, morados y neón
 const COLORES_RUTAS = [
   "#7B1DB2", // Púrpura
-  "#2196F3", // Azul
-  "#FF9800", // Naranja
-  "#00BCD4", // Cyan
-  "#9C27B0", // Violeta
-  "#FF5722", // Naranja oscuro
-  "#4CAF50", // Verde
-  "#E91E63", // Rosa
+  "#D946EF", // Morado neón
+  "#9333EA", // Violeta
+  "#C026D3", // Fucsia
+  "#6D28D9", // Violeta oscuro
+  "#A855F7", // Lila
+  "#4C1D95", // Morado profundo
+  "#E879F9", // Neón claro
 ];
 
 // Zonas clasificadas por la usuaria (pantalla "Clasificar zona"), dibujadas como círculo en el mapa
@@ -884,7 +887,7 @@ export default function MapaView() {
                       tracksViewChanges={trackear}
                       title="Fin"
                     >
-                      <View style={[ms.pinRuta, { backgroundColor: "#F44336" }]}>
+                      <View style={[ms.pinRuta, { backgroundColor: COLOR_PUNTO_B }]}>
                         <MaterialIcons name="flag" size={14} color="#FFFFFF" />
                       </View>
                     </Marker>
@@ -1052,7 +1055,7 @@ export default function MapaView() {
                       <MaterialIcons name="calendar-today" size={20} color="#7B1DB2" />
                       <Text style={[styles.infoLabel, { color: theme.contactSubtext }]}>Fecha:</Text>
                       <Text style={[styles.infoValue, { color: theme.text }]}>
-                        {recorridoInfo.fecha}
+                        {formatearFechaRecorrido(recorridoInfo.fecha, true)}
                       </Text>
                     </View>
                     <View style={styles.infoRow}>
