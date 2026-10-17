@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native"; // TEMPORAL
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack"; // TEMPORAL
 import {
     Modal,
     ScrollView,
@@ -15,7 +13,6 @@ import MapView, { Marker, Polyline } from "../../../components/mapa/MapaLibre";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { useTheme } from "../../../contexts/ThemeContext";
-import type { MainStackParamList } from "../../../navigation/types"; // TEMPORAL
 import type { PuntoUbicacion } from "../../../services/alert-tracking.service";
 import { createStyles } from "../style/alertaActivaStyle";
 import { useAlertaActivaViewModel } from "../viewModel/useAlertaActivaViewModel";
@@ -78,8 +75,6 @@ export default function AlertaActivaScreen() {
   const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const styles = createStyles(theme, width, height, insets);
-  const navigation =
-    useNavigation<NativeStackNavigationProp<MainStackParamList>>(); // TEMPORAL
   const tx = t.alertaContacto; // textos del mapa (los mismos de "Alerta de emergencia")
 
   // Los pines personalizados se redibujan unos instantes cuando llega un punto nuevo
@@ -197,38 +192,6 @@ export default function AlertaActivaScreen() {
           <Text style={styles.callText}>{t.alertaActiva.llamar911}</Text>
         </TouchableOpacity>
 
-        {/* ===== TEMPORAL: quitar este bloque cuando la alerta ya se envíe a los contactos ===== */}
-        <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={() =>
-            navigation.navigate("AlertaContacto", {
-              alertaId: 0,
-              nombreUsuaria: "Usuaria de prueba",
-              latitude: vm.location?.latitude,
-              longitude: vm.location?.longitude,
-              demo: true,
-            })
-          }
-          style={{
-            alignSelf: "center",
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 6,
-            marginTop: 16,
-            paddingHorizontal: 12,
-            paddingVertical: 6,
-            borderRadius: 14,
-            borderWidth: 1,
-            borderStyle: "dashed",
-            borderColor: theme.icono,
-          }}
-        >
-          <MaterialIcons name="visibility" size={14} color={theme.icono} />
-          <Text style={{ fontSize: 11, fontWeight: "600", color: theme.icono }}>
-            Ver pantalla de contacto (temporal)
-          </Text>
-        </TouchableOpacity>
-        {/* ===== FIN TEMPORAL ===== */}
         </View>
       </ScrollView>
 
