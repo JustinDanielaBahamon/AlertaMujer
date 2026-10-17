@@ -32,6 +32,7 @@ import { COLOR_PUNTO_B } from "../coloresRecorrido";
 import { useAuth } from "../../../contexts/AuthContext";
 import { frequentLocationsService } from "../../../services/frequent-locations.service";
 import BarraBusquedaDireccion from "./BarraBusquedaDireccion";
+import { getZonas } from "../../../services/zones.service";
 
 type Coord = { latitude: number; longitude: number };
 
@@ -66,10 +67,31 @@ type ZonaClasificada = {
 
 const RADIO_ZONA_METROS = 150;
 
+// Zonas que clasificó la usuaria: tonos de la paleta de la app según el nivel
 const COLOR_NIVEL: Record<ZonaClasificada["nivelRiesgo"], string> = {
-  muy_segura: "#27AE60",
-  moderada: "#D89B00",
-  muy_insegura: "#E74C3C",
+  muy_segura: "#7C3AED",
+  moderada: "#C084FC",
+  muy_insegura: "#D946EF",
+};
+
+// Zonas de emergencia del sistema (policía, asistencia, zonas seguras): siempre visibles, en morado
+// oscuro y con ícono, para que no se confundan con las de la usuaria
+type ZonaOficial = {
+  id: string;
+  nombre: string;
+  tipo: string;
+  latitude: number;
+  longitude: number;
+  radio: number;
+};
+
+const COLOR_ZONA_OFICIAL = "#4C1D95";
+
+const ICONO_ZONA_OFICIAL: Record<string, keyof typeof MaterialIcons.glyphMap> = {
+  policia: "local-police",
+  asistencia: "health-and-safety",
+  help: "support",
+  safe: "verified-user",
 };
 
 const distanciaMetros = (a: Coord, b: Coord) => {
@@ -186,6 +208,8 @@ export default function MapaView() {
   const [mapaListo, setMapaListo] = useState(false); // el mapa grande se dibuja cuando termina la animación del modal
   const [trackear, setTrackear] = useState(true); // los pines personalizados se redibujan solo unos instantes
   const [zonasClasificadas, setZonasClasificadas] = useState<ZonaClasificada[]>([]);
+  const [zonasOficiales, setZonasOficiales] = useState<ZonaOficial[]>([]);
+  const [mostrarMisZonas, setMostrarMisZonas] = useState(true);
   const [textoBusqueda, setTextoBusqueda] = useState("");
   const [resultadoBusqueda, setResultadoBusqueda] = useState<{
     coord: Coord;
@@ -403,7 +427,7 @@ export default function MapaView() {
         <MaterialIcons 
           name={serviciosDesactivados ? "settings" : (permisoDenegado ? "location-off" : "location-searching")} 
           size={48} 
-          color={esError ? "#E74C3C" : "#7B1DB2"} 
+          color={esError ? "#D946EF" : "#7B1DB2"} 
         />
         <Text style={[styles.loadingText, { color: theme.text }]}>
           {serviciosDesactivados 
@@ -429,25 +453,77 @@ export default function MapaView() {
     );
   }
 
+  // Zonas de emergencia del sistema: se cargan al entrar al mapa (no dependen de la usuaria)
+  useFocusEffect(
+    useCallback(() => {
+      let activo = true;
+      getZonas()
+        .then((zonas) => {
+          if (!activo) return;
+          setZonasOficiales(
+            zonas
+              .filter((z) => z.isActive !== false && z.latitude != null && z.longitude != null)
+              .map((z) => ({
+                id: String(z.id),
+                nombre: z.name,
+                tipo: (z.zoneType || "").toLowerCase(),
+                latitude: Number(z.latitude),
+                longitude: Number(z.longitude),
+                radio: Number(z.radiusMeters) > 0 ? Number(z.radiusMeters) : RADIO_ZONA_METROS,
+              }))
+          );
+        })
+        .catch((error) => console.warn("No se pudieron cargar las zonas de emergencia:", error));
+      return () => {
+        activo = false;
+      };
+    }, [])
+  );
+
   // ─── COORDENADA CENTRO Y ACCIONES LOCALES ─────────────────────────────────
   const centroCalculado = coordenadaCentro ?? destinoAlerta?.coordenada ?? location;
   const centroMapa: Coord = resultadoBusqueda?.coord ?? centroCalculado;
 
-  // Círculo del color del nivel de seguridad de cada zona clasificada
+  // Círculo del color del nivel de seguridad de cada zona clasificada (si la usuaria las muestra)
   const renderZonasClasificadas = () =>
-    zonasClasificadas.map((zona) => {
-      const color = COLOR_NIVEL[zona.nivelRiesgo];
-      return (
+    !mostrarMisZonas
+      ? null
+      : zonasClasificadas.map((zona) => {
+          const color = COLOR_NIVEL[zona.nivelRiesgo];
+          return (
+            <Circle
+              key={`zona-${zona.id}`}
+              center={{ latitude: zona.latitude, longitude: zona.longitude }}
+              radius={RADIO_ZONA_METROS}
+              strokeColor={color}
+              strokeWidth={1.5}
+              fillColor={`${color}22`}
+            />
+          );
+        });
+
+  // Zonas de emergencia: círculo morado oscuro y un ícono del tipo de zona
+  const renderZonasOficiales = () =>
+    zonasOficiales.map((zona) => (
+      <React.Fragment key={`oficial-${zona.id}`}>
         <Circle
-          key={`zona-${zona.id}`}
           center={{ latitude: zona.latitude, longitude: zona.longitude }}
-          radius={RADIO_ZONA_METROS}
-          strokeColor={color}
-          strokeWidth={2}
-          fillColor={`${color}33`}
+          radius={zona.radio}
+          strokeColor={COLOR_ZONA_OFICIAL}
+          strokeWidth={2.5}
+          fillColor={`${COLOR_ZONA_OFICIAL}26`}
         />
-      );
-    });
+        <Marker
+          coordinate={{ latitude: zona.latitude, longitude: zona.longitude }}
+          anchor={{ x: 0.5, y: 0.5 }}
+          title={zona.nombre}
+        >
+          <View style={[ms.pinRuta, { backgroundColor: COLOR_ZONA_OFICIAL }]}>
+            <MaterialIcons name={ICONO_ZONA_OFICIAL[zona.tipo] ?? "place"} size={14} color="#FFFFFF" />
+          </View>
+        </Marker>
+      </React.Fragment>
+    ));
 
   const acciones = [
     {
@@ -585,6 +661,7 @@ export default function MapaView() {
             rotateEnabled={false}
             pitchEnabled={false}
           >
+            {renderZonasOficiales()}
             {renderZonasClasificadas()}
             <Marker coordinate={location} title={t.mapa.tu_ubicacion_marcador} pinColor={theme.icono} />
             {resultadoBusqueda && (
@@ -639,6 +716,27 @@ export default function MapaView() {
             onValueChange={(value) => {
               setMostrarRecorridosEnMapa(value);
             }}
+            trackColor={{ false: '#ccc', true: theme.tabActiveColor }}
+            thumbColor="#fff"
+          />
+        </View>
+
+        {/* SWITCH DE MIS ZONAS (las de emergencia se ven siempre) */}
+        <View style={[styles.switchRecorridosContainer, { backgroundColor: theme.card }]}>
+          <View style={styles.switchRecorridosInfo}>
+            <MaterialIcons name="layers" size={20} color="#7B1DB2" />
+            <View style={styles.switchRecorridosText}>
+              <Text style={[styles.switchRecorridosTitle, { color: theme.text }]}>
+                Mostrar mis zonas
+              </Text>
+              <Text style={[styles.switchRecorridosSubtitle, { color: theme.contactSubtext }]}>
+                {zonasClasificadas.length} clasificadas por ti · las de emergencia siempre se ven
+              </Text>
+            </View>
+          </View>
+          <Switch
+            value={mostrarMisZonas}
+            onValueChange={setMostrarMisZonas}
             trackColor={{ false: '#ccc', true: theme.tabActiveColor }}
             thumbColor="#fff"
           />
@@ -805,7 +903,8 @@ export default function MapaView() {
               }}
             >
               {/* Zonas clasificadas: círculo del color de su nivel de seguridad */}
-              {renderZonasClasificadas()}
+              {renderZonasOficiales()}
+            {renderZonasClasificadas()}
 
               <PinesHistorial
                 puntos={historial ?? []}
@@ -941,7 +1040,7 @@ export default function MapaView() {
           />
 
           {/* Leyenda de niveles de seguridad */}
-          {zonasClasificadas.length > 0 && (
+          {mostrarMisZonas && zonasClasificadas.length > 0 && (
             <View
               pointerEvents="none"
               style={{

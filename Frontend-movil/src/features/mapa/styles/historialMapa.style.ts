@@ -86,7 +86,7 @@ export const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#27AE60",
+    backgroundColor: "#7C3AED",
   },
   rowValue: {
     fontSize: 14,
