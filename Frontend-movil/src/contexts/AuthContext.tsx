@@ -21,6 +21,8 @@ type AuthContextType = {
   pendingMainRoute: keyof MainStackParamList | null;
   signIn: (user: Usuario, token: string, options?: SignInOptions) => void;
   signOut: () => void;
+  /** Cambia datos de la usuaria en sesión (p. ej. la foto) sin volver a iniciar sesión. */
+  actualizarUsuario: (cambios: Partial<Usuario>) => void;
   clearPendingMainRoute: () => void;
   /** true mientras se restaura la sesión guardada al iniciar la app. */
   restoring: boolean;
@@ -118,6 +120,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [signOut],
   );
 
+  const actualizarUsuario = useCallback((cambios: Partial<Usuario>) => {
+    if (!user || !token) return;
+    const nuevo = { ...user, ...cambios };
+    setUser(nuevo);
+    guardar(nuevo, token);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, token]);
+
   const clearPendingMainRoute = useCallback(() => {
     setPendingMainRoute(null);
   }, []);
@@ -129,10 +139,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       pendingMainRoute,
       signIn,
       signOut,
+      actualizarUsuario,
       clearPendingMainRoute,
       restoring,
     }),
-    [user, token, pendingMainRoute, signIn, signOut, clearPendingMainRoute, restoring],
+    [user, token, pendingMainRoute, signIn, signOut, actualizarUsuario, clearPendingMainRoute, restoring],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

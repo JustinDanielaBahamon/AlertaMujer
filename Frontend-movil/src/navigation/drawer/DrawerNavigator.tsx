@@ -5,12 +5,13 @@ import {
 } from "@react-navigation/drawer";
 import { Ionicons } from "@expo/vector-icons";
 import { CommonActions } from "@react-navigation/native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import AppHeader from "../../components/ui/Header/header";
 import { useAuth } from "../../contexts/AuthContext";
+import { getMe } from "../../services/users.service";
 import { useTheme } from "../../contexts/ThemeContext";
 import { useLocale } from "../../contexts/LocaleContext";
 import { obtenerEstilosDrawer } from "../drawer/drawer.style";
@@ -29,8 +30,21 @@ function HeaderWithTabs() {
 }
 
 function CustomDrawerContent(props: DrawerContentComponentProps) {
-  const { signOut, user } = useAuth();
+  const { signOut, user, actualizarUsuario } = useAuth();
   const { theme } = useTheme();
+
+  // La foto de perfil está en el backend: se trae una vez por sesión si aún no se tiene
+  const userId = user?.id;
+  const tieneFoto = !!user?.fotoPerfil;
+  useEffect(() => {
+    if (!userId || tieneFoto) return;
+    getMe()
+      .then((me) => {
+        if (me.profilePhoto) actualizarUsuario({ fotoPerfil: me.profilePhoto });
+      })
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
   const { t } = useLocale();
   const styles = obtenerEstilosDrawer(theme);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);

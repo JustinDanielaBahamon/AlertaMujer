@@ -11,6 +11,7 @@ import { Alert } from "react-native";
 
 import type { MainStackParamList } from "../../../navigation/types";
 import { useContactosContext } from "../../../contexts/ContactosContext";
+import { aFotoGuardable } from "../../../services/fotos.service";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { esCorreoValido, textosContactoExtra } from "../contactosExtra";
 
@@ -78,6 +79,16 @@ export function useAgregarContactoViewModel() {
     contactoParam?.foto,
   ]);
 
+  // La foto se reduce y se guarda como data URI: así queda en el backend y no se pierde
+  const ponerFoto = useCallback(async (uri: string) => {
+    try {
+      setFotoUri(await aFotoGuardable(uri));
+    } catch (error) {
+      console.warn("No se pudo procesar la foto del contacto:", error);
+      Alert.alert("Foto", "No se pudo usar esa foto. Intenta con otra.");
+    }
+  }, []);
+
   /**
    * Seleccionar foto desde la galería
    */
@@ -102,9 +113,9 @@ export function useAgregarContactoViewModel() {
       });
 
     if (!result.canceled && result.assets.length > 0) {
-      setFotoUri(result.assets[0].uri);
+      ponerFoto(result.assets[0].uri);
     }
-  }, [t]);
+  }, [t, ponerFoto]);
 
   /**
    * Quitar foto
@@ -151,9 +162,7 @@ export function useAgregarContactoViewModel() {
             contactoSeleccionado.imageAvailable &&
             (contactoSeleccionado as any).image?.uri
           ) {
-            setFotoUri(
-              (contactoSeleccionado as any).image.uri
-            );
+            ponerFoto((contactoSeleccionado as any).image.uri);
           }
         }
       } catch (error) {

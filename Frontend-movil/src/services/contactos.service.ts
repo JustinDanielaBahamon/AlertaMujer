@@ -7,6 +7,7 @@ export interface EmergencyContact {
   telephone: string;
   email?: string;
   relationship?: string;
+  photo?: string | null; // data URI de la foto (ver fotos.service)
   createdAt: string;
   updatedAt?: string;
 }
@@ -17,6 +18,7 @@ export interface CreateContactData {
   telephone: string;
   email?: string;
   relationship?: string;
+  photo?: string; // "" la quita al actualizar
 }
 
 export const contactosService = {
@@ -38,6 +40,7 @@ export const contactosService = {
       telephone: data.telephone,
       email: data.email,
       relationship: data.relationship,
+      photo: data.photo || undefined,
     };
 
     const postResponse = await api.post<EmergencyContact>('/api/contacts', nuevoContacto);

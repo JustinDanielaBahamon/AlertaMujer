@@ -21,7 +21,7 @@ const mapearEmergencyContactAContacto = (ec: EmergencyContact): Contacto => ({
   parentesco: ec.relationship,
   telefono: ec.telephone,
   email: ec.email,
-  foto: undefined,
+  foto: ec.photo ?? undefined,
 });
 
 export function ContactosProvider({ children }: { children: React.ReactNode }) {
@@ -72,6 +72,7 @@ export function ContactosProvider({ children }: { children: React.ReactNode }) {
         telephone: payload.telefono,
         email: payload.email,
         relationship: payload.parentesco,
+        photo: payload.foto,
       });
 
 
@@ -97,6 +98,7 @@ export function ContactosProvider({ children }: { children: React.ReactNode }) {
         telephone: cambios.telefono,
         email: cambios.email,
         relationship: cambios.parentesco,
+        photo: cambios.foto ?? "", // sin foto = quitarla
       });
 
 

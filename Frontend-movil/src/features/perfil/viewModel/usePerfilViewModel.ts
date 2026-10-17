@@ -7,15 +7,13 @@ import { useAuth } from "../../../contexts/AuthContext";
 import * as ImagePicker from "expo-image-picker";
 import { STORAGE_KEY_UBICACION } from "../../tutorial/viewModel/useLocationTutorialViewModel";
 import { getMe, updateMe } from "../../../services/users.service";
+import { aFotoGuardable } from "../../../services/fotos.service";
 
 type PerfilNavigation = NativeStackNavigationProp<MainStackParamList, "Perfil">;
 
-// Clave de AsyncStorage para los datos del perfil
-const STORAGE_KEY_PERFIL = "@alerta_mujer:perfil";
-
 export function usePerfilViewModel() {
   const navigation = useNavigation<PerfilNavigation>();
-  const { user, token, signIn } = useAuth();
+  const { user, token, signIn, actualizarUsuario } = useAuth();
 
   const [nombre,          setNombre]          = useState(user?.nombre        ?? "");
   const [correo,          setCorreo]          = useState(user?.correo        ?? "");
@@ -45,19 +43,15 @@ export function usePerfilViewModel() {
             const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(me.birthdate));
             if (m) setFechaNacimiento(`${m[3]}/${m[2]}/${m[1]}`);
           }
+          // La foto vive en el backend (antes solo en el celular y se perdía)
+          setFotoPerfil(me.profilePhoto ?? null);
+          actualizarUsuario({ fotoPerfil: me.profilePhoto ?? undefined });
         }
       } catch (error) {
         console.error("Error al cargar el perfil desde el backend:", error);
       }
 
       try {
-        // Foto de perfil local (sin endpoint de imagen en el backend)
-        const perfilRaw = await AsyncStorage.getItem(STORAGE_KEY_PERFIL);
-        if (perfilRaw) {
-          const perfil = JSON.parse(perfilRaw);
-          if (perfil.fotoPerfil) setFotoPerfil(perfil.fotoPerfil);
-        }
-
         // Municipio del tutorial de ubicación
         const ubicacionRaw = await AsyncStorage.getItem(STORAGE_KEY_UBICACION);
         if (ubicacionRaw) {
@@ -85,10 +79,21 @@ export function usePerfilViewModel() {
       aspect: [1, 1],
       quality: 0.7,
     });
-    if (!result.canceled) {
-      setFotoPerfil(result.assets[0].uri);
+    if (result.canceled) return;
+    // Se guarda en el backend en cuanto se elige, sin esperar a "Guardar cambios"
+    const anterior = fotoPerfil;
+    try {
+      const foto = await aFotoGuardable(result.assets[0].uri);
+      setFotoPerfil(foto);
+      await updateMe({ profilePhoto: foto });
+      actualizarUsuario({ fotoPerfil: foto });
+    } catch (error) {
+      console.warn("No se pudo guardar la foto de perfil:", error);
+      setFotoPerfil(anterior);
+      setMensaje("No se pudo guardar la foto. Intenta de nuevo.");
+      setTimeout(() => setMensaje(""), 3000);
     }
-  }, []);
+  }, [fotoPerfil, actualizarUsuario]);
 
   // ── Validación de fecha DD/MM/YYYY ────────────────────────────────────────
   const validarFecha = (fecha: string): boolean => {
@@ -141,12 +146,6 @@ export function usePerfilViewModel() {
 
     setCargando(true);
     try {
-      // Guarda la foto localmente (sin endpoint de imagen en el backend)
-      await AsyncStorage.setItem(
-        STORAGE_KEY_PERFIL,
-        JSON.stringify({ fotoPerfil })
-      );
-
       // Persiste en el backend
       const partes = nombre.trim().split(/\s+/);
       const firstName = partes[0] ?? "";

@@ -11,6 +11,7 @@ export interface UserApi {
   documentNumber?: string;
   documentType?: string;
   birthdate?: string;
+  profilePhoto?: string | null; // data URI de la foto de perfil
   createdAt: string;
 }
 
@@ -21,6 +22,7 @@ export interface UpdateMePayload {
   documentNumber?: string;
   documentType?: string;
   birthdate?: string; // formato yyyy-MM-dd
+  profilePhoto?: string; // data URI; "" la quita
 }
 
 export const getMe = async (): Promise<UserApi> => {
