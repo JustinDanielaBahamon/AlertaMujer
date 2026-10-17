@@ -105,6 +105,9 @@ export function useLoginViewModel() {
     limpiarErrores();
     try {
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+      // Google recuerda la última cuenta y entra directo con ella; al olvidarla, siempre muestra el
+      // selector con todas las cuentas del teléfono (y la opción de agregar otra)
+      await GoogleSignin.signOut().catch(() => {});
       const respuesta = await GoogleSignin.signIn();
       if (!isSuccessResponse(respuesta)) return; // la usuaria cerró la ventana de Google
       const idToken = respuesta.data.idToken;
