@@ -620,7 +620,7 @@ export default function ClasificarZonaView() {
             ]}
             onPress={() => setNivelSeguridad("muy_segura")}
           >
-            <MaterialIcons name="verified-user" size={17} color="#27AE60" />
+            <MaterialIcons name="verified-user" size={17} color="#7C3AED" />
             <Text style={styles.verySafeText}>Muy segura</Text>
             <Text style={styles.securitySmallText}>Zona muy segura</Text>
           </TouchableOpacity>
@@ -634,7 +634,7 @@ export default function ClasificarZonaView() {
             ]}
             onPress={() => setNivelSeguridad("moderada")}
           >
-            <MaterialIcons name="warning" size={17} color="#D89B00" />
+            <MaterialIcons name="warning" size={17} color="#C084FC" />
             <Text style={styles.moderateText}>Moderada</Text>
             <Text style={styles.securitySmallText}>Riesgo medio</Text>
           </TouchableOpacity>
@@ -648,7 +648,7 @@ export default function ClasificarZonaView() {
             ]}
             onPress={() => setNivelSeguridad("muy_insegura")}
           >
-            <MaterialIcons name="report" size={17} color="#E74C3C" />
+            <MaterialIcons name="report" size={17} color="#D946EF" />
             <Text style={styles.veryUnsafeText}>Muy insegura</Text>
             <Text style={styles.securitySmallText}>Riesgo muy alto</Text>
           </TouchableOpacity>

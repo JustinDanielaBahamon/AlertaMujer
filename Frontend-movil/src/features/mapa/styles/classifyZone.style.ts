@@ -313,21 +313,21 @@
       verySafeText: {
         fontSize: 12.8,
         fontWeight: "700",
-        color: "#27AE60",
+        color: "#7C3AED",
         marginTop: 2,
       },
 
       safeText: {
         fontSize: 12.8,
         fontWeight: "700",
-        color: "#27AE60",
+        color: "#7C3AED",
         marginTop: 2,
       },
 
       moderateText: {
         fontSize: 12.8,
         fontWeight: "700",
-        color: "#D89B00",
+        color: "#C084FC",
         marginTop: 2,
       },
 
@@ -341,7 +341,7 @@
       veryUnsafeText: {
         fontSize: 12.8,
         fontWeight: "700",
-        color: "#E74C3C",
+        color: "#D946EF",
         marginTop: 2,
       },
 
