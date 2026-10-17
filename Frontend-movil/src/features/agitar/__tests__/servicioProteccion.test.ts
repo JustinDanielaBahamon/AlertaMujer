@@ -5,9 +5,11 @@ jest.mock("@notifee/react-native", () => ({
     displayNotification: jest.fn(async () => "id"),
     cancelNotification: jest.fn(async () => {}),
     createChannel: jest.fn(async () => "canal"),
-    requestPermission: jest.fn(async () => ({})),
+    requestPermission: jest.fn(async () => ({ authorizationStatus: 1 })),
+    getNotificationSettings: jest.fn(async () => ({ authorizationStatus: 1 })),
     stopForegroundService: jest.fn(async () => {}),
   },
+  AuthorizationStatus: { DENIED: 0, AUTHORIZED: 1 },
   AndroidCategory: { ALARM: "alarm" },
   AndroidForegroundServiceType: { FOREGROUND_SERVICE_TYPE_LOCATION: 8 },
   AndroidImportance: { HIGH: 4, LOW: 2 },
@@ -30,7 +32,10 @@ jest.mock("../../../../modules/sensor-sacudidas", () => ({
   },
 }));
 
-jest.mock("expo-location", () => ({ requestForegroundPermissionsAsync: jest.fn(async () => ({ status: "granted" })) }));
+jest.mock("expo-location", () => ({
+  getForegroundPermissionsAsync: jest.fn(async () => ({ granted: true, status: "granted" })),
+  requestForegroundPermissionsAsync: jest.fn(async () => ({ granted: true, status: "granted" })),
+}));
 
 jest.mock("../alertaEnSegundoPlano", () => ({
   alertaEnSegundoPlano: jest.fn(() => null),
@@ -77,7 +82,8 @@ describe("servicioProteccion", () => {
   afterEach(() => jest.useRealTimers());
 
   it("sin permiso de ubicación no enciende el servicio", async () => {
-    (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValueOnce({ status: "denied" });
+    (Location.getForegroundPermissionsAsync as jest.Mock).mockResolvedValueOnce({ granted: false, status: "denied" });
+    (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValueOnce({ granted: false, status: "denied" });
     expect(await iniciarProteccion()).toBe("sin_ubicacion");
     expect(notifee.displayNotification).not.toHaveBeenCalled();
   });

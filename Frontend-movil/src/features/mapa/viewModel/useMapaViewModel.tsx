@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Animated, Linking } from "react-native";
 import * as Location from "expo-location";
+import { permisoUbicacion } from "../../../services/permisosSeguros";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useTheme } from "../../../contexts/ThemeContext";
@@ -170,8 +171,7 @@ export const useMapaViewModel = () => {
         // Solo se pide el permiso si todavía no está concedido
         let status = permisoActual.status;
         if (status !== "granted") {
-          const solicitado = await Location.requestForegroundPermissionsAsync();
-          status = solicitado.status;
+          status = (await permisoUbicacion()) ? Location.PermissionStatus.GRANTED : Location.PermissionStatus.DENIED;
         }
         if (cancelado) return;
 

@@ -220,7 +220,7 @@ export function createPerfilStyles(theme: AppTheme) {
     },
     mensajeError: {
       textAlign: "center",
-      color: "#e74c3c",
+      color: "#C026D3",
       fontSize: 13,
       fontWeight: "600",
       paddingVertical: 4,

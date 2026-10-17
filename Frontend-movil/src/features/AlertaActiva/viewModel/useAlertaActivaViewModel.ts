@@ -14,6 +14,7 @@ import { getOrCreateDevice } from "../../../services/devices.service";
 import type { PuntoUbicacion } from "../../../services/alert-tracking.service";
 import { descripcionLugar, obtenerLugar } from "../../../services/geocoding.service";
 import { reportarUbicacion } from "../../../services/location-reporter.service";
+import { permisoUbicacion } from "../../../services/permisosSeguros";
 import { tomarControlDeLaAlerta } from "../../agitar/alertaEnSegundoPlano";
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
@@ -33,6 +34,27 @@ const MAX_HISTORIAL = 15; // puntos a los que se les consulta el barrio (el mapa
 // Cuanto esperar antes de la siguiente actualizacion, segun cuantas van en el ciclo actual.
 const esperaTrasActualizacion = (hechas: number) =>
   hechas % ACTUALIZACIONES_POR_CICLO === 0 ? REPOSO_MS : INTERVALO_ACTUALIZACION_MS;
+
+// La alerta espera la ubicación como máximo esto; si el GPS no responde (bajo techo, sin señal) se
+// crea igual y la ubicación se agrega cuando llegue. Antes la alerta no se enviaba sin GPS.
+const ESPERA_MAXIMA_UBICACION_MS = 8 * 1000;
+// Una lectura de GPS que tarde más que esto se abandona y se usa la última ubicación conocida
+const TIEMPO_MAXIMO_LECTURA_MS = 15 * 1000;
+const ANTIGUEDAD_MAXIMA_ULTIMA_MS = 15 * 60 * 1000;
+
+/** Ubicación actual con límite de tiempo; si no llega, la última que conoce el teléfono. */
+async function leerUbicacion(): Promise<Location.LocationObject | null> {
+  try {
+    const actual = await Promise.race([
+      Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }),
+      new Promise<null>((resolver) => setTimeout(() => resolver(null), TIEMPO_MAXIMO_LECTURA_MS)),
+    ]);
+    if (actual) return actual;
+  } catch {
+    // sin GPS: se intenta con la última conocida
+  }
+  return Location.getLastKnownPositionAsync({ maxAge: ANTIGUEDAD_MAXIMA_ULTIMA_MS }).catch(() => null);
+}
 
 // Tiempo total de la cuenta regresiva en segundos. 182s = 3:02, coincidiendo con el diseno de referencia.
 const INITIAL_SECONDS = 182;
@@ -124,6 +146,13 @@ export function useAlertaActivaViewModel() {
   }, [secondsLeft]);
 
   const alertaCreacionIniciadaRef = useRef(false);
+  // Última ubicación obtenida (para enviarla si la alerta se creó antes de tenerla)
+  const ultimaUbicacionRef = useRef<{ latitude: number; longitude: number; accuracy?: number | null } | null>(null);
+  const [esperaUbicacionVencida, setEsperaUbicacionVencida] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setEsperaUbicacionVencida(true), ESPERA_MAXIMA_UBICACION_MS);
+    return () => clearTimeout(t);
+  }, []);
 
   // Si la alerta ya existe, esta pantalla toma el seguimiento que hacía el servicio en segundo plano
   useEffect(() => {
@@ -137,7 +166,8 @@ export function useAlertaActivaViewModel() {
   useEffect(() => {
     let mounted = true;
     (async () => {
-      if (!user?.id || alertaCreacionIniciadaRef.current || !location) return;
+      if (!user?.id || alertaCreacionIniciadaRef.current) return;
+      if (!location && !esperaUbicacionVencida) return; // se espera un poco la ubicación, no más
       alertaCreacionIniciadaRef.current = true;
 
       try {
@@ -159,8 +189,10 @@ export function useAlertaActivaViewModel() {
           // Alerta individual: el backend solo avisa a este contacto
           contactIds: contactoDestino ? [Number(contactoDestino.id)] : undefined,
         });
-        if (mounted) {
-          alertaCreadaIdRef.current = alerta.id;
+        alertaCreadaIdRef.current = alerta.id;
+        // Si se creó sin ubicación y ya llegó una, se envía asociada a la alerta
+        if (!location && ultimaUbicacionRef.current) {
+          reportarUbicacion({ ...ultimaUbicacionRef.current, alertId: alerta.id });
         }
       } catch (err) {
         console.error("No se pudo crear la alerta en el backend:", err);
@@ -171,7 +203,7 @@ export function useAlertaActivaViewModel() {
     return () => {
       mounted = false;
     };
-  }, [user?.id, location, contactoDestino, metodo]);
+  }, [user?.id, location, esperaUbicacionVencida, contactoDestino, metodo]);
 
   // Actualiza la ubicacion en ciclos para ahorrar bateria: cada 30 s (10 veces) y luego
   // 5 min de reposo, en los que el GPS no se consulta. Despues repite el ciclo.
@@ -181,21 +213,28 @@ export function useAlertaActivaViewModel() {
     let hechas = 0;
 
     (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted" || !mounted) return;
+      if (!(await permisoUbicacion()) || !mounted) return;
+
+      // La última ubicación conocida es inmediata: el mapa aparece sin esperar al GPS
+      const ultima = await Location.getLastKnownPositionAsync({ maxAge: ANTIGUEDAD_MAXIMA_ULTIMA_MS }).catch(() => null);
+      if (ultima && mounted) {
+        const coords = { latitude: ultima.coords.latitude, longitude: ultima.coords.longitude };
+        ultimaUbicacionRef.current = { ...coords, accuracy: ultima.coords.accuracy };
+        setLocation((actual) => actual ?? coords);
+      }
 
       const actualizar = async () => {
         hechas += 1;
         try {
-          const current = await Location.getCurrentPositionAsync({
-            accuracy: Location.Accuracy.Balanced,
-          });
+          const current = await leerUbicacion();
+          if (!current) throw new Error("Sin ubicación");
           if (!mounted) return;
           const coords = {
             latitude: current.coords.latitude,
             longitude: current.coords.longitude,
           };
           setLocation(coords);
+          ultimaUbicacionRef.current = { ...coords, accuracy: current.coords.accuracy };
           // Durante la alerta cada punto se envía al backend asociado a la alerta
           reportarUbicacion({ ...coords, accuracy: current.coords.accuracy, alertId: alertaCreadaIdRef.current });
 

@@ -1,4 +1,5 @@
 import * as Location from "expo-location";
+import { permisoUbicacion } from "./permisosSeguros";
 
 // Interface para datos de ubicación mejorados
 export interface UbicacionDetallada {
@@ -31,6 +32,9 @@ export class LocationPermissionDeniedError extends Error {
   }
 }
 
+const TIEMPO_MAXIMO_GPS_MS = 15 * 1000;
+const ANTIGUEDAD_MAXIMA_MS = 15 * 60 * 1000;
+
 // Configuración de alta precisión para GPS
 const HIGH_ACCURACY_CONFIG = {
   accuracy: Location.Accuracy.BestForNavigation, // Máxima precisión para navegación
@@ -48,8 +52,7 @@ export class LocationService {
    */
   static async requestPermissions(): Promise<boolean> {
     try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      return status === "granted";
+      return await permisoUbicacion();
     } catch (error) {
       console.error("Error al solicitar permisos de ubicación:", error);
       return false;
@@ -86,8 +89,13 @@ export class LocationService {
         throw new LocationPermissionDeniedError();
       }
 
-      const location = await Location.getCurrentPositionAsync(HIGH_ACCURACY_CONFIG);
-      return location;
+      // expo-location no tiene "timeout": sin señal GPS (bajo techo) la lectura no termina nunca.
+      // Se espera un tiempo y, si no llega, se usa la última ubicación que conoce el teléfono.
+      const location = await Promise.race([
+        Location.getCurrentPositionAsync(HIGH_ACCURACY_CONFIG),
+        new Promise<null>((resolver) => setTimeout(() => resolver(null), TIEMPO_MAXIMO_GPS_MS)),
+      ]);
+      return location ?? (await Location.getLastKnownPositionAsync({ maxAge: ANTIGUEDAD_MAXIMA_MS }));
     } catch (error) {
       // Re-lanzar errores tipados para que el ViewModel los clasifique
       if (

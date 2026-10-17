@@ -1,7 +1,7 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Modal,
   ScrollView,
@@ -121,6 +121,17 @@ export default function HistorialRecorridos() {
 
   const [fullscreen, setFullscreen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Recorrido | null>(null);
+  const mapaDetalleRef = useRef<MapView>(null);
+
+  // Encuadra todo el recorrido (inicio, fin y los puntos intermedios) en el mapa del detalle
+  const encuadrarRecorrido = () => {
+    const puntos = selectedItem?.puntos ?? [];
+    if (puntos.length < 2) return;
+    mapaDetalleRef.current?.fitToCoordinates(
+      puntos.map((p) => ({ latitude: p.latitude, longitude: p.longitude })),
+      { edgePadding: { top: 50, right: 50, bottom: 50, left: 50 }, animated: false },
+    );
+  };
 
   const todosLosRecorridos: Recorrido[] = recorridosManuales;
   const direcciones = useDireccionesRecorridos(todosLosRecorridos);
@@ -359,6 +370,7 @@ export default function HistorialRecorridos() {
                     {/* MAPA PREVIEW CON POLYLINE */}
                     <View style={styles.mapPreview}>
                       <MapView
+                        ref={mapaDetalleRef}
                         style={styles.map}
                         initialRegion={{
                           latitude: selectedItem.puntos[0].latitude,
@@ -366,6 +378,7 @@ export default function HistorialRecorridos() {
                           latitudeDelta: 0.02,
                           longitudeDelta: 0.02,
                         }}
+                        onMapReady={encuadrarRecorrido}
                         scrollEnabled={false}
                         zoomEnabled={false}
                         rotateEnabled={false}
