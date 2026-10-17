@@ -11,10 +11,11 @@ export interface PuntoUbicacion {
 export interface SeguimientoAlerta {
   estado: string; // "active" | "cancelled" | "resolved" ...
   puntos: PuntoUbicacion[]; // ordenados del más antiguo al más reciente
+  alerta?: AlertaApi; // datos completos (solo para la dueña de la alerta)
 }
 
 // El backend devuelve LocalDateTime en UTC sin 'Z' (igual que en alerts.service.ts).
-const aFecha = (iso?: string | null): Date => {
+export const aFecha = (iso?: string | null): Date => {
   if (!iso) return new Date();
   const d = new Date(iso + (iso.endsWith("Z") || iso.includes("+") ? "" : "Z"));
   return isNaN(d.getTime()) ? new Date() : d;
@@ -55,7 +56,7 @@ export const getSeguimientoAlerta = async (
 
   puntos.sort((a, b) => a.recordedAt.getTime() - b.recordedAt.getTime());
 
-  return { estado: (alerta.status || "").toLowerCase(), puntos };
+  return { estado: (alerta.status || "").toLowerCase(), puntos, alerta };
 };
 
 /**

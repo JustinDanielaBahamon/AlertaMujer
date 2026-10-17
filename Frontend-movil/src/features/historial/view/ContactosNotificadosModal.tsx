@@ -14,15 +14,16 @@ type Props = {
 };
 
 // Color e ícono de cada estado de envío.
-const ESTADOS: Record<string, { color: string; icono: keyof typeof MaterialIcons.glyphMap }> = {
-  delivered: { color: "#2E7D32", icono: "check-circle" },
-  sent: { color: "#1565C0", icono: "send" },
-  pending: { color: "#EF8F00", icono: "schedule" },
-  failed: { color: "#C62828", icono: "error" },
+// Solo la paleta de la app (violetas y neón); el ícono distingue cada estado
+export const ESTADOS: Record<string, { color: string; icono: keyof typeof MaterialIcons.glyphMap }> = {
+  delivered: { color: "#7B1DB2", icono: "check-circle" },
+  sent: { color: "#9333EA", icono: "send" },
+  pending: { color: "#A855F7", icono: "schedule" },
+  failed: { color: "#C026D3", icono: "error" },
   expired: { color: "#757575", icono: "timer-off" },
 };
 
-const ICONO_CANAL: Record<string, keyof typeof MaterialIcons.glyphMap> = {
+export const ICONO_CANAL: Record<string, keyof typeof MaterialIcons.glyphMap> = {
   email: "email",
   push: "notifications-active",
 };
