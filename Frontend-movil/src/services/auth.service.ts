@@ -25,9 +25,14 @@ export interface RegisterData {
   email?: string;
   password: string;
   telefono?: string;
+  tipoDocumento?: string;
+  numeroDocumento?: string;
   fechaNacimiento?: string;
   municipio?: string;
 }
+
+/** Campos que ya usa otra cuenta, con el aviso para mostrar debajo de cada uno. */
+export type CamposRepetidos = Partial<Record<"email" | "telefono" | "numeroDocumento", string>>;
 
 export interface RegisterError {
   message: string;
@@ -72,16 +77,17 @@ export const authService = {
    * Registro de nuevo usuario con manejo de errores mejorado
    * Muestra mensajes amigables en lugar de "API error"
    */
-  async register(data: RegisterData): Promise<LoginResponse | { error: string }> {
+  async register(data: RegisterData): Promise<LoginResponse | { error: string; campos?: CamposRepetidos }> {
 
     try {
-      // Conectar al backend Spring Boot
-      // El backend espera: nombre, email, password, telefono
       const response = await api.post<LoginResponse>('/api/auth/register', {
         nombre: data.nombre,
         email: data.correo || data.email,
         password: data.password,
-        telefono: data.telefono
+        telefono: data.telefono,
+        tipoDocumento: data.tipoDocumento,
+        numeroDocumento: data.numeroDocumento,
+        fechaNacimiento: data.fechaNacimiento,
       });
 
       return response.data;
@@ -95,7 +101,11 @@ export const authService = {
         const status = error.response.status;
         const errorMessage = error.response.data?.message || error.response.data?.error || error.message;
         
-        // El backend lanza ConflictException("Email already exists") que retorna status 409
+        // 409 con fieldErrors: correo, teléfono o documento que ya usa otra cuenta
+        const campos: CamposRepetidos | undefined = error.response.data?.fieldErrors;
+        if (status === 409 && campos && Object.keys(campos).length > 0) {
+          return { error: 'Algunos datos ya están registrados en otra cuenta.', campos };
+        }
         if (status === 409 || errorMessage?.toLowerCase().includes('email') || errorMessage?.toLowerCase().includes('ya existe')) {
           return { error: 'El correo electrónico ya está registrado. Por favor, usa otro correo o inicia sesión.' };
         }

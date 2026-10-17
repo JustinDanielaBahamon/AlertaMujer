@@ -167,12 +167,22 @@ export function useRegistroViewModel() {
         correo: correo.trim(),
         password: password,
         telefono: telefono,
+        tipoDocumento: tipoDocumento,
+        numeroDocumento: documento.trim(),
         fechaNacimiento: fechaNacimiento,
         municipio: "Neiva",
       });
 
-      // Verificar si la respuesta contiene un error
       if ('error' in response) {
+        // Datos que ya usa otra cuenta: el aviso va debajo de cada campo
+        if (response.campos) {
+          setErrores({
+            correo: response.campos.email,
+            telefono: response.campos.telefono,
+            documento: response.campos.numeroDocumento,
+          });
+          return;
+        }
         setErrorTerminos(response.error);
         return;
       }
@@ -204,6 +214,8 @@ export function useRegistroViewModel() {
     correo,
     password,
     telefono,
+    tipoDocumento,
+    documento,
     fechaNacimiento,
     signIn,
   ]);
