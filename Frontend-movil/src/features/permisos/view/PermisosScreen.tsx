@@ -13,7 +13,7 @@ export default function PermisosScreen() {
   const styles = useMemo(() => createMetodosActivacionStyles(theme), [theme]);
   const { texto } = obtenerColoresHeader(theme);
   const insets = useSafeAreaInsets();
-  const { items, listos, total, cargando, activar, volver } = usePermisosViewModel();
+  const { items, listos, total, cargando, activar, salud, volver } = usePermisosViewModel();
   const porcentaje = total > 0 ? Math.round((listos / total) * 100) : 0;
 
   return (
@@ -51,9 +51,63 @@ export default function PermisosScreen() {
 
         {cargando && <ActivityIndicator color={theme.contactAccent} style={{ marginTop: 24 }} />}
 
+        {/* Protección sin interrupciones: comprobado con los cierres que registra Android */}
+        {!cargando && salud && (
+          <View style={styles.tarjeta}>
+            <View style={styles.filaTitulo}>
+              <View style={styles.iconoWrap}>
+                <MaterialIcons
+                  name={salud.veces === 0 ? "verified-user" : "report"}
+                  size={22}
+                  color={salud.veces === 0 ? theme.contactAccent : "#C026D3"}
+                />
+              </View>
+              <View style={styles.tituloWrap}>
+                <Text style={styles.tituloMetodo}>
+                  {salud.veces === 0
+                    ? "Protección sin interrupciones"
+                    : `La protección se detuvo ${salud.veces} ${salud.veces === 1 ? "vez" : "veces"}`}
+                </Text>
+                <Text style={{ fontSize: 12, color: theme.contactSubtext }}>Últimos 7 días</Text>
+              </View>
+            </View>
+            {salud.explicacion ? (
+              <>
+                <Text style={[styles.descripcionMetodo, { fontWeight: "700" }]}>{salud.explicacion.titulo}</Text>
+                <Text style={styles.descripcionMetodo}>{salud.explicacion.arreglo}</Text>
+              </>
+            ) : (
+              <Text style={styles.descripcionMetodo}>
+                Tu teléfono no ha cerrado la protección. Lo revisamos cada vez que abres esta pantalla.
+              </Text>
+            )}
+            {salud.puedeArreglar && (
+              <TouchableOpacity
+                onPress={salud.arreglar}
+                accessibilityRole="button"
+                style={{
+                  marginTop: 12,
+                  alignSelf: "flex-start",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 6,
+                  paddingHorizontal: 16,
+                  paddingVertical: 9,
+                  borderRadius: 20,
+                  backgroundColor: theme.contactAccent,
+                }}
+              >
+                <MaterialIcons name="autorenew" size={16} color="#FFFFFF" />
+                <Text style={{ color: "#FFFFFF", fontWeight: "700", fontSize: 13 }}>Permitir inicio automático</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
+
         {!cargando &&
           items.map((item) => {
-            const listo = !!item.estado?.concedido;
+            const listo = item.estado?.concedido === true;
+            const sinVerificar = item.estado?.concedido === null;
             return (
               <View key={item.id} style={[styles.tarjeta, !listo && styles.tarjetaInactiva]}>
                 <View style={styles.filaTitulo}>
@@ -68,7 +122,7 @@ export default function PermisosScreen() {
                   </View>
                   <View style={[styles.chipEstado, listo && styles.chipEstadoActivo]}>
                     <Text style={[styles.chipTexto, listo && styles.chipTextoActivo]}>
-                      {listo ? "Activo" : "Falta"}
+                      {listo ? "Activo" : sinVerificar ? "Revisar" : "Falta"}
                     </Text>
                   </View>
                 </View>
@@ -90,12 +144,12 @@ export default function PermisosScreen() {
                     }}
                   >
                     <MaterialIcons
-                      name={item.estado?.puedePreguntar === false ? "settings" : "check-circle"}
+                      name={item.estado?.puedePreguntar === false || sinVerificar ? "settings" : "check-circle"}
                       size={16}
                       color="#FFFFFF"
                     />
                     <Text style={{ color: "#FFFFFF", fontWeight: "700", fontSize: 13 }}>
-                      {item.estado?.puedePreguntar === false ? "Abrir ajustes" : "Activar"}
+                      {item.estado?.puedePreguntar === false || sinVerificar ? "Abrir ajuste" : "Activar"}
                     </Text>
                   </TouchableOpacity>
                 )}
