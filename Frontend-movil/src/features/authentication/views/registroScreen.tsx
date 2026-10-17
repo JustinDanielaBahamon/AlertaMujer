@@ -58,7 +58,7 @@ export default function Registro() {
                 />
               </View>
               {vm.errores.nombre && (
-                <Text style={{ color: "red", marginLeft: 10 }}>{vm.errores.nombre}</Text>
+                <Text style={{ color: "#A21CAF", marginLeft: 10 }}>{vm.errores.nombre}</Text>
               )}
 
               {/* Teléfono */}
@@ -75,7 +75,7 @@ export default function Registro() {
                 />
               </View>
               {vm.errores.telefono && (
-                <Text style={{ color: "red", marginLeft: 10 }}>{vm.errores.telefono}</Text>
+                <Text style={{ color: "#A21CAF", marginLeft: 10 }}>{vm.errores.telefono}</Text>
               )}
 
               {/* Tipo de documento (ahora va primero) */}
@@ -85,7 +85,7 @@ export default function Registro() {
                 <Image style={styles.IconoCorreo} source={require("@assets/imagesAlertaMujer/ScRegistro/flechaLista.png")} />
               </TouchableOpacity>
               {vm.errores.tipoDocumento && (
-                <Text style={{ color: "red", marginLeft: 10 }}>{vm.errores.tipoDocumento}</Text>
+                <Text style={{ color: "#A21CAF", marginLeft: 10 }}>{vm.errores.tipoDocumento}</Text>
               )}
 
               {vm.mostrarLista && (
@@ -115,7 +115,7 @@ export default function Registro() {
                 />
               </View>
               {vm.errores.documento && (
-                <Text style={{ color: "red", marginLeft: 10 }}>{vm.errores.documento}</Text>
+                <Text style={{ color: "#A21CAF", marginLeft: 10 }}>{vm.errores.documento}</Text>
               )}
 
               {/* Fecha de nacimiento con formato automático DD/MM/AAAA */}
@@ -133,7 +133,7 @@ export default function Registro() {
                 />
               </View>
               {vm.errores.fechaNacimiento && (
-                <Text style={{ color: "red", marginLeft: 10 }}>{vm.errores.fechaNacimiento}</Text>
+                <Text style={{ color: "#A21CAF", marginLeft: 10 }}>{vm.errores.fechaNacimiento}</Text>
               )}
 
               {/* Correo */}
@@ -149,7 +149,7 @@ export default function Registro() {
                 />
               </View>
               {vm.errores.correo && (
-                <Text style={{ color: "red", marginLeft: 10 }}>{vm.errores.correo}</Text>
+                <Text style={{ color: "#A21CAF", marginLeft: 10 }}>{vm.errores.correo}</Text>
               )}
 
               {/* Contraseña */}
@@ -159,6 +159,7 @@ export default function Registro() {
                   style={styles.inputContraseña}
                   secureTextEntry={!vm.mostrarPassword}
                   placeholder={t.registro.contrasena}
+                  placeholderTextColor="#000"
                   value={vm.password}
                   onChangeText={vm.setPassword}
                   onFocus={cerrarLista}
@@ -173,7 +174,7 @@ export default function Registro() {
                 </TouchableOpacity>
               </View>
               {vm.errores.password && (
-                <Text style={{ color: "red", marginLeft: 10 }}>{vm.errores.password}</Text>
+                <Text style={{ color: "#A21CAF", marginLeft: 10 }}>{vm.errores.password}</Text>
               )}
 
               {/* Confirmar contraseña (con icono de llave) */}
@@ -183,6 +184,7 @@ export default function Registro() {
                   style={styles.inputContraseña}
                   secureTextEntry={!vm.mostrarConfirmPassword}
                   placeholder={t.registro.confirmar_contrasena}
+                  placeholderTextColor="#000"
                   value={vm.confirmPassword}
                   onChangeText={vm.setConfirmPassword}
                   onFocus={cerrarLista}
@@ -197,7 +199,7 @@ export default function Registro() {
                 </TouchableOpacity>
               </View>
               {vm.errores.confirmPassword && (
-                <Text style={{ color: "red", marginLeft: 10 }}>{vm.errores.confirmPassword}</Text>
+                <Text style={{ color: "#A21CAF", marginLeft: 10 }}>{vm.errores.confirmPassword}</Text>
               )}
             </View>
 
@@ -236,7 +238,7 @@ export default function Registro() {
               </View>
 
               {vm.errorTerminos !== "" && (
-                <Text style={{ color: "red", marginLeft: 4 }}>{vm.errorTerminos}</Text>
+                <Text style={{ color: "#A21CAF", marginLeft: 4 }}>{vm.errorTerminos}</Text>
               )}
             </View>
 
