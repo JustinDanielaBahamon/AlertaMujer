@@ -156,6 +156,8 @@ export function useAlertaActivaViewModel() {
               : "Alerta SOS activada desde la app",
           latitude: location?.latitude,
           longitude: location?.longitude,
+          // Alerta individual: el backend solo avisa a este contacto
+          contactIds: contactoDestino ? [Number(contactoDestino.id)] : undefined,
         });
         if (mounted) {
           alertaCreadaIdRef.current = alerta.id;

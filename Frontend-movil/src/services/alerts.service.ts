@@ -37,6 +37,8 @@ export interface CreateAlertData {
   message?: string;
   latitude?: number;
   longitude?: number;
+  /** Alerta individual: solo se avisa a estos contactos (sin esto, a todos). */
+  contactIds?: number[];
 }
 
 export const createAlert = async (data: CreateAlertData): Promise<AlertaApi> => {
@@ -49,6 +51,7 @@ export const createAlert = async (data: CreateAlertData): Promise<AlertaApi> => 
     deviceId: data.deviceId,
     latitude: data.latitude,
     longitude: data.longitude,
+    contactIds: data.contactIds,
   });
   return response.data;
 };
