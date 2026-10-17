@@ -6,6 +6,7 @@ import AuthNavigator from "./AuthNavigator";
 import MainNavigator from "./MainNavigator";
 import { useAlertasSos } from "../notifications/useAlertasSos";
 import { useProteccionAgitar } from "../features/agitar/useProteccionAgitar";
+import { useRecordatorioProteccion } from "../features/permisos/useRecordatorioProteccion";
 
 export default function AppNavigator() {
   const { user, pendingMainRoute, restoring } = useAuth();
@@ -15,6 +16,8 @@ export default function AppNavigator() {
   useAlertasSos(navegacion, !!user && !restoring);
   // Activación de la alerta al agitar el teléfono (si la usuaria la encendió en Ajustes)
   useProteccionAgitar(navegacion, !!user && !restoring && user.id !== 0);
+  // Aviso si falta algo para que las alertas funcionen (agitar apagado, permisos...)
+  useRecordatorioProteccion(navegacion, !!user && !restoring && user.id !== 0);
 
   if (user && mainEntryRef.current === null) {
     mainEntryRef.current = pendingMainRoute ?? "DrawerHome";

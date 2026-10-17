@@ -15,6 +15,7 @@ import GuardarRecorridoScreen from "../features/mapa/view/GuardarRecorrido";
 import PerfilScreen from "../features/perfil/view/perfilScreen";
 import AcercaDeScreen from "../features/settings/view/acercaDeScreen";
 import MetodosActivacionScreen from "../features/settings/view/metodosActivacionScreen";
+import PermisosScreen from "../features/permisos/view/PermisosScreen";
 import NotificacionesScreen from "../features/settings/view/notificacionesScreen";
 import PrivacidadAppScreen from "../features/settings/view/privacidadAppScreen";
 import RetencionDatosScreen from "../features/settings/view/retencionDatosScreen";
@@ -65,6 +66,7 @@ export default function MainNavigator({ initialRouteName }: Props) {
       <Stack.Screen name="Perfil" component={PerfilScreen} /> 
       <Stack.Screen name="historialMapa" component={HistorialMapa}/>
       <Stack.Screen name="MetodosActivacion" component={MetodosActivacionScreen} />
+      <Stack.Screen name="Permisos" component={PermisosScreen} />
       <Stack.Screen name="Notificaciones" component={NotificacionesScreen} />
       <Stack.Screen name="PrivacidadApp" component={PrivacidadAppScreen} />
       <Stack.Screen name="RetencionDatos" component={RetencionDatosScreen} />
