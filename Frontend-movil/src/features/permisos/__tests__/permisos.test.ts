@@ -25,7 +25,14 @@ jest.mock("expo-location", () => ({
 }));
 jest.mock("../../../../modules/sensor-sacudidas", () => ({
   __esModule: true,
-  default: { ignoraOptimizacionBateria: jest.fn(() => false), pedirIgnorarOptimizacionBateria: jest.fn() },
+  default: {
+    ignoraOptimizacionBateria: jest.fn(() => false),
+    pedirIgnorarOptimizacionBateria: jest.fn(),
+    puedePantallaCompleta: jest.fn(() => false),
+    pedirPantallaCompleta: jest.fn(),
+    tieneAjusteInicioAutomatico: jest.fn(() => true),
+    abrirInicioAutomatico: jest.fn(() => true),
+  },
 }));
 
 import notifee from "@notifee/react-native";
@@ -43,7 +50,14 @@ describe("permisos", () => {
 
     expect(estados.notificaciones.concedido).toBe(true);
     expect(estados.camara).toEqual({ concedido: false, puedePreguntar: false });
-    expect(faltantesCriticos(estados).map((p) => p.id)).toEqual(["agitar", "ubicacion", "bateria"]);
+    expect(faltantesCriticos(estados).map((p) => p.id)).toEqual(["agitar", "ubicacion", "bateria", "pantallaCompleta"]);
+    // El inicio automático no se puede leer: queda "por revisar", no como faltante
+    expect(estados.inicioAutomatico.concedido).toBeNull();
+  });
+
+  it("si el teléfono ya cortó la protección, el inicio automático falta", async () => {
+    const estados = await revisarPermisos(true, 2);
+    expect(estados.inicioAutomatico.concedido).toBe(false);
   });
 
   it("pide el permiso si Android todavía deja preguntar", async () => {

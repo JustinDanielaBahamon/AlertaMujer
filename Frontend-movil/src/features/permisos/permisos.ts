@@ -10,7 +10,16 @@ import { enColaDePermisos, permisoNotificaciones, permisoUbicacion } from "../..
  * Permisos y ajustes que necesita la protección de AlertaMujer. "Crítico" = sin él una alerta puede
  * no enviarse (o no activarse al agitar): por esos se le recuerda a la usuaria al abrir la app.
  */
-export type IdPermiso = "agitar" | "ubicacion" | "notificaciones" | "bateria" | "microfono" | "camara" | "contactos";
+export type IdPermiso =
+  | "agitar"
+  | "ubicacion"
+  | "notificaciones"
+  | "bateria"
+  | "pantallaCompleta"
+  | "inicioAutomatico"
+  | "microfono"
+  | "camara"
+  | "contactos";
 
 export type InfoPermiso = {
   id: IdPermiso;
@@ -50,6 +59,21 @@ export const PERMISOS: InfoPermiso[] = [
     critico: true,
   },
   {
+    id: "pantallaCompleta",
+    titulo: "Alarma a pantalla completa",
+    descripcion: "Para que la alarma de emergencia de tus contactos aparezca aunque el teléfono esté bloqueado.",
+    icono: "fullscreen",
+    critico: true,
+  },
+  {
+    id: "inicioAutomatico",
+    titulo: "Inicio automático",
+    descripcion:
+      "Tu teléfono puede cerrar apps en segundo plano. Actívalo para AlertaMujer y la protección no se detendrá.",
+    icono: "autorenew",
+    critico: false,
+  },
+  {
     id: "microfono",
     titulo: "Micrófono",
     descripcion: "Para grabar audio como evidencia durante una alerta.",
@@ -73,7 +97,10 @@ export const PERMISOS: InfoPermiso[] = [
 ];
 
 export type EstadoPermiso = {
-  concedido: boolean;
+  /** null = Android no deja comprobarlo (se verifica por las interrupciones de la protección). */
+  concedido: boolean | null;
+  /** No aplica a este teléfono (p. ej. su marca no tiene "inicio automático"): no se muestra. */
+  oculto?: boolean;
   /** false si Android ya no deja volver a preguntar: hay que abrir los ajustes de la app. */
   puedePreguntar: boolean;
 };
@@ -81,8 +108,14 @@ export type EstadoPermiso = {
 type Permiso = { granted: boolean; canAskAgain: boolean };
 const aEstado = (p: Permiso): EstadoPermiso => ({ concedido: p.granted, puedePreguntar: p.canAskAgain });
 
-/** Estado actual de cada permiso o ajuste. agitarActivo viene de los ajustes de la app. */
-export async function revisarPermisos(agitarActivo: boolean): Promise<Record<IdPermiso, EstadoPermiso>> {
+/**
+ * Estado actual de cada permiso o ajuste. agitarActivo viene de los ajustes de la app;
+ * cortesDelSistema: veces recientes que el teléfono detuvo la protección (ver saludProteccion).
+ */
+export async function revisarPermisos(
+  agitarActivo: boolean,
+  cortesDelSistema = 0,
+): Promise<Record<IdPermiso, EstadoPermiso>> {
   const [ubicacion, notificaciones, microfono, camara, contactos] = await Promise.all([
     Location.getForegroundPermissionsAsync().then(aEstado),
     notifee.getNotificationSettings().then((s) => ({
@@ -93,12 +126,22 @@ export async function revisarPermisos(agitarActivo: boolean): Promise<Record<IdP
     Camera.getCameraPermissionsAsync().then(aEstado),
     Contacts.getPermissionsAsync().then(aEstado),
   ]);
-  const bateria = Platform.OS !== "android" || SensorSacudidas.ignoraOptimizacionBateria();
+  const android = Platform.OS === "android";
+  const bateria = !android || SensorSacudidas.ignoraOptimizacionBateria();
+  const pantallaCompleta = !android || SensorSacudidas.puedePantallaCompleta();
+  const conInicioAutomatico = android && SensorSacudidas.tieneAjusteInicioAutomatico();
   return {
     agitar: { concedido: agitarActivo, puedePreguntar: true },
     ubicacion,
     notificaciones,
     bateria: { concedido: bateria, puedePreguntar: true },
+    pantallaCompleta: { concedido: pantallaCompleta, puedePreguntar: true },
+    // La marca no deja leerlo: si el teléfono ya cortó la protección, falta; si no, hay que revisarlo
+    inicioAutomatico: {
+      concedido: cortesDelSistema > 0 ? false : null,
+      puedePreguntar: true,
+      oculto: !conInicioAutomatico,
+    },
     microfono,
     camara,
     contactos,
@@ -107,7 +150,7 @@ export async function revisarPermisos(agitarActivo: boolean): Promise<Record<IdP
 
 /** Faltantes críticos (para el recordatorio al abrir la app). */
 export function faltantesCriticos(estados: Record<IdPermiso, EstadoPermiso>): InfoPermiso[] {
-  return PERMISOS.filter((p) => p.critico && !estados[p.id].concedido);
+  return PERMISOS.filter((p) => p.critico && estados[p.id].concedido === false && !estados[p.id].oculto);
 }
 
 /**
@@ -129,6 +172,12 @@ export async function activarPermiso(id: Exclude<IdPermiso, "agitar">, estado: E
       return;
     case "bateria":
       SensorSacudidas.pedirIgnorarOptimizacionBateria();
+      return;
+    case "pantallaCompleta":
+      SensorSacudidas.pedirPantallaCompleta();
+      return;
+    case "inicioAutomatico":
+      SensorSacudidas.abrirInicioAutomatico();
       return;
     case "microfono":
       await enColaDePermisos(() => Camera.requestMicrophonePermissionsAsync());
