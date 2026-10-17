@@ -72,7 +72,8 @@ const transformarTipo = (apiTipo: string, message?: string): string => {
 const transformarEstado = (apiEstado: string): EstadoAlerta => {
   const e = (apiEstado || '').toLowerCase();
   if (e === 'cancelled' || e === 'cancelada') return 'Cancelada';
-  if (e === 'resolved' || e === 'atendida' || e === 'finalizada') return 'Enviada';
+  // Expirada = terminó sola por tiempo: no debe seguir apareciendo "En curso"
+  if (e === 'resolved' || e === 'expired' || e === 'atendida' || e === 'finalizada') return 'Enviada';
   return 'En curso';
 };
 
