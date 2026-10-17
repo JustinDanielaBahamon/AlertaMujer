@@ -5,6 +5,7 @@ import type { Usuario } from "../features/authentication/models/Usuario";
 import type { MainStackParamList } from "../navigation/types";
 import { escucharSesion, setAuthToken, setRefreshToken } from "../services/api";
 import { borrarTokens, guardarTokens, leerTokens } from "../services/tokenStorage";
+import { olvidarSesionDispositivo } from "../services/devices.service";
 
 export type SignInOptions = {
   /** Primera pantalla del stack principal tras iniciar sesión (p. ej. tutorial tras registro). */
@@ -94,6 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAuthToken(null); // Limpiar el token en el interceptor de axios
     refreshRef.current = null;
     setRefreshToken(null);
+    olvidarSesionDispositivo();
     setPendingMainRoute(null);
     AsyncStorage.removeItem(STORAGE_KEY_AUTH).catch(() => {});
     borrarTokens().catch(() => {});
