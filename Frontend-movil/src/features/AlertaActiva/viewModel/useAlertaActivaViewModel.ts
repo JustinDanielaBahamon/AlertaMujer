@@ -14,6 +14,7 @@ import { getOrCreateDevice } from "../../../services/devices.service";
 import type { PuntoUbicacion } from "../../../services/alert-tracking.service";
 import { descripcionLugar, obtenerLugar } from "../../../services/geocoding.service";
 import { reportarUbicacion } from "../../../services/location-reporter.service";
+import { permisoUbicacion } from "../../../services/permisosSeguros";
 import { tomarControlDeLaAlerta } from "../../agitar/alertaEnSegundoPlano";
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
@@ -212,8 +213,7 @@ export function useAlertaActivaViewModel() {
     let hechas = 0;
 
     (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted" || !mounted) return;
+      if (!(await permisoUbicacion()) || !mounted) return;
 
       // La última ubicación conocida es inmediata: el mapa aparece sin esperar al GPS
       const ultima = await Location.getLastKnownPositionAsync({ maxAge: ANTIGUEDAD_MAXIMA_ULTIMA_MS }).catch(() => null);

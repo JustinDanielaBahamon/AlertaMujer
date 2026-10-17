@@ -7,10 +7,10 @@ import notifee, {
   type Event,
 } from "@notifee/react-native";
 import { AppState, Vibration } from "react-native";
-import * as Location from "expo-location";
 import SensorSacudidas from "../../../modules/sensor-sacudidas";
 import { crearDetectorSacudidas } from "./detectorSacudidas";
 import { alertaEnSegundoPlano, crearAlertaPorSacudida } from "./alertaEnSegundoPlano";
+import { permisoNotificaciones, permisoUbicacion } from "../../services/permisosSeguros";
 
 /**
  * "Agitar el teléfono": un servicio en primer plano de Android (notificación fija "Protección
@@ -205,11 +205,10 @@ export async function iniciarProteccion(): Promise<EstadoProteccion> {
   if (!SensorSacudidas.disponible()) return "sin_sensor";
   // El servicio es de tipo ubicación (para poder enviarla con la pantalla bloqueada) y Android
   // exige el permiso antes de iniciarlo
-  const { status } = await Location.requestForegroundPermissionsAsync();
-  if (status !== "granted") return "sin_ubicacion";
+  if (!(await permisoUbicacion())) return "sin_ubicacion";
   if (activa) return "activa";
 
-  await notifee.requestPermission();
+  await permisoNotificaciones();
   await crearCanales();
   await notifee.displayNotification({
     id: ID_SERVICIO,
