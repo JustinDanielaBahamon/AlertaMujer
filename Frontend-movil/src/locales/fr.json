@@ -708,7 +708,9 @@
     "confirmarDescripcion": "Tes contacts recevront une notification automatique les informant que tu es en sécurité et que l'alerte a été désactivée.",
     "confirmarSi": "Oui, annuler",
     "confirmarNo": "Non, maintenir l'alerte",
-    "llamar911": "Appeler le 911"
+    "llamar911": "Appeler le 911",
+    "salirBloqueadoTitulo": "L'alerte est toujours active",
+    "salirBloqueadoDescripcion": "Pour quitter cet écran, touchez « Je vais bien » et confirmez que vous êtes en sécurité."
   },
   "alertaContacto": {
     "badgeActiva": "Alerte active en temps réel",

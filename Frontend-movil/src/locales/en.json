@@ -709,7 +709,9 @@
   "confirmarDescripcion": "Your contacts will receive an automatic notification letting them know you are safe and that the alert has been deactivated.",
   "confirmarSi": "Yes, cancel",
   "confirmarNo": "No, keep alert",
-  "llamar911": "Call 911"
+  "llamar911": "Call 911",
+  "salirBloqueadoTitulo": "Your alert is still active",
+  "salirBloqueadoDescripcion": "To leave this screen, tap \"I'm okay\" and confirm you are safe."
 },
     "alertaContacto": {
     "badgeActiva": "Active alert in real time",

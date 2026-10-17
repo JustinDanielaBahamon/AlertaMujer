@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
-import { Animated, Linking, Platform } from "react-native";
+import { Alert, Animated, Linking, Platform } from "react-native";
 import type MapView from "../../../components/mapa/MapaLibre";
 import * as Location from "expo-location";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useNavigation, usePreventRemove, useRoute } from "@react-navigation/native";
 import type { RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { MainStackParamList } from "../../../navigation/types";
 import { useAuth } from "../../../contexts/AuthContext";
+import { useLocale } from "../../../contexts/LocaleContext";
 import { createAlert, finalizarAlerta } from "../../../services/alerts.service";
 import { getOrCreateDevice } from "../../../services/devices.service";
 import type { PuntoUbicacion } from "../../../services/alert-tracking.service";
@@ -51,6 +52,7 @@ const PADDING_MAPA_COMPLETO: Padding = { top: 130, right: 60, bottom: 120, left:
 export function useAlertaActivaViewModel() {
   const navigation = useNavigation<Nav>();
   const { user } = useAuth();
+  const { t } = useLocale();
   const route = useRoute<AlertaActivaRoute>();
 
   // Si viene un contacto, la alerta es solo para esa persona (no para todos).
@@ -94,6 +96,17 @@ export function useAlertaActivaViewModel() {
 
   // Modal de confirmacion para cancelar la alerta ("Estoy bien" -> "Si, cancelar").
   const [confirmarVisible, setConfirmarVisible] = useState(false);
+
+  // Mientras la alerta está activa no se puede salir con "atrás" ni con el gesto: solo con
+  // "Estoy bien" -> "Si, cancelar". Antes se podía salir, la alerta quedaba en curso sin enviar
+  // ubicación y se podían activar otras encima.
+  const [puedeSalir, setPuedeSalir] = useState(false);
+  usePreventRemove(!puedeSalir, () => {
+    Alert.alert(t.alertaActiva.salirBloqueadoTitulo, t.alertaActiva.salirBloqueadoDescripcion);
+  });
+  useEffect(() => {
+    if (puedeSalir) navigation.replace("DrawerHome");
+  }, [puedeSalir, navigation]);
 
   useEffect(() => {
     vivo.current = true;
@@ -305,8 +318,8 @@ export function useAlertaActivaViewModel() {
         console.error("No se pudo cerrar la alerta en el backend:", err),
       );
     }
-    navigation.replace("DrawerHome");
-  }, [navigation]);
+    setPuedeSalir(true);
+  }, []);
 
   // Abre el marcador del telefono con el 911 ya preparado.
   const llamarEmergencias = useCallback(() => {

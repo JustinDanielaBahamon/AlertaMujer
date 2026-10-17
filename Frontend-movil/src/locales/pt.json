@@ -709,7 +709,9 @@
   "confirmarDescripcion": "Seus contatos receberão uma notificação automática informando que você está a salvo e que o alerta foi desativado.",
   "confirmarSi": "Sim, cancelar",
   "confirmarNo": "Não, manter alerta",
-  "llamar911": "Ligar para o 911"
+  "llamar911": "Ligar para o 911",
+  "salirBloqueadoTitulo": "O alerta continua ativo",
+  "salirBloqueadoDescripcion": "Para sair desta tela, toque em \"Estou bem\" e confirme que está em segurança."
 },
     "alertaContacto": {
     "badgeActiva": "Alerta ativo em tempo real",

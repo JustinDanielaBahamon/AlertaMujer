@@ -50,7 +50,8 @@ export default function MainNavigator({ initialRouteName }: Props) {
     >
       <Stack.Screen name="DrawerHome" component={DrawerNavigator} />
       <Stack.Screen name="Activacion" component={ActivacionScreen} />
-      <Stack.Screen name="AlertaActiva" component={AlertaActivaScreen} />
+      {/* Sin gesto de volver: de la alerta activa solo se sale con "Estoy bien" */}
+      <Stack.Screen name="AlertaActiva" component={AlertaActivaScreen} options={{ gestureEnabled: false }} />
       <Stack.Screen name="AlertaContacto" component={AlertaContactoScreen} />
       <Stack.Screen name="TutorialBienvenida" component={BienvenidaTutorialScreen} />
       <Stack.Screen name="TutorialBoton" component={BotonTutorialScreen} />
