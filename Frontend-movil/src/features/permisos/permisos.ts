@@ -4,6 +4,7 @@ import * as Contacts from "expo-contacts";
 import * as Location from "expo-location";
 import { Linking, Platform } from "react-native";
 import SensorSacudidas from "../../../modules/sensor-sacudidas";
+import { enColaDePermisos, permisoNotificaciones, permisoUbicacion } from "../../services/permisosSeguros";
 
 /**
  * Permisos y ajustes que necesita la protección de AlertaMujer. "Crítico" = sin él una alerta puede
@@ -118,26 +119,25 @@ export async function activarPermiso(id: Exclude<IdPermiso, "agitar">, estado: E
     await Linking.openSettings();
     return;
   }
+  // De una en una (ver permisosSeguros): dos peticiones a la vez pueden trabar la app
   switch (id) {
     case "ubicacion":
-      await Location.requestForegroundPermissionsAsync();
+      await permisoUbicacion();
       return;
-    case "notificaciones": {
-      const s = await notifee.requestPermission();
-      if (s.authorizationStatus !== AuthorizationStatus.AUTHORIZED) await notifee.openNotificationSettings();
+    case "notificaciones":
+      if (!(await permisoNotificaciones())) await notifee.openNotificationSettings();
       return;
-    }
     case "bateria":
       SensorSacudidas.pedirIgnorarOptimizacionBateria();
       return;
     case "microfono":
-      await Camera.requestMicrophonePermissionsAsync();
+      await enColaDePermisos(() => Camera.requestMicrophonePermissionsAsync());
       return;
     case "camara":
-      await Camera.requestCameraPermissionsAsync();
+      await enColaDePermisos(() => Camera.requestCameraPermissionsAsync());
       return;
     case "contactos":
-      await Contacts.requestPermissionsAsync();
+      await enColaDePermisos(() => Contacts.requestPermissionsAsync());
       return;
   }
 }

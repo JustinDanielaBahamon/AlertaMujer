@@ -21,7 +21,7 @@ jest.mock("expo-contacts", () => ({
 }));
 jest.mock("expo-location", () => ({
   getForegroundPermissionsAsync: jest.fn(async () => ({ granted: false, canAskAgain: true })),
-  requestForegroundPermissionsAsync: jest.fn(async () => ({})),
+  requestForegroundPermissionsAsync: jest.fn(async () => ({ granted: true })),
 }));
 jest.mock("../../../../modules/sensor-sacudidas", () => ({
   __esModule: true,
@@ -58,6 +58,7 @@ describe("permisos", () => {
   });
 
   it("si la usuaria rechaza las notificaciones, abre sus ajustes", async () => {
+    (notifee.getNotificationSettings as jest.Mock).mockResolvedValueOnce({ authorizationStatus: 0 });
     await activarPermiso("notificaciones", { concedido: false, puedePreguntar: true });
     expect(notifee.openNotificationSettings).toHaveBeenCalled();
   });
