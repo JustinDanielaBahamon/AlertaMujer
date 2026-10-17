@@ -4,6 +4,7 @@ import { frequentLocationsService } from "../../../services/frequent-locations.s
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import * as Location from "expo-location";
+import { permisoUbicacion } from "../../../services/permisosSeguros";
 import { LinearGradient } from "expo-linear-gradient"; // <-- NUEVA IMPORTACIÓN
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -167,8 +168,7 @@ export default function ClasificarZonaView() {
   const handleUsarUbicacionActual = async () => {
     try {
       setCargando(true);
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
+      if (!(await permisoUbicacion())) {
         Alert.alert("Permiso denegado", "Se requiere permiso de ubicación.");
         setCargando(false);
         return;

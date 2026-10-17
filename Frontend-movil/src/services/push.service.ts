@@ -3,7 +3,7 @@ import Constants from "expo-constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getApp } from "@react-native-firebase/app";
 import { getMessaging, getToken, onTokenRefresh } from "@react-native-firebase/messaging";
-import notifee, { AuthorizationStatus } from "@notifee/react-native";
+import { permisoNotificaciones } from "./permisosSeguros";
 import api from "./api";
 import { getOrCreateDevice } from "./devices.service";
 import { crearCanalSos } from "../notifications/alarmaSos";
@@ -23,8 +23,7 @@ let cancelarRefresco: (() => void) | null = null;
 export async function registrarPush(): Promise<void> {
   if (Platform.OS !== "android" || !pushDisponible()) return;
   try {
-    const permiso = await notifee.requestPermission();
-    if (permiso.authorizationStatus === AuthorizationStatus.DENIED) return;
+    if (!(await permisoNotificaciones())) return;
     await crearCanalSos();
 
     const device = await getOrCreateDevice();

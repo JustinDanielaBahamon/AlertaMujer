@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import MapView, { Circle, Marker, Polyline, type LatLng } from "../../../components/mapa/MapaLibre";
 import * as Location from "expo-location";
+import { permisoUbicacion } from "../../../services/permisosSeguros";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { styles } from "../styles/ZonasAuxiliares.style";
@@ -121,8 +122,7 @@ export default function ZonasAuxiliares() {
         // Ubicación actual para mostrarla en el mapa y calcular distancias
         let miPosicion: LatLng | null = null;
         try {
-          const { status } = await Location.requestForegroundPermissionsAsync();
-          if (status === "granted") {
+          if (await permisoUbicacion()) {
             const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
             miPosicion = { latitude: loc.coords.latitude, longitude: loc.coords.longitude };
           }

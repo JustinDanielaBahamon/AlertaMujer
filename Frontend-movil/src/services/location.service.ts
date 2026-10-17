@@ -1,4 +1,5 @@
 import * as Location from "expo-location";
+import { permisoUbicacion } from "./permisosSeguros";
 
 // Interface para datos de ubicación mejorados
 export interface UbicacionDetallada {
@@ -48,8 +49,7 @@ export class LocationService {
    */
   static async requestPermissions(): Promise<boolean> {
     try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      return status === "granted";
+      return await permisoUbicacion();
     } catch (error) {
       console.error("Error al solicitar permisos de ubicación:", error);
       return false;
