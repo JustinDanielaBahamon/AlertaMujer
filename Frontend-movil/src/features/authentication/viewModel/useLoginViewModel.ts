@@ -12,11 +12,13 @@ import {
 } from "@react-native-google-signin/google-signin";
 
 // Inicio de sesión nativo de Google (Credential Manager de Android): sin navegador ni redirección.
-// webClientId es el cliente web del proyecto: el ID token sale con ese "aud", que el backend acepta.
+// webClientId es el cliente web (tipo 3) del proyecto de Firebase alerta-mujer-b4fae, el mismo del
+// cliente Android de google-services.json: si son de proyectos distintos Google da DEVELOPER_ERROR.
+// El ID token sale con ese "aud", que el backend acepta (google.client-ids).
 // Google solo responde si el SHA-1 del APK está registrado en Firebase (app Android
 // com.alertamujer.app); si no, devuelve DEVELOPER_ERROR.
 GoogleSignin.configure({
-  webClientId: "266164512214-a48icf7ct4140gor9pq64iq04ebvp4ta.apps.googleusercontent.com",
+  webClientId: "656563018279-blo6edqva74tbsdce0mau3n6rv007fvi.apps.googleusercontent.com",
 });
 
 type LoginNavigation = NativeStackNavigationProp<AuthStackParamList, "Login">;
