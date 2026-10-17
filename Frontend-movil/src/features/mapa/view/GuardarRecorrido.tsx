@@ -17,14 +17,20 @@ import { useLocale } from "../../../contexts/LocaleContext";
 import { useRecorridos } from "../../../contexts/RecorridosContext";
 import { useAuth } from "../../../contexts/AuthContext";
 import { frequentLocationsService } from "../../../services/frequent-locations.service";
+import { descripcionLugar, obtenerLugar } from "../../../services/geocoding.service";
+import { COLOR_PUNTO_A, COLOR_PUNTO_B } from "../coloresRecorrido";
 import { styles } from "../styles/GuardarRecorrido.style";
 
 type PuntoSeleccionado = {
   latitude: number;
   longitude: number;
   nombre?: string;
-  direccion?: string;
+  direccion?: string; // "Carrera 7 · Barrio Altico", por geocodificación inversa
 };
+
+// Lo que se muestra y se guarda de un punto: el nombre que puso la usuaria y/o la dirección
+const etiquetaPunto = (nombre: string, punto: PuntoSeleccionado, porDefecto: string) =>
+  [nombre.trim() || punto.nombre, punto.direccion].filter(Boolean).join(" · ") || porDefecto;
 
 type MetodoSeleccion = "mapa" | "ubicaciones";
 
@@ -73,15 +79,34 @@ export default function GuardarRecorrido() {
     };
   }, [user?.id]);
 
+  // Busca la dirección y el barrio del punto tocado en el mapa
+  const completarDireccion = async (
+    punto: PuntoSeleccionado,
+    asignar: React.Dispatch<React.SetStateAction<PuntoSeleccionado | null>>,
+  ) => {
+    const lugar = await obtenerLugar(punto.latitude, punto.longitude);
+    const direccion = lugar ? descripcionLugar(lugar) : "";
+    if (!direccion) return;
+    // Solo si la usuaria no cambió el punto mientras tanto
+    asignar((actual) =>
+      actual && actual.latitude === punto.latitude && actual.longitude === punto.longitude
+        ? { ...actual, direccion }
+        : actual,
+    );
+  };
+
   const handleMapPress = (event: any) => {
     const { latitude, longitude } = event.nativeEvent.coordinate;
-    
+    const punto = { latitude, longitude };
+
     if (puntoSeleccionando === "A") {
-      setPuntoA({ latitude, longitude });
+      setPuntoA(punto);
       setPuntoSeleccionando(null);
+      completarDireccion(punto, setPuntoA);
     } else if (puntoSeleccionando === "B") {
-      setPuntoB({ latitude, longitude });
+      setPuntoB(punto);
       setPuntoSeleccionando(null);
+      completarDireccion(punto, setPuntoB);
     }
   };
 
@@ -133,12 +158,16 @@ export default function GuardarRecorrido() {
     // Tiempo estimado caminando a 5 km/h (igual que en la web)
     const minutosEstimados = Math.round((distanciaKm / 5) * 60);
 
-    const inicio = nombrePuntoA || puntoA.nombre || "Punto A";
-    const fin = nombrePuntoB || puntoB.nombre || "Punto B";
+    const inicio = etiquetaPunto(nombrePuntoA, puntoA, "Punto A");
+    const fin = etiquetaPunto(nombrePuntoB, puntoB, "Punto B");
+    const nombreCorto = (nombre: string, punto: PuntoSeleccionado, porDefecto: string) =>
+      nombre.trim() || punto.nombre || punto.direccion?.split(" · ")[0] || porDefecto;
 
     setGuardando(true);
     const resultado = await agregarRecorridoManual({
-      nombre: nombreRecorrido || `Ruta ${inicio} → ${fin}`,
+      nombre:
+        nombreRecorrido.trim() ||
+        `Ruta ${nombreCorto(nombrePuntoA, puntoA, "A")} → ${nombreCorto(nombrePuntoB, puntoB, "B")}`,
       inicio,
       fin,
       puntos: [
@@ -191,6 +220,26 @@ export default function GuardarRecorrido() {
             </Text>
           </View>
         </LinearGradient>
+
+        {/* NOMBRE DEL RECORRIDO */}
+        <View style={[styles.sectionContainer, { backgroundColor: theme.card }]}>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>
+            Nombre del recorrido
+          </Text>
+          <View style={[styles.nombreInputContainer, { backgroundColor: theme.background }]}>
+            <MaterialIcons name="route" size={18} color={theme.contactSubtext} style={{ marginRight: 8 }} />
+            <TextInput
+              style={[styles.nombreInput, { color: theme.text }]}
+              placeholder="Ej: Camino seguro Sanjuan - Plaza, Recorrido de la tarde..."
+              placeholderTextColor={theme.contactSubtext}
+              value={nombreRecorrido}
+              onChangeText={setNombreRecorrido}
+            />
+          </View>
+          <Text style={[styles.helperText, { color: theme.contactSubtext }]}>
+            Si no ingresas un nombre, se generará uno automáticamente
+          </Text>
+        </View>
 
         {/* MÉTODO DE SELECCIÓN */}
         <View style={[styles.sectionContainer, { backgroundColor: theme.card }]}>
@@ -264,7 +313,7 @@ export default function GuardarRecorrido() {
                 coordinate={puntoA}
                 title="Punto A - Inicio"
                 description={puntoA.nombre || puntoA.direccion}
-                pinColor="#4CAF50"
+                pinColor={COLOR_PUNTO_A}
               />
             )}
             
@@ -273,7 +322,7 @@ export default function GuardarRecorrido() {
                 coordinate={puntoB}
                 title="Punto B - Fin"
                 description={puntoB.nombre || puntoB.direccion}
-                pinColor="#F44336"
+                pinColor={COLOR_PUNTO_B}
               />
             )}
           </MapView>
@@ -306,11 +355,11 @@ export default function GuardarRecorrido() {
             style={[
               styles.puntoButton,
               puntoA && styles.puntoButtonSelected,
-              { borderColor: puntoA ? "#4CAF50" : theme.contactSubtext }
+              { borderColor: puntoA ? COLOR_PUNTO_A : theme.contactSubtext }
             ]}
             onPress={() => iniciarSeleccionPunto("A")}
           >
-            <View style={[styles.puntoIcon, { backgroundColor: puntoA ? "#4CAF50" : "#E0E0E0" }]}>
+            <View style={[styles.puntoIcon, { backgroundColor: puntoA ? COLOR_PUNTO_A : "#E0E0E0" }]}>
               <MaterialIcons name="radio-button-checked" size={24} color="#fff" />
             </View>
             <View style={styles.puntoInfo}>
@@ -349,11 +398,11 @@ export default function GuardarRecorrido() {
             style={[
               styles.puntoButton,
               puntoB && styles.puntoButtonSelected,
-              { borderColor: puntoB ? "#F44336" : theme.contactSubtext }
+              { borderColor: puntoB ? COLOR_PUNTO_B : theme.contactSubtext }
             ]}
             onPress={() => iniciarSeleccionPunto("B")}
           >
-            <View style={[styles.puntoIcon, { backgroundColor: puntoB ? "#F44336" : "#E0E0E0" }]}>
+            <View style={[styles.puntoIcon, { backgroundColor: puntoB ? COLOR_PUNTO_B : "#E0E0E0" }]}>
               <MaterialIcons name="radio-button-checked" size={24} color="#fff" />
             </View>
             <View style={styles.puntoInfo}>
@@ -388,25 +437,6 @@ export default function GuardarRecorrido() {
           )}
         </View>
 
-        {/* NOMBRE DEL RECORRIDO */}
-        <View style={[styles.sectionContainer, { backgroundColor: theme.card }]}>
-          <Text style={[styles.sectionTitle, { color: theme.text }]}>
-            Nombre del recorrido
-          </Text>
-          <View style={[styles.nombreInputContainer, { backgroundColor: theme.background }]}>
-            <MaterialIcons name="route" size={18} color={theme.contactSubtext} style={{ marginRight: 8 }} />
-            <TextInput
-              style={[styles.nombreInput, { color: theme.text }]}
-              placeholder="Ej: Camino seguro Sanjuan - Plaza, Recorrido de la tarde..."
-              placeholderTextColor={theme.contactSubtext}
-              value={nombreRecorrido}
-              onChangeText={setNombreRecorrido}
-            />
-          </View>
-          <Text style={[styles.helperText, { color: theme.contactSubtext }]}>
-            Si no ingresas un nombre, se generará uno automáticamente
-          </Text>
-        </View>
 
         {/* ACCIONES */}
         <View style={styles.actionsContainer}>
@@ -492,7 +522,7 @@ export default function GuardarRecorrido() {
                 coordinate={puntoA}
                 title="Punto A - Inicio"
                 description={puntoA.nombre || puntoA.direccion}
-                pinColor="#4CAF50"
+                pinColor={COLOR_PUNTO_A}
               />
             )}
             
@@ -501,7 +531,7 @@ export default function GuardarRecorrido() {
                 coordinate={puntoB}
                 title="Punto B - Fin"
                 description={puntoB.nombre || puntoB.direccion}
-                pinColor="#F44336"
+                pinColor={COLOR_PUNTO_B}
               />
             )}
           </MapView>

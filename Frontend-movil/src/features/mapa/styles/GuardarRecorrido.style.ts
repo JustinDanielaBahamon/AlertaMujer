@@ -158,7 +158,7 @@ export const styles = StyleSheet.create({
   },
 
   puntoButtonSelected: {
-    backgroundColor: "rgba(76, 175, 80, 0.05)",
+    backgroundColor: "rgba(123, 29, 178, 0.05)",
   },
 
   puntoIcon: {
