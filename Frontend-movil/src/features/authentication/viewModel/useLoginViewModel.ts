@@ -1,13 +1,23 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { AuthStackParamList } from "../../../navigation/types";
 import { useAuth } from "../../../contexts/AuthContext";
 import { loginWithEmail, loginWithGoogleIdToken } from "../services/login.service";
-import * as Google from "expo-auth-session/providers/google";
-import * as WebBrowser from "expo-web-browser";
+import {
+  GoogleSignin,
+  isErrorWithCode,
+  isSuccessResponse,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
 
-WebBrowser.maybeCompleteAuthSession();
+// Inicio de sesión nativo de Google (Credential Manager de Android): sin navegador ni redirección.
+// webClientId es el cliente web del proyecto: el ID token sale con ese "aud", que el backend acepta.
+// Google solo responde si el SHA-1 del APK está registrado en Firebase (app Android
+// com.alertamujer.app); si no, devuelve DEVELOPER_ERROR.
+GoogleSignin.configure({
+  webClientId: "266164512214-a48icf7ct4140gor9pq64iq04ebvp4ta.apps.googleusercontent.com",
+});
 
 type LoginNavigation = NativeStackNavigationProp<AuthStackParamList, "Login">;
 
@@ -23,31 +33,6 @@ export function useLoginViewModel() {
   const [errorCorreo, setErrorCorreo]     = useState("");
   const [errorPassword, setErrorPassword] = useState("");
   const [errorGeneral, setErrorGeneral]   = useState("");
-
-  // Google: se pide el ID token (identidad verificable) y se envía al backend.
-  // Sin redirectUri manual: en el APK Expo usa el que Google espera para la app Android
-  // (paquete com.alertamujer.app). El Client ID de Android debe tener registrado el SHA-1 de EAS.
-  const [, response, promptAsync] = Google.useIdTokenAuthRequest({
-    clientId: "266164512214-a48icf7ct4140gor9pq64iq04ebvp4ta.apps.googleusercontent.com",
-    androidClientId: "266164512214-u4jqsko28es0lns9ubpes0vrnr3hgjqv.apps.googleusercontent.com",
-  });
-
-  useEffect(() => {
-    if (response?.type === "success") {
-      const idToken = response.params?.id_token ?? response.authentication?.idToken;
-      if (!idToken) {
-        setErrorGeneral("Google no devolvió la identidad. Intenta de nuevo.");
-        return;
-      }
-      setCargando(true);
-      loginWithGoogleIdToken(idToken)
-        .then(({ usuario, token, refreshToken }) => signIn(usuario, token, { refreshToken }))
-        .catch((e: Error) => setErrorGeneral(e.message))
-        .finally(() => setCargando(false));
-    } else if (response?.type === "error") {
-      setErrorGeneral("No se pudo iniciar sesión con Google. Intenta de nuevo.");
-    }
-  }, [response, signIn]);
 
   const toggleMostrarPassword = useCallback(() => {
     setMostrarPassword((v) => !v);
@@ -113,10 +98,35 @@ export function useLoginViewModel() {
     }
   }, [correo, password, signIn, navigation]);
 
-  const continuarConGoogle = useCallback(() => {
+  // Google: se pide el ID token (identidad verificable) y se envía al backend.
+  const continuarConGoogle = useCallback(async () => {
     limpiarErrores();
-    void promptAsync();
-  }, [promptAsync]);
+    try {
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+      const respuesta = await GoogleSignin.signIn();
+      if (!isSuccessResponse(respuesta)) return; // la usuaria cerró la ventana de Google
+      const idToken = respuesta.data.idToken;
+      if (!idToken) {
+        setErrorGeneral("Google no devolvió la identidad. Intenta de nuevo.");
+        return;
+      }
+      setCargando(true);
+      const { usuario, token, refreshToken } = await loginWithGoogleIdToken(idToken);
+      signIn(usuario, token, { refreshToken });
+    } catch (e: unknown) {
+      if (isErrorWithCode(e) && e.code === statusCodes.IN_PROGRESS) return;
+      if (isErrorWithCode(e) && e.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        setErrorGeneral("Este teléfono no tiene Google Play Services actualizado.");
+      } else if (e instanceof Error && !isErrorWithCode(e)) {
+        setErrorGeneral(e.message); // errores del backend (cuenta bloqueada, etc.)
+      } else {
+        console.warn("Google Sign-In falló:", isErrorWithCode(e) ? e.code : e);
+        setErrorGeneral("No se pudo iniciar sesión con Google. Intenta de nuevo.");
+      }
+    } finally {
+      setCargando(false);
+    }
+  }, [signIn]);
 
   return {
     correo,
