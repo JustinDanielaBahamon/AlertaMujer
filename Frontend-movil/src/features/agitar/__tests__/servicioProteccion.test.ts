@@ -16,11 +16,14 @@ jest.mock("@notifee/react-native", () => ({
 }));
 
 let mockLector: ((m: { x: number; y: number; z: number }) => void) | null = null;
-jest.mock("expo-sensors", () => ({
-  Accelerometer: {
-    isAvailableAsync: jest.fn(async () => true),
-    setUpdateInterval: jest.fn(),
-    addListener: jest.fn((l) => {
+jest.mock("../../../../modules/sensor-sacudidas", () => ({
+  __esModule: true,
+  default: {
+    disponible: jest.fn(() => true),
+    iniciar: jest.fn(() => true),
+    detener: jest.fn(),
+    esperar: jest.fn((ms: number) => new Promise((r) => setTimeout(r, ms))),
+    addListener: jest.fn((_evento: string, l) => {
       mockLector = l;
       return { remove: () => (mockLector = null) };
     }),
@@ -38,6 +41,7 @@ import notifee from "@notifee/react-native";
 import { AppState } from "react-native";
 import * as Location from "expo-location";
 import { crearAlertaPorSacudida } from "../alertaEnSegundoPlano";
+import SensorSacudidas from "../../../../modules/sensor-sacudidas";
 import {
   alAbrirAlertaPorSacudida,
   alSacudirEnPantalla,
@@ -76,6 +80,15 @@ describe("servicioProteccion", () => {
     (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValueOnce({ status: "denied" });
     expect(await iniciarProteccion()).toBe("sin_ubicacion");
     expect(notifee.displayNotification).not.toHaveBeenCalled();
+  });
+
+  it("lee el acelerómetro nativo, que sigue con la app minimizada, y lo suelta al apagar", async () => {
+    await encender();
+    expect(SensorSacudidas.iniciar).toHaveBeenCalledWith(80);
+
+    await detenerProteccion();
+    expect(SensorSacudidas.detener).toHaveBeenCalled();
+    expect(mockLector).toBeNull();
   });
 
   it("con la app en pantalla abre la cuenta regresiva de la app", async () => {

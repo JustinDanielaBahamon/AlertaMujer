@@ -7,8 +7,8 @@ import notifee, {
   type Event,
 } from "@notifee/react-native";
 import { AppState, Vibration } from "react-native";
-import { Accelerometer } from "expo-sensors";
 import * as Location from "expo-location";
+import SensorSacudidas from "../../../modules/sensor-sacudidas";
 import { crearDetectorSacudidas } from "./detectorSacudidas";
 import { alertaEnSegundoPlano, crearAlertaPorSacudida } from "./alertaEnSegundoPlano";
 
@@ -19,6 +19,9 @@ import { alertaEnSegundoPlano, crearAlertaPorSacudida } from "./alertaEnSegundoP
  * - App en pantalla: se abre la cuenta regresiva de la app, igual que con el botón SOS.
  * - App en segundo plano: cuenta regresiva de 5 s en una notificación con "Cancelar"; si no se
  *   cancela, la alerta se crea sin desbloquear el teléfono.
+ *
+ * El acelerómetro es el del módulo nativo sensor-sacudidas: expo-sensors deja de leer en cuanto la
+ * app sale de la pantalla. Por lo mismo las esperas son nativas y no setTimeout.
  */
 
 const CANAL_PROTECCION = "proteccion_activa";
@@ -86,11 +89,14 @@ export function registrarServicioProteccion(): void {
 function escucharSensor() {
   detenerSensor?.();
   const detectar = crearDetectorSacudidas();
-  Accelerometer.setUpdateInterval(INTERVALO_SENSOR_MS);
-  const sub = Accelerometer.addListener(({ x, y, z }) => {
+  const sub = SensorSacudidas.addListener("onLectura", ({ x, y, z }) => {
     if (detectar(x, y, z, Date.now())) alSacudir();
   });
-  detenerSensor = () => sub.remove();
+  SensorSacudidas.iniciar(INTERVALO_SENSOR_MS);
+  detenerSensor = () => {
+    SensorSacudidas.detener();
+    sub.remove();
+  };
 }
 
 function alSacudir() {
@@ -141,7 +147,7 @@ async function cuentaRegresiva() {
           actions: [{ title: "Cancelar", pressAction: { id: ACCION_CANCELAR } }],
         },
       });
-      await new Promise((r) => setTimeout(r, 1000));
+      await SensorSacudidas.esperar(1000);
     }
     if (cuenta.cancelada) return;
     await notifee.cancelNotification(ID_CUENTA);
@@ -196,7 +202,7 @@ export function manejarEventoProteccion({ type, detail }: Event): boolean {
 }
 
 export async function iniciarProteccion(): Promise<EstadoProteccion> {
-  if (!(await Accelerometer.isAvailableAsync())) return "sin_sensor";
+  if (!SensorSacudidas.disponible()) return "sin_sensor";
   // El servicio es de tipo ubicación (para poder enviarla con la pantalla bloqueada) y Android
   // exige el permiso antes de iniciarlo
   const { status } = await Location.requestForegroundPermissionsAsync();

@@ -1,0 +1,6 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <!-- Mantener la CPU despierta mientras la protección por sacudida está encendida -->
+  <uses-permission android:name="android.permission.WAKE_LOCK" />
+  <!-- Pedir que el sistema no duerma la app (ahorro de batería de Android y de cada marca) -->
+  <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+</manifest>
