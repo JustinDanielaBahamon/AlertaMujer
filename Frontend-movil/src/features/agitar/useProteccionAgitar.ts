@@ -1,7 +1,9 @@
 import { useEffect } from "react";
-import { Alert } from "react-native";
+import { Alert, Platform } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { NavigationContainerRefWithCurrent } from "@react-navigation/native";
 import { useMetodosActivacion } from "../../contexts/MetodosActivacionContext";
+import SensorSacudidas from "../../../modules/sensor-sacudidas";
 import type { MainStackParamList } from "../../navigation/types";
 import {
   alAbrirAlertaPorSacudida,
@@ -12,6 +14,29 @@ import {
 
 // Durante una alerta (o su cuenta regresiva) otra sacudida no hace nada
 const PANTALLAS_DE_ALERTA = new Set(["Activacion", "AlertaActiva"]);
+
+const CLAVE_BATERIA = "@alerta_mujer:bateria_preguntada";
+const REPREGUNTAR_BATERIA_MS = 3 * 24 * 60 * 60 * 1000;
+
+/**
+ * El acelerómetro no necesita permiso, pero el ahorro de batería de Android (y el de cada marca:
+ * Infinix, Xiaomi, Samsung...) duerme la app con la pantalla apagada. Se pide que la deje correr
+ * siempre; si la usuaria dice que no, se vuelve a preguntar a los 3 días.
+ */
+async function pedirSinAhorroDeBateria() {
+  if (Platform.OS !== "android" || SensorSacudidas.ignoraOptimizacionBateria()) return;
+  const ultima = Number((await AsyncStorage.getItem(CLAVE_BATERIA)) ?? 0);
+  if (Date.now() - ultima < REPREGUNTAR_BATERIA_MS) return;
+  await AsyncStorage.setItem(CLAVE_BATERIA, String(Date.now()));
+  Alert.alert(
+    "Agitar el teléfono",
+    "Para que la alerta funcione con la app cerrada o la pantalla apagada, permite que AlertaMujer se ejecute siempre en segundo plano.",
+    [
+      { text: "Ahora no", style: "cancel" },
+      { text: "Permitir", onPress: () => SensorSacudidas.pedirIgnorarOptimizacionBateria() },
+    ],
+  );
+}
 
 /**
  * Enciende o apaga el servicio de "agitar el teléfono" según el ajuste de la usuaria y conecta
@@ -31,7 +56,9 @@ export function useProteccionAgitar(
     }
     iniciarProteccion()
       .then((estado) => {
-        if (estado === "sin_ubicacion") {
+        if (estado === "activa") {
+          pedirSinAhorroDeBateria().catch(() => {});
+        } else if (estado === "sin_ubicacion") {
           cambiar("agitar", false);
           Alert.alert(
             "Agitar el teléfono",
