@@ -1,4 +1,4 @@
-// App móvil ALERTA MUJER (Expo): tipos y pruebas en cada push. El APK se genera solo a mano:
+// App móvil ALERTA MUJER (Expo): ESLint, tipos y pruebas en cada push. El APK se genera solo a mano:
 // "Construir con parámetros" → GENERAR_APK. Usa EAS con la credencial expo-token de Jenkins; el
 // google-services.json debe estar en EAS como variable de archivo GOOGLE_SERVICES_JSON.
 pipeline {
@@ -19,6 +19,15 @@ pipeline {
       steps {
         dir('Frontend-movil') {
           sh 'npm ci --no-audit --no-fund'
+        }
+      }
+    }
+
+    // Errores de ESLint (p. ej. react-hooks/rules-of-hooks: un hook detrás de un return cerraba la app)
+    stage('Lint') {
+      steps {
+        dir('Frontend-movil') {
+          sh 'npx eslint . --quiet'
         }
       }
     }
