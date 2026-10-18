@@ -16,6 +16,7 @@ import { useTheme } from "../../../contexts/ThemeContext";
 import type { PuntoUbicacion } from "../../../services/alert-tracking.service";
 import { createStyles } from "../style/alertaActivaStyle";
 import { useAlertaActivaViewModel } from "../viewModel/useAlertaActivaViewModel";
+import ChatAlerta, { RAPIDOS_DE_ELLA } from "../../chatAlerta/ChatAlerta";
 
 type Estilos = ReturnType<typeof createStyles>;
 
@@ -180,6 +181,15 @@ export default function AlertaActivaScreen() {
             </View>
           </View>
         </View>
+
+        {/* Chat con los contactos: mensajes rápidos sin tener que hablar */}
+        <ChatAlerta
+          participante={vm.alertaId ? { tipo: "duena", alertaId: vm.alertaId } : null}
+          activo
+          soyElla
+          titulo="Mensajes a tus contactos"
+          rapidos={RAPIDOS_DE_ELLA}
+        />
 
         <TouchableOpacity style={styles.okButton} onPress={vm.abrirConfirmacion}>
           <MaterialIcons name="favorite" size={22} color={theme.headerText} />

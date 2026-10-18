@@ -85,6 +85,8 @@ export function useAlertaActivaViewModel() {
 
   // Referencia al id de la alerta creada en el backend (para poder cerrarla).
   const alertaCreadaIdRef = useRef<number | null>(null);
+  // Mismo id como estado: el chat de la alerta aparece cuando ya existe
+  const [alertaId, setAlertaId] = useState<number | null>(null);
   const [errorAlerta, setErrorAlerta] = useState<string | null>(null);
 
   // Crea la alerta en el backend al activar el SOS (una sola vez, incluyendo la ubicación).
@@ -159,6 +161,7 @@ export function useAlertaActivaViewModel() {
     if (!alertaExistente) return;
     alertaCreacionIniciadaRef.current = true;
     alertaCreadaIdRef.current = alertaExistente;
+    setAlertaId(alertaExistente);
     tomarControlDeLaAlerta();
   }, [alertaExistente]);
 
@@ -190,6 +193,7 @@ export function useAlertaActivaViewModel() {
           contactIds: contactoDestino ? [Number(contactoDestino.id)] : undefined,
         });
         alertaCreadaIdRef.current = alerta.id;
+        setAlertaId(alerta.id);
         // Si se creó sin ubicación y ya llegó una, se envía asociada a la alerta
         if (!location && ultimaUbicacionRef.current) {
           reportarUbicacion({ ...ultimaUbicacionRef.current, alertId: alerta.id });
@@ -404,6 +408,7 @@ export function useAlertaActivaViewModel() {
   }, []);
 
   return {
+    alertaId,
     formattedTime,
     marcarEstoyBien,
     abrirConfirmacion,

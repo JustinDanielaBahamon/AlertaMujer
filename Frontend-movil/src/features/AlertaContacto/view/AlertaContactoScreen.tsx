@@ -14,6 +14,8 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import MapView, { Marker, Polyline } from "../../../components/mapa/MapaLibre";
+import ChatAlerta, { RAPIDOS_DEL_CONTACTO } from "../../chatAlerta/ChatAlerta";
+import { useAuth } from "../../../contexts/AuthContext";
 import { useAlertaContactoViewModel } from "../viewModel/useAlertaContactoViewModel";
 import type { PuntoUbicacion } from "../../../services/alert-tracking.service";
 import { useTheme } from "../../../contexts/ThemeContext";
@@ -130,6 +132,8 @@ function PinesMapa({
 
 export default function AlertaContactoScreen() {
   const vm = useAlertaContactoViewModel();
+  const { user } = useAuth();
+  const miNombre = (user?.nombre ?? "").trim().split(/\s+/)[0] || "Contacto";
   const { theme } = useTheme();
   const { t } = useLocale();
   const { width, height } = useWindowDimensions();
@@ -428,6 +432,17 @@ export default function AlertaContactoScreen() {
             <MaterialIcons name="call" size={20} color={theme.icono} />
             <Text style={styles.callText}>{tx.llamar911}</Text>
           </TouchableOpacity>
+          {/* Chat con ella: respuestas rápidas o texto (con el código del seguimiento) */}
+          {!!vm.codigo && (
+            <ChatAlerta
+              participante={{ tipo: "contacto", codigo: vm.codigo, nombre: miNombre }}
+              activo={vm.activa}
+              soyElla={false}
+              nombreElla={vm.nombreUsuaria}
+              titulo={`Mensajes con ${vm.nombreUsuaria || "ella"}`}
+              rapidos={RAPIDOS_DEL_CONTACTO}
+            />
+          )}
         </View>
       </ScrollView>
 

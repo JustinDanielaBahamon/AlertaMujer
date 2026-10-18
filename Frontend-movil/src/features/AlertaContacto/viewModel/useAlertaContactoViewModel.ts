@@ -325,6 +325,7 @@ export function useAlertaContactoViewModel() {
   }, []);
 
   return {
+    codigo: params.codigo,
     nombreUsuaria: params.nombreUsuaria,
     mapRef,
     mapaCompletoRef,
