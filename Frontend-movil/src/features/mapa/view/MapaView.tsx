@@ -419,6 +419,35 @@ export default function MapaView() {
   };
 
   // ─── PANTALLA DE CARGA ────────────────────────────────────────────────────
+  // Zonas de emergencia del sistema: se cargan al entrar al mapa (no dependen de la usuaria).
+  // Debe ir antes del return de "sin ubicación": un hook después de un return cambia la
+  // cantidad de hooks entre renders y React cierra la app.
+  useFocusEffect(
+    useCallback(() => {
+      let activo = true;
+      getZonas()
+        .then((zonas) => {
+          if (!activo) return;
+          setZonasOficiales(
+            zonas
+              .filter((z) => z.isActive !== false && z.latitude != null && z.longitude != null)
+              .map((z) => ({
+                id: String(z.id),
+                nombre: z.name,
+                tipo: (z.zoneType || "").toLowerCase(),
+                latitude: Number(z.latitude),
+                longitude: Number(z.longitude),
+                radio: Number(z.radiusMeters) > 0 ? Number(z.radiusMeters) : RADIO_ZONA_METROS,
+              }))
+          );
+        })
+        .catch((error) => console.warn("No se pudieron cargar las zonas de emergencia:", error));
+      return () => {
+        activo = false;
+      };
+    }, [])
+  );
+
   if (!location) {
     const esError = permisoDenegado || serviciosDesactivados;
     
@@ -452,33 +481,6 @@ export default function MapaView() {
       </View>
     );
   }
-
-  // Zonas de emergencia del sistema: se cargan al entrar al mapa (no dependen de la usuaria)
-  useFocusEffect(
-    useCallback(() => {
-      let activo = true;
-      getZonas()
-        .then((zonas) => {
-          if (!activo) return;
-          setZonasOficiales(
-            zonas
-              .filter((z) => z.isActive !== false && z.latitude != null && z.longitude != null)
-              .map((z) => ({
-                id: String(z.id),
-                nombre: z.name,
-                tipo: (z.zoneType || "").toLowerCase(),
-                latitude: Number(z.latitude),
-                longitude: Number(z.longitude),
-                radio: Number(z.radiusMeters) > 0 ? Number(z.radiusMeters) : RADIO_ZONA_METROS,
-              }))
-          );
-        })
-        .catch((error) => console.warn("No se pudieron cargar las zonas de emergencia:", error));
-      return () => {
-        activo = false;
-      };
-    }, [])
-  );
 
   // ─── COORDENADA CENTRO Y ACCIONES LOCALES ─────────────────────────────────
   const centroCalculado = coordenadaCentro ?? destinoAlerta?.coordenada ?? location;
