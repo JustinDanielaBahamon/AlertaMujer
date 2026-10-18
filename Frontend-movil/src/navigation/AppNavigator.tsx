@@ -7,6 +7,7 @@ import MainNavigator from "./MainNavigator";
 import { useAlertasSos } from "../notifications/useAlertasSos";
 import { useProteccionAgitar } from "../features/agitar/useProteccionAgitar";
 import { useRecordatorioProteccion } from "../features/permisos/useRecordatorioProteccion";
+import { useReanudarAlerta } from "../features/AlertaActiva/useReanudarAlerta";
 
 export default function AppNavigator() {
   const { user, pendingMainRoute, restoring } = useAuth();
@@ -18,6 +19,8 @@ export default function AppNavigator() {
   useProteccionAgitar(navegacion, !!user && !restoring && user.id !== 0);
   // Aviso si falta algo para que las alertas funcionen (agitar apagado, permisos...)
   useRecordatorioProteccion(navegacion, !!user && !restoring && user.id !== 0);
+  // Si hay una alerta propia activa (la app se cerró con la alerta en curso), se vuelve a ella
+  useReanudarAlerta(navegacion, !!user && !restoring && user.id !== 0);
 
   if (user && mainEntryRef.current === null) {
     mainEntryRef.current = pendingMainRoute ?? "DrawerHome";
