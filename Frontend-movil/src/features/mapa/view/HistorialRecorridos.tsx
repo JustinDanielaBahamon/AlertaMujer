@@ -216,7 +216,7 @@ export default function HistorialRecorridos() {
               Los recorridos están ocultos
             </Text>
             <Text style={[styles.emptyStateSubtext, { color: theme.contactSubtext }]}>
-              Activa "Mostrar recorridos en mapa" en Ajustes
+              Activa «Mostrar recorridos en mapa» en Ajustes
             </Text>
           </View>
         ) : (
