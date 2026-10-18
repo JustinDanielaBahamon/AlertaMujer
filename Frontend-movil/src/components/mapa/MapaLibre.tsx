@@ -24,6 +24,16 @@ import {
 import { StyleSheet, Text, TouchableOpacity, View, type StyleProp, type ViewStyle } from "react-native";
 
 /** Estilo de mapa gratuito y sin clave (https://openfreemap.org). */
+/** Ancho mínimo (en grados, ~300 m) al encuadrar varios puntos. */
+const ANCHO_MINIMO_GRADOS = 0.003;
+
+/** Agranda un intervalo [min, max] alrededor de su centro hasta el ancho mínimo. */
+export function conAnchoMinimo(min: number, max: number, minimo = ANCHO_MINIMO_GRADOS): [number, number] {
+  if (max - min >= minimo) return [min, max];
+  const centro = (min + max) / 2;
+  return [centro - minimo / 2, centro + minimo / 2];
+}
+
 export const ESTILO_MAPA = "https://tiles.openfreemap.org/styles/liberty";
 
 export type LatLng = { latitude: number; longitude: number };
@@ -103,10 +113,14 @@ const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
       }
       const lngs = coords.map((c) => c.longitude);
       const lats = coords.map((c) => c.latitude);
-      camara.current?.fitBounds(
-        [Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)],
-        { padding: options?.edgePadding, duration: options?.animated === false ? 0 : 500 },
-      );
+      // Puntos muy juntos (alguien quieto: el GPS varía unos metros) darían un zoom mayor al que
+      // tiene calles dibujadas y el mapa quedaría vacío: se encuadra como mínimo ~300 m
+      const [oeste, este] = conAnchoMinimo(Math.min(...lngs), Math.max(...lngs));
+      const [sur, norte] = conAnchoMinimo(Math.min(...lats), Math.max(...lats));
+      camara.current?.fitBounds([oeste, sur, este, norte], {
+        padding: options?.edgePadding,
+        duration: options?.animated === false ? 0 : 500,
+      });
     },
   }));
 
