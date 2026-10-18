@@ -41,6 +41,16 @@ export interface CreateAlertData {
   contactIds?: number[];
 }
 
+/** Alertas de la usuaria en sesión, de la más reciente a la más antigua. */
+export const getMisAlertas = async (): Promise<AlertaApi[]> => {
+  const response = await api.get<AlertaApi[]>('/api/alerts/me');
+  return response.data;
+};
+
+/** La alerta propia que sigue activa (solo puede haber una), o null. */
+export const alertaActivaPropia = (alertas: AlertaApi[]): AlertaApi | null =>
+  alertas.find((a) => (a.status || '').toLowerCase() === 'active') ?? null;
+
 export const createAlert = async (data: CreateAlertData): Promise<AlertaApi> => {
   const response = await api.post<AlertaApi>('/api/alerts', {
     alertType: data.alertType ?? 'main',
