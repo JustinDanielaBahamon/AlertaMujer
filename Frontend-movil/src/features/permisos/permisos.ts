@@ -4,6 +4,7 @@ import * as Contacts from "expo-contacts";
 import * as Location from "expo-location";
 import { Linking, Platform } from "react-native";
 import SensorSacudidas from "../../../modules/sensor-sacudidas";
+import { reportarPermisos } from "../../services/devices.service";
 import { enColaDePermisos, permisoNotificaciones, permisoUbicacion } from "../../services/permisosSeguros";
 
 /**
@@ -130,6 +131,16 @@ export async function revisarPermisos(
   const bateria = !android || SensorSacudidas.ignoraOptimizacionBateria();
   const pantallaCompleta = !android || SensorSacudidas.puedePantallaCompleta();
   const conInicioAutomatico = android && SensorSacudidas.tieneAjusteInicioAutomatico();
+  // La web muestra si el celular está listo para una emergencia
+  void reportarPermisos({
+    ubicacion: ubicacion.concedido === true,
+    notificaciones: notificaciones.concedido === true,
+    agitar: agitarActivo,
+    bateria,
+    pantallaCompleta,
+    microfono: microfono.concedido === true,
+    camara: camara.concedido === true,
+  });
   return {
     agitar: { concedido: agitarActivo, puedePreguntar: true },
     ubicacion,

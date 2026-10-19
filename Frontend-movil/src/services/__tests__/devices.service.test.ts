@@ -11,7 +11,7 @@ jest.mock("expo-application", () => ({ nativeApplicationVersion: "1.0.0" }));
 jest.mock("../api", () => ({ __esModule: true, default: { get: jest.fn(), post: jest.fn(), put: jest.fn() } }));
 
 import api from "../api";
-import { getOrCreateDevice, olvidarSesionDispositivo } from "../devices.service";
+import { getOrCreateDevice, olvidarSesionDispositivo, reportarPermisos } from "../devices.service";
 
 const mockApi = api as unknown as { get: jest.Mock; post: jest.Mock; put: jest.Mock };
 
@@ -54,5 +54,19 @@ describe("devices.service", () => {
     await getOrCreateDevice();
 
     expect(mockApi.put).toHaveBeenCalledTimes(1);
+  });
+
+  it("informa los permisos del celular solo cuando cambian", async () => {
+    mockApi.get.mockResolvedValue({ data: [{ id: 1, deviceUuid: "expo-viejo", model: "Dispositivo Expo" }] });
+
+    await reportarPermisos({ ubicacion: true, agitar: false });
+    await reportarPermisos({ ubicacion: true, agitar: false });
+    await reportarPermisos({ ubicacion: true, agitar: true });
+
+    const envios = mockApi.put.mock.calls.filter(([, datos]) => "permissions" in datos);
+    expect(envios.map(([, d]) => d.permissions)).toEqual([
+      JSON.stringify({ ubicacion: true, agitar: false }),
+      JSON.stringify({ ubicacion: true, agitar: true }),
+    ]);
   });
 });
