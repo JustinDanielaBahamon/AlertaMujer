@@ -7,6 +7,7 @@ import notifee, { EventType } from "@notifee/react-native";
 import { getApp } from "@react-native-firebase/app";
 import { getMessaging, setBackgroundMessageHandler } from "@react-native-firebase/messaging";
 import App from "./App";
+import { esNuevoCelular, mostrarNuevoCelular } from "./src/notifications/nuevoCelular";
 import { esPedidoUbicacion, responderPedidoUbicacion } from "./src/services/pedidoUbicacion";
 import { manejarEventoProteccion, registrarServicioProteccion } from "./src/features/agitar/servicioProteccion";
 import {
@@ -27,6 +28,8 @@ if (Constants.expoConfig?.extra?.pushConfigurado === true) {
         await mostrarAlertaFinalizada(mensaje.data);
       } else if (esPedidoUbicacion(mensaje.data)) {
         await responderPedidoUbicacion();
+      } else if (esNuevoCelular(mensaje.data)) {
+        await mostrarNuevoCelular(mensaje.data);
       }
     });
   } catch (error) {
