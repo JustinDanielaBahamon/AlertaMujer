@@ -107,7 +107,26 @@ async function obtener(): Promise<DeviceApi> {
   return device;
 }
 
+let ultimosPermisos: string | null = null;
+
+/**
+ * Informa al backend qué permisos tiene el celular (true/false por permiso) para que la usuaria
+ * los vea en la web. Solo envía cuando algo cambió; un fallo no afecta a la app.
+ */
+export async function reportarPermisos(permisos: Record<string, boolean>): Promise<void> {
+  const json = JSON.stringify(permisos);
+  if (json === ultimosPermisos) return;
+  try {
+    const device = await getOrCreateDevice();
+    await api.put(`/api/devices/${device.id}/info`, { permissions: json });
+    ultimosPermisos = json;
+  } catch {
+    // Se reintenta en la próxima revisión de permisos
+  }
+}
+
 /** Al cerrar sesión: la próxima cuenta vuelve a informar los datos del celular. */
 export function olvidarSesionDispositivo(): void {
   actualizadoEnEstaSesion = false;
+  ultimosPermisos = null;
 }
