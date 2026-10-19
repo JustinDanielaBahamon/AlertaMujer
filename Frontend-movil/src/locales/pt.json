@@ -767,7 +767,7 @@
     "titulo_header": "Retenção de dados",
     "intro": "Estes são os prazos durante os quais o aplicativo conserva suas informações em seus servidores seguros.",
     "ubicaciones_titulo": "Histórico de localizações",
-    "ubicaciones_desc": "As rotas de GPS registradas durante seus alertas são conservadas por 30 dias. Passado esse tempo, são excluídas automaticamente, ou antes se você excluir sua conta.",
+    "ubicaciones_desc": "As rotas de GPS dos seus alertas são conservadas por 30 dias e as localizações do dia a dia por 7 dias. Depois são excluídas automaticamente, ou antes se você excluir sua conta.",
     "evidencias_titulo": "Evidências (vídeos e áudios)",
     "evidencias_desc": "As gravações feitas em uma emergência permanecem na nuvem por 60 dias para que você possa baixá-las. Depois são excluídas definitivamente.",
     "perfil_titulo": "Dados de perfil",

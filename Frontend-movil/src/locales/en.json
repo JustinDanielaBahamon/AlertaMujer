@@ -767,7 +767,7 @@
     "titulo_header": "Data retention",
     "intro": "These are the periods during which the app keeps your information on its secure servers.",
     "ubicaciones_titulo": "Location history",
-    "ubicaciones_desc": "GPS routes recorded during your alerts are kept for 30 days. After that they are deleted automatically, or sooner if you delete your account.",
+    "ubicaciones_desc": "GPS routes from your alerts are kept for 30 days and everyday locations for 7 days. After that they are deleted automatically, or sooner if you delete your account.",
     "evidencias_titulo": "Evidence (videos and audio)",
     "evidencias_desc": "Recordings taken during an emergency remain in the cloud for 60 days so you can download them. After that they are permanently deleted.",
     "perfil_titulo": "Profile data",
