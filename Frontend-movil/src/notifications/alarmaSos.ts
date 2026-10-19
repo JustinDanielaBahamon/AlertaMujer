@@ -4,6 +4,7 @@ import notifee, {
   AndroidVisibility,
   type Notification,
 } from "@notifee/react-native";
+import { estiloGrande } from "./estiloNotificacion";
 
 /**
  * Alarma que recibe un contacto de emergencia cuando una usuaria activa una alerta. Llega como
@@ -54,11 +55,16 @@ export async function mostrarAlertaFinalizada(datos: DatosAlertaFinalizada): Pro
     datos.estado === "resolved" ? "fue marcada como atendida"
     : datos.estado === "cancelled" ? "fue cancelada"
     : "terminó";
+  const texto = `La alerta de ${nombre} ${que}. Si aún no sabes de ella, comunícate para confirmar que está bien.`;
   await notifee.displayNotification({
     id: `fin-${datos.alertaId}`,
-    title: "✅ Alerta terminada",
-    body: `La alerta de ${nombre} ${que}.`,
-    android: { channelId: CANAL_AVISOS, pressAction: { id: "default", launchActivity: "default" } },
+    title: "Alerta terminada",
+    body: texto,
+    android: {
+      channelId: CANAL_AVISOS,
+      ...estiloGrande(texto),
+      pressAction: { id: "default", launchActivity: "default" },
+    },
   });
 }
 
@@ -79,13 +85,15 @@ export async function crearCanalSos(): Promise<void> {
 export async function mostrarAlarmaSos(datos: DatosAlertaSos): Promise<void> {
   await crearCanalSos();
   const nombre = datos.nombre?.trim() || "Una persona";
+  const texto = `${nombre} activó una alerta y puede estar en peligro. Toca para ver su ubicación en tiempo real y escribirle.`;
   await notifee.displayNotification({
     id: idNotificacion(datos.alertaId),
-    title: "🚨 Alerta de emergencia",
-    body: `${nombre} activó una alerta. Toca para ver su ubicación en tiempo real.`,
+    title: `🚨 ${nombre} necesita ayuda`,
+    body: texto,
     data: datos,
     android: {
       channelId: CANAL_SOS,
+      ...estiloGrande(texto),
       category: AndroidCategory.ALARM,
       importance: AndroidImportance.HIGH,
       visibility: AndroidVisibility.PUBLIC,

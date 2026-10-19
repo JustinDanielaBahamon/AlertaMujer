@@ -7,6 +7,7 @@ import notifee, {
   type Event,
 } from "@notifee/react-native";
 import { AppState, Vibration } from "react-native";
+import { estiloGrande } from "../../notifications/estiloNotificacion";
 import SensorSacudidas from "../../../modules/sensor-sacudidas";
 import { crearDetectorSacudidas } from "./detectorSacudidas";
 import { alertaEnSegundoPlano, crearAlertaPorSacudida } from "./alertaEnSegundoPlano";
@@ -138,6 +139,7 @@ async function cuentaRegresiva() {
         body: "Agitaste el teléfono. Toca Cancelar si fue un error.",
         android: {
           channelId: CANAL_AVISO,
+          ...estiloGrande("Agitaste el teléfono. Toca Cancelar si fue un error."),
           category: AndroidCategory.ALARM,
           importance: AndroidImportance.HIGH,
           visibility: AndroidVisibility.PUBLIC,
@@ -162,6 +164,7 @@ async function cuentaRegresiva() {
         data: { alertaId: String(alertaId) },
         android: {
           channelId: CANAL_AVISO,
+          ...estiloGrande("Tus contactos recibieron tu ubicación. Toca para ver la alerta, escribirles y ver lo que se graba."),
           visibility: AndroidVisibility.PUBLIC,
           pressAction: { id: ACCION_ABRIR, launchActivity: "default" },
         },
@@ -171,7 +174,11 @@ async function cuentaRegresiva() {
         id: ID_ENVIADA,
         title: "No se pudo enviar la alerta",
         body: "Abre la app y usa el botón SOS, o llama a la línea de emergencias.",
-        android: { channelId: CANAL_AVISO, pressAction: { id: "default", launchActivity: "default" } },
+        android: {
+          channelId: CANAL_AVISO,
+          ...estiloGrande("Abre la app y usa el botón SOS, o llama a la línea de emergencias."),
+          pressAction: { id: "default", launchActivity: "default" },
+        },
       });
     }
   } finally {
@@ -216,6 +223,7 @@ export async function iniciarProteccion(): Promise<EstadoProteccion> {
     body: "Agita el teléfono con fuerza para enviar una alerta a tus contactos.",
     android: {
       channelId: CANAL_PROTECCION,
+      ...estiloGrande("Agita el teléfono con fuerza para enviar una alerta a tus contactos."),
       asForegroundService: true,
       foregroundServiceTypes: [AndroidForegroundServiceType.FOREGROUND_SERVICE_TYPE_LOCATION],
       ongoing: true,

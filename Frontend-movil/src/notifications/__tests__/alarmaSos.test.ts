@@ -2,6 +2,7 @@ jest.mock("@notifee/react-native", () => ({
   __esModule: true,
   default: { createChannel: jest.fn(), displayNotification: jest.fn(), cancelNotification: jest.fn() },
   AndroidCategory: { ALARM: "alarm" },
+  AndroidStyle: { BIGTEXT: 1 },
   AndroidImportance: { HIGH: 4, DEFAULT: 3 },
   AndroidVisibility: { PUBLIC: 1 },
 }));
