@@ -769,7 +769,7 @@
     "ubicaciones_titulo": "Histórico de localizações",
     "ubicaciones_desc": "As rotas de GPS dos seus alertas são conservadas por 30 dias e as localizações do dia a dia por 7 dias. Depois são excluídas automaticamente, ou antes se você excluir sua conta.",
     "evidencias_titulo": "Evidências (vídeos e áudios)",
-    "evidencias_desc": "As gravações feitas em uma emergência permanecem na nuvem por 60 dias para que você possa baixá-las. Depois são excluídas definitivamente.",
+    "evidencias_desc": "As gravações de uma emergência ficam na nuvem por 60 dias e depois são excluídas. Se precisar delas como prova (por exemplo, para uma denúncia), você pode conservar até 5 alertas pela web, em Evidências.",
     "perfil_titulo": "Dados de perfil",
     "perfil_desc": "Seus dados pessoais são usados unicamente para o funcionamento dos alertas de segurança e nunca são vendidos a terceiros."
   },

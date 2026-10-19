@@ -768,7 +768,7 @@
     "ubicaciones_titulo": "Historique des positions",
     "ubicaciones_desc": "Les itinéraires GPS de tes alertes sont conservés 30 jours et les positions du quotidien 7 jours. Ensuite, ils sont supprimés automatiquement, ou plus tôt si tu supprimes ton compte.",
     "evidencias_titulo": "Preuves (vidéos et audios)",
-    "evidencias_desc": "Les enregistrements effectués lors d'une urgence restent dans le cloud pendant 60 jours pour que tu puisses les télécharger. Ensuite, ils sont supprimés définitivement.",
+    "evidencias_desc": "Les enregistrements d'une urgence sont conservés 60 jours dans le cloud, puis supprimés. Si tu en as besoin comme preuve (par exemple pour une plainte), tu peux conserver jusqu'à 5 alertes depuis le site web, dans Preuves.",
     "perfil_titulo": "Données de profil",
     "perfil_desc": "Tes données personnelles sont utilisées uniquement pour le fonctionnement des alertes de sécurité et ne sont jamais vendues à des tiers."
   },
