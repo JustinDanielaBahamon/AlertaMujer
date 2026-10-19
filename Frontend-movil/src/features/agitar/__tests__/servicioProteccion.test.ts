@@ -12,6 +12,7 @@ jest.mock("@notifee/react-native", () => ({
   AuthorizationStatus: { DENIED: 0, AUTHORIZED: 1 },
   AndroidCategory: { ALARM: "alarm" },
   AndroidForegroundServiceType: { FOREGROUND_SERVICE_TYPE_LOCATION: 8 },
+  AndroidStyle: { BIGTEXT: 1 },
   AndroidImportance: { HIGH: 4, LOW: 2 },
   AndroidVisibility: { PUBLIC: 1 },
   EventType: { PRESS: 1, ACTION_PRESS: 2 },
