@@ -16,6 +16,7 @@ import { useTheme } from "../../../contexts/ThemeContext";
 import type { PuntoUbicacion } from "../../../services/alert-tracking.service";
 import { createStyles } from "../style/alertaActivaStyle";
 import { useAlertaActivaViewModel } from "../viewModel/useAlertaActivaViewModel";
+import GrabacionAlerta from "../../grabacion/GrabacionAlerta";
 import ChatAlerta, { RAPIDOS_DE_ELLA } from "../../chatAlerta/ChatAlerta";
 
 type Estilos = ReturnType<typeof createStyles>;
@@ -183,6 +184,8 @@ export default function AlertaActivaScreen() {
         </View>
 
         {/* Chat con los contactos: mensajes rápidos sin tener que hablar */}
+        {/* Video/audio automático como evidencia (se sube cada 30 s) */}
+        <GrabacionAlerta alertaId={vm.alertaId} />
         <ChatAlerta
           participante={vm.alertaId ? { tipo: "duena", alertaId: vm.alertaId } : null}
           activo
