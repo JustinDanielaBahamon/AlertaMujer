@@ -766,7 +766,7 @@
     "titulo_header": "Conservation des données",
     "intro": "Voici les durées pendant lesquelles l'application conserve tes informations sur ses serveurs sécurisés.",
     "ubicaciones_titulo": "Historique des positions",
-    "ubicaciones_desc": "Les itinéraires GPS enregistrés pendant tes alertes sont conservés 30 jours. Passé ce délai, ils sont supprimés automatiquement, ou plus tôt si tu supprimes ton compte.",
+    "ubicaciones_desc": "Les itinéraires GPS de tes alertes sont conservés 30 jours et les positions du quotidien 7 jours. Ensuite, ils sont supprimés automatiquement, ou plus tôt si tu supprimes ton compte.",
     "evidencias_titulo": "Preuves (vidéos et audios)",
     "evidencias_desc": "Les enregistrements effectués lors d'une urgence restent dans le cloud pendant 60 jours pour que tu puisses les télécharger. Ensuite, ils sont supprimés définitivement.",
     "perfil_titulo": "Données de profil",
