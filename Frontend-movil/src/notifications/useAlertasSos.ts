@@ -22,6 +22,7 @@ import {
   mostrarAlertaFinalizada,
 } from "./alarmaSos";
 import { manejarEventoProteccion } from "../features/agitar/servicioProteccion";
+import { esNuevoCelular, mostrarNuevoCelular } from "./nuevoCelular";
 import { esPedidoUbicacion, responderPedidoUbicacion } from "../services/pedidoUbicacion";
 
 /**
@@ -93,6 +94,8 @@ export function useAlertasSos(
             await mostrarAlertaFinalizada(mensaje.data);
           } else if (esPedidoUbicacion(mensaje.data)) {
             await responderPedidoUbicacion();
+          } else if (esNuevoCelular(mensaje.data)) {
+            await mostrarNuevoCelular(mensaje.data);
           }
         });
       } catch (error) {
