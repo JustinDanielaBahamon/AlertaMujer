@@ -60,6 +60,13 @@ export function datosDelCelular(): Partial<DeviceApi> {
 const nuevoUuid = () => `${Platform.OS}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 
 let enCurso: Promise<DeviceApi> | null = null;
+// Id del dispositivo de esta instalación, una vez conocido (va con cada ubicación que se envía)
+let idActual: number | null = null;
+
+/** Id de este celular en el backend, si ya se obtuvo en esta sesión. */
+export function idDispositivoActual(): number | null {
+  return idActual;
+}
 let actualizadoEnEstaSesion = false;
 
 /**
@@ -104,6 +111,7 @@ async function obtener(): Promise<DeviceApi> {
       // Si falla, el dispositivo sigue sirviendo para las alertas
     }
   }
+  idActual = device.id;
   return device;
 }
 
@@ -128,5 +136,6 @@ export async function reportarPermisos(permisos: Record<string, boolean>): Promi
 /** Al cerrar sesión: la próxima cuenta vuelve a informar los datos del celular. */
 export function olvidarSesionDispositivo(): void {
   actualizadoEnEstaSesion = false;
+  idActual = null;
   ultimosPermisos = null;
 }

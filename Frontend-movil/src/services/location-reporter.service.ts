@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "./api";
+import { idDispositivoActual } from "./devices.service";
 
 // Envía la ubicación del celular al backend para que la usuaria (y solo ella) la vea en la web.
 // Si no hay conexión, los puntos quedan en una cola corta y se suben en el siguiente envío.
@@ -29,6 +30,8 @@ const enviar = (p: PuntoReporte & { recordedAt?: string }) =>
     accuracy: redondear(p.accuracy, 2),
     alertId: p.alertId ?? null,
     recordedAt: p.recordedAt,
+    // Con la cuenta en varios celulares, el backend guarda la ubicación diaria solo del más reciente
+    deviceId: idDispositivoActual(),
   });
 
 async function leerCola(): Promise<PuntoEnCola[]> {

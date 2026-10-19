@@ -3,6 +3,7 @@ import api from "../api";
 import { limpiarColaUbicaciones, reportarUbicacion } from "../location-reporter.service";
 
 jest.mock("../api", () => ({ __esModule: true, default: { post: jest.fn() } }));
+jest.mock("../devices.service", () => ({ idDispositivoActual: () => 4 }));
 
 const post = api.post as jest.Mock;
 const COLA_KEY = "@alerta-mujer:location-queue";
@@ -24,7 +25,7 @@ describe("location-reporter.service", () => {
     expect(post).toHaveBeenCalledTimes(1);
     const [url, body] = post.mock.calls[0];
     expect(url).toBe("/api/location-logs");
-    expect(body).toMatchObject({ latitude: 2.930123, longitude: -75.281111, accuracy: 12.35, alertId: 7 });
+    expect(body).toMatchObject({ latitude: 2.930123, longitude: -75.281111, accuracy: 12.35, alertId: 7, deviceId: 4 });
     expect(body.recordedAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}$/); // UTC sin zona
   });
 
