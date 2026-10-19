@@ -7,6 +7,9 @@ export type CierreApp = { timestamp: number; motivo: number; importancia: number
 
 type Eventos = {
   onLectura: (lectura: Lectura) => void;
+  /** Terminó un trozo de audio de la evidencia (archivo listo para subir). */
+  onTrozoAudio: (trozo: { uri: string; duracionMs: number }) => void;
+  onErrorGrabacion: (error: { mensaje: string }) => void;
 };
 
 declare class SensorSacudidasModule extends NativeModule<Eventos> {
@@ -27,6 +30,20 @@ declare class SensorSacudidasModule extends NativeModule<Eventos> {
   tieneAjusteInicioAutomatico(): boolean;
   /** Abre el "inicio automático" de la marca; false si no existe y se abrió la info de la app. */
   abrirInicioAutomatico(): boolean;
+  /**
+   * Servicio de micrófono para la evidencia de una alerta: graba en trozos y sigue con la pantalla
+   * apagada. Solo se puede encender con la app abierta; false si falta el permiso de micrófono.
+   * grabar=false lo deja encendido sin usar el micrófono (mientras la cámara graba video).
+   */
+  iniciarGrabacionAudio(segundosPorTrozo: number, grabar: boolean): boolean;
+  pausarGrabacionAudio(): void;
+  reanudarGrabacionAudio(): void;
+  detenerGrabacionAudio(): void;
+  grabacionAudioActiva(): boolean;
+  /** Trozos de audio terminados que siguen en el teléfono. */
+  audiosPendientes(): string[];
+  /** Borra un archivo de evidencia del caché de la app (ya subido). */
+  borrarArchivo(uri: string): boolean;
 }
 
 /** Acelerómetro para "agitar el teléfono" que no se apaga al minimizar la app (solo Android). */

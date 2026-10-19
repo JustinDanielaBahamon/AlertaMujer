@@ -39,7 +39,14 @@ class SensorSacudidasModule : Module() {
 
   override fun definition() = ModuleDefinition {
     Name("SensorSacudidas")
-    Events("onLectura")
+    Events("onLectura", "onTrozoAudio", "onErrorGrabacion")
+
+    OnCreate {
+      GrabadoraAudioService.oyenteTrozo = { archivo, duracionMs ->
+        sendEvent("onTrozoAudio", mapOf("uri" to Uri.fromFile(archivo).toString(), "duracionMs" to duracionMs.toDouble()))
+      }
+      GrabadoraAudioService.oyenteError = { mensaje -> sendEvent("onErrorGrabacion", mapOf("mensaje" to mensaje)) }
+    }
 
     Function("disponible") {
       sensores.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null
@@ -125,9 +132,58 @@ class SensorSacudidasModule : Module() {
       }
     }
 
+    // ── Grabación de evidencia durante una alerta ───────────────────────────────────────────
+
+    // Enciende el servicio de micrófono (hay que llamarlo con la app abierta). grabar=false lo
+    // deja listo pero sin usar el micrófono, mientras la cámara graba video con audio.
+    Function("iniciarGrabacionAudio") { segundosPorTrozo: Int, grabar: Boolean ->
+      val permiso = contexto.checkSelfPermission(android.Manifest.permission.RECORD_AUDIO)
+      if (permiso != android.content.pm.PackageManager.PERMISSION_GRANTED) return@Function false
+      val intent = Intent(contexto, GrabadoraAudioService::class.java)
+        .setAction(GrabadoraAudioService.ACCION_INICIAR)
+        .putExtra(GrabadoraAudioService.EXTRA_SEGUNDOS, segundosPorTrozo)
+        .putExtra(GrabadoraAudioService.EXTRA_GRABAR, grabar)
+      try {
+        contexto.startForegroundService(intent)
+        true
+      } catch (e: Exception) {
+        false
+      }
+    }
+
+    Function("pausarGrabacionAudio") { enviarAGrabadora(GrabadoraAudioService.ACCION_PAUSAR) }
+    Function("reanudarGrabacionAudio") { enviarAGrabadora(GrabadoraAudioService.ACCION_REANUDAR) }
+    Function("detenerGrabacionAudio") { enviarAGrabadora(GrabadoraAudioService.ACCION_DETENER) }
+
+    Function("grabacionAudioActiva") { GrabadoraAudioService.activo }
+
+    // Trozos de audio que quedaron sin subir (p. ej. la app se cerró a mitad de la alerta)
+    Function("audiosPendientes") {
+      val enCurso = GrabadoraAudioService.rutaEnCurso
+      GrabadoraAudioService.carpetaAudios(contexto).listFiles().orEmpty()
+        .filter { it.isFile && it.length() > 0 && it.absolutePath != enCurso }
+        .sortedBy { it.lastModified() }
+        .map { Uri.fromFile(it).toString() }
+    }
+
+    // Borra un archivo de evidencia ya subido (solo dentro del caché de la app)
+    Function("borrarArchivo") { uri: String ->
+      val ruta = Uri.parse(uri).path ?: return@Function false
+      val archivo = java.io.File(ruta).canonicalFile
+      if (!archivo.path.startsWith(contexto.cacheDir.canonicalPath)) return@Function false
+      archivo.delete()
+    }
+
     OnDestroy {
       detener()
+      GrabadoraAudioService.oyenteTrozo = null
+      GrabadoraAudioService.oyenteError = null
     }
+  }
+
+  private fun enviarAGrabadora(accion: String) {
+    if (!GrabadoraAudioService.activo) return
+    contexto.startService(Intent(contexto, GrabadoraAudioService::class.java).setAction(accion))
   }
 
   private fun abrir(intent: Intent) {

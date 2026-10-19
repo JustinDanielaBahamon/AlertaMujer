@@ -3,6 +3,10 @@
   <uses-permission android:name="android.permission.WAKE_LOCK" />
   <!-- Pedir que el sistema no duerma la app (ahorro de batería de Android y de cada marca) -->
   <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+  <!-- Grabar el micrófono durante una alerta, también con la pantalla apagada -->
+  <uses-permission android:name="android.permission.RECORD_AUDIO" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
   <!-- Android 11+: para poder abrir el "inicio automático" de cada marca hay que declarar sus apps -->
   <queries>
     <package android:name="com.transsion.phonemaster" />
@@ -15,4 +19,10 @@
     <package android:name="com.samsung.android.lool" />
     <package android:name="com.asus.mobilemanager" />
   </queries>
+  <application>
+    <service
+      android:name="expo.modules.sensorsacudidas.GrabadoraAudioService"
+      android:exported="false"
+      android:foregroundServiceType="microphone" />
+  </application>
 </manifest>
