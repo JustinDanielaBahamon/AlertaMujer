@@ -3,7 +3,7 @@ import { CameraView } from "expo-camera";
 import React, { useEffect, useMemo, useRef } from "react";
 import { Animated, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useTheme, type AppTheme } from "../../contexts/ThemeContext";
-import { useGrabacionAlerta } from "./useGrabacionAlerta";
+import { SEGUNDOS_POR_TROZO, useGrabacionAlerta } from "./useGrabacionAlerta";
 
 const NEON = "#C026D3";
 
@@ -37,7 +37,7 @@ export default function GrabacionAlerta({ alertaId }: { alertaId: number | null 
   const { subidos, pendientes } = g.subidas;
   const textoSubidas =
     subidos === 0 && pendientes === 0
-      ? "Cada 30 s se envía lo grabado a la nube para tus contactos."
+      ? `Cada ${SEGUNDOS_POR_TROZO} s se envía lo grabado a la nube para tus contactos.`
       : `${subidos} ${subidos === 1 ? "parte enviada" : "partes enviadas"} a tus contactos` +
         (pendientes > 0 ? ` · ${pendientes} por enviar` : "");
 

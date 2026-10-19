@@ -184,7 +184,7 @@ export default function AlertaActivaScreen() {
         </View>
 
         {/* Chat con los contactos: mensajes rápidos sin tener que hablar */}
-        {/* Video/audio automático como evidencia (se sube cada 30 s) */}
+        {/* Video/audio automático como evidencia (se sube cada 45 s) */}
         <GrabacionAlerta alertaId={vm.alertaId} />
         <ChatAlerta
           participante={vm.alertaId ? { tipo: "duena", alertaId: vm.alertaId } : null}
