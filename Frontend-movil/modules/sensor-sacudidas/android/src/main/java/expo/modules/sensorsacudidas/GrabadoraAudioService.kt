@@ -136,9 +136,13 @@ class GrabadoraAudioService : Service() {
     } finally {
       actual.release()
     }
-    if (archivo != null && archivo.exists() && archivo.length() > 0) {
-      oyenteTrozo?.invoke(archivo, duracion)
+    if (archivo == null || !archivo.exists()) return
+    // Trozos de pocos segundos (al alternar con la cámara) no aportan nada: se descartan
+    if (archivo.length() == 0L || duracion < MINIMO_TROZO_MS) {
+      archivo.delete()
+      return
     }
+    oyenteTrozo?.invoke(archivo, duracion)
   }
 
   private fun apagar() {
@@ -177,6 +181,7 @@ class GrabadoraAudioService : Service() {
     private const val TAG = "GrabadoraAudio"
     private const val CANAL = "grabacion_evidencia"
     private const val ID_AVISO = 7301
+    private const val MINIMO_TROZO_MS = 3000L
     const val ACCION_INICIAR = "alertamujer.grabacion.INICIAR"
     const val ACCION_PAUSAR = "alertamujer.grabacion.PAUSAR"
     const val ACCION_REANUDAR = "alertamujer.grabacion.REANUDAR"

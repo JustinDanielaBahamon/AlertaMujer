@@ -7,8 +7,12 @@ import { useEvidencia } from "../../contexts/EvidenciaContext";
 import { enColaDePermisos } from "../../services/permisosSeguros";
 import { asignarAlertaDelAudio, encolarTrozo, escucharSubidas, procesarCola, type EstadoSubidas } from "./colaSubidas";
 
-/** Largo de cada trozo: lo grabado se sube cada 30 s, así se pierde poco si le quitan el teléfono. */
-export const SEGUNDOS_POR_TROZO = 30;
+/** Largo de cada trozo: lo grabado se sube cada 45 s, así se pierde poco si le quitan el teléfono. */
+export const SEGUNDOS_POR_TROZO = 45;
+/** Trozos más cortos (al cambiar de cámara, al volver a la app...) no aportan nada: se descartan. */
+export const MINIMO_TROZO_MS = 3000;
+/** Si la cámara no avisa que está lista en este tiempo, se sigue solo con audio. */
+const ESPERA_CAMARA_MS = 6000;
 
 type Permisos = { camara: boolean; micro: boolean; puedePreguntar: boolean };
 
@@ -111,9 +115,14 @@ export function useGrabacionAlerta(alertaId: number | null) {
       await SensorSacudidas.esperar(400); // que el servicio suelte el micrófono antes de la cámara
       while (vivo) {
         try {
+          const inicio = Date.now();
           const video = await camaraRef.current?.recordAsync({ maxDuration: SEGUNDOS_POR_TROZO });
-          if (video?.uri) void encolarTrozo({ uri: video.uri, alertaId, tipo: "video" });
           if (!video) break;
+          if (video.uri && Date.now() - inicio >= MINIMO_TROZO_MS) {
+            void encolarTrozo({ uri: video.uri, alertaId, tipo: "video" });
+          } else if (video.uri) {
+            SensorSacudidas.borrarArchivo(video.uri);
+          }
         } catch (e) {
           if (vivo) {
             console.warn("No se pudo grabar video, se sigue con audio:", e);
@@ -126,9 +135,9 @@ export function useGrabacionAlerta(alertaId: number | null) {
     return () => {
       vivo = false;
       camaraRef.current?.stopRecording();
-      if (conAudio) SensorSacudidas.reanudarGrabacionAudio();
+      // El audio lo retoma el efecto de abajo solo si ya no se va a grabar video
     };
-  }, [grabandoVideo, alertaId, frontal, conAudio]);
+  }, [grabandoVideo, alertaId, frontal]);
 
   const mostrarCamara = activa && servicioListo && puedeVideo && enPantalla;
 
@@ -137,10 +146,18 @@ export function useGrabacionAlerta(alertaId: number | null) {
     if (!mostrarCamara) setCamaraLista(false);
   }, [mostrarCamara]);
 
-  // Sin video (minimizada, cámara aún no lista o falló) el audio no se corta
+  // Sin video (minimizada, sin permiso o la cámara falló) sigue el audio. Mientras la cámara se
+  // prepara o cambia de lado no: dejaría trocitos de audio de 1–2 segundos.
   useEffect(() => {
-    if (activa && servicioListo && conAudio && !grabandoVideo) SensorSacudidas.reanudarGrabacionAudio();
-  }, [activa, servicioListo, conAudio, grabandoVideo]);
+    if (activa && servicioListo && conAudio && !mostrarCamara) SensorSacudidas.reanudarGrabacionAudio();
+  }, [activa, servicioListo, conAudio, mostrarCamara]);
+
+  // Si la cámara nunca avisa que está lista, se sigue solo con audio en vez de quedarse sin grabar
+  useEffect(() => {
+    if (!mostrarCamara || camaraLista) return;
+    const t = setTimeout(() => setVideoFallo(true), ESPERA_CAMARA_MS);
+    return () => clearTimeout(t);
+  }, [mostrarCamara, camaraLista]);
 
   // Al cambiar de cámara, la nueva avisa cuando está lista
   const cambiarCamara = useCallback(() => {
