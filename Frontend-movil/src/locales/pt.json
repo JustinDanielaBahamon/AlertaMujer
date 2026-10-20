@@ -116,7 +116,7 @@
     "agitar_titulo": "Agitar o telefone",
     "agitar_desc": "Ative um alerta de emergência agitando o celular com força, mesmo com o aplicativo minimizado ou a tela bloqueada. Enquanto estiver ligado, você verá o aviso fixo \"Proteção ativa\".",
     "agitar_paso1": "Ative esta função em Configurações > Métodos de ativação > Ativar",
-    "agitar_paso2": "Agite o celular de forma rápida e firme, cerca de 4 vezes seguidas.",
+    "agitar_paso2": "Faça 4 movimentos de machadada rápidos e fortes seguidos com o celular e depois fique parada por um instante. Um único movimento, caminhar, trotar ou correr não a ativam.",
     "agitar_paso3": "Você sentirá uma vibração e terá 5 segundos para cancelar se foi um engano.",
     "agitar_paso4": "Se você não cancelar, o alerta é enviado aos seus contatos com sua localização, sem desbloquear o telefone.",
     "recomendaciones_titulo": "Recomendações",
