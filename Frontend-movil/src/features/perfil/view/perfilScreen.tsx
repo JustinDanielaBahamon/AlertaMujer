@@ -9,6 +9,7 @@ import { StatusBar } from "expo-status-bar";
 import { createPerfilStyles } from "../styles/perfilStyle";
 import { usePerfilViewModel } from "../viewModel/usePerfilViewModel";
 import { useRequisitosCuenta } from "../viewModel/useRequisitosCuenta";
+import EliminarCuentaModal from "./EliminarCuentaModal";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { useLocale } from "../../../contexts/LocaleContext";
 
@@ -267,8 +268,26 @@ export default function PerfilScreen() {
             )}
           </TouchableOpacity>
 
+          {/* Eliminar la cuenta: al final, separado del resto */}
+          <View style={[styles.tarjeta, req_s.zonaEliminar, { borderColor: accent + "50" }]}>
+            <Text style={[styles.tituloSeccion, { marginBottom: 4 }]}>{t.perfil.eliminar_seccion}</Text>
+            <Text style={[req_s.detalle, { color: theme.text }]}>{t.perfil.eliminar_desc}</Text>
+            <TouchableOpacity onPress={vm.abrirEliminar} style={[req_s.botonEliminar, { borderColor: accent }]}>
+              <Ionicons name="trash-outline" size={16} color={accent} />
+              <Text style={[req_s.accionTexto, { color: accent }]}>{t.perfil.eliminar_boton}</Text>
+            </TouchableOpacity>
+          </View>
+
         </View>
       </ScrollView>
+
+      <EliminarCuentaModal
+        visible={vm.eliminarVisible}
+        eliminando={vm.eliminando}
+        error={vm.errorEliminar}
+        onConfirmar={vm.confirmarEliminar}
+        onCerrar={vm.cerrarEliminar}
+      />
     </View>
   );
 }
@@ -287,4 +306,6 @@ const req_s = StyleSheet.create({
   detalle: { fontSize: 12, opacity: 0.72, lineHeight: 17, marginTop: 2 },
   accion: { flexDirection: "row", alignItems: "center", gap: 2, marginTop: 6 },
   accionTexto: { fontSize: 13, fontWeight: "700" },
+  zonaEliminar: { borderWidth: 1, borderStyle: "dashed", marginTop: 16 },
+  botonEliminar: { flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start", borderWidth: 1.5, borderRadius: 18, paddingHorizontal: 14, paddingVertical: 8, marginTop: 10 },
 });
