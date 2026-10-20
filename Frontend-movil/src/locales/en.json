@@ -116,7 +116,19 @@
   "req_permisos_accion": "Check permissions",
   "req_foto_titulo": "Profile photo",
   "req_foto_ok": "Your contacts recognize you in the tracking view.",
-  "req_foto_falta": "Helps your contacts recognize you. Tap your photo above to add one."
+  "req_foto_falta": "Helps your contacts recognize you. Tap your photo above to add one.",
+  "eliminar_seccion": "Delete account",
+  "eliminar_desc": "Delete your account and your data from AlertaMujer. This can't be undone.",
+  "eliminar_boton": "Delete my account",
+  "eliminar_titulo": "Delete your account?",
+  "eliminar_intro": "You'll be signed out on all your devices and we'll delete:",
+  "eliminar_borra_datos": "Your name, email, phone, ID document and photo",
+  "eliminar_borra_contactos": "Your emergency contacts",
+  "eliminar_borra_ubicaciones": "Your locations, routes and saved places",
+  "eliminar_borra_grabaciones": "The videos and audio from your alerts",
+  "eliminar_irreversible": "This can't be undone. Your alerts remain only as an anonymous record.",
+  "eliminar_escribe": "Type {palabra} to confirm",
+  "eliminar_confirmar": "Delete permanently"
   },
   "metodosActivacion": {
     "titulo_header": "Activation methods",

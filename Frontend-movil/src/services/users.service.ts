@@ -34,3 +34,14 @@ export const updateMe = async (updates: UpdateMePayload): Promise<UserApi> => {
   const response = await api.put<UserApi>('/api/users/me', updates);
   return response.data;
 };
+
+/** Palabra que la usuaria escribe para confirmar que quiere eliminar su cuenta. */
+export const CONFIRMACION_ELIMINAR = 'ELIMINAR';
+
+/**
+ * Elimina la cuenta de la usuaria en sesión: se borran sus datos personales, contactos, ubicaciones
+ * y grabaciones. No se puede deshacer.
+ */
+export const eliminarMiCuenta = async (confirmacion: string): Promise<void> => {
+  await api.delete('/api/users/me', { data: { confirmation: confirmacion } });
+};

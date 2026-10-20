@@ -116,7 +116,19 @@
   "req_permisos_accion": "Verificar permissões",
   "req_foto_titulo": "Foto de perfil",
   "req_foto_ok": "Seus contatos reconhecem você no acompanhamento.",
-  "req_foto_falta": "Ajuda seus contatos a reconhecerem você. Toque na sua foto acima para adicionar."
+  "req_foto_falta": "Ajuda seus contatos a reconhecerem você. Toque na sua foto acima para adicionar.",
+  "eliminar_seccion": "Excluir conta",
+  "eliminar_desc": "Exclua sua conta e seus dados do AlertaMujer. Não dá para desfazer.",
+  "eliminar_boton": "Excluir minha conta",
+  "eliminar_titulo": "Excluir sua conta?",
+  "eliminar_intro": "Sua sessão será encerrada em todos os dispositivos e vamos apagar:",
+  "eliminar_borra_datos": "Seu nome, e-mail, telefone, documento e foto",
+  "eliminar_borra_contactos": "Seus contatos de emergência",
+  "eliminar_borra_ubicaciones": "Suas localizações, trajetos e lugares salvos",
+  "eliminar_borra_grabaciones": "Os vídeos e áudios dos seus alertas",
+  "eliminar_irreversible": "Não dá para desfazer. Seus alertas ficam apenas como um registro anônimo.",
+  "eliminar_escribe": "Digite {palabra} para confirmar",
+  "eliminar_confirmar": "Excluir definitivamente"
   },
   "metodosActivacion": {
     "titulo_header": "Métodos de ativação",

@@ -116,7 +116,19 @@
     "req_permisos_accion": "Vérifier les autorisations",
     "req_foto_titulo": "Photo de profil",
     "req_foto_ok": "Tes contacts te reconnaissent dans le suivi.",
-    "req_foto_falta": "Aide tes contacts à te reconnaître. Touche ta photo en haut pour l'ajouter."
+    "req_foto_falta": "Aide tes contacts à te reconnaître. Touche ta photo en haut pour l'ajouter.",
+    "eliminar_seccion": "Supprimer le compte",
+    "eliminar_desc": "Supprime ton compte et tes données d'AlertaMujer. C'est irréversible.",
+    "eliminar_boton": "Supprimer mon compte",
+    "eliminar_titulo": "Supprimer ton compte ?",
+    "eliminar_intro": "Ta session sera fermée sur tous tes appareils et nous supprimerons :",
+    "eliminar_borra_datos": "Ton nom, e-mail, téléphone, pièce d'identité et photo",
+    "eliminar_borra_contactos": "Tes contacts d'urgence",
+    "eliminar_borra_ubicaciones": "Tes positions, trajets et lieux enregistrés",
+    "eliminar_borra_grabaciones": "Les vidéos et audios de tes alertes",
+    "eliminar_irreversible": "C'est irréversible. Tes alertes restent seulement comme un registre anonyme.",
+    "eliminar_escribe": "Écris {palabra} pour confirmer",
+    "eliminar_confirmar": "Supprimer définitivement"
   },
    "metodosActivacion": {
     "titulo_header": "Méthodes d'activation",

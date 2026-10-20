@@ -6,14 +6,14 @@ import type { MainStackParamList } from "../../../navigation/types";
 import { useAuth } from "../../../contexts/AuthContext";
 import * as ImagePicker from "expo-image-picker";
 import { STORAGE_KEY_UBICACION } from "../../tutorial/viewModel/useLocationTutorialViewModel";
-import { getMe, updateMe } from "../../../services/users.service";
+import { eliminarMiCuenta, getMe, updateMe } from "../../../services/users.service";
 import { aFotoGuardable } from "../../../services/fotos.service";
 
 type PerfilNavigation = NativeStackNavigationProp<MainStackParamList, "Perfil">;
 
 export function usePerfilViewModel() {
   const navigation = useNavigation<PerfilNavigation>();
-  const { user, token, signIn, actualizarUsuario } = useAuth();
+  const { user, token, signIn, signOut, actualizarUsuario } = useAuth();
 
   const [nombre,          setNombre]          = useState(user?.nombre        ?? "");
   const [correo,          setCorreo]          = useState(user?.correo        ?? "");
@@ -186,6 +186,26 @@ export function usePerfilViewModel() {
     }
   }, [nombre, correo, telefono, fechaNacimiento, fotoPerfil, municipio, user, signIn]);
 
+  // ── Eliminar la cuenta ────────────────────────────────────────────────────
+  const [eliminarVisible, setEliminarVisible] = useState(false);
+  const [eliminando, setEliminando] = useState(false);
+  const [errorEliminar, setErrorEliminar] = useState<string | null>(null);
+
+  const confirmarEliminar = useCallback(async (confirmacion: string) => {
+    setEliminando(true);
+    setErrorEliminar(null);
+    try {
+      await eliminarMiCuenta(confirmacion.trim().toUpperCase());
+      setEliminarVisible(false);
+      // Sin sesión, la app vuelve sola a la pantalla de inicio de sesión
+      signOut();
+    } catch {
+      setErrorEliminar("No se pudo eliminar la cuenta. Revisa tu conexión e inténtalo de nuevo.");
+    } finally {
+      setEliminando(false);
+    }
+  }, [signOut]);
+
   const volver = useCallback(() => {
     navigation.goBack();
   }, [navigation]);
@@ -201,6 +221,15 @@ export function usePerfilViewModel() {
     department,
     guardarCambios,
     volver,
+    eliminarVisible,
+    abrirEliminar: () => {
+      setErrorEliminar(null);
+      setEliminarVisible(true);
+    },
+    cerrarEliminar: () => setEliminarVisible(false),
+    confirmarEliminar,
+    eliminando,
+    errorEliminar,
     cargando,
     mensaje,
   };

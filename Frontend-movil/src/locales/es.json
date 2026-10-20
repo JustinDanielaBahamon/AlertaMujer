@@ -116,7 +116,19 @@
   "req_permisos_accion": "Revisar permisos",
   "req_foto_titulo": "Foto de perfil",
   "req_foto_ok": "Tus contactos te reconocen en el seguimiento.",
-  "req_foto_falta": "Ayuda a que tus contactos te reconozcan. Toca tu foto arriba para agregarla."
+  "req_foto_falta": "Ayuda a que tus contactos te reconozcan. Toca tu foto arriba para agregarla.",
+  "eliminar_seccion": "Eliminar cuenta",
+  "eliminar_desc": "Borra tu cuenta y tus datos de AlertaMujer. No se puede deshacer.",
+  "eliminar_boton": "Eliminar mi cuenta",
+  "eliminar_titulo": "¿Eliminar tu cuenta?",
+  "eliminar_intro": "Se cerrará tu sesión en todos tus dispositivos y se borrará:",
+  "eliminar_borra_datos": "Tu nombre, correo, teléfono, documento y foto",
+  "eliminar_borra_contactos": "Tus contactos de emergencia",
+  "eliminar_borra_ubicaciones": "Tus ubicaciones, recorridos y lugares guardados",
+  "eliminar_borra_grabaciones": "Los videos y audios de tus alertas",
+  "eliminar_irreversible": "Esta acción no se puede deshacer. Tus alertas quedan solo como un registro anónimo.",
+  "eliminar_escribe": "Escribe {palabra} para confirmar",
+  "eliminar_confirmar": "Eliminar definitivamente"
   },
     "metodosActivacion": {
     "titulo_header": "Metodos de activación",
