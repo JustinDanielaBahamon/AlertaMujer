@@ -6,10 +6,11 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { CommonActions } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { Image, Share, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import AppHeader from "../../components/ui/Header/header";
+import { WEB_URL } from "../../constants/enlaces";
 import { useAuth } from "../../contexts/AuthContext";
 import { getMe } from "../../services/users.service";
 import { useTheme } from "../../contexts/ThemeContext";
@@ -50,6 +51,11 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const isDarkMode = theme.mode === "dark";
+
+  // Invita a otras personas: el enlace lleva a la web, donde pueden descargar la app
+  const compartirEnlace = () => {
+    Share.share({ message: `${t.menu.compartir_mensaje}\n${WEB_URL}` }).catch(() => {});
+  };
 
   const whiteIconThemes = ["rosa", "vino", "magenta", "Azul"];
   const cardIconColor = whiteIconThemes.includes(theme.mode) ? "#ffffff" : theme.icono;
@@ -189,6 +195,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
             <TouchableOpacity
               style={[styles.btnCompartir, { backgroundColor: shareButtonBg }]}
               activeOpacity={0.8}
+              onPress={compartirEnlace}
             >
               <View style={styles.btnInterior}>
                 <View style={[styles.btnIconoFondo, {
