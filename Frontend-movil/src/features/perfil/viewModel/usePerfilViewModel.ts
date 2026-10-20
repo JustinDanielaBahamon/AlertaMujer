@@ -20,6 +20,7 @@ export function usePerfilViewModel() {
   const [telefono,        setTelefono]        = useState(user?.telefono      ?? "");
   const [fechaNacimiento, setFechaNacimiento] = useState(user?.fechaNacimiento ?? "");
   const [fotoPerfil,      setFotoPerfil]      = useState<string | null>(user?.fotoPerfil ?? null);
+  const [documento,       setDocumento]       = useState("");
 
   // Municipio viene del tutorial — solo lectura en el perfil
   const [municipio,  setMunicipio]  = useState(user?.municipio ?? "");
@@ -38,6 +39,7 @@ export function usePerfilViewModel() {
           if (nombreCompleto) setNombre(nombreCompleto);
           if (me.email)       setCorreo(me.email);
           if (me.telephone)   setTelefono(me.telephone);
+          setDocumento(me.documentNumber ?? "");
           if (me.birthdate) {
             // Backend devuelve "yyyy-MM-dd"; el perfil usa "DD/MM/YYYY"
             const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(me.birthdate));
@@ -194,6 +196,7 @@ export function usePerfilViewModel() {
     telefono,        setTelefono,
     fechaNacimiento, handleFechaChange,
     fotoPerfil,      seleccionarFoto,
+    documento,
     municipio,
     department,
     guardarCambios,
