@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { View, Text, Animated, TouchableOpacity, ScrollView, } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import TutorialLottie from "../component/TutorialLottie";
+import { useTutorialPage } from "../component/TutorialPager";
 import Card from "../../../components/ui/card/card";
 import PermisosModal from "../../../components/ui/modalMesanje/permisosMLL";
 import { useNotificationTutorialViewModel, type NotifFeatureItem, } from "../viewModel/useNotificationTutorialViewModel";
@@ -104,6 +105,7 @@ export default function NotificationTutorial({ externalVm }: NotificationTutoria
   const { t } = useLocale();
   const internalVM = useNotificationTutorialViewModel();
   const vm = externalVm ?? internalVM;
+  const { avanzar } = useTutorialPage();
 
   // ── Spring card entrance animation ────────────────────────────────────────
   const cardAnim = useRef(new Animated.Value(0)).current;
@@ -208,7 +210,7 @@ export default function NotificationTutorial({ externalVm }: NotificationTutoria
 
                 {/* Finish button — inside scroll so it's always visible */}
                 <TouchableOpacity
-                  onPress={vm.openModal}
+                  onPress={avanzar}
                   style={notificationStyle.btnFinalizar}
                   activeOpacity={0.85}
                 >

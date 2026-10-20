@@ -20,10 +20,10 @@ let cancelarRefresco: (() => void) | null = null;
  * token FCM del teléfono en el backend para recibir alertas de las personas que lo tienen como
  * contacto. Nunca lanza: si algo falla, la app sigue funcionando sin push.
  */
-export async function registrarPush(): Promise<void> {
+export async function registrarPush(pedirPermiso = false): Promise<void> {
   if (Platform.OS !== "android" || !pushDisponible()) return;
   try {
-    if (!(await permisoNotificaciones())) return;
+    if (!(await permisoNotificaciones(pedirPermiso))) return;
     await crearCanalSos();
 
     const device = await getOrCreateDevice();

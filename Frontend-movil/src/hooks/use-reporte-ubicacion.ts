@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { AppState, AppStateStatus } from "react-native";
 import * as Location from "expo-location";
+import { ubicacionSinAvisos } from "../services/permisosSeguros";
 import { useAuth } from "../contexts/AuthContext";
 import { limpiarColaUbicaciones, reportarUbicacion } from "../services/location-reporter.service";
 
@@ -50,22 +51,28 @@ export function useReporteUbicacion() {
       const { status } = await Location.getForegroundPermissionsAsync();
       if (status !== "granted" || !activo || suscripcion) return;
 
+      // Con el GPS apagado no se hace nada: Android mostraría su aviso de "activa la ubicación"
+      // al abrir la app. Se reintenta al volver a la app o con el latido.
+      if (!(await Location.hasServicesEnabledAsync().catch(() => false)) || !activo) return;
+
       // Punto inicial al abrir la app
       try {
-        quizasEnviar(await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }), true);
+        const inicial = await ubicacionSinAvisos();
+        if (inicial) quizasEnviar(inicial, true);
       } catch {
-        // GPS apagado: se reintenta con el latido
+        // sin señal: se reintenta con el latido
       }
       if (!activo) return;
 
       suscripcion = await Location.watchPositionAsync(
-        { accuracy: Location.Accuracy.Balanced, timeInterval: 60000, distanceInterval: METROS_MINIMOS },
+        { accuracy: Location.Accuracy.Balanced, timeInterval: 60000, distanceInterval: METROS_MINIMOS, mayShowUserSettingsDialog: false },
         (loc) => quizasEnviar(loc)
       );
       // Si está quieta, watchPosition no avisa: el latido asegura un punto cada 5 min
       latido = setInterval(async () => {
         try {
-          quizasEnviar(await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }));
+          const actual = await ubicacionSinAvisos();
+          if (actual) quizasEnviar(actual);
         } catch {
           // sin GPS en este momento
         }

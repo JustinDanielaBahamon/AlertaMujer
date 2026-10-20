@@ -9,8 +9,8 @@ import ContactsScreen from "../view/contactScreen";
 import { useContactTutorialViewModel } from "../viewModel/useContactTutorialViewModel";
 import LocationScreen from "../view/locationScreen";
 import MessagesScreen from "../view/messageScreen";
-import { useMessagesTutorialViewModel } from "../viewModel/useMessagesTutorialViewModel";
 import NotificationScreen from "../view/notificationScreen";
+import ProtectionScreen from "../view/protectionScreen";
 import { useNotificationTutorialViewModel } from "../viewModel/useNotificationTutorialViewModel";
 import SecurityScreen from "../view/securityScreen";
 import { useSecurityTutorialViewModel } from "../viewModel/useSecurityTutorialViewModel";
@@ -21,7 +21,6 @@ import { useLocale } from "../../../contexts/LocaleContext";
 
 export default function Welcome() {
   const { t } = useLocale();
-  const messagesVM     = useMessagesTutorialViewModel();
   const contactsVM     = useContactTutorialViewModel();
   const locationVM     = useLocationTutorialViewModel();
   const securityVM     = useSecurityTutorialViewModel();
@@ -48,7 +47,6 @@ export default function Welcome() {
         <SafeAreaView style={localStyles.safeArea} edges={['top', 'bottom']}>
           <TutorialPager
             paginasConBloqueo={{
-              2: messagesVM.requestPermissions,
               3: locationVM.requestLocationConfirmation,
               4: contactsVM.requestPermissions,
               5: securityVM.requestPermissions,
@@ -135,11 +133,12 @@ export default function Welcome() {
 
             {/* ── Otras paginas ── */}
             <ActivationTutorial />
-            <MessagesScreen externalVm={messagesVM} />
+            <MessagesScreen />
             <LocationScreen externalVm={locationVM} />
             <ContactsScreen externalVm={contactsVM} />
             <SecurityScreen externalVm={securityVM} />
             <NotificationScreen externalVm={notificationVM} />
+            <ProtectionScreen />
 
           </TutorialPager>
         </SafeAreaView>

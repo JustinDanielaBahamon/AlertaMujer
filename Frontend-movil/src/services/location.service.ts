@@ -50,9 +50,9 @@ export class LocationService {
   /**
    * Solicita permisos de ubicación
    */
-  static async requestPermissions(): Promise<boolean> {
+  static async requestPermissions(pedir = true): Promise<boolean> {
     try {
-      return await permisoUbicacion();
+      return await permisoUbicacion(pedir);
     } catch (error) {
       console.error("Error al solicitar permisos de ubicación:", error);
       return false;
@@ -75,7 +75,7 @@ export class LocationService {
    * Verifica servicios del sistema antes de pedir permisos.
    * Lanza errores tipados para que el llamador pueda distinguir la causa.
    */
-  static async getCurrentPosition(): Promise<Location.LocationObject | null> {
+  static async getCurrentPosition(pedirPermiso = true): Promise<Location.LocationObject | null> {
     try {
       // 1) Servicios de ubicación del dispositivo (GPS/red) habilitados?
       const serviciosActivos = await Location.hasServicesEnabledAsync();
@@ -84,7 +84,7 @@ export class LocationService {
       }
 
       // 2) La app tiene permiso?
-      const hasPermission = await this.requestPermissions();
+      const hasPermission = await this.requestPermissions(pedirPermiso);
       if (!hasPermission) {
         throw new LocationPermissionDeniedError();
       }
@@ -171,9 +171,10 @@ export class LocationService {
    * Propaga LocationServicesDisabledError y LocationPermissionDeniedError
    * para que el llamador muestre el mensaje apropiado.
    */
-  static async getFullLocation(): Promise<UbicacionDetallada | null> {
+  /** pedirPermiso = false al abrir una pantalla: solo consulta y no muestra avisos del sistema. */
+  static async getFullLocation(pedirPermiso = true): Promise<UbicacionDetallada | null> {
     // No capturamos errores tipados — los dejamos subir al ViewModel
-    const location = await this.getCurrentPosition();
+    const location = await this.getCurrentPosition(pedirPermiso);
     if (!location) return null;
 
     const { latitude, longitude, accuracy } = location.coords;

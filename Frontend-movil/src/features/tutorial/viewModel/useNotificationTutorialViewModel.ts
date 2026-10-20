@@ -1,12 +1,8 @@
-import { useNavigation } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { PermissionsAndroid, Platform } from "react-native";
-import type { MainStackParamList } from "../../../navigation/types";
+import { registrarPush } from "../../../services/push.service";
 import { NOTIF_COLORS } from "../styles/notificationStyle";
 import { useLocale } from "../../../contexts/LocaleContext";
-
-type Nav = NativeStackNavigationProp<MainStackParamList>;
 
 export interface NotifFeatureItem {
   id: string;
@@ -71,7 +67,6 @@ export function useNotificationTutorialViewModel() {
   const { t } = useLocale();
   const featureRows = useMemo(() => getNotifFeatureRows(t), [t]);
 
-  const navigation = useNavigation<Nav>();
   const [modalVisible, setModalVisible]   = useState(false);
   const [showWarning, setShowWarning]     = useState(false);
 
@@ -98,30 +93,16 @@ export function useNotificationTutorialViewModel() {
     });
   }, []);
 
-  // Si ya tiene el permiso, entra directo a la app sin mostrar el aviso
-  const openModal = useCallback(async () => {
-    setShowWarning(false);
-    if (await yaTienePermiso()) {
-      navigation.replace("DrawerHome");
-      return;
-    }
-    setModalVisible(true);
-  }, [navigation]);
-
+  // Al aceptar se pide el permiso del sistema y se registra el celular para recibir alarmas.
+  // Con o sin permiso el tutorial sigue a la página de protección.
   const confirmModal = useCallback(async () => {
     setModalVisible(false);
-
-    // ✅ Request native permissions without using expo-notifications
     if (Platform.OS === "android" && Platform.Version >= 33) {
-      await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
-      );
+      await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS).catch(() => null);
     }
-    // On iOS, notification permissions are handled when registering the device
-    // No extra call needed here
-
-    navigation.replace("DrawerHome");
-  }, [navigation]);
+    if (await yaTienePermiso()) registrarPush().catch(() => {});
+    resolvePermission.current(true);
+  }, []);
 
   const cancelModal = useCallback(() => {
     setModalVisible(false);
@@ -135,15 +116,14 @@ export function useNotificationTutorialViewModel() {
 
   const continueWithoutPermissions = useCallback(() => {
     setShowWarning(false);
-    navigation.replace("DrawerHome");
-  }, [navigation]);
+    resolvePermission.current(true);
+  }, []);
 
   return {
     featureRows,
     modalVisible,
     showWarning,
     requestPermissions,
-    openModal,
     confirmModal,
     cancelModal,
     retryPermissions,

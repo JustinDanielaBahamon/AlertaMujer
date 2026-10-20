@@ -19,3 +19,8 @@ export function getMainStackNavigation(
   }
   return null;
 }
+
+/** true mientras la usuaria está en el tutorial: ahí no se interrumpe con avisos ni permisos. */
+export function estaEnTutorial(navegacion: { isReady: () => boolean; getCurrentRoute: () => { name: string } | undefined }): boolean {
+  return navegacion.isReady() && (navegacion.getCurrentRoute()?.name ?? "").startsWith("Tutorial");
+}

@@ -23,6 +23,7 @@ import {
 } from "./alarmaSos";
 import { manejarEventoProteccion } from "../features/agitar/servicioProteccion";
 import { esNuevoCelular, mostrarNuevoCelular } from "./nuevoCelular";
+import { estaEnTutorial } from "../navigation/navigationHelpers";
 import { esPedidoUbicacion, responderPedidoUbicacion } from "../services/pedidoUbicacion";
 
 /**
@@ -37,7 +38,7 @@ export function useAlertasSos(
     if (!conSesion) return undefined;
 
     registrarPush().then(async () => {
-      if (await debeOfrecerPantallaCompleta()) {
+      if (!estaEnTutorial(navegacion) && (await debeOfrecerPantallaCompleta())) {
         await marcarAvisoPantallaCompleta();
         Alert.alert(
           "Alarma de emergencia",

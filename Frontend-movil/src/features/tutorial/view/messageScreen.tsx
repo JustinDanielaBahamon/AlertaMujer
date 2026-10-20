@@ -1,9 +1,8 @@
 import TutorialLottie from "../component/TutorialLottie";
 import React, { useEffect, useRef } from "react";
-import { Animated, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Animated, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Card from "../../../components/ui/card/card";
-import CustomePermisos from "../../../components/ui/modalMesanje/permisosMLL";
 import { messageStyle, MSG_COLORS } from "../styles/messageStyle";
 import { useMessagesTutorialViewModel, type FeatureItem } from "../viewModel/useMessagesTutorialViewModel";
 import { LinearGradient } from 'expo-linear-gradient';
@@ -196,7 +195,7 @@ export default function MessagesScreen({ externalVm }: Props) {
 
                 <View style={messageStyle.permisosCard}>
                   <View style={messageStyle.permisosRow}>
-                    <Text style={messageStyle.permisosEmoji}>🔐</Text>
+                    <Text style={messageStyle.permisosEmoji}>✨</Text>
                     <View style={{ flex: 1 }}>
                       <Text style={messageStyle.permisosTitle}>{t.tutorial.mensaje_permisos_activa_titulo}</Text>
                       <Text style={messageStyle.permisosDesc}>
@@ -216,30 +215,6 @@ export default function MessagesScreen({ externalVm }: Props) {
           </Animated.View>
 
         </SafeAreaView>
-
-        {/* 4️⃣ La superposición de advertencia también va DENTRO del degradado */}
-        {vm.showWarning && (
-          <View style={messageStyle.overlayBg}>
-            <View style={messageStyle.warningBox}>
-              <Text style={messageStyle.warningText}>
-                {t.tutorial.mensaje_warning_texto}
-              </Text>
-              <TouchableOpacity onPress={vm.retryPermissions} style={messageStyle.btnPrimary}>
-                <Text style={messageStyle.btnPrimaryText}>{t.tutorial.mensaje_btn_activar_permisos}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={vm.continueWithoutPermissions} style={messageStyle.btnSecondary}>
-                <Text style={messageStyle.btnSecondaryText}>{t.tutorial.mensaje_btn_continuar_sin_permisos}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-
-        <CustomePermisos
-          visible={vm.modalVisible}
-          tipo={vm.permissionType}
-          onConfirmar={vm.confirmModal}
-          onCancelar={vm.cancelModal}
-        />
 
       {/* 5️⃣ Cerrar LinearGradient */}
       </LinearGradient>

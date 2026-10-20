@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { estaEnTutorial } from "../../navigation/navigationHelpers";
 import type { NavigationContainerRefWithCurrent } from "@react-navigation/native";
 import { useEffect, useRef } from "react";
 import { Alert } from "react-native";
@@ -33,6 +34,8 @@ export function useRecordatorioProteccion(
 
     const temporizador = setTimeout(async () => {
       try {
+        // Durante el tutorial no se interrumpe: ahí mismo se piden los permisos en orden
+        if (estaEnTutorial(navegacion)) return;
         const ultimo = Number((await AsyncStorage.getItem(CLAVE_ULTIMO_AVISO)) ?? 0);
         if (Date.now() - ultimo < REPETIR_CADA_MS) return;
         // Cortes de la protección desde el último aviso (comprobados con los registros de Android)

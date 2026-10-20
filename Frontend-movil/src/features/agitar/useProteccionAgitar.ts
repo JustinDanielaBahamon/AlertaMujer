@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Alert, Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { NavigationContainerRefWithCurrent } from "@react-navigation/native";
@@ -48,17 +48,25 @@ export function useProteccionAgitar(
 ): void {
   const { config, cargado, cambiar } = useMetodosActivacion();
   const encendida = conSesion && cargado && config.agitar;
+  // Valor del ajuste visto en esta sesión: si pasa de apagado a encendido, lo encendió la usuaria
+  const ajusteAnterior = useRef<boolean | null>(null);
 
   useEffect(() => {
+    const anterior = ajusteAnterior.current;
+    ajusteAnterior.current = conSesion && cargado ? config.agitar : null;
     if (!encendida) {
       detenerProteccion().catch(() => {});
       return;
     }
-    iniciarProteccion()
+    // Al abrir la app solo arranca si ya tiene los permisos; los pide si la usuaria la acaba de encender
+    const loEncendioAhora = anterior === false;
+    iniciarProteccion(loEncendioAhora)
       .then((estado) => {
         if (estado === "activa") {
-          pedirSinAhorroDeBateria().catch(() => {});
+          if (loEncendioAhora) pedirSinAhorroDeBateria().catch(() => {});
         } else if (estado === "sin_ubicacion") {
+          // Al abrir la app no se insiste: el recordatorio de protección avisa lo que falta
+          if (!loEncendioAhora) return;
           cambiar("agitar", false);
           Alert.alert(
             "Agitar el teléfono",
@@ -70,6 +78,7 @@ export function useProteccionAgitar(
         }
       })
       .catch((e) => console.warn("No se pudo iniciar la protección por sacudida:", e));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [encendida, cambiar]);
 
   useEffect(() => {
