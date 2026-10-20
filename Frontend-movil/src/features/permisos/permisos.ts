@@ -6,6 +6,7 @@ import { Linking, Platform } from "react-native";
 import SensorSacudidas from "../../../modules/sensor-sacudidas";
 import { reportarPermisos } from "../../services/devices.service";
 import { enColaDePermisos, permisoNotificaciones, permisoUbicacion } from "../../services/permisosSeguros";
+import { registrarPush } from "../../services/push.service";
 
 /**
  * Permisos y ajustes que necesita la protección de AlertaMujer. "Crítico" = sin él una alerta puede
@@ -180,6 +181,8 @@ export async function activarPermiso(id: Exclude<IdPermiso, "agitar">, estado: E
       return;
     case "notificaciones":
       if (!(await permisoNotificaciones())) await notifee.openNotificationSettings();
+      // Con el permiso recién dado, el celular ya puede recibir las alertas de sus contactos
+      else await registrarPush();
       return;
     case "bateria":
       SensorSacudidas.pedirIgnorarOptimizacionBateria();

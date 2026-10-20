@@ -32,13 +32,14 @@ export function useInicioViewModel() {
     useState<UbicacionDetallada | null>(null);
   const [cargando, setCargando] = useState(false);
 
-  const obtenerUbicacion = useCallback(async () => {
+  // pedirPermiso = false al abrir la pantalla: los permisos se piden en el tutorial o al tocar "actualizar"
+  const cargarUbicacion = useCallback(async (pedirPermiso: boolean) => {
     try {
       setCargando(true);
       setEstadoUbicacion("cargando");
 
       // Usar el servicio centralizado de ubicación con alta precisión
-      const ubicacion = await LocationService.getFullLocation();
+      const ubicacion = await LocationService.getFullLocation(pedirPermiso);
 
       if (ubicacion) {
         setUbicacionDetallada(ubicacion);
@@ -69,8 +70,10 @@ export function useInicioViewModel() {
   }, [t]);
 
   useEffect(() => {
-    void obtenerUbicacion();
-  }, [obtenerUbicacion]);
+    void cargarUbicacion(false);
+  }, [cargarUbicacion]);
+
+  const obtenerUbicacion = useCallback(() => cargarUbicacion(true), [cargarUbicacion]);
 
   // Texto de ubicacion ya traducido segun el idioma activo
   const ubicacionNombre = useMemo(() => {
@@ -80,7 +83,7 @@ export function useInicioViewModel() {
       case "denegado":
         return t.inicio.permiso_denegado;
       case "gps_apagado":
-        return "Activa el GPS del dispositivo";
+        return "Enciende la ubicación del celular y toca aquí";
       case "error":
         return t.inicio.error_actualizar;
       default:

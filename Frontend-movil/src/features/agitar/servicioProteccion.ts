@@ -209,14 +209,15 @@ export function manejarEventoProteccion({ type, detail }: Event): boolean {
   return false;
 }
 
-export async function iniciarProteccion(): Promise<EstadoProteccion> {
+/** pedirPermisos = true solo cuando la usuaria enciende la protección (no al abrir la app). */
+export async function iniciarProteccion(pedirPermisos = false): Promise<EstadoProteccion> {
   if (!SensorSacudidas.disponible()) return "sin_sensor";
   // El servicio es de tipo ubicación (para poder enviarla con la pantalla bloqueada) y Android
   // exige el permiso antes de iniciarlo
-  if (!(await permisoUbicacion())) return "sin_ubicacion";
+  if (!(await permisoUbicacion(pedirPermisos))) return "sin_ubicacion";
   if (activa) return "activa";
 
-  await permisoNotificaciones();
+  await permisoNotificaciones(pedirPermisos);
   await crearCanales();
   await notifee.displayNotification({
     id: ID_SERVICIO,

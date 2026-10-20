@@ -23,6 +23,8 @@ jest.mock("expo-location", () => ({
   getForegroundPermissionsAsync: jest.fn(async () => ({ granted: false, canAskAgain: true })),
   requestForegroundPermissionsAsync: jest.fn(async () => ({ granted: true })),
 }));
+jest.mock("../../../services/push.service", () => ({ registrarPush: jest.fn(async () => {}) }));
+jest.mock("../../../services/devices.service", () => ({ reportarPermisos: jest.fn(async () => {}) }));
 jest.mock("../../../../modules/sensor-sacudidas", () => ({
   __esModule: true,
   default: {

@@ -42,7 +42,7 @@
     "sin_incidentes": "Aucun incident",
     "gps_activo": "GPS actif",
     "ubicacion_desconocida": "Position inconnue",
-    "permiso_denegado": "Autorisation refusée",
+    "permiso_denegado": "Touche ici pour activer ta localisation",
     "error_actualizar": "Erreur de mise à jour",
     "ultima_alerta": "Dernière alerte :",
     "ultima_ubicacion_enviada": "Dernière position envoyée :",

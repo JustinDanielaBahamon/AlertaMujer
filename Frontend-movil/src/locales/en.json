@@ -42,7 +42,7 @@
   "sin_incidentes": "No incidents",
   "gps_activo": "GPS active",
   "ubicacion_desconocida": "Unknown location",
-  "permiso_denegado": "Permission denied",
+  "permiso_denegado": "Tap here to turn on your location",
   "error_actualizar": "Update error",
   "ultima_alerta": "Last alert:",
   "ultima_ubicacion_enviada": "Last location sent:",
