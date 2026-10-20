@@ -1,4 +1,5 @@
-import api from "./api";
+import api, { fuenteConToken } from "./api";
+import { aFecha } from "./alert-tracking.service";
 
 export type TipoGrabacion = "video" | "audio";
 
@@ -20,3 +21,32 @@ export async function subirEvidencia(alertaId: number, uri: string, tipo: TipoGr
     timeout: TIEMPO_SUBIDA_MS,
   });
 }
+
+/** Evidencia guardada de una alerta de la usuaria. */
+export interface EvidenciaGuardada {
+  id: number;
+  tipo: "photo" | "video" | "audio" | "document";
+  nombre: string;
+  tamanoBytes: number | null;
+  fecha: Date;
+  tieneArchivo: boolean;
+}
+
+/** Evidencias de una alerta propia, de la más antigua a la más reciente (el backend las da todas juntas). */
+export async function getEvidenciasDeAlerta(alertaId: number): Promise<EvidenciaGuardada[]> {
+  const { data } = await api.get<any[]>("/api/evidences/me");
+  return (data ?? [])
+    .filter((e) => Number(e.alertId) === alertaId)
+    .map((e) => ({
+      id: Number(e.id),
+      tipo: e.mediaType,
+      nombre: e.fileName ?? `evidencia-${e.id}`,
+      tamanoBytes: e.sizeBytes ?? null,
+      fecha: aFecha(e.createdAt),
+      tieneArchivo: !!e.hasFile,
+    }))
+    .sort((a, b) => a.fecha.getTime() - b.fecha.getTime());
+}
+
+/** Fuente para reproducir el archivo de una evidencia (solo la dueña puede abrirlo). */
+export const fuenteEvidencia = (id: number) => fuenteConToken(`/api/evidences/${id}/file`);

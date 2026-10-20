@@ -625,7 +625,17 @@
   "alert_llamar_titulo": "Llamar",
   "alert_llamar_msg": "Esta acción estará disponible pronto.",
   "alert_reportar_titulo": "Reportar",
-  "alert_reportar_msg": "Gracias, pronto podrás enviar reportes desde aquí."
+  "alert_reportar_msg": "Gracias, pronto podrás enviar reportes desde aquí.",
+  "evidencias_titulo": "Evidencias grabadas",
+  "evidencias_vacio": "No se guardaron grabaciones en esta alerta.",
+  "evidencias_error": "No se pudieron cargar las evidencias. Toca para reintentar.",
+  "evidencias_nota": "Las grabaciones se graban por partes y se guardan 60 días.",
+  "evidencia_video": "Video",
+  "evidencia_audio": "Audio",
+  "evidencia_foto": "Foto",
+  "evidencia_documento": "Documento",
+  "evidencia_sin_archivo": "sin archivo",
+  "evidencia_error_reproducir": "No se pudo reproducir. Revisa tu conexión e inténtalo de nuevo."
 },
 "confirmacion": {
   "titulo": "¡Casi listos!",

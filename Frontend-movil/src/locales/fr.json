@@ -624,7 +624,17 @@
     "alert_llamar_titulo": "Appeler",
     "alert_llamar_msg": "Cette action sera bientôt disponible.",
     "alert_reportar_titulo": "Signaler",
-    "alert_reportar_msg": "Merci, tu pourras bientôt envoyer des signalements depuis ici."
+    "alert_reportar_msg": "Merci, tu pourras bientôt envoyer des signalements depuis ici.",
+    "evidencias_titulo": "Preuves enregistrées",
+    "evidencias_vacio": "Aucun enregistrement n'a été sauvegardé pour cette alerte.",
+    "evidencias_error": "Impossible de charger les preuves. Touche pour réessayer.",
+    "evidencias_nota": "Les enregistrements sont faits par parties et conservés 60 jours.",
+    "evidencia_video": "Vidéo",
+    "evidencia_audio": "Audio",
+    "evidencia_foto": "Photo",
+    "evidencia_documento": "Document",
+    "evidencia_sin_archivo": "sans fichier",
+    "evidencia_error_reproducir": "Lecture impossible. Vérifie ta connexion et réessaie."
   },
   "confirmacion": {
     "titulo": "Presque prêtes !",
