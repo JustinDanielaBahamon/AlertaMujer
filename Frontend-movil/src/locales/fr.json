@@ -794,7 +794,13 @@
     "confirmarNo": "Non, maintenir l'alerte",
     "llamar911": "Appeler le 911",
     "salirBloqueadoTitulo": "L'alerte est toujours active",
-    "salirBloqueadoDescripcion": "Pour quitter cet écran, touchez « Je vais bien » et confirmez que vous êtes en sécurité."
+    "salirBloqueadoDescripcion": "Pour quitter cet écran, touchez « Je vais bien » et confirmez que vous êtes en sécurité.",
+    "envio_enviando": "Nous prévenons tes contacts…",
+    "envio_reintentando": "Le serveur ne répond pas. Nouvel essai ({n}/{total})…",
+    "envio_enviada": "Tes contacts ont été prévenus",
+    "envio_fallida": "Impossible d'envoyer l'alerte. Vérifie ton réseau ou demande de l'aide directement.",
+    "envio_reintentar": "Réessayer",
+    "envio_llamar": "Appeler le 123"
   },
   "alertaContacto": {
     "badgeActiva": "Alerte active en temps réel",
