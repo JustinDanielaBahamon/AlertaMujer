@@ -116,7 +116,7 @@
     "agitar_titulo": "Shake phone",
     "agitar_desc": "Trigger an emergency alert by shaking your phone hard, even if the app is minimized or the screen is locked. While it is on you will see the \"Protection active\" notification.",
     "agitar_paso1": "Enable this feature from Settings > Activation methods > Activate",
-    "agitar_paso2": "Shake your phone quickly and firmly, about 4 times in a row.",
+    "agitar_paso2": "Make 4 quick, strong chopping motions in a row with your phone, then hold still for a moment. A single movement, walking, jogging or running won't trigger it.",
     "agitar_paso3": "You will feel a vibration and have 5 seconds to cancel if it was a mistake.",
     "agitar_paso4": "If you don't cancel, the alert is sent to your contacts with your location, without unlocking the phone.",
     "recomendaciones_titulo": "Recommendations",

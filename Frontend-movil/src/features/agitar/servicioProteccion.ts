@@ -33,7 +33,8 @@ const ID_ENVIADA = "agitar-enviada";
 const ACCION_CANCELAR = "cancelar_agitar";
 const ACCION_ABRIR = "abrir_alerta_agitar";
 const SEGUNDOS_CUENTA = 5;
-const INTERVALO_SENSOR_MS = 80;
+// Cada 40 ms: con menos lecturas un hachazo se confunde con varios picos sueltos
+const INTERVALO_SENSOR_MS = 40;
 
 export type EstadoProteccion = "activa" | "sin_ubicacion" | "sin_sensor";
 

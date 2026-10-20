@@ -116,7 +116,7 @@
     "agitar_titulo": "Secouer le téléphone",
     "agitar_desc": "Déclenche une alerte d'urgence en secouant fort ton téléphone, même si l'application est réduite ou l'écran verrouillé. Tant qu'elle est activée, tu verras la notification « Protection active ».",
     "agitar_paso1": "Active cette fonction depuis Paramètres > Méthodes d'activation > Activer",
-    "agitar_paso2": "Secoue ton téléphone de manière rapide et ferme, environ 4 fois de suite.",
+    "agitar_paso2": "Fais 4 mouvements de hache rapides et forts d'affilée avec ton téléphone, puis reste immobile un instant. Un seul mouvement, marcher, trotter ou courir ne la déclenchent pas.",
     "agitar_paso3": "Tu sentiras une vibration et tu auras 5 secondes pour annuler en cas d'erreur.",
     "agitar_paso4": "Si tu n'annules pas, l'alerte est envoyée à tes contacts avec ta position, sans déverrouiller le téléphone.",
     "recomendaciones_titulo": "Recommandations",

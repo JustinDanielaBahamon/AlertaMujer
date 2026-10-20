@@ -57,11 +57,14 @@ import {
   registrarServicioProteccion,
 } from "../servicioProteccion";
 
-// Cuatro picos fuertes separados, como una sacudida real
+// Cuatro hachazos fuertes con calma antes y después, leídos cada 40 ms como en el servicio
+const HACHAZO = [1.3, 4.6, 5.8, 3.1, 4.2, 2.2, 1.1, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
 function sacudir() {
-  for (let i = 0; i < 4; i++) {
-    jest.setSystemTime(Date.now() + 200);
-    mockLector?.({ x: 3, y: 0, z: 0 });
+  const quieto = (ms: number) => Array(ms / 40).fill(1);
+  const lecturas = [...quieto(1200), ...Array(4).fill(HACHAZO).flat(), ...quieto(1000)];
+  for (const g of lecturas) {
+    jest.setSystemTime(Date.now() + 40);
+    mockLector?.({ x: g, y: 0, z: 0 });
   }
 }
 
@@ -91,7 +94,7 @@ describe("servicioProteccion", () => {
 
   it("lee el acelerómetro nativo, que sigue con la app minimizada, y lo suelta al apagar", async () => {
     await encender();
-    expect(SensorSacudidas.iniciar).toHaveBeenCalledWith(80);
+    expect(SensorSacudidas.iniciar).toHaveBeenCalledWith(40);
 
     await detenerProteccion();
     expect(SensorSacudidas.detener).toHaveBeenCalled();
