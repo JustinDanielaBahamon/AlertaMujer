@@ -930,5 +930,14 @@
     "error_carga": "We couldn't load the alerts. Check your connection.",
     "reintentar": "Try again",
     "error_seguimiento": "Tracking for this alert is no longer available."
+  },
+  "version": {
+    "titulo": "A new version of AlertaMujer is available",
+    "texto": "Your version is no longer the recommended one. Download the new one to get the latest safety and protection improvements.",
+    "instalada": "Installed",
+    "minima": "Minimum recommended",
+    "nota": "Meanwhile the app keeps working: you can send alerts as usual.",
+    "descargar": "Download the new version",
+    "mas_tarde": "Remind me tomorrow"
   }
 }

@@ -930,5 +930,14 @@
     "error_carga": "No pudimos cargar las alertas. Revisa tu conexión.",
     "reintentar": "Reintentar",
     "error_seguimiento": "El seguimiento de esta alerta ya no está disponible."
+  },
+  "version": {
+    "titulo": "Hay una versión nueva de AlertaMujer",
+    "texto": "Tu versión ya no es la recomendada. Descarga la nueva para tener las últimas mejoras de seguridad y protección.",
+    "instalada": "Instalada",
+    "minima": "Mínima recomendada",
+    "nota": "Mientras tanto la app sigue funcionando: puedes enviar alertas con normalidad.",
+    "descargar": "Descargar la nueva versión",
+    "mas_tarde": "Recordármelo mañana"
   }
 }

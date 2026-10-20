@@ -929,5 +929,14 @@
     "error_carga": "Impossible de charger les alertes. Vérifie ta connexion.",
     "reintentar": "Réessayer",
     "error_seguimiento": "Le suivi de cette alerte n'est plus disponible."
+  },
+  "version": {
+    "titulo": "Une nouvelle version d'AlertaMujer est disponible",
+    "texto": "Ta version n'est plus celle recommandée. Télécharge la nouvelle pour avoir les dernières améliorations de sécurité et de protection.",
+    "instalada": "Installée",
+    "minima": "Minimum recommandé",
+    "nota": "En attendant, l'app continue de fonctionner : tu peux envoyer des alertes normalement.",
+    "descargar": "Télécharger la nouvelle version",
+    "mas_tarde": "Me le rappeler demain"
   }
 }
