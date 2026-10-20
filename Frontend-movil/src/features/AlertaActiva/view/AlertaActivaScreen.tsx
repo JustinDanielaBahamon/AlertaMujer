@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import {
+    ActivityIndicator,
+    Linking,
     Modal,
     ScrollView,
     StyleSheet,
@@ -143,6 +145,43 @@ export default function AlertaActivaScreen() {
 
         <Text style={styles.title}>{t.alertaActiva.titulo}</Text>
         <Text style={styles.subtitle}>{t.alertaActiva.subtitulo}</Text>
+
+        {/* Estado del envío: la usuaria tiene que saber si sus contactos ya fueron avisados */}
+        <View style={[envioEstilos.caja, { borderColor: theme.icono, backgroundColor: theme.icono + (vm.envio.estado === "enviada" ? "14" : "22") }]}>
+          {vm.envio.estado === "enviando" ? (
+            <ActivityIndicator size="small" color={theme.icono} />
+          ) : (
+            <MaterialIcons name={vm.envio.estado === "enviada" ? "mark-email-read" : "error-outline"} size={22} color={theme.icono} />
+          )}
+          <View style={{ flex: 1 }}>
+            <Text style={[envioEstilos.texto, { color: theme.text }]}>
+              {vm.envio.estado === "enviada"
+                ? t.alertaActiva.envio_enviada
+                : vm.envio.estado === "fallida"
+                  ? t.alertaActiva.envio_fallida
+                  : vm.envio.intento > 1
+                    ? t.alertaActiva.envio_reintentando
+                        .replace("{n}", String(vm.envio.intento))
+                        .replace("{total}", String(vm.envio.total))
+                    : t.alertaActiva.envio_enviando}
+            </Text>
+            {vm.envio.estado === "fallida" && (
+              <View style={envioEstilos.acciones}>
+                <TouchableOpacity onPress={vm.reintentarEnvio} style={[envioEstilos.boton, { backgroundColor: theme.icono }]}>
+                  <MaterialIcons name="refresh" size={16} color="#fff" />
+                  <Text style={envioEstilos.botonTexto}>{t.alertaActiva.envio_reintentar}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => Linking.openURL("tel:123").catch(() => {})}
+                  style={[envioEstilos.boton, { borderColor: theme.icono, borderWidth: 1.5 }]}
+                >
+                  <MaterialIcons name="call" size={16} color={theme.icono} />
+                  <Text style={[envioEstilos.botonTexto, { color: theme.icono }]}>{t.alertaActiva.envio_llamar}</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        </View>
 
         <View style={styles.circleWrapper}>
           <View style={styles.circle}>
@@ -317,3 +356,10 @@ export default function AlertaActivaScreen() {
     </View>
   );
 }
+const envioEstilos = StyleSheet.create({
+  caja: { flexDirection: "row", alignItems: "flex-start", gap: 10, borderWidth: 1.5, borderRadius: 16, padding: 12, marginTop: 12, marginHorizontal: 4 },
+  texto: { fontSize: 13, fontWeight: "700", lineHeight: 19 },
+  acciones: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 10 },
+  boton: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18 },
+  botonTexto: { color: "#fff", fontSize: 13, fontWeight: "700" },
+});

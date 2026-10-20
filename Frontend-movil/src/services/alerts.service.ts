@@ -66,6 +66,49 @@ export const createAlert = async (data: CreateAlertData): Promise<AlertaApi> => 
   return response.data;
 };
 
+// Esperas antes de cada intento: cubren una red mala o el servidor de Render despertando (~1 min)
+const ESPERAS_REINTENTO_MS = [0, 2000, 5000, 10000, 20000];
+// Una alerta activa más reciente que esto puede ser la de un intento que sí llegó al servidor
+const VENTANA_INTENTO_PREVIO_MS = 3 * 60 * 1000;
+
+const esReintentable = (e: any) => {
+  const estado = e?.response?.status;
+  return !estado || estado >= 500 || estado === 408 || estado === 429;
+};
+
+const aMs = (iso?: string) => (iso ? Date.parse(/[zZ]|[+-]\d{2}:?\d{2}$/.test(iso) ? iso : `${iso}Z`) : NaN);
+
+export type IntentoAlerta = { intento: number; total: number };
+
+/**
+ * Crea la alerta y, si no hay red o el servidor no responde, la reintenta varias veces. Antes de
+ * cada reintento revisa si el intento anterior sí alcanzó a crearla (se perdió la respuesta), para
+ * no avisar dos veces a los contactos.
+ */
+export async function crearAlertaConReintentos(
+  data: CreateAlertData,
+  opciones: { alIntentar?: (i: IntentoAlerta) => void; esperar?: (ms: number) => Promise<void> } = {},
+): Promise<AlertaApi> {
+  const esperar = opciones.esperar ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
+  const total = ESPERAS_REINTENTO_MS.length;
+  let ultimoError: unknown;
+  for (let i = 0; i < total; i++) {
+    if (ESPERAS_REINTENTO_MS[i] > 0) await esperar(ESPERAS_REINTENTO_MS[i]);
+    opciones.alIntentar?.({ intento: i + 1, total });
+    if (i > 0) {
+      const previa = await getMisAlertas().then(alertaActivaPropia).catch(() => null);
+      if (previa && Date.now() - aMs(previa.startedAt || previa.createdAt) < VENTANA_INTENTO_PREVIO_MS) return previa;
+    }
+    try {
+      return await createAlert(data);
+    } catch (e) {
+      ultimoError = e;
+      if (!esReintentable(e)) throw e;
+    }
+  }
+  throw ultimoError;
+}
+
 export const finalizarAlerta = async (alertId: number, estado: 'resolved' | 'cancelled'): Promise<AlertaApi> => {
   const response = await api.put<AlertaApi>(`/api/alerts/${alertId}`, { status: estado });
   return response.data;

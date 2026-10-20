@@ -795,7 +795,13 @@
   "confirmarNo": "No, keep alert",
   "llamar911": "Call 911",
   "salirBloqueadoTitulo": "Your alert is still active",
-  "salirBloqueadoDescripcion": "To leave this screen, tap \"I'm okay\" and confirm you are safe."
+  "salirBloqueadoDescripcion": "To leave this screen, tap \"I'm okay\" and confirm you are safe.",
+  "envio_enviando": "Alerting your contacts…",
+  "envio_reintentando": "The server isn't responding. Retrying ({n}/{total})…",
+  "envio_enviada": "Your contacts have been alerted",
+  "envio_fallida": "We couldn't send the alert. Check your signal or ask for help directly.",
+  "envio_reintentar": "Try again",
+  "envio_llamar": "Call 123"
 },
     "alertaContacto": {
     "badgeActiva": "Active alert in real time",

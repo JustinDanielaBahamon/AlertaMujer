@@ -795,7 +795,13 @@
   "confirmarNo": "Não, manter alerta",
   "llamar911": "Ligar para o 911",
   "salirBloqueadoTitulo": "O alerta continua ativo",
-  "salirBloqueadoDescripcion": "Para sair desta tela, toque em \"Estou bem\" e confirme que está em segurança."
+  "salirBloqueadoDescripcion": "Para sair desta tela, toque em \"Estou bem\" e confirme que está em segurança.",
+  "envio_enviando": "Avisando seus contatos…",
+  "envio_reintentando": "O servidor não responde. Tentando de novo ({n}/{total})…",
+  "envio_enviada": "Seus contatos já foram avisados",
+  "envio_fallida": "Não conseguimos enviar o alerta. Verifique o sinal ou peça ajuda diretamente.",
+  "envio_reintentar": "Tentar de novo",
+  "envio_llamar": "Ligar para 123"
 },
     "alertaContacto": {
     "badgeActiva": "Alerta ativo em tempo real",

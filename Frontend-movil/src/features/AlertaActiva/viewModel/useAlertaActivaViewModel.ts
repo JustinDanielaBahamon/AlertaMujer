@@ -9,7 +9,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { MainStackParamList } from "../../../navigation/types";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useLocale } from "../../../contexts/LocaleContext";
-import { createAlert, finalizarAlerta } from "../../../services/alerts.service";
+import { crearAlertaConReintentos, finalizarAlerta } from "../../../services/alerts.service";
 import { getOrCreateDevice } from "../../../services/devices.service";
 import type { PuntoUbicacion } from "../../../services/alert-tracking.service";
 import { descripcionLugar, obtenerLugar } from "../../../services/geocoding.service";
@@ -88,6 +88,21 @@ export function useAlertaActivaViewModel() {
   // Mismo id como estado: el chat de la alerta aparece cuando ya existe
   const [alertaId, setAlertaId] = useState<number | null>(null);
   const [errorAlerta, setErrorAlerta] = useState<string | null>(null);
+  // Estado del envío al servidor, para que la usuaria sepa si sus contactos ya fueron avisados
+  const [envio, setEnvio] = useState<{ estado: "enviando" | "enviada" | "fallida"; intento: number; total: number }>({
+    estado: "enviando",
+    intento: 1,
+    total: 1,
+  });
+  const [reintentosManuales, setReintentosManuales] = useState(0);
+  // La creación con reintentos puede durar más que un cambio de ubicación: se usa el montaje de la pantalla
+  const pantallaMontadaRef = useRef(true);
+  useEffect(() => {
+    pantallaMontadaRef.current = true;
+    return () => {
+      pantallaMontadaRef.current = false;
+    };
+  }, []);
 
   // Crea la alerta en el backend al activar el SOS (una sola vez, incluyendo la ubicación).
   // Generico useState<number>: TypeScript garantiza que este estado solo puede contener un numero.
@@ -166,16 +181,18 @@ export function useAlertaActivaViewModel() {
   }, [alertaExistente]);
 
   // Crea la alerta en el backend al activar el SOS (una sola vez, incluyendo la ubicación).
+  // Si falla, se vuelve a intentar con la siguiente ubicación o al tocar "Reintentar".
   useEffect(() => {
-    let mounted = true;
     (async () => {
       if (!user?.id || alertaCreacionIniciadaRef.current) return;
       if (!location && !esperaUbicacionVencida) return; // se espera un poco la ubicación, no más
       alertaCreacionIniciadaRef.current = true;
 
       try {
+        setErrorAlerta(null);
+        setEnvio({ estado: "enviando", intento: 1, total: 1 });
         const device = await getOrCreateDevice();
-        const alerta = await createAlert({
+        const alerta = await crearAlertaConReintentos({
           userProfileId: user.id,
           deviceId: device.id,
           alertType: "main",
@@ -191,23 +208,33 @@ export function useAlertaActivaViewModel() {
           longitude: location?.longitude,
           // Alerta individual: el backend solo avisa a este contacto
           contactIds: contactoDestino ? [Number(contactoDestino.id)] : undefined,
+        }, {
+          alIntentar: ({ intento, total }) => pantallaMontadaRef.current && setEnvio({ estado: "enviando", intento, total }),
         });
         alertaCreadaIdRef.current = alerta.id;
         setAlertaId(alerta.id);
+        if (pantallaMontadaRef.current) setEnvio((e) => ({ ...e, estado: "enviada" }));
         // Si se creó sin ubicación y ya llegó una, se envía asociada a la alerta
         if (!location && ultimaUbicacionRef.current) {
           reportarUbicacion({ ...ultimaUbicacionRef.current, alertId: alerta.id });
         }
       } catch (err) {
         console.error("No se pudo crear la alerta en el backend:", err);
-        if (mounted)
+        // Se permite volver a intentarlo desde la pantalla
+        alertaCreacionIniciadaRef.current = false;
+        if (pantallaMontadaRef.current) {
           setErrorAlerta("No se pudo registrar la alerta en el servidor");
+          setEnvio((e) => ({ ...e, estado: "fallida" }));
+        }
       }
     })();
-    return () => {
-      mounted = false;
-    };
-  }, [user?.id, location, esperaUbicacionVencida, contactoDestino, metodo]);
+    // reintentosManuales: al tocar "Reintentar" se vuelve a correr la creación
+  }, [user?.id, location, esperaUbicacionVencida, contactoDestino, metodo, reintentosManuales]);
+
+  const reintentarEnvio = useCallback(() => {
+    if (alertaCreadaIdRef.current || alertaCreacionIniciadaRef.current) return;
+    setReintentosManuales((n) => n + 1);
+  }, []);
 
   // Actualiza la ubicacion en ciclos para ahorrar bateria: cada 30 s (10 veces) y luego
   // 5 min de reposo, en los que el GPS no se consulta. Despues repite el ciclo.
@@ -423,6 +450,8 @@ export function useAlertaActivaViewModel() {
     handleMapPress,
     cerrarMapaCompleto,
     errorAlerta,
+    envio,
+    reintentarEnvio,
     // Mapa con el mismo diseno y datos que "Alerta de emergencia"
     mapRef,
     mapaCompletoRef,

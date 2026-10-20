@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Location from "expo-location";
-import { createAlert } from "../../services/alerts.service";
+import { crearAlertaConReintentos } from "../../services/alerts.service";
 import { getOrCreateDevice } from "../../services/devices.service";
 import { reportarUbicacion } from "../../services/location-reporter.service";
 import SensorSacudidas from "../../../modules/sensor-sacudidas";
@@ -40,7 +40,8 @@ export async function crearAlertaPorSacudida(): Promise<number> {
   if (!usuario) throw new Error("No hay sesión iniciada");
 
   const [device, ubicacion] = await Promise.all([getOrCreateDevice(), ubicacionParaLaAlerta()]);
-  const alerta = await createAlert({
+  // Con reintentos: si la red falla o el servidor está despertando, no se pierde la alerta
+  const alerta = await crearAlertaConReintentos({
     userProfileId: usuario.id,
     deviceId: device.id,
     alertType: "main",
