@@ -238,18 +238,13 @@
   "ajustes": {
   "acerca_de": "Acerca de",
   "notificaciones": "Notificaciones",
-  "privacidad_app": "Privacidad de la aplicación",
   "grabar_video": "Grabar video automáticamente al activar una emergencia",
   "grabar_video_desc": "Graba hasta 1 minuto de video con tu cámara al activar una alerta. Apágalo si no quieres usarla.",
   "grabar_audio": "Grabar audio automáticamente al activar una emergencia",
   "grabar_audio_desc": "Graba hasta 5 minutos de audio con tu micrófono al activar una alerta. Apágalo si no quieres usarlo.",
   "permiso_camara_msg": "Para activar el video debes permitir el acceso a la cámara desde los ajustes del teléfono.",
   "permiso_microfono_msg": "Para activar el audio debes permitir el acceso al micrófono desde los ajustes del teléfono.",
-  "evidencias_privacidad": "Evidencias y privacidad",
-  "grabar_evidencia": "Grabar video y audio automáticamente al activar una emergencia",
-  "grabar_evidencia_desc": "Se graba hasta 1 minuto con tu cámara y micrófono cuando activas una alerta. Si no quieres que se use tu cámara, apaga esta opción.",
   "permiso_requerido_titulo": "Permisos necesarios",
-  "permiso_requerido_msg": "Para activar esta opción debes permitir el acceso a la cámara y al micrófono desde los ajustes del teléfono.",
   "abrir_ajustes": "Abrir ajustes",
   "titulo": "Ajustes",
   "idioma": "Idioma",
@@ -267,10 +262,20 @@
   },
     "acercaDe": {
     "titulo_header": "Acerca de",
-    "intro": "Información sobre la aplicación y sus documentos legales.",
-    "version": "Versión de la aplicación",
+    "version": "Versión",
     "terminos": "Términos y condiciones",
-    "politica_privacidad": "Política de privacidad"
+    "politica_privacidad": "Política de privacidad",
+    "descripcion": "Tu red de apoyo en el bolsillo: pide ayuda en segundos y comparte dónde estás con quienes confías.",
+    "seccion_privacidad": "TU PRIVACIDAD",
+    "privacidad_punto_venta": "Tus datos solo se usan para que funcionen tus alertas y nunca se venden a terceros.",
+    "privacidad_punto_grabacion": "Tú decides si se graba video o audio durante una alerta, desde Permisos y protección.",
+    "privacidad_punto_borrado": "Las ubicaciones y las grabaciones se borran solas pasado su plazo.",
+    "retencion_titulo": "Retención de datos",
+    "retencion_desc": "Cuánto tiempo guardamos cada dato",
+    "seccion_app": "ALERTAMUJER EN LA WEB",
+    "web": "Sitio web de AlertaMujer",
+    "web_desc": "Sigue alertas, revisa evidencias y descarga la app",
+    "proyecto": "Proyecto formativo SENA · ADSO · Ficha 3145556"
   },
   "recuperar": {
   "titulo_paso1": "¿Olvidaste tu contraseña?",
@@ -638,7 +643,10 @@
   "llamada_titulo": "Permitir que Alerta Mujer realice llamadas",
   "llamada_desc": "La aplicación podrá iniciar una llamada directa para solicitar ayuda inmediata.",
   "btn_confirmar": "Confirmar",
-  "btn_regresar": "Regresar"
+  "btn_regresar": "Regresar",
+  "seccion_evidencias": "EVIDENCIAS AUTOMÁTICAS",
+  "seccion_evidencias_desc": "Qué se graba cuando activas una alerta. Las grabaciones se suben a la nube para tus contactos.",
+  "sin_permiso_grabacion": "Falta el permiso"
 },
 "historialMapa": {
   "titulo": "Detalle de ubicación",
@@ -800,21 +808,27 @@
     "probar_error": "No se pudo mostrar la prueba. Revisa el permiso de notificaciones.",
     "avanzado": "Sonidos y canales en los ajustes del celular"
   },
-  "privacidadApp": {
-    "titulo_header": "Privacidad de la aplicación",
-    "intro": "Aquí puedes conocer cómo cuidamos tu información y qué control tienes sobre ella.",
-    "retencion_titulo": "Política de retención de datos",
-    "retencion_desc": "Cuánto tiempo guardamos tu información."
-  },
   "retencion": {
     "titulo_header": "Retención de datos",
-    "intro": "Estos son los plazos durante los cuales la aplicación conserva tu información en sus servidores seguros.",
-    "ubicaciones_titulo": "Historial de ubicaciones",
-    "ubicaciones_desc": "Las rutas de GPS de tus alertas se conservan 30 días y las ubicaciones del día a día, 7 días. Después se eliminan automáticamente, o antes si borras tu cuenta.",
-    "evidencias_titulo": "Evidencias (videos y audios)",
-    "evidencias_desc": "Las grabaciones de una emergencia se guardan en la nube 60 días y después se eliminan. Si las necesitas como prueba (por ejemplo, para una denuncia), puedes conservar hasta 5 alertas desde la web, en Evidencias.",
-    "perfil_titulo": "Datos de perfil",
-    "perfil_desc": "Tus datos personales se usan únicamente para el funcionamiento de las alertas de seguridad y nunca se venden a terceros."
+    "intro": "Guardamos cada dato solo el tiempo necesario. Pasado el plazo se elimina automáticamente de nuestros servidores.",
+    "evidencias_titulo": "Videos y audios",
+    "evidencias_desc": "Las grabaciones de una emergencia. Puedes conservar hasta 5 alertas si las necesitas como prueba.",
+    "perfil_titulo": "Perfil y contactos",
+    "perfil_desc": "Tus datos personales y tu red de apoyo se guardan mientras tengas tu cuenta.",
+    "rutas_titulo": "Rutas de tus alertas",
+    "rutas_plazo": "30 días",
+    "rutas_desc": "El recorrido GPS que haces mientras una alerta está activa.",
+    "diaria_titulo": "Ubicación del día a día",
+    "diaria_plazo": "7 días",
+    "diaria_desc": "La última ubicación que reporta tu celular para tener un punto de partida en una emergencia.",
+    "evidencias_plazo": "60 días",
+    "perfil_plazo": "Con tu cuenta",
+    "seccion_control": "LO QUE PUEDES HACER",
+    "accion_conservar": "Conservar evidencias",
+    "accion_conservar_desc": "Desde la web, en Evidencias, marca las alertas que quieres guardar (por ejemplo, para una denuncia).",
+    "accion_grabacion": "Elegir qué se graba",
+    "accion_grabacion_desc": "Apaga la grabación automática de video o audio en Permisos y protección.",
+    "nota_cuenta": "Tus datos se usan únicamente para el funcionamiento de las alertas de seguridad y nunca se venden a terceros."
   },
 "indexDemo": {
   "mensaje": "Bienvenido (pantalla de prueba)",

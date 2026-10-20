@@ -238,18 +238,13 @@
   "ajustes": {
   "acerca_de": "About",
   "notificaciones": "Notifications",
-  "privacidad_app": "App privacy",
   "grabar_video": "Automatically record video when an emergency is activated",
   "grabar_video_desc": "Records up to 1 minute of video with your camera when you trigger an alert. Turn it off if you don't want to use it.",
   "grabar_audio": "Automatically record audio when an emergency is activated",
   "grabar_audio_desc": "Records up to 5 minutes of audio with your microphone when you trigger an alert. Turn it off if you don't want to use it.",
   "permiso_camara_msg": "To enable video you must allow camera access from your phone settings.",
   "permiso_microfono_msg": "To enable audio you must allow microphone access from your phone settings.",
-  "evidencias_privacidad": "Evidence and privacy",
-  "grabar_evidencia": "Automatically record video and audio when an emergency is activated",
-  "grabar_evidencia_desc": "Up to 1 minute is recorded with your camera and microphone when you trigger an alert. If you don't want your camera to be used, turn this option off.",
   "permiso_requerido_titulo": "Permissions required",
-  "permiso_requerido_msg": "To enable this option you must allow access to the camera and microphone from your phone settings.",
   "abrir_ajustes": "Open settings",
   "titulo": "Settings",
   "idioma": "Language",
@@ -267,10 +262,20 @@
   },
     "acercaDe": {
     "titulo_header": "About",
-    "intro": "Information about the app and its legal documents.",
-    "version": "App version",
+    "version": "Version",
     "terminos": "Terms and conditions",
-    "politica_privacidad": "Privacy policy"
+    "politica_privacidad": "Privacy policy",
+    "descripcion": "Your support network in your pocket: ask for help in seconds and share where you are with people you trust.",
+    "seccion_privacidad": "YOUR PRIVACY",
+    "privacidad_punto_venta": "Your data is only used to make your alerts work and is never sold to third parties.",
+    "privacidad_punto_grabacion": "You decide whether video or audio is recorded during an alert, in Permissions and protection.",
+    "privacidad_punto_borrado": "Locations and recordings are deleted automatically after their retention period.",
+    "retencion_titulo": "Data retention",
+    "retencion_desc": "How long we keep each kind of data",
+    "seccion_app": "ALERTAMUJER ON THE WEB",
+    "web": "AlertaMujer website",
+    "web_desc": "Follow alerts, review evidence and download the app",
+    "proyecto": "SENA training project · ADSO · Group 3145556"
   },
   "recuperar": {
   "titulo_paso1": "Forgot your password?",
@@ -638,7 +643,10 @@
   "llamada_titulo": "Allow Alerta Mujer to make calls",
   "llamada_desc": "The app will be able to start a direct call to request immediate help.",
   "btn_confirmar": "Confirm",
-  "btn_regresar": "Go back"
+  "btn_regresar": "Go back",
+  "seccion_evidencias": "AUTOMATIC EVIDENCE",
+  "seccion_evidencias_desc": "What is recorded when you trigger an alert. Recordings are uploaded to the cloud for your contacts.",
+  "sin_permiso_grabacion": "Permission missing"
 },
 "historialMapa": {
   "titulo": "Location details",
@@ -800,21 +808,27 @@
     "probar_error": "The test couldn't be shown. Check the notification permission.",
     "avanzado": "Sounds and channels in phone settings"
   },
-  "privacidadApp": {
-    "titulo_header": "App privacy",
-    "intro": "Here you can learn how we protect your information and what control you have over it.",
-    "retencion_titulo": "Data retention policy",
-    "retencion_desc": "How long we keep your information."
-  },
   "retencion": {
     "titulo_header": "Data retention",
-    "intro": "These are the periods during which the app keeps your information on its secure servers.",
-    "ubicaciones_titulo": "Location history",
-    "ubicaciones_desc": "GPS routes from your alerts are kept for 30 days and everyday locations for 7 days. After that they are deleted automatically, or sooner if you delete your account.",
-    "evidencias_titulo": "Evidence (videos and audio)",
-    "evidencias_desc": "Recordings from an emergency are stored in the cloud for 60 days and then deleted. If you need them as proof (for example, for a police report), you can keep up to 5 alerts from the web, in Evidence.",
-    "perfil_titulo": "Profile data",
-    "perfil_desc": "Your personal data is used only for the operation of the safety alerts and is never sold to third parties."
+    "intro": "We keep each piece of data only as long as needed. After that it is deleted from our servers automatically.",
+    "evidencias_titulo": "Videos and audio",
+    "evidencias_desc": "Recordings from an emergency. You can keep up to 5 alerts if you need them as evidence.",
+    "perfil_titulo": "Profile and contacts",
+    "perfil_desc": "Your personal data and support network are kept while you have your account.",
+    "rutas_titulo": "Your alert routes",
+    "rutas_plazo": "30 days",
+    "rutas_desc": "The GPS route you follow while an alert is active.",
+    "diaria_titulo": "Everyday location",
+    "diaria_plazo": "7 days",
+    "diaria_desc": "The last location your phone reports, used as a starting point in an emergency.",
+    "evidencias_plazo": "60 days",
+    "perfil_plazo": "With your account",
+    "seccion_control": "WHAT YOU CAN DO",
+    "accion_conservar": "Keep evidence",
+    "accion_conservar_desc": "On the website, under Evidence, mark the alerts you want to keep (for example, for a police report).",
+    "accion_grabacion": "Choose what is recorded",
+    "accion_grabacion_desc": "Turn off automatic video or audio recording in Permissions and protection.",
+    "nota_cuenta": "Your data is used only to run safety alerts and is never sold to third parties."
   },
 "indexDemo": {
   "mensaje": "Welcome (test screen)",

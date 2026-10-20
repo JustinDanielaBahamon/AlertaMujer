@@ -1,8 +1,9 @@
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import React, { useMemo } from "react";
-import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, ScrollView, Switch, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useLocale } from "../../../contexts/LocaleContext";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { createMetodosActivacionStyles, obtenerColoresHeader } from "../../settings/styles/metodosActivacion.styles";
 import { usePermisosViewModel } from "../usePermisosViewModel";
@@ -13,7 +14,8 @@ export default function PermisosScreen() {
   const styles = useMemo(() => createMetodosActivacionStyles(theme), [theme]);
   const { texto } = obtenerColoresHeader(theme);
   const insets = useSafeAreaInsets();
-  const { items, listos, total, cargando, activar, salud, volver } = usePermisosViewModel();
+  const { t } = useLocale();
+  const { items, listos, total, cargando, activar, salud, evidencias, volver } = usePermisosViewModel();
   const porcentaje = total > 0 ? Math.round((listos / total) * 100) : 0;
 
   return (
@@ -156,6 +158,61 @@ export default function PermisosScreen() {
               </View>
             );
           })}
+
+        {/* Evidencias automáticas: qué se graba al activar una alerta */}
+        {!cargando && (
+          <>
+            <Text style={[styles.intro, { fontWeight: "800", letterSpacing: 1.2, fontSize: 12, marginTop: 8 }]}>
+              {t.permisos.seccion_evidencias}
+            </Text>
+            <Text style={styles.intro}>{t.permisos.seccion_evidencias_desc}</Text>
+            {[
+              { id: "video", icono: "videocam", titulo: t.ajustes.grabar_video, desc: t.ajustes.grabar_video_desc, estado: evidencias.video, cambiar: evidencias.cambiarVideo },
+              { id: "audio", icono: "mic", titulo: t.ajustes.grabar_audio, desc: t.ajustes.grabar_audio_desc, estado: evidencias.audio, cambiar: evidencias.cambiarAudio },
+            ].map((g) => (
+              <View key={g.id} style={[styles.tarjeta, !g.estado.activo && styles.tarjetaInactiva]}>
+                <View style={styles.filaTitulo}>
+                  <View style={styles.iconoWrap}>
+                    <MaterialIcons name={g.icono as never} size={22} color={theme.contactAccent} />
+                  </View>
+                  <View style={styles.tituloWrap}>
+                    <Text style={styles.tituloMetodo}>{g.titulo}</Text>
+                    {g.estado.sinPermiso && (
+                      <Text style={{ fontSize: 12, fontWeight: "700", color: "#C026D3" }}>{t.permisos.sin_permiso_grabacion}</Text>
+                    )}
+                  </View>
+                  <Switch
+                    value={g.estado.activo}
+                    onValueChange={g.cambiar}
+                    trackColor={{ false: "#ccc", true: theme.contactAccent }}
+                    thumbColor="#fff"
+                  />
+                </View>
+                <Text style={styles.descripcionMetodo}>{g.desc}</Text>
+                {g.estado.sinPermiso && (
+                  <TouchableOpacity
+                    onPress={() => g.cambiar(true)}
+                    accessibilityRole="button"
+                    style={{
+                      marginTop: 12,
+                      alignSelf: "flex-start",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 6,
+                      paddingHorizontal: 16,
+                      paddingVertical: 9,
+                      borderRadius: 20,
+                      backgroundColor: theme.contactAccent,
+                    }}
+                  >
+                    <MaterialIcons name="check-circle" size={16} color="#FFFFFF" />
+                    <Text style={{ color: "#FFFFFF", fontWeight: "700", fontSize: 13 }}>Activar</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            ))}
+          </>
+        )}
       </ScrollView>
     </View>
   );

@@ -5,6 +5,10 @@ import { useMetodosActivacion } from "../../contexts/MetodosActivacionContext";
 import { activarPermiso, PERMISOS, revisarPermisos, type EstadoPermiso, type IdPermiso } from "./permisos";
 import { EXPLICACION, interrupcionesRecientes, type Interrupcion } from "./saludProteccion";
 import SensorSacudidas from "../../../modules/sensor-sacudidas";
+import { useGrabacionAutomatica } from "./useGrabacionAutomatica";
+
+// Cámara y micrófono se muestran junto a sus interruptores de grabación automática
+const DE_GRABACION: IdPermiso[] = ["camara", "microfono"];
 
 export function usePermisosViewModel() {
   const navigation = useNavigation();
@@ -42,7 +46,11 @@ export function usePermisosViewModel() {
     [estados, cambiar, refrescar],
   );
 
-  const items = PERMISOS.map((p) => ({ ...p, estado: estados?.[p.id] ?? null })).filter((i) => !i.estado?.oculto);
+  const grabacion = useGrabacionAutomatica(refrescar);
+
+  const items = PERMISOS.map((p) => ({ ...p, estado: estados?.[p.id] ?? null })).filter(
+    (i) => !i.estado?.oculto && !DE_GRABACION.includes(i.id),
+  );
   const listos = items.filter((i) => i.estado?.concedido === true).length;
 
   // Salud de la protección: verificada con los cierres que registró Android
@@ -59,5 +67,13 @@ export function usePermisosViewModel() {
         },
       };
 
-  return { items, listos, total: items.length, cargando: !estados, activar, salud, volver: navigation.goBack };
+  // Si la grabación está encendida pero luego se quitó el permiso desde Android, se avisa en la tarjeta
+  const evidencias = {
+    video: { activo: grabacion.grabarVideo, sinPermiso: grabacion.grabarVideo && estados?.camara.concedido === false },
+    audio: { activo: grabacion.grabarAudio, sinPermiso: grabacion.grabarAudio && estados?.microfono.concedido === false },
+    cambiarVideo: grabacion.cambiarGrabarVideo,
+    cambiarAudio: grabacion.cambiarGrabarAudio,
+  };
+
+  return { items, listos, total: items.length, cargando: !estados, activar, salud, evidencias, volver: navigation.goBack };
 }

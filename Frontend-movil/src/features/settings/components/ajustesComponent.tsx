@@ -18,10 +18,6 @@ export default function AjustesComponent({ navigation }: any) {
     seleccionarIdioma,
     obtenerTextoIdioma,
     obtenerIconoTema,
-    grabarVideo,
-    cambiarGrabarVideo,
-    grabarAudio,
-    cambiarGrabarAudio,
   } = useAjustesViewModel();
 
   const { t } = useLocale();
@@ -122,73 +118,6 @@ export default function AjustesComponent({ navigation }: any) {
         <View style={styles.filaConChevron}>
           <Ionicons name="notifications-outline" size={17} color={theme.text} style={{ marginRight: 8 }} />
           <Text style={{ color: theme.text, flex: 1, fontSize: 14 }}>{t.ajustes.notificaciones}</Text>
-          <Ionicons name="chevron-forward" size={15} color={theme.tabActiveColor} />
-        </View>
-      </TouchableOpacity>
-
-      {/* evidencias y privacidad */}
-      <View style={styles.item}>
-        <Text style={[styles.tituloSeccion, { color: theme.text }]}>
-          {t.ajustes.evidencias_privacidad}
-        </Text>
-      </View>
-
-      {/* grabar video (camara) */}
-      <View style={styles.item}>
-        <View style={styles.filaSwitch}>
-          <Ionicons
-            name="videocam-outline"
-            size={18}
-            color={theme.text}
-            style={{ marginRight: 8 }}
-          />
-          <Text style={[styles.textoSwitch, { color: theme.text, flex: 1, paddingRight: 8 }]}>
-            {t.ajustes.grabar_video}
-          </Text>
-          <Switch
-            value={grabarVideo}
-            onValueChange={cambiarGrabarVideo}
-            trackColor={{ false: '#ccc', true: theme.tabActiveColor }}
-            thumbColor="#fff"
-          />
-        </View>
-        <Text style={{ color: theme.text, opacity: 0.6, fontSize: 12, marginTop: 6 }}>
-          {t.ajustes.grabar_video_desc}
-        </Text>
-      </View>
-
-      {/* grabar audio (microfono) */}
-      <View style={styles.item}>
-        <View style={styles.filaSwitch}>
-          <Ionicons
-            name="mic-outline"
-            size={18}
-            color={theme.text}
-            style={{ marginRight: 8 }}
-          />
-          <Text style={[styles.textoSwitch, { color: theme.text, flex: 1, paddingRight: 8 }]}>
-            {t.ajustes.grabar_audio}
-          </Text>
-          <Switch
-            value={grabarAudio}
-            onValueChange={cambiarGrabarAudio}
-            trackColor={{ false: '#ccc', true: theme.tabActiveColor }}
-            thumbColor="#fff"
-          />
-        </View>
-        <Text style={{ color: theme.text, opacity: 0.6, fontSize: 12, marginTop: 6 }}>
-          {t.ajustes.grabar_audio_desc}
-        </Text>
-      </View>
-
-      {/* privacidad de la aplicacion */}
-      <TouchableOpacity
-        onPress={() => navigation.navigate("PrivacidadApp")}
-        style={styles.item}
-      >
-        <View style={styles.filaConChevron}>
-          <Ionicons name="lock-closed-outline" size={17} color={theme.text} style={{ marginRight: 8 }} />
-          <Text style={{ color: theme.text, flex: 1, fontSize: 14 }}>{t.ajustes.privacidad_app}</Text>
           <Ionicons name="chevron-forward" size={15} color={theme.tabActiveColor} />
         </View>
       </TouchableOpacity>
