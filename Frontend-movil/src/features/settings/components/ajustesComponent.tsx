@@ -91,9 +91,24 @@ export default function AjustesComponent({ navigation }: any) {
       <TouchableOpacity onPress={abrirModalIdioma} style={styles.item}>
         <View style={styles.filaConChevron}>
           <Ionicons name="globe-outline" size={17} color={theme.text} style={{ marginRight: 8 }} />
-          <Text style={{ color: theme.text, flex: 1, fontSize: 14 }}>
-            {t.ajustes.idioma}: {obtenerTextoIdioma()}
-          </Text>
+          <Text style={{ color: theme.text, flex: 1, fontSize: 14 }}>{t.ajustes.idioma}</Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 4,
+              paddingHorizontal: 10,
+              paddingVertical: 3,
+              borderRadius: 12,
+              backgroundColor: theme.tabActiveColor + '22',
+              marginRight: 4,
+            }}
+          >
+            <Text style={{ color: theme.tabActiveColor, fontSize: 12, fontWeight: '800' }}>
+              {locale.toUpperCase()}
+            </Text>
+            <Text style={{ color: theme.text, fontSize: 12 }}>{obtenerTextoIdioma()}</Text>
+          </View>
           <Ionicons name="chevron-forward" size={15} color={theme.tabActiveColor} />
         </View>
       </TouchableOpacity>

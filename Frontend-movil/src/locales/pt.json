@@ -502,7 +502,12 @@
     "cerrar": "Fechar",
     "eliminar_contacto": "Excluir este contato?",
     "alerta_enviada": "Alerta enviado com sucesso",
-    "seleccionar_idioma": "Selecione um idioma"
+    "seleccionar_idioma": "Selecione um idioma",
+    "idioma_subtitulo": "O app muda na hora",
+    "idioma_es": "Espanhol",
+    "idioma_en": "Inglês",
+    "idioma_pt": "Português",
+    "idioma_fr": "Francês"
   },
   "asistencia": {
   "titulo": "Canais de Assistência",

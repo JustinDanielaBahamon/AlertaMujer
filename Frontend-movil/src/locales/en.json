@@ -502,7 +502,12 @@
     "cerrar": "Close",
     "eliminar_contacto": "Delete this contact?",
     "alerta_enviada": "Alert sent successfully",
-    "seleccionar_idioma": "Select a language"
+    "seleccionar_idioma": "Select a language",
+    "idioma_subtitulo": "The app changes instantly",
+    "idioma_es": "Spanish",
+    "idioma_en": "English",
+    "idioma_pt": "Portuguese",
+    "idioma_fr": "French"
   },
   "asistencia": {
   "titulo": "Assistance Channels",

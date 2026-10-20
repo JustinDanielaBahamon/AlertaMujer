@@ -501,7 +501,12 @@
     "cerrar": "Fermer",
     "eliminar_contacto": "Supprimer ce contact ?",
     "alerta_enviada": "Alerte envoyée avec succès",
-    "seleccionar_idioma": "Sélectionne une langue"
+    "seleccionar_idioma": "Sélectionne une langue",
+    "idioma_subtitulo": "L'app change instantanément",
+    "idioma_es": "Espagnol",
+    "idioma_en": "Anglais",
+    "idioma_pt": "Portugais",
+    "idioma_fr": "Français"
   },
   "asistencia": {
     "titulo": "Canaux d'Assistance",
