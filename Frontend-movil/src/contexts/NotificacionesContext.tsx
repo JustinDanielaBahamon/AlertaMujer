@@ -10,34 +10,14 @@ import React, {
 
 const STORAGE_KEY = "alertamujer_notificaciones";
 
+// Las alertas de emergencia no se pueden silenciar: solo se elige si el celular vibra
 export type ConfigNotificaciones = {
-  activadas: boolean;
   vibracion: boolean;
-  noMolestar: boolean;
-  horaInicio: number; // minutos desde medianoche (22:00 = 1320)
-  horaFin: number; // minutos desde medianoche (07:00 = 420)
 };
 
 const CONFIG_POR_DEFECTO: ConfigNotificaciones = {
-  activadas: true,
   vibracion: true,
-  noMolestar: false,
-  horaInicio: 22 * 60,
-  horaFin: 7 * 60,
 };
-
-// true si "ahora" cae dentro de las horas silenciosas (soporta rangos que cruzan medianoche)
-export function estaEnHorasSilenciosas(
-  config: ConfigNotificaciones,
-  ahora: Date = new Date(),
-): boolean {
-  if (!config.noMolestar) return false;
-  const { horaInicio, horaFin } = config;
-  if (horaInicio === horaFin) return false;
-  const minutos = ahora.getHours() * 60 + ahora.getMinutes();
-  if (horaInicio < horaFin) return minutos >= horaInicio && minutos < horaFin;
-  return minutos >= horaInicio || minutos < horaFin;
-}
 
 type NotificacionesContextValue = {
   config: ConfigNotificaciones;
@@ -63,7 +43,7 @@ export function NotificacionesProvider({
     (async () => {
       try {
         const raw = await AsyncStorage.getItem(STORAGE_KEY);
-        if (raw) setConfig({ ...CONFIG_POR_DEFECTO, ...JSON.parse(raw) });
+        if (raw) setConfig({ ...CONFIG_POR_DEFECTO, vibracion: JSON.parse(raw).vibracion ?? true });
       } catch (e) {
         console.error("No se pudo leer la configuración de notificaciones:", e);
       } finally {

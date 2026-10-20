@@ -1,25 +1,51 @@
-import { useNavigation } from "@react-navigation/native";
-import { Vibration } from "react-native";
+import notifee, { AndroidImportance } from "@notifee/react-native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { useCallback, useEffect, useState } from "react";
+import { Alert, AppState, Platform, Vibration } from "react-native";
+import SensorSacudidas from "../../../../modules/sensor-sacudidas";
+import { useLocale } from "../../../contexts/LocaleContext";
 import { useNotificaciones } from "../../../contexts/NotificacionesContext";
+import { estiloGrande } from "../../../notifications/estiloNotificacion";
+import { permisoNotificaciones } from "../../../services/permisosSeguros";
+import { registrarPush } from "../../../services/push.service";
 
-export const PASO_MINUTOS = 30;
-const MINUTOS_DIA = 24 * 60;
+const CANAL_PRUEBA = "avisos_prueba";
 
-export type CampoHora = "horaInicio" | "horaFin";
-
-export function formatearHora(minutos: number) {
-  const h = Math.floor(minutos / 60);
-  const m = minutos % 60;
-  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
-}
-
+/**
+ * Pantalla Notificaciones: las alertas de emergencia no se pueden silenciar, así que aquí solo se
+ * revisa que el celular las deje llegar (permiso y pantalla completa) y se ajusta la vibración.
+ */
 export function useNotificacionesViewModel() {
   const navigation = useNavigation();
+  const { t } = useLocale();
   const { config, actualizar } = useNotificaciones();
+  const [permiso, setPermiso] = useState<boolean | null>(null);
+  const [pantallaCompleta, setPantallaCompleta] = useState<boolean | null>(null);
 
-  const volver = () => navigation.goBack();
+  const refrescar = useCallback(() => {
+    permisoNotificaciones(false).then(setPermiso).catch(() => setPermiso(false));
+    setPantallaCompleta(Platform.OS !== "android" || SensorSacudidas.puedePantallaCompleta());
+  }, []);
 
-  const cambiarActivadas = (valor: boolean) => actualizar({ activadas: valor });
+  // Al entrar y al volver de los ajustes de Android
+  useFocusEffect(refrescar);
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", (estado) => {
+      if (estado === "active") refrescar();
+    });
+    return () => sub.remove();
+  }, [refrescar]);
+
+  // Pide el permiso; si Android ya no deja preguntar, abre los ajustes de notificaciones de la app
+  const activarPermiso = useCallback(async () => {
+    if (await permisoNotificaciones()) registrarPush().catch(() => {});
+    else await notifee.openNotificationSettings();
+    refrescar();
+  }, [refrescar]);
+
+  const activarPantallaCompleta = useCallback(() => {
+    SensorSacudidas.pedirPantallaCompleta();
+  }, []);
 
   // Al activar la vibración vibra una vez para que la usuaria la sienta
   const cambiarVibracion = (valor: boolean) => {
@@ -27,22 +53,43 @@ export function useNotificacionesViewModel() {
     if (valor) Vibration.vibrate(200);
   };
 
-  const cambiarNoMolestar = (valor: boolean) =>
-    actualizar({ noMolestar: valor });
+  const probar = useCallback(async () => {
+    try {
+      if (!(await permisoNotificaciones())) throw new Error("sin permiso");
+      await notifee.createChannel({
+        id: CANAL_PRUEBA,
+        name: "Notificación de prueba",
+        importance: AndroidImportance.HIGH,
+        vibration: config.vibracion,
+      });
+      await notifee.displayNotification({
+        title: t.notificaciones.probar_titulo,
+        body: t.notificaciones.probar_cuerpo,
+        android: {
+          channelId: CANAL_PRUEBA,
+          ...estiloGrande(t.notificaciones.probar_cuerpo),
+          pressAction: { id: "default", launchActivity: "default" },
+        },
+      });
+    } catch {
+      Alert.alert(t.notificaciones.titulo_header, t.notificaciones.probar_error);
+    }
+    refrescar();
+  }, [config.vibracion, t, refrescar]);
 
-  // Suma o resta 30 min a la hora de inicio o fin (da la vuelta a las 24 h)
-  const moverHora = (campo: CampoHora, delta: number) => {
-    actualizar({
-      [campo]: (config[campo] + delta + MINUTOS_DIA) % MINUTOS_DIA,
-    });
-  };
+  const abrirAvanzado = useCallback(() => {
+    notifee.openNotificationSettings().catch(() => {});
+  }, []);
 
   return {
     config,
-    volver,
-    cambiarActivadas,
+    permiso,
+    pantallaCompleta,
+    volver: navigation.goBack,
+    activarPermiso,
+    activarPantallaCompleta,
     cambiarVibracion,
-    cambiarNoMolestar,
-    moverHora,
+    probar,
+    abrirAvanzado,
   };
 }
