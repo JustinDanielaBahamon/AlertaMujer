@@ -27,6 +27,7 @@ export type MainStackParamList = {
         alertaId?: number; // alerta ya creada en segundo plano: no se crea otra
       }
     | undefined;
+  AlertasRecibidas: undefined;
   AlertaContacto: {
     alertaId: number;
     nombreUsuaria?: string;

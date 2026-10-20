@@ -578,7 +578,8 @@
   "compartir_desc": "Convide outras mulheres a participar",
   "cerrar_sesion": "Sair",
   "slogan": "Juntas somos mais fortes",
-  "compartir_mensaje": "Convido você para o AlertaMujer, um app para pedir ajuda em segundos e avisar seus contatos de confiança. Baixe aqui:"
+  "compartir_mensaje": "Convido você para o AlertaMujer, um app para pedir ajuda em segundos e avisar seus contatos de confiança. Baixe aqui:",
+  "alertas_recibidas": "Alertas recebidos"
 },
 "activacion": {
   "activar_ahora": "Ativar agora",
@@ -840,5 +841,28 @@
   "mensaje": "Bem-vinda (tela de teste)",
   "btn_demo": "Entrar como demo (início)",
   "btn_login": "Ir para o login"
-}
+},
+  "alertasRecibidas": {
+    "titulo_header": "Alertas recebidos",
+    "intro": "Alertas das pessoas que têm você como contato de emergência. Se você não viu o alarme, aqui fica sabendo o que aconteceu.",
+    "seccion_activas": "EM ANDAMENTO",
+    "seccion_anteriores": "ANTERIORES",
+    "un_contacto": "Um contato",
+    "pide_ayuda": "Está pedindo ajuda agora",
+    "cancelo": "Cancelou o alerta",
+    "tuvo_alerta": "Ativou um alerta",
+    "estado_activa": "Em andamento",
+    "estado_atendida": "Atendido",
+    "estado_cancelada": "Cancelado",
+    "estado_terminada": "Encerrado",
+    "duro": "Durou",
+    "ver_ubicacion": "Ver localização e ajudar",
+    "ver_recorrido": "Ver trajeto",
+    "seguimiento_cerrado": "O acompanhamento deste alerta foi encerrado",
+    "vacio_titulo": "Tudo tranquilo",
+    "vacio_desc": "Quando alguém que tem você como contato ativar um alerta, ele aparecerá aqui.",
+    "error_carga": "Não foi possível carregar os alertas. Verifique sua conexão.",
+    "reintentar": "Tentar de novo",
+    "error_seguimiento": "O acompanhamento deste alerta não está mais disponível."
+  }
 }

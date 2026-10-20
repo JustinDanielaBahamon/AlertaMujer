@@ -577,7 +577,8 @@
     "compartir_desc": "Invite d'autres femmes à nous rejoindre",
     "cerrar_sesion": "Se déconnecter",
     "slogan": "Ensemble, nous sommes plus fortes",
-    "compartir_mensaje": "Je t'invite sur AlertaMujer, une app pour demander de l'aide en quelques secondes et prévenir tes contacts de confiance. Télécharge-la ici :"
+    "compartir_mensaje": "Je t'invite sur AlertaMujer, une app pour demander de l'aide en quelques secondes et prévenir tes contacts de confiance. Télécharge-la ici :",
+    "alertas_recibidas": "Alertes reçues"
   },
   "activacion": {
     "activar_ahora": "Activer maintenant",
@@ -839,5 +840,28 @@
     "mensaje": "Bienvenue (écran de test)",
     "btn_demo": "Entrer en démo (accueil)",
     "btn_login": "Aller à la connexion"
+  },
+  "alertasRecibidas": {
+    "titulo_header": "Alertes reçues",
+    "intro": "Les alertes des personnes qui t'ont comme contact d'urgence. Si tu as manqué l'alarme, tu sais ici ce qui s'est passé.",
+    "seccion_activas": "EN COURS",
+    "seccion_anteriores": "PRÉCÉDENTES",
+    "un_contacto": "Un contact",
+    "pide_ayuda": "Demande de l'aide en ce moment",
+    "cancelo": "A annulé son alerte",
+    "tuvo_alerta": "A déclenché une alerte",
+    "estado_activa": "En cours",
+    "estado_atendida": "Traitée",
+    "estado_cancelada": "Annulée",
+    "estado_terminada": "Terminée",
+    "duro": "Durée",
+    "ver_ubicacion": "Voir la position et aider",
+    "ver_recorrido": "Voir le trajet",
+    "seguimiento_cerrado": "Le suivi de cette alerte est fermé",
+    "vacio_titulo": "Tout est calme",
+    "vacio_desc": "Quand une personne qui t'a comme contact déclenche une alerte, elle apparaîtra ici.",
+    "error_carga": "Impossible de charger les alertes. Vérifie ta connexion.",
+    "reintentar": "Réessayer",
+    "error_seguimiento": "Le suivi de cette alerte n'est plus disponible."
   }
 }

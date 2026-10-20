@@ -154,6 +154,14 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
               <Ionicons name="chevron-forward" size={16} color={cardIconColor} style={styles.chevron} />
             </TouchableOpacity>
 
+            <TouchableOpacity style={styles.tarjetaItem} onPress={() => navigateTo("AlertasRecibidas")} activeOpacity={0.7}>
+              <View style={[styles.iconoCirculo, { backgroundColor: cardIconBg }]}>
+                <Ionicons name="notifications-circle-outline" size={20} color={cardIconColor} />
+              </View>
+              <Text style={styles.textoItem}>{t.menu.alertas_recibidas}</Text>
+              <Ionicons name="chevron-forward" size={16} color={cardIconColor} style={styles.chevron} />
+            </TouchableOpacity>
+
             <TouchableOpacity style={styles.tarjetaItem} onPress={() => navigateTo("Permisos")} activeOpacity={0.7}>
               <View style={[styles.iconoCirculo, { backgroundColor: cardIconBg }]}>
                 <Ionicons name="shield-checkmark-outline" size={20} color={cardIconColor} />
