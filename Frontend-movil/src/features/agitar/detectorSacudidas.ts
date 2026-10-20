@@ -34,16 +34,16 @@ export type OpcionesDetector = {
 };
 
 export const OPCIONES_POR_DEFECTO: OpcionesDetector = {
-  umbralG: 3.5,
-  reposoG: 1.6,
-  reposoMinimoMs: 120,
-  golpesNecesarios: 4,
-  ventanaMs: 3000,
-  separacionMinimaMs: 250,
-  separacionMaximaMs: 1000,
-  calmaPreviaMs: 1000,
-  calmaPosteriorMs: 600,
-  pausaMs: 8000,
+  umbralG: 4.2,              // Más fuerte: requiere golpes más intensos (era 3.5)
+  reposoG: 1.8,               // Más exigente para detectar "reposo" (era 1.6)
+  reposoMinimoMs: 150,        // Más tiempo quieto entre golpes (era 120)
+  golpesNecesarios: 4,        // Mantener 4 hachazos
+  ventanaMs: 2500,            // Ventana más corta: golpes más rápidos (era 3000)
+  separacionMinimaMs: 300,    // Más separación para evitar rebotes (era 250)
+  separacionMaximaMs: 900,    // Golpes deben ser más rápidos entre sí (era 1000)
+  calmaPreviaMs: 1200,        // Más calma antes del primer golpe (era 1000)
+  calmaPosteriorMs: 700,      // Más calma después del último (era 600)
+  pausaMs: 10000,             // Pausa más larga entre detecciones (era 8000)
 };
 
 export type DetectorSacudidas = (x: number, y: number, z: number, tiempoMs: number) => boolean;

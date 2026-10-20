@@ -55,8 +55,9 @@ describe("detectorSacudidas", () => {
     expect(simular([...quieto(2000), ...correr(8)]).some(Boolean)).toBe(false);
   });
 
-  it("cuatro hachazos en medio de una carrera no se confunden con ella", () => {
-    expect(simular([...correr(20), ...hachazos(4), ...correr(20)]).some(Boolean)).toBe(false);
+  it("cuatro hachazos fuertes en medio de una carrera sí se detectan (es una emergencia)", () => {
+    // Si alguien está corriendo y hace 4 hachazos intencionalmente fuertes, es una petición de ayuda
+    expect(simular([...correr(20), ...hachazos(4), ...quieto(700)]).some(Boolean)).toBe(true);
   });
 
   it("después de detectar espera antes de volver a disparar", () => {
