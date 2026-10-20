@@ -7,7 +7,11 @@ const { width } = Dimensions.get("window");
 const ARRASTRE_MINIMO = 20;
 
 // Cada página puede saber si es la que se está viendo (lo usa la animación de arriba)
-const TutorialPageContext = createContext({ isActive: true });
+// y pedir pasar a la siguiente desde un botón (pasa por el mismo bloqueo que deslizar)
+const TutorialPageContext = createContext<{ isActive: boolean; avanzar: () => Promise<void> }>({
+  isActive: true,
+  avanzar: async () => {},
+});
 export const useTutorialPage = () => useContext(TutorialPageContext);
 
 interface TutorialPagerProps {
@@ -64,14 +68,14 @@ export const TutorialPager = ({ children, paginasConBloqueo = {} }: TutorialPage
     intentoAvanceRef.current = 0;
   };
 
-  // Al soltar el dedo: si quería avanzar y la página está bloqueada, corre la verificación
-  const handleScrollEndDrag = async () => {
+  // Pasa a la siguiente página; si la actual está bloqueada, primero corre su verificación
+  const avanzar = async () => {
     const actual = activeIndexRef.current;
-    const quiereAvanzar = intentoAvanceRef.current > ARRASTRE_MINIMO;
-    intentoAvanceRef.current = 0;
-
-    if (!quiereAvanzar || procesandoRef.current || !estaBloqueada(actual)) return;
-
+    if (procesandoRef.current) return;
+    if (!estaBloqueada(actual)) {
+      goToIndex(actual + 1);
+      return;
+    }
     procesandoRef.current = true;
     try {
       const puedePasar = await paginasConBloqueo[actual]();
@@ -82,6 +86,13 @@ export const TutorialPager = ({ children, paginasConBloqueo = {} }: TutorialPage
     } finally {
       procesandoRef.current = false;
     }
+  };
+
+  // Al soltar el dedo: si quería avanzar y la página está bloqueada, corre la verificación
+  const handleScrollEndDrag = async () => {
+    const quiereAvanzar = intentoAvanceRef.current > ARRASTRE_MINIMO;
+    intentoAvanceRef.current = 0;
+    if (quiereAvanzar && estaBloqueada(activeIndexRef.current)) await avanzar();
   };
 
   // Al terminar de deslizar: actualiza la página activa (nunca más allá de un bloqueo)
@@ -111,7 +122,7 @@ export const TutorialPager = ({ children, paginasConBloqueo = {} }: TutorialPage
         style={{ flex: 1 }}
       >
         {pages.map((child, index) => (
-          <TutorialPageContext.Provider key={index} value={{ isActive: activeIndex === index }}>
+          <TutorialPageContext.Provider key={index} value={{ isActive: activeIndex === index, avanzar }}>
             <View style={{ width, flex: 1 }}>
               {child}
             </View>

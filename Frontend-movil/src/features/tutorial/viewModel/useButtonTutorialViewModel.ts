@@ -4,7 +4,7 @@ import { BUTTON_COLORS } from "../styles/buttonStyle";
 import { useLocale } from "../../../contexts/LocaleContext";
 
 // ─── Tipos públicos ───────────────────────────────────────────────────────────
-export type TapType = "widget" | "acelerometro" | "pantalla" | null;
+export type TapType = "contacto" | "acelerometro" | "pantalla" | null;
 
 export interface TapOption {
   id: TapType;
@@ -25,8 +25,8 @@ type LocaleT = ReturnType<typeof useLocale>["t"];
 // ─── Datos de métodos de activación (dependen del idioma activo) ──────────────
 const getTapOptions = (t: LocaleT): TapOption[] => [
   {
-    id: "widget",
-    emoji: "🧩",
+    id: "contacto",
+    emoji: "👤",
     title: t.tutorial.boton_toque_corto_titulo,
     badge: t.tutorial.boton_toque_corto_badge,
     highlightLabel: t.tutorial.boton_toque_corto_highlight,
@@ -124,7 +124,7 @@ export function useButtonTutorialViewModel() {
   /** Cicla entre los 3 métodos al presionar el botón SOS demo */
   const handleSOSTap = (msg: string) => {
     const next = tapCount + 1;
-    const types: TapType[] = ["widget", "acelerometro", "pantalla"];
+    const types: TapType[] = ["contacto", "acelerometro", "pantalla"];
     const type = types[(next - 1) % 3];
     setActiveRow(type);
     showFeedback(msg);
