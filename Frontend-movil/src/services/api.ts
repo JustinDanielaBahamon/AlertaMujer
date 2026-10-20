@@ -1,5 +1,6 @@
 import axios from "axios";
 import Constants from "expo-constants";
+import { servicioPara } from "./servicios";
 
 // La URL del backend no es secreta, pero el log solo interesa en desarrollo
 const registrarInicio = (...partes: unknown[]) => {
@@ -81,6 +82,10 @@ export const escucharSesion = (oyentes: { renovado: (token: string) => void; exp
 // Interceptor para agregar el token a las peticiones
 api.interceptors.request.use((config) => {
   registrar(" [api] Request:", config.method?.toUpperCase(), config.url);
+
+  // Cada ruta va a su microservicio (Alert o Evidence); el resto, a la URL principal (Auth)
+  const servicio = config.url ? servicioPara(config.url) : null;
+  if (servicio) config.baseURL = servicio;
 
   if (authToken) {
     config.headers.Authorization = `Bearer ${authToken}`;
