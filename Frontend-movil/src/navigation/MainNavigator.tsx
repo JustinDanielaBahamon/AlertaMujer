@@ -17,7 +17,6 @@ import AcercaDeScreen from "../features/settings/view/acercaDeScreen";
 import MetodosActivacionScreen from "../features/settings/view/metodosActivacionScreen";
 import PermisosScreen from "../features/permisos/view/PermisosScreen";
 import NotificacionesScreen from "../features/settings/view/notificacionesScreen";
-import PrivacidadAppScreen from "../features/settings/view/privacidadAppScreen";
 import RetencionDatosScreen from "../features/settings/view/retencionDatosScreen";
 import PrivacidadScreen from "../screens/politica/privacidad";
 import TerminosScreen from "../screens/politica/terminos";
@@ -68,7 +67,6 @@ export default function MainNavigator({ initialRouteName }: Props) {
       <Stack.Screen name="MetodosActivacion" component={MetodosActivacionScreen} />
       <Stack.Screen name="Permisos" component={PermisosScreen} />
       <Stack.Screen name="Notificaciones" component={NotificacionesScreen} />
-      <Stack.Screen name="PrivacidadApp" component={PrivacidadAppScreen} />
       <Stack.Screen name="RetencionDatos" component={RetencionDatosScreen} />
       <Stack.Screen name="AcercaDe" component={AcercaDeScreen} />
       <Stack.Screen name="PoliticaTerminos" component={TerminosScreen} />
