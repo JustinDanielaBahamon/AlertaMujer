@@ -171,6 +171,7 @@ export function useRegistroViewModel() {
         numeroDocumento: documento.trim(),
         fechaNacimiento: fechaNacimiento,
         municipio: "Neiva",
+        aceptaTerminos: aceptaTerminos && aceptaPrivacidad,
       });
 
       if ('error' in response) {

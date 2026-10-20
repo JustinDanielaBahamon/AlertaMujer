@@ -29,6 +29,8 @@ export interface RegisterData {
   numeroDocumento?: string;
   fechaNacimiento?: string;
   municipio?: string;
+  /** Marcó las casillas de términos y privacidad (el backend guarda la constancia). */
+  aceptaTerminos?: boolean;
 }
 
 /** Campos que ya usa otra cuenta, con el aviso para mostrar debajo de cada uno. */
@@ -88,6 +90,7 @@ export const authService = {
         tipoDocumento: data.tipoDocumento,
         numeroDocumento: data.numeroDocumento,
         fechaNacimiento: data.fechaNacimiento,
+        aceptaTerminos: data.aceptaTerminos,
       });
 
       return response.data;
