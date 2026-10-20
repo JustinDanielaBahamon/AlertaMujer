@@ -241,7 +241,19 @@
     "barrio": "Quartier",
     "municipio": "Commune",
     "pais": "Pays",
-    "precision": "Précision"
+    "precision": "Précision",
+    "opciones_titulo": "Options de la carte",
+    "opciones_resumen": "{n} sur 3 actives · touche pour choisir quoi afficher",
+    "opcion_recorridos": "Trajets enregistrés",
+    "opcion_recorridos_desc": "{n}/{max} trajets enregistrés",
+    "opcion_importantes": "Trajets importants seulement",
+    "opcion_importantes_desc": "{n}/{max} marqués comme importants",
+    "opcion_importantes_bloqueada": "Active les trajets pour utiliser ce filtre",
+    "opcion_zonas": "Mes zones",
+    "opcion_zonas_desc": "{n} classées par toi · les zones d'urgence sont toujours visibles",
+    "barrio_desconocido": "Quartier indisponible",
+    "direccion_desconocida": "Adresse indisponible",
+    "radio": "Rayon"
   },
   "historial": {
     "titulo": "Historique des Alertes",

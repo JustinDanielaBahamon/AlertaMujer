@@ -133,17 +133,6 @@ export const styles = StyleSheet.create({
     shadowRadius: 4,
   },
 
-  switchRecorridosInfo: {
-    flexDirection: "row" as const,
-    alignItems: "center",
-    gap: 12,
-    flex: 1,
-  },
-
-  switchRecorridosText: {
-    flex: 1,
-  },
-
   switchRecorridosTitle: {
     fontSize: 15,
     fontWeight: "600",
@@ -237,24 +226,6 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
   
-  },
-  columnaCoord: {
-    alignItems: "center",
-    flex: 1,
-  },
-  separadorCoord: {
-    width: 0.5,
-    backgroundColor: "#EEE",
-    marginVertical: 4,
- 
-  },
-  labelCoord: {
-    fontSize: 12,
-    marginBottom: 4,
-  },
-  valorCoord: {
-    fontSize: 20,
-    fontWeight: "bold",
   },
   filaActivo: {
     flexDirection: "row",

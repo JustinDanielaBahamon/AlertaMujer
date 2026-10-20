@@ -241,7 +241,19 @@
   "barrio": "Neighborhood",
   "municipio": "Municipality",
   "pais": "Country",
-  "precision": "Accuracy"
+  "precision": "Accuracy",
+  "opciones_titulo": "Map options",
+  "opciones_resumen": "{n} of 3 on · tap to choose what to show",
+  "opcion_recorridos": "Saved routes",
+  "opcion_recorridos_desc": "{n}/{max} routes saved",
+  "opcion_importantes": "Important routes only",
+  "opcion_importantes_desc": "{n}/{max} marked as important",
+  "opcion_importantes_bloqueada": "Turn on routes to use this filter",
+  "opcion_zonas": "My zones",
+  "opcion_zonas_desc": "{n} classified by you · emergency zones are always shown",
+  "barrio_desconocido": "Neighborhood not available",
+  "direccion_desconocida": "Address not available",
+  "radio": "Radius"
   },
   "historial": {
   "titulo": "Alert History",
