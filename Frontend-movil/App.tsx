@@ -2,6 +2,7 @@ import "react-native-gesture-handler";
 import { useCallback, useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import AlertaGlobalHost from "./src/components/ui/alertaGlobal/alertaGlobal";
+import AvisoActualizacion from "./src/features/version/AvisoActualizacion";
 import PrecargaImagenes from "./src/components/ui/PrecargaImagenes/PrecargaImagenes";
 import { AuthProvider } from "./src/contexts/AuthContext";
 import { ContactosProvider } from "./src/contexts/ContactosContext";
@@ -35,6 +36,7 @@ export default function App() {
                     <PrecargaImagenes />
                     <AppNavigator />
                     <AlertaGlobalHost />
+                    <AvisoActualizacion />
                     {mostrarSplash && <SplashAnimado onTerminar={terminarSplash} />}
                   </MetodosActivacionProvider>
                 </NotificacionesProvider>
