@@ -37,6 +37,8 @@ export const useMapaViewModel = () => {
   const [permisoDenegado, setPermisoDenegado] = useState(false);
   const [serviciosDesactivados, setServiciosDesactivados] = useState(false);
   const [cargando, setCargando] = useState(!ubicacionCache);
+  // Radio de precisión del GPS en metros (el celular estima qué tan exacta es la posición)
+  const [precisionMetros, setPrecisionMetros] = useState<number | null>(null);
   const [ultimaActualizacion, setUltimaActualizacion] = useState<Date | null>(
     null
   );
@@ -112,8 +114,9 @@ export const useMapaViewModel = () => {
     let tieneUbicacion = ubicacionCache !== null;
 
     // Guarda la posición en el estado y en el caché para la próxima vez que se abra el mapa
-    const aplicarUbicacion = (coord: Coordenada) => {
+    const aplicarUbicacion = (coord: Coordenada, precision?: number | null) => {
       ubicacionCache = coord;
+      setPrecisionMetros(precision ?? null);
       tieneUbicacion = true;
       setLocation(coord);
       setUltimaActualizacion(new Date());
@@ -214,10 +217,10 @@ export const useMapaViewModel = () => {
               maxAge: 10 * 60 * 1000,
             });
             if (ultima && !cancelado) {
-              aplicarUbicacion({
-                latitude: ultima.coords.latitude,
-                longitude: ultima.coords.longitude,
-              });
+              aplicarUbicacion(
+                { latitude: ultima.coords.latitude, longitude: ultima.coords.longitude },
+                ultima.coords.accuracy,
+              );
               setCargando(false);
             }
           } catch {
@@ -236,7 +239,7 @@ export const useMapaViewModel = () => {
           longitude: currentLocation.coords.longitude,
         };
 
-        aplicarUbicacion(firstLoc);
+        aplicarUbicacion(firstLoc, currentLocation.coords.accuracy);
         setHistorial([firstLoc]);
         setCargando(false);
 
@@ -252,7 +255,7 @@ export const useMapaViewModel = () => {
               longitude: loc.coords.longitude,
             };
 
-            aplicarUbicacion(newLoc);
+            aplicarUbicacion(newLoc, loc.coords.accuracy);
             agregarAlHistorial(newLoc);
           }
         );
@@ -275,7 +278,7 @@ export const useMapaViewModel = () => {
               longitude: current.coords.longitude,
             };
 
-            aplicarUbicacion(newLoc);
+            aplicarUbicacion(newLoc, current.coords.accuracy);
             agregarAlHistorial(newLoc);
           } catch (error) {
             console.error("Error en refresh automático:", error);
@@ -313,6 +316,7 @@ export const useMapaViewModel = () => {
 
       ubicacionCache = newLoc;
       setLocation(newLoc);
+      setPrecisionMetros(current.coords.accuracy ?? null);
       setUltimaActualizacion(new Date());
 
       setHistorial((prev) => {
@@ -434,6 +438,7 @@ export const useMapaViewModel = () => {
     coordenadaCentro,
     closeOpacity,
     ultimaActualizacion,
+    precisionMetros,
     acciones,
     handleMapPress,
     formatearHora,

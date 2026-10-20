@@ -241,7 +241,19 @@
   "barrio": "Bairro",
   "municipio": "Município",
   "pais": "País",
-  "precision": "Precisão"
+  "precision": "Precisão",
+  "opciones_titulo": "Opções do mapa",
+  "opciones_resumen": "{n} de 3 ativas · toque para escolher o que ver",
+  "opcion_recorridos": "Trajetos salvos",
+  "opcion_recorridos_desc": "{n}/{max} trajetos salvos",
+  "opcion_importantes": "Só trajetos importantes",
+  "opcion_importantes_desc": "{n}/{max} marcados como importantes",
+  "opcion_importantes_bloqueada": "Ative os trajetos para usar este filtro",
+  "opcion_zonas": "Minhas zonas",
+  "opcion_zonas_desc": "{n} classificadas por você · as de emergência sempre aparecem",
+  "barrio_desconocido": "Bairro indisponível",
+  "direccion_desconocida": "Endereço indisponível",
+  "radio": "Raio"
   },
   "historial": {
   "titulo": "Histórico de Alertas",

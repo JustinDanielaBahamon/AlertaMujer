@@ -33,6 +33,7 @@ import { useAuth } from "../../../contexts/AuthContext";
 import { frequentLocationsService } from "../../../services/frequent-locations.service";
 import BarraBusquedaDireccion from "./BarraBusquedaDireccion";
 import { getZonas } from "../../../services/zones.service";
+import { obtenerLugar } from "../../../services/geocoding.service";
 
 type Coord = { latitude: number; longitude: number };
 
@@ -113,7 +114,9 @@ const obtenerInfoDireccion = async (coord: Coord): Promise<InfoDireccion> => {
 
   const calle = info?.street || info?.name || "";
   const numero = info?.streetNumber || "";
-  const barrio = info?.district || "";
+  // En Colombia el geocodificador del celular casi nunca trae el barrio: se completa con OpenStreetMap
+  const barrio =
+    info?.district || (await obtenerLugar(coord.latitude, coord.longitude).catch(() => null))?.barrio || "";
   const municipio = info?.city || info?.subregion || "";
 
   return {
@@ -210,6 +213,7 @@ export default function MapaView() {
   const [zonasClasificadas, setZonasClasificadas] = useState<ZonaClasificada[]>([]);
   const [zonasOficiales, setZonasOficiales] = useState<ZonaOficial[]>([]);
   const [mostrarMisZonas, setMostrarMisZonas] = useState(true);
+  const [opcionesAbiertas, setOpcionesAbiertas] = useState(false);
   const [textoBusqueda, setTextoBusqueda] = useState("");
   const [resultadoBusqueda, setResultadoBusqueda] = useState<{
     coord: Coord;
@@ -226,6 +230,7 @@ export default function MapaView() {
     destinoAlerta,
     coordenadaCentro,
     ultimaActualizacion,
+    precisionMetros,
     formatearHora,
     refrescarUbicacion,
     reintentarPermisos,
@@ -700,72 +705,82 @@ export default function MapaView() {
           </TouchableOpacity>
         </View>
 
-        {/* SWITCH DE RECORRIDOS */}
-        <View style={[styles.switchRecorridosContainer, { backgroundColor: theme.card }]}>
-          <View style={styles.switchRecorridosInfo}>
-            <MaterialIcons name="route" size={20} color="#7B1DB2" />
-            <View style={styles.switchRecorridosText}>
-              <Text style={[styles.switchRecorridosTitle, { color: theme.text }]}>
-                Mostrar recorridos
-              </Text>
+        {/* OPCIONES DEL MAPA: un solo cuadro con las capas que la usuaria quiere ver */}
+        <View style={[styles.switchRecorridosContainer, op.panel, { backgroundColor: theme.card }]}>
+          <TouchableOpacity
+            style={op.cabecera}
+            onPress={() => setOpcionesAbiertas((v) => !v)}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityState={{ expanded: opcionesAbiertas }}
+          >
+            <View style={[op.iconoCabecera, { backgroundColor: theme.icono + "22" }]}>
+              <MaterialIcons name="tune" size={20} color={theme.icono} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.switchRecorridosTitle, { color: theme.text }]}>{t.mapa.opciones_titulo}</Text>
               <Text style={[styles.switchRecorridosSubtitle, { color: theme.contactSubtext }]}>
-                {recorridos.length}/{MAX_RECORRIDOS} recorridos guardados
+                {t.mapa.opciones_resumen.replace(
+                  "{n}",
+                  String([mostrarRecorridosEnMapa, mostrarMisZonas, mostrarRecorridosEnMapa && soloImportantes].filter(Boolean).length),
+                )}
               </Text>
             </View>
-          </View>
-          <Switch
-            value={mostrarRecorridosEnMapa}
-            onValueChange={(value) => {
-              setMostrarRecorridosEnMapa(value);
-            }}
-            trackColor={{ false: '#ccc', true: theme.tabActiveColor }}
-            thumbColor="#fff"
-          />
-        </View>
+            <MaterialIcons name={opcionesAbiertas ? "expand-less" : "expand-more"} size={24} color={theme.icono} />
+          </TouchableOpacity>
 
-        {/* SWITCH DE MIS ZONAS (las de emergencia se ven siempre) */}
-        <View style={[styles.switchRecorridosContainer, { backgroundColor: theme.card }]}>
-          <View style={styles.switchRecorridosInfo}>
-            <MaterialIcons name="layers" size={20} color="#7B1DB2" />
-            <View style={styles.switchRecorridosText}>
-              <Text style={[styles.switchRecorridosTitle, { color: theme.text }]}>
-                Mostrar mis zonas
-              </Text>
-              <Text style={[styles.switchRecorridosSubtitle, { color: theme.contactSubtext }]}>
-                {zonasClasificadas.length} clasificadas por ti · las de emergencia siempre se ven
-              </Text>
-            </View>
-          </View>
-          <Switch
-            value={mostrarMisZonas}
-            onValueChange={setMostrarMisZonas}
-            trackColor={{ false: '#ccc', true: theme.tabActiveColor }}
-            thumbColor="#fff"
-          />
-        </View>
-
-        {/* SWITCH DE SOLO IMPORTANTES */}
-        {mostrarRecorridosEnMapa && (
-          <View style={[styles.switchRecorridosContainer, { backgroundColor: theme.card }]}>
-            <View style={styles.switchRecorridosInfo}>
-              <MaterialIcons name="star" size={20} color="#FFD700" />
-              <View style={styles.switchRecorridosText}>
-                <Text style={[styles.switchRecorridosTitle, { color: theme.text }]}>
-                  Solo importantes
-                </Text>
-                <Text style={[styles.switchRecorridosSubtitle, { color: theme.contactSubtext }]}>
-                  {recorridos.filter((r: any) => r.importante).length}/{MAX_IMPORTANTES} importantes
-                </Text>
+          {opcionesAbiertas &&
+            [
+              {
+                id: "recorridos",
+                icono: "route",
+                titulo: t.mapa.opcion_recorridos,
+                detalle: t.mapa.opcion_recorridos_desc
+                  .replace("{n}", String(recorridos.length))
+                  .replace("{max}", String(MAX_RECORRIDOS)),
+                valor: mostrarRecorridosEnMapa,
+                cambiar: setMostrarRecorridosEnMapa,
+                deshabilitado: false,
+              },
+              {
+                id: "importantes",
+                icono: "star",
+                titulo: t.mapa.opcion_importantes,
+                detalle: mostrarRecorridosEnMapa
+                  ? t.mapa.opcion_importantes_desc
+                      .replace("{n}", String(recorridos.filter((r: any) => r.importante).length))
+                      .replace("{max}", String(MAX_IMPORTANTES))
+                  : t.mapa.opcion_importantes_bloqueada,
+                valor: mostrarRecorridosEnMapa && soloImportantes,
+                cambiar: setSoloImportantes,
+                deshabilitado: !mostrarRecorridosEnMapa,
+              },
+              {
+                id: "zonas",
+                icono: "layers",
+                titulo: t.mapa.opcion_zonas,
+                detalle: t.mapa.opcion_zonas_desc.replace("{n}", String(zonasClasificadas.length)),
+                valor: mostrarMisZonas,
+                cambiar: setMostrarMisZonas,
+                deshabilitado: false,
+              },
+            ].map((o) => (
+              <View key={o.id} style={[op.fila, { borderTopColor: theme.icono + "22" }, o.deshabilitado && { opacity: 0.45 }]}>
+                <MaterialIcons name={o.icono as any} size={20} color={theme.icono} />
+                <View style={{ flex: 1 }}>
+                  <Text style={[op.tituloFila, { color: theme.text }]}>{o.titulo}</Text>
+                  <Text style={[op.detalleFila, { color: theme.contactSubtext }]}>{o.detalle}</Text>
+                </View>
+                <Switch
+                  value={o.valor}
+                  onValueChange={o.cambiar}
+                  disabled={o.deshabilitado}
+                  trackColor={{ false: "#ccc", true: theme.tabActiveColor }}
+                  thumbColor="#fff"
+                />
               </View>
-            </View>
-            <Switch
-              value={soloImportantes}
-              onValueChange={setSoloImportantes}
-              trackColor={{ false: '#ccc', true: theme.tabActiveColor }}
-              thumbColor="#fff"
-            />
-          </View>
-        )}
+            ))}
+        </View>
 
         {/* BOTONES DE ACCIÓN */}
         <View style={styles.filaBotones}>
@@ -779,16 +794,36 @@ export default function MapaView() {
           ))}
         </View>
 
-        {/* TARJETA COORDENADAS */}
+        {/* TARJETA DE UBICACIÓN: barrio y dirección; radio y coordenadas en pequeño */}
         <View style={[styles.tarjetaCoordenadas, { backgroundColor: theme.card }]}>
-          <View style={{ flexDirection: "row" }}>
-            <View style={styles.columnaCoord}>
-              <Text style={[styles.labelCoord, { color: theme.contactSubtext }]}>{t.mapa.latitud}</Text>
-              <Text style={[styles.valorCoord, { color: theme.text }]}>{location.latitude.toFixed(5)}</Text>
+          <View style={op.filaLugar}>
+            <View style={[op.iconoLugar, { backgroundColor: theme.icono }]}>
+              <MaterialIcons name="place" size={22} color="#fff" />
             </View>
-            <View style={styles.columnaCoord}>
-              <Text style={[styles.labelCoord, { color: theme.contactSubtext }]}>{t.mapa.longitud}</Text>
-              <Text style={[styles.valorCoord, { color: theme.text }]}>{location.longitude.toFixed(5)}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={[op.etiqueta, { color: theme.contactSubtext }]}>{t.mapa.barrio}</Text>
+              <Text style={[op.barrio, { color: theme.text }]} numberOfLines={1}>
+                {infoDireccion ? infoDireccion.barrio || infoDireccion.ciudad || t.mapa.barrio_desconocido : t.mapa.obteniendo}
+              </Text>
+              <Text style={[op.etiqueta, { color: theme.contactSubtext, marginTop: 8 }]}>{t.mapa.direccion}</Text>
+              <Text style={[op.direccion, { color: theme.text }]} numberOfLines={2}>
+                {infoDireccion ? infoDireccion.direccion || t.mapa.direccion_desconocida : t.mapa.obteniendo}
+              </Text>
+            </View>
+          </View>
+
+          <View style={[op.filaTecnica, { backgroundColor: theme.icono + "12" }]}>
+            <View style={op.datoTecnico}>
+              <MaterialIcons name="radar" size={14} color={theme.icono} />
+              <Text style={[op.textoTecnico, { color: theme.text }]}>
+                {t.mapa.radio} {precisionMetros != null ? `± ${Math.round(precisionMetros)} m` : "--"}
+              </Text>
+            </View>
+            <View style={op.datoTecnico}>
+              <MaterialIcons name="my-location" size={14} color={theme.icono} />
+              <Text style={[op.textoTecnico, { color: theme.text }]} numberOfLines={1}>
+                {location.latitude.toFixed(5)}, {location.longitude.toFixed(5)}
+              </Text>
             </View>
           </View>
 
@@ -1190,3 +1225,20 @@ export default function MapaView() {
     </View>
   );
 }
+// Panel de opciones del mapa y tarjeta de ubicación
+const op = StyleSheet.create({
+  panel: { flexDirection: "column", alignItems: "stretch" },
+  cabecera: { flexDirection: "row", alignItems: "center", gap: 12 },
+  iconoCabecera: { width: 36, height: 36, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+  fila: { flexDirection: "row", alignItems: "center", gap: 12, paddingTop: 12, marginTop: 12, borderTopWidth: StyleSheet.hairlineWidth },
+  tituloFila: { fontSize: 14, fontWeight: "600" },
+  detalleFila: { fontSize: 12, marginTop: 2 },
+  filaLugar: { flexDirection: "row", gap: 12 },
+  iconoLugar: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
+  etiqueta: { fontSize: 11, fontWeight: "700", letterSpacing: 0.6, textTransform: "uppercase" },
+  barrio: { fontSize: 18, fontWeight: "800", marginTop: 2 },
+  direccion: { fontSize: 14, fontWeight: "500", marginTop: 2 },
+  filaTecnica: { flexDirection: "row", flexWrap: "wrap", gap: 14, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6, marginTop: 12 },
+  datoTecnico: { flexDirection: "row", alignItems: "center", gap: 4 },
+  textoTecnico: { fontSize: 11, fontWeight: "600" },
+});
