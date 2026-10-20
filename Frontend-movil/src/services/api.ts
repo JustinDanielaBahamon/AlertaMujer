@@ -94,6 +94,15 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+/**
+ * URL y cabecera de sesión para que un reproductor (video, audio, imagen) cargue un archivo
+ * protegido directamente, sin descargarlo antes.
+ */
+export const fuenteConToken = (ruta: string): { uri: string; headers: Record<string, string> } => ({
+  uri: `${servicioPara(ruta) ?? API_BASE_URL}${ruta}`,
+  headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+});
+
 // Una sola renovación a la vez aunque fallen varias peticiones juntas
 let renovando: Promise<string | null> | null = null;
 

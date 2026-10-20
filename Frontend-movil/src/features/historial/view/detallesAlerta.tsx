@@ -8,6 +8,7 @@ import MapView, { Marker, Polyline } from "../../../components/mapa/MapaLibre";
 import { COLOR_PUNTO_A, COLOR_PUNTO_B } from "../../mapa/coloresRecorrido";
 import { useDetalleAlertaViewModel, type PasoAlerta } from "../viewModel/useDetalleAlertaViewModel";
 import ContactosNotificadosModal, { ESTADOS, ICONO_CANAL } from "./ContactosNotificadosModal";
+import EvidenciasAlerta from "./EvidenciasAlerta";
 import { useTheme } from "../../../../src/contexts/ThemeContext";
 import { useLocale } from "../../../../src/contexts/LocaleContext";
 import { getMainStackNavigation } from "../../../navigation/navigationHelpers";
@@ -262,6 +263,10 @@ export default function DetalleAlerta() {
               </View>
             </>
           )}
+
+          {/* EVIDENCIAS GRABADAS */}
+          <Text style={styles.SeccionTitulo}>{t.detalle.evidencias_titulo}</Text>
+          <EvidenciasAlerta alertaId={Number(alerta.id)} />
 
           {/* CONTACTOS AVISADOS */}
           <View style={extra.seccionFila}>

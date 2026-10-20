@@ -625,7 +625,17 @@
   "alert_llamar_titulo": "Ligar",
   "alert_llamar_msg": "Esta ação estará disponível em breve.",
   "alert_reportar_titulo": "Reportar",
-  "alert_reportar_msg": "Obrigada, em breve você poderá enviar relatórios por aqui."
+  "alert_reportar_msg": "Obrigada, em breve você poderá enviar relatórios por aqui.",
+  "evidencias_titulo": "Evidências gravadas",
+  "evidencias_vacio": "Nenhuma gravação foi salva neste alerta.",
+  "evidencias_error": "Não foi possível carregar as evidências. Toque para tentar de novo.",
+  "evidencias_nota": "As gravações são feitas em partes e guardadas por 60 dias.",
+  "evidencia_video": "Vídeo",
+  "evidencia_audio": "Áudio",
+  "evidencia_foto": "Foto",
+  "evidencia_documento": "Documento",
+  "evidencia_sin_archivo": "sem arquivo",
+  "evidencia_error_reproducir": "Não foi possível reproduzir. Verifique sua conexão e tente de novo."
 },
 "confirmacion": {
   "titulo": "Quase lá!",

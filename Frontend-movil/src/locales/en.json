@@ -625,7 +625,17 @@
   "alert_llamar_titulo": "Call",
   "alert_llamar_msg": "This action will be available soon.",
   "alert_reportar_titulo": "Report",
-  "alert_reportar_msg": "Thank you, soon you will be able to send reports from here."
+  "alert_reportar_msg": "Thank you, soon you will be able to send reports from here.",
+  "evidencias_titulo": "Recorded evidence",
+  "evidencias_vacio": "No recordings were saved for this alert.",
+  "evidencias_error": "Evidence couldn't be loaded. Tap to try again.",
+  "evidencias_nota": "Recordings are saved in parts and kept for 60 days.",
+  "evidencia_video": "Video",
+  "evidencia_audio": "Audio",
+  "evidencia_foto": "Photo",
+  "evidencia_documento": "Document",
+  "evidencia_sin_archivo": "no file",
+  "evidencia_error_reproducir": "It couldn't be played. Check your connection and try again."
 },
 "confirmacion": {
   "titulo": "Almost there!",
