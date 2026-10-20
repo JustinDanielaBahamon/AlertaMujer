@@ -1,13 +1,14 @@
 import React, { useMemo } from "react";
 import {
   View, Text, TouchableOpacity, Image,
-  TextInput, ScrollView, ActivityIndicator,
+  TextInput, ScrollView, ActivityIndicator, StyleSheet,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { createPerfilStyles } from "../styles/perfilStyle";
 import { usePerfilViewModel } from "../viewModel/usePerfilViewModel";
+import { useRequisitosCuenta } from "../viewModel/useRequisitosCuenta";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { useLocale } from "../../../contexts/LocaleContext";
 
@@ -30,6 +31,8 @@ export default function PerfilScreen() {
   const { theme } = useTheme();
   const { t } = useLocale();
   const styles = useMemo(() => createPerfilStyles(theme), [theme]);
+  const req = useRequisitosCuenta(vm);
+  const accent = theme.icono;
 
   const esError =
     vm.mensaje.toLowerCase().includes("error") ||
@@ -81,6 +84,54 @@ export default function PerfilScreen() {
 
         {/* Cuerpo */}
         <View style={styles.cuerpo}>
+
+          {/* ── Estado de la cuenta: lo que necesita una alerta para funcionar ── */}
+          <View style={styles.tarjeta}>
+            <View style={req_s.cabecera}>
+              <View style={[req_s.anillo, { borderColor: req.lista ? accent : accent + "40" }]}>
+                <Text style={[req_s.anilloTexto, { color: accent }]}>
+                  {req.cumplidos}/{req.total}
+                </Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.tituloSeccion, { marginBottom: 2 }]}>{t.perfil.req_titulo}</Text>
+                <Text style={[req_s.resumen, { color: theme.text }]}>
+                  {req.lista ? t.perfil.req_lista : t.perfil.req_pendiente}
+                </Text>
+              </View>
+            </View>
+            <View style={[req_s.barra, { backgroundColor: accent + "25" }]}>
+              <View
+                style={[
+                  req_s.barraRelleno,
+                  { backgroundColor: accent, width: `${Math.round((req.cumplidos / req.total) * 100)}%` as `${number}%` },
+                ]}
+              />
+            </View>
+
+            {req.requisitos.map((q) => (
+              <View key={q.id} style={req_s.fila}>
+                <View style={[req_s.icono, { backgroundColor: q.cumple ? accent : accent + "20" }]}>
+                  <Ionicons name={(q.cumple ? "checkmark" : q.icono) as never} size={16} color={q.cumple ? "#fff" : accent} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <View style={req_s.filaTitulo}>
+                    <Text style={[req_s.titulo, { color: theme.text }]}>{q.titulo}</Text>
+                    {!q.necesario && (
+                      <Text style={[req_s.etiqueta, { color: accent, borderColor: accent + "60" }]}>{t.perfil.req_recomendado}</Text>
+                    )}
+                  </View>
+                  <Text style={[req_s.detalle, { color: theme.text }]}>{q.detalle}</Text>
+                  {!q.cumple && q.accion && (
+                    <TouchableOpacity onPress={q.accion.ir} style={req_s.accion}>
+                      <Text style={[req_s.accionTexto, { color: accent }]}>{q.accion.texto}</Text>
+                      <Ionicons name="chevron-forward" size={14} color={accent} />
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </View>
+            ))}
+          </View>
 
           {/* ── Datos personales ── */}
           <View style={styles.tarjeta}>
@@ -221,3 +272,19 @@ export default function PerfilScreen() {
     </View>
   );
 }
+const req_s = StyleSheet.create({
+  cabecera: { flexDirection: "row", alignItems: "center", gap: 14 },
+  anillo: { width: 56, height: 56, borderRadius: 28, borderWidth: 4, alignItems: "center", justifyContent: "center" },
+  anilloTexto: { fontSize: 15, fontWeight: "800" },
+  resumen: { fontSize: 12, opacity: 0.75, lineHeight: 17 },
+  barra: { height: 6, borderRadius: 3, marginTop: 14, marginBottom: 6, overflow: "hidden" },
+  barraRelleno: { height: 6, borderRadius: 3 },
+  fila: { flexDirection: "row", gap: 12, marginTop: 12 },
+  icono: { width: 30, height: 30, borderRadius: 15, alignItems: "center", justifyContent: "center" },
+  filaTitulo: { flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" },
+  titulo: { fontSize: 14, fontWeight: "700" },
+  etiqueta: { fontSize: 10, fontWeight: "700", borderWidth: 1, borderRadius: 8, paddingHorizontal: 6, paddingVertical: 1 },
+  detalle: { fontSize: 12, opacity: 0.72, lineHeight: 17, marginTop: 2 },
+  accion: { flexDirection: "row", alignItems: "center", gap: 2, marginTop: 6 },
+  accionTexto: { fontSize: 13, fontWeight: "700" },
+});
