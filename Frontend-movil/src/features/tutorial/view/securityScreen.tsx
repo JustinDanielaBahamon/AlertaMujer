@@ -5,7 +5,7 @@ import React, { useEffect, useRef } from "react";
 import { Animated, ScrollView, Text, TouchableOpacity, View, } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Card from "../../../components/ui/card/card";
-import PermissionsModal from "../../../components/ui/modalMesanje/permisosMLL";
+import PermissionsModal from "../../../components/ui/permissionsModal/PermissionsModal";
 import { SECURITY_COLORS, securityStyle } from "../styles/securityStyle";
 import { useSecurityTutorialViewModel, type SecurityFeatureItem, } from "../viewModel/useSecurityTutorialViewModel";
 import { useLocale } from "../../../contexts/LocaleContext";

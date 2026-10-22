@@ -1,0 +1,419 @@
+import { useEffect, useState } from "react";
+import { MaterialIcons } from "@expo/vector-icons";
+import {
+    ActivityIndicator,
+    Linking,
+    Modal,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    useWindowDimensions,
+    View,
+} from "react-native";
+import MapView, { Marker, Polyline } from "../../../components/map/MapLibreMap";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useLocale } from "../../../contexts/LocaleContext";
+import { useTheme } from "../../../contexts/ThemeContext";
+import type { LocationPoint } from "../../../services/alert-tracking.service";
+import { createStyles } from "../style/activeAlertStyle";
+import { useActiveAlertViewModel } from "../viewModel/useActiveAlertViewModel";
+import { useChatAboveKeyboard } from "../../../hooks/useChatAboveKeyboard";
+import AlertRecording from "../../recording/AlertRecording";
+import AlertChat, { HER_QUICK_REPLIES } from "../../alertChat/AlertChat";
+import Countdown from "./Countdown";
+
+type Styles = ReturnType<typeof createStyles>;
+
+// Linea de recorrido + pines numerados. Se usa en el mapa de la ventana emergente.
+function MapPins({
+  points,
+  lineColor,
+  styles,
+  trackChanges,
+  label,
+}: {
+  points: LocationPoint[];
+  lineColor: string;
+  styles: Styles;
+  trackChanges: boolean;
+  label: string;
+}) {
+  return (
+    <>
+      {points.length > 1 && (
+        <Polyline
+          coordinates={points.map((p) => ({ latitude: p.latitude, longitude: p.longitude }))}
+          strokeColor={lineColor}
+          strokeWidth={3}
+          lineDashPattern={[6, 4]}
+          lineCap="round"
+          lineJoin="round"
+        />
+      )}
+
+      {points.map((p, i) => {
+        const isLast = i === points.length - 1;
+        return (
+          <Marker
+            // La key cambia cuando un pin deja de ser el ultimo, para que se redibuje.
+            key={`${p.id}-${isLast ? "a" : "p"}`}
+            coordinate={{ latitude: p.latitude, longitude: p.longitude }}
+            anchor={{ x: 0.5, y: 0.5 }}
+            tracksViewChanges={trackChanges}
+            zIndex={isLast ? 999 : i}
+            title={`${label} ${i + 1}`}
+          >
+            <View style={isLast ? styles.currentPin : styles.pin}>
+              <Text style={isLast ? styles.currentPinText : styles.pinText}>{i + 1}</Text>
+            </View>
+          </Marker>
+        );
+      })}
+    </>
+  );
+}
+
+export default function ActiveAlertScreen() {
+  const vm = useActiveAlertViewModel();
+  const keyboard = useChatAboveKeyboard();
+  const { theme } = useTheme();
+  const { t } = useLocale();
+  const { width, height } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  const styles = createStyles(theme, width, height, insets);
+  const tx = t.alertaContacto; // textos del mapa (los mismos de "Alerta de emergencia")
+
+  // Los pines personalizados se redibujan unos instantes cuando llega un punto nuevo
+  // o cuando se abre la ventana emergente.
+  const [trackChanges, setTrackChanges] = useState(true);
+  useEffect(() => {
+    setTrackChanges(true);
+    const id = setTimeout(() => setTrackChanges(false), 600);
+    return () => clearTimeout(id);
+  }, [vm.points.length, vm.fullscreen]);
+
+  // "hace 5s" / "5s ago" / "há 5s" / "il y a 5s": el orden lo define el texto de cada idioma.
+  const ago = tx.hace.replace("{{tiempo}}", vm.timeSinceLast);
+
+  return (
+    <View style={styles.scrollContainer}>
+      <ScrollView
+        ref={keyboard.scrollRef}
+        style={styles.scrollContainer}
+        contentContainerStyle={[styles.mainContainer, { paddingBottom: keyboard.keyboardHeight }]}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        onScroll={keyboard.onScroll}
+        scrollEventThrottle={32}
+      >
+        <View style={styles.wrap}>
+        <View style={styles.header}>
+          {/* Mini-mapa con la ubicacion actual. Al tocarlo, abre el mapa completo con el diseno de "Alerta de emergencia". */}
+          <View style={styles.headerMapButton}>
+            {vm.location ? (
+              <>
+                <MapView
+                  style={styles.headerMap}
+                  pointerEvents="none"
+                  scrollEnabled={false}
+                  zoomEnabled={false}
+                  rotateEnabled={false}
+                  pitchEnabled={false}
+                  toolbarEnabled={false}
+                  initialRegion={{
+                    latitude: vm.location.latitude,
+                    longitude: vm.location.longitude,
+                    latitudeDelta: 0.01,
+                    longitudeDelta: 0.01,
+                  }}
+                >
+                  <Marker coordinate={vm.location} pinColor={theme.icon} />
+                </MapView>
+                {/* Capa transparente que intercepta el toque antes de que llegue al mapa nativo,
+                    asi se evita que Android abra la app de Google Maps al presionarlo. */}
+                <TouchableOpacity
+                  style={StyleSheet.absoluteFillObject}
+                  onPress={vm.openFullMap}
+                  activeOpacity={0.85}
+                />
+              </>
+            ) : (
+              <TouchableOpacity
+                style={[StyleSheet.absoluteFillObject, styles.headerMapFallback]}
+                onPress={vm.openFullMap}
+                activeOpacity={0.85}
+              >
+                <MaterialIcons name="my-location" size={22} color={theme.icon} />
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+
+        <Text style={styles.title}>{t.alertaActiva.titulo}</Text>
+        <Text style={styles.subtitle}>{t.alertaActiva.subtitulo}</Text>
+
+        {/* Estado del envío: la usuaria tiene que saber si sus contactos ya fueron avisados */}
+        <View style={[deliveryStyles.box, { borderColor: theme.icon, backgroundColor: theme.icon + (vm.delivery.status === "enviada" ? "14" : "22") }]}>
+          {vm.delivery.status === "enviando" ? (
+            <ActivityIndicator size="small" color={theme.icon} />
+          ) : (
+            <MaterialIcons name={vm.delivery.status === "enviada" ? "mark-email-read" : "error-outline"} size={22} color={theme.icon} />
+          )}
+          <View style={{ flex: 1 }}>
+            <Text style={[deliveryStyles.text, { color: theme.text }]}>
+              {vm.delivery.status === "enviada"
+                ? t.alertaActiva.envio_enviada
+                : vm.delivery.status === "fallida"
+                  ? t.alertaActiva.envio_fallida
+                  : vm.delivery.attempt > 1
+                    ? t.alertaActiva.envio_reintentando
+                        .replace("{n}", String(vm.delivery.attempt))
+                        .replace("{total}", String(vm.delivery.total))
+                    : t.alertaActiva.envio_enviando}
+            </Text>
+            {vm.delivery.status === "fallida" && (
+              <View style={deliveryStyles.actions}>
+                <TouchableOpacity onPress={vm.retrySend} style={[deliveryStyles.button, { backgroundColor: theme.icon }]}>
+                  <MaterialIcons name="refresh" size={16} color="#fff" />
+                  <Text style={deliveryStyles.buttonText}>{t.alertaActiva.envio_reintentar}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => Linking.openURL("tel:123").catch(() => {})}
+                  style={[deliveryStyles.button, { borderColor: theme.icon, borderWidth: 1.5 }]}
+                >
+                  <MaterialIcons name="call" size={16} color={theme.icon} />
+                  <Text style={[deliveryStyles.buttonText, { color: theme.icon }]}>{t.alertaActiva.envio_llamar}</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        </View>
+
+        <View style={styles.circleWrapper}>
+          <View style={styles.circle}>
+            <MaterialIcons name="notifications-active" size={22} color={theme.icon} />
+            <Countdown end={vm.alertEnd} durationMin={vm.maxDurationMin} style={styles.number} />
+            <Text style={styles.timeLabel}>{t.alertaActiva.tiempoRestante}</Text>
+          </View>
+        </View>
+
+        {/* Mensaje informativo sobre lo que pasa al terminar el tiempo y como cancelar. */}
+        <View style={styles.messageCard}>
+          <MaterialIcons name="info-outline" size={20} color={theme.icon} />
+          <Text style={styles.messageText}>{t.alertaActiva.mensajeReenvio}</Text>
+        </View>
+
+        <View style={styles.infoCard}>
+          <View style={styles.infoIconWrapper}>
+            <MaterialIcons name="verified-user" size={22} color={theme.icon} />
+          </View>
+          <View style={styles.infoTextWrapper}>
+            <Text style={styles.infoTitle}>{t.alertaActiva.serviciosTitulo}</Text>
+            <Text style={styles.infoDescription}>{t.alertaActiva.serviciosDescripcion}</Text>
+          </View>
+        </View>
+
+        <View style={styles.locationCard}>
+          <Text style={styles.locationTitle}>{t.alertaActiva.compartiendoUbicacion}</Text>
+          <View style={styles.locationRow}>
+            <View style={styles.locationItem}>
+              <MaterialIcons name="location-on" size={18} color={theme.icon} />
+              <Text style={styles.locationText}>{t.alertaActiva.enTiempoReal}</Text>
+            </View>
+            <View style={styles.divider} />
+            <View style={styles.locationItem}>
+              <MaterialIcons name="visibility" size={18} color={theme.icon} />
+              <Text style={styles.locationText}>
+                {vm.views.watchingNow > 0
+                  ? t.alertaActiva.viendo_ahora.replace("{n}", String(vm.views.watchingNow))
+                  : `${vm.views.total} ${vm.views.total === 1 ? t.alertaActiva.vista : t.alertaActiva.vistas}`}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Chat con los contactos: mensajes rápidos sin tener que hablar */}
+        {/* Video/audio automático como evidencia (se sube cada 45 s) */}
+        <AlertRecording alertId={vm.alertId} />
+        <View ref={keyboard.chatRef} collapsable={false}>
+          <AlertChat
+            participant={vm.alertId ? { type: "duena", alertId: vm.alertId } : null}
+            enabled
+            soyElla
+            title="Mensajes a tus contactos"
+            quickReplies={HER_QUICK_REPLIES}
+            onFocus={keyboard.onChatFocus}
+          />
+        </View>
+
+        <TouchableOpacity style={styles.okButton} onPress={vm.openConfirmation}>
+          <MaterialIcons name="favorite" size={22} color={theme.headerText} />
+          <Text style={styles.okButtonText}>{t.alertaActiva.estoyBien}</Text>
+          <Text style={styles.okButtonSubtext}>{t.alertaActiva.estoyBienDescripcion}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.callRow} onPress={vm.callEmergency}>
+          <MaterialIcons name="call" size={18} color={theme.icon} />
+          <Text style={styles.callText}>{t.alertaActiva.llamar_numero.replace("{numero}", vm.emergencyNumber)}</Text>
+        </TouchableOpacity>
+
+        </View>
+      </ScrollView>
+
+      {/* Ventana de verificacion para cancelar la alerta. */}
+      <Modal
+        visible={vm.confirmVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={vm.closeConfirmation}
+      >
+        <View style={styles.confirmOverlay}>
+          <View style={styles.confirmCard}>
+            <View style={styles.confirmIconCircle}>
+              <MaterialIcons name="favorite" size={28} color={theme.icon} />
+            </View>
+            <Text style={styles.confirmTitle}>{t.alertaActiva.confirmarTitulo}</Text>
+            <Text style={styles.confirmDescription}>{t.alertaActiva.confirmarDescripcion}</Text>
+
+            <TouchableOpacity style={styles.confirmButtonYes} onPress={vm.markImOk}>
+              <Text style={styles.confirmButtonYesText}>{t.alertaActiva.confirmarSi}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.confirmButtonNo} onPress={vm.closeConfirmation}>
+              <Text style={styles.confirmButtonNoText}>{t.alertaActiva.confirmarNo}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Mapa en pantalla completa (mismo diseno que la ventana de "Alerta de emergencia"). Al cerrar, sigue en AlertaActiva. */}
+      <Modal
+        visible={vm.fullscreen}
+        animationType="slide"
+        statusBarTranslucent
+        onRequestClose={vm.closeFullMap}
+      >
+        <View style={styles.modalContainer}>
+          {vm.lastItem && (
+            <MapView
+              ref={vm.fullMapRef}
+              style={styles.modalMap}
+              onMapReady={vm.onFullMapReady}
+              toolbarEnabled={false}
+              initialRegion={{
+                latitude: vm.lastItem.latitude,
+                longitude: vm.lastItem.longitude,
+                latitudeDelta: 0.005,
+                longitudeDelta: 0.005,
+              }}
+            >
+              <MapPins
+                points={vm.points}
+                lineColor={theme.icon}
+                styles={styles}
+                trackChanges={trackChanges}
+                label={tx.punto}
+              />
+            </MapView>
+          )}
+
+          {/* Barra superior: cerrar + estado de la ubicacion */}
+          <View style={styles.modalTopBar} pointerEvents="box-none">
+            <TouchableOpacity
+              style={styles.modalCloseBtn}
+              onPress={vm.closeFullMap}
+              activeOpacity={0.85}
+              accessibilityRole="button"
+              accessibilityLabel={tx.cerrarMapa}
+            >
+              <MaterialIcons name="close" size={20} color={theme.icon} />
+              <Text style={styles.modalCloseText}>{tx.cerrarMapa}</Text>
+            </TouchableOpacity>
+
+            <View style={styles.modalTitlePill} pointerEvents="none">
+              <Text style={styles.modalTitle} numberOfLines={1}>
+                {tx.ubicacionActual}
+              </Text>
+              <Text style={styles.modalSub} numberOfLines={1}>
+                {tx.actualizada} {ago}
+              </Text>
+            </View>
+          </View>
+
+          {/* Ultima coordenada */}
+          {vm.lastItem && (
+            <View style={styles.modalInfo} pointerEvents="none">
+              <Text style={styles.modalInfoText} numberOfLines={1}>
+                {tx.punto} {vm.points.length} · {vm.lastCoords}
+              </Text>
+              {vm.lastNeighborhood && (
+                <Text style={styles.neighborhoodInfoModal} numberOfLines={2}>
+                  {vm.lastNeighborhood}
+                </Text>
+              )}
+            </View>
+          )}
+
+          {/* Encuadrar todos los puntos */}
+          <TouchableOpacity
+            style={styles.modalFitBtn}
+            onPress={vm.showAllPoints}
+            activeOpacity={0.85}
+            accessibilityRole="button"
+            accessibilityLabel={tx.verTodosPuntos}
+          >
+            <MaterialIcons name="zoom-out-map" size={22} color={theme.icon} />
+          </TouchableOpacity>
+        </View>
+      </Modal>
+
+      {/* La alerta terminó en el servidor (venció, atendida o cancelada): ya no se envía la ubicación */}
+      <Modal visible={!!vm.end} transparent animationType="fade" onRequestClose={vm.leaveAfterEnd}>
+        <View style={endStyles.background}>
+          <View style={[endStyles.card, { backgroundColor: theme.containerBackground }]}>
+            <View style={[endStyles.icon, { backgroundColor: theme.icon + "22" }]}>
+              <MaterialIcons name="timer-off" size={30} color={theme.icon} />
+            </View>
+            <Text style={[endStyles.title, { color: theme.text }]}>{t.alertaActiva.fin_titulo}</Text>
+            <Text style={[endStyles.text, { color: theme.text }]}>
+              {vm.end?.status === "resolved"
+                ? t.alertaActiva.fin_atendida
+                : vm.end?.status === "cancelled"
+                  ? t.alertaActiva.fin_cancelada
+                  : t.alertaActiva.fin_vencida.replace("{min}", String(vm.end?.minutes ?? ""))}
+            </Text>
+            <Text style={[endStyles.question, { color: theme.text }]}>{t.alertaActiva.fin_pregunta}</Text>
+            <TouchableOpacity onPress={vm.activateAnotherAlert} style={[endStyles.button, { backgroundColor: theme.icon }]}>
+              <MaterialIcons name="notifications-active" size={20} color="#fff" />
+              <Text style={endStyles.buttonText}>{t.alertaActiva.fin_otra}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={vm.leaveAfterEnd} style={[endStyles.secondary, { borderColor: theme.icon }]}>
+              <Text style={[endStyles.secondaryText, { color: theme.icon }]}>{t.alertaActiva.fin_bien}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    </View>
+  );
+}
+
+const endStyles = StyleSheet.create({
+  background: { flex: 1, backgroundColor: "rgba(0,0,0,0.55)", justifyContent: "center", padding: 24 },
+  card: { borderRadius: 22, padding: 22, alignItems: "center" },
+  icon: { width: 60, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center" },
+  title: { fontSize: 18, fontWeight: "800", marginTop: 12, textAlign: "center" },
+  text: { fontSize: 13, lineHeight: 19, opacity: 0.8, textAlign: "center", marginTop: 6 },
+  question: { fontSize: 15, fontWeight: "700", marginTop: 14, textAlign: "center" },
+  button: { alignSelf: "stretch", flexDirection: "row", gap: 8, height: 50, borderRadius: 14, alignItems: "center", justifyContent: "center", marginTop: 14 },
+  buttonText: { color: "#fff", fontSize: 15, fontWeight: "800" },
+  secondary: { alignSelf: "stretch", height: 46, borderRadius: 14, borderWidth: 1.5, alignItems: "center", justifyContent: "center", marginTop: 10 },
+  secondaryText: { fontSize: 14, fontWeight: "700" },
+});
+const deliveryStyles = StyleSheet.create({
+  box: { flexDirection: "row", alignItems: "flex-start", gap: 10, borderWidth: 1.5, borderRadius: 16, padding: 12, marginTop: 12, marginHorizontal: 4 },
+  text: { fontSize: 13, fontWeight: "700", lineHeight: 19 },
+  actions: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 10 },
+  button: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18 },
+  buttonText: { color: "#fff", fontSize: 13, fontWeight: "700" },
+});

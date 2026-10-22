@@ -1,34 +1,34 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import ActiveAlertScreen from "../features/AlertaActiva/view/AlertaActivaScreen";
-import ContactAlertScreen from "../features/AlertaContacto/view/AlertaContactoScreen";
-import ActivacionScreen from "../features/BotonActivacion/activacion";
-import AgregarContactoScreen from "../features/contactos/view/agregarScreen";
-import DetalleAlertaScreen from "../features/historial/view/detallesAlerta"; // ← nuevo
-import HistorialMapa from "../features/historial/view/historial";
-import ClasificarZonaScreen from "../features/mapa/view/classifyZoneView"; // Ajusta la ruta a tu archivo real// Ajusta la ruta a tu archivo real
-import UbicacionesGuardadasScreen from "../features/mapa/view/UbicacionesGuardadas";
-import ZonasAuxiliaresScreen from "../features/mapa/view/ZonasAuxiliares";
-import HistorialRecorridosScreen from "../features/mapa/view/HistorialRecorridos";
-import GuardarRecorridoScreen from "../features/mapa/view/GuardarRecorrido";
-import ProfileScreen from "../features/perfil/view/perfilScreen";
-import AboutScreen from "../features/settings/view/acercaDeScreen";
-import ActivationMethodsScreen from "../features/settings/view/metodosActivacionScreen";
-import ReceivedAlertsScreen from "../features/alertasRecibidas/view/AlertasRecibidasScreen";
-import TripScreen from "../features/trayecto/view/TrayectoScreen";
-import PermissionsScreen from "../features/permisos/view/PermisosScreen";
-import NotificationsScreen from "../features/settings/view/notificacionesScreen";
-import DataRetentionScreen from "../features/settings/view/retencionDatosScreen";
-import PrivacidadScreen from "../screens/politica/privacidad";
-import TerminosScreen from "../screens/politica/terminos";
-import BienvenidaTutorialScreen from "../screens/tutorial/bienvenida";
-import BotonTutorialScreen from "../screens/tutorial/boton";
-import ContactoTutorialScreen from "../screens/tutorial/contacto";
-import MensajeTutorialScreen from "../screens/tutorial/mensaje";
-import NotificacionTutorialScreen from "../screens/tutorial/notificacion";
-import SeguridadTutorialScreen from "../screens/tutorial/seguridad";
-import UbicacionTutorialScreen from "../screens/tutorial/ubicacion";
+import ActiveAlertScreen from "../features/activeAlert/view/ActiveAlertScreen";
+import ContactAlertScreen from "../features/contactAlert/view/ContactAlertScreen";
+import ActivacionScreen from "../features/activation/activation";
+import AgregarContactoScreen from "../features/contacts/view/addContactScreen";
+import DetalleAlertaScreen from "../features/history/view/alertDetail"; // ← nuevo
+import HistorialMapa from "../features/history/view/history";
+import ClasificarZonaScreen from "../features/map/view/classifyZoneView"; // Ajusta la ruta a tu archivo real// Ajusta la ruta a tu archivo real
+import UbicacionesGuardadasScreen from "../features/map/view/SavedLocations";
+import ZonasAuxiliaresScreen from "../features/map/view/HelpZones";
+import HistorialRecorridosScreen from "../features/map/view/RouteHistory";
+import GuardarRecorridoScreen from "../features/map/view/SaveRoute";
+import ProfileScreen from "../features/profile/view/profileScreen";
+import AboutScreen from "../features/settings/view/aboutScreen";
+import ActivationMethodsScreen from "../features/settings/view/activationMethodsScreen";
+import ReceivedAlertsScreen from "../features/receivedAlerts/view/ReceivedAlertsScreen";
+import TripScreen from "../features/trip/view/TripScreen";
+import PermissionsScreen from "../features/permissions/view/PermissionsScreen";
+import NotificationsScreen from "../features/settings/view/notificationsScreen";
+import DataRetentionScreen from "../features/settings/view/dataRetentionScreen";
+import PrivacidadScreen from "../screens/policy/privacy";
+import TerminosScreen from "../screens/policy/terms";
+import BienvenidaTutorialScreen from "../screens/tutorial/welcome";
+import BotonTutorialScreen from "../screens/tutorial/button";
+import ContactoTutorialScreen from "../screens/tutorial/contact";
+import MensajeTutorialScreen from "../screens/tutorial/message";
+import NotificacionTutorialScreen from "../screens/tutorial/notification";
+import SeguridadTutorialScreen from "../screens/tutorial/security";
+import UbicacionTutorialScreen from "../screens/tutorial/location";
 import DrawerNavigator from "./drawer/DrawerNavigator";
 import type { MainStackParamList } from "./types";
 

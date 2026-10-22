@@ -1,6 +1,6 @@
 import axios from "axios";
 import Constants from "expo-constants";
-import { serviceFor } from "./servicios";
+import { serviceFor } from "./serviceRoutes";
 
 // La URL del backend no es secreta, pero el log solo interesa en desarrollo
 const logStart = (...parts: unknown[]) => {

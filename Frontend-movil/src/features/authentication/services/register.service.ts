@@ -1,4 +1,4 @@
-import type { User } from "../models/Usuario";
+import type { User } from "../models/User";
 import { authService } from "../../../services/auth.service";
 
 export interface RegisterData {

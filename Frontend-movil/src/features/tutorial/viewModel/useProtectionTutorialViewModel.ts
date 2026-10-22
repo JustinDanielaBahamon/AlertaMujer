@@ -4,9 +4,9 @@ import * as Location from "expo-location";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AppState } from "react-native";
 import { useLocale } from "../../../contexts/LocaleContext";
-import { useActivationMethods } from "../../../contexts/MetodosActivacionContext";
+import { useActivationMethods } from "../../../contexts/ActivationMethodsContext";
 import type { MainStackParamList } from "../../../navigation/types";
-import { grantPermission, checkPermissions, type PermissionStatus, type PermissionId } from "../../permisos/permisos";
+import { grantPermission, checkPermissions, type PermissionStatus, type PermissionId } from "../../permissions/permissions";
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
 type LocaleT = ReturnType<typeof useLocale>["t"];

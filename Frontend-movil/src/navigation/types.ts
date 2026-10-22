@@ -1,5 +1,5 @@
-import type { Contact } from "../features/contactos/models/Contacto";
-import type { AlertRecord } from "../features/historial/models/Alerta";
+import type { Contact } from "../features/contacts/models/Contact";
+import type { AlertRecord } from "../features/history/models/AlertRecord";
 
 export type AuthStackParamList = {
   Index: undefined;

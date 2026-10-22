@@ -1,5 +1,5 @@
 import * as Location from "expo-location";
-import { locationPermission } from "./permisosSeguros";
+import { locationPermission } from "./safePermissions";
 
 // Interface para datos de ubicación mejorados
 export interface DetailedLocation {

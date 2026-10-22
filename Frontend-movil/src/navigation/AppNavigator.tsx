@@ -1,17 +1,17 @@
 import { NavigationContainer, useNavigationContainerRef } from "@react-navigation/native";
 import { useEffect, useRef, useState } from "react";
-import CompleteSignUpScreen from "../features/completarRegistro/CompletarRegistroScreen";
-import { profileIncomplete } from "../features/completarRegistro/perfilIncompleto";
+import CompleteSignUpScreen from "../features/completeSignUp/CompleteSignUpScreen";
+import { profileIncomplete } from "../features/completeSignUp/profileIncomplete";
 import { getMe } from "../services/users.service";
 import { useAuth } from "../contexts/AuthContext";
 import type { MainStackParamList } from "./types";
 import AuthNavigator from "./AuthNavigator";
 import MainNavigator from "./MainNavigator";
-import { useSosAlerts } from "../notifications/useAlertasSos";
-import { useShakeProtection } from "../features/agitar/useProteccionAgitar";
-import { useProtectionReminder } from "../features/permisos/useRecordatorioProteccion";
-import { useResumeAlert } from "../features/AlertaActiva/useReanudarAlerta";
-import { useSosLink } from "../features/widget/useEnlaceSOS";
+import { useSosAlerts } from "../notifications/useSosAlerts";
+import { useShakeProtection } from "../features/shake/useShakeProtection";
+import { useProtectionReminder } from "../features/permissions/useProtectionReminder";
+import { useResumeAlert } from "../features/activeAlert/useResumeAlert";
+import { useSosLink } from "../features/widget/useSosLink";
 
 export default function AppNavigator() {
   const { user, pendingMainRoute, restoring } = useAuth();

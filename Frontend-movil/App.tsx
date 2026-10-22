@@ -1,20 +1,20 @@
 import "react-native-gesture-handler";
 import { useCallback, useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
-import GlobalAlertHost from "./src/components/ui/alertaGlobal/alertaGlobal";
-import UpdateNotice from "./src/features/version/AvisoActualizacion";
-import ImagePreload from "./src/components/ui/PrecargaImagenes/PrecargaImagenes";
+import GlobalAlertHost from "./src/components/ui/globalAlert/globalAlert";
+import UpdateNotice from "./src/features/version/UpdateNotice";
+import ImagePreload from "./src/components/ui/ImagePreload/ImagePreload";
 import { AuthProvider } from "./src/contexts/AuthContext";
-import { ContactsProvider } from "./src/contexts/ContactosContext";
-import { EvidenceProvider } from "./src/contexts/EvidenciaContext";
+import { ContactsProvider } from "./src/contexts/ContactsContext";
+import { EvidenceProvider } from "./src/contexts/EvidenceContext";
 import { LocaleProvider } from "./src/contexts/LocaleContext";
-import { ActivationMethodsProvider } from "./src/contexts/MetodosActivacionContext";
-import { NotificationsProvider } from "./src/contexts/NotificacionesContext";
-import { RoutesProvider } from "./src/contexts/RecorridosContext";
+import { ActivationMethodsProvider } from "./src/contexts/ActivationMethodsContext";
+import { NotificationsProvider } from "./src/contexts/NotificationsContext";
+import { RoutesProvider } from "./src/contexts/RoutesContext";
 import { ThemeProvider } from "./src/contexts/ThemeContext";
 import AppNavigator from "./src/navigation/AppNavigator";
-import LocationReport from "./src/components/ReporteUbicacion";
-import AnimatedSplash from "./src/components/ui/SplashAnimado/SplashAnimado";
+import LocationReport from "./src/components/LocationReporting";
+import AnimatedSplash from "./src/components/ui/AnimatedSplash/AnimatedSplash";
 
 // El splash nativo se mantiene hasta que la animación de apertura esté dibujada encima
 SplashScreen.preventAutoHideAsync().catch(() => {});

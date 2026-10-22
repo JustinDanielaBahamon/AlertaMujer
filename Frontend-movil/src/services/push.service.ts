@@ -3,10 +3,10 @@ import Constants from "expo-constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getApp } from "@react-native-firebase/app";
 import { getMessaging, getToken, onTokenRefresh } from "@react-native-firebase/messaging";
-import { notificationsPermission } from "./permisosSeguros";
+import { notificationsPermission } from "./safePermissions";
 import api from "./api";
 import { getOrCreateDevice } from "./devices.service";
-import { createSosChannel } from "../notifications/alarmaSos";
+import { createSosChannel } from "../notifications/sosAlarm";
 
 const FULL_SCREEN_NOTICE_KEY = "@alerta_mujer:aviso_pantalla_completa";
 

@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import TutorialLottie from "../component/TutorialLottie";
 import { useTutorialPage } from "../component/TutorialPager";
 import Card from "../../../components/ui/card/card";
-import PermissionsModal from "../../../components/ui/modalMesanje/permisosMLL";
+import PermissionsModal from "../../../components/ui/permissionsModal/PermissionsModal";
 import { useNotificationTutorialViewModel, type NotifFeatureItem, } from "../viewModel/useNotificationTutorialViewModel";
 import { notificationStyle, NOTIF_COLORS } from "../styles/notificationStyle";
 import { LinearGradient } from 'expo-linear-gradient';

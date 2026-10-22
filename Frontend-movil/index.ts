@@ -8,11 +8,11 @@ import { getApp } from "@react-native-firebase/app";
 import { getMessaging, setBackgroundMessageHandler } from "@react-native-firebase/messaging";
 import App from "./App";
 import { registerWidgetTaskHandler } from "react-native-android-widget";
-import { widgetTask } from "./src/features/widget/tareaWidget";
-import { isNewPhone, showNewPhone } from "./src/notifications/nuevoCelular";
-import { isTripDueSoon, showTripDueSoon } from "./src/notifications/trayectoPorVencer";
-import { isLocationRequest, answerLocationRequest } from "./src/services/pedidoUbicacion";
-import { handleProtectionEvent, registerProtectionService } from "./src/features/agitar/servicioProteccion";
+import { widgetTask } from "./src/features/widget/widgetTask";
+import { isNewPhone, showNewPhone } from "./src/notifications/newPhone";
+import { isTripDueSoon, showTripDueSoon } from "./src/notifications/tripDueSoon";
+import { isLocationRequest, answerLocationRequest } from "./src/services/locationRequest";
+import { handleProtectionEvent, registerProtectionService } from "./src/features/shake/protectionService";
 import {
   openSosAlert,
   notificationData,
@@ -20,7 +20,7 @@ import {
   isSosAlert,
   showSosAlarm,
   showEndedAlert,
-} from "./src/notifications/alarmaSos";
+} from "./src/notifications/sosAlarm";
 
 if (Constants.expoConfig?.extra?.pushConfigurado === true) {
   try {

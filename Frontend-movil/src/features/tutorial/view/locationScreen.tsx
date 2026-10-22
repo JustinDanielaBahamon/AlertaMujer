@@ -5,7 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Picker } from "@react-native-picker/picker";
 import { MaterialIcons } from "@expo/vector-icons";
 import Card from "../../../components/ui/card/card";
-import ConfirmationModal from "@/components/ui/modalConfirmacion/confirmacion";
+import ConfirmationModal from "@/components/ui/confirmationModal/confirmation";
 import { useLocationTutorialViewModel, PLACEHOLDER_MUNICIPALITY } from "../viewModel/useLocationTutorialViewModel";
 import { locationStyle, LOCATION_COLORS } from "../styles/locationStyle";
 import { useLocale } from "../../../contexts/LocaleContext";

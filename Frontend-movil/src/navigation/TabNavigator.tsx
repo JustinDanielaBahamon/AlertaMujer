@@ -3,15 +3,15 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import React, { useRef } from "react";
 import { Animated, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { getTabScreenOptions } from "../components/ui/Tabs/TabsNavegationStyle";
+import { getTabScreenOptions } from "../components/ui/Tabs/TabsNavigationStyle";
 import { useTheme } from "../contexts/ThemeContext";
 import { useLocale } from "../contexts/LocaleContext";
 
-import Assistance from "../features/Asistencia/view/Asistencia";
-import ContactsTab from "../features/contactos/view/contactos";
-import HistoryTab from "../features/historial/view/historial";
-import Home from "../features/inicio/view/index";
-import Mapa from "../features/mapa/view/MapaView";
+import Assistance from "../features/assistance/view/Assistance";
+import ContactsTab from "../features/contacts/view/contacts";
+import HistoryTab from "../features/history/view/history";
+import Home from "../features/home/view/index";
+import Mapa from "../features/map/view/MapScreen";
 
 const Tab = createBottomTabNavigator();
 

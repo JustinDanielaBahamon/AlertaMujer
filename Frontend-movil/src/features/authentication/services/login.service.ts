@@ -1,4 +1,4 @@
-import type { User } from "../models/Usuario";
+import type { User } from "../models/User";
 
 export type Session = { user: User; token: string; refreshToken?: string };
 import { authService } from "../../../services/auth.service";

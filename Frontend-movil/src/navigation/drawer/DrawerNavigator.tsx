@@ -10,14 +10,14 @@ import { Image, Share, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import AppHeader from "../../components/ui/Header/header";
-import { WEB_URL } from "../../constants/enlaces";
+import { WEB_URL } from "../../constants/links";
 import { useAuth } from "../../contexts/AuthContext";
 import { getMe } from "../../services/users.service";
 import { useTheme } from "../../contexts/ThemeContext";
 import { useLocale } from "../../contexts/LocaleContext";
-import { getDrawerStyles } from "../drawer/drawer.style";
+import { getDrawerStyles } from "./drawer.style";
 import TabNavigator from "../TabNavigator";
-import AjustesSubmenu from "../../features/settings/components/ajustesComponent";
+import AjustesSubmenu from "../../features/settings/components/settingsComponent";
 
 const Drawer = createDrawerNavigator();
 

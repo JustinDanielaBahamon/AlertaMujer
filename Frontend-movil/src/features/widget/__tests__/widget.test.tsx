@@ -7,12 +7,12 @@ jest.mock("react-native-android-widget", () => ({
 }));
 
 let mockWidgetEnabled = true;
-jest.mock("../../../contexts/MetodosActivacionContext", () => ({
+jest.mock("../../../contexts/ActivationMethodsContext", () => ({
   useActivationMethods: () => ({ config: { widget: mockWidgetEnabled }, loaded: true }),
 }));
 
-import { widgetTask } from "../tareaWidget";
-import { useSosLink } from "../useEnlaceSOS";
+import { widgetTask } from "../widgetTask";
+import { useSosLink } from "../useSosLink";
 
 const fakeNavigation = () =>
   ({ isReady: () => true, getCurrentRoute: () => ({ name: "DrawerHome" }), navigate: jest.fn() }) as never;

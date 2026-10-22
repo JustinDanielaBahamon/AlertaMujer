@@ -1,5 +1,5 @@
 import api from './api';
-import type { AlertRecord, AlertStatus } from '../features/historial/models/Alerta';
+import type { AlertRecord, AlertStatus } from '../features/history/models/AlertRecord';
 
 // Estructura real que devuelve el backend (Alert entity, schema alert.alert)
 export interface AlertApi {
