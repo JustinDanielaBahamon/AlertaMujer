@@ -114,8 +114,13 @@ export default function Registro() {
                   onFocus={cerrarLista}
                 />
               </View>
-              {vm.errores.documento && (
+              {vm.errores.documento ? (
                 <Text style={{ color: "#A21CAF", marginLeft: 10 }}>{vm.errores.documento}</Text>
+              ) : (
+                <View style={{ flexDirection: "row", gap: 6, marginHorizontal: 10, marginTop: -4, marginBottom: 6 }}>
+                  <Ionicons name="information-circle-outline" size={15} color="#6B21A8" style={{ marginTop: 1 }} />
+                  <Text style={{ flex: 1, fontSize: 12, lineHeight: 17, color: "#6B21A8" }}>{t.registro.documento_para_que}</Text>
+                </View>
               )}
 
               {/* Fecha de nacimiento con formato automático DD/MM/AAAA */}

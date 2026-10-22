@@ -228,13 +228,13 @@ export const createStyles = (theme: AppTheme) =>
       width: 8,
       height: 8,
       borderRadius: 4,
-      backgroundColor: "#2FCB8A",
+      backgroundColor: theme.contactAccent,
       marginRight: 6,
     },
 
     statusText: {
       fontSize: 13,
-      color: "#2CA975",
+      color: theme.contactAccent,
     },
 
     // --- BOTONES ---

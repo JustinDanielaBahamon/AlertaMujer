@@ -26,7 +26,8 @@
   "acepto_la": "I accept the",
   "privacidad": "Privacy policy",
   "continuar": "Continue",
-  "ya_cuenta": "Already have an account? Log in"
+  "ya_cuenta": "Already have an account? Log in",
+  "documento_para_que": "We use it so each person has only one account, avoiding fake or duplicate accounts. Your contacts can't see it."
   },
   "inicio": {
   "sin_alertas": "No alerts",
@@ -61,7 +62,6 @@
   "que_deseas": "What would you like to do?",
   "editar": "Edit",
   "tus_contactos": "Your contacts",
-  "disponible": "Available",
   "llamar": "Call",
   "whatsapp": "WhatsApp",
   "ubicacion_boton": "Location",
@@ -69,7 +69,17 @@
   "agregar_desc": "Add people you trust.",
   "buscar_placeholder": "Search by name or phone...",
   "parentesco_default": "Friend",
-  "agregar_corto": "+ Add"
+  "agregar_corto": "+ Add",
+  "estado_app": "Gets your alerts in the app",
+  "estado_cuenta": "Has an account, but no phone registered",
+  "estado_correo": "Only gets them by email",
+  "estado_revisando": "Checking…",
+  "invitar": "Invite to the app",
+  "invitar_mensaje": "Hi {nombre}, I added you as an emergency contact in AlertaMujer. Install the app and sign in with this email ({correo}) so my alerts reach your phone instantly: {url}",
+  "minimo_titulo": "Add at least {total} contacts",
+  "minimo_desc": "You have {n} of {total}. The more people get your alert, the faster help arrives if someone misses it.",
+  "minimo_boton": "Add",
+  "recomendacion": "They can get your alerts by email even without the app, but it's best if they install it: the alert reaches their phone instantly."
   },
   "perfil": {
   "titulo_header": "My profile",
@@ -601,12 +611,12 @@
   "label_celular": "Mobile",
   "info_ubicacion": "This contact will receive your location if you trigger an alert.",
   "vista_previa": "Preview",
-  "disponible": "Available",
   "permiso_galeria_titulo": "Permission required",
   "permiso_galeria_desc": "We need access to your gallery to select a photo.",
   "duplicado_titulo": "Duplicate contact",
   "duplicado_desc": "The number {telefono} is already registered as an emergency contact of {nombre}.",
-  "duplicado_boton": "Got it"
+  "duplicado_boton": "Got it",
+  "recibira": "Will get your alerts by email and, with the app, on their phone"
 },
   "general": {
     "cargando": "Loading...",
@@ -981,5 +991,19 @@
   "conexion": {
     "titulo": "No internet connection",
     "texto": "If you trigger an alert now, it won't go out. Connect to Wi‑Fi or top up your data, and use \"Let them know if I don't arrive\" before you leave."
+  },
+  "completarRegistro": {
+    "titulo": "Complete your sign-up",
+    "intro": "Hi {nombre}, you signed in with Google. To protect your account we need a few more details, like in the regular sign-up. We only ask once.",
+    "telefono": "Mobile phone",
+    "tipo_documento": "Document type",
+    "fecha": "Date of birth",
+    "guardar": "Save and continue",
+    "otra_cuenta": "Use another account",
+    "error_telefono": "Enter a 10-digit mobile number",
+    "error_tipo": "Choose the document type",
+    "error_documento": "Enter your document number",
+    "error_fecha": "Enter a valid date DD/MM/YYYY",
+    "error_guardar": "Couldn't save your details. Check your connection and try again."
   }
 }

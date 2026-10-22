@@ -26,7 +26,8 @@
   "acepto_la": "Aceito a",
   "privacidad": "Política de privacidade",
   "continuar": "Continuar",
-  "ya_cuenta": "Já tem uma conta? Entre"
+  "ya_cuenta": "Já tem uma conta? Entre",
+  "documento_para_que": "Usamos para que cada pessoa tenha uma só conta e evitar contas falsas ou repetidas. Seus contatos não veem."
   },
   "inicio": {
   "sin_alertas": "Sem alertas",
@@ -61,7 +62,6 @@
   "que_deseas": "O que você deseja fazer?",
   "editar": "Editar",
   "tus_contactos": "Seus contatos",
-  "disponible": "Disponível",
   "llamar": "Ligar",
   "whatsapp": "WhatsApp",
   "ubicacion_boton": "Localização",
@@ -69,7 +69,17 @@
   "agregar_desc": "Adicione pessoas de confiança.",
   "buscar_placeholder": "Buscar por nome ou telefone...",
   "parentesco_default": "Amigo",
-  "agregar_corto": "+ Adicionar"
+  "agregar_corto": "+ Adicionar",
+  "estado_app": "Recebe seus alertas no app",
+  "estado_cuenta": "Tem conta, mas nenhum celular registrado",
+  "estado_correo": "Só recebe por e-mail",
+  "estado_revisando": "Verificando…",
+  "invitar": "Convidar para o app",
+  "invitar_mensaje": "Oi {nombre}, adicionei você como contato de emergência no AlertaMujer. Instale o app e entre com este e-mail ({correo}) para receber meus alertas no celular na hora: {url}",
+  "minimo_titulo": "Adicione pelo menos {total} contatos",
+  "minimo_desc": "Você tem {n} de {total}. Quanto mais pessoas recebem seu alerta, mais rápido a ajuda chega se alguém não vir o aviso.",
+  "minimo_boton": "Adicionar",
+  "recomendacion": "Eles podem receber seus alertas por e-mail mesmo sem o app, mas o recomendado é instalar: o aviso chega no celular na hora."
   },
   "perfil": {
   "titulo_header": "Meu perfil",
@@ -601,12 +611,12 @@
   "label_celular": "Celular",
   "info_ubicacion": "Este contato receberá sua localização se você ativar um alerta.",
   "vista_previa": "Pré-visualização",
-  "disponible": "Disponível",
   "permiso_galeria_titulo": "Permissão necessária",
   "permiso_galeria_desc": "Precisamos de acesso à sua galeria para selecionar uma foto.",
   "duplicado_titulo": "Contato duplicado",
   "duplicado_desc": "O número {telefono} já está cadastrado como contato de emergência de {nombre}.",
-  "duplicado_boton": "Entendi"
+  "duplicado_boton": "Entendi",
+  "recibira": "Receberá seus alertas por e-mail e, com o app, no celular"
 },
   "general": {
     "cargando": "Carregando...",
@@ -981,5 +991,19 @@
   "conexion": {
     "titulo": "Sem conexão com a internet",
     "texto": "Se você ativar um alerta agora, ele não sairá. Conecte-se ao Wi‑Fi ou recarregue os dados e use \"Avise se eu não chegar\" antes de sair."
+  },
+  "completarRegistro": {
+    "titulo": "Complete seu cadastro",
+    "intro": "Oi {nombre}, você entrou com o Google. Para proteger sua conta precisamos de mais alguns dados, como no cadastro normal. Só pedimos uma vez.",
+    "telefono": "Celular",
+    "tipo_documento": "Tipo de documento",
+    "fecha": "Data de nascimento",
+    "guardar": "Salvar e continuar",
+    "otra_cuenta": "Usar outra conta",
+    "error_telefono": "Digite um celular de 10 dígitos",
+    "error_tipo": "Escolha o tipo de documento",
+    "error_documento": "Digite o número do documento",
+    "error_fecha": "Digite uma data válida DD/MM/AAAA",
+    "error_guardar": "Não foi possível salvar. Verifique sua conexão e tente de novo."
   }
 }

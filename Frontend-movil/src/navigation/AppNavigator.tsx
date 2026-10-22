@@ -1,5 +1,8 @@
 import { NavigationContainer, useNavigationContainerRef } from "@react-navigation/native";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import CompletarRegistroScreen from "../features/completarRegistro/CompletarRegistroScreen";
+import { perfilIncompleto } from "../features/completarRegistro/perfilIncompleto";
+import { getMe } from "../services/users.service";
 import { useAuth } from "../contexts/AuthContext";
 import type { MainStackParamList } from "./types";
 import AuthNavigator from "./AuthNavigator";
@@ -22,6 +25,24 @@ export default function AppNavigator() {
   // Si hay una alerta propia activa (la app se cerró con la alerta en curso), se vuelve a ella
   useReanudarAlerta(navegacion, !!user && !restoring && user.id !== 0);
 
+  // Cuentas creadas con Google: faltan teléfono, documento y fecha de nacimiento. Si la consulta
+  // falla (sin señal) no se bloquea la app: se vuelve a revisar en la próxima apertura.
+  const [faltanDatos, setFaltanDatos] = useState(false);
+  const sesionReal = !!user && !restoring && user.id !== 0 && user.role_id !== 2;
+  useEffect(() => {
+    if (!sesionReal) {
+      setFaltanDatos(false);
+      return;
+    }
+    let vigente = true;
+    getMe()
+      .then((u) => vigente && setFaltanDatos(perfilIncompleto(u)))
+      .catch(() => {});
+    return () => {
+      vigente = false;
+    };
+  }, [sesionReal, user?.correo]);
+
   if (user && mainEntryRef.current === null) {
     mainEntryRef.current = pendingMainRoute ?? "DrawerHome";
   }
@@ -36,7 +57,9 @@ export default function AppNavigator() {
 
   return (
     <NavigationContainer ref={navegacion}>
-      {user ? (
+      {user && faltanDatos ? (
+        <CompletarRegistroScreen alTerminar={() => setFaltanDatos(false)} />
+      ) : user ? (
         <MainNavigator
           key={user.correo}
           initialRouteName={mainEntryRef.current ?? "DrawerHome"}

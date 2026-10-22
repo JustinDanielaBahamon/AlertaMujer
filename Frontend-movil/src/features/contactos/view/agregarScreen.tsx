@@ -322,7 +322,7 @@ export default function AgregarContacto() {
                 <Text style={styles.previewValue}>{phonePreview}</Text>
                 <View style={styles.previewRow}>
                   <View style={styles.statusDot} />
-                  <Text style={styles.statusText}>{t.agregar.disponible}</Text>
+                  <Text style={styles.statusText}>{t.agregar.recibira}</Text>
                 </View>
               </View>
             </View>
