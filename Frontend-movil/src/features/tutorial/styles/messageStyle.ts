@@ -1,18 +1,18 @@
 import { StyleSheet } from "react-native";
 import { TUTORIAL_PALETTE } from "./tutorialTheme";
 
-// ─── Paleta del módulo Mensajes ───────────────────────────────────────────────
+// ─── Messages module palette ──────────────────────────────────────────────────
 export const MSG_COLORS = {
   ...TUTORIAL_PALETTE,
 };
 
 export const messageStyle = StyleSheet.create({
-  // ── Fondo ──────────────────────────────────────────────────────────────────
+  // ── Background ─────────────────────────────────────────────────────────────
   screenBg: {
     flex: 1,
   },
 
-  // ── Círculos de fondo ──────────────────────────────────────────────────────
+  // ── Background circles ─────────────────────────────────────────────────────
   bgCircleBase: {
     position: "absolute",
   },
@@ -36,7 +36,7 @@ export const messageStyle = StyleSheet.create({
     height: 200,
   },
 
-  // ── ScrollView dentro de la card ───────────────────────────────────────────
+  // ── ScrollView inside the card ─────────────────────────────────────────────
   cardScroll: {
     flex: 1,
   },
@@ -44,7 +44,7 @@ export const messageStyle = StyleSheet.create({
     paddingBottom: 8,
   },
 
-  // ── Etiqueta de sección ────────────────────────────────────────────────────
+  // ── Section label ──────────────────────────────────────────────────────────
   sectionRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -63,7 +63,7 @@ export const messageStyle = StyleSheet.create({
     backgroundColor: MSG_COLORS.sectionLine,
   },
 
-  // ── Fila de característica ─────────────────────────────────────────────────
+  // ── Feature row ────────────────────────────────────────────────────────────
   featureRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -90,7 +90,7 @@ export const messageStyle = StyleSheet.create({
     borderTopRightRadius: 18,
   },
 
-  // ── Ícono ──────────────────────────────────────────────────────────────────
+  // ── Icon ───────────────────────────────────────────────────────────────────
   rowIconWrap: {
     width: 46,
     height: 46,
@@ -103,7 +103,7 @@ export const messageStyle = StyleSheet.create({
     fontSize: 24,
   },
 
-  // ── Texto de fila ──────────────────────────────────────────────────────────
+  // ── Row text ───────────────────────────────────────────────────────────────
   rowTextContainer: {
     flex: 1,
     justifyContent: "center",
@@ -140,7 +140,7 @@ export const messageStyle = StyleSheet.create({
     marginVertical: 14,
   },
 
-  // ── Descripción detallada ──────────────────────────────────────────────────
+  // ── Detailed description ───────────────────────────────────────────────────
   descRow: {
     flexDirection: "row",
     alignItems: "flex-start",
@@ -173,7 +173,7 @@ export const messageStyle = StyleSheet.create({
     lineHeight: 19,
   },
 
-  // ── Card de permisos ───────────────────────────────────────────────────────
+  // ── Permissions card ───────────────────────────────────────────────────────
   permissionsCard: {
     borderRadius: 18,
     padding: 16,
@@ -223,7 +223,7 @@ export const messageStyle = StyleSheet.create({
     letterSpacing: 0.2,
   },
 
-  // ── Overlay advertencia ────────────────────────────────────────────────────
+  // ── Warning overlay ────────────────────────────────────────────────────────
   overlayBg: {
     position: "absolute",
     top: 0, left: 0, right: 0, bottom: 0,

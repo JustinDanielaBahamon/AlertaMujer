@@ -19,7 +19,7 @@ export default function HistoryTab() {
   const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  // Colores por tipo derivados del tema activo
+  // Colors by type derived from the active theme
   const emergencyColors = useMemo(() => getEmergencyColors(theme), [theme]);
   const assistanceColors = useMemo(() => getAssistanceColors(theme), [theme]);
 
@@ -52,7 +52,7 @@ export default function HistoryTab() {
     }
   }, [user?.id]);
 
-  // Cargar al montar y cada vez que la pantalla recibe foco (para ver alertas creadas fuera de aquí).
+  // Load on mount and every time the screen gets focus (to see alerts created elsewhere).
   const isFocused = useIsFocused();
   useFocusEffect(
     useCallback(() => {
@@ -60,7 +60,7 @@ export default function HistoryTab() {
     }, [loadAlerts]),
   );
 
-  // Respaldo: vuelve a cargar cuando el componente está montado y gana foco visible.
+  // Fallback: reload when the component is mounted and becomes visible.
   useEffect(() => {
     if (isFocused) {
       loadAlerts();
@@ -108,13 +108,13 @@ export default function HistoryTab() {
     [filteredAlerts]
   );
 
-  // ─── Render de cada card ──────────────────────────────────────────────────
+  // ─── Render of each card ──────────────────────────────────────────────────
 
   const renderItem = ({ item }: { item: AlertRecord }) => {
     const isEmergency = item.type === "Emergencia";
     const colors = isEmergency ? emergencyColors : assistanceColors;
 
-    // Estado: "Enviada" comparte colores con emergencia / "Cancelada" con asistencia
+    // Status: "Sent" shares colors with emergency / "Cancelled" with assistance
     const badgeBg   = item.status === "Cancelada" ? assistanceColors.badgeBg   : emergencyColors.badgeBg;
     const badgeText = item.status === "Cancelada" ? assistanceColors.badgeText : emergencyColors.badgeText;
 
@@ -126,7 +126,7 @@ export default function HistoryTab() {
       >
         <View style={[styles.card, { borderLeftColor: colors.border }]}>
 
-          {/* ── COLUMNA IZQUIERDA ── */}
+          {/* ── LEFT COLUMN ── */}
           <View style={styles.leftColumn}>
             <View style={[styles.iconContainer, { backgroundColor: colors.iconBg }]}>
               <Image
@@ -137,10 +137,10 @@ export default function HistoryTab() {
             <View style={[styles.decorativeLine, { backgroundColor: colors.line + "55" }]} />
           </View>
 
-          {/* ── COLUMNA DERECHA ── */}
+          {/* ── RIGHT COLUMN ── */}
           <View style={styles.rightColumn}>
 
-            {/* Encabezado: tipo + hora */}
+            {/* Header: type + time */}
             <View style={styles.headerRow}>
               <View style={styles.typePill}>
                 <Text style={[styles.alertType, { color: colors.text }]}>
@@ -153,13 +153,13 @@ export default function HistoryTab() {
               </View>
             </View>
 
-            {/* Fecha */}
+            {/* Date */}
             <Text style={styles.dateText}>
               <MaterialIcons name="event" size={12} color={theme.contactSubtext} />{" "}
               {item.date}
             </Text>
 
-            {/* Ubicación + flecha */}
+            {/* Location + arrow */}
             <View style={styles.locationRow}>
               <Text style={styles.locationText}>
                 <MaterialIcons name="place" size={12} color={theme.contactSubtext} />{" "}
@@ -168,7 +168,7 @@ export default function HistoryTab() {
               <MaterialIcons name="chevron-right" size={22} color={theme.contactSubtext} />
             </View>
 
-            {/* Badge de estado */}
+            {/* Status badge */}
             <View style={[styles.statusBadge, { backgroundColor: badgeBg }]}>
               <Text style={[styles.statusText, { color: badgeText }]}>
                 {item.status.toUpperCase()}
@@ -181,12 +181,12 @@ export default function HistoryTab() {
     );
   };
 
-  // ─── Header de la lista ───────────────────────────────────────────────────
+  // ─── List header ──────────────────────────────────────────────────────────
 
   const ListHeader = useMemo(
     () => (
       <View>
-        {/* HEADER GRADIENTE */}
+        {/* GRADIENT HEADER */}
         <View style={styles.header}>
           <LinearGradient
             colors={[theme.headercolor1, theme.headercolor2]}
@@ -209,7 +209,7 @@ export default function HistoryTab() {
           </LinearGradient>
         </View>
 
-        {/* BUSCADOR */}
+        {/* SEARCH */}
         <View style={styles.searchContainer}>
           <MaterialIcons
             name="search"
@@ -231,7 +231,7 @@ export default function HistoryTab() {
           )}
         </View>
 
-        {/* ESTADÍSTICAS */}
+        {/* STATISTICS */}
         <View style={styles.statsCard}>
           <View style={styles.statItem}>
             <Text style={styles.statLabel}>{t.historial.stats_total}</Text>

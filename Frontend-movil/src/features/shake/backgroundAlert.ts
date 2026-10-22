@@ -6,16 +6,16 @@ import { reportLocation } from "../../services/location-reporter.service";
 import ShakeSensor from "../../../modules/shake-sensor";
 
 /**
- * Alerta activada al agitar el teléfono sin tener la app en pantalla: se crea directamente en el
- * backend (que avisa a los contactos) y la ubicación se sigue enviando cada 30 s hasta que la
- * usuaria abra la app y la pantalla de alerta activa tome el control. Las esperas son nativas: los
- * setTimeout de JS pueden quedarse quietos con la pantalla apagada.
+ * Alert activated by shaking the phone without the app on screen: it is created directly in the
+ * backend (which notifies the contacts) and the location keeps being sent every 30 s until the
+ * user opens the app and the active alert screen takes over. The waits are native: JS
+ * setTimeout can stand still with the screen off.
  */
 
-// Debe coincidir con la clave de AuthContext (no se importa para no cargar React en el servicio)
+// Must match the AuthContext key (not imported so React is not loaded in the service)
 const SESSION_KEY = "@alerta_mujer:auth";
 const INTERVAL_MS = 30 * 1000;
-const MAX_MS = 3 * 60 * 60 * 1000; // el backend expira la alerta antes; esto solo evita un bucle eterno
+const MAX_MS = 3 * 60 * 60 * 1000; // the backend expires the alert earlier; this only avoids an endless loop
 
 let alertInProgress: number | null = null;
 
@@ -45,7 +45,7 @@ export async function createShakeAlert(method: keyof typeof METHODS = "agitar"):
   if (!user) throw new Error("No hay sesión iniciada");
 
   const [device, location] = await Promise.all([getOrCreateDevice(), locationForAlert()]);
-  // Con reintentos: si la red falla o el servidor está despertando, no se pierde la alerta
+  // With retries: if the network fails or the server is waking up, the alert is not lost
   const alert = await createAlertWithRetries({
     userProfileId: user.id,
     deviceId: device.id,
@@ -66,8 +66,8 @@ async function followLocation(alertId: number, startTime: number) {
   while (alertInProgress === alertId && Date.now() - startTime <= MAX_MS) {
     await ShakeSensor.wait(INTERVAL_MS);
     if (alertInProgress !== alertId) return;
-    // Si la alerta ya terminó (la cerró un contacto o la administración, o venció), se suelta: si no,
-    // el servicio la seguiría dando por "en curso" e ignoraría las sacudidas siguientes
+    // If the alert already ended (a contact or the administration closed it, or it expired), it is released: otherwise
+    // the service would keep treating it as "in progress" and ignore the next shakes
     if (!(await stillActive(alertId))) break;
     const u = await currentLocation();
     if (u && alertInProgress === alertId) {
@@ -82,7 +82,7 @@ async function followLocation(alertId: number, startTime: number) {
   if (alertInProgress === alertId) alertInProgress = null;
 }
 
-/** Sin conexión no se sabe: se asume que sigue activa para no dejar de enviar la ubicación. */
+/** Offline we cannot know: assume it is still active so the location keeps being sent. */
 async function stillActive(alertId: number): Promise<boolean> {
   try {
     return (await getAlert(alertId)).status === "active";
@@ -91,7 +91,7 @@ async function stillActive(alertId: number): Promise<boolean> {
   }
 }
 
-/** La pantalla de alerta activa se encarga desde ahora (o la alerta terminó): deja de enviar ubicación. */
+/** The active alert screen takes over from now on (or the alert ended): stop sending the location. */
 export function takeOverAlert(): void {
   alertInProgress = null;
 }

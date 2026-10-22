@@ -1,6 +1,6 @@
 import api from "./api";
 
-/** Mensaje del chat de una alerta. deElla: lo escribió quien activó la alerta. */
+/** A message in an alert chat. deElla: written by the person who activated the alert. */
 export interface AlertMessage {
   id: number;
   deElla: boolean;
@@ -9,7 +9,7 @@ export interface AlertMessage {
   time: Date;
 }
 
-// El backend devuelve LocalDateTime en UTC sin 'Z' (igual que en alerts.service.ts)
+// The backend returns LocalDateTime in UTC without 'Z' (same as in alerts.service.ts)
 const toDate = (iso?: string | null): Date => {
   if (!iso) return new Date();
   const d = new Date(iso + (iso.endsWith("Z") || iso.includes("+") ? "" : "Z"));
@@ -24,7 +24,7 @@ export const toMessage = (m: any): AlertMessage => ({
   time: toDate(m.createdAt),
 });
 
-/** Quién escribe: la dueña de la alerta (con su sesión) o un contacto (con el código del seguimiento). */
+/** Who writes: the alert owner (with her session) or a contact (with the tracking code). */
 export type ChatParticipant =
   | { type: "duena"; alertId: number }
   | { type: "contacto"; code: string; name: string };

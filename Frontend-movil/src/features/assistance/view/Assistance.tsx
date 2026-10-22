@@ -95,7 +95,7 @@ export default function Assistance() {
         </LinearGradient>
       </View>
 
-      {/* CONTENIDO SCROLLABLE */}
+      {/* SCROLLABLE CONTENT */}
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 30 }}
@@ -111,7 +111,7 @@ export default function Assistance() {
             <Text style={{ color: '#E74C3C', textAlign: 'center' }}>{error}</Text>
           )}
 
-          {/* EMERGENCIA */}
+          {/* EMERGENCY */}
           {emergencyResource && (
           <LinearGradient
             colors={emergencyGradient}
@@ -136,7 +136,7 @@ export default function Assistance() {
           </LinearGradient>
           )}
 
-          {/* SECCIÓN DOBLE: VIOLENCIA Y SALUD MENTAL */}
+          {/* DOUBLE SECTION: VIOLENCE AND MENTAL HEALTH */}
           <View style={styles.SecondSection}>
 
             {violenceResource && (
@@ -181,7 +181,7 @@ export default function Assistance() {
 
           </View>
 
-          {/* TERCERA SECCIÓN: DEFENSORÍA */}
+          {/* THIRD SECTION: OMBUDSMAN */}
           {ombudsmanResource && (
           <View style={styles.ThirdSection}>
             <LinearGradient

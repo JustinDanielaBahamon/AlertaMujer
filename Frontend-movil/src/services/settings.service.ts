@@ -1,10 +1,10 @@
 import api from "./api";
 
-/** Ajustes del sistema que la administración define en el panel (GET /api/settings). */
+/** System settings the administration defines in the panel (GET /api/settings). */
 export interface PublicSettings {
   minAppVersion: string | null;
   emergencyPhoneNumber: string | null;
-  /** Minutos tras los cuales el servidor da por terminada una alerta activa. */
+  /** Minutes after which the server considers an active alert finished. */
   sosMaxDurationMinutes: number | null;
 }
 

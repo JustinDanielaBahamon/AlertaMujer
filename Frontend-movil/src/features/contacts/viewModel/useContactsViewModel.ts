@@ -1,13 +1,13 @@
 /**
- * VIEWMODEL DE CONTACTOS (MVVM)
- * 
- * Maneja toda la lógica de la lista de contactos:
- * - Estado de la lista de contactos
- * - Modal de acciones (abrir/cerrar)
- * - Confirmación de borrado
- * - Navegación a agregar/editar
- * 
- * La vista (contactos.tsx) solo consume este ViewModel.
+ * CONTACTS VIEWMODEL (MVVM)
+ *
+ * Handles all the logic of the contact list:
+ * - Contact list state
+ * - Actions modal (open/close)
+ * - Delete confirmation
+ * - Navigation to add/edit
+ *
+ * The view (contacts.tsx) only consumes this ViewModel.
  */
 
 import { useCallback, useState ,useMemo} from "react";
@@ -22,7 +22,7 @@ import { getMainStackNavigation } from "../../../navigation/navigationHelpers";
 import { useContactsContext } from "../../../contexts/ContactsContext";
 
 /**
- * Formatea un teléfono de 10 dígitos a formato: 317 686 6754
+ * Formats a 10-digit phone as: 317 686 6754
  */
 function formatPhoneForDisplay(phoneNumber: string): string {
   const digitsOnly = phoneNumber.replace(/\D/g, "");
@@ -32,7 +32,7 @@ function formatPhoneForDisplay(phoneNumber: string): string {
   return phoneNumber;
 }
 
-/** Con menos de estos contactos es fácil que nadie vea la alerta a tiempo. */
+/** With fewer contacts than this it is easy for nobody to see the alert in time. */
 export const RECOMMENDED_CONTACTS = 5;
 
 export function useContactsTabViewModel() {
@@ -43,13 +43,13 @@ export function useContactsTabViewModel() {
   const [refreshing, setRefreshing] = useState(false);
 
   /**
-   * RECARGAR AL ENFOCAR LA PANTALLA
-   * Igual que en Historial: cada vez que el usuario entra a la pestaña
-   * de Contactos, se vuelve a pedir la lista al backend. Así, si el
-   * contacto se creó/editó/borró en otro lado (web, u otra sesión),
-   * la móvil siempre muestra lo último al abrir la pantalla.
+   * RELOAD WHEN THE SCREEN GETS FOCUS
+   * Same as in History: every time the user opens the Contacts
+   * tab, the list is requested again from the backend. That way, if a
+   * contact was created/edited/deleted elsewhere (web, or another session),
+   * the app always shows the latest when the screen opens.
    */
-  // Estado real de cada contacto (antes decía "Disponible" sin revisar nada)
+  // Real status of each contact (it used to say "Available" without checking anything)
   const [appStatus, setAppStatus] = useState<Record<string, ContactAppStatus>>({});
   const loadAppStatus = useCallback(() => {
     contactsService.getAppStatus().then(setAppStatus).catch(() => {});
@@ -62,7 +62,7 @@ export function useContactsTabViewModel() {
     }, [refreshContacts, loadAppStatus]),
   );
 
-  /** Comparte el enlace de la app para que el contacto reciba las alertas también en su celular. */
+  /** Shares the app link so the contact also gets the alerts on their phone. */
   const inviteToApp = useCallback((contact: Contact) => {
     const message = t.contactos.invitar_mensaje
       .replace("{nombre}", (contact.name || "").split(" ")[0] || "")
@@ -72,8 +72,8 @@ export function useContactsTabViewModel() {
   }, [t]);
 
   /**
-   * PULL TO REFRESH (deslizar hacia abajo para recargar)
-   * Mismo comportamiento que tiene el módulo de Historial.
+   * PULL TO REFRESH (swipe down to reload)
+   * Same behavior as the History module.
    */
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -91,37 +91,37 @@ export function useContactsTabViewModel() {
       const phoneStr = c.phoneNumber || '';
       return nameStr.includes(searchText.toLowerCase()) || phoneStr.includes(searchText);
     }),
-    [contacts, searchText]  // ← solo recalcula cuando estos dos cambian
+    [contacts, searchText]  // ← only recomputed when these two change
   );
-  // Estado: ¿Está abierto el modal de acciones?
+  // State: is the actions modal open?
   const [modalVisible, setModalVisible] = useState(false); 
 
   
-  // Estado: ¿Qué contacto se seleccionó?
+  // State: which contact was selected?
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
 
   /**
-   * ABRIR MODAL DE ACCIONES
-   * Se ejecuta cuando el usuario toca un contacto.
+   * OPEN ACTIONS MODAL
+   * Runs when the user taps a contact.
    */
   const openActionsModal = useCallback((contact: Contact) => {
-    setSelectedContact(contact); // Guardar cuál contacto tocó
-    setModalVisible(true);              // Mostrar el modal
+    setSelectedContact(contact); // Remember which contact was tapped
+    setModalVisible(true);              // Show the modal
   }, []);
 
   /**
-   * CERRAR MODAL DE ACCIONES
+   * CLOSE ACTIONS MODAL
    */
   const closeActionsModal = useCallback(() => {
     setModalVisible(false);
-    // Esperar a que termine la animación antes de limpiar
+    // Wait for the animation to end before clearing
     setTimeout(() => setSelectedContact(null), 300);
   }, []);
 
   /**
-   * NAVEGAR A AGREGAR/EDITAR CONTACTO
-   * Si recibe un contacto, abre en modo "editar" (con datos precargados).
-   * Si no recibe contacto, abre en modo "crear nuevo".
+   * NAVIGATE TO ADD/EDIT CONTACT
+   * If it receives a contact, it opens in "edit" mode (with preloaded data).
+   * If it does not receive a contact, it opens in "create new" mode.
    */
   const navigateAddOrEdit = useCallback(
     (contact?: Contact) => {
@@ -130,10 +130,10 @@ export function useContactsTabViewModel() {
         return;
       }
       if (contact) {
-        // Modo editar: pasar el contacto como parámetro
+        // Edit mode: pass the contact as a param
         main.navigate("AddContact", { contact: contact });
       } else {
-        // Modo crear nuevo
+        // Create-new mode
         main.navigate("AddContact", undefined);
       }
     },
@@ -141,16 +141,16 @@ export function useContactsTabViewModel() {
   );
 
   /**
-   * IR A AGREGAR NUEVO CONTACTO
-   * Se ejecuta al tocar el botón flotante "+"
+   * GO TO ADD A NEW CONTACT
+   * Runs when the floating "+" button is tapped
    */
   const goToAddContact = useCallback(() => {
     navigateAddOrEdit(undefined);
   }, [navigateAddOrEdit]);
 
   /**
-   * ALERTA INDIVIDUAL
-   * Inicia la alerta normal (pantalla de 5 segundos) pero solo para este contacto.
+   * INDIVIDUAL ALERT
+   * Starts the normal alert (5-second screen) but only for this contact.
    */
   const alertContact = useCallback(
     (contact: Contact) => {
@@ -164,8 +164,8 @@ export function useContactsTabViewModel() {
   );
 
   /**
-   * CONFIRMAR BORRADO
-   * Muestra un Alert nativo de confirmación antes de borrar.
+   * CONFIRM DELETION
+   * Shows a native confirmation Alert before deleting.
    */
   const confirmDelete = useCallback((contact: Contact) => {
     Alert.alert(
@@ -185,8 +185,8 @@ export function useContactsTabViewModel() {
   }, [removeContact]);
 
   /**
-   * ACCIÓN: ACTUALIZAR
-   * Se ejecuta cuando el usuario toca "Actualizar" en el modal.
+   * ACTION: UPDATE
+   * Runs when the user taps "Update" in the modal.
    */
   const handleUpdate = useCallback(() => {
     if (selectedContact) {
@@ -195,8 +195,8 @@ export function useContactsTabViewModel() {
   }, [selectedContact, navigateAddOrEdit]);
 
   /**
-   * ACCIÓN: BORRAR
-   * Se ejecuta cuando el usuario toca "Borrar" en el modal.
+   * ACTION: DELETE
+   * Runs when the user taps "Delete" in the modal.
    */
   const handleDelete = useCallback(() => {
     if (selectedContact) {
@@ -205,16 +205,16 @@ export function useContactsTabViewModel() {
   }, [selectedContact, confirmDelete]);
 
   /**
-   * BORRAR CON SWIPE (deslizar)
-   * Se ejecuta cuando el usuario desliza un contacto hacia la izquierda.
+   * DELETE WITH SWIPE
+   * Runs when the user swipes a contact to the left.
    */
   const deleteWithSwipe = useCallback((contact: Contact) => {
     confirmDelete(contact);
   }, [confirmDelete]);
 
-  // Retornar todo lo que la vista necesita
+  // Return everything the view needs
   return {
-    // Estado
+    // State
     contacts: contacts,
     modalVisible,
     selectedContact: selectedContact,
@@ -226,10 +226,10 @@ export function useContactsTabViewModel() {
     missingContacts: Math.max(0, RECOMMENDED_CONTACTS - contacts.length),
     inviteToApp: inviteToApp,
     
-    // Funciones de utilidad
+    // Utility functions
     formatPhoneForDisplay: formatPhoneForDisplay,
     filteredContacts: filteredContacts,
-    // Acciones
+    // Actions
     openActionsModal: openActionsModal,
     closeActionsModal: closeActionsModal,
     handleUpdate: handleUpdate,

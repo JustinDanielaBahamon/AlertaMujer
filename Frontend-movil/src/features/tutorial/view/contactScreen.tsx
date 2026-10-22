@@ -11,7 +11,7 @@ import { useContactTutorialViewModel, type ContactFeatureItem, } from "../viewMo
 import { useLocale } from "../../../contexts/LocaleContext";
 import { useTutorialPage } from "../component/TutorialPager";
 
-// ─── Círculos decorativos de fondo ───────────────────────────────────────────
+// ─── Decorative background circles ───────────────────────────────────────────
 function BackgroundCircles() {
   const { isActive } = useTutorialPage();
   const f1 = useRef(new Animated.Value(0)).current;
@@ -26,7 +26,7 @@ function BackgroundCircles() {
           Animated.timing(anim, { toValue: 0,   duration: dur,         useNativeDriver: true }),
         ])
       );
-    // Solo se animan los círculos de la página que se está viendo (antes corrían los de todas)
+    // Only the circles of the visible page are animated (before, every page's ran)
     if (!isActive) return;
     const loops = [
       float(f1, 3200, 0),
@@ -61,7 +61,7 @@ function BackgroundCircles() {
   );
 }
 
-// ─── Fila de característica animada ──────────────────────────────────────────
+// ─── Animated feature row ────────────────────────────────────────────────────
 function FeatureRow({ item, enterDelay }: { item: ContactFeatureItem; enterDelay: number }) {
   const slideAnim   = useRef(new Animated.Value(28)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -103,7 +103,7 @@ function FeatureRow({ item, enterDelay }: { item: ContactFeatureItem; enterDelay
   );
 }
 
-// ─── Pantalla principal ───────────────────────────────────────────────────────
+// ─── Main screen ─────────────────────────────────────────────────────────────
 interface Props {
    externalVm?: ReturnType<typeof useContactTutorialViewModel>;
 }
@@ -113,7 +113,7 @@ export default function ContactsScreen({  externalVm }: Props) {
   const internalVm = useContactTutorialViewModel();
   const vm =  externalVm ?? internalVm;
 
-  // ── Animación card spring ────────────────────────────────────────────────
+  // ── Card spring animation ────────────────────────────────────────────────
   const cardAnim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.spring(cardAnim, {
@@ -153,7 +153,7 @@ export default function ContactsScreen({  externalVm }: Props) {
           />
         </View>
 
-        {/* Card animada */}
+        {/* Animated card */}
         <Animated.View style={[{ flex: 1 }, cardAnimStyle]}>
           <Card title={`${t.tutorial.contacto_titulo_1}\n`} titleHighlight={t.tutorial.contacto_titulo_2}>
             <ScrollView
@@ -163,7 +163,7 @@ export default function ContactsScreen({  externalVm }: Props) {
               scrollEventThrottle={16}
               nestedScrollEnabled={true}
             >
-              {/* Sección principal */}
+              {/* Main section */}
               <View style={contactStyle.sectionRow}>
                 <Text style={contactStyle.sectionLabel}>{t.tutorial.contacto_red_familia_titulo}</Text>
                 <View style={contactStyle.sectionLine} />
@@ -179,7 +179,7 @@ export default function ContactsScreen({  externalVm }: Props) {
 
               <View style={contactStyle.divider} />
 
-              {/* Detalle descriptivo */}
+              {/* Descriptive detail */}
               <View style={{ gap: 4 }}>
                 {vm.featureRows.map((item) => (
                   <View key={`desc-${item.id}`} style={contactStyle.descRow}>
@@ -199,7 +199,7 @@ export default function ContactsScreen({  externalVm }: Props) {
 
               <View style={contactStyle.divider} />
 
-              {/* Sección permisos */}
+              {/* Permissions section */}
               <View style={contactStyle.sectionRow}>
                 <Text style={contactStyle.sectionLabel}>{t.tutorial.contacto_permisos_titulo}</Text>
                 <View style={contactStyle.sectionLine} />
@@ -229,7 +229,7 @@ export default function ContactsScreen({  externalVm }: Props) {
 
       </SafeAreaView>
 
-      {/* Overlay advertencia — lógica original intacta */}
+      {/* Warning overlay — original logic untouched */}
       {vm.showWarning && (
         <View style={contactStyle.overlayBg}>
           <View style={contactStyle.warningBox}>

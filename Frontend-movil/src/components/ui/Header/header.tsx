@@ -29,7 +29,7 @@ export default function AppHeader() {
         <Text style={[styles.menuIcon, { color: theme.headerText }]}>☰</Text>
       </TouchableOpacity>
 
-      {/* ✅ theme.logo ya trae el logo correcto según el tema activo */}
+      {/* ✅ theme.logo already has the right logo for the active theme */}
       <Image
         source={theme.logo}
         style={styles.logo}

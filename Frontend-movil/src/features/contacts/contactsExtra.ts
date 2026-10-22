@@ -1,10 +1,10 @@
 import type { AppLocale } from "../../contexts/LocaleContext";
 
 /**
- * Validación estricta de correo:
- * - sin espacios
- * - usuario con letras, números y . _ % + -
- * - dominio válido y extensión de al menos 2 letras
+ * Strict email validation:
+ * - no spaces
+ * - user part with letters, numbers and . _ % + -
+ * - valid domain and an extension of at least 2 letters
  */
 export const EMAIL_REGEX =
   /^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/;
@@ -23,10 +23,10 @@ type ExtraTexts = {
   correo_invalido_desc: string;
   alerta_boton: string;
   alerta_titulo: string;
-  alerta_desc: string; // usa {nombre}
+  alerta_desc: string; // uses {nombre}
   alerta_enviar: string;
   alerta_cancelar: string;
-  alerta_mensaje: string; // usa {ubicacion}
+  alerta_mensaje: string; // uses {ubicacion}
   alerta_sin_ubicacion: string;
   alerta_error: string;
 };

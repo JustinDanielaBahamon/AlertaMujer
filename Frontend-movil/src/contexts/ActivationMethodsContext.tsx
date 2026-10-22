@@ -13,7 +13,7 @@ const STORAGE_KEY = "alertamujer_metodos_activacion";
 export type MethodId = "boton" | "contacto" | "agitar" | "encendido" | "bloqueo" | "widget";
 export type MethodsConfig = Record<MethodId, boolean>;
 
-// Botón y alerta a un contacto vienen activos; los demás los enciende la usuaria
+// Button and alert to a contact start enabled; the user turns on the others
 const DEFAULT_CONFIG: MethodsConfig = {
   boton: true,
   contacto: true,
@@ -35,7 +35,7 @@ export function ActivationMethodsProvider({ children }: { children: React.ReactN
   const [config, setConfig] = useState<MethodsConfig>(DEFAULT_CONFIG);
   const [loaded, setLoaded] = useState(false);
 
-  // Al abrir la app, lee lo que la usuaria dejó guardado
+  // When the app opens, read what the user saved
   useEffect(() => {
     (async () => {
       try {
@@ -49,7 +49,7 @@ export function ActivationMethodsProvider({ children }: { children: React.ReactN
     })();
   }, []);
 
-  // Guarda cada cambio (solo después de haber leído lo guardado)
+  // Save every change (only after the saved values were read)
   useEffect(() => {
     if (!loaded) return;
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(config)).catch((e) =>

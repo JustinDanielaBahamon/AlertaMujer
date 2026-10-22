@@ -2,7 +2,7 @@ import * as Location from "expo-location";
 
 export type PointPlace = {
   neighborhood: string | null; // barrio / sector
-  place: string | null; // sitio (almacén, colegio...) o, si no hay, la vía (ej. "Carrera 7")
+  place: string | null; // place (store, school...) or, if none, the street (e.g. "Carrera 7")
 };
 
 const clear = (v?: string | null) => {
@@ -10,8 +10,8 @@ const clear = (v?: string | null) => {
   return s ? s : null;
 };
 
-// OpenStreetMap (Nominatim): gratis y sin clave. Devuelve barrio, vía y nombre del sitio.
-// Su política pide máximo 1 consulta por segundo (el ViewModel respeta ese ritmo).
+// OpenStreetMap (Nominatim): free and without a key. Returns neighborhood, street and place name.
+// Its policy asks for at most 1 query per second (the ViewModel keeps that pace).
 async function fromNominatim(lat: number, lng: number): Promise<PointPlace | null> {
   const url =
     `https://nominatim.openstreetmap.org/reverse?format=jsonv2` +
@@ -34,13 +34,13 @@ async function fromNominatim(lat: number, lng: number): Promise<PointPlace | nul
   const via = clear(a.road);
   const name = clear(data?.name);
   const streetWithNumber = via ? (a.house_number ? `${via} #${a.house_number}` : via) : null;
-  // Si el punto cae sobre un sitio con nombre (almacén, colegio...), se muestra ese nombre.
+  // If the point falls on a named place (store, school...), that name is shown.
   const place = name && name !== via && name !== neighborhood ? name : streetWithNumber;
 
   return { neighborhood, place };
 }
 
-// Respaldo: geocodificador del propio teléfono.
+// Fallback: the phone's own geocoder.
 async function fromPhone(lat: number, lng: number): Promise<PointPlace | null> {
   const [dir] = await Location.reverseGeocodeAsync({ latitude: lat, longitude: lng });
   if (!dir) return null;
@@ -55,7 +55,7 @@ export async function getPlace(lat: number, lng: number): Promise<PointPlace | n
     const r = await fromNominatim(lat, lng);
     if (r && (r.neighborhood || r.place)) return r;
   } catch {
-    // sin internet o servicio caído: se prueba el respaldo
+    // no internet or service down: try the fallback
   }
   try {
     return await fromPhone(lat, lng);
@@ -64,6 +64,6 @@ export async function getPlace(lat: number, lng: number): Promise<PointPlace | n
   }
 }
 
-// Texto para mostrar: "Carrera 7 · Barrio Quebraditas" (o solo lo que haya).
+// Text to show: "Carrera 7 · Barrio Quebraditas" (or only what is available).
 export const placeDescription = (l: PointPlace) =>
   [l.place, l.neighborhood].filter(Boolean).join(" · ");

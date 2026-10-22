@@ -2,11 +2,11 @@ import React from "react";
 import { Image, StyleSheet, View, useWindowDimensions } from "react-native";
 import { PRELOAD_IMAGES } from "../../../contexts/ThemeContext";
 
-// Monta todas las imágenes de los temas fuera de la vista para que queden
-// decodificadas en memoria. Así, al cambiar de color aparecen al instante.
+// Mounts every theme image off screen so they stay
+// decoded in memory. That way they appear instantly when the color changes.
 export default function ImagePreload() {
   const { width } = useWindowDimensions();
-  const tam = Math.round(width * 0.68 * 1.1); // mismo tamaño que el botón de Inicio
+  const tam = Math.round(width * 0.68 * 1.1); // same size as the Home button
 
   return (
     <View pointerEvents="none" style={styles.hidden}>

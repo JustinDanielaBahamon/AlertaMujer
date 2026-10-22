@@ -2,9 +2,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Keyboard, ScrollView, View, useWindowDimensions } from "react-native";
 
 /**
- * Con edge-to-edge Android no achica la pantalla al abrir el teclado: el chat quedaba debajo.
- * Devuelve el espacio a dejar al final del ScrollView (la altura del teclado) y una función para
- * el foco del chat que desplaza la pantalla hasta dejar el campo de texto justo encima del teclado.
+ * With edge-to-edge Android does not shrink the screen when the keyboard opens: the chat ended up below it.
+ * Returns the space to leave at the end of the ScrollView (the keyboard height) and a function for
+ * the chat focus that scrolls the screen until the text field sits right above the keyboard.
  */
 export function useChatAboveKeyboard() {
   const scrollRef = useRef<ScrollView>(null);
@@ -20,7 +20,7 @@ export function useChatAboveKeyboard() {
       const chat = chatRef.current;
       if (!scroll || !chat) return;
       chat.measureInWindow((_x, y, _width, height) => {
-        // Cuánto tapa el teclado el borde inferior del chat (con un pequeño margen)
+        // How much the keyboard covers the bottom edge of the chat (with a small margin)
         const covered = y + height - (screenHeight - keyboard) + 16;
         if (covered > 0) scroll.scrollTo({ y: scrollOffset.current + covered, animated: true });
       });
@@ -31,7 +31,7 @@ export function useChatAboveKeyboard() {
   useEffect(() => {
     const show = Keyboard.addListener("keyboardDidShow", (e) => {
       setKeyboardHeight(e.endCoordinates.height);
-      // Se espera a que el ScrollView tenga el espacio extra antes de medir
+      // Wait until the ScrollView has the extra space before measuring
       if (wantsChat.current) setTimeout(() => goToChat(e.endCoordinates.height), 50);
     });
     const hide = Keyboard.addListener("keyboardDidHide", () => {
@@ -44,9 +44,9 @@ export function useChatAboveKeyboard() {
     };
   }, [goToChat]);
 
-  /** Para el ScrollView: guarda su desplazamiento actual (lo usa llevarAlChat). */
+  /** For the ScrollView: stores its current offset (used by goToChat). */
   const onScroll = useCallback((e: { nativeEvent: { contentOffset: { y: number } } }) => {
-    scrollOffset.current = e.nativeEvent.contentOffset.y; // en un ref: no re-renderiza al desplazar
+    scrollOffset.current = e.nativeEvent.contentOffset.y; // in a ref: no re-render while scrolling
   }, []);
 
   const onChatFocus = useCallback(() => {

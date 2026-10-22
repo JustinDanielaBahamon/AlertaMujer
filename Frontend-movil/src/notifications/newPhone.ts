@@ -2,8 +2,8 @@ import notifee, { AndroidImportance } from "@notifee/react-native";
 import { bigStyle } from "./notificationStyle";
 
 /**
- * Aviso cuando se entra a la cuenta desde otro celular (push NUEVO_CELULAR del backend). La cuenta
- * puede estar en varios celulares; la ubicación del día a día se toma del usado más recientemente.
+ * Notice when the account is opened from another phone (NUEVO_CELULAR push from the backend). The account
+ * can be on several phones; the daily location is taken from the most recently used one.
  */
 export function isNewPhone(data: Record<string, unknown> | undefined): boolean {
   return !!data && data.tipo === "NUEVO_CELULAR";

@@ -19,7 +19,7 @@ export default function NotificationsScreen() {
   const n = t.notificaciones;
   const accent = theme.icon;
 
-  // Tarjeta de estado: lo que el celular debe permitir para que la alarma llegue
+  // Status card: what the phone must allow for the alarm to arrive
   const renderStatus = (
     icon: IonIcon,
     title: string,
@@ -84,7 +84,7 @@ export default function NotificationsScreen() {
           true,
         )}
 
-        {/* Tipos de aviso: las emergencias no se pueden silenciar */}
+        {/* Notice types: emergencies cannot be silenced */}
         <Text style={[local.section, { color: theme.headerText }]}>{n.seccion_tipos}</Text>
         <View style={styles.card}>
           {types.map((type, i) => (

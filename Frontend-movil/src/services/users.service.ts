@@ -1,6 +1,6 @@
 import api from './api';
 
-// Estructura real que devuelve el backend (User entity)
+// Real structure the backend returns (User entity)
 export interface UserApi {
   id: number;
   firstName: string;
@@ -11,7 +11,7 @@ export interface UserApi {
   documentNumber?: string;
   documentType?: string;
   birthdate?: string;
-  profilePhoto?: string | null; // data URI de la foto de perfil
+  profilePhoto?: string | null; // data URI of the profile photo
   createdAt: string;
 }
 
@@ -21,8 +21,8 @@ export interface UpdateMePayload {
   telephone?: string;
   documentNumber?: string;
   documentType?: string;
-  birthdate?: string; // formato yyyy-MM-dd
-  profilePhoto?: string; // data URI; "" la quita
+  birthdate?: string; // yyyy-MM-dd format
+  profilePhoto?: string; // data URI; "" removes it
 }
 
 export const getMe = async (): Promise<UserApi> => {
@@ -35,12 +35,12 @@ export const updateMe = async (updates: UpdateMePayload): Promise<UserApi> => {
   return response.data;
 };
 
-/** Palabra que la usuaria escribe para confirmar que quiere eliminar su cuenta. */
+/** Word the user types to confirm she wants to delete her account. */
 export const DELETE_CONFIRMATION = 'ELIMINAR';
 
 /**
- * Elimina la cuenta de la usuaria en sesión: se borran sus datos personales, contactos, ubicaciones
- * y grabaciones. No se puede deshacer.
+ * Deletes the signed-in user's account: her personal data, contacts, locations
+ * and recordings are deleted. It cannot be undone.
  */
 export const deleteMyAccount = async (confirmation: string): Promise<void> => {
   await api.delete('/api/users/me', { data: { confirmation: confirmation } });

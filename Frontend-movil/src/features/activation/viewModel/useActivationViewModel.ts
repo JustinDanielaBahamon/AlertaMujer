@@ -13,14 +13,14 @@ type ActivationRoute = RouteProp<MainStackParamList, "Activation">;
 export function useActivationViewModel() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<ActivationRoute>();
-  // Si viene un contacto, la alerta es solo para esa persona (no para todos)
+  // If a contact comes in, the alert is only for that person (not for everyone)
   const contact = route.params?.contact;
   const method = route.params?.method;
   const { config } = useNotifications();
   const { recordVideo, recordAudio } = useEvidence();
   const [counter, setCounter] = useState(5);
 
-  // Evita navegar dos veces (por ejemplo, si se toca "Activar ahora" justo cuando el conteo llega a 0)
+  // Avoids navigating twice (for example, if "Activate now" is tapped right when the countdown reaches 0)
   const alreadyNavigatedRef = useRef(false);
 
   const goToActiveAlert = useCallback(() => {
@@ -31,7 +31,7 @@ export function useActivationViewModel() {
 
   useEffect(() => {
     if (counter > 0) {
-      // Una vibración corta por cada segundo del conteo (5, 4, 3, 2, 1)
+      // A short vibration for each second of the countdown (5, 4, 3, 2, 1)
       if (config.vibracion) Vibration.vibrate(200);
       const timer = setTimeout(() => setCounter((c) => c - 1), 1000);
       return () => clearTimeout(timer);
@@ -40,7 +40,7 @@ export function useActivationViewModel() {
     return undefined;
   }, [counter, goToActiveAlert, config.vibracion]);
 
-  // Salta el conteo y va directo a la pantalla de alerta activa
+  // Skips the countdown and goes straight to the active alert screen
   const activateNow = useCallback(() => {
     goToActiveAlert();
   }, [goToActiveAlert]);

@@ -65,12 +65,12 @@ export function useClassifyZoneViewModel(
     setDescription(text.slice(0, MAX_DESCRIPTION_LENGTH));
   }, []);
 
-  //  Obtener la ubicación actual mediante GPS y reverse geocoding con alta precisión
+  // Get the current location with GPS and high-accuracy reverse geocoding
   const getCurrentLocation = useCallback(async () => {
     try {
       setGettingLocation(true);
 
-      // Usar el servicio centralizado de ubicación con alta precisión
+      // Use the central high-accuracy location service
       const location = await LocationService.getFullLocation();
 
       if (location) {

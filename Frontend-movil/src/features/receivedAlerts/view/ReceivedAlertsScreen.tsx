@@ -34,7 +34,7 @@ export default function ReceivedAlertsScreen() {
   const vm = useReceivedAlertsViewModel();
   const accent = theme.icon;
 
-  // Anteriores agrupadas por día: "Hoy", "Ayer" o la fecha
+  // Previous ones grouped by day: "Today", "Yesterday" or the date
   const groups = useMemo(() => {
     const today = new Date();
     const yesterday = new Date(today.getTime() - 86400000);
@@ -69,7 +69,7 @@ export default function ReceivedAlertsScreen() {
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={false} onRefresh={vm.reload} tintColor={theme.headerText} colors={[accent]} />}
       >
-        {/* Qué es esta pantalla: no son las alertas propias */}
+        {/* What this screen is: these are not her own alerts */}
         <View style={[local.explanation, { backgroundColor: "rgba(255,255,255,0.14)" }]}>
           <Ionicons name="people" size={20} color={theme.headerText} />
           <Text style={[local.explanationText, { color: theme.headerText }]}>{r.intro}</Text>
@@ -87,7 +87,7 @@ export default function ReceivedAlertsScreen() {
           </View>
         )}
 
-        {/* En curso: tarjeta de emergencia grande */}
+        {/* In progress: big emergency card */}
         {vm.activeOnes.map((a) => {
           const name = a.name || r.un_contacto;
           return (
@@ -125,7 +125,7 @@ export default function ReceivedAlertsScreen() {
           );
         })}
 
-        {/* Vacío */}
+        {/* Empty */}
         {!vm.loading && !vm.error && vm.activeOnes.length === 0 && vm.previousOnes.length === 0 && (
           <View style={[styles.card, local.empty]}>
             <View style={[local.emptyIcon, { backgroundColor: accent + "22" }]}>
@@ -136,7 +136,7 @@ export default function ReceivedAlertsScreen() {
           </View>
         )}
 
-        {/* Anteriores por día */}
+        {/* Previous ones by day */}
         {groups.map(([day, list]) => (
           <View key={day}>
             <Text style={[local.day, { color: theme.headerText }]}>{day}</Text>

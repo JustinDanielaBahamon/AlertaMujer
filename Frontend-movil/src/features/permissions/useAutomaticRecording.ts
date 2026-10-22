@@ -7,9 +7,9 @@ import { useLocale } from "../../contexts/LocaleContext";
 import { inPermissionQueue } from "../../services/safePermissions";
 
 /**
- * Interruptores "Grabar video / audio automáticamente al activar una emergencia". Apagar se guarda
- * directo; encender primero pide el permiso (cámara o micrófono) y, si se niega, deja el interruptor
- * apagado y ofrece abrir los ajustes.
+ * "Record video / audio automatically when an emergency is activated" switches. Turning off is saved
+ * directly; turning on first asks for the permission (camera or microphone) and, if denied, leaves the switch
+ * off and offers to open the settings.
  */
 export function useAutomaticRecording(onChange?: () => void) {
   const { t } = useLocale();

@@ -1,7 +1,7 @@
 import * as Location from "expo-location";
 import { locationPermission } from "./safePermissions";
 
-// Interface para datos de ubicación mejorados
+// Interface for improved location data
 export interface DetailedLocation {
   fullAddress: string;
   street: string;
@@ -17,7 +17,7 @@ export interface DetailedLocation {
   precision: number;
 }
 
-// Errores tipados para distinguir la causa del fallo de ubicación
+// Typed errors to tell the cause of a location failure
 export class LocationServicesDisabledError extends Error {
   constructor() {
     super("Los servicios de ubicación del dispositivo están desactivados");
@@ -35,20 +35,20 @@ export class LocationPermissionDeniedError extends Error {
 const MAX_GPS_TIME_MS = 15 * 1000;
 const MAX_AGE_MS = 15 * 60 * 1000;
 
-// Configuración de alta precisión para GPS
+// High-accuracy GPS settings
 const HIGH_ACCURACY_CONFIG = {
-  accuracy: Location.Accuracy.BestForNavigation, // Máxima precisión para navegación
+  accuracy: Location.Accuracy.BestForNavigation, // Maximum accuracy for navigation
   enableHighAccuracy: true,
   timeout: 15000,
   maximumAge: 10000,
 };
 
 /**
- * Servicio centralizado para manejo de ubicación con alta precisión
+ * Central service for high-accuracy location handling
  */
 export class LocationService {
   /**
-   * Solicita permisos de ubicación
+   * Requests location permissions
    */
   static async requestPermissions(ask = true): Promise<boolean> {
     try {
@@ -60,7 +60,7 @@ export class LocationService {
   }
 
   /**
-   * Verifica si los servicios de ubicación del dispositivo están activos
+   * Checks whether the device location services are on
    */
   static async hasServicesEnabled(): Promise<boolean> {
     try {
@@ -71,33 +71,33 @@ export class LocationService {
   }
 
   /**
-   * Obtiene la ubicación actual con máxima precisión.
-   * Verifica servicios del sistema antes de pedir permisos.
-   * Lanza errores tipados para que el llamador pueda distinguir la causa.
+   * Gets the current location with maximum accuracy.
+   * Checks system services before asking for permissions.
+   * Throws typed errors so the caller can tell the cause.
    */
   static async getCurrentPosition(requestPermission = true): Promise<Location.LocationObject | null> {
     try {
-      // 1) Servicios de ubicación del dispositivo (GPS/red) habilitados?
+      // 1) Device location services (GPS/network) enabled?
       const activeServices = await Location.hasServicesEnabledAsync();
       if (!activeServices) {
         throw new LocationServicesDisabledError();
       }
 
-      // 2) La app tiene permiso?
+      // 2) Does the app have permission?
       const hasPermission = await this.requestPermissions(requestPermission);
       if (!hasPermission) {
         throw new LocationPermissionDeniedError();
       }
 
-      // expo-location no tiene "timeout": sin señal GPS (bajo techo) la lectura no termina nunca.
-      // Se espera un tiempo y, si no llega, se usa la última ubicación que conoce el teléfono.
+      // expo-location has no "timeout": without GPS signal (indoors) the reading never ends.
+      // We wait for a while and, if it does not arrive, the last location the phone knows is used.
       const location = await Promise.race([
         Location.getCurrentPositionAsync(HIGH_ACCURACY_CONFIG),
         new Promise<null>((resolver) => setTimeout(() => resolver(null), MAX_GPS_TIME_MS)),
       ]);
       return location ?? (await Location.getLastKnownPositionAsync({ maxAge: MAX_AGE_MS }));
     } catch (error) {
-      // Re-lanzar errores tipados para que el ViewModel los clasifique
+      // Rethrow typed errors so the ViewModel classifies them
       if (
         error instanceof LocationServicesDisabledError ||
         error instanceof LocationPermissionDeniedError
@@ -110,7 +110,7 @@ export class LocationService {
   }
 
   /**
-   * Realiza geocoding inverso mejorado para obtener dirección detallada
+   * Improved reverse geocoding to get a detailed address
    */
   static async reverseGeocode(
     latitude: number,
@@ -125,7 +125,7 @@ export class LocationService {
       if (reverse.length > 0) {
         const info = reverse[0];
 
-        // Extracción mejorada de datos con múltiples fallbacks (solo propiedades válidas)
+        // Improved data extraction with several fallbacks (valid properties only)
         const street = info.street || info.name || "Calle desconocida";
         const number = info.streetNumber || "";
         const neighborhood = info.district || info.subregion || "Sector desconocido";
@@ -135,7 +135,7 @@ export class LocationService {
         const country = info.country || "País desconocido";
         const postalCode = info.postalCode || "";
 
-        // Construcción de dirección más completa
+        // Builds a more complete address
         const fullAddress = `${street} ${number}`.trim();
         const fullCity = city !== "Ciudad desconocida"
           ? `${city}, ${department}`
@@ -153,7 +153,7 @@ export class LocationService {
           postalCode,
           latitudeValue: latitude,
           longitudeValue: longitude,
-          precision: 0, // Se actualiza cuando se obtiene del GPS
+          precision: 0, // Updated when it comes from the GPS
         };
 
         return detailedLocation;
@@ -167,13 +167,13 @@ export class LocationService {
   }
 
   /**
-   * Obtiene ubicación completa (GPS + geocoding) con máxima precisión.
-   * Propaga LocationServicesDisabledError y LocationPermissionDeniedError
-   * para que el llamador muestre el mensaje apropiado.
+   * Gets the full location (GPS + geocoding) with maximum accuracy.
+   * Propagates LocationServicesDisabledError and LocationPermissionDeniedError
+   * so the caller shows the right message.
    */
-  /** pedirPermiso = false al abrir una pantalla: solo consulta y no muestra avisos del sistema. */
+  /** askPermission = false when a screen opens: it only checks and shows no system prompts. */
   static async getFullLocation(requestPermission = true): Promise<DetailedLocation | null> {
-    // No capturamos errores tipados — los dejamos subir al ViewModel
+    // We do not catch typed errors — we let them bubble up to the ViewModel
     const location = await this.getCurrentPosition(requestPermission);
     if (!location) return null;
 
@@ -182,14 +182,14 @@ export class LocationService {
     const geocoding = await this.reverseGeocode(latitude, longitude);
     if (!geocoding) return null;
 
-    // Actualizar precisión con valor real del GPS (manejar null)
+    // Update the accuracy with the real GPS value (handle null)
     geocoding.precision = accuracy || 0;
 
     return geocoding;
   }
 
   /**
-   * Calcula distancia entre dos coordenadas en metros (fórmula Haversine)
+   * Computes the distance between two coordinates in meters (Haversine formula)
    */
   static calculateDistance(
     lat1: number,
@@ -197,7 +197,7 @@ export class LocationService {
     lat2: number,
     lon2: number
   ): number {
-    const R = 6371e3; // Radio de la Tierra en metros
+    const R = 6371e3; // Earth radius in meters
     const φ1 = (lat1 * Math.PI) / 180;
     const φ2 = (lat2 * Math.PI) / 180;
     const Δφ = ((lat2 - lat1) * Math.PI) / 180;
@@ -212,7 +212,7 @@ export class LocationService {
   }
 
   /**
-   * Obtiene dirección formateada para mostrar en UI
+   * Gets a formatted address to show in the UI
    */
   static formatAddress(location: DetailedLocation): string {
     const parts = [];
@@ -226,7 +226,7 @@ export class LocationService {
   }
 
   /**
-   * Obtiene dirección corta para títulos y encabezados
+   * Gets a short address for titles and headers
    */
   static formatShortAddress(location: DetailedLocation): string {
     if (location.neighborhood && location.neighborhood !== "Sector desconocido") {

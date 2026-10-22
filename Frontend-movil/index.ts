@@ -1,5 +1,5 @@
-// Punto de entrada: antes de montar la app se registran los manejadores que deben funcionar con
-// la app cerrada o en segundo plano (push de alerta de emergencia y toques en la notificación).
+// Entry point: before mounting the app, register the handlers that must work with
+// the app closed or in the background (emergency alert push and taps on the notification).
 import "react-native-gesture-handler";
 import { registerRootComponent } from "expo";
 import Constants from "expo-constants";
@@ -42,10 +42,10 @@ if (Constants.expoConfig?.extra?.pushConfigurado === true) {
   }
 }
 
-// Servicio de "agitar el teléfono" (notificación fija "Protección activa")
+// "Shake the phone" service (persistent "Active protection" notification)
 registerProtectionService();
 
-// Widget "SOS" de la pantalla de inicio: Android pide dibujarlo aunque la app esté cerrada
+// Home screen "SOS" widget: Android asks to draw it even when the app is closed
 registerWidgetTaskHandler(widgetTask);
 
 notifee.onBackgroundEvent(async ({ type, detail }) => {

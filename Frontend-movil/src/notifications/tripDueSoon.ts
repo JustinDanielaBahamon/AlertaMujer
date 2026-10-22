@@ -2,8 +2,8 @@ import notifee, { AndroidImportance, AndroidVisibility } from "@notifee/react-na
 import { bigStyle } from "./notificationStyle";
 
 /**
- * "¿Ya llegaste?": push que envía el servidor 5 minutos antes de la hora de llegada de un trayecto
- * de "Avísame si no llego". Al tocarla se abre la pantalla del trayecto para confirmar o alargar.
+ * "Did you arrive?": push the server sends 5 minutes before the arrival time of a
+ * "Let me know if I don't arrive" trip. Tapping it opens the trip screen to confirm or extend.
  */
 export function isTripDueSoon(data: Record<string, unknown> | undefined): boolean {
   return !!data && data.tipo === "TRAYECTO_POR_VENCER";
@@ -39,5 +39,5 @@ export async function showTripDueSoon(data: Record<string, unknown> | undefined)
   });
 }
 
-/** true si la notificación es la de un trayecto (para abrir su pantalla al tocarla). */
+/** true if the notification is a trip one (to open its screen when tapped). */
 export const isTripNotification = (data: Record<string, unknown> | undefined) => data?.tipo === "TRAYECTO";

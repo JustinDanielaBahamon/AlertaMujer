@@ -25,10 +25,10 @@ type SelectedPoint = {
   latitude: number;
   longitude: number;
   name?: string;
-  address?: string; // "Carrera 7 · Barrio Altico", por geocodificación inversa
+  address?: string; // "Carrera 7 · Barrio Altico", by reverse geocoding
 };
 
-// Lo que se muestra y se guarda de un punto: el nombre que puso la usuaria y/o la dirección
+// What is shown and stored for a point: the name the user gave and/or the address
 const pointLabel = (name: string, point: SelectedPoint, byDefault: string) =>
   [name.trim() || point.name, point.address].filter(Boolean).join(" · ") || byDefault;
 
@@ -50,7 +50,7 @@ export default function GuardarRecorrido() {
   const [selectingPoint, setSelectingPoint] = useState<"A" | "B" | null>(null);
   const [mapFullscreen, setMapFullscreen] = useState(false);
 
-  // Ubicaciones guardadas reales desde el backend
+  // Real saved locations from the backend
   const [savedLocations, setSavedLocations] = useState<Array<{ id: string; name: string; latitude: number; longitude: number; address: string }>>([]);
   const { user } = useAuth();
 
@@ -79,7 +79,7 @@ export default function GuardarRecorrido() {
     };
   }, [user?.id]);
 
-  // Busca la dirección y el barrio del punto tocado en el mapa
+  // Looks up the address and neighborhood of the point tapped on the map
   const completeAddress = async (
     point: SelectedPoint,
     assign: React.Dispatch<React.SetStateAction<SelectedPoint | null>>,
@@ -87,7 +87,7 @@ export default function GuardarRecorrido() {
     const place = await getPlace(point.latitude, point.longitude);
     const address = place ? placeDescription(place) : "";
     if (!address) return;
-    // Solo si la usuaria no cambió el punto mientras tanto
+    // Only if the user did not change the point in the meantime
     assign((current) =>
       current && current.latitude === point.latitude && current.longitude === point.longitude
         ? { ...current, address }
@@ -142,20 +142,20 @@ export default function GuardarRecorrido() {
     }
     if (saving) return;
 
-    // Calcular distancia entre punto A y B usando fórmula Haversine
+    // Compute the distance between point A and B with the Haversine formula
     const computeDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-      const R = 6371; // Radio de la Tierra en km
+      const R = 6371; // Earth radius in km
       const dLat = (lat2 - lat1) * Math.PI / 180;
       const dLon = (lon2 - lon1) * Math.PI / 180;
       const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
                 Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
                 Math.sin(dLon/2) * Math.sin(dLon/2);
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      return R * c; // Distancia en km
+      return R * c; // Distance in km
     };
 
     const distanceKm = computeDistance(pointA.latitude, pointA.longitude, pointB.latitude, pointB.longitude);
-    // Tiempo estimado caminando a 5 km/h (igual que en la web)
+    // Estimated walking time at 5 km/h (same as on the web)
     const estimatedMinutes = Math.round((distanceKm / 5) * 60);
 
     const startTime = pointLabel(pointAName, pointA, "Punto A");
@@ -221,7 +221,7 @@ export default function GuardarRecorrido() {
           </View>
         </LinearGradient>
 
-        {/* NOMBRE DEL RECORRIDO */}
+        {/* ROUTE NAME */}
         <View style={[styles.sectionContainer, { backgroundColor: theme.card }]}>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>
             Nombre del recorrido
@@ -241,7 +241,7 @@ export default function GuardarRecorrido() {
           </Text>
         </View>
 
-        {/* MÉTODO DE SELECCIÓN */}
+        {/* SELECTION METHOD */}
         <View style={[styles.sectionContainer, { backgroundColor: theme.card }]}>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>
             Método de selección
@@ -292,7 +292,7 @@ export default function GuardarRecorrido() {
           </View>
         </View>
 
-        {/* MAPA */}
+        {/* MAP */}
         <View style={styles.mapContainer}>
           <MapView
             style={styles.map}
@@ -344,13 +344,13 @@ export default function GuardarRecorrido() {
           </TouchableOpacity>
         </View>
 
-        {/* SELECCIÓN DE PUNTOS */}
+        {/* POINT SELECTION */}
         <View style={[styles.sectionContainer, { backgroundColor: theme.card }]}>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>
             Puntos del recorrido
           </Text>
 
-          {/* PUNTO A */}
+          {/* POINT A */}
           <TouchableOpacity
             style={[
               styles.pointButton,
@@ -379,7 +379,7 @@ export default function GuardarRecorrido() {
             <MaterialIcons name="chevron-right" size={20} color={theme.contactSubtext} />
           </TouchableOpacity>
 
-          {/* Campo de nombre para Punto A */}
+          {/* Name field for Point A */}
           {pointA && (
             <View style={[styles.nameInputContainer, { backgroundColor: theme.background }]}>
               <MaterialIcons name="edit" size={18} color={theme.contactSubtext} style={{ marginRight: 8 }} />
@@ -393,7 +393,7 @@ export default function GuardarRecorrido() {
             </View>
           )}
 
-          {/* PUNTO B */}
+          {/* POINT B */}
           <TouchableOpacity
             style={[
               styles.pointButton,
@@ -422,7 +422,7 @@ export default function GuardarRecorrido() {
             <MaterialIcons name="chevron-right" size={20} color={theme.contactSubtext} />
           </TouchableOpacity>
 
-          {/* Campo de nombre para Punto B */}
+          {/* Name field for Point B */}
           {pointB && (
             <View style={[styles.nameInputContainer, { backgroundColor: theme.background }]}>
               <MaterialIcons name="edit" size={18} color={theme.contactSubtext} style={{ marginRight: 8 }} />
@@ -438,7 +438,7 @@ export default function GuardarRecorrido() {
         </View>
 
 
-        {/* ACCIONES */}
+        {/* ACTIONS */}
         <View style={styles.actionsContainer}>
           <TouchableOpacity
             style={[styles.actionButton, styles.secondaryButton]}
@@ -461,7 +461,7 @@ export default function GuardarRecorrido() {
         </View>
       </ScrollView>
 
-      {/* MODAL DE UBICACIONES GUARDADAS */}
+      {/* SAVED LOCATIONS MODAL */}
       <Modal visible={locationsModalVisible} animationType="slide" transparent>
         <TouchableWithoutFeedback onPress={() => setLocationsModalVisible(false)}>
           <View style={styles.modalOverlay}>
@@ -504,7 +504,7 @@ export default function GuardarRecorrido() {
         </TouchableWithoutFeedback>
       </Modal>
 
-      {/* MODAL MAPA COMPLETO */}
+      {/* FULL MAP MODAL */}
       <Modal visible={mapFullscreen} animationType="slide">
         <View style={{ flex: 1 }}>
           <MapView

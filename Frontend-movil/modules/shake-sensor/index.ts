@@ -2,55 +2,55 @@ import { NativeModule, requireNativeModule } from "expo";
 
 export type Reading = { x: number; y: number; z: number };
 
-/** ApplicationExitInfo: motivo (REASON_*), importancia del proceso al morir y descripción. */
+/** ApplicationExitInfo: reason (REASON_*), process importance when it died and description. */
 export type AppExit = { timestamp: number; reason: number; importance: number; description: string };
 
 type Events = {
   onReading: (reading: Reading) => void;
-  /** Terminó un trozo de audio de la evidencia (archivo listo para subir). */
+  /** An evidence audio chunk finished (file ready to upload). */
   onAudioChunk: (chunk: { uri: string; durationMs: number }) => void;
   onRecordingError: (error: { message: string }) => void;
-  /** La pantalla se prendió o se apagó (cada pulsación del botón de encendido). No llega en llamadas. */
+  /** The screen turned on or off (each power button press). Not sent during calls. */
   onScreenChange: (change: { screenOn: boolean }) => void;
 };
 
 declare class ShakeSensorModule extends NativeModule<Events> {
-  /** El teléfono tiene acelerómetro. */
+  /** The phone has an accelerometer. */
   available(): boolean;
-  /** Empieza a emitir onLectura (en g) cada intervaloMs, también en segundo plano. */
+  /** Starts emitting onReading (in g) every intervalMs, also in the background. */
   start(intervalMs: number): boolean;
   stop(): void;
-  /** Empieza a emitir onPantalla con cada pulsación del botón de encendido. */
+  /** Starts emitting onScreenChange with each power button press. */
   startPowerButton(): void;
   stopPowerButton(): void;
-  /** Espera con un temporizador nativo (sigue corriendo con la pantalla apagada). */
+  /** Waits with a native timer (keeps running with the screen off). */
   wait(ms: number): Promise<void>;
   ignoresBatteryOptimization(): boolean;
-  /** false si ya tenía el permiso o no se pudo: se abrió la página de la app en Ajustes. */
+  /** false if the app already had the permission or it failed: the app's page in Settings was opened. */
   requestIgnoreBatteryOptimization(): boolean;
   manufacturer(): string;
-  /** Cierres de la app registrados por Android (11+) desde desdeMs. */
+  /** App exits recorded by Android (11+) since sinceMs. */
   exitReasons(sinceMs: number): AppExit[];
   canUseFullScreen(): boolean;
   requestFullScreen(): void;
   hasAutoStartSetting(): boolean;
-  /** Abre el "inicio automático" de la marca; false si no existe y se abrió la info de la app. */
+  /** Opens the brand's "auto start" screen; false if it does not exist and the app info was opened. */
   openAutoStart(): boolean;
   /**
-   * Servicio de micrófono para la evidencia de una alerta: graba en trozos y sigue con la pantalla
-   * apagada. Solo se puede encender con la app abierta; false si falta el permiso de micrófono.
-   * grabar=false lo deja encendido sin usar el micrófono (mientras la cámara graba video).
+   * Microphone service for an alert's evidence: records in chunks and keeps going with the screen
+   * off. It can only be started with the app open; false if the microphone permission is missing.
+   * record=false keeps it running without using the microphone (while the camera records video).
    */
   startAudioRecording(secondsPerChunk: number, record: boolean): boolean;
   pauseAudioRecording(): void;
   resumeAudioRecording(): void;
   stopAudioRecording(): void;
   isAudioRecording(): boolean;
-  /** Trozos de audio terminados que siguen en el teléfono. */
+  /** Finished audio chunks still on the phone. */
   pendingAudios(): string[];
-  /** Borra un archivo de evidencia del caché de la app (ya subido). */
+  /** Deletes an evidence file from the app cache (already uploaded). */
   deleteFile(uri: string): boolean;
 }
 
-/** Acelerómetro para "agitar el teléfono" que no se apaga al minimizar la app (solo Android). */
+/** Accelerometer for "shake the phone" that does not stop when the app is minimized (Android only). */
 export default requireNativeModule<ShakeSensorModule>("ShakeSensor");

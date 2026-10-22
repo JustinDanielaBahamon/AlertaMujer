@@ -13,7 +13,7 @@ export default function Terms(){
   const navigation = useNavigation<any>();
   const { t } = useLocale();
 
-  //  componente reutilizable
+  // reusable component
   const TermItem = ({ title, description }: Props) => (
     <View style={{ marginBottom: 12 }}>
       <Text style={{ fontWeight: 'bold', fontSize: 16, color: '#4B1FA8' }}>
@@ -28,7 +28,7 @@ export default function Terms(){
   const items = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const;
 
   return(
-    // Fondo morado del login/registro cubriendo TODA la pantalla (sin bordes blancos)
+    // Login/sign-up purple background covering the WHOLE screen (no white edges)
     <SafeAreaView style={{ flex: 1, backgroundColor: 'rgb(202, 171, 222)' }}>
       <StatusBar style="dark" backgroundColor="rgb(202, 171, 222)" />
       <ScrollView
@@ -41,7 +41,7 @@ export default function Terms(){
           {t.politicaTerminos.encabezado}
         </Text>
 
-        {/* tarjeta blanca con borde morado (igual que los inputs) */}
+        {/* white card with a purple border (same as the inputs) */}
         <View style={{
           backgroundColor: '#fff',
           borderRadius: 20,
@@ -65,7 +65,7 @@ export default function Terms(){
 
         </View>
 
-        {/* boton igual al "Continuar" del registro */}
+        {/* button same as the sign-up "Continue" */}
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={{

@@ -53,7 +53,7 @@ describe("permisos", () => {
     expect(statuses.notificaciones.granted).toBe(true);
     expect(statuses.camara).toEqual({ granted: false, canAsk: false });
     expect(missingCritical(statuses).map((p) => p.id)).toEqual(["agitar", "ubicacion", "bateria", "pantallaCompleta"]);
-    // El inicio automático no se puede leer: queda "por revisar", no como faltante
+    // Auto start cannot be read: it is left "to check", not as missing
     expect(statuses.inicioAutomatico.granted).toBeNull();
   });
 

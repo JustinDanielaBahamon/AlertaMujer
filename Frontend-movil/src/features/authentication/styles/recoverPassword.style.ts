@@ -5,7 +5,7 @@ const { width } = Dimensions.get('window');
 export const styles = StyleSheet.create({
     MainContainer: {
         flex: 1,
-        backgroundColor: 'rgb(202, 171, 222)', // Fondo morado claro
+        backgroundColor: 'rgb(202, 171, 222)', // Light purple background
     },
     ScrollContent: {
         flexGrow: 1,
@@ -13,14 +13,14 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: 40,
     },
-    // CARD BLANCA MEJORADA
+    // IMPROVED WHITE CARD
     container: {
         backgroundColor: '#FFF',
-        borderRadius: 35, // Bordes más curvos y elegantes
+        borderRadius: 35, // Rounder, more elegant corners
         paddingHorizontal: 25,
         paddingVertical: 40,
-        width: width * 0.88, // Ocupa el 88% del ancho de la pantalla
-        // Sombras
+        width: width * 0.88, // Takes 88% of the screen width
+        // Shadows
         elevation: 10,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 5 },
@@ -33,7 +33,7 @@ export const styles = StyleSheet.create({
         marginBottom: 25,
     },
     LogoImage: {
-        width: 140, // Ajustado para no saturar la card
+        width: 140, // Adjusted so it does not crowd the card
         height: 120,
         resizeMode: 'contain',
     },
@@ -64,7 +64,7 @@ export const styles = StyleSheet.create({
         borderWidth: 1.5,
         borderColor: '#EEE'
     },
-    // Texto dentro de los inputs con icono (correo y contraseñas)
+    // Text inside the inputs with an icon (email and passwords)
     inputText: {
         flex: 1,
         height: 50,
@@ -89,13 +89,13 @@ export const styles = StyleSheet.create({
         color: '#6B3FA0',
         backgroundColor: '#FDFDFF'
     },
-    // Cuadros del código cuando ya venció el tiempo
+    // Code boxes once the time ran out
     expiredBoxInput: {
         borderColor: '#9333EA',
         backgroundColor: '#F5F5F5',
         opacity: 0.6,
     },
-    // Temporizador del código (1:30)
+    // Code timer (1:30)
     timerText: {
         textAlign: 'center',
         color: '#6B3FA0',
@@ -109,7 +109,7 @@ export const styles = StyleSheet.create({
     primaryButton: {
         backgroundColor: '#6B3FA0', 
         height: 60, 
-        borderRadius: 18, // Botón con curvas similares a la card
+        borderRadius: 18, // Button with corners like the card
         justifyContent: 'center', 
         alignItems: 'center',
         width: '100%', 

@@ -4,7 +4,7 @@ import { TouchableOpacity, Text, StyleSheet, ViewStyle } from "react-native";
 interface Props {
   title: string;
   onPress: () => void;
-  // Añadimos estas dos opciones
+  // We add these two options
   bgColor?: string; 
   textColor?: string;
  
@@ -13,7 +13,7 @@ interface Props {
 export default function SecondaryButton({ title, onPress, bgColor = "#ffffff", textColor = "#000000" }: Props) {
   return (
     <TouchableOpacity 
-      // Combinamos el estilo base con el color que elijamos
+      // We combine the base style with the chosen color
       style={[styles.button, { backgroundColor: bgColor }]} 
       onPress={onPress}
     >
@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     borderWidth: 1,
     borderColor: "#ffffff",
-    // Quitamos el color fijo de aquí para que mande la prop
+    // The fixed color is removed here so the prop wins
   },
 
   text: {

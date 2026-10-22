@@ -15,21 +15,21 @@ import { backgroundAlert, createShakeAlert } from "./backgroundAlert";
 import { notificationsPermission, locationPermission } from "../../services/safePermissions";
 
 /**
- * "Agitar el teléfono": un servicio en primer plano de Android (notificación fija "Protección
- * activa") escucha el acelerómetro aunque la app esté minimizada o la pantalla bloqueada.
+ * "Shake the phone": an Android foreground service (persistent "Active protection"
+ * notification) listens to the accelerometer even with the app minimized or the screen locked.
  *
- * - App en pantalla: se abre la cuenta regresiva de la app, igual que con el botón SOS.
- * - App en segundo plano: cuenta regresiva de 5 s en una notificación con "Cancelar"; si no se
- *   cancela, la alerta se crea sin desbloquear el teléfono.
+ * - App on screen: the app countdown opens, same as with the SOS button.
+ * - App in the background: 5 s countdown in a notification with "Cancel"; if it is not
+ *   cancelled, the alert is created without unlocking the phone.
  *
- * El acelerómetro es el del módulo nativo sensor-sacudidas: expo-sensors deja de leer en cuanto la
- * app sale de la pantalla. Por lo mismo las esperas son nativas y no setTimeout.
+ * The accelerometer is the one of the native shake-sensor module: expo-sensors stops reading as soon as the
+ * app leaves the screen. For the same reason the waits are native and not setTimeout.
  *
- * El mismo servicio atiende el botón de encendido (4 pulsaciones rápidas, también con la pantalla
- * apagada) si la usuaria activó ese método.
+ * The same service handles the power button (4 quick presses, also with the screen
+ * off) if the user enabled that method.
  */
 
-/** Método con el que se pidió la alerta. */
+/** Method the alert was requested with. */
 export type ProtectionMethod = "agitar" | "encendido";
 export type ProtectionOptions = { shake: boolean; powerButton: boolean };
 
@@ -41,7 +41,7 @@ const SENT_ID = "agitar-enviada";
 const ACTION_CANCEL = "cancelar_agitar";
 const ACTION_OPEN = "abrir_alerta_agitar";
 const COUNTDOWN_SECONDS = 5;
-// Cada 40 ms: con menos lecturas un hachazo se confunde con varios picos sueltos
+// Every 40 ms: with fewer readings a chop is confused with several loose peaks
 const SENSOR_INTERVAL_MS = 40;
 
 export type ProtectionStatus = "activa" | "sin_ubicacion" | "sin_sensor";
@@ -53,7 +53,7 @@ let options: ProtectionOptions = { shake: true, powerButton: false };
 let finishTask: (() => void) | null = null;
 let countdownRunning: { cancelled: boolean } | null = null;
 
-// --- Sacudida con la app en pantalla: la navegación se suscribe y abre la cuenta regresiva ---
+// --- Shake with the app on screen: navigation subscribes and opens the countdown ---
 const onScreenListeners = new Set<(method: ProtectionMethod) => void>();
 
 export function onShakeOnScreen(listener: (method: ProtectionMethod) => void): () => void {
@@ -63,7 +63,7 @@ export function onShakeOnScreen(listener: (method: ProtectionMethod) => void): (
   };
 }
 
-// --- Alerta creada en segundo plano: al tocar la notificación se abre su pantalla ---
+// --- Alert created in the background: tapping the notification opens its screen ---
 let alertToOpen: number | null = null;
 const openListeners = new Set<(alertId: number) => void>();
 
@@ -87,7 +87,7 @@ function openAlert(alertId: number) {
   openListeners.forEach((o) => o(alertId));
 }
 
-/** Se registra una sola vez al arrancar (index.ts), antes de montar la app. */
+/** Registered only once at startup (index.ts), before mounting the app. */
 export function registerProtectionService(): void {
   notifee.registerForegroundService(
     () =>
@@ -98,7 +98,7 @@ export function registerProtectionService(): void {
   );
 }
 
-/** Enciende solo lo que la usuaria activó: acelerómetro, botón de encendido o ambos. */
+/** Turns on only what the user enabled: accelerometer, power button or both. */
 function setUpDetectors() {
   stopSensor?.();
   stopSensor = null;
@@ -224,9 +224,9 @@ async function startCountdown(method: ProtectionMethod) {
 }
 
 /**
- * Atiende los toques en las notificaciones de este servicio (Cancelar y "Alerta enviada").
- * Devuelve true si el evento era suyo. Se llama desde los manejadores de Notifee de primer y
- * segundo plano.
+ * Handles taps on this service's notifications (Cancel and "Alert sent").
+ * Returns true if the event was its own. Called from the Notifee foreground and
+ * background handlers.
  */
 export function handleProtectionEvent({ type, detail }: Event): boolean {
   if (type !== EventType.ACTION_PRESS && type !== EventType.PRESS) return false;
@@ -254,16 +254,16 @@ function protectionText(): string {
 }
 
 /**
- * pedirPermisos = true solo cuando la usuaria enciende un método (no al abrir la app). Si ya
- * estaba activa con otros métodos, solo cambia lo que se escucha.
+ * requestPermissions = true only when the user turns on a method (not when the app opens). If it was
+ * already running with other methods, only what is listened to changes.
  */
 export async function startProtection(
   requestPermissions = false,
   newItems: ProtectionOptions = { shake: true, powerButton: false },
 ): Promise<ProtectionStatus> {
   if (newItems.shake && !ShakeSensor.available()) return "sin_sensor";
-  // El servicio es de tipo ubicación (para poder enviarla con la pantalla bloqueada) y Android
-  // exige el permiso antes de iniciarlo
+  // The service is a location service (so it can send it with the screen locked) and Android
+  // requires the permission before starting it
   if (!(await locationPermission(requestPermissions))) return "sin_ubicacion";
   const changed = options.shake !== newItems.shake || options.powerButton !== newItems.powerButton;
   options = newItems;
@@ -272,7 +272,7 @@ export async function startProtection(
 
   await notificationsPermission(requestPermissions);
   await createChannels();
-  // Mostrar la notificación del servicio otra vez la actualiza (y la primera vez lo arranca)
+  // Showing the service notification again updates it (and the first time starts it)
   await notifee.displayNotification({
     id: SERVICE_ID,
     title: "Protección activa",

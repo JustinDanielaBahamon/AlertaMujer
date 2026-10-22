@@ -34,7 +34,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
   const { signOut, user, updateUser } = useAuth();
   const { theme } = useTheme();
 
-  // La foto de perfil está en el backend: se trae una vez por sesión si aún no se tiene
+  // The profile photo is in the backend: fetched once per session if it is not there yet
   const userId = user?.id;
   const hasPhoto = !!user?.fotoPerfil;
   useEffect(() => {
@@ -52,7 +52,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
 
   const isDarkMode = theme.mode === "dark";
 
-  // Invita a otras personas: el enlace lleva a la web, donde pueden descargar la app
+  // Invites other people: the link goes to the website, where they can download the app
   const shareLink = () => {
     Share.share({ message: `${t.menu.compartir_mensaje}\n${WEB_URL}` }).catch(() => {});
   };
@@ -99,14 +99,14 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
           showsVerticalScrollIndicator={false}
         >
 
-          {/* ✅ Perfil tappable con datos dinámicos del usuario */}
+          {/* ✅ Tappable profile with the user's dynamic data */}
           <TouchableOpacity
             style={styles.zoneHeader}
             onPress={() => navigateTo("Profile")}
             activeOpacity={0.75}
           >
             <View style={styles.avatarRow}>
-              {/* ✅ Foto dinámica: usa la del usuario o la imagen por defecto */}
+              {/* ✅ Dynamic photo: uses the user's or the default image */}
               <Image
                 source={
                   user?.fotoPerfil
@@ -116,18 +116,18 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
                 style={[styles.avatar, { borderColor: accentLineColor }]}
               />
             </View>
-            {/* ✅ Nombre dinámico */}
+            {/* ✅ Dynamic name */}
             <Text style={styles.name}>
               {user?.nombre || "Isabella Quintero"}
             </Text>
-            {/* ✅ Correo dinámico */}
+            {/* ✅ Dynamic email */}
             <Text style={styles.email}>
               {user?.correo || "isabella@gmail.com"}
             </Text>
             <View style={[styles.accentLine, { backgroundColor: accentLineColor }]} />
           </TouchableOpacity>
 
-          {/* Menú */}
+          {/* Menu */}
           <View style={styles.menuList}>
 
             <TouchableOpacity style={styles.cardItem} onPress={() => navigateTo("DrawerHome")} activeOpacity={0.7}>

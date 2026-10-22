@@ -7,7 +7,7 @@ import { EXPLANATION, recentInterruptions, type Interruption } from "./protectio
 import ShakeSensor from "../../../modules/shake-sensor";
 import { useAutomaticRecording } from "./useAutomaticRecording";
 
-// Cámara y micrófono se muestran junto a sus interruptores de grabación automática
+// Camera and microphone are shown next to their automatic recording switches
 const RECORDING_PERMISSIONS: PermissionId[] = ["camara", "microfono"];
 
 export function usePermissionsViewModel() {
@@ -24,7 +24,7 @@ export function usePermissionsViewModel() {
       .catch((e) => console.warn("No se pudieron revisar los permisos:", e));
   }, [config.agitar]);
 
-  // Al entrar y al volver de los ajustes de Android (la usuaria pudo cambiar algo allá)
+  // On entering and when coming back from Android settings (the user may have changed something there)
   useFocusEffect(refresh);
   useEffect(() => {
     const sub = AppState.addEventListener("change", (status) => {
@@ -36,7 +36,7 @@ export function usePermissionsViewModel() {
   const activate = useCallback(
     async (id: PermissionId) => {
       if (id === "agitar") {
-        change("agitar", true); // useProteccionAgitar enciende el servicio y pide lo que falte
+        change("agitar", true); // useShakeProtection starts the service and asks for whatever is missing
         return;
       }
       if (!statuses) return;
@@ -53,21 +53,21 @@ export function usePermissionsViewModel() {
   );
   const readyItems = items.filter((i) => i.status?.granted === true).length;
 
-  // Salud de la protección: verificada con los cierres que registró Android
+  // Protection health: verified with the exits Android recorded
   const latest = interruptions[0];
   const health = !config.agitar
     ? null
     : {
         times: interruptions.length,
         explanation: latest ? EXPLANATION[latest.cause] : null,
-        // Si la cortó el sistema, el arreglo es el inicio automático de la marca
+        // If the system cut it, the fix is the brand's auto start
         canFix: latest?.cause === "sistema",
         fix: () => {
           ShakeSensor.openAutoStart();
         },
       };
 
-  // Si la grabación está encendida pero luego se quitó el permiso desde Android, se avisa en la tarjeta
+  // If recording is on but the permission was later removed in Android, the card warns about it
   const evidence = {
     video: { enabled: recording.recordVideo, noPermission: recording.recordVideo && statuses?.camara.granted === false },
     audio: { enabled: recording.recordAudio, noPermission: recording.recordAudio && statuses?.microfono.granted === false },

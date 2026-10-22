@@ -1,7 +1,7 @@
-// Fondo morado compartido por todas las pantallas del tutorial (igual al de la bienvenida)
+// Purple background shared by every tutorial screen (same as the welcome one)
 export const TUTORIAL_GRADIENT = ["#a031e0", "#f7f7f7e7", "#b026bd"] as const;
 
-// Paleta morada compartida por todas las pantallas del tutorial
+// Purple palette shared by every tutorial screen
 export const TUTORIAL_PALETTE = {
   accent:      "#6006aa",
   accentLight: "#F5F0FF",

@@ -6,14 +6,14 @@ import { useLocale } from "../../../contexts/LocaleContext";
 import { useTheme } from "../../../contexts/ThemeContext";
 
 /**
- * Aviso cuando el celular no tiene internet: si activa una alerta en ese momento, no saldrá. Se avisa
- * antes de la emergencia, cuando todavía puede conectarse a Wi‑Fi o recargar datos.
+ * Notice when the phone has no internet: an alert activated at that moment will not go out. It is
+ * shown before the emergency, while she can still connect to Wi‑Fi or top up data.
  */
 export default function OfflineNotice() {
   const red = useNetworkState();
   const { t } = useLocale();
   const { theme } = useTheme();
-  // isInternetReachable puede venir null mientras se comprueba: solo se avisa con un "no" seguro
+  // isInternetReachable may be null while it is being checked: only warn on a certain "no"
   const sinInternet = red.isConnected === false || red.isInternetReachable === false;
   if (!sinInternet) return null;
   return (

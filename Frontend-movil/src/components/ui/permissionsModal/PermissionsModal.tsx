@@ -27,7 +27,7 @@ export default function PermissionsModal({ visible, type, onConfirm, onCancel }:
     type === 'audio'        ? t.permisos.audio_titulo :
     t.permisos.notificacion_titulo;
 
-  // Cámara y micrófono muestran la divulgación clara (Prominent Disclosure)
+  // Camera and microphone show the clear disclosure (Prominent Disclosure)
   const description =
     type === 'sms'          ? t.permisos.sms_desc :
     type === 'contacto'     ? t.permisos.contacto_desc :

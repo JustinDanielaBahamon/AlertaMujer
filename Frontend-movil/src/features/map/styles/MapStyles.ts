@@ -84,7 +84,7 @@ export const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
-  /* MAPA */
+  /* MAP */
   mapWrapper: {
     height: 250,
     margin: 20,
@@ -117,7 +117,7 @@ export const styles = StyleSheet.create({
     fontSize: 12,
   },
 
-  /* SWITCH DE RECORRIDOS */
+  /* ROUTES SWITCH */
   routesSwitchContainer: {
     flexDirection: "row" as const,
     justifyContent: "space-between",
@@ -143,7 +143,7 @@ export const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-  /* CALLOUTS DE MARCADORES */
+  /* MARKER CALLOUTS */
   calloutContainer: {
     backgroundColor: "white",
     padding: 8,
@@ -168,7 +168,7 @@ export const styles = StyleSheet.create({
     color: "#666",
   },
 
-  /* ETIQUETAS DE RUTA */
+  /* ROUTE LABELS */
   routeLabelContainer: {
     backgroundColor: "rgba(123, 27, 178, 0.9)",
     paddingHorizontal: 8,
@@ -191,7 +191,7 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
 
-  /* BOTONES ACCIÓN */
+  /* ACTION BUTTONS */
   buttonsRow: {
     flexDirection: "row",
     justifyContent: "space-around",
@@ -215,7 +215,7 @@ export const styles = StyleSheet.create({
     fontWeight: "500",
   },
 
-  /* TARJETA COORDENADAS */
+  /* COORDINATES CARD */
   coordinatesCard: {
     marginHorizontal: 16,
     borderRadius: 16,
@@ -256,7 +256,7 @@ export const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
-  /* HISTORIAL */
+  /* HISTORY */
   historyTitleRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -320,7 +320,7 @@ export const styles = StyleSheet.create({
     fontSize: 14
   },
 
-  /* MODAL CERRAR */
+  /* CLOSE MODAL */
   closeMapButton: {
     position: "absolute",
     top: 20,
@@ -334,7 +334,7 @@ export const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 
-  /* MODAL INFORMACIÓN DE RECORRIDO */
+  /* ROUTE INFORMATION MODAL */
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
@@ -388,7 +388,7 @@ export const styles = StyleSheet.create({
     fontSize: 16,
   },
 
-  // Legacy — se mantienen por si algún otro componente los referencia
+  // Legacy — kept in case another component references them
   container:       { flex: 1, padding: 15 },
   card:            { flex: 1, borderRadius: 25, overflow: "hidden" },
   topContainer:    { alignItems: "center", paddingVertical: 15 },

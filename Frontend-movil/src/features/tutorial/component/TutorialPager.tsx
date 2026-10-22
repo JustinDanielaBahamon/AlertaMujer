@@ -3,11 +3,11 @@ import { View, ScrollView, Dimensions, NativeSyntheticEvent, NativeScrollEvent }
 
 const { width } = Dimensions.get("window");
 
-// Mínimo que el usuario debe arrastrar hacia adelante para contar como "quiere avanzar"
+// Minimum the user must drag forward to count as "wants to advance"
 const MIN_DRAG = 20;
 
-// Cada página puede saber si es la que se está viendo (lo usa la animación de arriba)
-// y pedir pasar a la siguiente desde un botón (pasa por el mismo bloqueo que deslizar)
+// Each page can know whether it is the visible one (used by the animation above)
+// and ask to go to the next one from a button (it goes through the same lock as swiping)
 const TutorialPageContext = createContext<{ isActive: boolean; advance: () => Promise<void> }>({
   isActive: true,
   advance: async () => {},
@@ -31,11 +31,11 @@ export const TutorialPager = ({ children, lockedPages = {} }: TutorialPagerProps
   const pages = React.Children.toArray(children);
   const lastPage = pages.length - 1;
 
-  // Una página está bloqueada si tiene verificación y todavía no la pasó
+  // A page is locked if it has a check and has not passed it yet
   const isLocked = (index: number) =>
     !!lockedPages[index] && !approvedPages.current.has(index);
 
-  // Última página a la que se puede llegar desde la actual sin pasar un bloqueo
+  // Last page reachable from the current one without passing a lock
   const maxIndex = () => {
     let i = activeIndexRef.current;
     while (i < lastPage && !isLocked(i)) i++;
@@ -49,8 +49,8 @@ export const TutorialPager = ({ children, lockedPages = {} }: TutorialPagerProps
     setActiveIndex(destination);
   };
 
-  // La página activa sale de la posición real. Al frenar el scroll con scrollTo, Android a veces no
-  // avisa el final del deslizamiento: la página quedaba desfasada y ya no dejaba avanzar.
+  // The active page comes from the real position. When the scroll is stopped with scrollTo, Android sometimes does not
+  // report the end of the swipe: the page got out of sync and no longer let her advance.
   const sync = (x: number) => {
     const index = Math.min(Math.round(x / width), maxIndex());
     if (index !== activeIndexRef.current) {
@@ -59,8 +59,8 @@ export const TutorialPager = ({ children, lockedPages = {} }: TutorialPagerProps
     }
   };
 
-  // Mientras el usuario arrastra: si intenta pasar una página bloqueada, el scroll
-  // se queda pegado en esa página (no se desliza a la siguiente y regresa)
+  // While the user drags: if she tries to pass a locked page, the scroll
+  // sticks on that page (it does not slide to the next one and come back)
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const x = event.nativeEvent.contentOffset.x;
     const maximum = maxIndex();
@@ -77,7 +77,7 @@ export const TutorialPager = ({ children, lockedPages = {} }: TutorialPagerProps
     advanceAttemptRef.current = 0;
   };
 
-  // Pasa a la siguiente página; si la actual está bloqueada, primero corre su verificación
+  // Goes to the next page; if the current one is locked, its check runs first
   const advance = async () => {
     const current = activeIndexRef.current;
     if (processingRef.current) return;
@@ -97,7 +97,7 @@ export const TutorialPager = ({ children, lockedPages = {} }: TutorialPagerProps
     }
   };
 
-  // Al soltar el dedo: si quería avanzar y la página está bloqueada, corre la verificación
+  // When the finger is lifted: if she wanted to advance and the page is locked, the check runs
   const handleScrollEndDrag = async (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const wantsToAdvance = advanceAttemptRef.current > MIN_DRAG;
     advanceAttemptRef.current = 0;
@@ -105,7 +105,7 @@ export const TutorialPager = ({ children, lockedPages = {} }: TutorialPagerProps
     if (wantsToAdvance && isLocked(activeIndexRef.current)) await advance();
   };
 
-  // Al terminar de deslizar: actualiza la página activa (nunca más allá de un bloqueo)
+  // When the swipe ends: update the active page (never beyond a lock)
   const handleMomentumEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     sync(event.nativeEvent.contentOffset.x);
   };

@@ -14,7 +14,7 @@ const MODE_TEXT = {
   sin_permiso: "Falta el permiso de micrófono",
 } as const;
 
-/** Tarjeta "Evidencia" de la alerta activa: vista de la cámara, estado y lo que ya se subió. */
+/** "Evidence" card of the active alert: camera view, status and what was already uploaded. */
 export default function AlertRecording({ alertId }: { alertId: number | null }) {
   const { theme } = useTheme();
   const s = useMemo(() => createStyles(theme), [theme]);

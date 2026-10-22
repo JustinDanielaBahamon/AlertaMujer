@@ -37,7 +37,7 @@ export default function TripScreen() {
         {vm.loading ? (
           <ActivityIndicator color={theme.headerText} style={{ marginTop: 32 }} />
         ) : vm.trip ? (
-          /* ── Trayecto en curso ── */
+          /* ── Trip in progress ── */
           <>
             <View style={[styles.card, local.inProgress, { borderColor: accent }]}>
               <Text style={[local.label, { color: theme.text }]}>{tr.vas_a}</Text>
@@ -84,7 +84,7 @@ export default function TripScreen() {
             </TouchableOpacity>
           </>
         ) : (
-          /* ── Nuevo trayecto ── */
+          /* ── New trip ── */
           <>
             <Text style={styles.intro}>{tr.intro}</Text>
 

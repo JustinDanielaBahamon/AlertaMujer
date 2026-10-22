@@ -5,7 +5,7 @@ import { useTheme } from "../../../contexts/ThemeContext";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { createStyles } from "../style/activationStyle";
 
-// Texto de la grabación de audio (el de video ya existe en los idiomas como "iniciando_grabacion")
+// Audio recording text (the video one already exists in the languages as "iniciando_grabacion")
 const AUDIO_TEXT = {
   es: "Iniciando grabación de audio",
   en: "Starting audio recording",
@@ -25,7 +25,7 @@ export default function Activacion() {
     <View style={[styles.mainContainer, { backgroundColor }]}>
       <View style={styles.card}>
         <View style={styles.logoContainer}>
-          {/* ✅ Usa el logo del tema en lugar del hardcodeado */}
+          {/* ✅ Uses the theme logo instead of the hardcoded one */}
           <Image
             source={theme.activationImage}
             style={styles.logo}
@@ -47,7 +47,7 @@ export default function Activacion() {
             </View>
             <Text style={styles.itemText}>{t.activacion.enviando_ubicacion}</Text>
           </View>
-          {/* Solo se muestra lo que la usuaria activó en Ajustes (video, audio o ambos) */}
+          {/* Only what the user enabled in Settings is shown (video, audio or both) */}
           {vm.recordVideo && (
             <View style={styles.itemRow}>
               <View style={styles.iconBackground}>
@@ -66,7 +66,7 @@ export default function Activacion() {
           )}
         </View>
 
-        {/* Salta el conteo y pasa directo a la alerta activa */}
+        {/* Skips the countdown and goes straight to the active alert */}
         <TouchableOpacity style={styles.activateButton} onPress={vm.activateNow}>
           <MaterialIcons name="flash-on" size={20} color="#ffffff" />
           <Text style={styles.activateText}>{t.activacion.activar_ahora}</Text>

@@ -4,7 +4,7 @@ import { AppTheme } from "../../../contexts/ThemeContext";
 export const createStyles = (theme: AppTheme) => {
   return StyleSheet.create({
 // =====================================================
-    // CONTENEDOR
+    // CONTAINER
     // =====================================================
 
     container: {
@@ -16,7 +16,7 @@ export const createStyles = (theme: AppTheme) => {
     },
 
     // =====================================================
-    // HEADER (REDONDEADO, IGUAL AL DE "TU UBICACIÓN")
+    // HEADER (ROUNDED, SAME AS "YOUR LOCATION")
     // =====================================================
 
     header: {
@@ -66,7 +66,7 @@ export const createStyles = (theme: AppTheme) => {
     },
 
     // =====================================================
-    // ESTADO VACÍO
+    // EMPTY STATE
     // =====================================================
 
     emptyContainer: {
@@ -92,7 +92,7 @@ export const createStyles = (theme: AppTheme) => {
     },
 
     // =====================================================
-    // LISTA
+    // LIST
     // =====================================================
 
     listContainer: {
@@ -183,7 +183,7 @@ export const createStyles = (theme: AppTheme) => {
     },
 
     // =====================================================
-    // BÚSQUEDA
+    // SEARCH
     // =====================================================
 
     searchContainer: {
@@ -209,7 +209,7 @@ export const createStyles = (theme: AppTheme) => {
     },
 
     // =====================================================
-    // FILTROS
+    // FILTERS
     // =====================================================
 
     filtersContainer: {

@@ -7,7 +7,7 @@ export const styles = StyleSheet.create({
     HeaderContainer: {
         alignItems: 'center',
         flexDirection: 'row',
-        paddingVertical: 20, // Un poco más de espacio en cabecera
+        paddingVertical: 20, // A little more space in the header
         justifyContent: 'center'
     },
     HeaderText: {
@@ -16,19 +16,19 @@ export const styles = StyleSheet.create({
         color:'purple'
     },
     BoxesContainer: {
-        padding: 10, // Aumentado ligeramente para mejor respiro en bordes
+        padding: 10, // Slightly increased for better breathing room at the edges
     },
-    // --- MEJORA RESPONSIVE: Botón de emergencia ---
+    // --- RESPONSIVE IMPROVEMENT: emergency button ---
     PoliceButton: {
         borderColor: 'rgba(255, 255, 255, 0.25)',
         borderWidth: 1,
         backgroundColor: 'rgba(255, 255, 255, 0.18)',
         borderRadius: 14.5,
-        height: 45, // Un poco más alto para accesibilidad táctil
+        height: 45, // A bit taller for touch accessibility
         alignItems: 'center',
         justifyContent: 'center',
-        width: '100%', // Que ocupe el ancho del padre en móviles
-        maxWidth: 220,  // Pero que no crezca infinito en tablets
+        width: '100%', // Takes the parent's width on phones
+        maxWidth: 220,  // But does not grow forever on tablets
     },
     CallIcon: {
         flexDirection: 'row',
@@ -44,16 +44,16 @@ export const styles = StyleSheet.create({
         justifyContent: 'space-between',
         marginTop: 0,
     },
-    // --- MEJORA RESPONSIVE: Cuadros laterales ---
+    // --- RESPONSIVE IMPROVEMENT: side boxes ---
     ViolenceContainer: {
         borderRadius: 22,
         padding: 20,
-        width: '48%', // Usa porcentaje para que siempre quepan dos
+        width: '48%', // Uses a percentage so two always fit
     },
     MentalContainer: {
         borderRadius: 22,
         padding: 20,
-        width: '48%', // Usa porcentaje
+        width: '48%', // Uses a percentage
         alignItems: 'flex-end'
     },
     callViolenceLine: {
@@ -62,7 +62,7 @@ export const styles = StyleSheet.create({
         backgroundColor: 'rgba(255, 255, 255, 0.18)',
         borderRadius: 14.5,
         height: 40,
-        width: '100%', // Se adapta al cuadro
+        width: '100%', // Adapts to the box
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -74,9 +74,9 @@ export const styles = StyleSheet.create({
         height: 40,
         alignItems: 'center',
         justifyContent: 'center',
-        width: '100%', // Se adapta al cuadro
+        width: '100%', // Adapts to the box
     },
-    // --- Iconos y otros elementos ---
+    // --- Icons and other elements ---
     userIcon: {
         backgroundColor: 'purple',
         width: 47,
@@ -142,7 +142,7 @@ export const styles = StyleSheet.create({
     lineHeight: 20,
     width: 220,
   },Body: {
-    flex: 1,  // ← sin esto, el ScrollView hijo no tiene espacio para expandirse
+    flex: 1,  // ← without this, the child ScrollView has no room to expand
 },Scroll: {
     flex: 1,
 },

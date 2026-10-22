@@ -77,8 +77,8 @@ export default function UbicacionesGuardadas() {
   const [riskFilter, setRiskFilter] = useState<string | null>(null);
   const [searchText, setSearchText] = useState("");
 
-  // Volver siempre lleva al módulo de Mapa (también justo después de guardar una ubicación,
-  // cuando por detrás todavía está la pantalla de "Clasificar zona").
+  // Back always leads to the Map module (also right after saving a location,
+  // when the "Classify zone" screen is still behind).
   const goToMap = useCallback(() => {
     const destination = { screen: "Home", params: { screen: "Map" } } as never;
     try {
@@ -106,7 +106,7 @@ export default function UbicacionesGuardadas() {
     useCallback(() => {
       loadLocations();
 
-      // Botón "atrás" del celular: mismo comportamiento que la flecha del encabezado
+      // Phone "back" button: same behavior as the header arrow
       const sub = BackHandler.addEventListener("hardwareBackPress", () => {
         goToMap();
         return true;
@@ -214,7 +214,7 @@ export default function UbicacionesGuardadas() {
     return true;
   });
 
-  // Encabezado redondeado (mismo diseño que el de "Tu ubicación")
+  // Rounded header (same design as "Your location")
   const heading = (
     <LinearGradient
       colors={[theme.headercolor1, theme.headercolor2]}
@@ -242,7 +242,7 @@ export default function UbicacionesGuardadas() {
       <View style={[styles.container, { backgroundColor: theme.background }]}>
         {heading}
 
-        {/* ESTADO VACÍO */}
+        {/* EMPTY STATE */}
         <View style={styles.emptyContainer}>
           <MaterialIcons
             name="bookmark-border"
@@ -268,7 +268,7 @@ export default function UbicacionesGuardadas() {
       >
         {heading}
 
-        {/* BARRA DE BÚSQUEDA */}
+        {/* SEARCH BAR */}
         <View style={styles.searchContainer}>
           <View style={[styles.searchInput, { backgroundColor: theme.card }]}>
             <MaterialIcons
@@ -295,7 +295,7 @@ export default function UbicacionesGuardadas() {
           </View>
         </View>
 
-        {/* FILTROS POR NIVEL DE RIESGO */}
+        {/* FILTERS BY RISK LEVEL */}
         <View style={styles.filtersContainer}>
           <TouchableOpacity
             style={[
@@ -385,14 +385,14 @@ export default function UbicacionesGuardadas() {
           </TouchableOpacity>
         </View>
 
-        {/* CONTADOR DE RESULTADOS */}
+        {/* RESULTS COUNTER */}
         {filteredLocations.length !== locations.length && (
           <Text style={[styles.resultsCount, { color: theme.contactSubtext }]}>
             {filteredLocations.length} de {locations.length} ubicaciones
           </Text>
         )}
 
-        {/* LISTA DE UBICACIONES */}
+        {/* LOCATION LIST */}
         <View style={styles.listContainer}>
           {filteredLocations.map((location) => (
             <TouchableOpacity
@@ -401,7 +401,7 @@ export default function UbicacionesGuardadas() {
               onPress={() => handleCardPress(location)}
               activeOpacity={0.85}
             >
-              {/* HEADER DE LA CARD */}
+              {/* CARD HEADER */}
               <View style={styles.cardHeader}>
                 <View style={styles.cardHeaderLeft}>
                   <View
@@ -438,17 +438,17 @@ export default function UbicacionesGuardadas() {
                 </TouchableOpacity>
               </View>
 
-              {/* NOMBRE */}
+              {/* NAME */}
               <Text style={[styles.cardTitle, { color: theme.text }]}>
                 {location.name}
               </Text>
 
-              {/* DIRECCIÓN */}
+              {/* ADDRESS */}
               <Text style={[styles.cardAddress, { color: theme.contactSubtext }]}>
                 {location.address}
               </Text>
 
-              {/* CIUDAD */}
+              {/* CITY */}
               <Text style={[styles.cardCity, { color: theme.contactSubtext }]}>
                 {location.city}, {location.department}
               </Text>

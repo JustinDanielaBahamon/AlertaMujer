@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { AppLocale, useLocale } from "../../../contexts/LocaleContext";
 
-// Idiomas disponibles para seleccionar en el modal de idioma
+// Languages available in the language modal
 export const LANGUAGE_OPTIONS: { code: AppLocale; label: string }[] = [
   { code: "es", label: "Español" },
   { code: "en", label: "English" },
@@ -14,10 +14,10 @@ export const useSettingsViewModel = () => {
   const { theme, toggleTheme, setMode } = useTheme();
   const { locale, toggleLocale, setLocale, t } = useLocale();
 
-  // Controla si el modal de seleccion de idioma esta visible
+  // Controls whether the language selection modal is visible
   const [languageModalVisible, setLanguageModalVisible] = useState(false);
 
-  // Opciones de recorridos
+  // Route options
   const [saveRoutes, setSaveRoutes] = useState(true);
   const [showRoutes, setShowRoutes] = useState(true);
 
@@ -37,13 +37,13 @@ export const useSettingsViewModel = () => {
   const getThemeIcon = () => {
     if (theme.mode === "dark") return `🌙 ${t.ajustes.oscuro}`;
     if (theme.mode === "light") return `☀️ ${t.ajustes.claro}`;
-    return `🎨 ${t.ajustes.tema_personalizado}`; // Por si está en rosa/vino
+    return `🎨 ${t.ajustes.tema_personalizado}`; // In case it is pink/wine
   };
 
   return {
     theme,
     toggleTheme,
-    setMode, // Exportamos esto para los círculos
+    setMode, // We export this for the circles
     locale,
     toggleLocale,
     languageModalVisible: languageModalVisible,

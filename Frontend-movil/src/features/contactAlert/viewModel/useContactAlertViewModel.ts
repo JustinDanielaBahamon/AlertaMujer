@@ -16,26 +16,26 @@ import { getPublicSettings } from "../../../services/settings.service";
 import { stopSosAlarm } from "../../../notifications/sosAlarm";
 import { placeDescription, getPlace } from "../../../services/geocoding.service";
 
-// Ciclo de actualización: cada 30 s se actualiza la ubicación; tras 10 actualizaciones
-// se entra en reposo 5 minutos (ahorra batería) y luego se repite el ciclo.
-// Refresco del seguimiento que ve el contacto
+// Update cycle: the location is updated every 30 s; after 10 updates
+// it rests for 5 minutes (saves battery) and then the cycle repeats.
+// Refresh of the tracking the contact sees
 const CONTACT_REFRESH_MS = 10 * 1000;
 const CONTACT_SLOW_REFRESH_MS = 30 * 1000;
 const UPDATE_INTERVAL_MS = 30 * 1000;
 const UPDATES_PER_CYCLE = 10;
 const REST_MS = 5 * 60 * 1000;
-const MAX_HISTORY = 15; // registros que se muestran en la lista (el mapa muestra todos)
+const MAX_HISTORY = 15; // records shown in the list (the map shows all of them)
 const TIME_ZONE = "America/Bogota";
 const FINAL_STATUSES = ["cancelled", "cancelada", "resolved", "atendida", "finalizada"];
 
-// TEMPORAL (modo demo): coordenadas de respaldo para los puntos simulados.
+// TEMPORARY (demo mode): fallback coordinates for the simulated points.
 const DEMO_COORDS = { latitude: 2.9273, longitude: -75.2895 };
 
 type Padding = { top: number; right: number; bottom: number; left: number };
 const MAP_PADDING: Padding = { top: 80, right: 60, bottom: 80, left: 60 };
 const FULL_MAP_PADDING: Padding = { top: 130, right: 60, bottom: 120, left: 60 };
 
-// Cuánto esperar antes de la siguiente actualización, según cuántas van en el ciclo actual.
+// How long to wait before the next update, depending on how many were done in the current cycle.
 const delayAfterUpdate = (done: number) =>
   done % UPDATES_PER_CYCLE === 0 ? REST_MS : UPDATE_INTERVAL_MS;
 
@@ -76,17 +76,17 @@ export type HistoryItem = {
 export function useContactAlertViewModel() {
   const { params } = useRoute<RouteProp<MainStackParamList, "ContactAlert">>();
 
-  // TEMPORAL: en modo demo no se consulta el backend, se simulan los puntos.
+  // TEMPORARY: in demo mode the backend is not queried, the points are simulated.
   const DEMO = params.demo === true;
 
-  // Mapa pequeño de la pantalla y mapa de la ventana emergente.
+  // Small map on the screen and map of the popup.
   const mapRef = useRef<MapView>(null);
   const [mapReady, setMapReady] = useState(false);
   const fullMapRef = useRef<MapView>(null);
   const [fullMapReady, setFullMapReady] = useState(false);
   const [mapVisible, setMapVisible] = useState(false);
 
-  // Si la notificación trae coordenadas, se muestran de inmediato mientras llega el primer fetch.
+  // If the notification brings coordinates, they are shown right away while the first fetch arrives.
   const [points, setPoints] = useState<LocationPoint[]>(() =>
     !DEMO && params.latitude != null && params.longitude != null
       ? [
@@ -100,24 +100,24 @@ export function useContactAlertViewModel() {
       : [],
   );
   const [active, setActive] = useState(true);
-  // Número de emergencias que define la administración (123 en Colombia)
+  // Emergency number set by the administration (123 in Colombia)
   const [emergencyNumber, setEmergencyNumber] = useState("123");
   useEffect(() => {
     getPublicSettings()
       .then((a) => a.emergencyPhoneNumber && setEmergencyNumber(a.emergencyPhoneNumber))
       .catch(() => {});
   }, []);
-  // Grabaciones de la alerta (video y audio por partes): el contacto las ve para ayudar a ubicarla
+  // Alert recordings (video and audio in parts): the contact sees them to help locate her
   const [evidence, setEvidence] = useState<TrackingEvidence[]>([]);
   const [loading, setLoading] = useState(true);
   const [connectionError, setConnectionError] = useState(false);
   const [now, setNow] = useState(Date.now());
 
-  // Barrio y lugar de cada punto (id del punto -> "Carrera 7 · Barrio X"), por geocodificación inversa.
+  // Neighborhood and place of each point (point id -> "Carrera 7 · Barrio X"), by reverse geocoding.
   const [barrios, setBarrios] = useState<Record<string, string>>({});
   const queriedNeighborhoods = useRef<Set<string>>(new Set());
   const alive = useRef(true);
-  const demoCounter = useRef(0); // ids únicos para los puntos simulados (no se reinicia)
+  const demoCounter = useRef(0); // unique ids for the simulated points (never reset)
   useEffect(() => {
     alive.current = true;
     return () => {
@@ -125,8 +125,8 @@ export function useContactAlertViewModel() {
     };
   }, []);
 
-  // Consulta el barrio/lugar solo de los puntos nuevos (los del historial), uno por uno y empezando
-  // por el más reciente. Se espera 1,1 s entre consultas para respetar el límite del servicio.
+  // Looks up the neighborhood/place only for new points (those in the history), one by one starting
+  // with the most recent. Waits 1.1 s between queries to respect the service limit.
   useEffect(() => {
     const pendingItems = points
       .slice(-MAX_HISTORY)
@@ -148,19 +148,19 @@ export function useContactAlertViewModel() {
     })();
   }, [points]);
 
-  // Consulta la alerta al abrir la pantalla y luego en ciclos: cada 30 s (10 veces) y 5 min de reposo;
-  // se detiene cuando la usuaria la cancela o finaliza.
+  // Fetches the alert when the screen opens and then in cycles: every 30 s (10 times) and 5 min of rest;
+  // it stops when the user cancels or ends it.
   useEffect(() => {
     if (DEMO) return undefined; // TEMPORAL
 
     let mounted = true;
     let timer: ReturnType<typeof setTimeout> | undefined;
-    let done = 0; // actualizaciones hechas (se cuentan todas, también las fallidas)
+    let done = 0; // updates done (all are counted, also the failed ones)
 
     const load = async () => {
       done += 1;
       try {
-        // Contacto de emergencia (llega por push): endpoint público con el código de seguimiento
+        // Emergency contact (arrives by push): public endpoint with the tracking code
         const tracking = params.code
           ? await getPublicTracking(params.code)
           : await getAlertTracking(params.alertId);
@@ -173,14 +173,14 @@ export function useContactAlertViewModel() {
 
         const stillActive = !FINAL_STATUSES.includes(tracking.status);
         setActive(stillActive);
-        if (!stillActive) return; // última consulta hecha, no se reprograma
+        if (!stillActive) return; // last query done, not rescheduled
       } catch {
         if (!mounted) return;
         setConnectionError(true);
         setLoading(false);
       }
-      // Quien ayuda necesita ver el movimiento casi en vivo: cada 10 s los primeros 10 minutos y
-      // luego cada 30 s (no el ciclo de ahorro de batería que usa el celular de la usuaria)
+      // The helper needs to see the movement almost live: every 10 s for the first 10 minutes and
+      // then every 30 s (not the battery saving cycle the user's phone uses)
       if (mounted) timer = setTimeout(load, done <= 60 ? CONTACT_REFRESH_MS : CONTACT_SLOW_REFRESH_MS);
     };
 
@@ -191,12 +191,12 @@ export function useContactAlertViewModel() {
     };
   }, [params.alertId, params.code, DEMO]);
 
-  // Al abrir la pantalla de la alerta se apaga la alarma
+  // Opening the alert screen turns the alarm off
   useEffect(() => {
     if (!DEMO) stopSosAlarm(params.alertId).catch(() => undefined);
   }, [params.alertId, DEMO]);
 
-  // ===== TEMPORAL (modo demo): agrega un punto nuevo con la ubicación real del teléfono =====
+  // ===== TEMPORARY (demo mode): adds a new point with the phone's real location =====
   useEffect(() => {
     if (!DEMO) return undefined;
 
@@ -211,8 +211,8 @@ export function useContactAlertViewModel() {
     const addPoint = async () => {
       done += 1;
 
-      // Primer punto: la ubicación con la que se abrió la pantalla. Los siguientes: el GPS real,
-      // así que si no te mueves el punto se queda en el mismo lugar (si falla, se usa la base).
+      // First point: the location the screen was opened with. The next ones: the real GPS,
+      // so if you do not move the point stays in the same place (if it fails, the base is used).
       let coords = base;
       if (done > 1) {
         try {
@@ -227,7 +227,7 @@ export function useContactAlertViewModel() {
             };
           }
         } catch {
-          // Sin GPS: se queda con la ubicación base.
+          // No GPS: keeps the base location.
         }
       }
       if (!mounted) return;
@@ -236,7 +236,7 @@ export function useContactAlertViewModel() {
       const id = `demo-${demoCounter.current}`;
       setPoints((prev) => [...prev, { id, ...coords, recordedAt: new Date() }]);
       setLoading(false);
-      // Mismo ciclo que el real: 30 s entre puntos y reposo de 5 min cada 10.
+      // Same cycle as the real one: 30 s between points and 5 min of rest every 10.
       timer = setTimeout(addPoint, delayAfterUpdate(done));
     };
 
@@ -247,9 +247,9 @@ export function useContactAlertViewModel() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [DEMO]);
-  // ===== FIN TEMPORAL =====
+  // ===== END TEMPORARY =====
 
-  // Reloj para el "hace X". Cada 5 s: un tic por segundo volvía a dibujar toda la pantalla con el mapa.
+  // Clock for "X ago". Every 5 s: a tick per second redrew the whole screen with the map.
   useEffect(() => {
     if (!active) return undefined;
     const id = setInterval(() => setNow(Date.now()), 5000);
@@ -258,12 +258,12 @@ export function useContactAlertViewModel() {
 
   const lastItem = points.length > 0 ? points[points.length - 1] : null;
 
-  // Texto relativo: "5s", "3 min"... (la vista le agrega "hace" / "ago" según el idioma).
+  // Relative text: "5s", "3 min"... (the view adds "hace" / "ago" depending on the language).
   const timeSinceLast = lastItem
     ? formatDuration((now - lastItem.recordedAt.getTime()) / 1000)
     : "";
 
-  // Historial: más reciente arriba, con la misma numeración de los pines (1 = primer punto enviado).
+  // History: most recent on top, with the same numbering as the pins (1 = first point sent).
   const history: HistoryItem[] = useMemo(() => {
     if (points.length === 0) return [];
     const last = points[points.length - 1];
@@ -287,7 +287,7 @@ export function useContactAlertViewModel() {
       .slice(0, MAX_HISTORY);
   }, [points, barrios]);
 
-  // Encuadra todos los pines en el mapa indicado.
+  // Fits every pin on the given map.
   const fitTo = useCallback(
     (ref: RefObject<MapView | null>, padding: Padding) => {
       if (!ref.current || points.length === 0) return;
@@ -307,13 +307,13 @@ export function useContactAlertViewModel() {
     [points],
   );
 
-  // Mapa pequeño: se reencuadra cuando llega un punto nuevo (no en cada consulta).
+  // Small map: refit when a new point arrives (not on every query).
   useEffect(() => {
     if (mapReady) fitTo(mapRef, MAP_PADDING);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapReady, points.length]);
 
-  // Mapa de la ventana emergente: igual, mientras esté abierta.
+  // Popup map: the same, while it is open.
   useEffect(() => {
     if (mapVisible && fullMapReady) fitTo(fullMapRef, FULL_MAP_PADDING);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -322,7 +322,7 @@ export function useContactAlertViewModel() {
   const onMapReady = useCallback(() => setMapReady(true), []);
   const onFullMapReady = useCallback(() => setFullMapReady(true), []);
 
-  // Abre la ventana emergente con el mapa (no se sale de la app ni se abre Google Maps).
+  // Opens the popup with the map (the app is not left and Google Maps is not opened).
   const openMap = useCallback(() => {
     if (lastItem) setMapVisible(true);
   }, [lastItem]);

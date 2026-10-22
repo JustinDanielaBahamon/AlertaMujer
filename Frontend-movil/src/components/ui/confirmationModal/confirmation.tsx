@@ -9,7 +9,7 @@ interface ConfirmationModalProps {
   municipality: string;
   onConfirm: () => void;
   onBack: () => void;
-  confirmOnly: boolean; // ← agregar esto
+  confirmOnly: boolean; // ← add this
 }
 
 export default function ConfirmationModal({ 
@@ -18,7 +18,7 @@ export default function ConfirmationModal({
   municipality, 
   onConfirm, 
   onBack,
-  confirmOnly, // ← agregar esto
+  confirmOnly, // ← add this
 }: ConfirmationModalProps) {
   const { t } = useLocale();
 
@@ -53,7 +53,7 @@ export default function ConfirmationModal({
               <Text style={localStyles.confirmBtnText}>{t.confirmacion.btn_confirmar}</Text>
             </TouchableOpacity>
 
-            {/* ← Solo muestra "Cambiar datos" si NO ha confirmado aún */}
+            {/* ← Only shows "Change data" if it has NOT been confirmed yet */}
             {!confirmOnly && (
               <TouchableOpacity style={localStyles.backBtn} onPress={onBack}>
                 <Text style={localStyles.backBtnText}>{t.confirmacion.btn_cambiar}</Text>

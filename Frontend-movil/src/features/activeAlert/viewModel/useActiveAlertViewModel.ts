@@ -27,24 +27,24 @@ export type Coordinate = {
   longitude: number;
 };
 
-// Ciclo de actualizacion de la ubicacion: cada 30 s (10 veces) y luego 5 min de reposo.
+// Location update cycle: every 30 s (10 times) and then 5 min of rest.
 const UPDATE_INTERVAL_MS = 30 * 1000;
 const UPDATES_PER_CYCLE = 10;
 const REST_MS = 5 * 60 * 1000;
-const MAX_HISTORY = 15; // puntos a los que se les consulta el barrio (el mapa muestra todos)
+const MAX_HISTORY = 15; // points whose neighborhood is looked up (the map shows all of them)
 
-// Cuanto esperar antes de la siguiente actualizacion, segun cuantas van en el ciclo actual.
+// How long to wait before the next update, depending on how many were done in the current cycle.
 const delayAfterUpdate = (done: number) =>
   done % UPDATES_PER_CYCLE === 0 ? REST_MS : UPDATE_INTERVAL_MS;
 
-// La alerta espera la ubicación como máximo esto; si el GPS no responde (bajo techo, sin señal) se
-// crea igual y la ubicación se agrega cuando llegue. Antes la alerta no se enviaba sin GPS.
+// The alert waits for the location at most this long; if the GPS does not respond (indoors, no signal) it
+// is created anyway and the location is added when it arrives. Before, the alert was not sent without GPS.
 const MAX_LOCATION_WAIT_MS = 8 * 1000;
-// Una lectura de GPS que tarde más que esto se abandona y se usa la última ubicación conocida
+// A GPS reading that takes longer than this is abandoned and the last known location is used
 const MAX_READ_TIME_MS = 15 * 1000;
 const MAX_LAST_KNOWN_AGE_MS = 15 * 60 * 1000;
 
-/** Ubicación actual con límite de tiempo; si no llega, la última que conoce el teléfono. */
+/** Current location with a time limit; if it does not arrive, the last one the phone knows. */
 async function readLocation(): Promise<Location.LocationObject | null> {
   try {
     const current = await Promise.race([
@@ -53,21 +53,21 @@ async function readLocation(): Promise<Location.LocationObject | null> {
     ]);
     if (current) return current;
   } catch {
-    // sin GPS: se intenta con la última conocida
+    // no GPS: try the last known location
   }
   return Location.getLastKnownPositionAsync({ maxAge: MAX_LAST_KNOWN_AGE_MS }).catch(() => null);
 }
 
-// Si no se pueden leer los ajustes: duración máxima de una alerta y número de emergencias en Colombia
+// If the settings cannot be read: maximum alert duration and the emergency number in Colombia
 const DEFAULT_MAX_DURATION_MIN = 30;
 const DEFAULT_EMERGENCY_NUMBER = "123";
-// Cada cuánto se revisa en el servidor si la alerta sigue activa (vencida, atendida o cancelada)
+// How often the server is checked to see whether the alert is still active (expired, attended or cancelled)
 const STATUS_CHECK_MS = 30 * 1000;
 
-/** Cómo terminó la alerta, cuando el servidor la cerró sin que la usuaria tocara "Estoy bien". */
+/** How the alert ended, when the server closed it without the user tapping "I'm fine". */
 export type AlertEnd = { status: string; minutes: number };
 
-// Mismo formato de tiempo relativo que el modulo "Alerta de emergencia": "5s", "3 min", "2 h".
+// Same relative time format as the "Emergency alert" module: "5s", "3 min", "2 h".
 const formatDuration = (seconds: number) => {
   const s = Math.max(0, Math.round(seconds));
   if (s < 60) return `${s}s`;
@@ -85,25 +85,25 @@ export function useActiveAlertViewModel() {
   const { t } = useLocale();
   const route = useRoute<ActiveAlertRoute>();
 
-  // Si viene un contacto, la alerta es solo para esa persona (no para todos).
+  // If a contact comes in, the alert is only for that person (not for everyone).
   const targetContact = route.params?.contact;
   const method = route.params?.method;
-  // Alerta que ya se creó en segundo plano al agitar el teléfono
+  // Alert already created in the background when the phone was shaken
   const existingAlert = route.params?.alertId;
 
-  // Referencia al id de la alerta creada en el backend (para poder cerrarla).
+  // Ref to the id of the alert created in the backend (to be able to close it).
   const createdAlertIdRef = useRef<number | null>(null);
-  // Mismo id como estado: el chat de la alerta aparece cuando ya existe
+  // Same id as state: the alert chat appears once it exists
   const [alertId, setAlertId] = useState<number | null>(null);
   const [alertError, setAlertError] = useState<string | null>(null);
-  // Estado del envío al servidor, para que la usuaria sepa si sus contactos ya fueron avisados
+  // Delivery status to the server, so the user knows whether her contacts were notified
   const [delivery, setDelivery] = useState<{ status: "enviando" | "enviada" | "fallida"; attempt: number; total: number }>({
     status: "enviando",
     attempt: 1,
     total: 1,
   });
   const [manualRetries, setManualRetries] = useState(0);
-  // La creación con reintentos puede durar más que un cambio de ubicación: se usa el montaje de la pantalla
+  // Creating with retries may take longer than a location change: the screen mount is used
   const screenMountedRef = useRef(true);
   useEffect(() => {
     screenMountedRef.current = true;
@@ -112,11 +112,11 @@ export function useActiveAlertViewModel() {
     };
   }, []);
 
-  // Hasta cuándo sigue activa la alerta en el servidor (inicio + duración máxima del panel)
+  // Until when the alert stays active on the server (start + panel maximum duration)
   const [alertStart, setAlertStart] = useState<Date | null>(null);
   const [maxDurationMin, setMaxDurationMin] = useState(DEFAULT_MAX_DURATION_MIN);
   const [emergencyNumber, setEmergencyNumber] = useState(DEFAULT_EMERGENCY_NUMBER);
-  // La alerta terminó en el servidor: se deja de enviar la ubicación y se pregunta qué hacer
+  // The alert ended on the server: stop sending the location and ask what to do
   const [end, setEnd] = useState<AlertEnd | null>(null);
   const endedRef = useRef(false);
   useEffect(() => {
@@ -128,37 +128,37 @@ export function useActiveAlertViewModel() {
       .catch(() => {});
   }, []);
 
-  // Ubicacion actual, para el mini-mapa del header y para el mapa en pantalla completa.
+  // Current location, for the header mini map and for the full-screen map.
   const [location, setLocation] = useState<Coordinate | null>(null);
 
-  // Recorrido de la alerta: cada ubicacion obtenida se guarda como un punto (igual que en
-  // "Alerta de emergencia": id, coordenadas y hora de registro). 1 = primer punto.
+  // Alert route: each location obtained is stored as a point (same as
+  // "Emergency alert": id, coordinates and record time). 1 = first point.
   const [points, setPoints] = useState<LocationPoint[]>([]);
   const counterDot = useRef(0);
   const [now, setNow] = useState(Date.now());
 
-  // Barrio y lugar de cada punto (id del punto -> "Carrera 7 · Barrio X"), por geocodificacion inversa.
+  // Neighborhood and place of each point (point id -> "Carrera 7 · Barrio X"), by reverse geocoding.
   const [barrios, setBarrios] = useState<Record<string, string>>({});
   const queriedNeighborhoods = useRef<Set<string>>(new Set());
   const alive = useRef(true);
 
-  // Mapa pequeno y mapa en pantalla completa (refs para poder encuadrar todos los pines).
+  // Small map and full-screen map (refs to fit all the pins).
   const mapRef = useRef<MapView>(null);
   const [mapReady, setMapReady] = useState(false);
   const fullMapRef = useRef<MapView>(null);
   const [fullMapReady, setFullMapReady] = useState(false);
 
-  // Estado del mapa en pantalla completa (mismo mecanismo que useMapaViewModel: fullscreen + boton "cerrar mapa").
+  // Full-screen map state (same mechanism as useMapViewModel: fullscreen + "close map" button).
   const [fullscreen, setFullscreen] = useState(false);
   const [showClose, setShowClose] = useState(false);
   const closeOpacity = useRef(new Animated.Value(0)).current;
 
-  // Modal de confirmacion para cancelar la alerta ("Estoy bien" -> "Si, cancelar").
+  // Confirmation modal to cancel the alert ("I'm fine" -> "Yes, cancel").
   const [confirmVisible, setConfirmVisible] = useState(false);
 
-  // Mientras la alerta está activa no se puede salir con "atrás" ni con el gesto: solo con
-  // "Estoy bien" -> "Si, cancelar". Antes se podía salir, la alerta quedaba en curso sin enviar
-  // ubicación y se podían activar otras encima.
+  // While the alert is active she cannot leave with "back" or the gesture: only with
+  // "I'm fine" -> "Yes, cancel". Before, leaving left the alert running without sending the
+  // location and other alerts could be activated on top.
   const [canLeave, setCanLeave] = useState(false);
   const newAlertRef = useRef(false);
   usePreventRemove(!canLeave, () => {
@@ -166,7 +166,7 @@ export function useActiveAlertViewModel() {
   });
   useEffect(() => {
     if (!canLeave) return;
-    // "Sigo en peligro": se abre una alerta nueva (la anterior ya la cerró el servidor)
+    // "I'm still in danger": a new alert opens (the server already closed the previous one)
     if (newAlertRef.current) navigation.replace("ActiveAlert", targetContact ? { contact: targetContact } : undefined);
     else navigation.replace("DrawerHome");
   }, [canLeave, navigation, targetContact]);
@@ -180,7 +180,7 @@ export function useActiveAlertViewModel() {
 
 
   const alertCreationStartedRef = useRef(false);
-  // Última ubicación obtenida (para enviarla si la alerta se creó antes de tenerla)
+  // Last location obtained (to send it if the alert was created before having it)
   const lastLocationRef = useRef<{ latitude: number; longitude: number; accuracy?: number | null } | null>(null);
   const [locationWaitExpired, setLocationWaitExpired] = useState(false);
   useEffect(() => {
@@ -188,7 +188,7 @@ export function useActiveAlertViewModel() {
     return () => clearTimeout(t);
   }, []);
 
-  // Si la alerta ya existe, esta pantalla toma el seguimiento que hacía el servicio en segundo plano
+  // If the alert already exists, this screen takes over the tracking the background service was doing
   useEffect(() => {
     if (!existingAlert) return;
     alertCreationStartedRef.current = true;
@@ -201,12 +201,12 @@ export function useActiveAlertViewModel() {
     takeOverAlert();
   }, [existingAlert]);
 
-  // Crea la alerta en el backend al activar el SOS (una sola vez, incluyendo la ubicación).
-  // Si falla, se vuelve a intentar con la siguiente ubicación o al tocar "Reintentar".
+  // Creates the alert in the backend when SOS is activated (only once, including the location).
+  // If it fails, it is retried with the next location or when "Retry" is tapped.
   useEffect(() => {
     (async () => {
       if (!user?.id || alertCreationStartedRef.current) return;
-      if (!location && !locationWaitExpired) return; // se espera un poco la ubicación, no más
+      if (!location && !locationWaitExpired) return; // wait a little for the location, no more
       alertCreationStartedRef.current = true;
 
       try {
@@ -224,7 +224,7 @@ export function useActiveAlertViewModel() {
             : method === "widget" ? "widget"
             : "panic_button",
           status: "active",
-          // Alerta normal; si es individual, el mensaje indica el contacto destinatario.
+          // Normal alert; if it is individual, the message names the target contact.
           message: targetContact
             ? `Alerta SOS activada desde la app solo para: ${targetContact.name ?? ""} (${targetContact.phoneNumber})`
             : method === "agitar"
@@ -236,7 +236,7 @@ export function useActiveAlertViewModel() {
                   : "Alerta SOS activada desde la app",
           latitude: location?.latitude,
           longitude: location?.longitude,
-          // Alerta individual: el backend solo avisa a este contacto
+          // Individual alert: the backend only notifies this contact
           contactIds: targetContact ? [Number(targetContact.id)] : undefined,
         }, {
           onAttempt: ({ attempt, total }) => screenMountedRef.current && setDelivery({ status: "enviando", attempt, total }),
@@ -245,14 +245,14 @@ export function useActiveAlertViewModel() {
         setAlertId(alert.id);
         setAlertStart(alert.startedAt ? toDate(alert.startedAt) : new Date());
         if (screenMountedRef.current) setDelivery((e) => ({ ...e, status: "enviada" }));
-        // El primer punto del recorrido sale ya: así el contacto ve dónde está desde el primer momento
-        // (antes esperaba la siguiente lectura del GPS y veía "sin ubicaciones")
+        // The first route point goes out right away: the contact sees where she is from the first moment
+        // (before it waited for the next GPS reading and showed "no locations")
         if (lastLocationRef.current) {
           reportLocation({ ...lastLocationRef.current, alertaId: alert.id });
         }
       } catch (err) {
         console.error("No se pudo crear la alerta en el backend:", err);
-        // Se permite volver a intentarlo desde la pantalla
+        // She can try again from the screen
         alertCreationStartedRef.current = false;
         if (screenMountedRef.current) {
           setAlertError("No se pudo registrar la alerta en el servidor");
@@ -260,7 +260,7 @@ export function useActiveAlertViewModel() {
         }
       }
     })();
-    // reintentosManuales: al tocar "Reintentar" se vuelve a correr la creación
+    // manualRetries: tapping "Retry" runs the creation again
   }, [user?.id, location, locationWaitExpired, targetContact, method, manualRetries]);
 
   const retrySend = useCallback(() => {
@@ -268,8 +268,8 @@ export function useActiveAlertViewModel() {
     setManualRetries((n) => n + 1);
   }, []);
 
-  // Actualiza la ubicacion en ciclos para ahorrar bateria: cada 30 s (10 veces) y luego
-  // 5 min de reposo, en los que el GPS no se consulta. Despues repite el ciclo.
+  // Updates the location in cycles to save battery: every 30 s (10 times) and then
+  // 5 min of rest, when the GPS is not queried. Then the cycle repeats.
   useEffect(() => {
     let mounted = true;
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -278,7 +278,7 @@ export function useActiveAlertViewModel() {
     (async () => {
       if (!(await locationPermission()) || !mounted) return;
 
-      // La última ubicación conocida es inmediata: el mapa aparece sin esperar al GPS
+      // The last known location is immediate: the map appears without waiting for the GPS
       const latest = await Location.getLastKnownPositionAsync({ maxAge: MAX_LAST_KNOWN_AGE_MS }).catch(() => null);
       if (latest && mounted) {
         const coords = { latitude: latest.coords.latitude, longitude: latest.coords.longitude };
@@ -287,7 +287,7 @@ export function useActiveAlertViewModel() {
       }
 
       const update = async () => {
-        if (endedRef.current) return; // la alerta terminó en el servidor: no se envía más
+        if (endedRef.current) return; // the alert ended on the server: nothing more is sent
         done += 1;
         try {
           const current = await readLocation();
@@ -299,15 +299,15 @@ export function useActiveAlertViewModel() {
           };
           setLocation(coords);
           lastLocationRef.current = { ...coords, accuracy: current.coords.accuracy };
-          // Durante la alerta cada punto se envía al backend asociado a la alerta
+          // During the alert each point is sent to the backend linked to the alert
           reportLocation({ ...coords, accuracy: current.coords.accuracy, alertaId: createdAlertIdRef.current });
 
-          // Cada ubicacion obtenida tambien se registra como un punto del recorrido.
+          // Each location obtained is also recorded as a route point.
           counterDot.current += 1;
           const id = `activa-${counterDot.current}`;
           setPoints((prev) => [...prev, { id, ...coords, recordedAt: new Date() }]);
         } catch {
-          // Silenciar: si falla, el header muestra el icono de respaldo o la ultima ubicacion.
+          // Silent: if it fails, the header shows the fallback icon or the last location.
         }
         if (mounted) timer = setTimeout(update, delayAfterUpdate(done));
       };
@@ -321,8 +321,8 @@ export function useActiveAlertViewModel() {
     };
   }, []);
 
-  // Consulta el barrio/lugar solo de los puntos nuevos, uno por uno y empezando por el mas
-  // reciente. Se espera 1,1 s entre consultas para respetar el limite del servicio.
+  // Looks up the neighborhood/place only for new points, one by one starting with the most
+  // recent. Waits 1.1 s between queries to respect the service limit.
   useEffect(() => {
     const pendingItems = points
       .slice(-MAX_HISTORY)
@@ -344,20 +344,20 @@ export function useActiveAlertViewModel() {
     })();
   }, [points]);
 
-  // Reloj para el "hace X" de la etiqueta del mapa. Cada 10 s y no cada segundo: un tic por segundo
-  // volvía a dibujar toda la pantalla (mapa, cámara y chat) y el teléfono se ponía lento.
-  // La cuenta regresiva tiene su propio reloj en <CuentaRegresiva>.
+  // Clock for the map label "X ago". Every 10 s and not every second: a tick per second
+  // redrew the whole screen (map, camera and chat) and made the phone slow.
+  // The countdown has its own clock in <Countdown>.
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 10000);
     return () => clearInterval(id);
   }, []);
 
-  // Momento en que la alerta vence en el servidor
+  // Moment the alert expires on the server
   const alertEndMs = alertStart ? alertStart.getTime() + maxDurationMin * 60000 : null;
   const alertEnd = useMemo(() => (alertEndMs === null ? null : new Date(alertEndMs)), [alertEndMs]);
 
-  // ¿Sigue activa? Se revisa cada 30 s y al llegar el contador a 0. Si el servidor la cerró
-  // (venció, la marcaron atendida o se canceló desde otro lado) se deja de enviar la ubicación
+  // Still active? Checked every 30 s and when the counter reaches 0. If the server closed it
+  // (expired, marked attended or cancelled elsewhere) the location stops being sent
   const checkStatus = useCallback(async () => {
     const id = createdAlertIdRef.current;
     if (!id || endedRef.current) return;
@@ -369,7 +369,7 @@ export function useActiveAlertViewModel() {
         setEnd({ status, minutes: maxDurationMin });
       }
     } catch {
-      // Sin conexión: se revisa en la siguiente vuelta
+      // Offline: checked on the next round
     }
   }, [maxDurationMin]);
 
@@ -379,7 +379,7 @@ export function useActiveAlertViewModel() {
     return () => clearInterval(t);
   }, [alertId, checkStatus]);
 
-  // Quién abrió el seguimiento: le da tranquilidad saber que sus contactos la están viendo
+  // Who opened the tracking: knowing her contacts are watching gives her peace of mind
   const [views, setViews] = useState({ total: 0, watchingNow: 0 });
   useEffect(() => {
     if (!alertId) return;
@@ -389,14 +389,14 @@ export function useActiveAlertViewModel() {
     return () => clearInterval(t);
   }, [alertId]);
 
-  // Al llegar a cero se pregunta al servidor si la alerta ya terminó
+  // When it reaches zero the server is asked whether the alert already ended
   useEffect(() => {
     if (alertId === null || alertEndMs === null) return;
     const t = setTimeout(checkStatus, Math.max(0, alertEndMs - Date.now()) + 1000);
     return () => clearTimeout(t);
   }, [alertId, alertEndMs, checkStatus]);
 
-  // Datos derivados del ultimo punto (mismos que muestra "Alerta de emergencia").
+  // Data derived from the last point (the same "Emergency alert" shows).
   const lastItem = points.length > 0 ? points[points.length - 1] : null;
   const timeSinceLast = lastItem
     ? formatDuration((now - lastItem.recordedAt.getTime()) / 1000)
@@ -406,7 +406,7 @@ export function useActiveAlertViewModel() {
     ? `${lastItem.latitude.toFixed(4)}, ${lastItem.longitude.toFixed(4)}`
     : "";
 
-  // Encuadra todos los pines en el mapa indicado.
+  // Fits every pin on the given map.
   const fitTo = useCallback(
     (ref: RefObject<MapView | null>, padding: Padding) => {
       if (!ref.current || points.length === 0) return;
@@ -426,13 +426,13 @@ export function useActiveAlertViewModel() {
     [points],
   );
 
-  // Mapa pequeno: se reencuadra cuando llega un punto nuevo.
+  // Small map: refit when a new point arrives.
   useEffect(() => {
     if (mapReady) fitTo(mapRef, MAP_PADDING);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapReady, points.length]);
 
-  // Mapa en pantalla completa: igual, mientras este abierto.
+  // Full-screen map: the same, while it is open.
   useEffect(() => {
     if (fullscreen && fullMapReady) fitTo(fullMapRef, FULL_MAP_PADDING);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -445,20 +445,20 @@ export function useActiveAlertViewModel() {
     fitTo(fullMapRef, FULL_MAP_PADDING);
   }, [fitTo]);
 
-  // Al tocar "Estoy bien" solo se abre la ventana de verificacion.
+  // Tapping "I'm fine" only opens the confirmation dialog.
   const openConfirmation = useCallback(() => {
     setConfirmVisible(true);
   }, []);
 
-  // Cierra la ventana de verificacion sin cancelar la alerta.
+  // Closes the confirmation dialog without cancelling the alert.
   const closeConfirmation = useCallback(() => {
     setConfirmVisible(false);
   }, []);
 
-  // Se ejecuta cuando el usuario confirma "Si, cancelar".
+  // Runs when the user confirms "Yes, cancel".
   const markImOk = useCallback(() => {
     setConfirmVisible(false);
-    // Cerrar la alerta activa en el backend (estado cancelada)
+    // Close the active alert in the backend (cancelled status)
     if (createdAlertIdRef.current) {
       endAlert(createdAlertIdRef.current, "cancelled").catch((err) =>
         console.error("No se pudo cerrar la alerta en el backend:", err),
@@ -467,15 +467,15 @@ export function useActiveAlertViewModel() {
     setCanLeave(true);
   }, []);
 
-  // Abre el marcador con el número de emergencias que define la administración (123 en Colombia)
+  // Opens the dialer with the emergency number set by the administration (123 in Colombia)
   const callEmergency = useCallback(() => {
     const url = Platform.OS === "android" ? `tel:${emergencyNumber}` : `telprompt:${emergencyNumber}`;
     Linking.openURL(url).catch(() => {
-      // Ignorar silenciosamente si el dispositivo no puede realizar llamadas.
+      // Silently ignore it if the device cannot make calls.
     });
   }, [emergencyNumber]);
 
-  // Cuando la alerta ya terminó en el servidor: salir o activar otra
+  // When the alert already ended on the server: leave or activate another
   const activateAnotherAlert = useCallback(() => {
     setEnd(null);
     newAlertRef.current = true;
@@ -486,13 +486,13 @@ export function useActiveAlertViewModel() {
     setCanLeave(true);
   }, []);
 
-  // Abre el mapa en pantalla completa (equivalente al boton "navegar" del modulo Mapa),
-  // pero sin salir de AlertaActiva: es un Modal local, no una navegacion.
+  // Opens the full-screen map (equivalent to the "navigate" button of the Map module),
+  // but without leaving ActiveAlert: it is a local Modal, not a navigation.
   const openFullMap = useCallback(() => {
     if (location) setFullscreen(true);
   }, [location]);
 
-  // Al tocar el mapa en pantalla completa, muestra el boton "cerrar mapa" 15s (igual que en Mapa).
+  // Tapping the full-screen map shows the "close map" button for 15 s (same as in Map).
   const handleMapPress = useCallback(() => {
     if (showClose) return;
 
@@ -512,7 +512,7 @@ export function useActiveAlertViewModel() {
     }, 15000);
   }, [showClose, closeOpacity]);
 
-  // Cierra el mapa en pantalla completa y se queda en AlertaActiva (no navega a ningun lado).
+  // Closes the full-screen map and stays on ActiveAlert (does not navigate anywhere).
   const closeFullMap = useCallback(() => {
     setFullscreen(false);
     setShowClose(false);
@@ -543,7 +543,7 @@ export function useActiveAlertViewModel() {
     leaveAfterEnd: leaveAfterEnd,
     emergencyNumber: emergencyNumber,
     retrySend: retrySend,
-    // Mapa con el mismo diseno y datos que "Alerta de emergencia"
+    // Map with the same design and data as "Emergency alert"
     mapRef,
     fullMapRef: fullMapRef,
     points: points,

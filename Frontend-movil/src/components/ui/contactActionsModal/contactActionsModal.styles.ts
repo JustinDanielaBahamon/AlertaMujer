@@ -1,56 +1,56 @@
 
 /**
- * ESTILOS DEL MODAL DE ACCIONES
- * 
- * Define todos los colores, tamaños y posiciones del modal.
- * Usa el color morado de tu app (#6B3FA0).
+ * ACTIONS MODAL STYLES
+ *
+ * Defines every color, size and position of the modal.
+ * Uses the app purple (#6B3FA0).
  */
 
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
-  // Fondo oscuro que cubre toda la pantalla
+  // Dark background covering the whole screen
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)', // Negro con 60% de opacidad
+    backgroundColor: 'rgba(0,0,0,0.6)', // Black with 60% opacity
     justifyContent: 'center',
     alignItems: 'center',
   },
   
-  // Tarjeta blanca del modal
+  // White modal card
   modalCard: {
     width: '85%',
     backgroundColor: '#FFF',
     borderRadius: 25,
     padding: 25,
     alignItems: 'center',
-    elevation: 10, // Sombra en Android
-    shadowColor: '#000', // Sombra en iOS
+    elevation: 10, // Shadow on Android
+    shadowColor: '#000', // Shadow on iOS
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.3,
     shadowRadius: 10,
   },
   
-  // Círculo morado con ícono de persona
+  // Purple circle with a person icon
   iconCircle: {
     width: 70,
     height: 70,
     borderRadius: 35,
-    backgroundColor: '#F3E5F5', // Morado muy claro
+    backgroundColor: '#F3E5F5', // Very light purple
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 15,
   },
   
-  // Nombre del contacto (título principal)
+  // Contact name (main title)
   modalTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#6B3FA0', // Tu morado
+    color: '#6B3FA0', // Your purple
     marginBottom: 5,
   },
   
-  // Subtítulo "¿Qué deseas hacer?"
+  // "What do you want to do?" subtitle
   modalSubtitle: {
     fontSize: 14,
     color: '#666',
@@ -58,7 +58,7 @@ export const styles = StyleSheet.create({
     marginBottom: 25,
   },
   
-  // BOTÓN ACTUALIZAR (morado sólido)
+  // UPDATE BUTTON (solid purple)
   updateBtn: {
     width: '100%',
     height: 55,
@@ -68,8 +68,8 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
-    // --- CAMBIOS AQUÍ ---
-    gap: 12, // Aumentamos de 8 a 12 para que el lápiz no choque con la T de Tatiana o la A de Actualizar
+    // --- CHANGES HERE ---
+    gap: 12, // Raised from 8 to 12 so the pencil does not touch the first letter of the name or of the label
     paddingHorizontal: 60, 
   },
   updateBtnText: {
@@ -78,7 +78,7 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
   },
   
-  // BOTÓN BORRAR (blanco con borde rojo)
+  // DELETE BUTTON (white with a red border)
   deleteBtn: {
     width: '100%',
     height: 55,
@@ -90,8 +90,8 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
-    // --- CAMBIOS AQUÍ ---
-    gap: 12, // Mantenemos la simetría con el botón de arriba
+    // --- CHANGES HERE ---
+    gap: 12, // We keep the symmetry with the button above
     paddingHorizontal: 50,
   },
   deleteBtnText: {
@@ -100,7 +100,7 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
   },
   
-  // BOTÓN CANCELAR (transparente, solo texto)
+  // CANCEL BUTTON (transparent, text only)
   cancelBtn: {
     width: '100%',
     height: 45,

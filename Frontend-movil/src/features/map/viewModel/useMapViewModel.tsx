@@ -17,8 +17,8 @@ export type MapRouteParams = {
   targetAddress?: string;
 };
 
-// Última ubicación conocida. Vive fuera del hook para que, al volver a abrir el mapa
-// (por ejemplo desde un acceso rápido), se pinte al instante sin esperar al GPS.
+// Last known location. It lives outside the hook so that, when the map opens again
+// (for example from a shortcut), it is painted instantly without waiting for the GPS.
 let locationCache: Coordinate | null = null;
 
 export const useMapViewModel = () => {
@@ -37,7 +37,7 @@ export const useMapViewModel = () => {
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [disabledServices, setDisabledServices] = useState(false);
   const [loading, setLoading] = useState(!locationCache);
-  // Radio de precisión del GPS en metros (el celular estima qué tan exacta es la posición)
+  // GPS accuracy radius in meters (the phone estimates how exact the position is)
   const [precisionMetros, setPrecisionMetros] = useState<number | null>(null);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(
     null
@@ -49,7 +49,7 @@ export const useMapViewModel = () => {
 
   const closeOpacity = useRef(new Animated.Value(0)).current;
 
-  // ─── GEOLOCALIZAR DIRECCIÓN RECIBIDA POR PARÁMETRO ───────────────────────
+  // ─── GEOLOCATE THE ADDRESS RECEIVED AS A PARAM ───────────────────────────
   useEffect(() => {
     const address = params.targetAddress?.trim();
 
@@ -87,7 +87,7 @@ export const useMapViewModel = () => {
     };
   }, [params.targetAddress]);
 
-  // ─── FÓRMULA HAVERSINE ───────────────────────────────────────────────────
+  // ─── HAVERSINE FORMULA ───────────────────────────────────────────────────
   const getDistanceFromLatLonInMeters = (
     lat1: number,
     lon1: number,
@@ -113,7 +113,7 @@ export const useMapViewModel = () => {
     let canceled = false;
     let hasLocation = locationCache !== null;
 
-    // Guarda la posición en el estado y en el caché para la próxima vez que se abra el mapa
+    // Store the position in state and in the cache for the next time the map opens
     const applyLocation = (coord: Coordinate, precision?: number | null) => {
       locationCache = coord;
       setPrecisionMetros(precision ?? null);
@@ -122,7 +122,7 @@ export const useMapViewModel = () => {
       setLastUpdate(new Date());
     };
 
-    // Agrega un punto al historial solo si se movió al menos 10 m
+    // Add a point to the history only if it moved at least 10 m
     const addToHistory = (newLoc: Coordinate) => {
       setHistory((prev) => {
         const lastItem = prev[prev.length - 1];
@@ -145,11 +145,11 @@ export const useMapViewModel = () => {
 
     const startLocation = async () => {
       try {
-        // Solo mostramos la pantalla de carga si todavía no hay ninguna ubicación que pintar
+        // Only show the loading screen if there is still no location to paint
         if (!hasLocation) setLoading(true);
         setPermissionDenied(false);
 
-        // Servicios y permiso se consultan al mismo tiempo (antes eran uno tras otro)
+        // Services and permission are checked at the same time (before, one after the other)
         const [serviceEnabled, currentPermission] = await Promise.all([
           Location.hasServicesEnabledAsync(),
           Location.getForegroundPermissionsAsync(),
@@ -171,7 +171,7 @@ export const useMapViewModel = () => {
           return;
         }
 
-        // Solo se pide el permiso si todavía no está concedido
+        // Only ask for the permission if it is not granted yet
         let status = currentPermission.status;
         if (status !== "granted") {
           status = (await locationPermission()) ? Location.PermissionStatus.GRANTED : Location.PermissionStatus.DENIED;
@@ -209,8 +209,8 @@ export const useMapViewModel = () => {
           }
         }
 
-        // 1) Pintar el mapa YA con la última posición conocida (es casi instantáneo).
-        //    Después se afina con el GPS en segundo plano.
+        // 1) Paint the map NOW with the last known position (almost instant).
+        // Then refine it with the GPS in the background.
         if (!hasLocation) {
           try {
             const latest = await Location.getLastKnownPositionAsync({
@@ -224,11 +224,11 @@ export const useMapViewModel = () => {
               setLoading(false);
             }
           } catch {
-            // Si no hay posición previa seguimos con el GPS normal
+            // If there is no previous position, continue with the normal GPS
           }
         }
 
-        // 2) Posición actual precisa
+        // 2) Precise current position
         const currentLocation = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.Balanced,
         });
@@ -260,7 +260,7 @@ export const useMapViewModel = () => {
           }
         );
 
-        // Si la pantalla se cerró mientras se creaba la suscripción, se libera de inmediato
+        // If the screen closed while the subscription was being created, release it right away
         if (canceled) {
           subscription.remove();
           subscription = null;
@@ -288,7 +288,7 @@ export const useMapViewModel = () => {
         console.error("Error al obtener ubicación:", error);
         if (canceled) return;
         setLoading(false);
-        // Si ya hay una ubicación en pantalla no se muestra como "permiso denegado"
+        // If there is already a location on screen it is not shown as "permission denied"
         if (!hasLocation) setPermissionDenied(true);
       }
     };
@@ -329,7 +329,7 @@ export const useMapViewModel = () => {
     }
   };
 
-  // ─── MANEJO DE PANTALLA COMPLETA ──────────────────────────────────────────
+  // ─── FULL SCREEN HANDLING ────────────────────────────────────────────────
   const handleMapPress = () => {
     if (showClose) return;
 
@@ -350,14 +350,14 @@ export const useMapViewModel = () => {
     }, 15000);
   };
 
-  // ─── FORMATEO DE HORA ─────────────────────────────────────────────────────
+  // ─── TIME FORMATTING ─────────────────────────────────────────────────────
   const formatHour = (date: Date) =>
     date.toLocaleTimeString("es-CO", {
       hour: "2-digit",
       minute: "2-digit",
     });
 
-  // ─── ACCIONES DE BOTONES ─────────────────────────────────────────────────
+  // ─── BUTTON ACTIONS ──────────────────────────────────────────────────────
   const actions = [
     {
       icon: "share",
@@ -392,7 +392,7 @@ export const useMapViewModel = () => {
     },
   ] as const;
 
-  // ─── NAVEGACIÓN A ACCIONES ADICIONALES ────────────────────────────────────
+  // ─── NAVIGATION TO ADDITIONAL ACTIONS ────────────────────────────────────
   const goToClassifyZone = () => {
     if (!location) return;
     navigation.navigate("ClassifyZone", {

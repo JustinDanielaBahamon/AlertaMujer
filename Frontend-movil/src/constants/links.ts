@@ -1,7 +1,7 @@
-/** Sitio web de AlertaMujer: seguimiento de alertas, evidencias y descarga de la app. */
+/** AlertaMujer website: alert tracking, evidence and app download. */
 export const WEB_URL = process.env.EXPO_PUBLIC_WEB_URL || "https://alerta-mujer.vercel.app";
 
-/** APK de Android: recurso del último release del repositorio móvil (el mismo que ofrece la web). */
+/** Android APK: asset of the latest release of the mobile repository (the same one the website offers). */
 export const APK_DOWNLOAD_URL =
   process.env.EXPO_PUBLIC_APK_URL ||
   "https://github.com/JustinDanielaBahamon/AlertaMujer/releases/latest/download/AlertaMujer.apk";

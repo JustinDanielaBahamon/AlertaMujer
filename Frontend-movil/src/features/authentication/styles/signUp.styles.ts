@@ -1,7 +1,7 @@
 import {StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
-    // Fondo morado que cubre toda la pantalla (incluye barra de estado y zona inferior)
+    // Purple background covering the whole screen (including the status bar and the bottom area)
     Screen: {
         flex: 1,
         backgroundColor: 'rgb(202, 171, 222)',
@@ -17,8 +17,8 @@ export const styles = StyleSheet.create({
     LogoContainer:{
         justifyContent : 'center',
         alignItems:'center',
-        marginTop : 10, // 🔽 baja esto un poco
-        marginBottom: 10, // 🔥 agrega separación con el form
+        marginTop : 10, // 🔽 moves this down a bit
+        marginBottom: 10, // 🔥 adds spacing with the form
     },
      LogoImage :{
         width: 140,
@@ -27,21 +27,21 @@ export const styles = StyleSheet.create({
         resizeMode: 'contain',
     },
 
-    //Comienzo contenedor Formulario
+    // Start of the form container
 
    FormContainer:{
         backgroundColor: '#FFF',
-        marginHorizontal: 20, // separación de los lados
-        padding: 20, // espacio interno
+        marginHorizontal: 20, // side spacing
+        padding: 20, // inner spacing
         borderRadius: 20,
         gap :1,
-        // Sombra (opcional pero muy pro)
+        // Shadow (optional but very pro)
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
         shadowRadius: 4,
         flex:0,
-        elevation: 5, // para Android
+        elevation: 5, // for Android
     }, FormTitleContainer:{
     },
     FormTitle :{
@@ -57,7 +57,7 @@ export const styles = StyleSheet.create({
 
     
 
-    //Comienzo Diseño del contenedor del correo
+    // Start of the email container design
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -87,9 +87,9 @@ export const styles = StyleSheet.create({
         color: '#000'
         
     },
-    //Fin Diseño del contenedor del correo
+    // End of the email container design
 
-    //Comienzo diseño del contenedor de la contraseña
+    // Start of the password container design
 
     passwordInput:{
         flex: 1,
@@ -98,7 +98,7 @@ export const styles = StyleSheet.create({
         color: '#000',
     },
 
-    //Comienzo diseño lista
+    // Start of the list design
         dropdownList:{
         backgroundColor: '#FFF',
         marginHorizontal: 10,
@@ -117,7 +117,7 @@ export const styles = StyleSheet.create({
         fontSize: 16,
         color: '#000'
         },
-    //Fin diseño lista
+    // End of the list design
 
     sessionButton:{
   backgroundColor: 'rgba(164, 7, 255, 0.67)',
@@ -134,7 +134,7 @@ sessionText:{
   fontWeight : 'bold',
 },
 
-// Tarjeta de términos y privacidad (mismos colores de los inputs y el botón)
+// Terms and privacy card (same colors as the inputs and the button)
 checksContainer:{
   marginTop: 20,
   marginHorizontal: 20,

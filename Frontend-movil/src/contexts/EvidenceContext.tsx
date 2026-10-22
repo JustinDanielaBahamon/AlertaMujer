@@ -8,18 +8,18 @@ import React, {
   useState,
 } from "react";
 
-// Claves de AsyncStorage para cada interruptor
+// AsyncStorage keys for each switch
 const STORAGE_KEY_VIDEO = "alertamujer_grabar_video";
 const STORAGE_KEY_AUDIO = "alertamujer_grabar_audio";
 
 type EvidenceContextValue = {
-  // true = al activar una emergencia se graba video con la cámara (por defecto activado)
+  // true = activating an emergency records video with the camera (on by default)
   recordVideo: boolean;
   setRecordVideo: (value: boolean) => void;
-  // true = al activar una emergencia se graba audio con el micrófono (por defecto activado)
+  // true = activating an emergency records audio with the microphone (on by default)
   recordAudio: boolean;
   setRecordAudio: (value: boolean) => void;
-  // true cuando ya se leyeron los valores guardados en el teléfono
+  // true once the values saved on the phone were read
   loaded: boolean;
 };
 
@@ -30,7 +30,7 @@ export function EvidenceProvider({ children }: { children: React.ReactNode }) {
   const [recordAudio, setRecordAudioState] = useState<boolean>(true);
   const [loaded, setLoaded] = useState(false);
 
-  // Al abrir la app, lee lo que la usuaria dejó guardado
+  // When the app opens, read what the user saved
   useEffect(() => {
     (async () => {
       try {
@@ -70,7 +70,7 @@ export function EvidenceProvider({ children }: { children: React.ReactNode }) {
   return <EvidenceContext.Provider value={value}>{children}</EvidenceContext.Provider>;
 }
 
-// Uso: const { grabarVideo, grabarAudio } = useEvidencia();
+// Usage: const { recordVideo, recordAudio } = useEvidence();
 export function useEvidence() {
   const ctx = useContext(EvidenceContext);
   if (!ctx) {

@@ -45,7 +45,7 @@ type SavedRoute = {
   important: boolean;
 };
 
-// Estilos extra: acciones en vertical (estrella arriba, borrar abajo) y botón de borrar más grande
+// Extra styles: vertical actions (star on top, delete below) and a bigger delete button
 const extra = StyleSheet.create({
   verticalActions: {
     flexDirection: "column",
@@ -74,14 +74,14 @@ const extra = StyleSheet.create({
 const formatCoordinate = (p?: { latitude: number; longitude: number }) =>
   p ? `${p.latitude.toFixed(5)}, ${p.longitude.toFixed(5)}` : "--";
 
-// Recorridos guardados antes de que se guardara la dirección: su etiqueta es genérica
+// Routes saved before the address was stored: their label is generic
 const GENERIC_LABEL = /^(punto [ab]|inicio|fin)$/i;
 
 type Addresses = Record<string, { start?: string; end?: string }>;
 
 /**
- * Dirección y barrio de inicio y fin de cada recorrido. Si la etiqueta guardada ya los tiene se usa
- * tal cual; si es genérica ("Punto A") se buscan con las coordenadas, una consulta por segundo.
+ * Start and end address and neighborhood of each route. If the saved label already has them it is used
+ * as is; if it is generic ("Point A") they are looked up with the coordinates, one query per second.
  */
 function useRouteAddresses(routes: SavedRoute[]): Addresses {
   const [addresses, setAddresses] = useState<Addresses>({});
@@ -123,7 +123,7 @@ export default function HistorialRecorridos() {
   const [selectedItem, setSelectedItem] = useState<SavedRoute | null>(null);
   const detailMapRef = useRef<MapView>(null);
 
-  // Encuadra todo el recorrido (inicio, fin y los puntos intermedios) en el mapa del detalle
+  // Fits the whole route (start, end and the intermediate points) on the detail map
   const fitRoute = () => {
     const points = selectedItem?.points ?? [];
     if (points.length < 2) return;
@@ -136,7 +136,7 @@ export default function HistorialRecorridos() {
   const allRoutes: SavedRoute[] = manualRoutes;
   const addresses = useRouteAddresses(allRoutes);
 
-  // Dirección de inicio o fin para mostrar; mientras se busca, la etiqueta guardada
+  // Start or end address to show; while it is being looked up, the saved label
   const addressOf = (r: SavedRoute, end: "start" | "end") => {
     const found = addresses[r.id]?.[end];
     if (found) return found;
@@ -177,7 +177,7 @@ export default function HistorialRecorridos() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* HEADER MEJORADO */}
+      {/* IMPROVED HEADER */}
       <LinearGradient
         colors={[theme.headercolor1, theme.headercolor2]}
         start={{ x: 0, y: 0 }}
@@ -204,7 +204,7 @@ export default function HistorialRecorridos() {
         contentContainerStyle={{ paddingBottom: 40 }}
       >
 
-        {/* LISTA DE HISTORIAL */}
+        {/* HISTORY LIST */}
         <Text style={[styles.sectionTitle, { color: theme.text }]}>
           {t.mapa.historial_reciente}
         </Text>
@@ -268,7 +268,7 @@ export default function HistorialRecorridos() {
               </View>
             </View>
 
-            {/* ACCIONES: estrella y borrar, una debajo de la otra */}
+            {/* ACTIONS: star and delete, one below the other */}
             <View style={extra.verticalActions}>
               <TouchableOpacity
                 style={extra.starButton}
@@ -300,7 +300,7 @@ export default function HistorialRecorridos() {
         )}
       </ScrollView>
 
-      {/* MODAL DETALLE MEJORADO */}
+      {/* IMPROVED DETAIL MODAL */}
       <Modal visible={!!selectedItem} animationType="slide" transparent>
         <TouchableWithoutFeedback onPress={() => setSelectedItem(null)}>
           <View style={styles.modalOverlay}>
@@ -367,7 +367,7 @@ export default function HistorialRecorridos() {
                       />
                     </View>
 
-                    {/* MAPA PREVIEW CON POLYLINE */}
+                    {/* PREVIEW MAP WITH POLYLINE */}
                     <View style={styles.mapPreview}>
                       <MapView
                         ref={detailMapRef}
@@ -384,7 +384,7 @@ export default function HistorialRecorridos() {
                         rotateEnabled={false}
                         pitchEnabled={false}
                       >
-                        {/* Línea del recorrido */}
+                        {/* Route line */}
                         <Polyline
                           coordinates={selectedItem.points.map(point => ({
                             latitude: point.latitude,
@@ -394,14 +394,14 @@ export default function HistorialRecorridos() {
                           strokeColor="#7B1DB2"
                         />
 
-                        {/* Marcador de inicio */}
+                        {/* Start marker */}
                         <Marker
                           coordinate={selectedItem.points[0]}
                           title="Inicio"
                           pinColor={POINT_A_COLOR}
                         />
 
-                        {/* Marcador de fin */}
+                        {/* End marker */}
                         <Marker
                           coordinate={selectedItem.points[selectedItem.points.length - 1]}
                           title="Fin"
@@ -410,7 +410,7 @@ export default function HistorialRecorridos() {
                       </MapView>
                     </View>
 
-                    {/* BOTONES DE ACCIÓN */}
+                    {/* ACTION BUTTONS */}
                     <View style={styles.modalActions}>
                       <TouchableOpacity
                         style={[styles.modalActionButton, styles.modalButtonSecondary]}

@@ -3,7 +3,7 @@ import { StyleSheet} from "react-native";
 export const localStyles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(46, 16, 101, 0.55)', // morado oscuro translúcido
+    backgroundColor: 'rgba(46, 16, 101, 0.55)', // translucent dark purple
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -16,7 +16,7 @@ export const localStyles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1.5,
     borderColor: '#BC27BE',
-    // Sombras para Android y iOS
+    // Shadows for Android and iOS
     elevation: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },

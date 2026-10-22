@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(46, 16, 101, 0.55)', // morado oscuro translúcido
+    backgroundColor: 'rgba(46, 16, 101, 0.55)', // translucent dark purple
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -15,8 +15,8 @@ export const styles = StyleSheet.create({
     paddingVertical: 30,
     alignItems: 'center',
     borderWidth: 1.5,
-    borderColor: '#BC27BE', // mismo borde de los inputs
-    // Sombras
+    borderColor: '#BC27BE', // same border as the inputs
+    // Shadows
     elevation: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -50,7 +50,7 @@ export const styles = StyleSheet.create({
     width: '100%',
     height: 52,
     borderRadius: 25,
-    backgroundColor: '#6B3FA0', // mismo morado del botón principal
+    backgroundColor: '#6B3FA0', // same purple as the primary button
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#6B3FA0',

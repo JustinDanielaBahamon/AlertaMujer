@@ -13,7 +13,7 @@ import DeleteAccountModal from "./DeleteAccountModal";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { useLocale } from "../../../contexts/LocaleContext";
 
-// Genera iniciales desde el nombre completo (máx 2 letras)
+// Builds initials from the full name (max 2 letters)
 function getInitials(name: string): string {
   if (!name.trim()) return "?";
   return name
@@ -69,7 +69,7 @@ export default function ProfileScreen() {
               {vm.profilePhoto ? (
                 <Image source={{ uri: vm.profilePhoto }} style={styles.photo} />
               ) : (
-                // Iniciales — siempre visibles sin importar el tema
+                // Initials — always visible regardless of the theme
                 <Text style={styles.initialsText}>
                   {getInitials(vm.name)}
                 </Text>
@@ -83,10 +83,10 @@ export default function ProfileScreen() {
           <Text style={styles.userEmail}>{vm.email || t.perfil.correo_default}</Text>
         </View>
 
-        {/* Cuerpo */}
+        {/* Body */}
         <View style={styles.body}>
 
-          {/* ── Estado de la cuenta: lo que necesita una alerta para funcionar ── */}
+          {/* ── Account status: what an alert needs to work ── */}
           <View style={styles.card}>
             <View style={req_s.header}>
               <View style={[req_s.ring, { borderColor: req.list ? accent : accent + "40" }]}>
@@ -134,11 +134,11 @@ export default function ProfileScreen() {
             ))}
           </View>
 
-          {/* ── Datos personales ── */}
+          {/* ── Personal data ── */}
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>{t.perfil.titulo_datos_personales}</Text>
 
-            {/* Nombre */}
+            {/* Name */}
             <View style={styles.fieldWrap}>
               <Text style={styles.inputLabel}>{t.perfil.label_nombre}</Text>
               <View style={styles.inputContainer}>
@@ -155,7 +155,7 @@ export default function ProfileScreen() {
               </View>
             </View>
 
-            {/* Correo */}
+            {/* Email */}
             <View style={styles.fieldWrap}>
               <Text style={styles.inputLabel}>{t.perfil.label_correo}</Text>
               <View style={styles.inputContainer}>
@@ -173,7 +173,7 @@ export default function ProfileScreen() {
               </View>
             </View>
 
-            {/* Teléfono */}
+            {/* Phone */}
             <View style={styles.fieldWrap}>
               <Text style={styles.inputLabel}>{t.perfil.label_telefono}</Text>
               <View style={styles.inputContainer}>
@@ -190,7 +190,7 @@ export default function ProfileScreen() {
               </View>
             </View>
 
-            {/* Fecha de nacimiento */}
+            {/* Birth date */}
             <View style={styles.fieldWrap}>
               <Text style={styles.inputLabel}>{t.perfil.label_fecha_nacimiento}</Text>
               <View style={styles.inputContainer}>
@@ -209,11 +209,11 @@ export default function ProfileScreen() {
             </View>
           </View>
 
-          {/* ── Ubicación (solo lectura) ── */}
+          {/* ── Location (read only) ── */}
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>{t.perfil.titulo_ubicacion}</Text>
 
-            {/* Departamento */}
+            {/* Department */}
             <View style={styles.fieldWrap}>
               <Text style={styles.inputLabel}>{t.perfil.label_departamento}</Text>
               <View style={styles.readonlyInputContainer}>
@@ -225,7 +225,7 @@ export default function ProfileScreen() {
               </View>
             </View>
 
-            {/* Municipio */}
+            {/* Municipality */}
             <View style={styles.fieldWrap}>
               <Text style={styles.inputLabel}>{t.perfil.label_municipio}</Text>
               <View style={styles.readonlyInputContainer}>
@@ -254,7 +254,7 @@ export default function ProfileScreen() {
             </Text>
           ) : null}
 
-          {/* Guardar */}
+          {/* Save */}
           <TouchableOpacity
             style={styles.saveBtn}
             onPress={vm.saveChanges}
@@ -268,7 +268,7 @@ export default function ProfileScreen() {
             )}
           </TouchableOpacity>
 
-          {/* Eliminar la cuenta: al final, separado del resto */}
+          {/* Delete the account: at the end, apart from the rest */}
           <View style={[styles.card, req_s.zoneToDelete, { borderColor: accent + "50" }]}>
             <Text style={[styles.sectionTitle, { marginBottom: 4 }]}>{t.perfil.eliminar_seccion}</Text>
             <Text style={[req_s.detail, { color: theme.text }]}>{t.perfil.eliminar_desc}</Text>

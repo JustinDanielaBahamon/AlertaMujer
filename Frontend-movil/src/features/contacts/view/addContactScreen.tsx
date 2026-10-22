@@ -72,7 +72,7 @@ export default function AgregarContacto() {
         <View style={styles.content}>
           <View style={styles.card}>
 
-            {/* ── SELECTOR DE FOTO — zona visual prominente ─────────────── */}
+            {/* ── PHOTO PICKER — prominent visual area ──────────────────── */}
             <View style={{
               alignItems: "center",
               paddingVertical: 20,
@@ -89,7 +89,7 @@ export default function AgregarContacto() {
                 activeOpacity={0.85}
                 style={{ alignItems: "center" }}
               >
-                {/* Anillo decorativo alrededor del avatar */}
+                {/* Decorative ring around the avatar */}
                 <View style={{
                   width: 108,
                   height: 108,
@@ -125,7 +125,7 @@ export default function AgregarContacto() {
                     </View>
                   )}
 
-                  {/* Badge cámara */}
+                  {/* Camera badge */}
                   <LinearGradient
                     colors={headerGradient}
                     style={{
@@ -160,7 +160,7 @@ export default function AgregarContacto() {
                 </Text>
               </TouchableOpacity>
 
-              {/* Botón quitar foto (solo visible si hay foto) */}
+              {/* Remove photo button (only visible if there is a photo) */}
               {vm.photoUri && (
                 <TouchableOpacity
                   onPress={vm.removePhoto}
@@ -192,7 +192,7 @@ export default function AgregarContacto() {
               <Text style={styles.sectionTitle}>{t.agregar.info_contacto_titulo}</Text>
             </View>
 
-            {/* INPUT NOMBRE */}
+            {/* NAME INPUT */}
             <View style={styles.inputCard}>
               <Ionicons name="person-outline" size={20} color={theme.contactAccent} />
               <View style={styles.inputTextWrap}>
@@ -210,7 +210,7 @@ export default function AgregarContacto() {
               )}
             </View>
 
-            {/* INPUT PARENTESCO */}
+            {/* RELATIONSHIP INPUT */}
             <View style={styles.inputCard}>
               <Ionicons name="people-outline" size={20} color={theme.contactAccent} />
               <View style={styles.inputTextWrap}>
@@ -228,7 +228,7 @@ export default function AgregarContacto() {
               )}
             </View>
 
-            {/* INPUT TELÉFONO */}
+            {/* PHONE INPUT */}
             <View style={styles.inputCard}>
               <Ionicons name="call-outline" size={20} color={theme.contactAccent} />
               <View style={styles.inputTextWrap}>
@@ -250,7 +250,7 @@ export default function AgregarContacto() {
               </TouchableOpacity>
             </View>
 
-            {/* INPUT CORREO ELECTRÓNICO */}
+            {/* EMAIL INPUT */}
             <View style={styles.inputCard}>
               <Ionicons name="mail-outline" size={20} color={theme.contactAccent} />
               <View style={styles.inputTextWrap}>
@@ -282,7 +282,7 @@ export default function AgregarContacto() {
               </Text>
             </View>
 
-            {/* ── VISTA PREVIA ──────────────────────────────────────────── */}
+            {/* ── PREVIEW ───────────────────────────────────────────────── */}
             <Text style={styles.previewTitle}>{t.agregar.vista_previa}</Text>
 
             <View style={styles.previewCard}>
@@ -334,7 +334,7 @@ export default function AgregarContacto() {
               end={{ x: 1, y: 0 }}
               style={styles.saveButton}
             >
-              {/* ✅ guardar() ya no necesita recibir fotoUri como argumento */}
+              {/* ✅ save() no longer needs photoUri as an argument */}
               <TouchableOpacity style={styles.buttonInner} onPress={vm.save}>
                 <Ionicons name="save-outline" size={18} color="#f7eeee" />
                 <Text style={styles.buttonTextWhite}>{t.agregar.boton_guardar_nuevo}</Text>

@@ -23,14 +23,14 @@ export default function ActivationMethodsScreen() {
 
   const percentage = total > 0 ? Math.round((activeItems / total) * 100) : 0;
 
-  // Íconos de la barra de estado claros u oscuros según el color del header
+  // Light or dark status bar icons depending on the header color
   const statusBarStyle = text === "#1a1a1a" ? "dark" : "light";
 
   return (
     <View style={styles.container}>
       <StatusBar style={statusBarStyle} />
 
-      {/* Header (mismo color que la barra lateral) */}
+      {/* Header (same color as the sidebar) */}
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <View style={styles.headerRow}>
           <TouchableOpacity

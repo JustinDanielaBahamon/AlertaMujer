@@ -5,30 +5,30 @@ export const getDrawerStyles = (theme: AppTheme) => {
 
   const isDarkMode = theme.mode === "dark";
 
-  // Modo oscuro → tarjetas translúcidas oscuras, texto claro
-  // Resto de temas → tarjetas BLANCAS, texto siempre oscuro para máximo contraste
+  // Dark mode → dark translucent cards, light text
+  // Other themes → WHITE cards, always dark text for maximum contrast
   const cardBg     = isDarkMode ? "rgba(255,255,255,0.10)" : "#ffffff";
   const cardBorder  = isDarkMode ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.06)";
   const cardText  = isDarkMode ? "#ffffff" : "#1a1a1a";
 
-  // Iconos dentro del círculo: en modo oscuro usa theme.icono, en claro también
+  // Icons inside the circle: in dark mode it uses theme.icono, in light mode too
   const iconColor = theme.icon;
 
   return StyleSheet.create({
 
-    // Fondo = exactamente headerBackground, sin capas encima
+    // Background = exactly headerBackground, with no layers on top
     drawerBackground: {
       flex: 1,
       backgroundColor: theme.headerBackground,
     },
 
-    // Zona de perfil = mismo headerBackground, sin backgroundColor diferente
+    // Profile area = same headerBackground, no different backgroundColor
     zoneHeader: {
       paddingHorizontal: 24,
       paddingTop: 24,
       paddingBottom: 24,
       alignItems: "center",
-      // SIN backgroundColor para que sea igual al fondo del drawer
+      // NO backgroundColor so it matches the drawer background
     },
 
     backgroundDecoration: {
@@ -48,7 +48,7 @@ export const getDrawerStyles = (theme: AppTheme) => {
       height: 72,
       borderRadius: 36,
       borderWidth: 3,
-      // borderColor inline: theme.icono
+      // inline borderColor: theme.icono
     },
 
     name: {
@@ -73,7 +73,7 @@ export const getDrawerStyles = (theme: AppTheme) => {
       height: 3,
       borderRadius: 2,
       marginTop: 10,
-      // backgroundColor inline: theme.icono
+      // inline backgroundColor: theme.icono
     },
 
     menuList: {
@@ -81,7 +81,7 @@ export const getDrawerStyles = (theme: AppTheme) => {
       gap: 8,
     },
 
-    // Tarjetas BLANCAS en todos los temas excepto dark
+    // WHITE cards in every theme except dark
     cardItem: {
       flexDirection: "row",
       alignItems: "center",
@@ -105,10 +105,10 @@ export const getDrawerStyles = (theme: AppTheme) => {
       alignItems: "center",
       justifyContent: "center",
       marginRight: 13,
-      // backgroundColor inline: theme.icono + "22"
+      // inline backgroundColor: theme.icono + "22"
     },
 
-    // Texto siempre legible según el fondo de la tarjeta
+    // Text always readable for the card background
     itemText: {
       flex: 1,
       fontSize: 15,
@@ -170,7 +170,7 @@ export const getDrawerStyles = (theme: AppTheme) => {
       opacity: 0.85,
     },
 
-    // Branding con fondo semitransparente para que siempre se vea
+    // Branding with a semi-transparent background so it is always visible
     branding: {
       flexDirection: "row",
       alignItems: "center",

@@ -11,9 +11,9 @@ export interface LocationPoint {
 
 export interface AlertTracking {
   status: string; // "active" | "cancelled" | "resolved" ...
-  points: LocationPoint[]; // ordenados del más antiguo al más reciente
-  alert?: AlertApi; // datos completos (solo para la dueña de la alerta)
-  /** Grabaciones de la alerta (seguimiento público del contacto), de la más antigua a la más reciente. */
+  points: LocationPoint[]; // sorted from oldest to newest
+  alert?: AlertApi; // full data (only for the alert owner)
+  /** Alert recordings (the contact's public tracking), from oldest to newest. */
   evidence?: TrackingEvidence[];
 }
 
@@ -21,22 +21,22 @@ export interface TrackingEvidence {
   id: number;
   type: "video" | "audio" | "photo" | "document";
   created: Date;
-  /** Fuente para el reproductor (el endpoint público no necesita sesión). */
+  /** Source for the player (the public endpoint needs no session). */
   source: { uri: string; headers: Record<string, string> };
 }
 
-/** Identificador anónimo de esta app para contar quién vio la alerta (sin datos personales). */
+/** Anonymous identifier of this app to count who viewed the alert (no personal data). */
 function visitorId(): string {
   try {
     const id = Application.getAndroidId();
     if (id) return `app-${id}`;
   } catch {
-    // sin ANDROID_ID: se usa uno genérico
+    // no ANDROID_ID: a generic one is used
   }
   return "app-sin-identificador";
 }
 
-// El backend devuelve LocalDateTime en UTC sin 'Z' (igual que en alerts.service.ts).
+// The backend returns LocalDateTime in UTC without 'Z' (same as in alerts.service.ts).
 export const toDate = (iso?: string | null): Date => {
   if (!iso) return new Date();
   const d = new Date(iso + (iso.endsWith("Z") || iso.includes("+") ? "" : "Z"));
@@ -51,7 +51,7 @@ export const getAlertTracking = async (
   let points: LocationPoint[] = [];
 
   try {
-    // Endpoint de historial de ubicaciones de la alerta (pendiente en el backend).
+    // Alert location history endpoint (pending in the backend).
     const { data } = await api.get<any[]>(`/api/alerts/${alertId}/locations`);
     points = (data ?? [])
       .filter((p) => p?.latitude != null && p?.longitude != null)
@@ -62,7 +62,7 @@ export const getAlertTracking = async (
         recordedAt: toDate(p.recordedAt ?? p.createdAt ?? p.timestamp),
       }));
   } catch {
-    // Si el endpoint aún no existe, se usa solo la ubicación con la que se creó la alerta.
+    // If the endpoint does not exist yet, only the location the alert was created with is used.
   }
 
   if (points.length === 0 && alert.latitude != null && alert.longitude != null) {
@@ -82,8 +82,8 @@ export const getAlertTracking = async (
 };
 
 /**
- * Seguimiento para un contacto de emergencia: usa el endpoint público con el código que llega en
- * el push (un contacto no puede leer la alerta de otra persona por /api/alerts/{id}).
+ * Tracking for an emergency contact: uses the public endpoint with the code that arrives in
+ * the push (a contact cannot read another person's alert through /api/alerts/{id}).
  */
 export const getPublicTracking = async (code: string): Promise<AlertTracking> => {
   const route = `/api/public/tracking/${encodeURIComponent(code)}`;

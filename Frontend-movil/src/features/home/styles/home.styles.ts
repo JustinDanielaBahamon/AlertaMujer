@@ -11,7 +11,7 @@ export const createStyles = (
   return StyleSheet.create({
 
     // =====================================================
-    // CONTENEDOR
+    // CONTAINER
     // =====================================================
 
     container: {
@@ -22,7 +22,7 @@ export const createStyles = (
 
 
     // =====================================================
-    // ZONA SEGURA
+    // SAFE ZONE
     // =====================================================
 
     safeZoneCard: {
@@ -67,7 +67,7 @@ export const createStyles = (
 
 
     // =====================================================
-    // UBICACIÓN
+    // LOCATION
     // =====================================================
 
     locationCard: {
@@ -161,7 +161,7 @@ export const createStyles = (
 
 
     // =====================================================
-    // INDICADORES
+    // INDICATORS
     // =====================================================
 
     indicatorsRow: {
@@ -227,7 +227,7 @@ export const createStyles = (
 
 
     // =====================================================
-    // SECCIÓN CENTRAL
+    // CENTRAL SECTION
     // =====================================================
 
     centerSection: {
@@ -259,7 +259,7 @@ export const createStyles = (
 
 
     // =====================================================
-    // ÚLTIMA ALERTA
+    // LAST ALERT
     // =====================================================
 
     lastAlertCard: {

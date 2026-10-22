@@ -25,7 +25,7 @@ import Countdown from "./Countdown";
 
 type Styles = ReturnType<typeof createStyles>;
 
-// Linea de recorrido + pines numerados. Se usa en el mapa de la ventana emergente.
+// Route line + numbered pins. Used in the map popup.
 function MapPins({
   points,
   lineColor,
@@ -56,7 +56,7 @@ function MapPins({
         const isLast = i === points.length - 1;
         return (
           <Marker
-            // La key cambia cuando un pin deja de ser el ultimo, para que se redibuje.
+            // The key changes when a pin stops being the last one, so it is redrawn.
             key={`${p.id}-${isLast ? "a" : "p"}`}
             coordinate={{ latitude: p.latitude, longitude: p.longitude }}
             anchor={{ x: 0.5, y: 0.5 }}
@@ -82,10 +82,10 @@ export default function ActiveAlertScreen() {
   const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const styles = createStyles(theme, width, height, insets);
-  const tx = t.alertaContacto; // textos del mapa (los mismos de "Alerta de emergencia")
+  const tx = t.alertaContacto; // map texts (the same as "Emergency alert")
 
-  // Los pines personalizados se redibujan unos instantes cuando llega un punto nuevo
-  // o cuando se abre la ventana emergente.
+  // Custom pins are redrawn for a few moments when a new point arrives
+  // or when the popup opens.
   const [trackChanges, setTrackChanges] = useState(true);
   useEffect(() => {
     setTrackChanges(true);
@@ -93,7 +93,7 @@ export default function ActiveAlertScreen() {
     return () => clearTimeout(id);
   }, [vm.points.length, vm.fullscreen]);
 
-  // "hace 5s" / "5s ago" / "há 5s" / "il y a 5s": el orden lo define el texto de cada idioma.
+  // "hace 5s" / "5s ago" / "há 5s" / "il y a 5s": each language's text defines the order.
   const ago = tx.hace.replace("{{tiempo}}", vm.timeSinceLast);
 
   return (
@@ -109,7 +109,7 @@ export default function ActiveAlertScreen() {
       >
         <View style={styles.wrap}>
         <View style={styles.header}>
-          {/* Mini-mapa con la ubicacion actual. Al tocarlo, abre el mapa completo con el diseno de "Alerta de emergencia". */}
+          {/* Mini map with the current location. Tapping it opens the full map with the "Emergency alert" design. */}
           <View style={styles.headerMapButton}>
             {vm.location ? (
               <>
@@ -130,8 +130,10 @@ export default function ActiveAlertScreen() {
                 >
                   <Marker coordinate={vm.location} pinColor={theme.icon} />
                 </MapView>
-                {/* Capa transparente que intercepta el toque antes de que llegue al mapa nativo,
-                    asi se evita que Android abra la app de Google Maps al presionarlo. */}
+                {/*
+ * Transparent layer that catches the tap before it reaches the native map,
+ * so Android does not open the Google Maps app when it is pressed.
+ */}
                 <TouchableOpacity
                   style={StyleSheet.absoluteFillObject}
                   onPress={vm.openFullMap}
@@ -153,7 +155,7 @@ export default function ActiveAlertScreen() {
         <Text style={styles.title}>{t.alertaActiva.titulo}</Text>
         <Text style={styles.subtitle}>{t.alertaActiva.subtitulo}</Text>
 
-        {/* Estado del envío: la usuaria tiene que saber si sus contactos ya fueron avisados */}
+        {/* Delivery status: the user has to know whether her contacts were notified */}
         <View style={[deliveryStyles.box, { borderColor: theme.icon, backgroundColor: theme.icon + (vm.delivery.status === "enviada" ? "14" : "22") }]}>
           {vm.delivery.status === "enviando" ? (
             <ActivityIndicator size="small" color={theme.icon} />
@@ -198,7 +200,7 @@ export default function ActiveAlertScreen() {
           </View>
         </View>
 
-        {/* Mensaje informativo sobre lo que pasa al terminar el tiempo y como cancelar. */}
+        {/* Information about what happens when the time runs out and how to cancel. */}
         <View style={styles.messageCard}>
           <MaterialIcons name="info-outline" size={20} color={theme.icon} />
           <Text style={styles.messageText}>{t.alertaActiva.mensajeReenvio}</Text>
@@ -233,8 +235,8 @@ export default function ActiveAlertScreen() {
           </View>
         </View>
 
-        {/* Chat con los contactos: mensajes rápidos sin tener que hablar */}
-        {/* Video/audio automático como evidencia (se sube cada 45 s) */}
+        {/* Chat with the contacts: quick messages without having to speak */}
+        {/* Automatic video/audio as evidence (uploaded every 45 s) */}
         <AlertRecording alertId={vm.alertId} />
         <View ref={keyboard.chatRef} collapsable={false}>
           <AlertChat
@@ -261,7 +263,7 @@ export default function ActiveAlertScreen() {
         </View>
       </ScrollView>
 
-      {/* Ventana de verificacion para cancelar la alerta. */}
+      {/* Confirmation dialog to cancel the alert. */}
       <Modal
         visible={vm.confirmVisible}
         transparent
@@ -287,7 +289,7 @@ export default function ActiveAlertScreen() {
         </View>
       </Modal>
 
-      {/* Mapa en pantalla completa (mismo diseno que la ventana de "Alerta de emergencia"). Al cerrar, sigue en AlertaActiva. */}
+      {/* Full-screen map (same design as the "Emergency alert" popup). On close, stays on ActiveAlert. */}
       <Modal
         visible={vm.fullscreen}
         animationType="slide"
@@ -318,7 +320,7 @@ export default function ActiveAlertScreen() {
             </MapView>
           )}
 
-          {/* Barra superior: cerrar + estado de la ubicacion */}
+          {/* Top bar: close + location status */}
           <View style={styles.modalTopBar} pointerEvents="box-none">
             <TouchableOpacity
               style={styles.modalCloseBtn}
@@ -341,7 +343,7 @@ export default function ActiveAlertScreen() {
             </View>
           </View>
 
-          {/* Ultima coordenada */}
+          {/* Last coordinate */}
           {vm.lastItem && (
             <View style={styles.modalInfo} pointerEvents="none">
               <Text style={styles.modalInfoText} numberOfLines={1}>
@@ -355,7 +357,7 @@ export default function ActiveAlertScreen() {
             </View>
           )}
 
-          {/* Encuadrar todos los puntos */}
+          {/* Fit all the points */}
           <TouchableOpacity
             style={styles.modalFitBtn}
             onPress={vm.showAllPoints}
@@ -368,7 +370,7 @@ export default function ActiveAlertScreen() {
         </View>
       </Modal>
 
-      {/* La alerta terminó en el servidor (venció, atendida o cancelada): ya no se envía la ubicación */}
+      {/* The alert ended on the server (expired, attended or cancelled): the location is no longer sent */}
       <Modal visible={!!vm.end} transparent animationType="fade" onRequestClose={vm.leaveAfterEnd}>
         <View style={endStyles.background}>
           <View style={[endStyles.card, { backgroundColor: theme.containerBackground }]}>

@@ -3,8 +3,8 @@ import type { AppTheme } from "../../../contexts/ThemeContext";
 
 type Insets = { top: number; bottom: number; left: number; right: number };
 
-// Estilos del mini-mapa y del mapa en pantalla completa del módulo Mapa.
-// Mismo diseño que el mapa de "Alerta de emergencia" (píldoras redondeadas, pines numerados).
+// Styles of the mini map and the full-screen map of the Map module.
+// Same design as the "Emergency alert" map (rounded pills, numbered pins).
 export const createMapModalStyles = (theme: AppTheme, insets: Insets) => {
   const shadow = {
     shadowColor: "#000",
@@ -15,7 +15,7 @@ export const createMapModalStyles = (theme: AppTheme, insets: Insets) => {
   };
 
   return StyleSheet.create({
-    // ─── MINI-MAPA (dentro de la pantalla) ───────────────────────────────
+    // ─── MINI MAP (inside the screen) ────────────────────────────────────
     mapCard: {
       height: 250,
       marginHorizontal: 20,
@@ -73,7 +73,7 @@ export const createMapModalStyles = (theme: AppTheme, insets: Insets) => {
       color: theme.icon,
     },
 
-    // ─── PINES NUMERADOS ─────────────────────────────────────────────────
+    // ─── NUMBERED PINS ──────────────────────────────────────────────────
     pin: {
       width: 26,
       height: 26,
@@ -112,7 +112,7 @@ export const createMapModalStyles = (theme: AppTheme, insets: Insets) => {
       elevation: 5,
     },
 
-    // ─── MAPA EN PANTALLA COMPLETA ───────────────────────────────────────
+    // ─── FULL-SCREEN MAP ────────────────────────────────────────────────
     modalContainer: {
       flex: 1,
       backgroundColor: theme.background,

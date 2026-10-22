@@ -44,7 +44,7 @@ describe("devices.service", () => {
 
     expect(d.id).toBe(10);
     expect(mockApi.post).toHaveBeenCalledWith("/api/devices", expect.objectContaining({ model: "moto g84 5G" }));
-    expect(mockApi.put).not.toHaveBeenCalled(); // ya se creó con los datos
+    expect(mockApi.put).not.toHaveBeenCalled(); // already created with the data
   });
 
   it("informa los datos una sola vez por sesión", async () => {

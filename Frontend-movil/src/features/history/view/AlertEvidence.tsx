@@ -18,7 +18,7 @@ const time = (d: Date) => `${dos(d.getHours())}:${dos(d.getMinutes())}:${dos(d.g
 const size = (bytes: number | null) =>
   bytes == null ? "" : bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 
-/** Videos, audios y fotos que se grabaron durante la alerta, con su reproductor. */
+/** Videos, audios and photos recorded during the alert, with their player. */
 export default function AlertEvidence({ alertId }: { alertId: number }) {
   const { theme } = useTheme();
   const { t } = useLocale();
@@ -47,7 +47,7 @@ export default function AlertEvidence({ alertId }: { alertId: number }) {
     setOpened(ev);
   };
 
-  // Número de cada evidencia dentro de su tipo: "Video 1", "Video 2"... (se graban por partes)
+  // Number of each evidence within its type: "Video 1", "Video 2"... (they are recorded in parts)
   const label = (ev: SavedEvidence) => {
     const n = list.filter((x) => x.type === ev.type && x.date <= ev.date).length;
     const name = { video: e.evidencia_video, audio: e.evidencia_audio, photo: e.evidencia_foto, document: e.evidencia_documento }[ev.type];

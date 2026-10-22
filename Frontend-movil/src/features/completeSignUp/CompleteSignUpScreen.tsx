@@ -15,8 +15,8 @@ const TYPES = ["C.C", "T.I", "Documento extranjero"] as const;
 type Errors = Partial<Record<"telefono" | "tipo" | "documento" | "fecha" | "general", string>>;
 
 /**
- * Las cuentas creadas con Google solo traen nombre y correo. Antes de usar la app se piden los datos
- * que el registro normal exige: con el teléfono y el documento cada persona tiene una sola cuenta.
+ * Accounts created with Google only bring name and email. Before using the app we ask for the data
+ * the regular sign-up requires: with the phone and the document each person has a single account.
  */
 export default function CompleteSignUpScreen({ onDone }: { onDone: () => void }) {
   const { theme } = useTheme();

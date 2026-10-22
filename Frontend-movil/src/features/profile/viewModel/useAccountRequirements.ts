@@ -15,7 +15,7 @@ export type Requirement = {
   title: string;
   detail: string;
   meets: boolean;
-  /** false = recomendado: no impide que las alertas funcionen. */
+  /** false = recommended: it does not stop alerts from working. */
   required: boolean;
   action?: { text: string; ir: () => void };
 };
@@ -24,7 +24,7 @@ type ProfileData = { name: string; phoneNumber: string; birthDate: string; docum
 
 const validDate = (f: string) => /^\d{2}\/\d{2}\/\d{4}$/.test(f.trim());
 
-/** Revisa si la cuenta tiene lo necesario para que una alerta llegue y sirva de algo. */
+/** Checks whether the account has what is needed for an alert to arrive and be useful. */
 export function useAccountRequirements(profile: ProfileData) {
   const navigation = useNavigation<Nav>();
   const { t } = useLocale();

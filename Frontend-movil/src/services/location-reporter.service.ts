@@ -2,8 +2,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "./api";
 import { currentDeviceId } from "./devices.service";
 
-// Envía la ubicación del celular al backend para que la usuaria (y solo ella) la vea en la web.
-// Si no hay conexión, los puntos quedan en una cola corta y se suben en el siguiente envío.
+// Sends the phone location to the backend so the user (and only she) sees it on the web.
+// If there is no connection, the points stay in a short queue and are uploaded on the next send.
 
 export type ReportPoint = {
   latitude: number;
@@ -17,7 +17,7 @@ type QueuedPoint = ReportPoint & { recordedAt: string };
 const COLA_KEY = "@alerta-mujer:location-queue";
 const MAX_EN_COLA = 100;
 
-// El backend guarda LocalDateTime en UTC sin zona
+// The backend stores LocalDateTime in UTC without a zone
 const nowUtc = () => new Date().toISOString().slice(0, 23);
 
 const round = (n: number | null | undefined, decimals: number) =>
@@ -30,7 +30,7 @@ const send = (p: ReportPoint & { recordedAt?: string }) =>
     accuracy: round(p.accuracy, 2),
     alertId: p.alertaId ?? null,
     recordedAt: p.recordedAt,
-    // Con la cuenta en varios celulares, el backend guarda la ubicación diaria solo del más reciente
+    // With the account on several phones, the backend stores the daily location only from the most recent one
     deviceId: currentDeviceId(),
   });
 
@@ -57,7 +57,7 @@ async function emptyQueue(): Promise<void> {
     try {
       await send(point);
     } catch (error: any) {
-      // Sin conexión: se deja para el próximo intento. Rechazo del servidor (4xx): se descarta.
+      // Offline: left for the next attempt. Server rejection (4xx): discarded.
       if (!error?.response) pendingItems.push(point);
     }
   }

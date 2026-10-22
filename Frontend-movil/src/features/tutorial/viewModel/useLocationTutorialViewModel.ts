@@ -15,7 +15,7 @@ export const MUNICIPALITIES_HUILA = [
 
 export const PLACEHOLDER_MUNICIPALITY = "";
 
-// Clave fija de AsyncStorage para la ubicación
+// Fixed AsyncStorage key for the location
 export const STORAGE_KEY_LOCATION = "@alerta_mujer:ubicacion";
 
 export interface LocationErrors {
@@ -68,7 +68,7 @@ export function useLocationTutorialViewModel() {
     });
   }, [validate]);
 
-  // Guarda departamento + municipio en AsyncStorage al confirmar
+  // Saves department + municipality in AsyncStorage on confirm
   const confirmLocation = useCallback(async () => {
     try {
       await AsyncStorage.setItem(
@@ -76,7 +76,7 @@ export function useLocationTutorialViewModel() {
         JSON.stringify({ department, municipality })
       );
     } catch {
-      // Si falla el guardado no bloqueamos el flujo
+      // If saving fails we do not block the flow
     }
     alreadyConfirmedRef.current = true;
     setAlreadyConfirmed(true);

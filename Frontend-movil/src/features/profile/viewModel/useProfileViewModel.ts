@@ -22,14 +22,14 @@ export function useProfileViewModel() {
   const [profilePhoto,      setProfilePhoto]      = useState<string | null>(user?.fotoPerfil ?? null);
   const [document,       setDocument]       = useState("");
 
-  // Municipio viene del tutorial — solo lectura en el perfil
+  // Municipality comes from the tutorial — read only in the profile
   const [municipality,  setMunicipality]  = useState(user?.municipio ?? "");
   const [department, setDepartment] = useState("Huila");
 
   const [loading, setLoading] = useState(false);
   const [message,  setMessage]  = useState("");
 
-  // ── Al montar: carga datos reales del backend ─────────────────────────────
+  // ── On mount: load real data from the backend ───────────────────────────────
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -41,11 +41,11 @@ export function useProfileViewModel() {
           if (me.telephone)   setPhoneNumber(me.telephone);
           setDocument(me.documentNumber ?? "");
           if (me.birthdate) {
-            // Backend devuelve "yyyy-MM-dd"; el perfil usa "DD/MM/YYYY"
+            // The backend returns "yyyy-MM-dd"; the profile uses "DD/MM/YYYY"
             const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(me.birthdate));
             if (m) setBirthDate(`${m[3]}/${m[2]}/${m[1]}`);
           }
-          // La foto vive en el backend (antes solo en el celular y se perdía)
+          // The photo lives in the backend (before, only on the phone, and it was lost)
           setProfilePhoto(me.profilePhoto ?? null);
           updateUser({ fotoPerfil: me.profilePhoto ?? undefined });
         }
@@ -54,7 +54,7 @@ export function useProfileViewModel() {
       }
 
       try {
-        // Municipio del tutorial de ubicación
+        // Municipality from the location tutorial
         const rawLocation = await AsyncStorage.getItem(STORAGE_KEY_LOCATION);
         if (rawLocation) {
           const location = JSON.parse(rawLocation);
@@ -62,13 +62,13 @@ export function useProfileViewModel() {
           if (location.department)   setDepartment(location.department);
         }
       } catch {
-        // Si falla la lectura mostramos los valores por defecto
+        // If reading fails we show the default values
       }
     };
     loadData();
   }, [user?.id]);
 
-  // ── Selección de foto ─────────────────────────────────────────────────────
+  // ── Photo selection ────────────────────────────────────────────────────────
   const selectPhoto = useCallback(async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
@@ -82,7 +82,7 @@ export function useProfileViewModel() {
       quality: 0.7,
     });
     if (result.canceled) return;
-    // Se guarda en el backend en cuanto se elige, sin esperar a "Guardar cambios"
+    // Saved in the backend as soon as it is chosen, without waiting for "Save changes"
     const previous = profilePhoto;
     try {
       const photo = await toStorablePhoto(result.assets[0].uri);
@@ -97,9 +97,9 @@ export function useProfileViewModel() {
     }
   }, [profilePhoto, updateUser]);
 
-  // ── Validación de fecha DD/MM/YYYY ────────────────────────────────────────
+  // ── DD/MM/YYYY date validation ─────────────────────────────────────────────
   const validateDate = (date: string): boolean => {
-    if (!date.trim()) return true; // campo opcional
+    if (!date.trim()) return true; // optional field
     const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
     const match = date.match(regex);
     if (!match) return false;
@@ -112,11 +112,11 @@ export function useProfileViewModel() {
     return true;
   };
 
-  // ── Formateo automático de fecha mientras escribe ─────────────────────────
+  // ── Automatic date formatting while typing ─────────────────────────────────
   const handleDateChange = useCallback((text: string) => {
-    // Solo dígitos y "/"
+    // Only digits and "/"
     const clean = text.replace(/[^\d/]/g, "");
-    // Agrega "/" automáticamente en posición 2 y 5
+    // Adds "/" automatically at positions 2 and 5
     let formatted = clean;
     if (clean.length === 2 && !clean.includes("/")) {
       formatted = clean + "/";
@@ -126,7 +126,7 @@ export function useProfileViewModel() {
     setBirthDate(formatted.slice(0, 10));
   }, []);
 
-  // ── Guardar cambios ───────────────────────────────────────────────────────
+  // ── Save changes ──────────────────────────────────────────────────────────
   const saveChanges = useCallback(async () => {
     if (!name.trim()) {
       setMessage("El nombre no puede estar vacío.");
@@ -148,12 +148,12 @@ export function useProfileViewModel() {
 
     setLoading(true);
     try {
-      // Persiste en el backend
+      // Persists in the backend
       const parts = name.trim().split(/\s+/);
       const firstName = parts[0] ?? "";
       const lastName = parts.slice(1).join(" ");
 
-      // Convierte DD/MM/YYYY a yyyy-MM-dd para el backend
+      // Converts DD/MM/YYYY to yyyy-MM-dd for the backend
       let birthdate: string | undefined;
       const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(birthDate.trim());
       if (m) birthdate = `${m[3]}-${m[2]}-${m[1]}`;
@@ -165,7 +165,7 @@ export function useProfileViewModel() {
         birthdate,
       });
 
-      // Actualiza el contexto de auth
+      // Updates the auth context
       if (user) {
         signIn({
           ...user,
@@ -186,7 +186,7 @@ export function useProfileViewModel() {
     }
   }, [name, email, phoneNumber, birthDate, profilePhoto, municipality, user, signIn]);
 
-  // ── Eliminar la cuenta ────────────────────────────────────────────────────
+  // ── Delete the account ────────────────────────────────────────────────────
   const [deleteVisible, setDeleteVisible] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -197,7 +197,7 @@ export function useProfileViewModel() {
     try {
       await deleteMyAccount(confirmation.trim().toUpperCase());
       setDeleteVisible(false);
-      // Sin sesión, la app vuelve sola a la pantalla de inicio de sesión
+      // Without a session, the app goes back to the sign-in screen on its own
       signOut();
     } catch {
       setDeleteError("No se pudo eliminar la cuenta. Revisa tu conexión e inténtalo de nuevo.");

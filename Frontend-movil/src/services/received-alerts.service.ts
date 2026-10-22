@@ -1,7 +1,7 @@
 import api from "./api";
 import { toDate } from "./alert-tracking.service";
 
-/** Alerta de otra persona que tiene a la usuaria como contacto de emergencia. */
+/** Alert of another person who has the user as an emergency contact. */
 export interface ReceivedAlert {
   id: number;
   name: string;
@@ -25,7 +25,7 @@ export async function getReceivedAlerts(): Promise<ReceivedAlert[]> {
   }));
 }
 
-/** Código de seguimiento público para abrir la alerta (solo si el seguimiento sigue vigente). */
+/** Public tracking code to open the alert (only while the tracking is still valid). */
 export async function getTrackingCode(alertId: number): Promise<string> {
   const { data } = await api.post<{ code: string }>(`/api/received-alerts/${alertId}/tracking`, {});
   return data.code;

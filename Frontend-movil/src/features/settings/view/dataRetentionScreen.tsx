@@ -11,7 +11,7 @@ import { createSettingsScreenStyles } from "../styles/settingsScreen.styles";
 
 type IonIcon = React.ComponentProps<typeof Ionicons>["name"];
 
-/** Cuánto tiempo se guarda cada tipo de dato y qué puede hacer la usuaria con ellos. */
+/** How long each type of data is kept and what the user can do with it. */
 export default function DataRetentionScreen() {
   const navigation = useNavigation<any>();
   const { theme } = useTheme();
@@ -47,7 +47,7 @@ export default function DataRetentionScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.intro}>{r.intro}</Text>
 
-        {/* Plazos: línea de tiempo con el tiempo de cada dato a la vista */}
+        {/* Periods: timeline with the time of each data type in view */}
         <View style={styles.card}>
           {periods.map((p, i) => (
             <View key={p.title} style={local.step}>
@@ -70,7 +70,7 @@ export default function DataRetentionScreen() {
           ))}
         </View>
 
-        {/* Qué puede hacer la usuaria */}
+        {/* What the user can do */}
         <Text style={[local.section, { color: theme.headerText }]}>{r.seccion_control}</Text>
         <View style={styles.card}>
           {actions.map((ac, i) => (

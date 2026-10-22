@@ -11,12 +11,12 @@ import {
   statusCodes,
 } from "@react-native-google-signin/google-signin";
 
-// Inicio de sesión nativo de Google (Credential Manager de Android): sin navegador ni redirección.
-// webClientId es el cliente web (tipo 3) del proyecto de Firebase alerta-mujer-b4fae, el mismo del
-// cliente Android de google-services.json: si son de proyectos distintos Google da DEVELOPER_ERROR.
-// El ID token sale con ese "aud", que el backend acepta (google.client-ids).
-// Google solo responde si el SHA-1 del APK está registrado en Firebase (app Android
-// com.alertamujer.app); si no, devuelve DEVELOPER_ERROR.
+// Native Google sign-in (Android Credential Manager): no browser or redirect.
+// webClientId is the web client (type 3) of the alerta-mujer-b4fae Firebase project, the same as the
+// Android client in google-services.json: if they belong to different projects Google returns DEVELOPER_ERROR.
+// The ID token comes with that "aud", which the backend accepts (google.client-ids).
+// Google only responds if the APK SHA-1 is registered in Firebase (Android app
+// com.alertamujer.app); otherwise it returns DEVELOPER_ERROR.
 GoogleSignin.configure({
   webClientId: "656563018279-blo6edqva74tbsdce0mau3n6rv007fvi.apps.googleusercontent.com",
 });
@@ -100,16 +100,16 @@ export function useLoginViewModel() {
     }
   }, [email, password, signIn, navigation]);
 
-  // Google: se pide el ID token (identidad verificable) y se envía al backend.
+  // Google: request the ID token (verifiable identity) and send it to the backend.
   const continueWithGoogle = useCallback(async () => {
     clearErrors();
     try {
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-      // Google recuerda la última cuenta y entra directo con ella; al olvidarla, siempre muestra el
-      // selector con todas las cuentas del teléfono (y la opción de agregar otra)
+      // Google remembers the last account and signs in with it directly; after forgetting it, it always shows the
+      // picker with every account on the phone (and the option to add another)
       await GoogleSignin.signOut().catch(() => {});
       const response = await GoogleSignin.signIn();
-      if (!isSuccessResponse(response)) return; // la usuaria cerró la ventana de Google
+      if (!isSuccessResponse(response)) return; // the user closed the Google window
       const idToken = response.data.idToken;
       if (!idToken) {
         setGeneralError("Google no devolvió la identidad. Intenta de nuevo.");
@@ -123,7 +123,7 @@ export function useLoginViewModel() {
       if (isErrorWithCode(e) && e.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
         setGeneralError("Este teléfono no tiene Google Play Services actualizado.");
       } else if (e instanceof Error && !isErrorWithCode(e)) {
-        setGeneralError(e.message); // errores del backend (cuenta bloqueada, etc.)
+        setGeneralError(e.message); // backend errors (account blocked, etc.)
       } else {
         console.warn("Google Sign-In falló:", isErrorWithCode(e) ? e.code : e);
         setGeneralError("No se pudo iniciar sesión con Google. Intenta de nuevo.");

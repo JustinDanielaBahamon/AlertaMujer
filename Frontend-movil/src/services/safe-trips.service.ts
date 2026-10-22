@@ -1,7 +1,7 @@
 import api from "./api";
 import { toDate } from "./alert-tracking.service";
 
-/** Trayecto de "Avísame si no llego". */
+/** A "Let me know if I don't arrive" trip. */
 export interface Trip {
   id: number;
   destination: string;
@@ -35,7 +35,7 @@ export async function startTrip(trip: {
   return toTrip(data);
 }
 
-/** El trayecto en curso o null (el backend responde 204 si no hay). */
+/** The trip in progress or null (the backend answers 204 if there is none). */
 export async function activeTrip(): Promise<Trip | null> {
   const r = await api.get("/api/safe-trips/active");
   return r.status === 204 || !r.data ? null : toTrip(r.data);

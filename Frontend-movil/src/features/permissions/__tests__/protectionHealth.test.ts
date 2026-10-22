@@ -2,7 +2,7 @@ jest.mock("../../../../modules/shake-sensor", () => ({ __esModule: true, default
 
 import { classifyExit } from "../protectionHealth";
 
-// Casos reales registrados en un Infinix X678B (Android 14)
+// Real cases recorded on an Infinix X678B (Android 14)
 const exit = (reason: number, importance: number, description = "") => ({
   timestamp: 1, reason: reason, importance: importance, description: description,
 });

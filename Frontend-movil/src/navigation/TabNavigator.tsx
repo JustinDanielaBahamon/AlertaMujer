@@ -79,9 +79,9 @@ const tabStyles = StyleSheet.create({
 export default function TabNavigator() {
   const { theme } = useTheme();
   const { t } = useLocale();
-  const insets = useSafeAreaInsets(); // ← detecta el espacio de los botones Android/iOS automáticamente
+  const insets = useSafeAreaInsets(); // ← detects the space of the Android/iOS buttons automatically
 
-  // Traduce cada nombre de ruta a su texto visible en el idioma activo
+  // Translates each route name to its visible text in the active language
   const tabLabels: Record<string, string> = {
     Home: t.menu.inicio,
     Map: t.menu.mapa,
@@ -96,7 +96,7 @@ export default function TabNavigator() {
         <View style={{
           flexDirection: 'row',
           backgroundColor: theme.tabBackground,
-          paddingBottom: insets.bottom > 4 ? insets.bottom : 8, // ← se adapta solo
+          paddingBottom: insets.bottom > 4 ? insets.bottom : 8, // ← adapts on its own
           paddingTop: 6,
           elevation: 10,
           shadowColor: "#7B2CBF",

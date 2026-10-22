@@ -3,7 +3,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { CONTACT_COLORS } from "../styles/contactStyle";
 import { useLocale } from "../../../contexts/LocaleContext";
 
-// ─── Tipos públicos ───────────────────────────────────────────────────────────
+// ─── Public types ─────────────────────────────────────────────────────────────
 export interface ContactFeatureItem {
   id: string;
   emoji: string;
@@ -20,7 +20,7 @@ export interface ContactFeatureItem {
 
 type LocaleT = ReturnType<typeof useLocale>["t"];
 
-// ─── Datos (ahora dependen del idioma activo) ─────────────────────────────────
+// ─── Data (now depends on the active language) ───────────────────────────────
 const getContactFeatureRows = (t: LocaleT): ContactFeatureItem[] => [
   {
     id: "confianza",
@@ -73,8 +73,8 @@ export function useContactTutorialViewModel() {
 
   const permissionResolver = useRef<(value: boolean) => void>(() => {});
 
-  // ── Permisos ──────────────────────────────────────────────────────────────
-  // Si ya tiene el permiso de contactos, no se pide otra vez
+  // ── Permissions ───────────────────────────────────────────────────────────
+  // If it already has the contacts permission, it is not asked again
   const requestPermissions = useCallback(async (): Promise<boolean> => {
     try {
       const { status } = await Contacts.getPermissionsAsync();

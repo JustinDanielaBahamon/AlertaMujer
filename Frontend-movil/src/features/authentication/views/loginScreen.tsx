@@ -10,7 +10,7 @@ import { useLocale } from "../../../contexts/LocaleContext";
 export default function Login() {
   const vm = useLoginViewModel();
   const { t } = useLocale();
-  const insets = useSafeAreaInsets(); // detecta los espacios del teléfono
+  const insets = useSafeAreaInsets(); // detects the phone's insets
 
   useEffect(() => {
     async function setNavBar() {
@@ -24,8 +24,8 @@ export default function Login() {
     <View style={{
       flex: 1,
       backgroundColor: "#460447",
-      paddingTop: insets.top,       // espacio arriba según el teléfono
-      paddingBottom: insets.bottom, // espacio abajo según el teléfono
+      paddingTop: insets.top,       // top spacing for the phone
+      paddingBottom: insets.bottom, // bottom spacing for the phone
     }}>
       <StatusBar style="light" backgroundColor="#460447" />
 
@@ -44,7 +44,7 @@ export default function Login() {
         <View style={styles.FormContainer}>
           <Text style={styles.FormTitle}>{t.login.titulo}</Text>
 
-          {/* Input Correo */}
+          {/* Email input */}
           <View style={[
             styles.inputContainer,
             vm.emailError ? { borderColor: "#e74c3c" } : {},
@@ -71,7 +71,7 @@ export default function Login() {
             </Text>
           ) : null}
 
-          {/* Input Contraseña */}
+          {/* Password input */}
           <View style={[
             styles.inputContainer,
             vm.errorPassword ? { borderColor: "#e74c3c" } : {},
@@ -128,7 +128,7 @@ export default function Login() {
           </TouchableOpacity>
         </View>
 
-        {/* Botón Google */}
+        {/* Google button */}
         <TouchableOpacity style={styles.GoogleButton} onPress={vm.continueWithGoogle}>
           <Image
             style={styles.logoGoogle}

@@ -9,8 +9,8 @@ import { inPermissionQueue, notificationsPermission, locationPermission } from "
 import { registrarPush } from "../../services/push.service";
 
 /**
- * Permisos y ajustes que necesita la protección de AlertaMujer. "Crítico" = sin él una alerta puede
- * no enviarse (o no activarse al agitar): por esos se le recuerda a la usuaria al abrir la app.
+ * Permissions and settings AlertaMujer protection needs. "Critical" = without it an alert may
+ * not be sent (or not be activated by shaking): the user is reminded of those when the app opens.
  */
 export type PermissionId =
   | "agitar"
@@ -99,11 +99,11 @@ export const PERMISSIONS: PermissionInfo[] = [
 ];
 
 export type PermissionStatus = {
-  /** null = Android no deja comprobarlo (se verifica por las interrupciones de la protección). */
+  /** null = Android does not let us check it (verified through protection interruptions). */
   granted: boolean | null;
-  /** No aplica a este teléfono (p. ej. su marca no tiene "inicio automático"): no se muestra. */
+  /** Does not apply to this phone (e.g. its brand has no "auto start"): not shown. */
   hidden?: boolean;
-  /** false si Android ya no deja volver a preguntar: hay que abrir los ajustes de la app. */
+  /** false if Android no longer lets us ask again: the app settings must be opened. */
   canAsk: boolean;
 };
 
@@ -111,8 +111,8 @@ type Permission = { granted: boolean; canAskAgain: boolean };
 const toStatus = (p: Permission): PermissionStatus => ({ granted: p.granted, canAsk: p.canAskAgain });
 
 /**
- * Estado actual de cada permiso o ajuste. agitarActivo viene de los ajustes de la app;
- * cortesDelSistema: veces recientes que el teléfono detuvo la protección (ver saludProteccion).
+ * Current status of each permission or setting. shakeEnabled comes from the app settings;
+ * systemKills: recent times the phone stopped protection (see protectionHealth).
  */
 export async function checkPermissions(
   shakeEnabled: boolean,
@@ -132,7 +132,7 @@ export async function checkPermissions(
   const battery = !android || ShakeSensor.ignoresBatteryOptimization();
   const fullScreen = !android || ShakeSensor.canUseFullScreen();
   const withAutoStart = android && ShakeSensor.hasAutoStartSetting();
-  // La web muestra si el celular está listo para una emergencia
+  // The website shows whether the phone is ready for an emergency
   void reportPermissions({
     ubicacion: location.granted === true,
     notificaciones: notifications.granted === true,
@@ -148,7 +148,7 @@ export async function checkPermissions(
     notificaciones: notifications,
     bateria: { granted: battery, canAsk: true },
     pantallaCompleta: { granted: fullScreen, canAsk: true },
-    // La marca no deja leerlo: si el teléfono ya cortó la protección, falta; si no, hay que revisarlo
+    // The brand does not let us read it: if the phone already cut protection, it is missing; otherwise it must be checked
     inicioAutomatico: {
       granted: systemKills > 0 ? false : null,
       canAsk: true,
@@ -160,32 +160,32 @@ export async function checkPermissions(
   };
 }
 
-/** Faltantes críticos (para el recordatorio al abrir la app). */
+/** Missing critical items (for the reminder when the app opens). */
 export function missingCritical(statuses: Record<PermissionId, PermissionStatus>): PermissionInfo[] {
   return PERMISSIONS.filter((p) => p.critical && statuses[p.id].granted === false && !statuses[p.id].hidden);
 }
 
 /**
- * Pide el permiso; si Android ya no lo deja pedir, abre los ajustes de la app. "agitar" no es un
- * permiso: lo enciende quien llama (ajuste de la app).
+ * Asks for the permission; if Android no longer lets us ask, opens the app settings. "agitar" is not a
+ * permission: the caller turns it on (an app setting).
  */
 export async function grantPermission(id: Exclude<PermissionId, "agitar">, status: PermissionStatus): Promise<void> {
   if (!status.canAsk) {
     await Linking.openSettings();
     return;
   }
-  // De una en una (ver permisosSeguros): dos peticiones a la vez pueden trabar la app
+  // One at a time (see safePermissions): two requests at once can freeze the app
   switch (id) {
     case "ubicacion":
       await locationPermission();
       return;
     case "notificaciones":
       if (!(await notificationsPermission())) await notifee.openNotificationSettings();
-      // Con el permiso recién dado, el celular ya puede recibir las alertas de sus contactos
+      // With the permission just granted, the phone can now receive its contacts' alerts
       else await registrarPush();
       return;
     case "bateria":
-      // Si no salió el diálogo del sistema se abrió la página de la app: se explica qué tocar
+      // If the system dialog did not show, the app page was opened: explain what to tap
       if (!ShakeSensor.requestIgnoreBatteryOptimization()) {
         Alert.alert(
           "Batería sin restricciones",

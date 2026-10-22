@@ -6,14 +6,14 @@ export type RecordingType = "video" | "audio";
 const MIME: Record<RecordingType, string> = { video: "video/mp4", audio: "audio/mp4" };
 const EXTENSION: Record<RecordingType, string> = { video: "mp4", audio: "m4a" };
 
-// Un trozo de 30 s puede pesar varios MB y la red durante una emergencia suele ser mala
+// A 30 s chunk can weigh several MB and the network during an emergency is usually bad
 const UPLOAD_TIME_MS = 120000;
 
-/** Sube un archivo grabado como evidencia de la alerta (lo ven sus contactos en el seguimiento). */
+/** Uploads a file recorded as alert evidence (her contacts see it in the tracking). */
 export async function uploadEvidence(alertId: number, uri: string, type: RecordingType): Promise<void> {
   const name = `${type}_${Date.now()}.${EXTENSION[type]}`;
   const form = new FormData();
-  // React Native sube el archivo desde su ruta con { uri, name, type }
+  // React Native uploads the file from its path with { uri, name, type }
   form.append("file", { uri, name: name, type: MIME[type] } as any);
   form.append("alertId", String(alertId));
   await api.post("/api/evidences/upload", form, {
@@ -22,7 +22,7 @@ export async function uploadEvidence(alertId: number, uri: string, type: Recordi
   });
 }
 
-/** Evidencia guardada de una alerta de la usuaria. */
+/** Saved evidence of one of the user's alerts. */
 export interface SavedEvidence {
   id: number;
   type: "photo" | "video" | "audio" | "document";
@@ -32,7 +32,7 @@ export interface SavedEvidence {
   hasFile: boolean;
 }
 
-/** Evidencias de una alerta propia, de la más antigua a la más reciente (el backend las da todas juntas). */
+/** Evidence of one of her own alerts, from oldest to newest (the backend returns them all together). */
 export async function getAlertEvidence(alertId: number): Promise<SavedEvidence[]> {
   const { data } = await api.get<any[]>("/api/evidences/me");
   return (data ?? [])
@@ -48,5 +48,5 @@ export async function getAlertEvidence(alertId: number): Promise<SavedEvidence[]
     .sort((a, b) => a.date.getTime() - b.date.getTime());
 }
 
-/** Fuente para reproducir el archivo de una evidencia (solo la dueña puede abrirlo). */
+/** Source to play an evidence file (only the owner can open it). */
 export const evidenceSource = (id: number) => sourceWithToken(`/api/evidences/${id}/file`);

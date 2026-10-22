@@ -1,38 +1,38 @@
 /**
- * Detecta la activación por movimiento: 4 o más hachazos rápidos y fuertes, a partir de las lecturas
- * del acelerómetro (en g, incluida la gravedad; en reposo el teléfono marca ~1 g).
+ * Detects motion activation: 4 or more quick strong chops, from the accelerometer
+ * readings (in g, including gravity; at rest the phone reads ~1 g).
  *
- * Medido en un celular real (Infinix X678B): unos hachazos fuertes no se detienen entre golpe y golpe.
- * La fuerza se queda en 6-8 g con picos de 11-13 g cada 0,3-0,4 s durante 1-5 s. Por eso se cuentan
- * PICOS (máximos locales por encima de `umbralG`), no golpes separados por reposo.
+ * Measured on a real phone (Infinix X678B): strong chops do not stop between hits.
+ * The strength stays at 6-8 g with peaks of 11-13 g every 0.3-0.4 s for 1-5 s. That is why
+ * PEAKS are counted (local maxima above `thresholdG`), not hits separated by rest.
  *
- * Para no confundirlo con trotar o correr (pasos de ~3-4 g, a veces más):
- *   1) antes del primer pico tiene que haber un rato sin picos (corriendo, los pasos no paran) y
- *   2) después del último también, con el teléfono ya quieto: quien corre sigue moviéndose; quien
- *      pide ayuda se detiene.
- * Dar más de 4 hachazos también cuenta. Tras una detección hay una pausa para no disparar dos veces.
+ * So it is not confused with jogging or running (steps of ~3-4 g, sometimes more):
+ *   1) before the first peak there must be a while without peaks (when running, the steps do not stop) and
+ *   2) after the last one too, with the phone already still: someone running keeps moving; someone
+ *      asking for help stops.
+ * More than 4 chops also counts. After a detection there is a pause so it does not fire twice.
  */
 
 export type DetectorOptions = {
-  /** Fuerza mínima de un pico (hachazo), en g. */
+  /** Minimum strength of a peak (chop), in g. */
   thresholdG: number;
-  /** Por debajo de esta fuerza el teléfono se considera quieto. */
+  /** Below this strength the phone is considered still. */
   restG: number;
-  /** Tiempo quieto (bajo `reposoG`) para dar por terminada la secuencia (ms). */
+  /** Still time (below `restG`) to consider the sequence finished (ms). */
   minRestMs: number;
-  /** Picos necesarios. */
+  /** Required peaks. */
   requiredHits: number;
-  /** Duración máxima de la secuencia de picos, contada desde el primero (ms). */
+  /** Maximum duration of the peak sequence, counted from the first one (ms). */
   windowMs: number;
-  /** Separación mínima entre dos picos: lo que llega antes es el rebote del mismo hachazo (ms). */
+  /** Minimum gap between two peaks: anything sooner is the rebound of the same chop (ms). */
   minGapMs: number;
-  /** Separación máxima entre dos picos seguidos de la misma secuencia (ms). */
+  /** Maximum gap between two consecutive peaks of the same sequence (ms). */
   maxGapMs: number;
-  /** Tiempo sin picos antes del primero (ms). */
+  /** Time without peaks before the first one (ms). */
   calmBeforeMs: number;
-  /** Tiempo sin picos después del último para confirmar (ms). */
+  /** Time without peaks after the last one to confirm (ms). */
   calmAfterMs: number;
-  /** Pausa después de una detección (ms). */
+  /** Pause after a detection (ms). */
   pauseMs: number;
 };
 
@@ -54,7 +54,7 @@ export type ShakeDetector = (x: number, y: number, z: number, timeMs: number) =>
 export function createShakeDetector(options: Partial<DetectorOptions> = {}): ShakeDetector {
   const o = { ...DEFAULT_OPTIONS, ...options };
 
-  // Las dos lecturas anteriores: un pico se confirma cuando la siguiente lectura ya es menor
+  // The two previous readings: a peak is confirmed when the next reading is already lower
   let previous: { g: number; t: number } | null = null;
   let thirdToLast = 0;
   let lastPeak = Number.NEGATIVE_INFINITY;
@@ -63,11 +63,11 @@ export function createShakeDetector(options: Partial<DetectorOptions> = {}): Sha
   let pausedUntil = 0;
 
   const registerPeak = (t: number) => {
-    if (t - lastPeak < o.minGapMs) return; // rebote del mismo hachazo
+    if (t - lastPeak < o.minGapMs) return; // rebound of the same chop
     const hadCalm = t - lastPeak >= o.calmBeforeMs;
     const continues = peaks.length > 0 && t - lastPeak <= o.maxGapMs && t - peaks[0] <= o.windowMs;
     if (continues) peaks.push(t);
-    else peaks = hadCalm ? [t] : []; // sin calma previa es actividad continua (p. ej. correr)
+    else peaks = hadCalm ? [t] : []; // without calm before it is continuous activity (e.g. running)
     lastPeak = t;
   };
 
@@ -78,7 +78,7 @@ export function createShakeDetector(options: Partial<DetectorOptions> = {}): Sha
       return false;
     }
 
-    // ¿La lectura anterior fue un máximo local fuerte?
+    // Was the previous reading a strong local maximum?
     if (previous && previous.g >= o.thresholdG && previous.g >= thirdToLast && previous.g > strength) {
       registerPeak(previous.t);
     }
@@ -87,14 +87,14 @@ export function createShakeDetector(options: Partial<DetectorOptions> = {}): Sha
 
     stillSince = strength < o.restG ? (stillSince ?? t) : null;
 
-    // Secuencia completa: sin picos nuevos durante la calma posterior y el teléfono ya quieto
+    // Complete sequence: no new peaks during the calm afterwards and the phone already still
     const still = stillSince !== null && t - stillSince >= o.minRestMs;
     if (peaks.length >= o.requiredHits && t - lastPeak >= o.calmAfterMs && still) {
       peaks = [];
       pausedUntil = t + o.pauseMs;
       return true;
     }
-    // Pasó demasiado tiempo sin completar la secuencia: se descarta
+    // Too much time passed without completing the sequence: discarded
     if (peaks.length > 0 && t - lastPeak > o.maxGapMs && peaks.length < o.requiredHits) {
       peaks = [];
     }

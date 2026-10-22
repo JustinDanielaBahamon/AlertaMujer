@@ -47,14 +47,14 @@ export function useAddContactViewModel() {
   const [photoUri, setPhotoUri] = useState<string | null>(null);
 
   /**
-   * El correo no admite espacios: se eliminan mientras se escribe.
+   * Emails do not allow spaces: they are removed while typing.
    */
   const setEmail = useCallback((value: string) => {
     setEmailState(value.replace(/\s/g, ""));
   }, []);
 
   /**
-   * Cargar datos cuando estamos editando un contacto
+   * Load the data when editing a contact
    */
   useEffect(() => {
     if (contactParam) {
@@ -79,7 +79,7 @@ export function useAddContactViewModel() {
     contactParam?.photo,
   ]);
 
-  // La foto se reduce y se guarda como data URI: así queda en el backend y no se pierde
+  // The photo is reduced and stored as a data URI: that way it lives in the backend and is not lost
   const setPhoto = useCallback(async (uri: string) => {
     try {
       setPhotoUri(await toStorablePhoto(uri));
@@ -90,7 +90,7 @@ export function useAddContactViewModel() {
   }, []);
 
   /**
-   * Seleccionar foto desde la galería
+   * Pick a photo from the gallery
    */
   const selectPhoto = useCallback(async () => {
     const { status } =
@@ -118,14 +118,14 @@ export function useAddContactViewModel() {
   }, [t, setPhoto]);
 
   /**
-   * Quitar foto
+   * Remove photo
    */
   const removePhoto = useCallback(() => {
     setPhotoUri(null);
   }, []);
 
   /**
-   * Abrir agenda del teléfono
+   * Open the phone contacts
    */
   const openPhoneContacts = async () => {
     const { status } =
@@ -180,7 +180,7 @@ export function useAddContactViewModel() {
   };
 
   /**
-   * Guardar o actualizar contacto
+   * Save or update the contact
    */
   const save = useCallback(() => {
     const extra = contactExtraTexts[locale];
@@ -207,7 +207,7 @@ export function useAddContactViewModel() {
     }
 
     /**
-     * Validación del correo electrónico (obligatorio y con formato válido)
+     * Email validation (required and with a valid format)
      */
     if (!normalizedEmail) {
       Alert.alert(
@@ -226,10 +226,10 @@ export function useAddContactViewModel() {
     }
 
     /**
-     * Validación de contacto duplicado
+     * Duplicate contact validation
      *
-     * En modo edición se excluye el contacto actual
-     * para permitir modificarlo sin bloquear el teléfono.
+     * In edit mode the current contact is excluded
+     * so it can be changed without blocking its phone number.
      */
     const duplicate = contacts.find((c) => {
       const samePhone =
@@ -305,7 +305,7 @@ export function useAddContactViewModel() {
   ]);
 
   /**
-   * Cancelar
+   * Cancel
    */
   const cancel = useCallback(() => {
     navigation.goBack();

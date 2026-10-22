@@ -5,9 +5,9 @@ import ActiveAlertScreen from "../features/activeAlert/view/ActiveAlertScreen";
 import ContactAlertScreen from "../features/contactAlert/view/ContactAlertScreen";
 import ActivacionScreen from "../features/activation/activation";
 import AgregarContactoScreen from "../features/contacts/view/addContactScreen";
-import DetalleAlertaScreen from "../features/history/view/alertDetail"; // ← nuevo
+import DetalleAlertaScreen from "../features/history/view/alertDetail"; // ← new
 import HistorialMapa from "../features/history/view/history";
-import ClasificarZonaScreen from "../features/map/view/classifyZoneView"; // Ajusta la ruta a tu archivo real// Ajusta la ruta a tu archivo real
+import ClasificarZonaScreen from "../features/map/view/classifyZoneView"; // Adjust the path to your real file
 import UbicacionesGuardadasScreen from "../features/map/view/SavedLocations";
 import ZonasAuxiliaresScreen from "../features/map/view/HelpZones";
 import HistorialRecorridosScreen from "../features/map/view/RouteHistory";
@@ -52,7 +52,7 @@ export default function MainNavigator({ initialRouteName }: Props) {
     >
       <Stack.Screen name="DrawerHome" component={DrawerNavigator} />
       <Stack.Screen name="Activation" component={ActivacionScreen} />
-      {/* Sin gesto de volver: de la alerta activa solo se sale con "Estoy bien" */}
+      {/* No back gesture: the active alert can only be left with "I'm fine" */}
       <Stack.Screen name="ActiveAlert" component={ActiveAlertScreen} options={{ gestureEnabled: false }} />
       <Stack.Screen name="ContactAlert" component={ContactAlertScreen} />
       <Stack.Screen name="ReceivedAlerts" component={ReceivedAlertsScreen} />

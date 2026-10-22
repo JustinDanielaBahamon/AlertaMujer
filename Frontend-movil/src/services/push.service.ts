@@ -10,15 +10,15 @@ import { createSosChannel } from "../notifications/sosAlarm";
 
 const FULL_SCREEN_NOTICE_KEY = "@alerta_mujer:aviso_pantalla_completa";
 
-/** false si el APK se compiló sin google-services.json (no hay push). */
+/** false if the APK was built without google-services.json (no push). */
 export const pushAvailable = (): boolean => Constants.expoConfig?.extra?.pushConfigurado === true;
 
 let cancelRefresh: (() => void) | null = null;
 
 /**
- * Tras iniciar sesión: pide permiso de notificaciones, crea el canal de la alarma y registra el
- * token FCM del teléfono en el backend para recibir alertas de las personas que lo tienen como
- * contacto. Nunca lanza: si algo falla, la app sigue funcionando sin push.
+ * After signing in: asks for the notifications permission, creates the alarm channel and registers the
+ * phone FCM token in the backend to receive alerts from the people who have her as a
+ * contact. It never throws: if something fails, the app keeps working without push.
  */
 export async function registrarPush(requestPermission = false): Promise<void> {
   if (Platform.OS !== "android" || !pushAvailable()) return;
@@ -40,8 +40,8 @@ export async function registrarPush(requestPermission = false): Promise<void> {
 }
 
 /**
- * Android 14+: la alarma a pantalla completa necesita que la usuaria la permita en Ajustes.
- * Se ofrece una sola vez; devuelve true si conviene mostrar el aviso.
+ * Android 14+: the full-screen alarm needs the user to allow it in Settings.
+ * Offered only once; returns true if the notice should be shown.
  */
 export async function shouldOfferFullScreen(): Promise<boolean> {
   if (Platform.OS !== "android" || Number(Platform.Version) < 34 || !pushAvailable()) return false;

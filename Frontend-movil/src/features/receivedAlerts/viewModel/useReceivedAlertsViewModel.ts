@@ -8,12 +8,12 @@ import { getReceivedAlerts, getTrackingCode, type ReceivedAlert } from "../../..
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
 
-// Mientras hay una alerta activa la lista se actualiza sola
+// While there is an active alert the list updates itself
 const REFRESH_MS = 30_000;
 
 /**
- * Alertas de las personas que tienen a la usuaria como contacto de emergencia: por si no alcanzó a
- * atender la alarma, aquí puede ver qué pasó y abrir el seguimiento mientras siga disponible.
+ * Alerts from the people who have the user as an emergency contact: in case she could not
+ * answer the alarm, here she can see what happened and open the tracking while it is still available.
  */
 export function useReceivedAlertsViewModel() {
   const navigation = useNavigation<Nav>();

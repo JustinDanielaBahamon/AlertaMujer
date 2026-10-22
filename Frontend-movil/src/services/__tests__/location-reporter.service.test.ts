@@ -26,7 +26,7 @@ describe("location-reporter.service", () => {
     const [url, body] = post.mock.calls[0];
     expect(url).toBe("/api/location-logs");
     expect(body).toMatchObject({ latitude: 2.930123, longitude: -75.281111, accuracy: 12.35, alertId: 7, deviceId: 4 });
-    expect(body.recordedAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}$/); // UTC sin zona
+    expect(body.recordedAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}$/); // UTC without a zone
   });
 
   it("guarda el punto en cola si no hay conexión", async () => {
@@ -55,7 +55,7 @@ describe("location-reporter.service", () => {
     post.mockResolvedValue({ data: {} });
     await reportLocation({ latitude: 2, longitude: 2 });
 
-    // Llamadas: 1) punto 1 falla, 2) punto 2 se envía, 3) se reenvía el punto 1 de la cola
+    // Calls: 1) point 1 fails, 2) point 2 is sent, 3) point 1 is resent from the queue
     const deliveriesPoint1 = post.mock.calls.filter(([, body]) => body.latitude === 1);
     expect(deliveriesPoint1).toHaveLength(2);
     expect(post.mock.calls.at(-1)?.[1]).toMatchObject({ latitude: 1, recordedAt: originalTime });

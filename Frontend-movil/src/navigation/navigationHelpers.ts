@@ -2,8 +2,8 @@ import type { NavigationProp, ParamListBase } from "@react-navigation/native";
 import type { MainStackParamList } from "./types";
 
 /**
- * Busca el navegador del stack principal (DrawerHome, AgregarContacto, etc.).
- * Util cuando la pantalla esta anidada en Drawer + Tabs.
+ * Finds the main stack navigator (DrawerHome, AddContact, etc.).
+ * Useful when the screen is nested in Drawer + Tabs.
  */
 export function getMainStackNavigation(
   navigation: NavigationProp<ParamListBase>,
@@ -20,7 +20,7 @@ export function getMainStackNavigation(
   return null;
 }
 
-/** true mientras la usuaria está en el tutorial: ahí no se interrumpe con avisos ni permisos. */
+/** true while the user is in the tutorial: notices and permissions do not interrupt there. */
 export function isInTutorial(navigation: { isReady: () => boolean; getCurrentRoute: () => { name: string } | undefined }): boolean {
   return navigation.isReady() && (navigation.getCurrentRoute()?.name ?? "").startsWith("Tutorial");
 }

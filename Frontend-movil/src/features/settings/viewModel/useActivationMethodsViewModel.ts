@@ -20,13 +20,13 @@ export interface ActivationMethod {
   description: string;
   steps: MethodStep[];
   enabled: boolean;
-  // true = por ahora solo se guarda la preferencia (la función llega en una próxima versión)
+  // true = for now only the preference is saved (the feature comes in a future version)
   pending: boolean;
-  /** Consejos para que el método funcione bien en el teléfono de la usuaria. */
+  /** Tips so the method works well on the user's phone. */
   recommendations?: string[];
-  /** Consejo destacado para la marca del teléfono (p. ej. gestos de Motorola). */
+  /** Highlighted tip for the phone brand (e.g. Motorola gestures). */
   brandRecommendation?: string;
-  /** Botón extra dentro de la tarjeta (p. ej. agregar el widget a la pantalla de inicio). */
+  /** Extra button inside the card (e.g. add the widget to the home screen). */
   action?: { text: string; icon: string; onPressed: () => void };
 }
 
@@ -80,7 +80,7 @@ export function useActivationMethodsViewModel() {
 
   const activeItems = methods.filter((x) => x.enabled).length;
 
-  // Diálogo del sistema para poner el widget en la pantalla de inicio (si el launcher lo permite)
+  // System dialog to put the widget on the home screen (if the launcher allows it)
   const addWidget = () => {
     requestPinWidget({ widgetName: WIDGET_NAME })
       .then((ok) => {
@@ -92,7 +92,7 @@ export function useActivationMethodsViewModel() {
   const setMethod = (id: MethodId, value: boolean) => {
     change(id, value);
     if (id === "widget" && value) addWidget();
-    // Al encender "agitar" en un teléfono cuyo sistema también reacciona a la sacudida
+    // When "shake" is turned on on a phone whose system also reacts to shaking
     if (id === "agitar" && value && conflict === "motorola") {
       Alert.alert(m.gestos_alerta_titulo, m.gestos_alerta_msg, [
         { text: m.entendido, style: "cancel" },

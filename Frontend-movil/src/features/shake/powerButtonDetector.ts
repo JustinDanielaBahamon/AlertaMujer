@@ -1,14 +1,14 @@
 /**
- * Activación con el botón de encendido: 4 pulsaciones rápidas (en 3 s). Cada pulsación prende o
- * apaga la pantalla, que es lo que la app puede ver.
+ * Power button activation: 4 quick presses (within 3 s). Each press turns the screen on or
+ * off, which is what the app can see.
  *
- * Mirar la hora son 1 o 2 pulsaciones y el "SOS de emergencia" de Android usa 5: con 4 no se
- * confunde con ninguno de los dos. Tras una detección hay una pausa para no disparar dos veces.
+ * Checking the time is 1 or 2 presses and Android "Emergency SOS" uses 5: with 4 it is not
+ * confused with either. After a detection there is a pause so it does not fire twice.
  */
 export type PowerButtonOptions = {
   presses: number;
   windowMs: number;
-  /** Dos cambios de pantalla más juntos que esto son el mismo evento repetido por el sistema. */
+  /** Two screen changes closer together than this are the same event repeated by the system. */
   minGapMs: number;
   pauseMs: number;
 };

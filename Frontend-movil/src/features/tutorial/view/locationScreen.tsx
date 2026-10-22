@@ -19,7 +19,7 @@ export default function LocationScreen({ externalVm }: LocationScreenProps) {
   const internalVM = useLocationTutorialViewModel();
   const vm = externalVm ?? internalVM;
 
-  // ── Animación de entrada de la tarjeta ────────────────────────────────────
+  // ── Card entrance animation ───────────────────────────────────────────────
   const cardAnim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.spring(cardAnim, {
@@ -37,7 +37,7 @@ export default function LocationScreen({ externalVm }: LocationScreenProps) {
     }],
   };
 
-  // ── Animación de sacudida en error ────────────────────────────────────────
+  // ── Shake animation on error ──────────────────────────────────────────────
   const shakeAnim = useRef(new Animated.Value(0)).current;
   const triggerShake = () => {
     shakeAnim.setValue(0);
@@ -70,7 +70,7 @@ export default function LocationScreen({ externalVm }: LocationScreenProps) {
           />
         </View>
 
-        {/* Tarjeta */}
+        {/* Card */}
         <Animated.View style={[{ flex: 1 }, cardAnimStyle]}>
           <Card title={`${t.tutorial.ubicacion_titulo_1}\n`} titleHighlight={t.tutorial.ubicacion_titulo_2}>
             <ScrollView
@@ -79,7 +79,7 @@ export default function LocationScreen({ externalVm }: LocationScreenProps) {
               showsVerticalScrollIndicator={false}
               nestedScrollEnabled
             >
-              {/* Ícono circular + info card */}
+              {/* Circular icon + info card */}
               <View style={locationStyle.headerIconWrap}>
                 <MaterialIcons name="map" size={28} color={LOCATION_COLORS.accent} />
               </View>
@@ -91,7 +91,7 @@ export default function LocationScreen({ externalVm }: LocationScreenProps) {
                 </Text>
               </View>
 
-              {/* Banner de validación */}
+              {/* Validation banner */}
               {vm.showValidationBanner && (
                 <Animated.View
                   style={[locationStyle.validationBanner, { transform: [{ translateX: shakeAnim }] }]}
@@ -103,7 +103,7 @@ export default function LocationScreen({ externalVm }: LocationScreenProps) {
                 </Animated.View>
               )}
 
-              {/* Departamento — fijo, ya NO es un selector interactivo */}
+              {/* Department — fixed, it is NO longer an interactive picker */}
               <View style={locationStyle.fieldLabelRow}>
                 <View style={locationStyle.fieldLabelDot} />
                 <Text style={locationStyle.fieldLabel}>
@@ -118,7 +118,7 @@ export default function LocationScreen({ externalVm }: LocationScreenProps) {
                 <Text style={locationStyle.fixedBadge}>{t.tutorial.ubicacion_fijo_badge}</Text>
               </View>
 
-              {/* Municipio — sigue siendo el único selector real */}
+              {/* Municipality — still the only real picker */}
               <View style={locationStyle.fieldLabelRow}>
                 <View style={locationStyle.fieldLabelDot} />
                 <Text style={locationStyle.fieldLabel}>
@@ -153,7 +153,7 @@ export default function LocationScreen({ externalVm }: LocationScreenProps) {
 
               <View style={locationStyle.divider} />
 
-              {/* Resumen de selección */}
+              {/* Selection summary */}
               <View style={locationStyle.fieldLabelRow}>
                 <View style={locationStyle.fieldLabelDot} />
                 <Text style={locationStyle.fieldLabel}>
@@ -190,7 +190,7 @@ export default function LocationScreen({ externalVm }: LocationScreenProps) {
                 </View>
               </View>
 
-              {/* Botón guardar */}
+              {/* Save button */}
               <TouchableOpacity
                 onPress={vm.openConfirmation}
                 style={locationStyle.saveBtn}

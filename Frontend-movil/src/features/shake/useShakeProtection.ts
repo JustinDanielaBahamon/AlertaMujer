@@ -12,16 +12,16 @@ import {
   startProtection,
 } from "./protectionService";
 
-// Durante una alerta (o su cuenta regresiva) otra sacudida no hace nada
+// During an alert (or its countdown) another shake does nothing
 const ALERT_SCREENS = new Set(["Activation", "ActiveAlert"]);
 
 const BATTERY_KEY = "@alerta_mujer:bateria_preguntada";
 const BATTERY_REASK_MS = 3 * 24 * 60 * 60 * 1000;
 
 /**
- * El acelerómetro no necesita permiso, pero el ahorro de batería de Android (y el de cada marca:
- * Infinix, Xiaomi, Samsung...) duerme la app con la pantalla apagada. Se pide que la deje correr
- * siempre; si la usuaria dice que no, se vuelve a preguntar a los 3 días.
+ * The accelerometer needs no permission, but Android battery saving (and each brand's:
+ * Infinix, Xiaomi, Samsung...) puts the app to sleep with the screen off. We ask to let it always
+ * run; if the user says no, we ask again after 3 days.
  */
 async function askNoBatterySaver(name: string) {
   if (Platform.OS !== "android" || ShakeSensor.ignoresBatteryOptimization()) return;
@@ -39,8 +39,8 @@ async function askNoBatterySaver(name: string) {
 }
 
 /**
- * Enciende o apaga el servicio "Protección activa" según los métodos que activó la usuaria
- * (agitar el teléfono y/o botón de encendido) y conecta sus eventos con la navegación.
+ * Turns the "Active protection" service on or off depending on the methods the user enabled
+ * (shaking the phone and/or the power button) and connects its events with navigation.
  */
 export function useShakeProtection(
   navigation: NavigationContainerRefWithCurrent<MainStackParamList>,
@@ -51,7 +51,7 @@ export function useShakeProtection(
   const shake = ready && config.agitar;
   const button = ready && config.encendido;
   const turnedOn = shake || button;
-  // Valores del ajuste vistos en esta sesión: si uno pasa de apagado a encendido, lo encendió la usuaria
+  // Setting values seen in this session: if one goes from off to on, the user turned it on
   const previousSetting = useRef<{ shake: boolean; powerButton: boolean } | null>(null);
 
   useEffect(() => {
@@ -61,7 +61,7 @@ export function useShakeProtection(
       stopProtection().catch(() => {});
       return;
     }
-    // Al abrir la app solo arranca si ya tiene los permisos; los pide si la usuaria acaba de encender un método
+    // When the app opens it only starts if it already has the permissions; it asks for them if the user just turned a method on
     const shakeTurnedOn = previous !== null && !previous.shake && shake;
     const buttonTurnedOn = previous !== null && !previous.powerButton && button;
     const turnedOnNow = shakeTurnedOn || buttonTurnedOn;
@@ -71,7 +71,7 @@ export function useShakeProtection(
         if (status === "activa") {
           if (turnedOnNow) askNoBatterySaver(name).catch(() => {});
         } else if (status === "sin_ubicacion") {
-          // Al abrir la app no se insiste: el recordatorio de protección avisa lo que falta
+          // When the app opens we do not insist: the protection reminder tells what is missing
           if (!turnedOnNow) return;
           if (shakeTurnedOn) change("agitar", false);
           if (buttonTurnedOn) change("encendido", false);

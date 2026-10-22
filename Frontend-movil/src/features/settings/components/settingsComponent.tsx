@@ -36,7 +36,7 @@ export default function SettingsComponent({ navigation }: any) {
   return (
     <View style={styles.container}>
 
-      {/* modo claro y oscuro */}
+      {/* light and dark mode */}
       <View style={styles.item}>
         <View style={styles.switchRow}>
           <Ionicons
@@ -58,7 +58,7 @@ export default function SettingsComponent({ navigation }: any) {
         </View>
       </View>
 
-      {/* temas predeterminados */}
+      {/* preset themes */}
       <View style={styles.item}>
         <Text style={[styles.sectionTitle, { color: theme.text }]}>
           {t.ajustes.temas}
@@ -87,7 +87,7 @@ export default function SettingsComponent({ navigation }: any) {
         </View>
       </View>
 
-      {/* idioma */}
+      {/* language */}
       <TouchableOpacity onPress={openLanguageModal} style={styles.item}>
         <View style={styles.chevronRow}>
           <Ionicons name="globe-outline" size={17} color={theme.text} style={{ marginRight: 8 }} />
@@ -113,7 +113,7 @@ export default function SettingsComponent({ navigation }: any) {
         </View>
       </TouchableOpacity>
 
-      {/* metodos de activacion */}
+      {/* activation methods */}
       <TouchableOpacity
         onPress={() => navigation.navigate("ActivationMethods")}
         style={styles.item}
@@ -125,7 +125,7 @@ export default function SettingsComponent({ navigation }: any) {
         </View>
       </TouchableOpacity>
 
-      {/* notificaciones */}
+      {/* notifications */}
       <TouchableOpacity
         onPress={() => navigation.navigate("Notifications")}
         style={styles.item}
@@ -137,7 +137,7 @@ export default function SettingsComponent({ navigation }: any) {
         </View>
       </TouchableOpacity>
 
-      {/* acerca de */}
+      {/* about */}
       <TouchableOpacity
         onPress={() => navigation.navigate("About")}
         style={styles.item}
@@ -149,7 +149,7 @@ export default function SettingsComponent({ navigation }: any) {
         </View>
       </TouchableOpacity>
 
-      {/* tutoriales */}
+      {/* tutorials */}
       <TouchableOpacity
         onPress={() => navigation.navigate("WelcomeTutorial")}
         style={[styles.item, { borderBottomWidth: 0 }]}
@@ -161,7 +161,7 @@ export default function SettingsComponent({ navigation }: any) {
         </View>
       </TouchableOpacity>
 
-      {/* modal de seleccion de idioma */}
+      {/* language selection modal */}
       <LanguageModal
         visible={languageModalVisible}
         locale={locale}

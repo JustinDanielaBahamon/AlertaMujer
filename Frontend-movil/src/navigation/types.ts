@@ -16,15 +16,15 @@ export type MainStackParamList = {
 
   Activation:
     | {
-        contact?: Contact; // si viene, la alerta es solo para este contacto
-        method?: "agitar" | "encendido" | "widget"; // agitar, 4 pulsaciones del botón de encendido o widget (por defecto, botón SOS)
+        contact?: Contact; // if it comes, the alert is only for this contact
+        method?: "agitar" | "encendido" | "widget"; // shake, 4 power button presses or widget (by default, SOS button)
       }
     | undefined;
   ActiveAlert:
     | {
-        contact?: Contact; // si viene, la alerta es solo para este contacto
+        contact?: Contact; // if it comes, the alert is only for this contact
         method?: "agitar" | "encendido" | "widget";
-        alertId?: number; // alerta ya creada en segundo plano: no se crea otra
+        alertId?: number; // alert already created in the background: another one is not created
       }
     | undefined;
   ReceivedAlerts: undefined;
@@ -34,8 +34,8 @@ export type MainStackParamList = {
     userName?: string;
     latitude?: number;
     longitude?: number;
-    demo?: boolean; // TEMPORAL: modo de prueba con puntos simulados
-    code?: string; // código de seguimiento público (llega en el push a los contactos)
+    demo?: boolean; // TEMPORARY: test mode with simulated points
+    code?: string; // public tracking code (arrives in the push to the contacts)
   };
 
   WelcomeTutorial: undefined;
@@ -69,7 +69,7 @@ export type MainStackParamList = {
   HistoryMap: {
     location: {
       id: string;
-      name?: string; // Modificado a opcional
+      name?: string; // Changed to optional
       latitude: number;
       longitude: number;
       address: string;
@@ -102,7 +102,7 @@ export type MainStackParamList = {
           description: string;
         };
       }
-    | undefined; // Permite ir a ClasificarZona sin pasar parámetros
+    | undefined; // Allows going to ClassifyZone without params
 
   SavedLocations: undefined;
 

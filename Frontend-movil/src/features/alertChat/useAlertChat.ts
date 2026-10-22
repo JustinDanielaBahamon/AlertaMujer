@@ -3,7 +3,7 @@ import { sendMessage, readMessages, type AlertMessage, type ChatParticipant } fr
 
 const REFRESH_MS = 5000;
 
-/** Chat de la alerta: trae los mensajes nuevos cada 5 s mientras está activo y permite enviar. */
+/** Alert chat: fetches new messages every 5 s while active and lets you send. */
 export function useAlertChat(participant: ChatParticipant | null, enabled: boolean) {
   const [messages, setMessages] = useState<AlertMessage[]>([]);
   const [sending, setSending] = useState(false);
@@ -28,7 +28,7 @@ export function useAlertChat(participant: ChatParticipant | null, enabled: boole
       readMessages(participant, lastId.current)
         .then((newOnes) => alive && add(newOnes))
         .catch(() => {
-          // Sin conexión: se reintenta en la siguiente lectura
+          // Offline: retried on the next read
         });
     leer();
     const t = enabled ? setInterval(leer, REFRESH_MS) : null;
@@ -36,7 +36,7 @@ export function useAlertChat(participant: ChatParticipant | null, enabled: boole
       alive = false;
       if (t) clearInterval(t);
     };
-    // participante se compara por su contenido (clave)
+    // the participant is compared by its content (key)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, enabled, add]);
 

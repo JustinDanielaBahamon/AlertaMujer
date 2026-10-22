@@ -1,6 +1,6 @@
 import { createShakeDetector } from "../shakeDetector";
 
-// Lecturas cada 40 ms (frecuencia que usa el servicio)
+// Readings every 40 ms (the rate the service uses)
 const STEP_MS = 40;
 
 function simulate(readings: number[]) {
@@ -9,10 +9,10 @@ function simulate(readings: number[]) {
 }
 
 const still = (ms: number) => Array(Math.round(ms / STEP_MS)).fill(1);
-// Un hachazo: impulso, frenazo y rebote (varias lecturas fuertes) y luego el teléfono se detiene
+// One chop: push, sudden stop and rebound (several strong readings) and then the phone stops
 const CHOP = [1.3, 4.6, 5.8, 3.1, 4.2, 2.2, 1.1, 1.0, 1.0, 1.0];
 const chops = (n: number, between = 120) => Array.from({ length: n }, () => [...CHOP, ...still(between)]).flat();
-// Paso de carrera: golpe de ~4 g y ~360 ms por paso (cadencia de 165 pasos por minuto)
+// Running step: ~4 g hit and ~360 ms per step (cadence of 165 steps per minute)
 const RUNNING_STEP = [1.4, 3.8, 4.1, 2.0, 0.9, 0.7, 0.8, 1.0, 1.1];
 const run = (steps: number) => Array(steps).fill(RUNNING_STEP).flat();
 
@@ -51,12 +51,12 @@ describe("detectorSacudidas", () => {
   });
 
   it("empezar a correr justo después de estar quieta tampoco", () => {
-    // Los primeros pasos parecen hachazos, pero los siguientes llegan antes de la calma posterior
+    // The first steps look like chops, but the next ones arrive before the calm afterwards
     expect(simulate([...still(2000), ...run(8)]).some(Boolean)).toBe(false);
   });
 
   it("cuatro hachazos fuertes en medio de una carrera sí se detectan (es una emergencia)", () => {
-    // Si alguien está corriendo y hace 4 hachazos intencionalmente fuertes, es una petición de ayuda
+    // If someone is running and makes 4 deliberately strong chops, it is a request for help
     expect(simulate([...run(20), ...chops(4), ...still(700)]).some(Boolean)).toBe(true);
   });
 
@@ -66,8 +66,8 @@ describe("detectorSacudidas", () => {
   });
 
   describe("con datos reales de un celular (Infinix X678B, 2 minutos)", () => {
-    // Medidos por ADB: en reposo, luego varias rondas de hachazos fuertes sin detenerse entre golpes
-    // (picos de 11-13 g sobre 6-8 g) separadas por pausas cortas. Tiempo en ms y fuerza en g.
+    // Measured with ADB: at rest, then several rounds of strong chops without stopping between hits
+    // (peaks of 11-13 g over 6-8 g) separated by short pauses. Time in ms and strength in g.
     const series: [number, number][] = require("./data/chops-infinix.json");
     const triggers = (() => {
       const detect = createShakeDetector();
@@ -76,7 +76,7 @@ describe("detectorSacudidas", () => {
 
     it("detecta los hachazos aunque el celular no se detenga entre golpe y golpe", () => {
       expect(triggers.length).toBeGreaterThanOrEqual(2);
-      // La primera ronda termina a los ~59,3 s: la alerta sale al quedarse quieta
+      // The first round ends at ~59.3 s: the alert goes out when the phone stays still
       expect(triggers[0]).toBeGreaterThan(59);
       expect(triggers[0]).toBeLessThan(61);
     });

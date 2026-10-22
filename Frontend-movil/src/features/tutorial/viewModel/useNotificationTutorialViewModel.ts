@@ -20,7 +20,7 @@ export interface NotifFeatureItem {
 
 type LocaleT = ReturnType<typeof useLocale>["t"];
 
-// ─── Datos (ahora dependen del idioma activo) ─────────────────────────────────
+// ─── Data (now depends on the active language) ───────────────────────────────
 const getNotifFeatureRows = (t: LocaleT): NotifFeatureItem[] => [
   {
     id: "sos",
@@ -72,7 +72,7 @@ export function useNotificationTutorialViewModel() {
 
   const resolvePermission = useRef<(value: boolean) => void>(() => {});
 
-  // Android 12 o menor no pide permiso de notificaciones; en Android 13+ se revisa si ya está concedido
+  // Android 12 or lower does not ask for the notifications permission; on Android 13+ we check whether it is granted
   const alreadyHasPermission = async (): Promise<boolean> => {
     if (Platform.OS !== "android") return false;
     if (Platform.Version < 33) return true;
@@ -93,8 +93,8 @@ export function useNotificationTutorialViewModel() {
     });
   }, []);
 
-  // Al aceptar se pide el permiso del sistema y se registra el celular para recibir alarmas.
-  // Con o sin permiso el tutorial sigue a la página de protección.
+  // On accept the system permission is requested and the phone is registered to receive alarms.
+  // With or without the permission the tutorial goes on to the protection page.
   const confirmModal = useCallback(async () => {
     setModalVisible(false);
     if (Platform.OS === "android" && Platform.Version >= 33) {

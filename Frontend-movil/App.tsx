@@ -16,7 +16,7 @@ import AppNavigator from "./src/navigation/AppNavigator";
 import LocationReport from "./src/components/LocationReporting";
 import AnimatedSplash from "./src/components/ui/AnimatedSplash/AnimatedSplash";
 
-// El splash nativo se mantiene hasta que la animación de apertura esté dibujada encima
+// The native splash stays until the opening animation is drawn on top
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
 export default function App() {

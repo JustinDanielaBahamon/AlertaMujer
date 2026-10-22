@@ -51,7 +51,7 @@ export default function DetalleAlerta() {
   const [mapReady, setMapReady] = useState(false);
   const [showNotified, setShowNotified] = useState(false);
 
-  // El teléfono sale de la lista de contactos (el registro de envíos solo guarda el nombre)
+  // The phone comes from the contact list (the delivery log only stores the name)
   const { contacts } = useContactsContext();
   const phoneOf = (contactId: number) =>
     contacts.find((x) => String(x.id) === String(contactId))?.phoneNumber?.replace(/\D/g, "") ?? "";
@@ -93,7 +93,7 @@ export default function DetalleAlerta() {
     let mounted = true;
     (async () => {
       try {
-        // Si la alerta ya tiene coordenadas del backend, usarlas directamente
+        // If the alert already has coordinates from the backend, use them directly
         if (path.length > 0) {
           setAlertCoordinate(path[0]);
           if (mounted) setLoadingMap(false);
@@ -129,7 +129,7 @@ export default function DetalleAlerta() {
     };
   }, [alert.location, alert.coords, path]);
 
-  // Encuadra todo el recorrido en el mapa pequeño
+  // Fit the whole route on the small map
   useEffect(() => {
     if (!mapReady || path.length < 2) return;
     mapRef.current?.fitToCoordinates(path, {
@@ -175,7 +175,7 @@ export default function DetalleAlerta() {
         </LinearGradient>
 
         <View style={styles.Body}>
-          {/* RESUMEN */}
+          {/* SUMMARY */}
           <View style={styles.SummaryCard}>
             <View style={[styles.SummaryIcon, { backgroundColor: alertColors.iconBg }]}>
               <MaterialIcons name={isEmergency ? "warning" : "medical-services"} size={22} color={alertColors.iconTint} />
@@ -208,7 +208,7 @@ export default function DetalleAlerta() {
             </View>
           </View>
 
-          {/* MAPA CON EL RECORRIDO */}
+          {/* MAP WITH THE ROUTE */}
           <View style={styles.MapCard}>
             {alertCoordinate ? (
               <MapView
@@ -262,7 +262,7 @@ export default function DetalleAlerta() {
             )}
           </View>
 
-          {/* LÍNEA DE TIEMPO */}
+          {/* TIMELINE */}
           {steps.length > 0 && (
             <>
               <Text style={styles.SectionTitle}>Qué pasó</Text>
@@ -285,11 +285,11 @@ export default function DetalleAlerta() {
             </>
           )}
 
-          {/* EVIDENCIAS GRABADAS */}
+          {/* RECORDED EVIDENCE */}
           <Text style={styles.SectionTitle}>{t.detalle.evidencias_titulo}</Text>
           <AlertEvidence alertId={Number(alert.id)} />
 
-          {/* CONTACTOS AVISADOS */}
+          {/* NOTIFIED CONTACTS */}
           <View style={extra.sectionRow}>
             <Text style={styles.SectionTitle}>{t.detalle.notificados_titulo}</Text>
             {notifiedContacts.length > 0 && (
@@ -326,7 +326,7 @@ export default function DetalleAlerta() {
                         )}
                       </View>
                     </View>
-                    {/* Por dónde le llegó, en palabras: "Correo · Recibida" */}
+                    {/* How it reached them, in words: "Email · Received" */}
                     <View style={extra.channels}>
                       {c.channels.map((channel) => {
                         const status = STATUSES[channel.status] ?? STATUSES.pending;
@@ -371,7 +371,7 @@ export default function DetalleAlerta() {
             )}
           </View>
 
-          {/* NOTA DE LA ALERTA */}
+          {/* ALERT NOTE */}
           {!!message && (
             <View style={styles.DescriptionCard}>
               <Text style={styles.DescriptionTitle}>{t.detalle.descripcion}</Text>

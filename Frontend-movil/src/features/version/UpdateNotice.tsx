@@ -10,14 +10,14 @@ import { useTheme } from "../../contexts/ThemeContext";
 import { getPublicSettings } from "../../services/settings.service";
 import { isOlderVersion } from "./version";
 
-// "Más tarde" vuelve a avisar al día siguiente
+// "Later" warns again the next day
 const POSTPONED_KEY = "@alerta_mujer:aviso_version_pospuesto";
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
 /**
- * Aviso de actualización: si la versión instalada es anterior a la mínima que pide la
- * administración, ofrece descargar el APK nuevo. No bloquea la app: en una emergencia el botón de
- * alerta tiene que seguir funcionando aunque la versión sea vieja. Se monta una vez en App.tsx.
+ * Update notice: if the installed version is older than the minimum the administration
+ * requires, it offers to download the new APK. It does not block the app: in an emergency the alert
+ * button must keep working even on an old version. Mounted once in App.tsx.
  */
 export default function UpdateNotice() {
   const { user } = useAuth();
@@ -37,7 +37,7 @@ export default function UpdateNotice() {
         const postponed = Number(await AsyncStorage.getItem(POSTPONED_KEY).catch(() => null)) || 0;
         if (enabled && Date.now() - postponed > ONE_DAY_MS) setMinima(minAppVersion);
       } catch {
-        // Sin conexión: se revisa la próxima vez que se abra la app
+        // Offline: checked the next time the app opens
       }
     })();
     return () => {

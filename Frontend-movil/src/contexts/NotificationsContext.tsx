@@ -10,7 +10,7 @@ import React, {
 
 const STORAGE_KEY = "alertamujer_notificaciones";
 
-// Las alertas de emergencia no se pueden silenciar: solo se elige si el celular vibra
+// Emergency alerts cannot be silenced: the only choice is whether the phone vibrates
 export type NotificationsConfig = {
   vibracion: boolean;
 };
@@ -38,7 +38,7 @@ export function NotificationsProvider({
     useState<NotificationsConfig>(DEFAULT_CONFIG);
   const [loaded, setLoaded] = useState(false);
 
-  // Al abrir la app, lee lo que la usuaria dejó guardado
+  // When the app opens, read what the user saved
   useEffect(() => {
     (async () => {
       try {
@@ -52,7 +52,7 @@ export function NotificationsProvider({
     })();
   }, []);
 
-  // Guarda cada cambio (solo después de haber leído lo guardado)
+  // Save every change (only after the saved values were read)
   useEffect(() => {
     if (!loaded) return;
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(config)).catch((e) =>
@@ -79,7 +79,7 @@ export function NotificationsProvider({
   );
 }
 
-// Uso: const { config, actualizar } = useNotificaciones();
+// Usage: const { config, update } = useNotifications();
 export function useNotifications() {
   const ctx = useContext(NotificationsContext);
   if (!ctx) {

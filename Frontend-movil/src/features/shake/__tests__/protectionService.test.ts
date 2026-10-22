@@ -59,7 +59,7 @@ import {
   registerProtectionService,
 } from "../protectionService";
 
-// Cuatro hachazos fuertes con calma antes y después, leídos cada 40 ms como en el servicio
+// Four strong chops with calm before and after, read every 40 ms as in the service
 const CHOP = [1.3, 4.6, 5.8, 3.1, 4.2, 2.2, 1.1, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
 function shakePhone() {
   const still = (ms: number) => Array(ms / 40).fill(1);
@@ -74,7 +74,7 @@ async function turnOn() {
   registerProtectionService();
   const run = (notifee.registerForegroundService as jest.Mock).mock.calls.at(-1)[0];
   expect(await startProtection()).toBe("activa");
-  run(); // Notifee ejecuta la tarea al mostrar la notificación del servicio
+  run(); // Notifee runs the task when the service notification is shown
 }
 
 describe("servicioProteccion", () => {
@@ -152,7 +152,7 @@ describe("servicioProteccion", () => {
     expect(await startProtection(false, { shake: false, powerButton: true })).toBe("activa");
     run();
     expect(ShakeSensor.startPowerButton).toHaveBeenCalled();
-    expect(ShakeSensor.start).not.toHaveBeenCalled(); // sin acelerómetro si no se pidió agitar
+    expect(ShakeSensor.start).not.toHaveBeenCalled(); // no accelerometer if shake was not requested
 
     for (let i = 0; i < 4; i++) {
       jest.setSystemTime(Date.now() + 400);

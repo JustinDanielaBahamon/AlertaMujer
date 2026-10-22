@@ -4,9 +4,9 @@ const SIDE_PX = 400;
 const QUALITY = 0.6;
 
 /**
- * Convierte una foto elegida (galería o agenda) en una imagen pequeña en data URI (~400 px, unas
- * decenas de KB) que se guarda en el backend. La URI de la galería es un archivo temporal que
- * Android puede borrar: por eso las fotos de perfil y de contactos desaparecían al refrescar.
+ * Turns a chosen photo (gallery or phone contacts) into a small data URI image (~400 px, a few
+ * tens of KB) stored in the backend. The gallery URI is a temporary file that
+ * Android may delete: that is why profile and contact photos disappeared on refresh.
  */
 export async function toStorablePhoto(uri: string): Promise<string> {
   if (uri.startsWith("data:")) return uri;

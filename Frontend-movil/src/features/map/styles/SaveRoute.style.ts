@@ -29,9 +29,11 @@ export const styles = StyleSheet.create({
     marginTop: 5,
   },
 
-  /* =========================
-     SECCIONES
-  ========================= */
+  /*
+ * =========================
+ *      SECTIONS
+ *   =========================
+ */
 
   sectionContainer: {
     marginHorizontal: 18,
@@ -53,9 +55,11 @@ export const styles = StyleSheet.create({
     marginBottom: 12,
   },
 
-  /* =========================
-     MÉTODO DE SELECCIÓN
-  ========================= */
+  /*
+ * =========================
+ *      SELECTION METHOD
+ *   =========================
+ */
 
   methodContainer: {
     flexDirection: "row" as const,
@@ -83,9 +87,11 @@ export const styles = StyleSheet.create({
     fontWeight: "600" as const,
   },
 
-  /* =========================
-     MAPA
-  ========================= */
+  /*
+ * =========================
+ *      MAP
+ *   =========================
+ */
 
   mapContainer: {
     height: 300,
@@ -143,9 +149,11 @@ export const styles = StyleSheet.create({
     textAlign: "center" as const,
   },
 
-  /* =========================
-     PUNTOS DEL RECORRIDO
-  ========================= */
+  /*
+ * =========================
+ *      ROUTE POINTS
+ *   =========================
+ */
 
   pointButton: {
     flexDirection: "row" as const,
@@ -189,9 +197,11 @@ export const styles = StyleSheet.create({
     fontStyle: "italic" as const,
   },
 
-  /* =========================
-     CAMPOS DE NOMBRE
-  ========================= */
+  /*
+ * =========================
+ *      NAME FIELDS
+ *   =========================
+ */
 
   nameInputContainer: {
     flexDirection: "row" as const,
@@ -216,9 +226,11 @@ export const styles = StyleSheet.create({
     fontStyle: "italic" as const,
   },
 
-  /* =========================
-     ACCIONES
-  ========================= */
+  /*
+ * =========================
+ *      ACTIONS
+ *   =========================
+ */
 
   actionsContainer: {
     flexDirection: "row" as const,

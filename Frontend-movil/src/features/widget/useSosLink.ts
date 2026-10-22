@@ -9,8 +9,8 @@ const ALERT_SCREENS = new Set(["Activation", "ActiveAlert"]);
 const isSosLink = (url: string | null) => !!url && url.toLowerCase().startsWith(SOS_LINK);
 
 /**
- * El widget abre alertamujer://sos: con sesión iniciada lleva a la cuenta regresiva de la alerta
- * (método "widget"). Si se tocó antes de iniciar sesión, se atiende al entrar.
+ * The widget opens alertamujer://sos: when signed in it leads to the alert countdown
+ * ("widget" method). If it was tapped before signing in, it is handled on entering.
  */
 export function useSosLink(
   navigation: NavigationContainerRefWithCurrent<MainStackParamList>,
@@ -18,7 +18,7 @@ export function useSosLink(
 ): void {
   const { config, loaded } = useActivationMethods();
   const pending = useRef(false);
-  // Cambia con cada toque del widget para volver a correr el efecto que lo atiende
+  // Changes with each widget tap to run the effect that handles it again
   const [toques, setToques] = useState(0);
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export function useSosLink(
     return () => sub.remove();
   }, []);
 
-  // Se atiende en cuanto hay sesión y ajustes (el toque pudo llegar antes de iniciar sesión)
+  // Handled as soon as there is a session and settings (the tap may have come before signing in)
   useEffect(() => {
     if (!pending.current || !withSession || !loaded) return;
     pending.current = false;

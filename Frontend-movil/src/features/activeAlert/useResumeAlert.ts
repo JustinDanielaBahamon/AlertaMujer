@@ -4,14 +4,14 @@ import { AppState } from "react-native";
 import type { MainStackParamList } from "../../navigation/types";
 import { ownActiveAlert, getMyAlerts } from "../../services/alerts.service";
 
-// En estas pantallas la alerta ya se está mostrando (o creando): no se navega encima
+// On these screens the alert is already shown (or being created): do not navigate on top
 const ALERT_SCREENS = new Set(["Activation", "ActiveAlert"]);
 
 /**
- * Si la usuaria tiene una alerta activa (p. ej. cerró la app desde "Recientes" con la alerta en
- * curso), al abrir la app o volver a ella se muestra de nuevo la pantalla de alerta activa, que
- * retoma esa misma alerta y vuelve a enviar la ubicación. Antes la alerta seguía activa en el
- * servidor pero la app no lo sabía y dejaba de enviar la ubicación.
+ * If the user has an active alert (e.g. she closed the app from "Recents" with the alert in
+ * progress), opening or returning to the app shows the active alert screen again, which
+ * resumes that same alert and sends the location again. Before, the alert stayed active on the
+ * server but the app did not know and stopped sending the location.
  */
 export function useResumeAlert(
   navigation: NavigationContainerRefWithCurrent<MainStackParamList>,
@@ -37,7 +37,7 @@ export function useResumeAlert(
         const active = ownActiveAlert(await getMyAlerts());
         if (active) show(active.id);
       } catch {
-        // Sin conexión: se vuelve a revisar al volver a la app
+        // Offline: checked again when returning to the app
       }
     };
 

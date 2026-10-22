@@ -2,16 +2,16 @@ import { Platform } from "react-native";
 import ShakeSensor, { type AppExit } from "../../../modules/shake-sensor";
 
 /**
- * ¿La protección se ha detenido sin que la usuaria lo sepa? Android registra cada cierre de la app
- * con su motivo (ApplicationExitInfo). Si al morir el proceso tenía la importancia de un servicio en
- * primer plano (la notificación "Protección activa"), la protección estaba corriendo y se cortó.
- * Así no hay que confiar en que la usuaria configuró bien su teléfono: se comprueba.
+ * Has protection stopped without the user knowing? Android records every app exit
+ * with its reason (ApplicationExitInfo). If the process had the importance of a foreground
+ * service when it died (the "Active protection" notification), protection was running and was cut.
+ * That way we do not have to trust that the user set up her phone right: it is checked.
  */
 
 export type InterruptionCause = "recientes" | "detenida" | "sistema" | "error";
 export type Interruption = { when: number; cause: InterruptionCause };
 
-// ActivityManager.RunningAppProcessInfo: 125 = servicio en primer plano, 100 = en pantalla
+// ActivityManager.RunningAppProcessInfo: 125 = foreground service, 100 = on screen
 const FOREGROUND_SERVICE_IMPORTANCE = 125;
 // ApplicationExitInfo.REASON_*
 const USER_REQUESTED = 10;
@@ -22,19 +22,19 @@ const EXIT_SELF = 1;
 const PACKAGE_UPDATED = 16;
 
 export function classifyExit(c: AppExit): Interruption | null {
-  if (c.importance > FOREGROUND_SERVICE_IMPORTANCE) return null; // la protección no corría
-  if (c.reason === EXIT_SELF || c.reason === PACKAGE_UPDATED) return null; // la app terminó o se actualizó
+  if (c.importance > FOREGROUND_SERVICE_IMPORTANCE) return null; // protection was not running
+  if (c.reason === EXIT_SELF || c.reason === PACKAGE_UPDATED) return null; // the app exited or was updated
   if (c.reason === USER_REQUESTED) {
-    // Deslizar la app en "Recientes" (XOS: "remove task ... SwipeUpClean") la mata entera
+    // Swiping the app away in "Recents" (XOS: "remove task ... SwipeUpClean") kills it entirely
     const recent = /remove task|swipe/i.test(c.description);
     return { when: c.timestamp, cause: recent ? "recientes" : "detenida" };
   }
   if (c.reason === CRASH || c.reason === CRASH_NATIVE || c.reason === ANR) return { when: c.timestamp, cause: "error" };
-  // Memoria, ahorro de energía, "demasiados procesos", congelado...: lo hizo el sistema o la marca
+  // Memory, power saving, "too many processes", frozen...: the system or the brand did it
   return { when: c.timestamp, cause: "sistema" };
 }
 
-/** Interrupciones de la protección en los últimos días (Android 11+; antes no hay registro). */
+/** Protection interruptions in the last days (Android 11+; there is no record before). */
 export function recentInterruptions(days = 7): Interruption[] {
   if (Platform.OS !== "android") return [];
   try {
@@ -47,7 +47,7 @@ export function recentInterruptions(days = 7): Interruption[] {
   }
 }
 
-/** Texto y arreglo para la causa más reciente. */
+/** Text and fix for the most recent cause. */
 export const EXPLANATION: Record<InterruptionCause, { title: string; fixItem: string }> = {
   recientes: {
     title: "Se cerró la app desde «Recientes»",

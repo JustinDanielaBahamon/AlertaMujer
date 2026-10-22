@@ -43,7 +43,7 @@ export function createProfileStyles(theme: AppTheme) {
       paddingBottom: 48,
     },
 
-    // ── Zona avatar ───────────────────────────────────────────────
+    // ── Avatar area ───────────────────────────────────────────────
     photoContainer: {
       alignItems: "center",
       paddingTop: 12,
@@ -94,7 +94,7 @@ export function createProfileStyles(theme: AppTheme) {
       color: "rgba(255,255,255,0.70)",
     },
 
-    // ── Cuerpo ────────────────────────────────────────────────────
+    // ── Body ──────────────────────────────────────────────────────
     body: {
       backgroundColor: bg,
       borderTopLeftRadius: 30,
@@ -106,7 +106,7 @@ export function createProfileStyles(theme: AppTheme) {
       gap: 14,
     },
 
-    // ── Tarjeta ───────────────────────────────────────────────────
+    // ── Card ──────────────────────────────────────────────────────
     card: {
       backgroundColor: cardBg,
       borderRadius: 18,
@@ -129,7 +129,7 @@ export function createProfileStyles(theme: AppTheme) {
       marginBottom: 4,
     },
 
-    // ── Campo individual ──────────────────────────────────────────
+    // ── Single field ──────────────────────────────────────────────
     fieldWrap: {
       gap: 3,
     },
@@ -190,7 +190,7 @@ export function createProfileStyles(theme: AppTheme) {
       marginLeft: 2,
     },
 
-    // ── Botones ───────────────────────────────────────────────────
+    // ── Buttons ───────────────────────────────────────────────────
     saveBtn: {
       backgroundColor: accent,
       borderRadius: 15,
@@ -210,7 +210,7 @@ export function createProfileStyles(theme: AppTheme) {
       letterSpacing: 0.3,
     },
 
-    // ── Mensajes ──────────────────────────────────────────────────
+    // ── Messages ──────────────────────────────────────────────────
     successMessage: {
       textAlign: "center",
       color: "#27ae60",

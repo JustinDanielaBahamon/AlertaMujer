@@ -7,27 +7,27 @@ import notifee, {
 import { bigStyle } from "./notificationStyle";
 
 /**
- * Alarma que recibe un contacto de emergencia cuando una usuaria activa una alerta. Llega como
- * mensaje FCM solo de datos y de prioridad alta; aquí se convierte en una notificación tipo
- * llamada entrante: pantalla completa sobre el bloqueo, sonido de alarma en bucle y vibración.
+ * Alarm an emergency contact receives when a user activates an alert. It arrives as a
+ * data-only, high-priority FCM message; here it becomes an incoming-call-like
+ * notification: full screen over the lock screen, looping alarm sound and vibration.
  */
 
 export const SOS_CHANNEL = "alertas_sos";
 const SOUND = "alarma_sos"; // res/raw/alarma_sos.wav (plugins/withAlarmSound.js)
 
-/** Datos del push que envía el backend (AlertNotificationService). */
+/** Push data sent by the backend (AlertNotificationService). */
 export type SosAlertData = {
   tipo: "ALERTA_SOS";
   alertaId: string;
   nombre: string;
-  codigo: string; // código de seguimiento público
+  codigo: string; // public tracking code
 };
 
 export function isSosAlert(data: Record<string, unknown> | undefined): data is SosAlertData {
   return !!data && data.tipo === "ALERTA_SOS" && typeof data.alertaId === "string" && typeof data.codigo === "string";
 }
 
-/** Push que llega cuando la alerta termina (atendida, cancelada o expirada). */
+/** Push that arrives when the alert ends (attended, cancelled or expired). */
 export type EndedAlertData = {
   tipo: "ALERTA_FINALIZADA";
   alertaId: string;
@@ -41,7 +41,7 @@ export function isEndedAlert(data: Record<string, unknown> | undefined): data is
 
 const NOTICES_CHANNEL = "avisos_alertas";
 
-/** Apaga la alarma de esa alerta y deja un aviso silencioso de que terminó. */
+/** Turns off that alert's alarm and leaves a silent notice that it ended. */
 export async function showEndedAlert(data: EndedAlertData): Promise<void> {
   await stopSosAlarm(data.alertaId);
   await notifee.createChannel({
@@ -101,8 +101,8 @@ export async function showSosAlarm(data: SosAlertData): Promise<void> {
       loopSound: true,
       ongoing: true,
       autoCancel: false,
-      timeoutAfter: 10 * 60 * 1000, // la alarma deja de sonar sola a los 10 minutos
-      // Pantalla completa sobre el bloqueo (Android 14 exige permiso de pantalla completa)
+      timeoutAfter: 10 * 60 * 1000, // the alarm stops by itself after 10 minutes
+      // Full screen over the lock screen (Android 14 requires the full-screen permission)
       fullScreenAction: { id: "default" },
       pressAction: { id: "default", launchActivity: "default" },
       actions: [{ title: "Ver ubicación", pressAction: { id: "atender", launchActivity: "default" } }],
@@ -110,7 +110,7 @@ export async function showSosAlarm(data: SosAlertData): Promise<void> {
   });
 }
 
-/** Detiene la alarma (al abrir la pantalla de la alerta). */
+/** Stops the alarm (when the alert screen opens). */
 export async function stopSosAlarm(alertId: string | number): Promise<void> {
   await notifee.cancelNotification(notificationId(String(alertId)));
 }
@@ -122,8 +122,8 @@ export function notificationData(n: Notification | undefined): SosAlertData | nu
 
 const notificationId = (alertId: string) => `sos-${alertId}`;
 
-// Alerta pendiente de abrir: llega antes de que la navegación esté lista (app recién abierta
-// desde la notificación) o mientras no hay sesión iniciada.
+// Alert waiting to be opened: it arrives before navigation is ready (app just opened
+// from the notification) or while there is no session.
 let pending: SosAlertData | null = null;
 const listeners = new Set<(d: SosAlertData) => void>();
 
@@ -135,7 +135,7 @@ export function openSosAlert(data: SosAlertData): void {
   listeners.forEach((o) => o(data));
 }
 
-/** La navegación se suscribe aquí; si había una alerta pendiente, se entrega de inmediato. */
+/** Navigation subscribes here; if there was a pending alert, it is delivered right away. */
 export function onSosAlertOpen(listener: (d: SosAlertData) => void): () => void {
   listeners.add(listener);
   if (pending) {

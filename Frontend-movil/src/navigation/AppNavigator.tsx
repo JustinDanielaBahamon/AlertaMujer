@@ -17,19 +17,19 @@ export default function AppNavigator() {
   const { user, pendingMainRoute, restoring } = useAuth();
   const mainEntryRef = useRef<keyof MainStackParamList | null>(null);
   const navigation = useNavigationContainerRef<MainStackParamList>();
-  // Alarma de emergencia cuando una persona que tiene a esta usuaria como contacto activa una alerta
+  // Emergency alarm when a person who has this user as a contact activates an alert
   useSosAlerts(navigation, !!user && !restoring);
-  // Activación de la alerta al agitar el teléfono (si la usuaria la encendió en Ajustes)
+  // Alert activation by shaking the phone (if the user turned it on in Settings)
   useShakeProtection(navigation, !!user && !restoring && user.id !== 0);
-  // Aviso si falta algo para que las alertas funcionen (agitar apagado, permisos...)
+  // Notice if something is missing for alerts to work (shake off, permissions...)
   useProtectionReminder(navigation, !!user && !restoring && user.id !== 0);
-  // Si hay una alerta propia activa (la app se cerró con la alerta en curso), se vuelve a ella
+  // If there is an active alert of her own (the app closed with the alert in progress), go back to it
   useResumeAlert(navigation, !!user && !restoring && user.id !== 0);
-  // Toque en el widget "SOS" de la pantalla de inicio (abre alertamujer://sos)
+  // Tap on the home screen "SOS" widget (opens alertamujer://sos)
   useSosLink(navigation, !!user && !restoring && user.id !== 0);
 
-  // Cuentas creadas con Google: faltan teléfono, documento y fecha de nacimiento. Si la consulta
-  // falla (sin señal) no se bloquea la app: se vuelve a revisar en la próxima apertura.
+  // Accounts created with Google: phone, document and birth date are missing. If the query
+  // fails (no signal) the app is not blocked: it is checked again the next time it opens.
   const [missingData, setMissingData] = useState(false);
   const realSession = !!user && !restoring && user.id !== 0 && user.role_id !== 2;
   useEffect(() => {
@@ -53,7 +53,7 @@ export default function AppNavigator() {
     mainEntryRef.current = null;
   }
 
-  // Evitar parpadeo de la pantalla de login mientras se restaura la sesión
+  // Avoid flashing the login screen while the session is restored
   if (restoring) {
     return null;
   }

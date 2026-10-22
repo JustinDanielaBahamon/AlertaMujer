@@ -18,10 +18,10 @@ export interface DeviceApi {
   status: string;
 }
 
-// Identificador de esta instalación de la app para cada cuenta: distingue los celulares de una
-// cuenta y, como device_uuid es único en la base, cada cuenta que entre en el celular tiene el suyo.
+// Identifier of this app installation for each account: tells apart the phones of an
+// account and, since device_uuid is unique in the database, each account signed in on the phone has its own.
 const UUID_KEY = '@alerta_mujer:device_uuid';
-const SESSION_KEY = '@alerta_mujer:auth'; // la misma de AuthContext
+const SESSION_KEY = '@alerta_mujer:auth'; // the same as AuthContext
 
 async function signedInUser(): Promise<number | null> {
   try {
@@ -36,7 +36,7 @@ async function uuidKey(): Promise<string> {
   const id = await signedInUser();
   return id != null ? `${UUID_KEY}:${id}` : UUID_KEY;
 }
-// Así registraban el celular las versiones anteriores (sin datos reales)
+// This is how previous versions registered the phone (without real data)
 const OLD_MODEL = 'Dispositivo Expo';
 
 export const getDevices = async (): Promise<DeviceApi[]> => {
@@ -49,7 +49,7 @@ export const createDevice = async (device: Partial<DeviceApi>): Promise<DeviceAp
   return response.data;
 };
 
-/** Datos reales del celular (marca, modelo, nombre que le puso la usuaria, versiones). */
+/** Real phone data (brand, model, the name the user gave it, versions). */
 export function phoneData(): Partial<DeviceApi> {
   return {
     brand: Device.brand ?? Device.manufacturer ?? undefined,
@@ -62,9 +62,9 @@ export function phoneData(): Partial<DeviceApi> {
 }
 
 /**
- * Identificador de este celular para esta cuenta. En Android se basa en el ANDROID_ID, que no cambia
- * al reinstalar la app ni al borrar sus datos: así el mismo celular no se registra dos veces. Lleva
- * el id de la cuenta porque device_uuid es único en la base y varias cuentas pueden usar el celular.
+ * Identifier of this phone for this account. On Android it is based on ANDROID_ID, which does not change
+ * when the app is reinstalled or its data is cleared: so the same phone is not registered twice. It includes
+ * the account id because device_uuid is unique in the database and several accounts can use the phone.
  */
 function stableUuid(userId: number | null): string {
   let base: string | null = null;
@@ -78,19 +78,19 @@ function stableUuid(userId: number | null): string {
 }
 
 let inProgress: Promise<DeviceApi> | null = null;
-// Id del dispositivo de esta instalación, una vez conocido (va con cada ubicación que se envía)
+// Device id of this installation, once known (sent with each location)
 let currentId: number | null = null;
 
-/** Id de este celular en el backend, si ya se obtuvo en esta sesión. */
+/** Id of this phone in the backend, if already obtained in this session. */
 export function currentDeviceId(): number | null {
   return currentId;
 }
 let updatedThisSession = false;
 
 /**
- * El dispositivo de esta instalación; si no existe en el backend, lo crea. Una vez por sesión le
- * envía los datos actuales del celular y la hora de conexión.
- * Necesario porque POST /api/alerts exige un deviceId válido y el push se guarda por dispositivo.
+ * The device of this installation; if it does not exist in the backend, it is created. Once per session it
+ * sends the current phone data and the connection time.
+ * Needed because POST /api/alerts requires a valid deviceId and the push token is stored per device.
  */
 export const getOrCreateDevice = (): Promise<DeviceApi> => {
   inProgress ??= get().finally(() => {
@@ -109,7 +109,7 @@ async function get(): Promise<DeviceApi> {
     (savedItem ? devices.find((d) => d.deviceUuid === savedItem) : undefined) ??
     devices.find((d) => d.deviceUuid === stable);
   if (!device && !savedItem) {
-    // Instalación anterior a este cambio: se queda con el registro antiguo en vez de duplicarlo
+    // Installation from before this change: it keeps the old record instead of duplicating it
     device = devices.find((d) => d.model === OLD_MODEL);
   }
 
@@ -129,7 +129,7 @@ async function get(): Promise<DeviceApi> {
     try {
       device = (await api.put<DeviceApi>(`/api/devices/${device.id}/info`, data)).data;
     } catch {
-      // Si falla, el dispositivo sigue sirviendo para las alertas
+      // If it fails, the device still works for alerts
     }
   }
   currentId = device.id;
@@ -139,8 +139,8 @@ async function get(): Promise<DeviceApi> {
 let lastPermissions: string | null = null;
 
 /**
- * Informa al backend qué permisos tiene el celular (true/false por permiso) para que la usuaria
- * los vea en la web. Solo envía cuando algo cambió; un fallo no afecta a la app.
+ * Tells the backend which permissions the phone has (true/false per permission) so the user
+ * sees them on the web. It only sends when something changed; a failure does not affect the app.
  */
 export async function reportPermissions(permissions: Record<string, boolean>): Promise<void> {
   const json = JSON.stringify(permissions);
@@ -150,11 +150,11 @@ export async function reportPermissions(permissions: Record<string, boolean>): P
     await api.put(`/api/devices/${device.id}/info`, { permissions: json });
     lastPermissions = json;
   } catch {
-    // Se reintenta en la próxima revisión de permisos
+    // Retried on the next permission check
   }
 }
 
-/** Al cerrar sesión: la próxima cuenta vuelve a informar los datos del celular. */
+/** On sign-out: the next account reports the phone data again. */
 export function forgetDeviceSession(): void {
   updatedThisSession = false;
   currentId = null;

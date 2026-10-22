@@ -4,5 +4,5 @@ export type Contact = {
   relationship?: string;
   phoneNumber: string;
   email?: string;
-  photo?: string;   // ← URI local (galería o agenda)
+  photo?: string;   // ← local URI (gallery or phone contacts)
 };

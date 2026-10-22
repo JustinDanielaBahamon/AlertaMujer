@@ -3,17 +3,17 @@ import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Image, Scro
 import { MaterialIcons } from '@expo/vector-icons';
 import { CODE_DIGITS, useRecoverPasswordViewModel } from '../viewModel/useRecoverPasswordViewModel';
 import { styles } from "../styles/recoverPassword.style";
-// Traemos el hook del idioma para usar los textos del JSON
+// We bring the language hook to use the JSON texts
 import { useLocale } from "../../../contexts/LocaleContext";
-// Modal bonito para los mensajes (error, éxito, aviso)
+// Nice modal for messages (error, success, notice)
 import AlertModal from "../../../components/ui/alertModal/alertModal";
 
 export default function RecoverPasswordScreen() {
   const vm = useRecoverPasswordViewModel();
-  const { t } = useLocale(); // "t" tiene todos los textos del idioma activo
+  const { t } = useLocale(); // "t" has all the texts of the active language
   const inputs = useRef<Array<TextInput | null>>([]);
 
-  // Textos y acciones que cambian según el paso (1, 2 o 3)
+  // Texts and actions that change with the step (1, 2 or 3)
   const title =
     vm.step === 1 ? t.recuperar.titulo_paso1 :
     vm.step === 2 ? t.recuperar.titulo_paso2 :
@@ -43,7 +43,7 @@ export default function RecoverPasswordScreen() {
     if (vm.step === 2) {
       if (!vm.canResend) return;
       vm.resendCode();
-      setTimeout(() => inputs.current[0]?.focus(), 100); // vuelve al primer cuadro
+      setTimeout(() => inputs.current[0]?.focus(), 100); // goes back to the first box
     } else {
       vm.cancel();
     }
@@ -67,11 +67,11 @@ export default function RecoverPasswordScreen() {
           />
         </View>
 
-        {/* TEXTOS DINAMICOS: cambian segun el paso (1, 2 o 3) */}
+        {/* DYNAMIC TEXTS: they change with the step (1, 2 or 3) */}
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.subtitle}>{subtitle}</Text>
 
-        {/* PASO 1: EMAIL */}
+        {/* STEP 1: EMAIL */}
         {vm.step === 1 && (
           <View style={styles.inputContainer}>
             <MaterialIcons name="email" size={22} color="#6B3FA0" />
@@ -87,7 +87,7 @@ export default function RecoverPasswordScreen() {
           </View>
         )}
 
-        {/* PASO 2: CODIGO OTP + TEMPORIZADOR */}
+        {/* STEP 2: OTP CODE + TIMER */}
         {vm.step === 2 && (
           <>
             <View style={styles.codeContainer}>
@@ -105,12 +105,12 @@ export default function RecoverPasswordScreen() {
                   value={digit}
                   onChangeText={(text) => {
                     const clean = text.replace(/\D/g, '');
-                    // Si se pega el código completo en una casilla, se reparte entre las siguientes
+                    // If the full code is pasted in one box, it is spread over the next ones
                     const lastItem = vm.handleCodeChange(clean, index);
                     if (clean && lastItem < CODE_DIGITS - 1) inputs.current[lastItem + 1]?.focus();
                   }}
                   onKeyPress={({ nativeEvent }) => {
-                    // Borrar en un cuadro vacío regresa al anterior
+                    // Deleting in an empty box goes back to the previous one
                     if (nativeEvent.key === 'Backspace' && !digit && index > 0) {
                       inputs.current[index - 1]?.focus();
                     }
@@ -127,7 +127,7 @@ export default function RecoverPasswordScreen() {
           </>
         )}
 
-        {/* PASO 3: NUEVA CONTRASEÑA + CONFIRMAR */}
+        {/* STEP 3: NEW PASSWORD + CONFIRM */}
         {vm.step === 3 && (
           <>
             <View style={[styles.inputContainer, { marginBottom: 16 }]}>
@@ -172,7 +172,7 @@ export default function RecoverPasswordScreen() {
           </>
         )}
 
-        {/* BOTON ACCION: cambia segun el paso */}
+        {/* ACTION BUTTON: changes with the step */}
         <TouchableOpacity 
           style={[styles.primaryButton, disabledButton && styles.disabledButton]} 
           onPress={actionButton}
@@ -186,13 +186,13 @@ export default function RecoverPasswordScreen() {
           )}
         </TouchableOpacity>
 
-        {/* LINK: nuevo código (paso 2) o volver al login (pasos 1 y 3) */}
+        {/* LINK: new code (step 2) or back to login (steps 1 and 3) */}
         <TouchableOpacity onPress={actionLink} style={{ marginTop: 25 }}>
           <Text style={styles.linkText}>{linkTextValue}</Text>
         </TouchableOpacity>
       </View>
 
-      {/* MENSAJES: error, éxito y aviso con el diseño de la app */}
+      {/* MESSAGES: error, success and notice with the app design */}
       <AlertModal
         visible={vm.alert.visible}
         type={vm.alert.type}

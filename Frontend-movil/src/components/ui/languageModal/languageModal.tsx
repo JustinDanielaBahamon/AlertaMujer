@@ -29,7 +29,7 @@ export default function LanguageModal({
   const { t } = useLocale();
   const accent = theme.tabActiveColor;
 
-  // Nombre de cada idioma en el idioma actual, debajo de su nombre propio
+  // Name of each language in the current language, below its own name
   const translatedName: Record<AppLocale, string> = {
     es: t.modal.idioma_es,
     en: t.modal.idioma_en,

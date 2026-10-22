@@ -11,6 +11,6 @@ export interface User {
   role_id?: number;
   first_name?: string;
   last_name?: string;
-  fechaNacimiento?: string; // formato "DD/MM/YYYY"
-  municipio?: string;       // viene del tutorial de ubicación
+  fechaNacimiento?: string; // "DD/MM/YYYY" format
+  municipio?: string;       // comes from the location tutorial
 }

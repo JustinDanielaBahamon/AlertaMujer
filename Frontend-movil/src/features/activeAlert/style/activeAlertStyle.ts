@@ -1,9 +1,9 @@
 import { AppTheme } from "../../../contexts/ThemeContext";
 
-// Fabrica de estilos para la pantalla AlertaActiva.
-// Recibe el tema, el tamano de pantalla (useWindowDimensions) y los insets (notch, barra de
-// gestos, bordes laterales) para adaptarse a moviles pequenos, grandes y tablets, y que nada
-// quede pegado a los bordes del celular ni tapado por el sistema.
+// Style factory for the ActiveAlert screen.
+// It receives the theme, the screen size (useWindowDimensions) and the insets (notch, gesture
+// bar, side edges) to adapt to small and large phones and tablets, so nothing
+// sticks to the edges of the phone or gets covered by the system.
 type Insets = { top: number; bottom: number; left: number; right: number };
 
 export const createStyles = (
@@ -12,8 +12,8 @@ export const createStyles = (
   height: number,
   insets: Insets,
 ) => {
-  const isCompact = width < 360; // moviles chicos (ej. iPhone SE)
-  const isWide = width >= 500; // tablets / pantallas grandes
+  const isCompact = width < 360; // small phones (e.g. iPhone SE)
+  const isWide = width >= 500; // tablets / large screens
 
   const horizontalPadding = Math.max(16, Math.min(width * 0.06, 32));
   const circleSize = Math.round(Math.min(Math.max(width * 0.42, 130), 190));
@@ -38,7 +38,7 @@ export const createStyles = (
       paddingLeft: horizontalPadding + insets.left,
       paddingRight: horizontalPadding + insets.right,
     },
-    // Limita el ancho en tablets / horizontal y centra el contenido.
+    // Limits the width on tablets / landscape and centers the content.
     wrap: {
       width: "100%" as const,
       maxWidth: 560,
@@ -70,7 +70,7 @@ export const createStyles = (
       alignItems: "center" as const,
     },
 
-    // Pines numerados (mapa de la ventana emergente)
+    // Numbered pins (map of the popup)
     pin: {
       width: 26,
       height: 26,
@@ -248,7 +248,7 @@ export const createStyles = (
       fontWeight: "600" as const,
     },
 
-    // Ventana de verificacion para cancelar la alerta
+    // Confirmation dialog to cancel the alert
     confirmOverlay: {
       flex: 1,
       backgroundColor: "rgba(0,0,0,0.6)",
@@ -312,7 +312,7 @@ export const createStyles = (
       fontWeight: "700" as const,
     },
 
-    // Ventana emergente del mapa (mismo diseno que "Alerta de emergencia")
+    // Map popup (same design as "Emergency alert")
     modalContainer: {
       flex: 1,
       backgroundColor: theme.background,

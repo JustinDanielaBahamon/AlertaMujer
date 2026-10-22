@@ -13,7 +13,7 @@ import { createSettingsScreenStyles } from "../styles/settingsScreen.styles";
 
 type IonIcon = React.ComponentProps<typeof Ionicons>["name"];
 
-/** Acerca de: qué es la app, cómo cuida tu información y sus documentos legales. */
+/** About: what the app is, how it takes care of your information and its legal documents. */
 export default function AboutScreen() {
   const navigation = useNavigation<any>();
   const { theme } = useTheme();
@@ -23,7 +23,7 @@ export default function AboutScreen() {
   const insets = useSafeAreaInsets();
   const accent = theme.icon;
 
-  // Se lee de "version" en app.json
+  // Read from "version" in app.json
   const version = Constants.expoConfig?.version ?? "-";
 
   const linkRow = (icon: IonIcon, title: string, desc: string | null, onPress: () => void, external = false) => (
@@ -57,7 +57,7 @@ export default function AboutScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Presentación de la app */}
+        {/* App presentation */}
         <View style={[styles.card, { padding: 0, overflow: "hidden" }]}>
           <LinearGradient colors={[accent + "30", accent + "08"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={local.hero}>
             <Image source={require("../../../../assets/images/icon.png")} style={local.logo} />
@@ -71,7 +71,7 @@ export default function AboutScreen() {
           </LinearGradient>
         </View>
 
-        {/* Privacidad */}
+        {/* Privacy */}
         <Text style={[local.section, { color: theme.headerText }]}>{a.seccion_privacidad}</Text>
         <View style={styles.card}>
           {privacyPoints.map((p) => (
@@ -88,7 +88,7 @@ export default function AboutScreen() {
           {linkRow("document-text-outline", a.terminos, null, () => navigation.navigate("TermsPolicy"))}
         </View>
 
-        {/* La app en la web */}
+        {/* The app on the web */}
         <Text style={[local.section, { color: theme.headerText }]}>{a.seccion_app}</Text>
         <View style={styles.card}>
           {linkRow("globe-outline", a.web, a.web_desc, () => Linking.openURL(WEB_URL), true)}

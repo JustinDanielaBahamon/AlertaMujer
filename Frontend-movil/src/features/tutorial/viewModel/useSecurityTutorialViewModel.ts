@@ -20,7 +20,7 @@ export interface SecurityFeatureItem {
 
 type LocaleT = ReturnType<typeof useLocale>["t"];
 
-// ─── Datos (ahora dependen del idioma activo) ─────────────────────────────────
+// ─── Data (now depends on the active language) ───────────────────────────────
 const getSecurityFeatureRows = (t: LocaleT): SecurityFeatureItem[] => [
   {
     id: "registro",
@@ -81,8 +81,8 @@ export function useSecurityTutorialViewModel() {
     setPermissionType(type);
   };
 
-  // Revisa qué permisos faltan para arrancar desde el paso que corresponde.
-  // Devuelve null si ya tiene cámara y micrófono (no se pide nada).
+  // Checks which permissions are missing to start from the right step.
+  // Returns null if it already has camera and microphone (nothing is asked).
   const pendingStep = async (): Promise<"camara" | "audio" | null> => {
     try {
       const cam = await Camera.getCameraPermissionsAsync();
@@ -124,16 +124,16 @@ export function useSecurityTutorialViewModel() {
           flowStateRef.current = 0;
           const mic = await Audio.getPermissionsAsync();
           if (mic.granted || mic.status === "granted") {
-            // ← Cámara concedida y micrófono ya concedido → no se pide otra vez
+            // ← Camera granted and microphone already granted → not asked again
             setShowWarning(false);
             setModalVisible(false);
             resolvePermission.current(true);
           } else {
-            // ← Cámara concedida → pide audio
+            // ← Camera granted → ask for audio
             updatePermissionType("audio");
           }
         } else {
-          // ← Cámara denegada por el sistema → advertencia
+          // ← Camera denied by the system → warning
           flowStateRef.current = 0;
           setModalVisible(false);
           setShowWarning(true);
@@ -142,13 +142,13 @@ export function useSecurityTutorialViewModel() {
       } else {
         // ── Audio ──────────────────────────────────────────────────────────
         const result   = await Audio.requestPermissionsAsync();
-        // audioOk queda disponible por si en el futuro lo necesitas
+        // audioOk stays available in case it is needed in the future
         const _audioOk = result.granted || result.status === "granted";
 
         if (flowStateRef.current === 2) return;
 
-        // ← Confirmar audio siempre avanza al tutorial
-        // La advertencia SOLO sale si el usuario presiona "Cancelar"
+        // ← Confirming audio always continues the tutorial
+        // The warning ONLY shows if the user presses "Cancel"
         flowStateRef.current = 0;
         setShowWarning(false);
         setModalVisible(false);
@@ -159,19 +159,19 @@ export function useSecurityTutorialViewModel() {
       console.error("[Seguridad] Error en flujo de permisos:", e);
       flowStateRef.current = 0;
       setModalVisible(false);
-      // ← Error técnico → avanza sin advertencia
+      // ← Technical error → advance without a warning
       resolvePermission.current(true);
     }
   }, []);
 
-  // ← Advertencia SOLO cuando el usuario cancela manualmente
+  // ← Warning ONLY when the user cancels manually
   const cancelModal = useCallback(() => {
     if (flowStateRef.current === 1) {
       return;
     }
     flowStateRef.current = 2; // user_cancelled
     setModalVisible(false);
-    setShowWarning(true); // ← aquí sí se muestra
+    setShowWarning(true); // ← here it is shown
   }, []);
 
   const retryPermissions = useCallback(async () => {

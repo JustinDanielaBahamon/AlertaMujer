@@ -2,8 +2,8 @@ import { AppTheme } from "../../../contexts/ThemeContext";
 
 type Insets = { top: number; bottom: number; left: number; right: number };
 
-// Recibe también el alto de pantalla y los insets (notch, barra de gestos, bordes laterales)
-// para que nada quede pegado ni tapado por el sistema.
+// It also receives the screen height and the insets (notch, gesture bar, side edges)
+// so nothing sticks to the edges or gets covered by the system.
 export const createStyles = (
   theme: AppTheme,
   width: number,
@@ -35,14 +35,14 @@ export const createStyles = (
       paddingLeft: horizontalPadding + insets.left,
       paddingRight: horizontalPadding + insets.right,
     },
-    // Limita el ancho en tablets / horizontal y centra el contenido.
+    // Limits the width on tablets / landscape and centers the content.
     wrap: {
       width: "100%" as const,
       maxWidth: 560,
       alignSelf: "center" as const,
     },
 
-    // Encabezado
+    // Header
     badge: {
       alignSelf: "flex-start" as const,
       maxWidth: "100%" as const,
@@ -77,7 +77,7 @@ export const createStyles = (
       fontWeight: "800" as const,
     },
 
-    // Mapa pequeño (vista previa)
+    // Small map (preview)
     mapCard: {
       height: mapHeight,
       borderRadius: 24,
@@ -158,7 +158,7 @@ export const createStyles = (
       color: theme.icon,
     },
 
-    // Pines numerados
+    // Numbered pins
     pin: {
       width: 26,
       height: 26,
@@ -192,7 +192,7 @@ export const createStyles = (
       fontWeight: "900" as const,
     },
 
-    // Tarjetas
+    // Cards
     card: {
       backgroundColor: theme.containerBackground,
       borderRadius: 24,
@@ -274,7 +274,7 @@ export const createStyles = (
       marginTop: 2,
     },
 
-    // Aviso de estado
+    // Status notice
     noticeCard: {
       flexDirection: "row" as const,
       alignItems: "flex-start" as const,
@@ -312,7 +312,7 @@ export const createStyles = (
       marginTop: 6,
     },
 
-    // Historial (línea de tiempo)
+    // History (timeline)
     historyHeader: {
       flexDirection: "row" as const,
       flexWrap: "wrap" as const,
@@ -466,7 +466,7 @@ export const createStyles = (
       color: theme.icon,
     },
 
-    // Ventana emergente del mapa
+    // Map popup
     modalContainer: {
       flex: 1,
       backgroundColor: theme.background,

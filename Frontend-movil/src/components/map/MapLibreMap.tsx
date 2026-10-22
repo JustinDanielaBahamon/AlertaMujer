@@ -1,7 +1,7 @@
-// Mapa gratuito basado en MapLibre + teselas de OpenFreeMap (datos de OpenStreetMap).
-// Reemplaza a react-native-maps (Google Maps, que exige clave y facturación) manteniendo
-// la misma forma de uso: <MapView>, <Marker>, <Polyline>, <Circle> y los métodos
-// animateToRegion / fitToCoordinates, para que las pantallas solo cambien el import.
+// Free map based on MapLibre + OpenFreeMap tiles (OpenStreetMap data).
+// It replaces react-native-maps (Google Maps, which requires a key and billing) keeping
+// the same API: <MapView>, <Marker>, <Polyline>, <Circle> and the methods
+// animateToRegion / fitToCoordinates, so screens only change the import.
 import Ionicons from "@expo/vector-icons/Ionicons";
 import {
   Camera,
@@ -23,11 +23,11 @@ import {
 } from "react";
 import { StyleSheet, Text, TouchableOpacity, View, type StyleProp, type ViewStyle } from "react-native";
 
-/** Estilo de mapa gratuito y sin clave (https://openfreemap.org). */
-/** Ancho mínimo (en grados, ~300 m) al encuadrar varios puntos. */
+/** Free map style without a key (https://openfreemap.org). */
+/** Minimum width (in degrees, ~300 m) when fitting several points. */
 const MIN_WIDTH_DEGREES = 0.003;
 
-/** Agranda un intervalo [min, max] alrededor de su centro hasta el ancho mínimo. */
+/** Widens an interval [min, max] around its center up to the minimum width. */
 export function withMinWidth(min: number, max: number, minimum = MIN_WIDTH_DEGREES): [number, number] {
   if (max - min >= minimum) return [min, max];
   const center = (min + max) / 2;
@@ -45,7 +45,7 @@ type EdgePadding = { top: number; right: number; bottom: number; left: number };
 const ZOOM_MIN = 2;
 const ZOOM_MAX = 19;
 
-/** Convierte el "delta" de una región (grados visibles) al nivel de zoom equivalente. */
+/** Converts a region "delta" (visible degrees) to the equivalent zoom level. */
 const zoomDeRegion = (r: Region) => {
   const delta = Math.max(r.longitudeDelta, r.latitudeDelta, 0.0005);
   return Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.log2(360 / delta)));
@@ -53,7 +53,7 @@ const zoomDeRegion = (r: Region) => {
 
 const lngLat = (c: LatLng): [number, number] => [c.longitude, c.latitude];
 
-// Ids de fuentes y capas de MapLibre: deben ser únicos y sin caracteres especiales.
+// MapLibre source and layer ids: they must be unique and without special characters.
 const useMapId = (prefix: string) => `${prefix}-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
 
 // ─── MapView ────────────────────────────────────────────────────────────────
@@ -68,7 +68,7 @@ type MapViewProps = {
   zoomEnabled?: boolean;
   rotateEnabled?: boolean;
   pitchEnabled?: boolean;
-  /** Solo existían en Google Maps; se ignoran. */
+  /** They only existed in Google Maps; ignored. */
   toolbarEnabled?: boolean;
   liteMode?: boolean;
   pointerEvents?: "box-none" | "none" | "box-only" | "auto";
@@ -113,8 +113,8 @@ const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
       }
       const lngs = coords.map((c) => c.longitude);
       const lats = coords.map((c) => c.latitude);
-      // Puntos muy juntos (alguien quieto: el GPS varía unos metros) darían un zoom mayor al que
-      // tiene calles dibujadas y el mapa quedaría vacío: se encuadra como mínimo ~300 m
+      // Points very close together (someone standing still: the GPS varies a few meters) would give a zoom beyond
+      // the level that has streets drawn and the map would be empty: at least ~300 m are fitted
       const [west, east] = withMinWidth(Math.min(...lngs), Math.max(...lngs));
       const [south, north] = withMinWidth(Math.min(...lats), Math.max(...lats));
       camera.current?.fitBounds([west, south, east, north], {
@@ -124,7 +124,7 @@ const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
     },
   }));
 
-  // Región controlada: si la pantalla cambia `region`, la cámara la sigue.
+  // Controlled region: if the screen changes `region`, the camera follows it.
   useEffect(() => {
     if (!region) return;
     camera.current?.easeTo({ center: lngLat(region), zoom: zoomDeRegion(region), duration: 400 });
@@ -163,7 +163,7 @@ const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
   );
 });
 
-// Permite usar `MapView` también como tipo de la referencia (useRef<MapView>), igual que antes.
+// Lets `MapView` also be used as the ref type (useRef<MapView>), as before.
 type MapView = MapViewHandle;
 export default MapView;
 
@@ -174,11 +174,11 @@ type MarkerProps = {
   pinColor?: string;
   title?: string;
   description?: string;
-  /** {x: 0.5, y: 0.5} centra la vista en la coordenada; por defecto la punta queda abajo. */
+  /** {x: 0.5, y: 0.5} centers the view on the coordinate; by default the tip is at the bottom. */
   anchor?: { x: number; y: number };
   onPress?: () => void;
   zIndex?: number;
-  /** Solo existía en Google Maps; se ignora. */
+  /** It only existed in Google Maps; ignored. */
   tracksViewChanges?: boolean;
   children?: ReactElement;
 };
@@ -195,7 +195,7 @@ export function Marker({ coordinate, pinColor = "#E53935", title, description, a
 
   return (
     <MarkerLibre lngLat={lngLat(coordinate)} anchor={children && centered ? "center" : "bottom"}>
-      {/* Tamaño fijo: si la vista no tiene ancho propio, Android la recorta al acercarse al borde del mapa. */}
+      {/* Fixed size: if the view has no width of its own, Android clips it near the edge of the map. */}
       <TouchableOpacity
         activeOpacity={0.8}
         onPress={tap}
@@ -225,9 +225,9 @@ type PolylineProps = {
   strokeWidth?: number;
   lineCap?: "butt" | "round" | "square";
   lineJoin?: "miter" | "round" | "bevel";
-  /** En píxeles, como en react-native-maps. */
+  /** In pixels, as in react-native-maps. */
   lineDashPattern?: number[];
-  /** Con MapLibre la línea siempre se puede tocar si tiene onPress. */
+  /** With MapLibre the line can always be tapped if it has onPress. */
   tappable?: boolean;
   onPress?: () => void;
 };
@@ -249,7 +249,7 @@ export function Polyline({
     properties: {},
     geometry: { type: "LineString", coordinates: coordinates.map(lngLat) },
   };
-  // MapLibre mide el patrón en múltiplos del grosor de la línea.
+  // MapLibre measures the pattern in multiples of the line width.
   const dashes = lineDashPattern?.length ? lineDashPattern.map((v) => Math.max(v / strokeWidth, 0.1)) : undefined;
 
   return (
@@ -279,7 +279,7 @@ type CircleProps = {
   strokeWidth?: number;
 };
 
-/** Polígono de 64 lados que aproxima un círculo de `radio` metros alrededor de `centro`. */
+/** 64-sided polygon that approximates a circle of `radius` meters around `center`. */
 function circlePolygon(center: LatLng, radio: number): number[][] {
   const points: number[][] = [];
   const latRad = (center.latitude * Math.PI) / 180;

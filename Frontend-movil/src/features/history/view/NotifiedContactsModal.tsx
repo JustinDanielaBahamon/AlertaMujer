@@ -13,8 +13,8 @@ type Props = {
   error: boolean;
 };
 
-// Color e ícono de cada estado de envío.
-// Solo la paleta de la app (violetas y neón); el ícono distingue cada estado
+// Color and icon of each delivery status.
+// Only the app palette (violets and neon); the icon tells each status apart
 export const STATUSES: Record<string, { color: string; icon: keyof typeof MaterialIcons.glyphMap }> = {
   delivered: { color: "#7B1DB2", icon: "check-circle" },
   sent: { color: "#9333EA", icon: "send" },
@@ -28,7 +28,7 @@ export const CHANNEL_ICON: Record<string, keyof typeof MaterialIcons.glyphMap> =
   push: "notifications-active",
 };
 
-/** Tarjeta con los contactos avisados en una alerta; cada contacto se despliega con sus canales. */
+/** Card with the contacts notified in an alert; each contact expands to show its channels. */
 export default function NotifiedContactsModal({ visible, onClose, contacts, loading, error }: Props) {
   const { theme } = useTheme();
   const { t } = useLocale();

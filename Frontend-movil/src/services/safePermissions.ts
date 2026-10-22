@@ -2,32 +2,33 @@ import notifee, { AuthorizationStatus } from "@notifee/react-native";
 import * as Location from "expo-location";
 
 /**
- * Pedir permisos sin que la app se quede trabada.
+ * Ask for permissions without freezing the app.
  *
- * La actividad de React Native guarda UN solo "escuchador" de permisos: si dos librerías piden un
- * permiso a la vez (p. ej. Notifee las notificaciones y Expo la ubicación al abrir la app), la
- * respuesta de una se pierde. Expo, además, encola todas sus peticiones detrás de la que no
- * respondió: desde ahí ninguna petición de Expo vuelve a responder (no arrancaba la protección por
- * sacudida, la alerta no obtenía ubicación y el inicio decía "Obteniendo ubicación..." para siempre).
+ * The React Native activity keeps a SINGLE permission "listener": if two libraries ask for a
+ * permission at the same time (e.g. Notifee notifications and Expo location when the app opens), the
+ * answer of one is lost. On top of that, Expo queues all its requests behind the one that did not
+ * answer: from then on no Expo request answers again (shake protection did not start,
+ * the alert got no location and home said "Getting location..." forever).
  *
- * Por eso: 1) si el permiso ya está concedido no se pide (consultar no pasa por la actividad) y
- * 2) las peticiones que sí haya que hacer van de una en una.
+ * That is why: 1) if the permission is already granted it is not requested (checking does not go through the
+ * activity) and
+ * 2) the requests that must be made go one at a time.
  *
- * Orden de uso: lo que arranca solo al abrir la app (protección, push, ubicación diaria) solo
- * CONSULTA (pedir = false). Los permisos se piden en el tutorial, en "Permisos y protección" o
- * cuando la usuaria toca algo que los necesita, nunca de sorpresa al entrar.
+ * Usage order: what starts by itself when the app opens (protection, push, daily location) only
+ * CHECKS (ask = false). Permissions are requested in the tutorial, in "Permissions and protection" or
+ * when the user taps something that needs them, never by surprise on entering.
  */
 
 let cola: Promise<unknown> = Promise.resolve();
 
-/** Ejecuta la petición de permiso cuando termine la anterior (nunca dos a la vez). */
+/** Runs the permission request when the previous one ends (never two at once). */
 export function inPermissionQueue<T>(ask: () => Promise<T>): Promise<T> {
   const result = cola.then(ask, ask);
   cola = result.catch(() => undefined);
   return result;
 }
 
-/** true si la app tiene (o acaba de recibir) permiso de ubicación mientras se usa. */
+/** true if the app has (or just received) location permission while in use. */
 export async function locationPermission(ask = true): Promise<boolean> {
   const current = await Location.getForegroundPermissionsAsync();
   if (current.granted) return true;
@@ -36,7 +37,7 @@ export async function locationPermission(ask = true): Promise<boolean> {
   return request.granted;
 }
 
-/** true si la app puede mostrar notificaciones (las pide si hace falta y pedir = true). */
+/** true if the app can show notifications (asks for them if needed and ask = true). */
 export async function notificationsPermission(ask = true): Promise<boolean> {
   const current = await notifee.getNotificationSettings();
   if (current.authorizationStatus === AuthorizationStatus.AUTHORIZED) return true;
@@ -46,8 +47,8 @@ export async function notificationsPermission(ask = true): Promise<boolean> {
 }
 
 /**
- * Ubicación sin que Android muestre su aviso de "activa la ubicación del dispositivo": si el GPS
- * está apagado devuelve null. Para lo que corre solo (ubicación diaria, alerta en segundo plano).
+ * Location without Android showing its "turn on device location" prompt: if the GPS
+ * is off it returns null. For what runs on its own (daily location, background alert).
  */
 export async function locationWithoutNotices(
   precision: Location.Accuracy = Location.Accuracy.Balanced,

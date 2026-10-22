@@ -19,17 +19,17 @@ export type SearchCoord = { latitude: number; longitude: number };
 type Props = {
   value: string;
   onChangeText: (text: string) => void;
-  /** Se llama cuando se encontró la dirección */
+  /** Called when the address was found */
   onResult: (coord: SearchCoord, text: string) => void;
-  /** Se llama al presionar la "X" para borrar la búsqueda */
+  /** Called when the "X" is pressed to clear the search */
   onClear?: () => void;
-  /** Ciudad para darle contexto a la búsqueda (ej: "Pitalito, Huila") */
+  /** City to give the search context (e.g. "Pitalito, Huila") */
   city?: string;
   placeholder?: string;
   style?: StyleProp<ViewStyle>;
 };
 
-// Barra de búsqueda de direcciones (usa el geocodificador del teléfono, igual que el resto de la app)
+// Address search bar (uses the phone's geocoder, like the rest of the app)
 export default function AddressSearchBar({
   value,
   onChangeText,
@@ -52,7 +52,7 @@ export default function AddressSearchBar({
     setError(null);
 
     try {
-      // Primero se busca con la ciudad como contexto, luego solo con el país
+      // First search with the city as context, then only with the country
       const attempts = [
         city ? `${query}, ${city}, Colombia` : null,
         `${query}, Colombia`,

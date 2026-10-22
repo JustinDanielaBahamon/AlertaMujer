@@ -1,7 +1,7 @@
 import api from './api';
 import type { AlertRecord, AlertStatus } from '../features/history/models/AlertRecord';
 
-// Estructura real que devuelve el backend (Alert entity, schema alert.alert)
+// Real structure the backend returns (Alert entity, alert.alert schema)
 export interface AlertApi {
   id: number;
   userProfileId: number;
@@ -20,7 +20,7 @@ export interface AlertApi {
 
 export const getAlertsByUser = async (userId: number): Promise<AlertApi[]> => {
   const response = await api.get<AlertApi[]>(`/api/alerts/user/${userId}`);
-  // Más recientes primero (por fecha de inicio, o por id como respaldo)
+  // Most recent first (by start date, or by id as a fallback)
   return [...response.data].sort((a, b) => {
     const na = a.startedAt || a.createdAt || '';
     const nb = b.startedAt || b.createdAt || '';
@@ -37,17 +37,17 @@ export interface CreateAlertData {
   message?: string;
   latitude?: number;
   longitude?: number;
-  /** Alerta individual: solo se avisa a estos contactos (sin esto, a todos). */
+  /** Individual alert: only these contacts are notified (without it, all of them). */
   contactIds?: number[];
 }
 
-/** Alertas de la usuaria en sesión, de la más reciente a la más antigua. */
+/** Alerts of the signed-in user, from newest to oldest. */
 export const getMyAlerts = async (): Promise<AlertApi[]> => {
   const response = await api.get<AlertApi[]>('/api/alerts/me');
   return response.data;
 };
 
-/** La alerta propia que sigue activa (solo puede haber una), o null. */
+/** Her own alert that is still active (there can only be one), or null. */
 export const ownActiveAlert = (alerts: AlertApi[]): AlertApi | null =>
   alerts.find((a) => (a.status || '').toLowerCase() === 'active') ?? null;
 
@@ -66,9 +66,9 @@ export const createAlert = async (data: CreateAlertData): Promise<AlertApi> => {
   return response.data;
 };
 
-// Esperas antes de cada intento: cubren una red mala o el servidor de Render despertando (~1 min)
+// Waits before each attempt: they cover a bad network or the Render server waking up (~1 min)
 const RETRY_DELAYS_MS = [0, 2000, 5000, 10000, 20000];
-// Una alerta activa más reciente que esto puede ser la de un intento que sí llegó al servidor
+// An active alert more recent than this may be one from an attempt that did reach the server
 const PREVIOUS_ATTEMPT_WINDOW_MS = 3 * 60 * 1000;
 
 const isRetryable = (e: any) => {
@@ -81,9 +81,9 @@ const aMs = (iso?: string) => (iso ? Date.parse(/[zZ]|[+-]\d{2}:?\d{2}$/.test(is
 export type AlertAttempt = { attempt: number; total: number };
 
 /**
- * Crea la alerta y, si no hay red o el servidor no responde, la reintenta varias veces. Antes de
- * cada reintento revisa si el intento anterior sí alcanzó a crearla (se perdió la respuesta), para
- * no avisar dos veces a los contactos.
+ * Creates the alert and, if there is no network or the server does not respond, retries several times. Before
+ * each retry it checks whether the previous attempt did manage to create it (the response was lost), so
+ * the contacts are not notified twice.
  */
 export async function createAlertWithRetries(
   data: CreateAlertData,
@@ -109,13 +109,13 @@ export async function createAlertWithRetries(
   throw lastError;
 }
 
-/** Una alerta propia (para saber si sigue activa). */
+/** One of her own alerts (to know whether it is still active). */
 export const getAlert = async (alertId: number): Promise<AlertApi> => {
   const response = await api.get<AlertApi>(`/api/alerts/${alertId}`);
   return response.data;
 };
 
-/** Cuántas personas abrieron el seguimiento de la alerta y cuántas la están viendo ahora. */
+/** How many people opened the alert tracking and how many are watching it now. */
 export const getViews = async (alertId: number): Promise<{ total: number; watchingNow: number }> => {
   const response = await api.get<{ total: number; viendoAhora: number }>(`/api/alerts/${alertId}/views`);
   // The backend still sends this key in Spanish
@@ -138,16 +138,16 @@ const transformType = (apiType: string, message?: string): string => {
 const transformStatus = (apiStatus: string): AlertStatus => {
   const e = (apiStatus || '').toLowerCase();
   if (e === 'cancelled' || e === 'cancelada') return 'Cancelada';
-  // Expirada = terminó sola por tiempo: no debe seguir apareciendo "En curso"
+  // Expired = it ended by itself on time: it must not keep showing as "In progress"
   if (e === 'resolved' || e === 'expired' || e === 'atendida' || e === 'finalizada') return 'Enviada';
   return 'En curso';
 };
 
-// Adapta una alerta real del backend al modelo usado por el historial/inicio
+// Adapts a real backend alert to the model used by the history/home
 export const transformAlert = (apiAlert: AlertApi): AlertRecord => {
   const isoDate = apiAlert.startedAt || apiAlert.createdAt;
-  // El backend devuelve LocalDateTime en UTC sin sufijo 'Z'; si no se marca como UTC, JS lo interpreta
-  // como hora local y muestra la fecha/hora corrida.
+  // The backend returns LocalDateTime in UTC without the 'Z' suffix; if it is not marked as UTC, JS reads it
+  // as local time and shows the date/time shifted.
   const dateObj = isoDate
     ? new Date(isoDate + (isoDate.endsWith('Z') || isoDate.includes('+') ? '' : 'Z'))
     : null;
@@ -170,7 +170,7 @@ export const transformAlert = (apiAlert: AlertApi): AlertRecord => {
   };
 };
 
-/** Canal por el que se avisó a un contacto y su estado (GET /api/alerts/{id}/contacts). */
+/** Channel a contact was notified through and its status (GET /api/alerts/{id}/contacts). */
 export interface NotificationChannel {
   channel: "email" | "push" | string;
   destination?: string | null;

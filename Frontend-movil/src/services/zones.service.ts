@@ -1,6 +1,6 @@
 import api from './api';
 
-// Estructura real que devuelve el backend (Zone entity)
+// Real structure the backend returns (Zone entity)
 export interface ZoneApi {
   id: number;
   name: string;

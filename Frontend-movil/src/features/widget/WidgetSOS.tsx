@@ -1,14 +1,14 @@
 import React from "react";
 import { FlexWidget, TextWidget } from "react-native-android-widget";
 
-/** Nombre del widget en app.config.js (react-native-android-widget). */
+/** Widget name in app.config.js (react-native-android-widget). */
 export const WIDGET_NAME = "AlertaSOS";
-/** Enlace que abre el widget: la app lo recibe y muestra la cuenta regresiva de 5 s. */
+/** Link the widget opens: the app receives it and shows the 5 s countdown. */
 export const SOS_LINK = "alertamujer://sos";
 
 /**
- * Widget de la pantalla de inicio: un botón SOS violeta. Al tocarlo abre la app en la cuenta
- * regresiva (se puede cancelar si fue un toque accidental, por ejemplo en el bolsillo).
+ * Home screen widget: a violet SOS button. Tapping it opens the app on the
+ * countdown (it can be cancelled if it was an accidental tap, for example in a pocket).
  */
 export function WidgetSOS() {
   return (

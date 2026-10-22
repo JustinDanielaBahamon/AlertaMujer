@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-// ─── Paleta del módulo Ubicación (alineada con el resto de la app) ───────────
+// ─── Location module palette (in line with the rest of the app) ───────────────
 export const LOCATION_COLORS = {
   accent:      "#6A1B9A",
   accentDark:  "#4A148C",
@@ -44,7 +44,7 @@ export const locationStyle = StyleSheet.create({
     paddingBottom: 12,
   },
 
-  // ── Encabezado del ícono circular ─────────────────────────────────────────
+  // ── Circular icon header ──────────────────────────────────────────────────
   headerIconWrap: {
     alignSelf: "center",
     width: 64,
@@ -77,7 +77,7 @@ export const locationStyle = StyleSheet.create({
     lineHeight: 16,
   },
 
-  // ── Etiqueta de sección ("DEPARTAMENTO" / "MUNICIPIO") ─────────────────────
+  // ── Section label ("DEPARTAMENTO" / "MUNICIPIO") ───────────────────────────
   fieldLabelRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -97,7 +97,7 @@ export const locationStyle = StyleSheet.create({
     letterSpacing: 0.3,
   },
 
-  // ── Departamento (fijo, no interactivo) ────────────────────────────────────
+  // ── Department (fixed, not interactive) ────────────────────────────────────
   fixedField: {
     backgroundColor: LOCATION_COLORS.accentLight,
     borderWidth: 1.5,
@@ -126,7 +126,7 @@ export const locationStyle = StyleSheet.create({
     overflow: "hidden",
   },
 
-  // ── Picker de municipio ─────────────────────────────────────────────────────
+  // ── Municipality picker ──────────────────────────────────────────────────────
   pickerWrap: {
     backgroundColor: "#FFFFFF",
     borderRadius: 12,
@@ -157,7 +157,7 @@ export const locationStyle = StyleSheet.create({
     color: LOCATION_COLORS.errorColor,
   },
 
-  // ── Banner de validación ────────────────────────────────────────────────────
+  // ── Validation banner ───────────────────────────────────────────────────────
   validationBanner: {
     flexDirection: "row",
     alignItems: "center",
@@ -183,7 +183,7 @@ export const locationStyle = StyleSheet.create({
     marginVertical: 16,
   },
 
-  // ── Tarjeta de resumen ("TU SELECCIÓN") ─────────────────────────────────────
+  // ── Summary card ("TU SELECCIÓN") ───────────────────────────────────────────
   selectionCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 14,
@@ -213,7 +213,7 @@ export const locationStyle = StyleSheet.create({
     color: LOCATION_COLORS.text,
   },
 
-  // ── Botón guardar ───────────────────────────────────────────────────────────
+  // ── Save button ─────────────────────────────────────────────────────────────
   saveBtn: {
     flexDirection: "row",
     gap: 8,

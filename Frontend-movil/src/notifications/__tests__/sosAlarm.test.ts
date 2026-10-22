@@ -24,7 +24,7 @@ describe("alarmaSos", () => {
   it("reconoce solo el push de alerta de emergencia completo", () => {
     expect(isSosAlert(data)).toBe(true);
     expect(isSosAlert({ tipo: "OTRO" })).toBe(false);
-    expect(isSosAlert({ tipo: "ALERTA_SOS", alertaId: "1" })).toBe(false); // sin código
+    expect(isSosAlert({ tipo: "ALERTA_SOS", alertaId: "1" })).toBe(false); // no code
     expect(isSosAlert(undefined)).toBe(false);
   });
 
@@ -40,7 +40,7 @@ describe("alarmaSos", () => {
   });
 
   it("guarda la alerta hasta que la navegación se suscribe", () => {
-    openSosAlert(data); // aún no hay pantalla escuchando
+    openSosAlert(data); // no screen is listening yet
     const listener = jest.fn();
     const remove = onSosAlertOpen(listener);
 

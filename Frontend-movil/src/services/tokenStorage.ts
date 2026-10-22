@@ -1,8 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 /**
- * Tokens de la sesión en el almacén cifrado del sistema (Android Keystore) con expo-secure-store.
- * Si el módulo nativo no está en el build (dev client anterior), se usa AsyncStorage como antes.
+ * Session tokens in the system's encrypted storage (Android Keystore) with expo-secure-store.
+ * If the native module is not in the build (older dev client), AsyncStorage is used as before.
  */
 
 export type Tokens = { token: string; refreshToken: string | null };

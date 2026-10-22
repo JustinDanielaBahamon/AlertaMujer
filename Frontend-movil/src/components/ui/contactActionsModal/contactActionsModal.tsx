@@ -1,16 +1,16 @@
 /**
- * MODAL DE ACCIONES DE CONTACTO
- * 
- * Este componente muestra un modal bonito cuando el usuario toca un contacto.
- * Permite elegir entre ACTUALIZAR o BORRAR el contacto.
- * 
- * USO:
- * <ModalAccionesContacto 
+ * CONTACT ACTIONS MODAL
+ *
+ * Shows a modal when the user taps a contact.
+ * Lets them choose to UPDATE or DELETE the contact.
+ *
+ * USAGE:
+ * <ContactActionsModal
  *   visible={true/false}
- *   nombreContacto="Tatiana Montero"
- *   onActualizar={() => { // editar contacto }}
- *   onBorrar={() => { // confirmar borrado }}
- *   onCerrar={() => { // cerrar modal }}
+ *   contactName="Tatiana Montero"
+ *   onUpdate={() => { // edit contact }}
+ *   onDelete={() => { // confirm deletion }}
+ *   onClose={() => { // close modal }}
  * />
  */
 
@@ -44,25 +44,25 @@ export default function ContactActionsModal({
       animationType="fade"
       onRequestClose={onClose}
     >
-      {/* Fondo oscuro semitransparente */}
+      {/* Semi-transparent dark background */}
       <TouchableOpacity 
         style={styles.overlay} 
         activeOpacity={1} 
         onPress={onClose}
       >
-        {/* Tarjeta blanca del modal */}
+        {/* White modal card */}
         <TouchableOpacity 
           activeOpacity={1}
           onPress={(e) => e.stopPropagation()} 
         >
           <View style={styles.modalCard}>
             
-            {/* ICONO CON CIRCULO MORADO */}
+            {/* ICON WITH A PURPLE CIRCLE */}
             <View style={styles.iconCircle}>
               <MaterialIcons name="person" size={40} color="#6B3FA0" />
             </View>
 
-            {/* NOMBRE DEL CONTACTO */}
+            {/* CONTACT NAME */}
             <Text style={styles.modalTitle}>
               {contactNameValue}
             </Text>
@@ -71,7 +71,7 @@ export default function ContactActionsModal({
               {t.contactos.que_deseas}
             </Text>
 
-            {/* BOTON ACTUALIZAR */}
+            {/* UPDATE BUTTON */}
             <TouchableOpacity 
               style={styles.updateBtn} 
               activeOpacity={0.9}
@@ -84,7 +84,7 @@ export default function ContactActionsModal({
               <Text style={styles.updateBtnText}>{t.contactos.actualizar}</Text>
             </TouchableOpacity>
 
-            {/* BOTON BORRAR */}
+            {/* DELETE BUTTON */}
             <TouchableOpacity 
               style={styles.deleteBtn} 
               activeOpacity={0.1}
@@ -97,7 +97,7 @@ export default function ContactActionsModal({
               <Text style={styles.deleteBtnText}>{t.contactos.eliminar_contacto}</Text>
             </TouchableOpacity>
 
-            {/* BOTON CANCELAR */}
+            {/* CANCEL BUTTON */}
             <TouchableOpacity 
               style={styles.cancelBtn} 
               activeOpacity={0.7}

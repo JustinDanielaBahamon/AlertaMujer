@@ -10,7 +10,7 @@ import { notificationStyle } from "../styles/notificationStyle";
 import { TUTORIAL_GRADIENT, TUTORIAL_PALETTE as P } from "../styles/tutorialTheme";
 import { useProtectionTutorialViewModel, type ProtectionItem } from "../viewModel/useProtectionTutorialViewModel";
 
-// ─── Tarjeta de un ajuste: estado + botón para activarlo ──────────────────────
+// ─── Card for a setting: status + button to enable it ─────────────────────────
 function SettingCard({ item, onActivatePress, enterDelay }: { item: ProtectionItem; onActivatePress: () => void; enterDelay: number }) {
   const { t } = useLocale();
   const input = useRef(new Animated.Value(0)).current;
@@ -59,7 +59,7 @@ function SettingCard({ item, onActivatePress, enterDelay }: { item: ProtectionIt
   );
 }
 
-// ─── Pantalla ─────────────────────────────────────────────────────────────────
+// ─── Screen ──────────────────────────────────────────────────────────────────
 export default function ProtectionScreen() {
   const { t } = useLocale();
   const vm = useProtectionTutorialViewModel();

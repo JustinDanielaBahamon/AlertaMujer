@@ -8,23 +8,23 @@ import { clearTokens, saveTokens, leerTokens } from "../services/tokenStorage";
 import { forgetDeviceSession } from "../services/devices.service";
 
 export type SignInOptions = {
-  /** Primera pantalla del stack principal tras iniciar sesión (p. ej. tutorial tras registro). */
+  /** First screen of the main stack after signing in (e.g. the tutorial after sign-up). */
   initialMainRoute?: keyof MainStackParamList;
-  /** Refresh token del backend (login, Google o registro); si no se pasa se conserva el actual. */
+  /** Backend refresh token (login, Google or sign-up); if not passed the current one is kept. */
   refreshToken?: string;
 };
 
 type AuthContextType = {
   user: User | null;
   token: string | null;
-  /** Ruta inicial del stack principal en el próximo montaje (se consume al entrar a Main). */
+  /** Initial route of the main stack on its next mount (consumed when entering Main). */
   pendingMainRoute: keyof MainStackParamList | null;
   signIn: (user: User, token: string, options?: SignInOptions) => void;
   signOut: () => void;
-  /** Cambia datos de la usuaria en sesión (p. ej. la foto) sin volver a iniciar sesión. */
+  /** Changes the signed-in user's data (e.g. the photo) without signing in again. */
   updateUser: (changes: Partial<User>) => void;
   clearPendingMainRoute: () => void;
-  /** true mientras se restaura la sesión guardada al iniciar la app. */
+  /** true while the saved session is restored when the app starts. */
   restoring: boolean;
 };
 
@@ -41,7 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const userRef = useRef<User | null>(null);
   userRef.current = user;
 
-  // Restaurar sesión guardada al iniciar la app
+  // Restore the saved session when the app starts
   useEffect(() => {
     (async () => {
       try {
@@ -49,7 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (raw) {
           const savedItem = JSON.parse(raw);
           let tokens = await leerTokens();
-          // Sesiones guardadas antes de usar el almacén cifrado: los tokens se mudan allá
+          // Sessions saved before the encrypted storage existed: the tokens move there
           if (!tokens && savedItem.token) {
             tokens = { token: savedItem.token, refreshToken: savedItem.refreshToken ?? null };
             await saveTokens(tokens);
@@ -71,7 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })();
   }, []);
 
-  // Los datos de la usuaria van en AsyncStorage; los tokens, en el almacén cifrado del sistema
+  // User data goes to AsyncStorage; tokens, to the system's encrypted storage
   const save = (nextUser: User, nextToken: string) => {
     Promise.all([
       AsyncStorage.setItem(STORAGE_KEY_AUTH, JSON.stringify({ user: nextUser })),
@@ -83,7 +83,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setPendingMainRoute(options?.initialMainRoute ?? "DrawerHome");
     setUser(nextUser);
     setToken(nextToken);
-    setAuthToken(nextToken); // Actualizar el token en el interceptor de axios
+    setAuthToken(nextToken); // Update the token in the axios interceptor
     if (options?.refreshToken) {
       refreshRef.current = options.refreshToken;
       setRefreshToken(options.refreshToken);
@@ -94,7 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = useCallback(() => {
     setUser(null);
     setToken(null);
-    setAuthToken(null); // Limpiar el token en el interceptor de axios
+    setAuthToken(null); // Clear the token in the axios interceptor
     refreshRef.current = null;
     setRefreshToken(null);
     forgetDeviceSession();
@@ -103,7 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     clearTokens().catch(() => {});
   }, []);
 
-  // El interceptor de api.ts avisa cuando renovó el token o cuando la sesión ya no es válida
+  // The api.ts interceptor reports when it renewed the token or when the session is no longer valid
   useEffect(
     () =>
       listenSession({
@@ -112,7 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (userRef.current) save(userRef.current, newItem);
         },
         expired: () => {
-          if (!userRef.current || userRef.current.id === 0) return; // modo demo: no hay sesión real
+          if (!userRef.current || userRef.current.id === 0) return; // demo mode: there is no real session
           signOut();
           Alert.alert("Sesión vencida", "Por seguridad, inicia sesión de nuevo.");
         },

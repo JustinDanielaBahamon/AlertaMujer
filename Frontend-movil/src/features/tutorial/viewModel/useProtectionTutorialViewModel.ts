@@ -18,9 +18,9 @@ export interface ProtectionItem {
   icon: string; // MaterialIcons
   title: string;
   desc: string;
-  /** true listo, false falta, null no se puede comprobar (hay que revisarlo en los ajustes). */
+  /** true ready, false missing, null cannot be checked (it must be checked in the settings). */
   ready: boolean | null;
-  /** El botón abre los ajustes del sistema en vez de pedir directamente. */
+  /** The button opens the system settings instead of asking directly. */
   opensSettings: boolean;
 }
 
@@ -35,8 +35,8 @@ const texts = (t: LocaleT): Record<ProtectionId, { icon: string; title: string; 
 });
 
 /**
- * Última página del tutorial: los ajustes del celular que mantienen viva la protección en segundo
- * plano. Nada se pide solo: cada ajuste se activa cuando la usuaria toca su botón.
+ * Last tutorial page: the phone settings that keep protection alive in the
+ * background. Nothing is asked on its own: each setting is enabled when the user taps its button.
  */
 export function useProtectionTutorialViewModel() {
   const { t } = useLocale();
@@ -50,7 +50,7 @@ export function useProtectionTutorialViewModel() {
       .catch((e) => console.warn("No se pudieron revisar los ajustes de protección:", e));
   }, [config.agitar]);
 
-  // Al entrar y al volver de los ajustes de Android
+  // On entering and when coming back from Android settings
   useEffect(() => {
     refresh();
     const sub = AppState.addEventListener("change", (status) => {
@@ -88,7 +88,7 @@ export function useProtectionTutorialViewModel() {
       }
       if (id === "gps") {
         if (statuses.ubicacion.granted !== true) await grantPermission("ubicacion", statuses.ubicacion);
-        // Muestra el aviso de Android para encender la ubicación: aquí sí lo pidió la usuaria
+        // Shows the Android prompt to turn on location: here the user did ask for it
         if (!statuses.gpsOn) await Location.enableNetworkProviderAsync().catch(() => undefined);
       } else {
         await grantPermission(id, statuses[id]);
@@ -98,7 +98,7 @@ export function useProtectionTutorialViewModel() {
     [statuses, change, refresh],
   );
 
-  // Desde Ajustes se vuelve a donde estaba; después del registro entra a la app
+  // From Settings it goes back to where it was; after sign-up it enters the app
   const start = useCallback(() => {
     if (navigation.canGoBack()) navigation.goBack();
     else navigation.replace("DrawerHome");

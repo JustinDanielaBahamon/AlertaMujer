@@ -2,10 +2,10 @@ import * as Location from "expo-location";
 import { reportLocation } from "./location-reporter.service";
 
 /**
- * La web pidió "Actualizar ubicación del celular": el backend manda un push silencioso
- * (tipo PEDIR_UBICACION) y la app responde enviando la ubicación actual.
- * Con la app cerrada Android solo la entrega si la usuaria permitió la ubicación "todo el tiempo"
- * o si la protección por sacudida está activa; si no, la web sigue mostrando el último punto.
+ * The website asked to "Update the phone location": the backend sends a silent push
+ * (PEDIR_UBICACION type) and the app responds by sending the current location.
+ * With the app closed Android only delivers it if the user allowed location "all the time"
+ * or if shake protection is on; otherwise the website keeps showing the last point.
  */
 export function isLocationRequest(data: Record<string, unknown> | undefined): boolean {
   return !!data && data.tipo === "PEDIR_UBICACION";
@@ -22,6 +22,6 @@ export async function answerLocationRequest(): Promise<void> {
       accuracy: u.coords.accuracy,
     });
   } catch {
-    // GPS apagado o sin permiso en segundo plano: no hay nada que enviar
+    // GPS off or no background permission: there is nothing to send
   }
 }

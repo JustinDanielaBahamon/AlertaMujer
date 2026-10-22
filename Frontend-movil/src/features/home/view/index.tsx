@@ -31,7 +31,7 @@ export default function Home() {
   const { width, height } = useWindowDimensions();
   const styles = useMemo(() => createStyles(theme, width, height), [theme, width, height]);
 
-  //  Tamaño del botón ligeramente reducido para dar aire al texto
+  // Button size slightly reduced to give the text room
   const BUTTON_SIZE = width * 0.68;
 
   const [alerts, setAlerts] = useState<AlertRecord[]>([]);
@@ -58,7 +58,7 @@ export default function Home() {
     }, [loadAlerts]),
   );
 
-  // Respaldo: vuelve a cargar cuando el componente está montado y gana foco visible.
+  // Fallback: reload when the component is mounted and becomes visible.
   const isFocused = useIsFocused();
   useEffect(() => {
     if (isFocused) {
@@ -66,14 +66,14 @@ export default function Home() {
     }
   }, [isFocused, loadAlerts]);
 
-  //  Última alerta derivada del historial
+  // Last alert derived from the history
   const lastAlert = useMemo(() => alerts[0], [alerts]);
 
-  //  No usar calcularTiempoTranscurrido con formato de API
-  //  Usar directamente el valor de tiempo de la API
+  // Do not use the elapsed-time calculation with the API format
+  // Use the API time value directly
   const elapsedTime = lastAlert?.date || t.inicio.sin_alertas;
 
-  //  Animaciones glow expansivo
+  // Expanding glow animations
   const glow1Scale   = useRef(new Animated.Value(1)).current;
   const glow1Opacity = useRef(new Animated.Value(0.6)).current;
   const glow2Scale   = useRef(new Animated.Value(1)).current;
@@ -114,7 +114,7 @@ export default function Home() {
     setTimeout(() => loopGlow3(), 1200);
   }, []);
 
-  //  Navegación a mapa
+  // Navigation to the map
   const goToMap = () => {
     const main = getMainStackNavigation(navigation);
     main?.navigate("DrawerHome", {
@@ -123,7 +123,7 @@ export default function Home() {
     } as never);
   };
 
-  //  Navegación al historial desde tarjeta ultima alerta 
+  // Navigation to the history from the last alert card
   const goToHistory = () => {
     const main = getMainStackNavigation(navigation);
     main?.navigate("DrawerHome", {
@@ -135,10 +135,10 @@ export default function Home() {
   return (
     <View style={[styles.container, { backgroundColor: theme.background, paddingBottom: insets.bottom }]}>
 
-      {/* Sin internet: una alerta no saldría ahora */}
+      {/* No internet: an alert would not go out now */}
       <OfflineNotice />
 
-      {/* Zona segura */}
+      {/* Safe zone */}
       <TouchableOpacity
         style={[
           styles.safeZoneCard,
@@ -201,7 +201,7 @@ export default function Home() {
         />
       </TouchableOpacity>
 
-      {/* Botón central con glow expansivo */}
+      {/* Central button with an expanding glow */}
       <View style={[styles.centerSection, { paddingVertical: BUTTON_SIZE * 0.40 }]}>
 
         {/* Anillo glow 3 — exterior */}
@@ -218,7 +218,7 @@ export default function Home() {
           }}
         />
 
-        {/* Anillo glow 2 — medio */}
+        {/* Glow ring 2 — middle */}
         <Animated.View
           pointerEvents="none"
           style={{
@@ -246,7 +246,7 @@ export default function Home() {
           }}
         />
 
-        {/* Botón principal, imagen estática */}
+        {/* Main button, static image */}
         <TouchableOpacity
           activeOpacity={1}
           onPressIn={vm.onButtonPressIn}
@@ -280,7 +280,7 @@ export default function Home() {
 
       </View>
 
-      {/* Ultima alerta, (esta conectada al historial) */}
+      {/* Last alert (connected to the history) */}
       <TouchableOpacity
         style={[
           styles.lastAlertCard,

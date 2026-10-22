@@ -1,4 +1,4 @@
-// features/registro/useRegistroViewModel.ts
+// features/authentication/viewModel/useSignUpViewModel.ts
 import { useCallback, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -46,9 +46,9 @@ export function useSignUpViewModel() {
 
   const [errors, setErrors] = useState<ErrorsType>({});
 
-  // ── Formato automático DD/MM/AAAA ─────────────────────────────────────────
+  // ── Automatic DD/MM/YYYY format ──────────────────────────────────────────
   const setBirthDate = useCallback((text: string) => {
-    // Solo dígitos
+    // Digits only
     const digits = text.replace(/\D/g, "");
     let formatted = "";
     if (digits.length <= 2) {
@@ -175,7 +175,7 @@ export function useSignUpViewModel() {
       });
 
       if ('error' in response) {
-        // Datos que ya usa otra cuenta: el aviso va debajo de cada campo
+        // Data already used by another account: the notice goes below each field
         if (response.campos) {
           setErrors({
             email: response.campos.email,
@@ -188,7 +188,7 @@ export function useSignUpViewModel() {
         return;
       }
 
-      // Adaptar la respuesta del backend al modelo Usuario del móvil
+      // Adapt the backend response to the mobile User model
       const backendUser = response.user;
       const user: User = {
         id: backendUser.id,

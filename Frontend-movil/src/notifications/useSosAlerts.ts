@@ -28,8 +28,8 @@ import { isInTutorial } from "../navigation/navigationHelpers";
 import { isLocationRequest, answerLocationRequest } from "../services/locationRequest";
 
 /**
- * Con sesión iniciada: registra el token push, muestra la alarma si llega una alerta con la app
- * abierta y lleva a la pantalla de la alerta al tocar la notificación (o al abrirse sola).
+ * When signed in: registers the push token, shows the alarm if an alert arrives with the app
+ * open and leads to the alert screen when the notification is tapped (or when it opens by itself).
  */
 export function useSosAlerts(
   navigation: NavigationContainerRefWithCurrent<MainStackParamList>,
@@ -54,7 +54,7 @@ export function useSosAlerts(
 
     const alreadyOpen = new Set<string>();
     const stopListening = onSosAlertOpen((data) => {
-      if (alreadyOpen.has(data.alertaId)) return; // la misma alerta puede llegar por varios caminos
+      if (alreadyOpen.has(data.alertaId)) return; // the same alert can arrive by several paths
       alreadyOpen.add(data.alertaId);
       const ir = (attempts: number) => {
         if (navigation.isReady()) {
@@ -70,15 +70,15 @@ export function useSosAlerts(
       ir(20);
     });
 
-    // "¿Ya llegaste?" de Avísame si no llego: lleva a la pantalla del trayecto
+    // "Did you arrive?" of Let me know if I don't arrive: leads to the trip screen
     const goToTrip = (attempts = 20) => {
       if (navigation.isReady()) navigation.navigate("Trip");
       else if (attempts > 0) setTimeout(() => goToTrip(attempts - 1), 300);
     };
 
-    // App abierta desde la notificación o la pantalla completa
+    // App opened from the notification or the full screen
     notifee.getInitialNotification().then((initial) => {
-      // Notifee la entrega una sola vez: también puede ser la de "Alerta enviada" al agitar
+      // Notifee delivers it only once: it can also be the "Alert sent" one from shaking
       if (initial && handleProtectionEvent({ type: EventType.PRESS, detail: initial })) return;
       if (isTripNotification(initial?.notification?.data)) return goToTrip();
       const data = notificationData(initial?.notification);
@@ -92,7 +92,7 @@ export function useSosAlerts(
       if (data && (type === EventType.PRESS || type === EventType.ACTION_PRESS)) openSosAlert(data);
     });
 
-    // Con la app en primer plano: suena la alarma y se abre la pantalla de la alerta directamente
+    // With the app in the foreground: the alarm sounds and the alert screen opens directly
     let stopListeningPush: (() => void) | undefined;
     if (pushAvailable()) {
       try {

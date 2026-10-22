@@ -17,8 +17,9 @@ import {
 export const QUICK_MINUTES = [15, 30, 45, 60, 90];
 
 /**
- * "Avísame si no llego": la usuaria dice a dónde va y en cuánto llega. Si no confirma a tiempo, el
- * servidor avisa a sus contactos con su última ubicación, aunque su celular se quede sin datos.
+ * "Let me know if I don't arrive": the user says where she is going and when she will arrive. If she does not
+ * confirm in time, the
+ * server notifies her contacts with her last location, even if her phone runs out of data.
  */
 export function useTripViewModel() {
   const navigation = useNavigation();
@@ -49,7 +50,7 @@ export function useTripViewModel() {
     frequentLocationsService.getByUser(user.id).then(setPlaces).catch(() => {});
   }, [user?.id]);
 
-  // Cuenta regresiva en pantalla (cada 15 s basta: se muestra en minutos)
+  // On-screen countdown (every 15 s is enough: it is shown in minutes)
   useEffect(() => {
     if (!trip) return;
     const id = setInterval(() => setNow(Date.now()), 15000);

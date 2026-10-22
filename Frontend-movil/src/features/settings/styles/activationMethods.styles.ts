@@ -1,7 +1,7 @@
 import { StyleSheet } from "react-native";
 import type { AppTheme } from "../../../contexts/ThemeContext";
 
-// Colores del header: los mismos que la barra lateral en su estado normal
+// Header colors: the same as the sidebar in its normal state
 export function getHeaderColors(theme: AppTheme): {
   background: string;
   text: string;
@@ -20,7 +20,7 @@ export function createActivationMethodsStyles(theme: AppTheme) {
       backgroundColor: theme.background,
     },
 
-    // Header (mismo color plano que la barra lateral)
+    // Header (same flat color as the sidebar)
     header: {
       backgroundColor: background,
       paddingHorizontal: 20,
@@ -80,7 +80,7 @@ export function createActivationMethodsStyles(theme: AppTheme) {
       backgroundColor: text,
     },
 
-    // Contenido
+    // Content
     scrollContent: {
       paddingHorizontal: 20,
       paddingTop: 18,
@@ -94,7 +94,7 @@ export function createActivationMethodsStyles(theme: AppTheme) {
       lineHeight: 19,
     },
 
-    // Tarjeta de método
+    // Method card
     card: {
       backgroundColor: theme.containerBackground,
       borderRadius: 18,
@@ -150,7 +150,7 @@ export function createActivationMethodsStyles(theme: AppTheme) {
       marginBottom: 12,
     },
 
-    // Pasos
+    // Steps
     steps: { opacity: 1 },
     inactiveSteps: { opacity: 0.55 },
     stepRow: {
@@ -181,7 +181,7 @@ export function createActivationMethodsStyles(theme: AppTheme) {
       flex: 1,
     },
 
-    // Aviso dentro de la tarjeta (métodos que llegan en una próxima versión)
+    // Notice inside the card (methods coming in a future version)
     recommendationsWrap: {
       backgroundColor: accentSoft,
       borderRadius: 12,

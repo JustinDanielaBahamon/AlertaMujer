@@ -10,17 +10,17 @@ interface Props {
 }
 
 /**
- * Reemplaza a <LottieView autoPlay loop /> en el tutorial.
- * El progreso de la animación lo mueve el propio JS (no el reloj de animaciones del sistema),
- * así se ve igual en celulares con animaciones desactivadas o con ahorro de batería.
- * Solo se anima la pantalla que se está viendo.
+ * Replaces <LottieView autoPlay loop /> in the tutorial.
+ * The animation progress is driven by JS itself (not the system animation clock),
+ * so it looks the same on phones with animations disabled or battery saving on.
+ * Only the visible screen is animated.
  */
 export default function TutorialLottie({ source, style, resizeMode = "contain" }: Props) {
   const { isActive } = useTutorialPage();
   const [progress, setProgress] = useState(0);
   const elapsed = useRef(0);
 
-  // Duración real de la animación (frames / fps)
+  // Real animation duration (frames / fps)
   const duration = Math.max(500, ((source.op - source.ip) / source.fr) * 1000);
 
   useEffect(() => {
@@ -35,7 +35,7 @@ export default function TutorialLottie({ source, style, resizeMode = "contain" }
       elapsed.current = (elapsed.current + (now - lastItem)) % duration;
       lastItem = now;
 
-      // ~30 actualizaciones por segundo es suficiente y cuida la batería
+      // ~30 updates per second is enough and saves battery
       if (now - lastRender >= 33) {
         lastRender = now;
         setProgress(elapsed.current / duration);

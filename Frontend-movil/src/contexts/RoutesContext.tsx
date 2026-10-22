@@ -3,9 +3,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "./AuthContext";
 import { savedRoutesService, SavedRouteApi } from "../services/saved-routes.service";
 
-// Límites por usuaria (los garantiza el backend; aquí solo se usan para la UI)
-export const MAX_ROUTES = 4; // recorridos guardados / visibles en el mapa
-export const MAX_IMPORTANTES = 2; // rutas marcadas como importantes (estrella)
+// Per-user limits (the backend enforces them; here they are only used for the UI)
+export const MAX_ROUTES = 4; // saved routes / routes visible on the map
+export const MAX_IMPORTANTES = 2; // routes marked as important (star)
 
 type GpsPoint = {
   latitude: number;
@@ -16,8 +16,8 @@ type GpsPoint = {
 type SavedRoute = {
   id: string;
   date: string;
-  estimatedTime: string; // Tiempo estimado de viaje
-  estimatedDistance: string; // Distancia en km
+  estimatedTime: string; // Estimated travel time
+  estimatedDistance: string; // Distance in km
   startNeighborhood: string;
   endNeighborhood: string;
   municipality: string;
@@ -25,9 +25,9 @@ type SavedRoute = {
   country: string;
   points: GpsPoint[];
   pointCount: number;
-  esManual: boolean; // Para distinguir recorridos manuales de automáticos
-  customName?: string; // Para recorridos manuales
-  important: boolean; // Para mostrar en el mapa principal
+  esManual: boolean; // To tell manual routes from automatic ones
+  customName?: string; // For manual routes
+  important: boolean; // To show on the main map
 };
 
 export type NewRoute = {
@@ -44,7 +44,7 @@ export type NewRoute = {
 
 export type ActionResult = { ok: boolean; reason?: string };
 
-// Versión anterior: los recorridos vivían solo en este teléfono
+// Previous version: routes lived only on this phone
 const LEGACY_STORAGE_KEY = "alertamujer_recorridos";
 
 type RoutesContextType = {
@@ -67,8 +67,8 @@ export const useRoutes = () => {
 };
 
 /**
- * Fecha de un recorrido para mostrar ("16 oct 2026" o, con hora, "16 oct 2026, 9:54 p. m.").
- * Acepta la fecha ISO del backend y la antigua "dd/mm/aaaa" de los recorridos locales.
+ * Route date for display ("16 oct 2026" or, with time, "16 oct 2026, 9:54 p. m.").
+ * Accepts the backend ISO date and the old "dd/mm/yyyy" of local routes.
  */
 export const formatRouteDate = (date: string, withTime = false): string => {
   const parts = /^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(date ?? "");
@@ -119,7 +119,7 @@ export const RoutesProvider = ({ children }: { children: ReactNode }) => {
   const [routes, setRoutes] = useState<SavedRoute[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Sube al backend (una sola vez) los recorridos que la versión anterior guardaba en el teléfono
+  // Uploads to the backend (only once) the routes the previous version stored on the phone
   const migrateLocales = useCallback(async () => {
     const raw = await AsyncStorage.getItem(LEGACY_STORAGE_KEY);
     if (!raw) return;
@@ -144,8 +144,8 @@ export const RoutesProvider = ({ children }: { children: ReactNode }) => {
           isManual: r.esManual ?? true,
         });
       } catch (error: any) {
-        if (error?.response?.status === 409) break; // límite de 4 alcanzado
-        if (!error?.response) return; // sin conexión: se reintenta en la próxima carga
+        if (error?.response?.status === 409) break; // limit of 4 reached
+        if (!error?.response) return; // offline: retried on the next load
       }
     }
     await AsyncStorage.removeItem(LEGACY_STORAGE_KEY);
@@ -168,7 +168,7 @@ export const RoutesProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [token, migrateLocales]);
 
-  // Cargar al iniciar sesión y limpiar al cerrarla
+  // Load when signing in and clear when signing out
   useEffect(() => {
     reload();
   }, [reload]);
@@ -214,7 +214,7 @@ export const RoutesProvider = ({ children }: { children: ReactNode }) => {
     const current = routes.find((r) => r.id === id);
     if (!current) return { ok: false };
 
-    // Marcar como importante solo si todavía hay cupo
+    // Mark as important only if there is still room
     if (!current.important && routes.filter((r) => r.important).length >= MAX_IMPORTANTES) {
       return {
         ok: false,

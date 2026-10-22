@@ -8,25 +8,25 @@ import { useEvidence } from "../../contexts/EvidenceContext";
 import { inPermissionQueue } from "../../services/safePermissions";
 import { setAudioAlert, enqueueChunk, listenUploads, processQueue, type UploadStatus } from "./uploadQueue";
 
-/** Largo de cada trozo: lo grabado se sube cada 45 s, así se pierde poco si le quitan el teléfono. */
+/** Length of each chunk: what is recorded is uploaded every 45 s, so little is lost if the phone is taken away. */
 export const SECONDS_PER_CHUNK = 45;
-/** Trozos más cortos (al cambiar de cámara, al volver a la app...) no aportan nada: se descartan. */
+/** Shorter chunks (when switching camera, when returning to the app...) add nothing: they are discarded. */
 export const MIN_CHUNK_MS = 3000;
-/** Si la cámara no avisa que está lista en este tiempo, se sigue solo con audio. */
+/** If the camera does not report it is ready within this time, it continues with audio only. */
 const CAMERA_WAIT_MS = 6000;
 
 type Permissions = { camera: boolean; microphone: boolean; canAsk: boolean };
 
 /**
- * Grabación automática de evidencia durante la alerta activa.
+ * Automatic evidence recording during the active alert.
  *
- * Con la app en pantalla graba video con sonido (cámara); al minimizarla o apagar la pantalla,
- * Android no deja usar la cámara y sigue solo el audio con el servicio nativo de micrófono.
- * Lo que se graba en Ajustes (video, audio o ambos) decide el modo; el botón la pausa o reanuda.
+ * With the app on screen it records video with sound (camera); when it is minimized or the screen turns off,
+ * Android does not allow the camera and only audio continues with the native microphone service.
+ * What is chosen in Settings (video, audio or both) decides the mode; the button pauses or resumes it.
  */
 export function useAlertRecording(alertId: number | null) {
   const { recordVideo, recordAudio, loaded } = useEvidence();
-  // null = la usuaria no tocó el botón: se sigue lo elegido en Ajustes
+  // null = the user did not touch the button: what was chosen in Settings applies
   const [chosen, setChosen] = useState<boolean | null>(null);
   const [permissions, setPermissions] = useState<Permissions | null>(null);
   const [onScreen, setOnScreen] = useState(AppState.currentState === "active");
@@ -38,7 +38,7 @@ export function useAlertRecording(alertId: number | null) {
   const [uploads, setUploads] = useState<UploadStatus>({ uploaded: 0, pendingItems: 0, uploading: false });
   const cameraRef = useRef<CameraView>(null);
 
-  // Si apagó las dos en Ajustes pero toca "Grabar", se graba video con sonido
+  // If she turned both off in Settings but taps "Record", video with sound is recorded
   const conVideo = recordVideo || !recordAudio;
   const conAudio = recordAudio || !recordVideo;
   const turnedOn = chosen ?? (recordVideo || recordAudio);
@@ -61,7 +61,7 @@ export function useAlertRecording(alertId: number | null) {
     return () => sub.remove();
   }, []);
 
-  // Permisos: se piden al empezar a grabar (de uno en uno, ver permisosSeguros)
+  // Permissions: asked when recording starts (one at a time, see safePermissions)
   const requestPermissions = useCallback(async () => {
     let microphone = await Camera.getMicrophonePermissionsAsync();
     if (!microphone.granted && microphone.canAskAgain) {
@@ -87,8 +87,8 @@ export function useAlertRecording(alertId: number | null) {
     }
   }, [active, permissions, requestPermissions]);
 
-  // Servicio de micrófono: se enciende con la app abierta y queda encendido toda la alerta, para
-  // poder seguir grabando audio cuando se minimiza o se apaga la pantalla
+  // Microphone service: it starts with the app open and stays on for the whole alert, so
+  // audio can keep recording when the app is minimized or the screen turns off
   useEffect(() => {
     if (!active || !permissions?.microphone || !alertId) return;
     setAudioAlert(alertId);
@@ -103,17 +103,17 @@ export function useAlertRecording(alertId: number | null) {
       setServiceReady(false);
       ShakeSensor.stopAudioRecording();
     };
-    // puedeVideo solo decide cómo arranca; los cambios después los maneja el efecto del video
+    // canVideo only decides how it starts; later changes are handled by the video effect
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, permissions?.microphone, alertId, conAudio]);
 
-  // Video en trozos mientras la app está en pantalla; el micrófono del servicio queda en pausa
+  // Video in chunks while the app is on screen; the service microphone stays paused
   useEffect(() => {
     if (!recordingVideo || !alertId) return;
     let alive = true;
     (async () => {
       ShakeSensor.pauseAudioRecording();
-      await ShakeSensor.wait(400); // que el servicio suelte el micrófono antes de la cámara
+      await ShakeSensor.wait(400); // let the service release the microphone before the camera
       while (alive) {
         try {
           const startTime = Date.now();
@@ -136,14 +136,14 @@ export function useAlertRecording(alertId: number | null) {
     return () => {
       alive = false;
       cameraRef.current?.stopRecording();
-      // El audio lo retoma el efecto de abajo solo si ya no se va a grabar video
+      // The effect below resumes the audio only if no more video is going to be recorded
     };
   }, [recordingVideo, alertId, frontal]);
 
   const showCamera = active && serviceReady && canVideo && onScreen;
 
-  // La cámara frontal casi no tiene luz y el video salía muy oscuro: mientras graba con ella, la
-  // pantalla se pone al máximo para iluminar la cara. Al cambiar de cámara o terminar, se restaura.
+  // The front camera has almost no light and the video came out very dark: while recording with it, the
+  // screen goes to maximum brightness to light the face. It is restored when switching camera or finishing.
   useEffect(() => {
     if (!recordingVideo || !frontal) return;
     Brightness.setBrightnessAsync(1).catch(() => {});
@@ -152,25 +152,25 @@ export function useAlertRecording(alertId: number | null) {
     };
   }, [recordingVideo, frontal]);
 
-  // La vista de la cámara se desmonta al minimizar: al volver hay que esperar que esté lista otra vez
+  // The camera view is unmounted when minimizing: when coming back we have to wait until it is ready again
   useEffect(() => {
     if (!showCamera) setCameraReady(false);
   }, [showCamera]);
 
-  // Sin video (minimizada, sin permiso o la cámara falló) sigue el audio. Mientras la cámara se
-  // prepara o cambia de lado no: dejaría trocitos de audio de 1–2 segundos.
+  // Without video (minimized, no permission or the camera failed) audio continues. Not while the camera
+  // is getting ready or switching sides: it would leave 1–2 second audio scraps.
   useEffect(() => {
     if (active && serviceReady && conAudio && !showCamera) ShakeSensor.resumeAudioRecording();
   }, [active, serviceReady, conAudio, showCamera]);
 
-  // Si la cámara nunca avisa que está lista, se sigue solo con audio en vez de quedarse sin grabar
+  // If the camera never reports it is ready, continue with audio only instead of recording nothing
   useEffect(() => {
     if (!showCamera || cameraReady) return;
     const t = setTimeout(() => setVideoFailed(true), CAMERA_WAIT_MS);
     return () => clearTimeout(t);
   }, [showCamera, cameraReady]);
 
-  // Al cambiar de cámara, la nueva avisa cuando está lista
+  // When switching camera, the new one reports when it is ready
   const switchCamera = useCallback(() => {
     setCameraReady(false);
     setFrontal((f) => !f);
@@ -203,7 +203,7 @@ export function useAlertRecording(alertId: number | null) {
   return {
     mode: mode,
     turnedOn: turnedOn,
-    // La vista de la cámara se monta cuando corresponde grabar video (aunque aún no esté lista)
+    // The camera view is mounted when video should be recorded (even if it is not ready yet)
     showCamera: showCamera,
     cameraRef: cameraRef,
     frontal,

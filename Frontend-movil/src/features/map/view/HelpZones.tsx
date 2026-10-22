@@ -79,19 +79,19 @@ type HelpZone = {
     longitude: number;
   };
   address: string;
-  /** Radio de la zona en metros (viene del backend). */
+  /** Zone radius in meters (comes from the backend). */
   radio: number;
-  /** Distancia en metros desde la ubicación actual, si se conoce. */
+  /** Distance in meters from the current location, if known. */
   distance?: number;
 };
 
-// Centro de Neiva, usado si no hay ubicación ni zonas.
+// Neiva center, used if there is no location or zones.
 const DEFAULT_CENTER: LatLng = { latitude: 2.9273, longitude: -75.2819 };
 
 const formatDistance = (metros: number) =>
   metros < 1000 ? `${Math.round(metros)} m` : `${(metros / 1000).toFixed(1).replace(".", ",")} km`;
 
-// Unos 80 m por minuto a pie.
+// About 80 m per minute on foot.
 const walkingMinutes = (metros: number) => Math.max(1, Math.round(metros / 80));
 
 export default function ZonasAuxiliares() {
@@ -109,7 +109,7 @@ export default function ZonasAuxiliares() {
   const [loadingZones, setLoadingZones] = useState(true);
   const [zonesError, setZonesError] = useState<string | null>(null);
 
-  // Cargar zonas reales desde el backend
+  // Load the real zones from the backend
   React.useEffect(() => {
     let mounted = true;
     const load = async () => {
@@ -119,7 +119,7 @@ export default function ZonasAuxiliares() {
         const zones = await getZones();
         if (!mounted) return;
 
-        // Ubicación actual para mostrarla en el mapa y calcular distancias
+        // Current location to show it on the map and compute distances
         let myPosition: LatLng | null = null;
         try {
           if (await locationPermission()) {
@@ -156,7 +156,7 @@ export default function ZonasAuxiliares() {
               distance: distance,
             };
           })
-          // Las más cercanas primero
+          // Closest first
           .sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
         setHelpZones(mapped);
       } catch (err) {
@@ -172,7 +172,7 @@ export default function ZonasAuxiliares() {
     };
   }, []);
 
-  // Zonas que se muestran según el filtro elegido (afecta la lista y los marcadores del mapa)
+  // Zones shown for the chosen filter (affects the list and the map markers)
   const filteredZones =
     filter === "todas"
       ? helpZones
@@ -193,7 +193,7 @@ export default function ZonasAuxiliares() {
     }
   };
 
-  // El mapa se centra en la usuaria; si no hay ubicación, en la zona más cercana o en Neiva.
+  // The map centers on the user; without a location, on the closest zone or on Neiva.
   const mapCenter = useMemo(() => {
     const center = myPosition ?? filteredZones[0]?.coordinate ?? DEFAULT_CENTER;
     return { ...center, latitudeDelta: 0.03, longitudeDelta: 0.03 };
@@ -216,7 +216,7 @@ export default function ZonasAuxiliares() {
     );
   };
 
-  // Círculos de cada zona, sus marcadores, el punto de la usuaria y la línea hasta la zona elegida.
+  // Circles of each zone, their markers, the user's dot and the line to the chosen zone.
   const mapLayers = () => (
     <>
       {filteredZones.map((zone) => (
@@ -302,7 +302,7 @@ export default function ZonasAuxiliares() {
           </View>
         </LinearGradient>
 
-        {/* MAPA */}
+        {/* MAP */}
         <View style={styles.mapContainer}>
           <MapView
             style={styles.map}
@@ -324,7 +324,7 @@ export default function ZonasAuxiliares() {
           </TouchableOpacity>
         </View>
 
-        {/* LEYENDA */}
+        {/* LEGEND */}
         <View style={[styles.legendContainer, { backgroundColor: theme.card }]}>
           <Text style={[styles.legendTitle, { color: theme.text }]}>
             {t.mapa.leyenda}
@@ -365,12 +365,12 @@ export default function ZonasAuxiliares() {
           </View>
         </View>
 
-        {/* LISTA DE ZONAS */}
+        {/* ZONE LIST */}
         <Text style={[styles.sectionTitle, { color: theme.text }]}>
           {t.mapa.zonas_cercanas}
         </Text>
 
-        {/* FILTRO POR TIPO DE ZONA */}
+        {/* FILTER BY ZONE TYPE */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -470,7 +470,7 @@ export default function ZonasAuxiliares() {
         ))}
       </ScrollView>
 
-      {/* MODAL DETALLE */}
+      {/* DETAIL MODAL */}
       <Modal visible={!!selectedZone} animationType="slide" transparent>
         <TouchableWithoutFeedback onPress={() => setSelectedZone(null)}>
           <View style={styles.modalOverlay}>
@@ -562,7 +562,7 @@ export default function ZonasAuxiliares() {
         </TouchableWithoutFeedback>
       </Modal>
 
-      {/* MODAL MAPA COMPLETO */}
+      {/* FULL MAP MODAL */}
       <Modal visible={fullscreen} animationType="slide">
         <View style={{ flex: 1 }}>
           <MapView ref={fullMapRef} style={{ flex: 1 }} initialRegion={mapCenter}>

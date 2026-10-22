@@ -7,21 +7,21 @@ import { authService } from "../../../services/auth.service";
 
 type Nav = NativeStackNavigationProp<AuthStackParamList, "RecoverPassword">;
 
-// El código que envía el backend tiene 6 dígitos y vence a los 15 minutos;
-// se puede pedir otro pasado 1 minuto (el backend no acepta más seguido).
+// The code the backend sends has 6 digits and expires after 15 minutes;
+// another one can be requested after 1 minute (the backend does not accept it more often).
 export const CODE_DIGITS = 6;
 const CODE_TIME = 15 * 60;
 const RESEND_WAIT = 60;
 const emptyCode = () => Array<string>(CODE_DIGITS).fill('');
 
-/** Mensaje entendible a partir del error de la API. */
+/** Readable message from the API error. */
 function errorMessage(e: any, byDefault: string): string {
   if (e?.response?.status === 429) return 'Hiciste muchos intentos. Espera un minuto e inténtalo de nuevo.';
   if (!e?.response) return 'No hay conexión con el servidor. Revisa tu internet e inténtalo de nuevo.';
   return e.response.data?.message ?? byDefault;
 }
 
-// Estado del mensaje (modal) que se muestra en pantalla
+// State of the message (modal) shown on screen
 type AlertState = {
   visible: boolean;
   type: AlertType;
@@ -34,26 +34,26 @@ type AlertState = {
 export function useRecoverPasswordViewModel() {
   const navigation = useNavigation<Nav>();
 
-  // Estados para el paso 1 (Email)
+  // State for step 1 (Email)
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [step, setStep] = useState(1); // 1: Email, 2: Código, 3: Nueva contraseña
+  const [step, setStep] = useState(1); // 1: Email, 2: Code, 3: New password
 
-  // Estados para el paso 2 (Código)
+  // State for step 2 (Code)
   const [code, setCode] = useState<string[]>(emptyCode());
   const [seconds, setSeconds] = useState(CODE_TIME);
   const [resendWait, setResendWait] = useState(RESEND_WAIT);
-  const codeEnd = useRef(0); // momento exacto en que vence el código
+  const codeEnd = useRef(0); // exact moment the code expires
   const codeStart = useRef(0);
   const verifying = useRef(false);
 
-  // Estados para el paso 3 (Nueva contraseña)
+  // State for step 3 (New password)
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  // Mensaje bonito (modal) en vez del Alert genérico
+  // Nice message (modal) instead of the generic Alert
   const [alert, setAlert] = useState<AlertState>({
     visible: false,
     type: 'error',
@@ -78,7 +78,7 @@ export function useRecoverPasswordViewModel() {
     action?.();
   };
 
-  // Arranca (o reinicia) el contador de vencimiento y la espera para reenviar
+  // Starts (or restarts) the expiration counter and the resend wait
   const startTimer = () => {
     codeStart.current = Date.now();
     codeEnd.current = Date.now() + CODE_TIME * 1000;
@@ -86,7 +86,7 @@ export function useRecoverPasswordViewModel() {
     setResendWait(RESEND_WAIT);
   };
 
-  // Cuenta regresiva: solo corre mientras estamos en el paso 2
+  // Countdown: only runs while we are on step 2
   useEffect(() => {
     if (step !== 2) return;
     const id = setInterval(() => {
@@ -140,7 +140,7 @@ export function useRecoverPasswordViewModel() {
     }
   };
 
-  /** Escribe en una casilla; si llegan varios dígitos (pegar o autocompletar) se reparten. */
+  /** Writes in one box; if several digits arrive (paste or autofill) they are spread out. */
   const handleCodeChange = (text: string, index: number): number => {
     if (expiredItem) return index;
     const digits = text.replace(/\D/g, '');
@@ -155,12 +155,12 @@ export function useRecoverPasswordViewModel() {
       });
     }
     setCode(newCode);
-    // Al completar los 6 dígitos se comprueba solo
+    // Once the 6 digits are complete it is checked automatically
     if (newCode.every((d) => d !== '')) checkCode(newCode.join(''));
     return lastItem;
   };
 
-  // Botón "Confirmar Código" (por si el avance automático no se disparó)
+  // "Confirm code" button (in case the automatic step did not fire)
   const verifyCode = () => {
     if (expiredItem) {
       showAlert(
@@ -181,7 +181,7 @@ export function useRecoverPasswordViewModel() {
     checkCode(code.join(''));
   };
 
-  // "Solicitar un nuevo código": pide otro al backend (el anterior deja de servir)
+  // "Request a new code": asks the backend for another one (the previous one stops working)
   const resendCode = async () => {
     if (!canResend) return;
     setIsLoading(true);
@@ -242,13 +242,13 @@ export function useRecoverPasswordViewModel() {
     sendLink: sendLink,
     handleCodeChange: handleCodeChange,
     verifyCode: verifyCode,
-    // temporizador
+    // timer
     expiredItem: expiredItem,
     formattedDuration: formattedDuration,
     resendCode: resendCode,
     canResend: canResend,
     resendWait: resendWait,
-    // paso 3
+    // step 3
     newPassword: newPassword,
     setNewPassword: setNewPassword,
     confirmPassword: confirmPassword,
@@ -258,7 +258,7 @@ export function useRecoverPasswordViewModel() {
     showConfirm: showConfirm,
     toggleShowConfirm: () => setShowConfirm((v) => !v),
     saveNewPassword: saveNewPassword,
-    // mensajes (modal)
+    // messages (modal)
     alert: alert,
     closeAlert: closeAlert,
     cancel: () => navigation.goBack()

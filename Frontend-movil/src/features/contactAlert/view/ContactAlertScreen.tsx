@@ -26,7 +26,7 @@ import { createStyles } from "../style/contactAlertStyle";
 
 type Styles = ReturnType<typeof createStyles>;
 
-// Punto con anillo que se expande (indicador "en vivo").
+// Dot with an expanding ring ("live" indicator).
 function PulseDot({ color, size = 10 }: { color: string; size?: number }) {
   const anim = useRef(new Animated.Value(0)).current;
 
@@ -78,7 +78,7 @@ function PulseDot({ color, size = 10 }: { color: string; size?: number }) {
   );
 }
 
-// Línea de recorrido + pines numerados. Se usa en el mapa pequeño y en la ventana emergente.
+// Route line + numbered pins. Used in the small map and in the popup.
 function MapPins({
   points,
   lineColor,
@@ -112,7 +112,7 @@ function MapPins({
         const isLast = i === points.length - 1;
         return (
           <Marker
-            // La key cambia cuando un pin deja de ser el último, para que se redibuje.
+            // The key changes when a pin stops being the last one, so it is redrawn.
             key={`${p.id}-${isLast ? "a" : "p"}`}
             coordinate={{ latitude: p.latitude, longitude: p.longitude }}
             anchor={{ x: 0.5, y: 0.5 }}
@@ -144,8 +144,8 @@ export default function ContactAlertScreen() {
   const styles = createStyles(theme, width, height, insets);
   const tx = t.alertaContacto;
 
-  // Los pines personalizados se redibujan unos instantes cuando llega un punto nuevo
-  // o cuando se abre la ventana emergente.
+  // Custom pins are redrawn for a few moments when a new point arrives
+  // or when the popup opens.
   const [trackChanges, setTrackChanges] = useState(true);
   useEffect(() => {
     setTrackChanges(true);
@@ -154,7 +154,7 @@ export default function ContactAlertScreen() {
   }, [vm.points.length, vm.mapVisible]);
 
   const endedColor = "#27ae60";
-  // "hace 5s" / "5s ago" / "há 5s" / "il y a 5s": el orden lo define el texto de cada idioma.
+  // "hace 5s" / "5s ago" / "há 5s" / "il y a 5s": each language's text defines the order.
   const ago = tx.hace.replace("{{tiempo}}", vm.timeSinceLast);
 
   return (
@@ -168,7 +168,7 @@ export default function ContactAlertScreen() {
         scrollEventThrottle={32}
       >
         <View style={styles.wrap}>
-          {/* Estado de la alerta */}
+          {/* Alert status */}
           <View style={styles.badge}>
             {vm.active ? (
               <PulseDot color={theme.icon} size={10} />
@@ -197,7 +197,7 @@ export default function ContactAlertScreen() {
             </Text>
           </Text>
 
-          {/* Mapa pequeño (vista previa): al tocarlo abre la ventana emergente */}
+          {/* Small map (preview): tapping it opens the popup */}
           <View style={styles.mapCard}>
             {vm.lastItem ? (
               <>
@@ -227,14 +227,14 @@ export default function ContactAlertScreen() {
                   />
                 </MapView>
 
-                {/* Capa transparente: intercepta el toque para abrir nuestra ventana y no Google Maps */}
+                {/* Transparent layer: catches the tap to open our popup and not Google Maps */}
                 <TouchableOpacity
                   style={StyleSheet.absoluteFillObject}
                   onPress={vm.openMap}
                   activeOpacity={0.9}
                 />
 
-                {/* Etiqueta superior izquierda */}
+                {/* Top left label */}
                 <View style={styles.locationPill} pointerEvents="none">
                   {vm.active ? (
                     <PulseDot color={theme.icon} size={9} />
@@ -266,7 +266,7 @@ export default function ContactAlertScreen() {
                   </View>
                 </View>
 
-                {/* Abrir mapa en ventana emergente */}
+                {/* Open the map in a popup */}
                 <TouchableOpacity
                   style={styles.mapsBtn}
                   onPress={vm.openMap}
@@ -295,7 +295,7 @@ export default function ContactAlertScreen() {
             )}
           </View>
 
-          {/* Última ubicación */}
+          {/* Last location */}
           {vm.lastItem && (
             <View style={styles.card}>
               <View style={styles.cardHeader}>
@@ -325,7 +325,7 @@ export default function ContactAlertScreen() {
             </View>
           )}
 
-          {/* Aviso de estado */}
+          {/* Status notice */}
           <View style={styles.noticeCard}>
             <View style={styles.noticeIcon}>
               <MaterialIcons
@@ -356,7 +356,7 @@ export default function ContactAlertScreen() {
             </View>
           </View>
 
-          {/* Historial de ubicación */}
+          {/* Location history */}
           <View style={styles.card}>
             <View style={styles.historyHeader}>
               <View style={styles.historyTitleRow}>
@@ -429,7 +429,7 @@ export default function ContactAlertScreen() {
             )}
           </View>
 
-          {/* Grabaciones de la alerta: se reproducen seguidas, parte por parte */}
+          {/* Alert recordings: played back to back, part by part */}
           {(vm.videos.length > 0 || vm.audios.length > 0) && (
             <View style={styles.card}>
               <Text style={styles.cardTitle}>{tx.grabaciones}</Text>
@@ -463,7 +463,7 @@ export default function ContactAlertScreen() {
             <MaterialIcons name="call" size={20} color={theme.icon} />
             <Text style={styles.callText}>{tx.llamar_numero.replace("{numero}", vm.emergencyNumber)}</Text>
           </TouchableOpacity>
-          {/* Chat con ella: respuestas rápidas o texto (con el código del seguimiento) */}
+          {/* Chat with her: quick replies or text (with the tracking code) */}
           {!!vm.code && (
             <View ref={keyboard.chatRef} collapsable={false}>
               <AlertChat
@@ -480,7 +480,7 @@ export default function ContactAlertScreen() {
         </View>
       </ScrollView>
 
-      {/* Ventana emergente con el mapa completo */}
+      {/* Popup with the full map */}
       <Modal
         visible={vm.mapVisible}
         animationType="slide"
@@ -511,7 +511,7 @@ export default function ContactAlertScreen() {
             </MapView>
           )}
 
-          {/* Barra superior: cerrar + a quién pertenece la ubicación */}
+          {/* Top bar: close + whose location it is */}
           <View style={styles.modalTopBar} pointerEvents="box-none">
             <TouchableOpacity
               style={styles.modalCloseBtn}
@@ -534,7 +534,7 @@ export default function ContactAlertScreen() {
             </View>
           </View>
 
-          {/* Última coordenada */}
+          {/* Last coordinate */}
           {vm.lastItem && (
             <View style={styles.modalInfo} pointerEvents="none">
               <Text style={styles.modalInfoText} numberOfLines={1}>
@@ -548,7 +548,7 @@ export default function ContactAlertScreen() {
             </View>
           )}
 
-          {/* Encuadrar todos los puntos */}
+          {/* Fit all the points */}
           <TouchableOpacity
             style={styles.modalFitBtn}
             onPress={vm.showAllPoints}

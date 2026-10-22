@@ -12,8 +12,8 @@ import { registrarPush } from "../../../services/push.service";
 const TEST_CHANNEL = "avisos_prueba";
 
 /**
- * Pantalla Notificaciones: las alertas de emergencia no se pueden silenciar, así que aquí solo se
- * revisa que el celular las deje llegar (permiso y pantalla completa) y se ajusta la vibración.
+ * Notifications screen: emergency alerts cannot be silenced, so here we only
+ * check that the phone lets them through (permission and full screen) and adjust the vibration.
  */
 export function useNotificationsViewModel() {
   const navigation = useNavigation();
@@ -27,7 +27,7 @@ export function useNotificationsViewModel() {
     setFullScreen(Platform.OS !== "android" || ShakeSensor.canUseFullScreen());
   }, []);
 
-  // Al entrar y al volver de los ajustes de Android
+  // On entering and when coming back from Android settings
   useFocusEffect(refresh);
   useEffect(() => {
     const sub = AppState.addEventListener("change", (status) => {
@@ -36,7 +36,7 @@ export function useNotificationsViewModel() {
     return () => sub.remove();
   }, [refresh]);
 
-  // Pide el permiso; si Android ya no deja preguntar, abre los ajustes de notificaciones de la app
+  // Asks for the permission; if Android no longer lets us ask, opens the app notification settings
   const grantPermission = useCallback(async () => {
     if (await notificationsPermission()) registrarPush().catch(() => {});
     else await notifee.openNotificationSettings();
@@ -47,7 +47,7 @@ export function useNotificationsViewModel() {
     ShakeSensor.requestFullScreen();
   }, []);
 
-  // Al activar la vibración vibra una vez para que la usuaria la sienta
+  // When vibration is turned on it vibrates once so the user feels it
   const setVibration = (value: boolean) => {
     update({ vibracion: value });
     if (value) Vibration.vibrate(200);

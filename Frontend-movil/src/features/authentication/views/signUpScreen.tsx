@@ -1,4 +1,4 @@
-// features/registro/registroScreen.tsx
+// features/authentication/views/signUpScreen.tsx
 import {View,Text,TouchableOpacity,Image,TextInput,ScrollView,KeyboardAvoidingView,Platform,Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -6,20 +6,20 @@ import { StatusBar } from "expo-status-bar";
 import { styles } from "../styles/signUp.styles";
 import { Ionicons } from "@expo/vector-icons";
 import { useSignUpViewModel } from "../viewModel/useSignUpViewModel";
-// Traemos el hook del idioma para usar los textos del JSON
+// We bring the language hook to use the JSON texts
 import { useLocale } from "../../../contexts/LocaleContext";
 
 export default function SignUp() {
   const vm = useSignUpViewModel();
-  const { t } = useLocale(); // "t" tiene todos los textos del idioma activo
+  const { t } = useLocale(); // "t" has all the texts of the active language
 
-  // Cierra el menú de tipo de documento (solo si está abierto)
+  // Closes the document type menu (only if it is open)
   const closeList = () => {
     if (vm.showList) vm.setShowList(false);
   };
 
   return (
-    // El fondo morado va en el SafeAreaView para que cubra TODA la pantalla (sin bordes blancos)
+    // The purple background goes on the SafeAreaView so it covers the WHOLE screen (no white edges)
     <SafeAreaView style={styles.Screen}>
       <StatusBar style="dark" backgroundColor="rgb(202, 171, 222)" />
       <KeyboardAvoidingView
@@ -31,9 +31,9 @@ export default function SignUp() {
           contentContainerStyle={{ flexGrow: 1, paddingBottom: 24 }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="always"
-          onScrollBeginDrag={closeList} // al hacer scroll también se cierra
+          onScrollBeginDrag={closeList} // scrolling closes it too
         >
-          {/* Tocar cualquier espacio vacío de la pantalla cierra el menú */}
+          {/* Tapping any empty space on the screen closes the menu */}
           <Pressable style={{ flexGrow: 1 }} onPress={closeList}>
             <View style={styles.LogoContainer}>
               <Image
@@ -45,7 +45,7 @@ export default function SignUp() {
             <View style={styles.FormContainer}>
               <Text style={styles.FormTitle}>{t.registro.titulo}</Text>
 
-              {/* Nombre */}
+              {/* Name */}
               <View style={styles.inputContainer}>
                 <Image style={styles.EmailIcon} source={require("@assets/imagesAlertaMujer/ScRegistro/user.png")} />
                 <TextInput
@@ -61,7 +61,7 @@ export default function SignUp() {
                 <Text style={{ color: "#A21CAF", marginLeft: 10 }}>{vm.errors.name}</Text>
               )}
 
-              {/* Teléfono */}
+              {/* Phone */}
               <View style={styles.inputContainer}>
                 <Image style={styles.EmailIcon} source={require("@assets/imagesAlertaMujer/ScRegistro/phone.png")} />
                 <TextInput
@@ -78,7 +78,7 @@ export default function SignUp() {
                 <Text style={{ color: "#A21CAF", marginLeft: 10 }}>{vm.errors.phoneNumber}</Text>
               )}
 
-              {/* Tipo de documento (ahora va primero) */}
+              {/* Document type (now first) */}
               <TouchableOpacity style={styles.inputContainer} onPress={vm.toggleDocumentTypeList}>
                 <Image style={styles.EmailIcon} source={require("@assets/imagesAlertaMujer/ScRegistro/Documento.png")} />
                 <Text style={{ flex: 1 }}>{vm.documentType || t.registro.tipo_documento}</Text>
@@ -102,7 +102,7 @@ export default function SignUp() {
                 </View>
               )}
 
-              {/* Número de documento (ahora va después del tipo) */}
+              {/* Document number (now after the type) */}
               <View style={styles.inputContainer}>
                 <Image style={styles.EmailIcon} source={require("@assets/imagesAlertaMujer/ScRegistro/Documento.png")} />
                 <TextInput
@@ -123,7 +123,7 @@ export default function SignUp() {
                 </View>
               )}
 
-              {/* Fecha de nacimiento con formato automático DD/MM/AAAA */}
+              {/* Birth date with automatic DD/MM/YYYY format */}
               <View style={styles.inputContainer}>
                 <Ionicons name="calendar-outline" size={20} color="#000" style={{ marginRight: 10 }} />
                 <TextInput
@@ -141,7 +141,7 @@ export default function SignUp() {
                 <Text style={{ color: "#A21CAF", marginLeft: 10 }}>{vm.errors.birthDate}</Text>
               )}
 
-              {/* Correo */}
+              {/* Email */}
               <View style={styles.inputContainer}>
                 <Image style={styles.EmailIcon} source={require("@assets/imagesAlertaMujer/ScLogin/correo.png")} />
                 <TextInput
@@ -157,7 +157,7 @@ export default function SignUp() {
                 <Text style={{ color: "#A21CAF", marginLeft: 10 }}>{vm.errors.email}</Text>
               )}
 
-              {/* Contraseña */}
+              {/* Password */}
               <View style={styles.inputContainer}>
                 <Image style={styles.EmailIcon} source={require("@assets/imagesAlertaMujer/ScRegistro/llave.png")} />
                 <TextInput
@@ -182,7 +182,7 @@ export default function SignUp() {
                 <Text style={{ color: "#A21CAF", marginLeft: 10 }}>{vm.errors.password}</Text>
               )}
 
-              {/* Confirmar contraseña (con icono de llave) */}
+              {/* Confirm password (with a key icon) */}
               <View style={styles.inputContainer}>
                 <Image style={styles.EmailIcon} source={require("@assets/imagesAlertaMujer/ScRegistro/llave.png")} />
                 <TextInput
@@ -208,7 +208,7 @@ export default function SignUp() {
               )}
             </View>
 
-            {/* Términos y política: con los colores del botón/inputs */}
+            {/* Terms and policy: with the button/input colors */}
             <View style={styles.checksContainer}>
               <View style={styles.checkRow}>
                 <TouchableOpacity

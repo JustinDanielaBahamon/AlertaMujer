@@ -5,7 +5,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import * as Location from "expo-location";
 import { locationPermission } from "../../../services/safePermissions";
-import { LinearGradient } from "expo-linear-gradient"; // <-- NUEVA IMPORTACIÓN
+import { LinearGradient } from "expo-linear-gradient"; // <-- NEW IMPORT
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -67,7 +67,7 @@ export default function ClassifyZoneView() {
   const route = useRoute<ClassifyZoneRouteProp>();
   const { user } = useAuth();
 
-  // Coordenadas actuales del estado para permitir actualizaciones al presionar "Mi ubicación"
+  // Current coordinates in state to allow updates when "My location" is pressed
   const locationToEdit = route.params?.locationToEdit;
   const initialLat = route.params?.latitude ?? 2.962828;
   const initialLng = route.params?.longitude ?? -75.2855952;
@@ -97,7 +97,7 @@ export default function ClassifyZoneView() {
   const [isLocationHovered, setIsLocationHovered] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Función reutilizable de Geocodificación Inversa mejorada
+  // Improved reusable reverse geocoding function
   const fetchAddress = useCallback(
     async (lat: number, lng: number) => {
       try {
@@ -109,7 +109,7 @@ export default function ClassifyZoneView() {
 
         const info = reverse[0];
 
-        // Extracción mejorada de datos con múltiples fallbacks (solo propiedades válidas)
+        // Improved data extraction with several fallbacks (valid properties only)
         const street = info?.street || info?.name || t.mapa.sin_calle;
         const number = info?.streetNumber || "";
         const detectedNeighborhood = info?.district || info?.subregion || t.mapa.sector_desconocido;
@@ -119,7 +119,7 @@ export default function ClassifyZoneView() {
         const detectedCountry = info?.country || t.mapa.pais_desconocido;
         const postalCode = info?.postalCode || "";
 
-        // Construcción de dirección más completa
+        // Builds a more complete address
         const fullAddress = `${street} ${number}`.trim();
         const fullCity = detectedCity !== t.mapa.ciudad_desconocida
           ? `${detectedCity}, ${detectedDepartment}`
@@ -159,12 +159,12 @@ export default function ClassifyZoneView() {
     [t]
   );
 
-  // Carga inicial
+  // Initial load
   useEffect(() => {
     fetchAddress(coords.latitude, coords.longitude);
   }, [coords, fetchAddress]);
 
-  // Handler para "Usar mi ubicación actual"
+  // Handler for "Use my current location"
   const handleUseCurrentLocation = async () => {
     try {
       setLoading(true);
@@ -191,13 +191,13 @@ export default function ClassifyZoneView() {
   const handleSave = async () => {
     if (saving) return;
 
-    // Validación: nombre obligatorio
+    // Validation: name required
     if (!name.trim()) {
       setNameError(true);
       return;
     }
 
-    // Validación: nivel de seguridad obligatorio
+    // Validation: safety level required
     if (!safetyLevel) {
       Alert.alert("Atención", "Por favor selecciona el nivel de seguridad de la zona.");
       return;
@@ -211,7 +211,7 @@ export default function ClassifyZoneView() {
         return;
       }
 
-      // Validación: verificar nombre duplicado (solo al crear)
+      // Validation: check for a duplicate name (only when creating)
       if (!locationToEdit) {
         const existing = await frequentLocationsService.getByUser(user.id);
         const duplicateName = existing.some(
@@ -243,7 +243,7 @@ export default function ClassifyZoneView() {
         await frequentLocationsService.create(payload);
       }
 
-      // Navegar a la pantalla de ubicaciones guardadas
+      // Navigate to the saved locations screen
       navigation.navigate("SavedLocations");
     } catch (error) {
       console.error("Error al guardar ubicación:", error);
@@ -280,7 +280,7 @@ export default function ClassifyZoneView() {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        {/* ================= HEADER ACTUALIZADO ================= */}
+        {/* ================= UPDATED HEADER ================= */}
         <LinearGradient
           colors={[theme.headercolor1, theme.headercolor2]}
           start={{ x: 0, y: 0 }}
@@ -303,7 +303,7 @@ export default function ClassifyZoneView() {
         </LinearGradient>
         {/* ======================================================= */}
 
-        {/* UBICACIÓN EN EL MAPA */}
+        {/* LOCATION ON THE MAP */}
         <Text
           style={[
             styles.sectionTitle,
@@ -318,7 +318,7 @@ export default function ClassifyZoneView() {
           Ubicación en el mapa
         </Text>
 
-        {/* BUSCAR DIRECCIÓN */}
+        {/* SEARCH ADDRESS */}
         <AddressSearchBar
           style={{ marginHorizontal: 18, marginBottom: 12 }}
           value={searchQuery}
@@ -369,7 +369,7 @@ export default function ClassifyZoneView() {
           </TouchableOpacity>
         </View>
 
-        {/* USAR UBICACIÓN ACTUAL */}
+        {/* USE CURRENT LOCATION */}
         <Pressable
           onPress={handleUseCurrentLocation}
           onHoverIn={() => setIsLocationHovered(true)}
@@ -400,7 +400,7 @@ export default function ClassifyZoneView() {
           }}
         </Pressable>
 
-        {/* NOMBRE DE LA UBICACIÓN */}
+        {/* LOCATION NAME */}
         <Text
           style={[
             styles.sectionTitle,
@@ -461,7 +461,7 @@ export default function ClassifyZoneView() {
           ))}
         </View>
 
-        {/* INFORMACIÓN DE LA ZONA */}
+        {/* ZONE INFORMATION */}
         <Text
           style={[
             styles.sectionTitle,
@@ -476,7 +476,7 @@ export default function ClassifyZoneView() {
           Información de la zona
         </Text>
 
-        {/* DIRECCIÓN */}
+        {/* ADDRESS */}
         <Text style={[styles.inputLabel, { color: theme.text }]}>
           Dirección
         </Text>
@@ -494,7 +494,7 @@ export default function ClassifyZoneView() {
           onChangeText={setAddress}
         />
 
-        {/* CIUDAD */}
+        {/* CITY */}
         <Text style={[styles.inputLabel, { color: theme.text }]}>
           Ciudad
         </Text>
@@ -530,7 +530,7 @@ export default function ClassifyZoneView() {
           onChangeText={setNeighborhood}
         />
 
-        {/* DESCRIPCIÓN DE LA ZONA */}
+        {/* ZONE DESCRIPTION */}
         <Text style={[styles.inputLabel, { color: theme.text }]}>
           Descripción de la zona
         </Text>
@@ -559,7 +559,7 @@ export default function ClassifyZoneView() {
           {description.length}/250
         </Text>
 
-        {/* NOTAS ADICIONALES */}
+        {/* ADDITIONAL NOTES */}
         <Text style={[styles.inputLabel, { color: theme.text }]}>
           Notas adicionales (opcional)
         </Text>
@@ -597,7 +597,7 @@ export default function ClassifyZoneView() {
           </View>
         )}
 
-        {/* NIVEL DE SEGURIDAD */}
+        {/* SAFETY LEVEL */}
         <Text style={[styles.sectionTitle, { color: theme.text }]}>
           <MaterialIcons
             name="security"
@@ -611,7 +611,7 @@ export default function ClassifyZoneView() {
         </Text>
 
         <View style={styles.securityGrid}>
-          {/* MUY SEGURA */}
+          {/* VERY SAFE */}
           <TouchableOpacity
             style={[
               styles.securityOption,
@@ -625,7 +625,7 @@ export default function ClassifyZoneView() {
             <Text style={styles.securitySmallText}>Zona muy segura</Text>
           </TouchableOpacity>
 
-          {/* MODERADA */}
+          {/* MODERATE */}
           <TouchableOpacity
             style={[
               styles.securityOption,
@@ -654,7 +654,7 @@ export default function ClassifyZoneView() {
           </TouchableOpacity>
         </View>
 
-        {/* GUARDAR UBICACIÓN */}
+        {/* SAVE LOCATION */}
         <TouchableOpacity
           style={[styles.submitButton, saving && { opacity: 0.7 }]}
           onPress={handleSave}

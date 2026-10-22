@@ -13,7 +13,7 @@ type Props = {
   onClose: () => void;
 };
 
-/** Confirmación para eliminar la cuenta: explica qué se borra y pide escribir ELIMINAR. */
+/** Confirmation to delete the account: explains what is deleted and asks to type ELIMINAR. */
 export default function DeleteAccountModal({ visible, deleting, error, onConfirm, onClose }: Props) {
   const { theme } = useTheme();
   const { t } = useLocale();

@@ -1,11 +1,11 @@
 import { StyleSheet } from "react-native";
 import { AppTheme } from "../../../contexts/ThemeContext";
 
-// Recibe el tema activo y devuelve los estilos con los colores correctos
+// Receives the active theme and returns the styles with the right colors
 export const createStyles = (theme: AppTheme) =>
   StyleSheet.create({
 
-    // --- CONTENEDORES PRINCIPALES ---
+    // --- MAIN CONTAINERS ---
 
     mainContainer: {
       flex: 1,
@@ -45,7 +45,7 @@ export const createStyles = (theme: AppTheme) =>
       width: 220,
     },
 
-    // --- FILA DE CONTEO (Tus contactos) ---
+    // --- COUNT ROW (Your contacts) ---
 
     countRow: {
       flexDirection: "row",
@@ -67,7 +67,7 @@ export const createStyles = (theme: AppTheme) =>
       fontWeight: "800",
     },
 
-    // --- BUSCADOR ---
+    // --- SEARCH ---
 
     searchContainer: {
       flexDirection: "row",
@@ -86,10 +86,10 @@ export const createStyles = (theme: AppTheme) =>
       flex: 1,
       fontSize: 14,
       color: theme.contactSearchText,
-      padding: 0, // reset del padding por defecto en Android
+      padding: 0, // resets the default padding on Android
     },
 
-    // --- TARJETA DE CONTACTO ---
+    // --- CONTACT CARD ---
 
     cardWrapper: {
       marginBottom: 16,
@@ -103,7 +103,7 @@ export const createStyles = (theme: AppTheme) =>
       padding: 16,
       borderWidth: 1,
       borderColor: theme.contactCardBorder,
-      // Sombras
+      // Shadows
       elevation: 4,
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 4 },
@@ -112,7 +112,7 @@ export const createStyles = (theme: AppTheme) =>
       marginBottom: 20,
     },
 
-    // SECCIÓN SUPERIOR: Foto, Info y Editar
+    // TOP SECTION: Photo, Info and Edit
 
     topSection: {
       flexDirection: "row",
@@ -140,7 +140,7 @@ export const createStyles = (theme: AppTheme) =>
       width: 18,
       height: 18,
       borderRadius: 9,
-      backgroundColor: "#BDBDBD", // Se reemplaza por el estado real del contacto
+      backgroundColor: "#BDBDBD", // Replaced by the contact's real status
       borderWidth: 3,
       borderColor: theme.contactCardBg,
     },
@@ -193,7 +193,7 @@ export const createStyles = (theme: AppTheme) =>
       marginLeft: 8,
     },
 
-    // SECCIÓN ACCIONES: Llamar, WhatsApp, Ubicación
+    // ACTIONS SECTION: Call, WhatsApp, Location
 
     actionsSection: {
       flexDirection: "row",
@@ -223,17 +223,17 @@ export const createStyles = (theme: AppTheme) =>
       fontWeight: "500",
     },
 
-    // --- FOOTER: ¿QUIERES AGREGAR MÁS? ---
+    // --- FOOTER: WANT TO ADD MORE? ---
 
     suggestionCard: {
       borderRadius: 20,
       padding: 20,
       flexDirection: "row",
       alignItems: "center",
-      borderStyle: "dashed", // Borde punteado
+      borderStyle: "dashed", // Dotted border
       borderWidth: 1.5,
       marginTop: 10,
-      marginBottom: 100, // Espacio para que el botón flotante no tape nada
+      marginBottom: 100, // Room so the floating button does not cover anything
       margin: 10,
     },
 
@@ -255,7 +255,7 @@ export const createStyles = (theme: AppTheme) =>
       elevation: 2,
     },
 
-    // --- BOTÓN FLOTANTE Y SWIPE ---
+    // --- FLOATING BUTTON AND SWIPE ---
 
     floatingButton: {
       position: "absolute",

@@ -1,11 +1,11 @@
 import type { UserApi } from "../../services/users.service";
 
-/** Datos que pide el registro normal y que una cuenta creada con Google no trae. */
+/** Data the regular sign-up asks for and that an account created with Google does not have. */
 export function profileIncomplete(u: Pick<UserApi, "telephone" | "documentNumber" | "documentType" | "birthdate">): boolean {
   return !u.telephone?.trim() || !u.documentNumber?.trim() || !u.documentType?.trim() || !u.birthdate;
 }
 
-/** "05/05/1995" → "1995-05-05"; null si la fecha no existe o no es razonable (edad 5 a 110 años). */
+/** "05/05/1995" → "1995-05-05"; null if the date does not exist or is not reasonable (age 5 to 110). */
 export function dateToIso(ddMmYyyy: string, today = new Date()): string | null {
   const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(ddMmYyyy.trim());
   if (!m) return null;
@@ -17,7 +17,7 @@ export function dateToIso(ddMmYyyy: string, today = new Date()): string | null {
   return `${m[3]}-${m[2]}-${m[1]}`;
 }
 
-/** Escribe la fecha con las barras a medida que se teclea. */
+/** Writes the date with the slashes as it is typed. */
 export function formatDateText(text: string): string {
   const d = text.replace(/\D/g, "").slice(0, 8);
   if (d.length <= 2) return d;

@@ -2,22 +2,22 @@ import axios from "axios";
 import Constants from "expo-constants";
 import { serviceFor } from "./serviceRoutes";
 
-// La URL del backend no es secreta, pero el log solo interesa en desarrollo
+// The backend URL is not secret, but the log only matters in development
 const logStart = (...parts: unknown[]) => {
   if (__DEV__) console.log(...parts);
 };
 
 function getApiBaseUrl(): string {
-  // 1) Variable de entorno explícita (seteada por update-env.js al hacer npm start)
+  // 1) Explicit environment variable (set by update-env.js on npm start)
   const envApiUrl = process.env.EXPO_PUBLIC_API_URL;
   if (envApiUrl) {
     logStart(" [api.ts] Usando EXPO_PUBLIC_API_URL:", envApiUrl);
     return envApiUrl;
   }
 
-  // 2) Dispositivo físico / Expo Go: derivar la IP del hostUri de Expo
-  //    Constants.expoConfig.hostUri tiene el formato "192.168.x.x:8081"
-  //    manifest.debuggerHost es el equivalente en SDK antiguo
+  // 2) Physical device / Expo Go: derive the IP from the Expo hostUri
+  // Constants.expoConfig.hostUri has the format "192.168.x.x:8081"
+  // manifest.debuggerHost is the equivalent in old SDKs
   const hostUri =
     Constants.expoConfig?.hostUri ??
     (Constants as any).manifest?.debuggerHost ??
@@ -30,7 +30,7 @@ function getApiBaseUrl(): string {
     return url;
   }
 
-  // 3) Fallback final (solo funciona en web o emulador Android con 10.0.2.2)
+  // 3) Final fallback (only works on web or the Android emulator with 10.0.2.2)
   console.warn(" [api.ts] No se detectó IP — usando localhost");
   return "http://localhost:8080";
 }
@@ -38,8 +38,8 @@ function getApiBaseUrl(): string {
 const API_BASE_URL = getApiBaseUrl();
 logStart(" [api.ts] API_BASE_URL:", API_BASE_URL);
 
-// Sin tiempo de espera, si el backend no responde (p. ej. dormido en Render) la app se quedaba
-// esperando indefinidamente. 20 s alcanzan para que el servidor despierte en la mayoría de los casos.
+// Without a timeout, if the backend does not respond (e.g. asleep on Render) the app kept
+// waiting forever. 20 s is enough for the server to wake up in most cases.
 export const WAIT_TIME_MS = 20000;
 
 const api = axios.create({
@@ -47,13 +47,13 @@ const api = axios.create({
   timeout: WAIT_TIME_MS,
 });
 
-// Registro de peticiones solo en desarrollo, y nunca el contenido: el cuerpo trae contraseñas
-// (inicio de sesión) y las respuestas traen tokens; en un APK quedaría en el log de Android.
+// Request logging only in development, and never the content: the body has passwords
+// (sign-in) and the responses have tokens; in an APK it would end up in the Android log.
 const registrar = (...parts: unknown[]) => {
   if (__DEV__) console.log(...parts);
 };
 
-// Tokens de la sesión (los actualiza AuthContext)
+// Session tokens (updated by AuthContext)
 let authToken: string | null = null;
 let refreshToken: string | null = null;
 
@@ -66,7 +66,7 @@ export const setRefreshToken = (token: string | null) => {
   refreshToken = token;
 };
 
-// AuthContext se suscribe para guardar el token renovado y para cerrar la sesión cuando ya no es válida
+// AuthContext subscribes to store the renewed token and to sign out when it is no longer valid
 let onTokenRenewed: ((token: string) => void) | null = null;
 let onSessionExpired: (() => void) | null = null;
 
@@ -79,11 +79,11 @@ export const listenSession = (listeners: { renewed: (token: string) => void; exp
   };
 };
 
-// Interceptor para agregar el token a las peticiones
+// Interceptor that adds the token to the requests
 api.interceptors.request.use((config) => {
   registrar(" [api] Request:", config.method?.toUpperCase(), config.url);
 
-  // Cada ruta va a su microservicio (Alert o Evidence); el resto, a la URL principal (Auth)
+  // Each route goes to its microservice (Alert or Evidence); the rest, to the main URL (Auth)
   const service = config.url ? serviceFor(config.url) : null;
   if (service) config.baseURL = service;
 
@@ -95,15 +95,15 @@ api.interceptors.request.use((config) => {
 });
 
 /**
- * URL y cabecera de sesión para que un reproductor (video, audio, imagen) cargue un archivo
- * protegido directamente, sin descargarlo antes.
+ * URL and session header so a player (video, audio, image) loads a protected file
+ * directly, without downloading it first.
  */
 export const sourceWithToken = (route: string): { uri: string; headers: Record<string, string> } => ({
   uri: `${serviceFor(route) ?? API_BASE_URL}${route}`,
   headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
 });
 
-// Una sola renovación a la vez aunque fallen varias peticiones juntas
+// A single renewal at a time even if several requests fail together
 let renewing: Promise<string | null> | null = null;
 
 async function renewToken(): Promise<string | null> {
@@ -112,7 +112,7 @@ async function renewToken(): Promise<string | null> {
     .post<{ token: string }>(`${API_BASE_URL}/api/auth/refresh`, { refreshToken }, { timeout: WAIT_TIME_MS })
     .then((r) => r.data.token ?? null)
     .catch((e) => {
-      // Sin conexión o servidor caído: no es motivo para cerrar la sesión
+      // Offline or server down: not a reason to sign out
       if (!e?.response) throw e;
       return null;
     })
@@ -132,7 +132,7 @@ api.interceptors.response.use(
     const original = error.config;
     const isAuthRequest = String(original?.url ?? "").startsWith("/api/auth/");
 
-    // Token vencido: se renueva con el refresh token y se repite la petición una vez
+    // Expired token: renewed with the refresh token and the request is repeated once
     if (error.response?.status === 401 && authToken && original && !original._reintento && !isAuthRequest) {
       original._reintento = true;
       let newItem: string | null = null;

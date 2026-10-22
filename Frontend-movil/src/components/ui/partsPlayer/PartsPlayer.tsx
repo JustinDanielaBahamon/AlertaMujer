@@ -13,8 +13,8 @@ const dos = (n: number) => String(n).padStart(2, "0");
 const time = (d: Date) => `${dos(d.getHours())}:${dos(d.getMinutes())}:${dos(d.getSeconds())}`;
 
 /**
- * Reproduce las partes de una grabación una tras otra, como si fueran un solo archivo (la app sube
- * el video y el audio en trozos de ~45 s). Los botones numerados permiten saltar a cualquier parte.
+ * Plays the parts of a recording one after another, as if they were a single file (the app uploads
+ * video and audio in ~45 s chunks). The numbered buttons jump to any part.
  */
 export default function PartsPlayer({
   parts,
@@ -45,7 +45,7 @@ export default function PartsPlayer({
     }
     if (loading) setLoading(false);
     if (s.didJustFinish && index < parts.length - 1) {
-      playOnLoad.current = true; // la siguiente parte empieza sola
+      playOnLoad.current = true; // the next part starts by itself
       setIndex(index + 1);
     }
   };

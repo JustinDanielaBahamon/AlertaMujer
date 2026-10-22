@@ -38,26 +38,26 @@ import { getPlace } from "../../../services/geocoding.service";
 type Coord = { latitude: number; longitude: number };
 
 type AddressInfoBlock = {
-  zone: string; // barrio, o la ciudad si no hay barrio (se usa en el encabezado)
+  zone: string; // neighborhood, or the city if there is no neighborhood (used in the header)
   neighborhood: string;
   city: string;
   address: string;
 };
 
-// Colores distintos para cada recorrido guardado, para que no se amontonen
-// Solo la paleta de la app: violetas, morados y neón
+// Different colors for each saved route, so they do not pile up
+// Only the app palette: violets, purples and neon
 const ROUTE_COLORS = [
-  "#7B1DB2", // Púrpura
-  "#D946EF", // Morado neón
-  "#9333EA", // Violeta
-  "#C026D3", // Fucsia
-  "#6D28D9", // Violeta oscuro
+  "#7B1DB2", // Purple
+  "#D946EF", // Neon purple
+  "#9333EA", // Violet
+  "#C026D3", // Fuchsia
+  "#6D28D9", // Dark violet
   "#A855F7", // Lila
-  "#4C1D95", // Morado profundo
-  "#E879F9", // Neón claro
+  "#4C1D95", // Deep purple
+  "#E879F9", // Light neon
 ];
 
-// Zonas clasificadas por la usuaria (pantalla "Clasificar zona"), dibujadas como círculo en el mapa
+// Zones classified by the user ("Classify zone" screen), drawn as circles on the map
 type ClassifiedZone = {
   id: string;
   name: string;
@@ -68,15 +68,15 @@ type ClassifiedZone = {
 
 const ZONE_RADIUS_METERS = 150;
 
-// Zonas que clasificó la usuaria: tonos de la paleta de la app según el nivel
+// Zones the user classified: app palette shades by level
 const LEVEL_COLOR: Record<ClassifiedZone["riskLevel"], string> = {
   muy_segura: "#7C3AED",
   moderada: "#C084FC",
   muy_insegura: "#D946EF",
 };
 
-// Zonas de emergencia del sistema (policía, asistencia, zonas seguras): siempre visibles, en morado
-// oscuro y con ícono, para que no se confundan con las de la usuaria
+// System emergency zones (police, assistance, safe zones): always visible, in dark
+// purple and with an icon, so they are not confused with the user's
 type OfficialZone = {
   id: string;
   name: string;
@@ -107,14 +107,14 @@ const distanceMeters = (a: Coord, b: Coord) => {
   return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
 };
 
-// Consulta la dirección de unas coordenadas (barrio, ciudad y calle)
+// Looks up the address of some coordinates (neighborhood, city and street)
 const getAddressInfo = async (coord: Coord): Promise<AddressInfoBlock> => {
   const reverse = await Location.reverseGeocodeAsync(coord);
   const info = reverse?.[0];
 
   const street = info?.street || info?.name || "";
   const number = info?.streetNumber || "";
-  // En Colombia el geocodificador del celular casi nunca trae el barrio: se completa con OpenStreetMap
+  // In Colombia the phone geocoder almost never returns the neighborhood: OpenStreetMap fills it in
   const neighborhood =
     info?.district || (await getPlace(coord.latitude, coord.longitude).catch(() => null))?.neighborhood || "";
   const municipality = info?.city || info?.subregion || "";
@@ -129,7 +129,7 @@ const getAddressInfo = async (coord: Coord): Promise<AddressInfoBlock> => {
 
 type MapStyles = ReturnType<typeof createMapModalStyles>;
 
-// Línea punteada + pines numerados del recorrido (mismo diseño que "Alerta de emergencia")
+// Dotted line + numbered route pins (same design as "Emergency alert")
 function HistoryPins({
   points,
   current,
@@ -147,7 +147,7 @@ function HistoryPins({
   label: string;
   currentTitle: string;
 }) {
-  // La línea termina en la posición actual
+  // The line ends at the current position
   const line = [...points, current];
 
   return (
@@ -178,7 +178,7 @@ function HistoryPins({
         </Marker>
       ))}
 
-      {/* Posición actual: pin grande al frente */}
+      {/* Current position: big pin on top */}
       <Marker
         coordinate={current}
         anchor={{ x: 0.5, y: 0.5 }}
@@ -203,13 +203,13 @@ export default function MapScreen() {
   const mounted = useRef(true);
   const lastGeocoded = useRef<Coord | null>(null);
 
-  const [showRoutesOnMap, setShowRoutesOnMap] = useState(true); // Activado por defecto
-  const [onlyImportant, setOnlyImportant] = useState(false); // Mostrar todos por defecto
+  const [showRoutesOnMap, setShowRoutesOnMap] = useState(true); // On by default
+  const [onlyImportant, setOnlyImportant] = useState(false); // Show all by default
   const [addressInfoText, setAddressInfoText] = useState<AddressInfoBlock | null>(null);
   const [routeInfoVisible, setRouteInfoVisible] = useState(false);
   const [routeInfo, setRouteInfo] = useState<any>(null);
-  const [mapReady, setMapReady] = useState(false); // el mapa grande se dibuja cuando termina la animación del modal
-  const [trackChanges, setTrackChanges] = useState(true); // los pines personalizados se redibujan solo unos instantes
+  const [mapReady, setMapReady] = useState(false); // the big map is drawn when the modal animation ends
+  const [trackChanges, setTrackChanges] = useState(true); // custom pins are redrawn only for a few moments
   const [classifiedZones, setClassifiedZones] = useState<ClassifiedZone[]>([]);
   const [officialZones, setOfficialZones] = useState<OfficialZone[]>([]);
   const [showMyZones, setShowMyZones] = useState(true);
@@ -250,7 +250,7 @@ export default function MapScreen() {
       : addressInfoText.address
     : "";
 
-  // Recorridos guardados que se dibujan en el mapa grande (misma lógica de siempre)
+  // Saved routes drawn on the big map (same logic as always)
   const visibleRoutes = useMemo(
     () =>
       !showRoutesOnMap
@@ -265,7 +265,7 @@ export default function MapScreen() {
     navigation.navigate("SaveRoute");
   };
 
-  // Zonas clasificadas (seguras / moderadas / inseguras): se recargan cada vez que se vuelve al mapa
+  // Classified zones (safe / moderate / unsafe): reloaded every time the map is opened again
   useFocusEffect(
     useCallback(() => {
       let enabled = true;
@@ -303,7 +303,7 @@ export default function MapScreen() {
     }, [user?.id])
   );
 
-  // Al buscar una dirección con el mapa grande abierto, la cámara se mueve hasta ahí
+  // When an address is searched with the big map open, the camera moves there
   useEffect(() => {
     if (!fullscreen || !mapReady || !searchResult) return;
     mapRef.current?.animateToRegion(
@@ -334,7 +334,7 @@ export default function MapScreen() {
     };
   }, []);
 
-  // El mapa grande se monta al terminar de deslizar el modal para que la animación no se trabe
+  // The big map is mounted when the modal finishes sliding so the animation does not stutter
   useEffect(() => {
     if (!fullscreen) {
       setMapReady(false);
@@ -344,15 +344,15 @@ export default function MapScreen() {
     return () => clearTimeout(id);
   }, [fullscreen]);
 
-  // Los pines personalizados se redibujan unos instantes cuando cambian o se abre el mapa
+  // Custom pins are redrawn for a few moments when they change or the map opens
   useEffect(() => {
     setTrackChanges(true);
     const id = setTimeout(() => setTrackChanges(false), 600);
     return () => clearTimeout(id);
   }, [history?.length, fullscreen, mapReady, visibleRoutes.length]);
 
-  // Dirección actual (reverse geocoding). Solo se consulta al inicio o si se movió más de 40 m,
-  // así no se hace una petición de red en cada actualización del GPS.
+  // Current address (reverse geocoding). Only queried at the start or after moving more than 40 m,
+  // so there is no network request on every GPS update.
   useEffect(() => {
     if (!location) return;
 
@@ -397,7 +397,7 @@ export default function MapScreen() {
       const lat = location.latitude.toFixed(6);
       const lng = location.longitude.toFixed(6);
 
-      // Solo se incluyen las líneas de las que realmente hay dato
+      // Only the lines that actually have data are included
       const lines = [
         t.mapa.mensaje_ubicacion,
         "",
@@ -423,10 +423,10 @@ export default function MapScreen() {
     }
   };
 
-  // ─── PANTALLA DE CARGA ────────────────────────────────────────────────────
-  // Zonas de emergencia del sistema: se cargan al entrar al mapa (no dependen de la usuaria).
-  // Debe ir antes del return de "sin ubicación": un hook después de un return cambia la
-  // cantidad de hooks entre renders y React cierra la app.
+  // ─── LOADING SCREEN ──────────────────────────────────────────────────────
+  // System emergency zones: loaded when entering the map (they do not depend on the user).
+  // It must go before the "no location" return: a hook after a return changes the
+  // number of hooks between renders and React closes the app.
   useFocusEffect(
     useCallback(() => {
       let enabled = true;
@@ -487,11 +487,11 @@ export default function MapScreen() {
     );
   }
 
-  // ─── COORDENADA CENTRO Y ACCIONES LOCALES ─────────────────────────────────
+  // ─── CENTER COORDINATE AND LOCAL ACTIONS ─────────────────────────────────
   const computedCenter = centerCoordinate ?? alertDestination?.coordenada ?? location;
   const mapCenter: Coord = searchResult?.coord ?? computedCenter;
 
-  // Círculo del color del nivel de seguridad de cada zona clasificada (si la usuaria las muestra)
+  // Circle with the safety level color of each classified zone (if the user shows them)
   const renderClassifiedZones = () =>
     !showMyZones
       ? null
@@ -509,7 +509,7 @@ export default function MapScreen() {
           );
         });
 
-  // Zonas de emergencia: círculo morado oscuro y un ícono del tipo de zona
+  // Emergency zones: dark purple circle and an icon of the zone type
   const renderOfficialZones = () =>
     officialZones.map((zone) => (
       <React.Fragment key={`oficial-${zone.id}`}>
@@ -565,8 +565,8 @@ export default function MapScreen() {
     },
   ] as const;
 
-  // ─── ENCUADRE DEL MAPA GRANDE ─────────────────────────────────────────────
-  // Todos los puntos que están visibles: ubicación, dirección de alerta, historial y recorridos.
+  // ─── BIG MAP FITTING ─────────────────────────────────────────────────────
+  // Every visible point: location, alert address, history and routes.
   const visiblePoints = (): Coord[] => {
     const pts: Coord[] = [location];
     if (alertDestination) pts.push(alertDestination.coordenada);
@@ -615,7 +615,7 @@ export default function MapScreen() {
         overScrollMode="never"
         contentContainerStyle={{ paddingBottom: 100 }}
       >
-        {/* HEADER GRADIENTE */}
+        {/* GRADIENT HEADER */}
         <LinearGradient
           colors={[theme.headercolor1, theme.headercolor2]}
           start={{ x: 1, y: 0 }}
@@ -640,7 +640,7 @@ export default function MapScreen() {
           </View>
         </LinearGradient>
 
-        {/* BARRA DE BÚSQUEDA DE DIRECCIÓN */}
+        {/* ADDRESS SEARCH BAR */}
         <AddressSearchBar
           style={{ marginHorizontal: 20, marginTop: 20 }}
           value={searchQuery}
@@ -650,7 +650,7 @@ export default function MapScreen() {
           city={addressInfoText?.city}
         />
 
-        {/* MAPA */}
+        {/* MAP */}
         <View style={ms.mapCard}>
           <MapView
             style={ms.miniMap}
@@ -688,7 +688,7 @@ export default function MapScreen() {
             )}
           </MapView>
 
-          {/* Capa transparente: intercepta el toque para que Android no abra la app de Google Maps */}
+          {/* Transparent layer: catches the tap so Android does not open the Google Maps app */}
           <TouchableOpacity
             style={StyleSheet.absoluteFillObject}
             onPress={() => setFullscreen(true)}
@@ -705,7 +705,7 @@ export default function MapScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* OPCIONES DEL MAPA: un solo cuadro con las capas que la usuaria quiere ver */}
+        {/* MAP OPTIONS: a single box with the layers the user wants to see */}
         <View style={[styles.routesSwitchContainer, op.panel, { backgroundColor: theme.card }]}>
           <TouchableOpacity
             style={op.header}
@@ -782,7 +782,7 @@ export default function MapScreen() {
             ))}
         </View>
 
-        {/* BOTONES DE ACCIÓN */}
+        {/* ACTION BUTTONS */}
         <View style={styles.buttonsRow}>
           {actions.map((a) => (
             <TouchableOpacity key={a.label} style={styles.actionButton} onPress={a.action}>
@@ -794,7 +794,7 @@ export default function MapScreen() {
           ))}
         </View>
 
-        {/* TARJETA DE UBICACIÓN: barrio y dirección; radio y coordenadas en pequeño */}
+        {/* LOCATION CARD: neighborhood and address; radius and coordinates in small print */}
         <View style={[styles.coordinatesCard, { backgroundColor: theme.card }]}>
           <View style={op.placeRow}>
             <View style={[op.placeIcon, { backgroundColor: theme.icono }]}>
@@ -839,12 +839,12 @@ export default function MapScreen() {
           </View>
         </View>
 
-        {/* TÍTULO ACCIONES ADICIONALES */}
+        {/* ADDITIONAL ACTIONS TITLE */}
         <Text style={[styles.historyTitle, { color: theme.text }]}>
           {t.mapa.acciones_adicionales}
         </Text>
 
-        {/* UBICACIONES GUARDADAS */}
+        {/* SAVED LOCATIONS */}
         <TouchableOpacity
           style={[styles.historyItem, { backgroundColor: theme.card }]}
           onPress={goToSavedLocations}
@@ -862,7 +862,7 @@ export default function MapScreen() {
           <MaterialIcons name="chevron-right" size={20} color={theme.contactSubtext} />
         </TouchableOpacity>
 
-        {/* ZONAS AUXILIARES */}
+        {/* HELP ZONES */}
         <TouchableOpacity
           style={[styles.historyItem, { backgroundColor: theme.card }]}
           onPress={goToHelpZones}
@@ -880,7 +880,7 @@ export default function MapScreen() {
           <MaterialIcons name="chevron-right" size={20} color={theme.contactSubtext}/>
         </TouchableOpacity>
 
-           {/* GUARDAR RECORRIDO */}
+           {/* SAVE ROUTE */}
         <TouchableOpacity
           style={[styles.historyItem, { backgroundColor: theme.card }]}
           onPress={goToSaveRoute}
@@ -898,7 +898,7 @@ export default function MapScreen() {
           <MaterialIcons name="chevron-right" size={20} color={theme.contactSubtext} />
         </TouchableOpacity>
 
-        {/* HISTORIAL DE RECORRIDOS */}
+        {/* ROUTE HISTORY */}
         <TouchableOpacity
           style={[styles.historyItem, { backgroundColor: theme.card }]}
           onPress={goToRouteHistory}
@@ -919,7 +919,7 @@ export default function MapScreen() {
        
       </ScrollView>
 
-      {/* MODAL PANTALLA COMPLETA (mismo diseño que "Alerta de emergencia") */}
+      {/* FULL-SCREEN MODAL (same design as "Emergency alert") */}
       <Modal
         visible={fullscreen}
         animationType="slide"
@@ -939,7 +939,7 @@ export default function MapScreen() {
                 longitudeDelta: searchResult ? 0.006 : 0.01,
               }}
             >
-              {/* Zonas clasificadas: círculo del color de su nivel de seguridad */}
+              {/* Classified zones: circle with the color of their safety level */}
               {renderOfficialZones()}
             {renderClassifiedZones()}
 
@@ -976,7 +976,7 @@ export default function MapScreen() {
                 </Marker>
               )}
 
-              {/* Recorridos guardados (misma lógica: interruptores de la pantalla y toque para ver información) */}
+              {/* Saved routes (same logic: screen switches and tap to see information) */}
               {visibleRoutes.map((route: any, index: number) => {
                 const routeColor = ROUTE_COLORS[index % ROUTE_COLORS.length];
                 const points = route.puntos.map((point: any) => ({
@@ -999,7 +999,7 @@ export default function MapScreen() {
                       />
                     )}
 
-                    {/* Marcador de inicio */}
+                    {/* Start marker */}
                     <Marker
                       coordinate={points[0]}
                       anchor={{ x: 0.5, y: 0.5 }}
@@ -1016,7 +1016,7 @@ export default function MapScreen() {
                       </View>
                     </Marker>
 
-                    {/* Marcador de fin */}
+                    {/* End marker */}
                     <Marker
                       coordinate={points[points.length - 1]}
                       anchor={{ x: 0.5, y: 0.5 }}
@@ -1037,7 +1037,7 @@ export default function MapScreen() {
             </View>
           )}
 
-          {/* Barra superior: cerrar + estado de la ubicación */}
+          {/* Top bar: close + location status */}
           <View style={ms.modalTopBar} pointerEvents="box-none">
             <TouchableOpacity
               style={ms.modalCloseBtn}
@@ -1061,7 +1061,7 @@ export default function MapScreen() {
             </View>
           </View>
 
-          {/* Búsqueda de dirección dentro del mapa grande */}
+          {/* Address search inside the big map */}
           <AddressSearchBar
             style={{
               position: "absolute",
@@ -1076,7 +1076,7 @@ export default function MapScreen() {
             city={addressInfoText?.city}
           />
 
-          {/* Leyenda de niveles de seguridad */}
+          {/* Safety level legend */}
           {showMyZones && classifiedZones.length > 0 && (
             <View
               pointerEvents="none"
@@ -1117,7 +1117,7 @@ export default function MapScreen() {
             </View>
           )}
 
-          {/* Coordenadas y dirección actual */}
+          {/* Coordinates and current address */}
           <View style={ms.modalInfo} pointerEvents="none">
             <Text style={ms.modalInfoText} numberOfLines={1}>
               {location.latitude.toFixed(5)}, {location.longitude.toFixed(5)}
@@ -1129,7 +1129,7 @@ export default function MapScreen() {
             )}
           </View>
 
-          {/* Ir a mi ubicación / encuadrar todos los puntos */}
+          {/* Go to my location / fit all the points */}
           <TouchableOpacity
             style={ms.modalLocBtn}
             onPress={centerOnMe}
@@ -1149,7 +1149,7 @@ export default function MapScreen() {
         </View>
       </Modal>
 
-      {/* MODAL INFORMACIÓN DE RECORRIDO */}
+      {/* ROUTE INFORMATION MODAL */}
       <Modal visible={routeInfoVisible} animationType="slide" transparent>
         <TouchableWithoutFeedback onPress={() => setRouteInfoVisible(false)}>
           <View style={styles.modalOverlay}>
@@ -1225,7 +1225,7 @@ export default function MapScreen() {
     </View>
   );
 }
-// Panel de opciones del mapa y tarjeta de ubicación
+// Map options panel and location card
 const op = StyleSheet.create({
   panel: { flexDirection: "column", alignItems: "stretch" },
   header: { flexDirection: "row", alignItems: "center", gap: 12 },

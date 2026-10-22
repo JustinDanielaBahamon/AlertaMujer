@@ -26,7 +26,7 @@ function BackgroundCircles() {
           Animated.timing(anim, { toValue: 0,   duration: dur,         useNativeDriver: true }),
         ])
       );
-    // Solo se animan los círculos de la página que se está viendo (antes corrían los de todas)
+    // Only the circles of the visible page are animated (before, every page's ran)
     if (!isActive) return;
     const loops = [
       float(f1, 3200, 0),

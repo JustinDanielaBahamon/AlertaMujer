@@ -16,7 +16,7 @@ interface AlertModalProps {
 
 type IconName = React.ComponentProps<typeof MaterialIcons>["name"];
 
-// Icono y colores según el tipo de mensaje
+// Icon and colors by message type
 const CONFIG: Record<
   AlertType,
   { icon: IconName; color: string; background: string }
@@ -45,7 +45,7 @@ export default function AlertModal({
     >
       <View style={styles.overlay}>
         <View style={styles.card}>
-          {/* Icono dentro de un círculo */}
+          {/* Icon inside a circle */}
           <View
             style={[
               styles.iconCircle,

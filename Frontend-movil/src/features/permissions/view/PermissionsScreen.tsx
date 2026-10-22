@@ -8,7 +8,7 @@ import { useTheme } from "../../../contexts/ThemeContext";
 import { createActivationMethodsStyles, getHeaderColors } from "../../settings/styles/activationMethods.styles";
 import { usePermissionsViewModel } from "../usePermissionsViewModel";
 
-/** "Permisos y protección": qué falta para que una alerta funcione y un botón para activarlo. */
+/** "Permissions and protection": what is missing for an alert to work and a button to enable it. */
 export default function PermissionsScreen() {
   const { theme } = useTheme();
   const styles = useMemo(() => createActivationMethodsStyles(theme), [theme]);
@@ -53,7 +53,7 @@ export default function PermissionsScreen() {
 
         {loading && <ActivityIndicator color={theme.contactAccent} style={{ marginTop: 24 }} />}
 
-        {/* Protección sin interrupciones: comprobado con los cierres que registra Android */}
+        {/* Protection without interruptions: checked with the exits Android records */}
         {!loading && health && (
           <View style={styles.card}>
             <View style={styles.titleRow}>
@@ -159,7 +159,7 @@ export default function PermissionsScreen() {
             );
           })}
 
-        {/* Evidencias automáticas: qué se graba al activar una alerta */}
+        {/* Automatic evidence: what is recorded when an alert is activated */}
         {!loading && (
           <>
             <Text style={[styles.intro, { fontWeight: "800", letterSpacing: 1.2, fontSize: 12, marginTop: 8 }]}>

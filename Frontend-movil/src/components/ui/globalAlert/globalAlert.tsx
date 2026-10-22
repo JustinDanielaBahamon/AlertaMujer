@@ -5,12 +5,12 @@ import { useLocale } from "../../../contexts/LocaleContext";
 import { styles } from "./globalAlert.styles";
 
 /**
- * ALERTA GLOBAL
- * -------------
- * Reemplaza TODOS los Alert.alert(...) y alert(...) de la app por el
- * diseño morado de AlertaMujer, sin tener que tocar cada pantalla.
+ * GLOBAL ALERT
+ * ------------
+ * Replaces EVERY Alert.alert(...) and alert(...) in the app with the
+ * AlertaMujer purple design, without touching each screen.
  *
- * Uso: se monta <AlertaGlobalHost /> una sola vez en App.tsx.
+ * Usage: <GlobalAlertHost /> is mounted once in App.tsx.
  */
 
 type AlertType = "exito" | "error" | "aviso" | "peligro";
@@ -40,7 +40,7 @@ const CONFIG: Record<
   peligro: { icon: "delete-outline", color: "#D32F2F", background: "#FDECEC" },
 };
 
-// Decide el icono según lo que dice el mensaje
+// Picks the icon from what the message says
 function inferType(title: string, message: string, buttons: DialogButton[]): AlertType {
   if (buttons.some((b) => b.style === "destructive")) return "peligro";
 
@@ -65,7 +65,7 @@ function inferType(title: string, message: string, buttons: DialogButton[]): Ale
   return "aviso";
 }
 
-// ─── Cola + conexión con el componente ───────────────────────────────────────
+// ─── Queue + connection with the component ───────────────────────────────────
 type Listener = (a: AlertItem) => void;
 let listener: Listener | null = null;
 const pendingItems: AlertItem[] = [];
@@ -85,24 +85,24 @@ function show(
     cancelable: options?.cancelable ?? false,
   };
   if (listener) listener(item);
-  else pendingItems.push(item); // todavía no se monta el componente
+  else pendingItems.push(item); // the component is not mounted yet
 }
 
-// Cambia Alert.alert y alert() de toda la app por el diseño nuevo
+// Replaces Alert.alert and alert() across the app with the new design
 Alert.alert = (title, message, buttons, options) =>
   show(title, message, buttons as DialogButton[] | undefined, options);
 
 (globalThis as any).alert = (message?: unknown) =>
   show("", message == null ? "" : String(message));
 
-// ─── Componente ──────────────────────────────────────────────────────────────
+// ─── Component ───────────────────────────────────────────────────────────────
 export default function GlobalAlertHost() {
   const { t } = useLocale();
   const [current, setCurrent] = useState<AlertItem | null>(null);
 
   useEffect(() => {
     listener = (item) => setCurrent(item);
-    // Si hubo alertas antes de montarse, mostrar la última
+    // If there were alerts before mounting, show the last one
     const latest = pendingItems.pop();
     pendingItems.length = 0;
     if (latest) setCurrent(latest);
@@ -120,7 +120,7 @@ export default function GlobalAlertHost() {
 
   const cfg = CONFIG[current.type];
 
-  // Primero las acciones y al final "Cancelar"
+  // Actions first and "Cancel" at the end
   const buttons: DialogButton[] =
     current.buttons.length > 0
       ? [
@@ -138,7 +138,7 @@ export default function GlobalAlertHost() {
       animationType="fade"
       statusBarTranslucent
       onRequestClose={() => {
-        // Botón "atrás" de Android
+        // Android "back" button
         if (cancelButton) close(cancelButton);
         else if (current.cancelable || current.buttons.length <= 1) close();
       }}

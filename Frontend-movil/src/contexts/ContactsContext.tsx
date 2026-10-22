@@ -66,7 +66,7 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
     setError(null);
     try {
-      // NO enviamos userProfileId, el backend lo establece automáticamente
+      // We do NOT send userProfileId, the backend sets it automatically
       const newContact = await contactsService.addContact({
         contactName: payload.name ?? '',
         telephone: payload.phoneNumber,
@@ -98,7 +98,7 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
         telephone: changes.phoneNumber,
         email: changes.email,
         relationship: changes.relationship,
-        photo: changes.photo ?? "", // sin foto = quitarla
+        photo: changes.photo ?? "", // no photo = remove it
       });
 
 

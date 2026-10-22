@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Text, type StyleProp, type TextStyle } from "react-native";
 
-/** "m:ss" que falta para `fin`. Solo este texto se vuelve a dibujar cada segundo. */
+/** "m:ss" left until `end`. Only this text is redrawn every second. */
 export default function Countdown({ end, durationMin, style }: {
   end: Date | null;
   durationMin: number;

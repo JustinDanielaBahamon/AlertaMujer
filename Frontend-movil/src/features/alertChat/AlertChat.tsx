@@ -5,7 +5,7 @@ import { useTheme, type AppTheme } from "../../contexts/ThemeContext";
 import type { ChatParticipant } from "../../services/alert-chat.service";
 import { useAlertChat } from "./useAlertChat";
 
-/** Mensajes rápidos de quien activó la alerta: un toque, sin tener que escribir. */
+/** Quick messages from the person who activated the alert: one tap, no typing. */
 export const HER_QUICK_REPLIES = [
   "No puedo hablar",
   "Estoy escondida",
@@ -15,7 +15,7 @@ export const HER_QUICK_REPLIES = [
   "Estoy bien, pero no cancelen",
 ];
 
-/** Respuestas rápidas de un contacto (las mismas de la página de seguimiento). */
+/** A contact's quick replies (the same as on the tracking page). */
 export const CONTACT_QUICK_REPLIES = [
   "Voy en camino",
   "Ya llamé a la policía",
@@ -26,15 +26,15 @@ export const CONTACT_QUICK_REPLIES = [
 
 type Props = {
   participant: ChatParticipant | null;
-  /** false cuando la alerta terminó: se puede leer pero no escribir. */
+  /** false when the alert ended: it can be read but not written. */
   enabled: boolean;
-  /** true si quien ve el chat es la persona que activó la alerta. */
+  /** true if the person viewing the chat is the one who activated the alert. */
   soyElla: boolean;
-  /** Nombre de quien activó la alerta (para sus mensajes vistos por un contacto). */
+  /** Name of the person who activated the alert (for her messages seen by a contact). */
   herName?: string;
   title: string;
   quickReplies: string[];
-  /** Al enfocar el campo de texto (la pantalla se desplaza para que el teclado no lo tape). */
+  /** When the text field gets focus (the screen scrolls so the keyboard does not cover it). */
   onFocus?: () => void;
 };
 

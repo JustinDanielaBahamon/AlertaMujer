@@ -131,7 +131,7 @@ export default function Welcome() {
 
             </View>
 
-            {/* ── Otras paginas ── */}
+            {/* ── Other pages ── */}
             <ActivationTutorial />
             <MessagesScreen />
             <LocationScreen externalVm={locationVM} />

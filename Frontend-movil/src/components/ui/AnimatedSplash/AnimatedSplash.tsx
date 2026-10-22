@@ -2,20 +2,20 @@ import React, { useEffect, useMemo, useRef } from "react";
 import { AccessibilityInfo, Animated, Easing, Image, StyleSheet, Text, View } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 
-// Mismo morado que el splash nativo (app.json) para que el cambio no se note
+// Same purple as the native splash (app.json) so the switch is not noticed
 export const BACKGROUND_COLOR = "#2B0C3B";
 const GOLD = "#E9C46A";
 const TITLE = "ALERTA MUJER";
 const MOTTO = "SEGURIDAD PARA TODAS";
 
-// Tamaño inicial del logo = tamaño de la pantera en el splash nativo (imageWidth 200 * 58%)
+// Initial logo size = size of the panther in the native splash (imageWidth 200 * 58%)
 const INITIAL_LOGO = 116;
 
 type Props = { onFinish: () => void };
 
 /**
- * Animación de apertura: la pantera sube, las letras de ALERTA MUJER aparecen una a una,
- * luego el lema, y todo se desvanece para mostrar la app (que ya cargó por debajo).
+ * Opening animation: the panther rises, the letters of ALERTA MUJER appear one by one,
+ * then the motto, and everything fades out to show the app (already loaded underneath).
  */
 export default function AnimatedSplash({ onFinish }: Props) {
   const letters = useMemo(() => TITLE.split(""), []);
@@ -29,10 +29,10 @@ export default function AnimatedSplash({ onFinish }: Props) {
   const started = useRef(false);
 
   const start = async () => {
-    // onLayout puede dispararse varias veces; la animación solo arranca una
+    // onLayout may fire several times; the animation starts only once
     if (started.current) return;
     started.current = true;
-    // El splash nativo se oculta justo cuando esta vista ya está dibujada encima
+    // The native splash hides right when this view is already drawn on top
     await SplashScreen.hideAsync().catch(() => {});
     const reduce = await AccessibilityInfo.isReduceMotionEnabled().catch(() => false);
 
@@ -48,29 +48,29 @@ export default function AnimatedSplash({ onFinish }: Props) {
 
     Animated.sequence([
       Animated.delay(150),
-      // 1) La pantera crece un poco y sube para dejar espacio al nombre
+      // 1) The panther grows a little and rises to make room for the name
       Animated.parallel([
         Animated.timing(logoScale, { toValue: 1.35, duration: 650, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
         Animated.timing(logoRise, { toValue: -70, duration: 650, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
         Animated.timing(brillo, { toValue: 1, duration: 650, useNativeDriver: true }),
       ]),
-      // 2) Letras una por una
+      // 2) Letters one by one
       Animated.stagger(
         55,
         letterValues.map((v) =>
           Animated.timing(v, { toValue: 1, duration: 320, easing: Easing.out(Easing.back(1.6)), useNativeDriver: true })
         )
       ),
-      // 3) Lema
+      // 3) Motto
       Animated.timing(motto, { toValue: 1, duration: 400, useNativeDriver: true }),
       Animated.delay(550),
-      // 4) Salida
+      // 4) Exit
       Animated.timing(background, { toValue: 0, duration: 380, easing: Easing.in(Easing.quad), useNativeDriver: true }),
     ]).start(onFinish);
   };
 
   useEffect(() => {
-    // Por si algo falla, la app nunca se queda tapada
+    // In case something fails, the app is never left covered
     const safe = setTimeout(onFinish, 6000);
     return () => clearTimeout(safe);
   }, [onFinish]);

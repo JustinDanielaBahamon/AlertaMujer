@@ -9,21 +9,21 @@ export interface RegisterData {
 }
 
 /**
- * Capa de acceso a datos / API para registro.
- * Utiliza el servicio de autenticación que conecta al backend Spring Boot.
+ * Data access / API layer for sign-up.
+ * Uses the authentication service that connects to the Spring Boot backend.
  */
 export async function registerWithEmail(data: RegisterData): Promise<User> {
   const response = await authService.register(data);
   
-  // Verificar si la respuesta contiene un error
+  // Check whether the response contains an error
   if ('error' in response) {
     throw new Error(response.error);
   }
   
-  // El backend devuelve {token, user}, necesitamos adaptar al modelo Usuario del móvil
+  // The backend returns {token, user}; we need to adapt it to the mobile User model
   const backendUser = response.user;
   
-  // Adaptar el formato del backend al modelo del móvil
+  // Adapt the backend format to the mobile model
   const user: User = {
     id: backendUser.id,
     nombre: `${backendUser.firstName} ${backendUser.lastName}`,

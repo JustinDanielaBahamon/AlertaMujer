@@ -1,6 +1,6 @@
 import api from './api';
 
-// Estructura real que devuelve el backend (FrequentLocation entity)
+// Real structure the backend returns (FrequentLocation entity)
 export interface FrequentLocationApi {
   id: number;
   userProfileId: number;

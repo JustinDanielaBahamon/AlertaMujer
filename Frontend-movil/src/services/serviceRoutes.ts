@@ -1,7 +1,7 @@
 /**
- * El backend son 3 microservicios (Auth, Alert y Evidence) sin API Gateway: cada petición va al
- * servicio dueño según el inicio de la ruta. Sin EXPO_PUBLIC_ALERT_API_URL / _EVIDENCE_API_URL todo
- * va a la URL principal (el monolito o Auth), así la app funciona igual mientras se despliegan.
+ * The backend is 3 microservices (Auth, Alert and Evidence) with no API Gateway: each request goes to the
+ * owning service by the start of the route. Without EXPO_PUBLIC_ALERT_API_URL / _EVIDENCE_API_URL everything
+ * goes to the main URL (the monolith or Auth), so the app works the same while they are deployed.
  */
 const EVIDENCE_ROUTES = ["/api/evidences"];
 const ALERT_ROUTES = [
@@ -13,7 +13,7 @@ const ALERT_ROUTES = [
 const startsWith = (route: string, prefixes: string[]) =>
   prefixes.some((p) => route === p || route.startsWith(p + "/") || route.startsWith(p + "?"));
 
-/** URL base del servicio que atiende esa ruta, o null si es la principal. */
+/** Base URL of the service that handles that route, or null if it is the main one. */
 export function serviceFor(
   route: string,
   urls: { alert?: string; evidence?: string } = {

@@ -10,7 +10,7 @@ import { TUTORIAL_GRADIENT } from "../styles/tutorialTheme";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { useTutorialPage } from "../component/TutorialPager";
 
-// ─── Círculos de fondo decorativos ───────────────────────────────────────────
+// ─── Decorative background circles ───────────────────────────────────────────
 function BackgroundCircles() {
   const { isActive } = useTutorialPage();
   const f1 = useRef(new Animated.Value(0)).current;
@@ -25,7 +25,7 @@ function BackgroundCircles() {
           Animated.timing(anim, { toValue: 0,   duration: dur,         useNativeDriver: true }),
         ])
       );
-    // Solo se animan los círculos de la página que se está viendo (antes corrían los de todas)
+    // Only the circles of the visible page are animated (before, every page's ran)
     if (!isActive) return;
     const loops = [
       float(f1, 3200, 0),
@@ -60,7 +60,7 @@ function BackgroundCircles() {
   );
 }
 
-// ─── fila de animacion ──────────────────────────────────────────────────────
+// ─── animation row ──────────────────────────────────────────────────────────
 function FeatureRow({ item, enterDelay }: { item: FeatureItem; enterDelay: number }) {
   const slideAnim   = useRef(new Animated.Value(28)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -99,7 +99,7 @@ function FeatureRow({ item, enterDelay }: { item: FeatureItem; enterDelay: numbe
   );
 }
 
-// ─── Pantalla principal ───────────────────────────────────────────────────────────────
+// ─── Main screen ─────────────────────────────────────────────────────────────────────
 interface Props {
   externalVm?: ReturnType<typeof useMessagesTutorialViewModel>;
 }
@@ -109,7 +109,7 @@ export default function MessagesScreen({ externalVm }: Props) {
   const internalVm = useMessagesTutorialViewModel();
   const vm = externalVm ?? internalVm;
 
-  // ── Animación de entrada de tarjeta de primavera ────────────────────────────────────────
+  // ── Card spring entrance animation ──────────────────────────────────────────────────────
   const cardAnim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.spring(cardAnim, {
@@ -128,17 +128,17 @@ export default function MessagesScreen({ externalVm }: Props) {
   };
 
   return (
-   // 1️ Vista exterior — igual que antes
+   // 1️ Outer view — same as before
     <View style={messageStyle.screenBg}>
 
-      {/* 2️⃣ LinearGradient cubre todo el interior */}
+      {/* 2️⃣ LinearGradient covers the whole inside */}
       <LinearGradient
         colors={[...TUTORIAL_GRADIENT]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={{ flex: 1 }}
       >
-        {/* 3️⃣ Los círculos van DENTRO del degradado */}
+        {/* 3️⃣ The circles go INSIDE the gradient */}
         <BackgroundCircles />
 
         <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
@@ -224,10 +224,10 @@ export default function MessagesScreen({ externalVm }: Props) {
 
         </SafeAreaView>
 
-      {/* 5️⃣ Cerrar LinearGradient */}
+      {/* 5️⃣ Close LinearGradient */}
       </LinearGradient>
 
-    {/* 6️⃣ Cerrar vista externa */}
+    {/* 6️⃣ Close the outer view */}
     </View>
   );
 }

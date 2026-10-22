@@ -1,11 +1,11 @@
 import { StyleSheet } from "react-native";
 import { AppTheme } from "../../../contexts/ThemeContext";
 
-// Recibe el tema activo y devuelve los estilos con los colores correctos
+// Receives the active theme and returns the styles with the right colors
 export const createStyles = (theme: AppTheme) =>
   StyleSheet.create({
 
-    // --- CONTENEDOR PRINCIPAL ---
+    // --- MAIN CONTAINER ---
 
     container: {
       flex: 1,
@@ -21,7 +21,7 @@ export const createStyles = (theme: AppTheme) =>
       paddingTop: 14,
     },
 
-    // --- HEADER GRADIENTE ---
+    // --- GRADIENT HEADER ---
 
     header: {
       marginBottom: 0,
@@ -66,7 +66,7 @@ export const createStyles = (theme: AppTheme) =>
       borderColor: theme.contactCardBorder,
     },
 
-    // --- ENCABEZADO DE SECCIÓN ---
+    // --- SECTION HEADER ---
 
     sectionHeader: {
       alignItems: "center",
@@ -130,7 +130,7 @@ export const createStyles = (theme: AppTheme) =>
       justifyContent: "center",
     },
 
-    // --- CAJA DE INFO ---
+    // --- INFO BOX ---
 
     infoBox: {
       flexDirection: "row",
@@ -237,7 +237,7 @@ export const createStyles = (theme: AppTheme) =>
       color: theme.contactAccent,
     },
 
-    // --- BOTONES ---
+    // --- BUTTONS ---
 
     saveButton: {
       borderRadius: 14,

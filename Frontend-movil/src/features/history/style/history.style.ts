@@ -28,7 +28,7 @@ export function getEmergencyColors(theme: AppTheme) {
 }
 
 export function getAssistanceColors(theme: AppTheme) {
-  // light → rojo original
+  // light → original red
   if (theme.mode === "light") {
     return {
       border:    "#C62828",
@@ -41,7 +41,7 @@ export function getAssistanceColors(theme: AppTheme) {
       time:      "#9e83cf",
     };
   }
-  // rosa → morado
+  // pink → purple
   if (theme.mode === "rosa") {
     return {
       border:    "#7B1FA2",
@@ -54,7 +54,7 @@ export function getAssistanceColors(theme: AppTheme) {
       time:      "#AB47BC",
     };
   }
-  // Azul → morado
+  // Blue → purple
   if (theme.mode === "Azul") {
     return {
       border:    "#6A1B9A",
@@ -67,7 +67,7 @@ export function getAssistanceColors(theme: AppTheme) {
       time:      "#9C27B0",
     };
   }
-  // dark → azul más bonito (celeste vibrante)
+  // dark → a nicer blue (vibrant light blue)
   if (theme.mode === "dark") {
     return {
       border:    "#29B6F6",
@@ -80,7 +80,7 @@ export function getAssistanceColors(theme: AppTheme) {
       time:      "#29B6F6",
     };
   }
-  // magenta → rosado/morado claro
+  // magenta → pink/light purple
   if (theme.mode === "magenta") {
     return {
       border:    "#E040FB",
@@ -93,7 +93,7 @@ export function getAssistanceColors(theme: AppTheme) {
       time:      "#CE93D8",
     };
   }
-  // vino → fucsia oscuro
+  // wine → dark fuchsia
   if (theme.mode === "vino") {
     return {
       border:    "#7b04aa",
@@ -106,7 +106,7 @@ export function getAssistanceColors(theme: AppTheme) {
       time:      "#bc0af1",
     };
   }
-  // fallback genérico
+  // generic fallback
   return {
     border:    theme.contactIconLocColor,
     iconBg:    theme.contactIconLocBg,
@@ -119,7 +119,7 @@ export function getAssistanceColors(theme: AppTheme) {
   };
 }
 
-// ─── Fábrica de estilos ───────────────────────────────────────────────────────
+// ─── Style factory ────────────────────────────────────────────────────────────
 
 export const createStyles = (theme: AppTheme) =>
   StyleSheet.create({
@@ -314,7 +314,7 @@ export const createStyles = (theme: AppTheme) =>
       alignItems: "center",
     },
 
-    // Pill del tipo — sin punto, solo texto
+    // Type pill — no dot, text only
     typePill: {
       flexDirection: "row",
       alignItems: "center",

@@ -144,7 +144,7 @@ export default function HistoryMap() {
 
           </View>
 
-          {/* MAPA PREVIEW */}
+          {/* PREVIEW MAP */}
           <TouchableOpacity
             activeOpacity={0.95}
             onPress={() =>
@@ -222,7 +222,7 @@ export default function HistoryMap() {
 
           </TouchableOpacity>
 
-          {/* DETALLES */}
+          {/* DETAILS */}
           <View
             style={[
               styles.detailsCard,
@@ -303,7 +303,7 @@ export default function HistoryMap() {
 
       </ScrollView>
 
-      {/* MODAL MAPA FULLSCREEN */}
+      {/* FULLSCREEN MAP MODAL */}
       <Modal
         visible={fullscreen}
         animationType="slide"
@@ -349,7 +349,7 @@ export default function HistoryMap() {
             />
           </MapView>
 
-          {/* BOTÓN CERRAR */}
+          {/* CLOSE BUTTON */}
           <TouchableWithoutFeedback
             onPress={() =>
               setFullscreen(false)

@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { MSG_COLORS } from "../styles/messageStyle";
 import { useLocale } from "../../../contexts/LocaleContext";
 
-// ─── Tipos públicos ───────────────────────────────────────────────────────────
+// ─── Public types ─────────────────────────────────────────────────────────────
 export interface FeatureItem {
   id: string;
   emoji: string;
@@ -19,8 +19,8 @@ export interface FeatureItem {
 
 type LocaleT = ReturnType<typeof useLocale>["t"];
 
-// ─── Datos (dependen del idioma activo) ───────────────────────────────────────
-// Cómo se avisa a los contactos: lo hace el servidor, no hace falta ningún permiso del celular
+// ─── Data (depends on the active language) ───────────────────────────────────
+// How contacts are notified: the server does it, no phone permission is needed
 const getFeatureRows = (t: LocaleT): FeatureItem[] => [
   {
     id: "correo",

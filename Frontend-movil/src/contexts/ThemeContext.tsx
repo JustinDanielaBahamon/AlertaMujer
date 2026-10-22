@@ -2,7 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ImageSourcePropType } from "react-native";
 
-// ─── Tipos ────────────────────────────────────────────────────────────────────
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 export type AppMode = "light" | "dark" | "rosa" | "vino" | "Azul" | "magenta";
 
@@ -19,12 +19,12 @@ export type AppTheme = {
   tabInactiveColor: string;
   logo: ImageSourcePropType;
   buttonImage: ImageSourcePropType;
-  activationImage: ImageSourcePropType; // ← nuevo
+  activationImage: ImageSourcePropType; // ← new
   icon: string;
   headercolor1: string;
   headercolor2: string;
 
-  // ─── Contactos ───────────────────────────────────────────────
+  // ─── Contacts ───────────────────────────────────────────────
   contactCardBg: string;
   contactCardBorder: string;
   contactName: string;
@@ -52,7 +52,7 @@ export type AppTheme = {
   contactSearchBg: string;
   contactSearchText: string;
 
-  // ─── Asistencia ──────────────────────────────────────────────
+  // ─── Assistance ─────────────────────────────────────────────
   assistanceEmergencyGradient: [string, string];
   assistanceViolenceGradient: [string, string];
   assistanceMentalGradient: [string, string];
@@ -62,7 +62,7 @@ export type AppTheme = {
   assistanceStarIconBg: string;
 };
 
-// ─── Contraste automático ─────────────────────────────────────────────────────
+// ─── Automatic contrast ──────────────────────────────────────────────────────
 
 function hexToRgb(color: string): { r: number; g: number; b: number } | null {
   const hex = color.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
@@ -88,7 +88,7 @@ const pinkLogo   = require("../../assets/imagesAlertaMujer/logos/logo-rosa.png")
 const wineLogo   = require("../../assets/imagesAlertaMujer/logos/logo-vino.png");
 const blackLogo  = require("../../assets/imagesAlertaMujer/logos/logo-negro.png");
 
-// ─── Assets botones ───────────────────────────────────────────────────────────
+// ─── Button assets ───────────────────────────────────────────────────────────
 
 const purpleButton = require("../../assets/imagesAlertaMujer/ScInicio/boton-morado.png");
 const blueButton   = require("../../assets/imagesAlertaMujer/ScInicio/boton-azul.png");
@@ -104,7 +104,7 @@ const activationBlue   = require("../../assets/imagesAlertaMujer/ScActivacion/Az
 const activationWine   = require("../../assets/imagesAlertaMujer/ScActivacion/vino.png");
 const activationLogo   = require("../../assets/imagesAlertaMujer/ScActivacion/LOGO.png");
 
-// ─── Imágenes que se precargan al abrir la app (evita la demora al cambiar de tema) ───
+// ─── Images preloaded when the app opens (avoids the delay when changing theme) ───
 
 export const PRELOAD_IMAGES: ImageSourcePropType[] = [
   currentLogo, purpleLogo, blueLogo, pinkLogo, wineLogo, blackLogo,
@@ -112,7 +112,7 @@ export const PRELOAD_IMAGES: ImageSourcePropType[] = [
   activationPurple, activationPink, activationBlue, activationWine, activationLogo,
 ];
 
-// ─── Temas ────────────────────────────────────────────────────────────────────
+// ─── Themes ──────────────────────────────────────────────────────────────────
 
 const THEMES: Record<AppMode, AppTheme> = {
 
@@ -275,7 +275,7 @@ const THEMES: Record<AppMode, AppTheme> = {
     assistanceStarIconBg:    "#a0005a",
   },
 
-  // ── VINO ──────────────────────────────────────────────────────────────────
+  // ── WINE ──────────────────────────────────────────────────────────────────
   vino: {
     mode: "vino",
     headerBackground: "#770736",
@@ -328,7 +328,7 @@ const THEMES: Record<AppMode, AppTheme> = {
     assistanceStarIconBg:    "#4a0020",
   },
 
-  // ── AZUL ──────────────────────────────────────────────────────────────────
+  // ── BLUE ──────────────────────────────────────────────────────────────────
   Azul: {
     mode: "Azul",
     headerBackground: "#0b013b",
@@ -445,12 +445,12 @@ type ThemeContextValue = {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-// El tema es del celular, no de la cuenta: se conserva al cerrar sesión y al reiniciar la app
+// The theme belongs to the phone, not the account: it is kept after signing out and restarting the app
 const THEME_KEY = "@alerta_mujer:tema";
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [mode, setModeState] = useState<AppMode>("light");
-  // Hasta leer el tema guardado no se pinta nada, para no mostrar un instante el tema claro
+  // Nothing is painted until the saved theme is read, so the light theme never flashes
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {

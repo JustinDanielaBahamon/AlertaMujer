@@ -5,9 +5,9 @@ import { locationWithoutNotices } from "../services/safePermissions";
 import { useAuth } from "../contexts/AuthContext";
 import { clearLocationQueue, reportLocation } from "../services/location-reporter.service";
 
-// Mientras la app está abierta y con sesión, envía la ubicación al backend:
-// cuando la usuaria se mueve más de METROS_MINIMOS o, si está quieta, cada INTERVALO_MAX_MS.
-// No pide permisos por su cuenta: solo funciona si la usuaria ya dio acceso a la ubicación.
+// While the app is open with a session, it sends the location to the backend:
+// when the user moves more than MIN_METERS or, if she is still, every MAX_INTERVAL_MS.
+// It does not ask for permissions on its own: it only works if the user already gave location access.
 const MIN_METERS = 50;
 const MAX_INTERVAL_MS = 5 * 60 * 1000;
 
@@ -51,16 +51,16 @@ export function useLocationReporting() {
       const { status } = await Location.getForegroundPermissionsAsync();
       if (status !== "granted" || !enabled || subscription) return;
 
-      // Con el GPS apagado no se hace nada: Android mostraría su aviso de "activa la ubicación"
-      // al abrir la app. Se reintenta al volver a la app o con el latido.
+      // With the GPS off nothing is done: Android would show its "turn on location" prompt
+      // when the app opens. Retried when coming back to the app or with the heartbeat.
       if (!(await Location.hasServicesEnabledAsync().catch(() => false)) || !enabled) return;
 
-      // Punto inicial al abrir la app
+      // Starting point when the app opens
       try {
         const initial = await locationWithoutNotices();
         if (initial) maybeSend(initial, true);
       } catch {
-        // sin señal: se reintenta con el latido
+        // no signal: retried with the heartbeat
       }
       if (!enabled) return;
 
@@ -68,13 +68,13 @@ export function useLocationReporting() {
         { accuracy: Location.Accuracy.Balanced, timeInterval: 60000, distanceInterval: MIN_METERS, mayShowUserSettingsDialog: false },
         (loc) => maybeSend(loc)
       );
-      // Si está quieta, watchPosition no avisa: el latido asegura un punto cada 5 min
+      // If she is still, watchPosition does not report: the heartbeat ensures a point every 5 min
       heartbeat = setInterval(async () => {
         try {
           const current = await locationWithoutNotices();
           if (current) maybeSend(current);
         } catch {
-          // sin GPS en este momento
+          // no GPS right now
         }
       }, MAX_INTERVAL_MS);
     };

@@ -11,7 +11,7 @@ import { useSecurityTutorialViewModel, type SecurityFeatureItem, } from "../view
 import { useLocale } from "../../../contexts/LocaleContext";
 import { useTutorialPage } from "../component/TutorialPager";
 
-// ─── Círculos decorativos de fondo ───────────────────────────────────────────
+// ─── Decorative background circles ───────────────────────────────────────────
 function BackgroundCircles() {
   const { isActive } = useTutorialPage();
   const f1 = useRef(new Animated.Value(0)).current;
@@ -26,7 +26,7 @@ function BackgroundCircles() {
           Animated.timing(anim, { toValue: 0,   duration: dur,         useNativeDriver: true }),
         ])
       );
-    // Solo se animan los círculos de la página que se está viendo (antes corrían los de todas)
+    // Only the circles of the visible page are animated (before, every page's ran)
     if (!isActive) return;
     const loops = [
       float(f1, 3200, 0),
@@ -60,7 +60,7 @@ function BackgroundCircles() {
     </>
   );
 }
-// ─── Fila de característica animada ──────────────────────────────────────────
+// ─── Animated feature row ────────────────────────────────────────────────────
 function FeatureRow({ item, enterDelay }: { item: SecurityFeatureItem; enterDelay: number }) {
   const slideAnim   = useRef(new Animated.Value(28)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -102,7 +102,7 @@ function FeatureRow({ item, enterDelay }: { item: SecurityFeatureItem; enterDela
   );
 }
 
-// ─── Pantalla principal ───────────────────────────────────────────────────────
+// ─── Main screen ─────────────────────────────────────────────────────────────
 interface Props {
   externalVm?: ReturnType<typeof useSecurityTutorialViewModel>;
 }
@@ -112,7 +112,7 @@ export default function CameraAndMicrophoneTutorial({ externalVm }: Props) {
   const internalVm = useSecurityTutorialViewModel();
   const vm = externalVm ?? internalVm;
 
-  // ── Animación card spring ────────────────────────────────────────────────
+  // ── Card spring animation ────────────────────────────────────────────────
   const cardAnim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.spring(cardAnim, {
@@ -149,7 +149,7 @@ export default function CameraAndMicrophoneTutorial({ externalVm }: Props) {
           />
         </View>
 
-        {/* Card animada */}
+        {/* Animated card */}
         <Animated.View style={[{ flex: 1 }, cardAnimStyle]}>
           <Card title={`${t.tutorial.seguridad_titulo_1}\n`} titleHighlight={t.tutorial.seguridad_titulo_2}>
             <ScrollView
@@ -159,7 +159,7 @@ export default function CameraAndMicrophoneTutorial({ externalVm }: Props) {
               scrollEventThrottle={16}
               nestedScrollEnabled={true}
             >
-              {/* Sección principal */}
+              {/* Main section */}
               <View style={securityStyle.sectionRow}>
                 <Text style={securityStyle.sectionLabel}>{t.tutorial.seguridad_evidencia_titulo}</Text>
                 <View style={securityStyle.sectionLine} />
@@ -175,7 +175,7 @@ export default function CameraAndMicrophoneTutorial({ externalVm }: Props) {
 
               <View style={securityStyle.divider} />
 
-              {/* Detalle descriptivo */}
+              {/* Descriptive detail */}
               <View style={{ gap: 4 }}>
                 {vm.featureRows.map((item) => (
                   <View key={`desc-${item.id}`} style={securityStyle.descRow}>
@@ -195,14 +195,14 @@ export default function CameraAndMicrophoneTutorial({ externalVm }: Props) {
 
               <View style={securityStyle.divider} />
 
-              {/* Sección permisos — muestra los dos (cámara y audio) */}
+              {/* Permissions section — shows both (camera and audio) */}
               <View style={securityStyle.sectionRow}>
                 <Text style={securityStyle.sectionLabel}>{t.tutorial.seguridad_permisos_titulo}</Text>
                 <View style={securityStyle.sectionLine} />
               </View>
 
               <View style={securityStyle.permissionsCard}>
-                {/* Cámara */}
+                {/* Camera */}
                 <View style={securityStyle.permissionsRow}>
                   <Text style={securityStyle.permissionsEmoji}>📷</Text>
                   <View style={securityStyle.permissionsTitleWrap}>
@@ -215,7 +215,7 @@ export default function CameraAndMicrophoneTutorial({ externalVm }: Props) {
 
                 <View style={securityStyle.permissionsSeparator} />
 
-                {/* Micrófono */}
+                {/* Microphone */}
                 <View style={securityStyle.permissionsRow}>
                   <Text style={securityStyle.permissionsEmoji}>🎙️</Text>
                   <View style={securityStyle.permissionsTitleWrap}>
@@ -239,7 +239,7 @@ export default function CameraAndMicrophoneTutorial({ externalVm }: Props) {
 
       </SafeAreaView>
 
-      {/* Overlay advertencia — lógica original intacta */}
+      {/* Warning overlay — original logic untouched */}
       {vm.showWarning && (
         <View style={securityStyle.overlayBg}>
           <View style={securityStyle.warningBox}>

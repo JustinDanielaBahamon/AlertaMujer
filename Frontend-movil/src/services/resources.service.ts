@@ -1,6 +1,6 @@
 import api from './api';
 
-// Estructura real que devuelve el backend (EmergencyResource entity)
+// Real structure the backend returns (EmergencyResource entity)
 export interface EmergencyResourceApi {
   id: number;
   name: string;

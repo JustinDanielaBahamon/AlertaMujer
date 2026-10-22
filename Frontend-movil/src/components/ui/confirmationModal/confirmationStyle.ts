@@ -1,10 +1,10 @@
 import { StyleSheet } from "react-native";
 
 export const localStyles = StyleSheet.create({
-  // Estilos de la Pantalla de Selección (Imagen 1)
+  // Selection screen styles (Image 1)
   overlay: {
         flex: 1,
-        backgroundColor: 'rgba(46, 16, 101, 0.55)', // morado oscuro translúcido
+        backgroundColor: 'rgba(46, 16, 101, 0.55)', // translucent dark purple
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -40,7 +40,7 @@ export const localStyles = StyleSheet.create({
     modalTitle: {
         fontSize: 22,
         fontWeight: 'bold',
-        color: '#471e63', // Tu morado
+        color: '#471e63', // Your purple
         marginBottom: 10,
     },
     modalSubtitle: {
@@ -52,7 +52,7 @@ export const localStyles = StyleSheet.create({
     },
     infoBox: {
         width: '100%',
-        backgroundColor: '#471e63', // Morado oscuro
+        backgroundColor: '#471e63', // Dark purple
         borderRadius: 20,
         padding: 20,
         marginBottom: 25,
@@ -73,7 +73,7 @@ export const localStyles = StyleSheet.create({
     },
     buttonContainer: {
         width: '100%',
-        gap: 12, // Espacio entre botones
+        gap: 12, // Space between buttons
     },
     confirmBtn: {
         width: '100%',

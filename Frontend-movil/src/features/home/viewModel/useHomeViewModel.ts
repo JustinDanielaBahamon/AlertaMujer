@@ -15,7 +15,7 @@ import {
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
 
-// Estado de la ubicacion, independiente del idioma (el texto se traduce aparte)
+// Location status, independent of the language (the text is translated separately)
 type LocationStatus = "cargando" | "lista" | "denegado" | "gps_apagado" | "error";
 
 export function useHomeViewModel() {
@@ -32,13 +32,13 @@ export function useHomeViewModel() {
     useState<DetailedLocation | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // pedirPermiso = false al abrir la pantalla: los permisos se piden en el tutorial o al tocar "actualizar"
+  // askPermission = false when the screen opens: permissions are asked in the tutorial or when tapping "update"
   const loadLocation = useCallback(async (requestPermission: boolean) => {
     try {
       setLoading(true);
       setLocationStatus("cargando");
 
-      // Usar el servicio centralizado de ubicación con alta precisión
+      // Use the central high-accuracy location service
       const location = await LocationService.getFullLocation(requestPermission);
 
       if (location) {
@@ -53,11 +53,11 @@ export function useHomeViewModel() {
       }
     } catch (error) {
       if (error instanceof LocationServicesDisabledError) {
-        // GPS / servicios de ubicación del dispositivo apagados
+        // GPS / device location services turned off
         console.warn("GPS del dispositivo desactivado:", error.message);
         setLocationStatus("gps_apagado");
       } else if (error instanceof LocationPermissionDeniedError) {
-        // El usuario negó el permiso a la app
+        // The user denied the permission to the app
         console.warn("Permiso de ubicación denegado:", error.message);
         setLocationStatus("denegado");
       } else {
@@ -75,7 +75,7 @@ export function useHomeViewModel() {
 
   const getLocation = useCallback(() => loadLocation(true), [loadLocation]);
 
-  // Texto de ubicacion ya traducido segun el idioma activo
+  // Location text already translated to the active language
   const locationName = useMemo(() => {
     switch (locationStatus) {
       case "cargando":
@@ -91,7 +91,7 @@ export function useHomeViewModel() {
     }
   }, [locationStatus, resolvedLocation, t]);
 
-  // true solo cuando ya se resolvio una ubicacion real (para mostrar "GPS activo")
+  // true only once a real location was resolved (to show "GPS active")
   const locationList = locationStatus === "lista";
 
   const activateAlert = useCallback(() => {
@@ -106,7 +106,7 @@ export function useHomeViewModel() {
     navigation.navigate("Activation");
   }, [navigation, config.vibracion]);
 
-  // Vibra mientras el botón está presionado y se detiene al soltarlo
+  // Vibrates while the button is pressed and stops when released
   const onButtonPressIn = useCallback(() => {
     setPressed(true);
     if (config.vibracion) Vibration.vibrate([0, 400, 200], true);
@@ -116,7 +116,7 @@ export function useHomeViewModel() {
     Vibration.cancel();
   }, []);
 
-  // Si se sale de la pantalla con el botón presionado, no deja el teléfono vibrando
+  // If the screen is left with the button pressed, the phone is not left vibrating
   useEffect(() => () => Vibration.cancel(), []);
 
   const signOutNow = useCallback(() => {

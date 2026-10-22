@@ -26,7 +26,7 @@ const duration = (ms: number) => {
   return `${Math.floor(min / 60)} h ${min % 60} min`;
 };
 
-/** Paso de la línea de tiempo del detalle. */
+/** A step of the detail timeline. */
 export type AlertStep = { icon: "alerta" | "ubicacion" | "fin" | "curso"; title: string; detail: string };
 
 interface UseAlertDetailViewModelResult {
@@ -36,10 +36,10 @@ interface UseAlertDetailViewModelResult {
   notifiedContacts: NotifiedContact[];
   loadingContacts: boolean;
   contactsError: boolean;
-  /** Recorrido de la alerta (puntos de ubicación enviados), del más antiguo al más reciente. */
+  /** Alert route (location points sent), from oldest to newest. */
   points: LocationPoint[];
   loadingDetail: boolean;
-  /** "Carrera 7 · Altico" del punto inicial, si se pudo obtener. */
+  /** "Carrera 7 · Altico" of the starting point, if it could be obtained. */
   address: string | null;
   method: string | null;
   message: string | null;
@@ -51,12 +51,12 @@ export function useAlertDetailViewModel(alert: AlertRecord): UseAlertDetailViewM
 
   const isEmergency = useMemo(() => alert.type === "Emergencia", [alert.type]);
 
-  // Contactos avisados en esta alerta y el estado de cada canal.
+  // Contacts notified in this alert and the status of each channel.
   const [notifiedContacts, setNotifiedContacts] = useState<NotifiedContact[]>([]);
   const [loadingContacts, setLoadingContacts] = useState(true);
   const [contactsError, setContactsError] = useState(false);
 
-  // Datos completos de la alerta y su recorrido
+  // Full alert data and its route
   const [data, setData] = useState<AlertApi | null>(null);
   const [points, setPoints] = useState<LocationPoint[]>([]);
   const [loadingDetail, setLoadingDetail] = useState(true);
@@ -90,7 +90,7 @@ export function useAlertDetailViewModel(alert: AlertRecord): UseAlertDetailViewM
         }
       })
       .catch(() => {
-        // Sin conexión: se muestra lo que trae el historial
+        // Offline: show what the history brings
         if (enabled && alert.coords) setPoints([{ id: "inicio", ...alert.coords, recordedAt: new Date() }]);
       })
       .finally(() => enabled && setLoadingDetail(false));

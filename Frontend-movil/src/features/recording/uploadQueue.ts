@@ -4,8 +4,8 @@ import ShakeSensor from "../../../modules/shake-sensor";
 import { uploadEvidence, type RecordingType } from "../../services/evidence.service";
 
 /**
- * Cola de trozos grabados por subir. Se guarda en el teléfono para que, si no hay señal o la app
- * se cierra, los archivos se suban después en vez de perderse. Sube de a uno y reintenta.
+ * Queue of recorded chunks to upload. It is stored on the phone so that, if there is no signal or the app
+ * closes, the files are uploaded later instead of being lost. It uploads one at a time and retries.
  */
 export type PendingChunk = {
   uri: string;
@@ -29,7 +29,7 @@ const listeners = new Set<(e: UploadStatus) => void>();
 
 let loading: Promise<PendingChunk[]> | null = null;
 
-// Una sola lectura compartida: dos trozos que llegan juntos no deben crear dos colas distintas
+// A single shared read: two chunks arriving together must not create two different queues
 function load(): Promise<PendingChunk[]> {
   if (cola) return Promise.resolve(cola);
   loading ??= AsyncStorage.getItem(KEY)
@@ -64,7 +64,7 @@ export function listenUploads(listener: (e: UploadStatus) => void): () => void {
   };
 }
 
-/** Agrega un archivo terminado y empieza a subirlo. */
+/** Adds a finished file and starts uploading it. */
 export async function enqueueChunk(chunk: PendingChunk): Promise<void> {
   const current = await load();
   if (!current.some((t) => t.uri === chunk.uri)) {
@@ -75,14 +75,14 @@ export async function enqueueChunk(chunk: PendingChunk): Promise<void> {
   void processQueue();
 }
 
-/** Errores que no se arreglan reintentando (archivo rechazado, alerta ajena o borrada). */
+/** Errors that retrying does not fix (file rejected, alert of someone else or deleted). */
 function isPermanent(error: any): boolean {
   const status = error?.response?.status;
   return typeof status === "number" && status >= 400 && status < 500 && ![401, 408, 429].includes(status);
 }
 
 export async function processQueue(): Promise<void> {
-  // La marca va antes de cualquier await: dos llamadas a la vez subirían el mismo archivo
+  // The flag goes before any await: two calls at once would upload the same file
   if (uploading) return;
   uploading = true;
   try {
@@ -100,7 +100,7 @@ export async function processQueue(): Promise<void> {
         uploaded++;
       } catch (e) {
         if (!isPermanent(e)) {
-          // Sin señal o servidor dormido: se reintenta en un rato sin perder el archivo
+          // No signal or the server is asleep: retried in a while without losing the file
           retry = setTimeout(() => void processQueue(), RETRY_MS);
           return;
         }
@@ -111,7 +111,7 @@ export async function processQueue(): Promise<void> {
       try {
         ShakeSensor.deleteFile(chunk.uri);
       } catch {
-        // Si no se puede borrar, Android limpia el caché por su cuenta
+        // If it cannot be deleted, Android cleans the cache by itself
       }
       notify();
     }
@@ -121,24 +121,24 @@ export async function processQueue(): Promise<void> {
   }
 }
 
-// Los trozos de audio llegan del servicio nativo, también después de salir de la pantalla de la
-// alerta (el último trozo se cierra al detener): por eso se escuchan aquí y no en la pantalla.
+// Audio chunks come from the native service, also after leaving the alert
+// screen (the last chunk closes on stop): that is why they are listened to here and not on the screen.
 let audioAlert: number | null = null;
 let audioListener: { remove: () => void } | null = null;
 
-/** Los próximos trozos de audio (y los que quedaron sin subir) son de esta alerta. */
+/** The next audio chunks (and the ones left without uploading) belong to this alert. */
 export function setAudioAlert(alertId: number): void {
   audioAlert = alertId;
   audioListener ??= ShakeSensor.addListener("onAudioChunk", ({ uri }) => {
     if (audioAlert !== null) void enqueueChunk({ uri, alertaId: audioAlert, tipo: "audio" });
   });
-  // Audios que se grabaron pero no llegaron a la cola (la app se cerró a mitad de la alerta)
+  // Audios that were recorded but did not reach the queue (the app closed in the middle of the alert)
   for (const uri of ShakeSensor.pendingAudios()) {
     void enqueueChunk({ uri, alertaId: alertId, tipo: "audio" });
   }
 }
 
-/** Solo para pruebas. */
+/** Tests only. */
 export function _resetQueue() {
   cola = null;
   loading = null;

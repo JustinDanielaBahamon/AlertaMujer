@@ -24,7 +24,7 @@ export default function ContactsTab() {
 
   const headerGradient: [string, string] = [theme.headercolor1, theme.headercolor2];
 
-  // Estado real: con la app (violeta lleno), con cuenta sin celular (violeta claro) o solo correo (gris)
+  // Real status: with the app (solid violet), with an account but no phone (light violet) or email only (gray)
   const statusOf = (c: Contact) => {
     const e = vm.appStatus[String(c.id)];
     if (e === "app") return { color: theme.contactAccent, text: t.contactos.estado_app, invite: false };
@@ -58,7 +58,7 @@ export default function ContactsTab() {
   return (
     <View style={styles.mainContainer}>
 
-      {/* HEADER — fijo, nunca se recrea */}
+      {/* HEADER — fixed, never recreated */}
       <View style={styles.header}>
         <LinearGradient
           colors={headerGradient}
@@ -81,7 +81,7 @@ export default function ContactsTab() {
         </LinearGradient>
       </View>
 
-      {/* CONTEO — fijo, nunca se recrea */}
+      {/* COUNT — fixed, never recreated */}
       <View style={styles.countRow}>
         <View style={styles.countIcon}>
           <Feather name="users" size={18} color={theme.contactCounterIcon} />
@@ -91,7 +91,7 @@ export default function ContactsTab() {
         </Text>
       </View>
 
-      {/* BUSCADOR — fijo, el TextInput nunca se desmonta */}
+      {/* SEARCH — fixed, the TextInput is never unmounted */}
       <View style={styles.searchContainer}>
         <Feather name="search" size={18} color="#9E9E9E" />
         <TextInput
@@ -108,7 +108,7 @@ export default function ContactsTab() {
         )}
       </View>
 
-      {/* LISTA — solo maneja los items */}
+      {/* LIST — only handles the items */}
       <SwipeListView<Contact>
         data={vm.filteredContacts}
         keyExtractor={(item) => item.id}
@@ -163,19 +163,19 @@ export default function ContactsTab() {
         renderItem={({ item: c }) => { const status = statusOf(c); return (
           <View style={styles.cardWrapper}>
             <View style={styles.contactCard}>
-              {/* Sección superior: foto, info, botones */}
+              {/* Top section: photo, info, buttons */}
               <View style={styles.topSection}>
 
-                {/* ── AVATAR CON LÓGICA DE 3 NIVELES ─────────────────────── */}
+                {/* ── AVATAR WITH 3-LEVEL LOGIC ──────────────────────────── */}
                 <View style={styles.photoContainer}>
                   {c.photo ? (
-                    // Nivel 1: foto personalizada o traída de la agenda
+                    // Level 1: custom photo or one taken from the phone contacts
                     <Image
                       source={{ uri: c.photo }}
                       style={[styles.profilePhoto, { borderColor: theme.contactAvatarBorder }]}
                     />
                   ) : (c.name || '').trim() ? (
-                    // Nivel 2: inicial del nombre sobre fondo de color
+                    // Level 2: initial of the name on a colored background
                     <View style={[
                       styles.profilePhoto,
                       {
@@ -195,7 +195,7 @@ export default function ContactsTab() {
                       </Text>
                     </View>
                   ) : (
-                    // Nivel 3: imagen por defecto
+                    // Level 3: default image
                     <Image
                       source={require("../../../../assets/imagesAlertaMujer/ScContacto/contacto.png")}
                       style={[styles.profilePhoto, { borderColor: theme.contactAvatarBorder }]}
@@ -256,7 +256,7 @@ export default function ContactsTab() {
                 </View>
               </View>
 
-              {/* Sección acciones: Llamar, WhatsApp, Alerta individual */}
+              {/* Actions section: Call, WhatsApp, Individual alert */}
               <View style={[styles.actionsSection, { borderTopColor: theme.contactDivider }]}>
                 <TouchableOpacity
                   style={styles.actionItem}
@@ -335,7 +335,7 @@ export default function ContactsTab() {
         )}
       />
 
-      {/* BOTÓN FLOTANTE */}
+      {/* FLOATING BUTTON */}
       <TouchableOpacity
         style={[styles.floatingButton, { backgroundColor: theme.contactFloatingBg }]}
         onPress={vm.goToAddContact}

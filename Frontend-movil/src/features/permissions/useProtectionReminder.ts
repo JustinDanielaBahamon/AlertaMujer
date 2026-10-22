@@ -13,9 +13,9 @@ const REPEAT_EVERY_MS = 12 * 60 * 60 * 1000;
 const OPEN_DELAY_MS = 3000;
 
 /**
- * Al abrir la app con sesión, si falta algo crítico (agitar apagado, ubicación, notificaciones,
- * batería) se muestra un aviso con acceso a "Permisos y protección". Como mucho cada 12 h, para no
- * molestar. Tras reinstalar la app, "agitar" vuelve a estar apagado: este aviso lo recuerda.
+ * When the app opens with a session, if something critical is missing (shake off, location, notifications,
+ * battery) a notice with access to "Permissions and protection" is shown. At most every 12 h, so it does not
+ * nag. After reinstalling the app, "shake" is off again: this notice reminds her.
  */
 export function useProtectionReminder(
   navigation: NavigationContainerRefWithCurrent<MainStackParamList>,
@@ -34,11 +34,11 @@ export function useProtectionReminder(
 
     const timer = setTimeout(async () => {
       try {
-        // Durante el tutorial no se interrumpe: ahí mismo se piden los permisos en orden
+        // It does not interrupt during the tutorial: the permissions are asked there in order
         if (isInTutorial(navigation)) return;
         const lastItem = Number((await AsyncStorage.getItem(LAST_NOTICE_KEY)) ?? 0);
         if (Date.now() - lastItem < REPEAT_EVERY_MS) return;
-        // Cortes de la protección desde el último aviso (comprobados con los registros de Android)
+        // Protection cuts since the last notice (checked with the Android records)
         const cortes = config.agitar ? recentInterruptions().filter((c) => c.when > lastItem) : [];
         const missing = missingCritical(
           await checkPermissions(config.agitar, cortes.filter((c) => c.cause === "sistema").length),
@@ -64,7 +64,7 @@ export function useProtectionReminder(
       }
     }, OPEN_DELAY_MS);
     return () => clearTimeout(timer);
-    // Solo una vez por sesión, cuando ya cargaron los ajustes
+    // Only once per session, once the settings have loaded
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [withSession, loaded]);
 }
