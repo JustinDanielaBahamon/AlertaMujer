@@ -695,7 +695,12 @@
     "evidencia_foto": "Photo",
     "evidencia_documento": "Document",
     "evidencia_sin_archivo": "sans fichier",
-    "evidencia_error_reproducir": "Lecture impossible. Vérifie ta connexion et réessaie."
+    "evidencia_error_reproducir": "Lecture impossible. Vérifie ta connexion et réessaie.",
+    "canal_corto_email": "E-mail",
+    "canal_corto_push": "App",
+    "escribir_whatsapp": "WhatsApp",
+    "llamar_contacto": "Appeler",
+    "whatsapp_mensaje": "Bonjour {nombre}, je t'écris à propos de l'alerte que tu as reçue de moi ({fecha})."
   },
   "confirmacion": {
     "titulo": "Presque prêtes !",
