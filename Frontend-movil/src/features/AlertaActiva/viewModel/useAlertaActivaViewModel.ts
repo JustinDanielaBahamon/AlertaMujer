@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import type { RefObject } from "react";
 import { Alert, Animated, Linking, Platform } from "react-native";
 import type MapView from "../../../components/mapa/MapaLibre";
@@ -335,19 +335,17 @@ export function useAlertaActivaViewModel() {
     })();
   }, [puntos]);
 
-  // Reloj para el "hace X segundos" de la etiqueta del mapa.
+  // Reloj para el "hace X" de la etiqueta del mapa. Cada 10 s y no cada segundo: un tic por segundo
+  // volvía a dibujar toda la pantalla (mapa, cámara y chat) y el teléfono se ponía lento.
+  // La cuenta regresiva tiene su propio reloj en <CuentaRegresiva>.
   useEffect(() => {
-    const id = setInterval(() => setAhora(Date.now()), 1000);
+    const id = setInterval(() => setAhora(Date.now()), 10000);
     return () => clearInterval(id);
   }, []);
 
-  // Tiempo que le queda a la alerta en el servidor (se actualiza con el reloj de cada segundo)
-  const secondsLeft = inicioAlerta
-    ? Math.max(0, Math.round((inicioAlerta.getTime() + duracionMaximaMin * 60000 - ahora) / 1000))
-    : duracionMaximaMin * 60;
-  const minutes = Math.floor(secondsLeft / 60);
-  const seconds = secondsLeft % 60;
-  const formattedTime = `${minutes}:${String(seconds).padStart(2, "0")}`;
+  // Momento en que la alerta vence en el servidor
+  const finAlertaMs = inicioAlerta ? inicioAlerta.getTime() + duracionMaximaMin * 60000 : null;
+  const finAlerta = useMemo(() => (finAlertaMs === null ? null : new Date(finAlertaMs)), [finAlertaMs]);
 
   // ¿Sigue activa? Se revisa cada 30 s y al llegar el contador a 0. Si el servidor la cerró
   // (venció, la marcaron atendida o se canceló desde otro lado) se deja de enviar la ubicación
@@ -382,10 +380,12 @@ export function useAlertaActivaViewModel() {
     return () => clearInterval(t);
   }, [alertaId]);
 
-  const llegoACero = alertaId !== null && inicioAlerta !== null && secondsLeft === 0;
+  // Al llegar a cero se pregunta al servidor si la alerta ya terminó
   useEffect(() => {
-    if (llegoACero) revisarEstado();
-  }, [llegoACero, revisarEstado]);
+    if (alertaId === null || finAlertaMs === null) return;
+    const t = setTimeout(revisarEstado, Math.max(0, finAlertaMs - Date.now()) + 1000);
+    return () => clearTimeout(t);
+  }, [alertaId, finAlertaMs, revisarEstado]);
 
   // Datos derivados del ultimo punto (mismos que muestra "Alerta de emergencia").
   const ultimo = puntos.length > 0 ? puntos[puntos.length - 1] : null;
@@ -512,7 +512,8 @@ export function useAlertaActivaViewModel() {
 
   return {
     alertaId,
-    formattedTime,
+    finAlerta,
+    duracionMaximaMin,
     marcarEstoyBien,
     abrirConfirmacion,
     cerrarConfirmacion,
