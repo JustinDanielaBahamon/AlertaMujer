@@ -109,6 +109,12 @@ export async function crearAlertaConReintentos(
   throw ultimoError;
 }
 
+/** Una alerta propia (para saber si sigue activa). */
+export const getAlerta = async (alertId: number): Promise<AlertaApi> => {
+  const response = await api.get<AlertaApi>(`/api/alerts/${alertId}`);
+  return response.data;
+};
+
 export const finalizarAlerta = async (alertId: number, estado: 'resolved' | 'cancelled'): Promise<AlertaApi> => {
   const response = await api.put<AlertaApi>(`/api/alerts/${alertId}`, { status: estado });
   return response.data;

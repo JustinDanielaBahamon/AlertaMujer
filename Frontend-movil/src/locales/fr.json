@@ -792,8 +792,8 @@
   "alertaActiva": {
     "titulo": "Alerte active",
     "subtitulo": "Ton réseau a été notifié",
-    "tiempoRestante": "Temps restant",
-    "mensajeReenvio": "Lorsque le temps sera écoulé, l'alerte sera renvoyée à tes contacts avec ta nouvelle position. Pour annuler l'alerte, appuie sur \"Je vais bien\" puis sur \"Oui, annuler\".",
+    "tiempoRestante": "L'alerte reste active",
+    "mensajeReenvio": "Tes contacts voient ta position tant que l'alerte est active. Le minuteur indique le temps avant qu'elle se ferme seule ; pour l'arrêter avant, touche « Je vais bien ».",
     "serviciosTitulo": "Services d'urgence actifs",
     "serviciosDescripcion": "Quand tu seras en sécurité, appuie sur \"Je vais bien\" pour prévenir.",
     "compartiendoUbicacion": "Partage de la position",
@@ -813,7 +813,14 @@
     "envio_enviada": "Tes contacts ont été prévenus",
     "envio_fallida": "Impossible d'envoyer l'alerte. Vérifie ton réseau ou demande de l'aide directement.",
     "envio_reintentar": "Réessayer",
-    "envio_llamar": "Appeler le 123"
+    "envio_llamar": "Appeler le 123",
+    "fin_titulo": "L'alerte est terminée",
+    "fin_vencida": "Les {min} minutes maximum d'une alerte sont passées et elle s'est fermée seule. Ta position n'est plus envoyée.",
+    "fin_atendida": "L'alerte a été marquée comme traitée. Ta position n'est plus envoyée.",
+    "fin_cancelada": "L'alerte a été annulée. Ta position n'est plus envoyée.",
+    "fin_pregunta": "Es-tu toujours en danger ?",
+    "fin_otra": "Oui, déclencher une autre alerte",
+    "fin_bien": "Je vais bien, quitter"
   },
   "alertaContacto": {
     "badgeActiva": "Alerte active en temps réel",

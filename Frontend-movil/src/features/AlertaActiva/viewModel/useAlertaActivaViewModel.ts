@@ -9,7 +9,9 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { MainStackParamList } from "../../../navigation/types";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useLocale } from "../../../contexts/LocaleContext";
-import { crearAlertaConReintentos, finalizarAlerta } from "../../../services/alerts.service";
+import { crearAlertaConReintentos, finalizarAlerta, getAlerta } from "../../../services/alerts.service";
+import { getAjustesPublicos } from "../../../services/settings.service";
+import { aFecha } from "../../../services/alert-tracking.service";
 import { getOrCreateDevice } from "../../../services/devices.service";
 import type { PuntoUbicacion } from "../../../services/alert-tracking.service";
 import { descripcionLugar, obtenerLugar } from "../../../services/geocoding.service";
@@ -56,8 +58,14 @@ async function leerUbicacion(): Promise<Location.LocationObject | null> {
   return Location.getLastKnownPositionAsync({ maxAge: ANTIGUEDAD_MAXIMA_ULTIMA_MS }).catch(() => null);
 }
 
-// Tiempo total de la cuenta regresiva en segundos. 182s = 3:02, coincidiendo con el diseno de referencia.
-const INITIAL_SECONDS = 182;
+// Si no se pueden leer los ajustes: duración máxima de una alerta y número de emergencias en Colombia
+const DURACION_MAXIMA_POR_DEFECTO_MIN = 30;
+const NUMERO_EMERGENCIA_POR_DEFECTO = "123";
+// Cada cuánto se revisa en el servidor si la alerta sigue activa (vencida, atendida o cancelada)
+const REVISION_ESTADO_MS = 30 * 1000;
+
+/** Cómo terminó la alerta, cuando el servidor la cerró sin que la usuaria tocara "Estoy bien". */
+export type FinAlerta = { estado: string; minutos: number };
 
 // Mismo formato de tiempo relativo que el modulo "Alerta de emergencia": "5s", "3 min", "2 h".
 const formatDuracion = (segundos: number) => {
@@ -104,9 +112,21 @@ export function useAlertaActivaViewModel() {
     };
   }, []);
 
-  // Crea la alerta en el backend al activar el SOS (una sola vez, incluyendo la ubicación).
-  // Generico useState<number>: TypeScript garantiza que este estado solo puede contener un numero.
-  const [secondsLeft, setSecondsLeft] = useState<number>(INITIAL_SECONDS);
+  // Hasta cuándo sigue activa la alerta en el servidor (inicio + duración máxima del panel)
+  const [inicioAlerta, setInicioAlerta] = useState<Date | null>(null);
+  const [duracionMaximaMin, setDuracionMaximaMin] = useState(DURACION_MAXIMA_POR_DEFECTO_MIN);
+  const [numeroEmergencia, setNumeroEmergencia] = useState(NUMERO_EMERGENCIA_POR_DEFECTO);
+  // La alerta terminó en el servidor: se deja de enviar la ubicación y se pregunta qué hacer
+  const [fin, setFin] = useState<FinAlerta | null>(null);
+  const terminadaRef = useRef(false);
+  useEffect(() => {
+    getAjustesPublicos()
+      .then((a) => {
+        if (a.sosMaxDurationMinutes && a.sosMaxDurationMinutes > 0) setDuracionMaximaMin(a.sosMaxDurationMinutes);
+        if (a.emergencyPhoneNumber) setNumeroEmergencia(a.emergencyPhoneNumber);
+      })
+      .catch(() => {});
+  }, []);
 
   // Ubicacion actual, para el mini-mapa del header y para el mapa en pantalla completa.
   const [location, setLocation] = useState<Coordenada | null>(null);
@@ -140,12 +160,16 @@ export function useAlertaActivaViewModel() {
   // "Estoy bien" -> "Si, cancelar". Antes se podía salir, la alerta quedaba en curso sin enviar
   // ubicación y se podían activar otras encima.
   const [puedeSalir, setPuedeSalir] = useState(false);
+  const nuevaAlertaRef = useRef(false);
   usePreventRemove(!puedeSalir, () => {
     Alert.alert(t.alertaActiva.salirBloqueadoTitulo, t.alertaActiva.salirBloqueadoDescripcion);
   });
   useEffect(() => {
-    if (puedeSalir) navigation.replace("DrawerHome");
-  }, [puedeSalir, navigation]);
+    if (!puedeSalir) return;
+    // "Sigo en peligro": se abre una alerta nueva (la anterior ya la cerró el servidor)
+    if (nuevaAlertaRef.current) navigation.replace("AlertaActiva", contactoDestino ? { contacto: contactoDestino } : undefined);
+    else navigation.replace("DrawerHome");
+  }, [puedeSalir, navigation, contactoDestino]);
 
   useEffect(() => {
     vivo.current = true;
@@ -154,13 +178,6 @@ export function useAlertaActivaViewModel() {
     };
   }, []);
 
-  // Efecto de cuenta regresiva: se ejecuta cada segundo y limpia su propio temporizador.
-  useEffect(() => {
-    if (secondsLeft <= 0) return undefined;
-
-    const timer = setTimeout(() => setSecondsLeft((s) => s - 1), 1000);
-    return () => clearTimeout(timer);
-  }, [secondsLeft]);
 
   const alertaCreacionIniciadaRef = useRef(false);
   // Última ubicación obtenida (para enviarla si la alerta se creó antes de tenerla)
@@ -177,6 +194,10 @@ export function useAlertaActivaViewModel() {
     alertaCreacionIniciadaRef.current = true;
     alertaCreadaIdRef.current = alertaExistente;
     setAlertaId(alertaExistente);
+    setInicioAlerta(new Date());
+    getAlerta(alertaExistente)
+      .then((a) => a.startedAt && setInicioAlerta(aFecha(a.startedAt)))
+      .catch(() => {});
     tomarControlDeLaAlerta();
   }, [alertaExistente]);
 
@@ -213,9 +234,11 @@ export function useAlertaActivaViewModel() {
         });
         alertaCreadaIdRef.current = alerta.id;
         setAlertaId(alerta.id);
+        setInicioAlerta(alerta.startedAt ? aFecha(alerta.startedAt) : new Date());
         if (pantallaMontadaRef.current) setEnvio((e) => ({ ...e, estado: "enviada" }));
-        // Si se creó sin ubicación y ya llegó una, se envía asociada a la alerta
-        if (!location && ultimaUbicacionRef.current) {
+        // El primer punto del recorrido sale ya: así el contacto ve dónde está desde el primer momento
+        // (antes esperaba la siguiente lectura del GPS y veía "sin ubicaciones")
+        if (ultimaUbicacionRef.current) {
           reportarUbicacion({ ...ultimaUbicacionRef.current, alertId: alerta.id });
         }
       } catch (err) {
@@ -255,6 +278,7 @@ export function useAlertaActivaViewModel() {
       }
 
       const actualizar = async () => {
+        if (terminadaRef.current) return; // la alerta terminó en el servidor: no se envía más
         hechas += 1;
         try {
           const current = await leerUbicacion();
@@ -317,10 +341,41 @@ export function useAlertaActivaViewModel() {
     return () => clearInterval(id);
   }, []);
 
-  // Valor derivado (no es un estado): se recalcula en cada render a partir de secondsLeft.
+  // Tiempo que le queda a la alerta en el servidor (se actualiza con el reloj de cada segundo)
+  const secondsLeft = inicioAlerta
+    ? Math.max(0, Math.round((inicioAlerta.getTime() + duracionMaximaMin * 60000 - ahora) / 1000))
+    : duracionMaximaMin * 60;
   const minutes = Math.floor(secondsLeft / 60);
   const seconds = secondsLeft % 60;
   const formattedTime = `${minutes}:${String(seconds).padStart(2, "0")}`;
+
+  // ¿Sigue activa? Se revisa cada 30 s y al llegar el contador a 0. Si el servidor la cerró
+  // (venció, la marcaron atendida o se canceló desde otro lado) se deja de enviar la ubicación
+  const revisarEstado = useCallback(async () => {
+    const id = alertaCreadaIdRef.current;
+    if (!id || terminadaRef.current) return;
+    try {
+      const a = await getAlerta(id);
+      const estado = (a.status || "").toLowerCase();
+      if (estado && estado !== "active") {
+        terminadaRef.current = true;
+        setFin({ estado, minutos: duracionMaximaMin });
+      }
+    } catch {
+      // Sin conexión: se revisa en la siguiente vuelta
+    }
+  }, [duracionMaximaMin]);
+
+  useEffect(() => {
+    if (!alertaId) return;
+    const t = setInterval(revisarEstado, REVISION_ESTADO_MS);
+    return () => clearInterval(t);
+  }, [alertaId, revisarEstado]);
+
+  const llegoACero = alertaId !== null && inicioAlerta !== null && secondsLeft === 0;
+  useEffect(() => {
+    if (llegoACero) revisarEstado();
+  }, [llegoACero, revisarEstado]);
 
   // Datos derivados del ultimo punto (mismos que muestra "Alerta de emergencia").
   const ultimo = puntos.length > 0 ? puntos[puntos.length - 1] : null;
@@ -393,12 +448,23 @@ export function useAlertaActivaViewModel() {
     setPuedeSalir(true);
   }, []);
 
-  // Abre el marcador del telefono con el 911 ya preparado.
+  // Abre el marcador con el número de emergencias que define la administración (123 en Colombia)
   const llamarEmergencias = useCallback(() => {
-    const url = Platform.OS === "android" ? "tel:911" : "telprompt:911";
+    const url = Platform.OS === "android" ? `tel:${numeroEmergencia}` : `telprompt:${numeroEmergencia}`;
     Linking.openURL(url).catch(() => {
       // Ignorar silenciosamente si el dispositivo no puede realizar llamadas.
     });
+  }, [numeroEmergencia]);
+
+  // Cuando la alerta ya terminó en el servidor: salir o activar otra
+  const activarOtraAlerta = useCallback(() => {
+    setFin(null);
+    nuevaAlertaRef.current = true;
+    setPuedeSalir(true);
+  }, []);
+  const salirTrasFin = useCallback(() => {
+    setFin(null);
+    setPuedeSalir(true);
   }, []);
 
   // Abre el mapa en pantalla completa (equivalente al boton "navegar" del modulo Mapa),
@@ -451,6 +517,10 @@ export function useAlertaActivaViewModel() {
     cerrarMapaCompleto,
     errorAlerta,
     envio,
+    fin,
+    activarOtraAlerta,
+    salirTrasFin,
+    numeroEmergencia,
     reintentarEnvio,
     // Mapa con el mismo diseno y datos que "Alerta de emergencia"
     mapRef,

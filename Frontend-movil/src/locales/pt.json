@@ -793,8 +793,8 @@
 "alertaActiva": {
   "titulo": "Alerta ativo",
   "subtitulo": "Sua rede foi notificada",
-  "tiempoRestante": "Tempo restante",
-  "mensajeReenvio": "Ao terminar o tempo, o alerta será enviado novamente aos seus contatos com sua nova localização. Para cancelar o alerta, toque em \"Estou bem\" e depois em \"Sim, cancelar\".",
+  "tiempoRestante": "O alerta continua ativo",
+  "mensajeReenvio": "Seus contatos veem sua localização enquanto o alerta estiver ativo. O tempo mostra quanto falta para ele fechar sozinho; para terminar antes toque em \"Estou bem\".",
   "serviciosTitulo": "Serviços de emergência ativos",
   "serviciosDescripcion": "Quando estiver a salvo, pressione \"Estou bem\" para notificar.",
   "compartiendoUbicacion": "Compartilhando localização",
@@ -814,7 +814,14 @@
   "envio_enviada": "Seus contatos já foram avisados",
   "envio_fallida": "Não conseguimos enviar o alerta. Verifique o sinal ou peça ajuda diretamente.",
   "envio_reintentar": "Tentar de novo",
-  "envio_llamar": "Ligar para 123"
+  "envio_llamar": "Ligar para 123",
+  "fin_titulo": "O alerta terminou",
+  "fin_vencida": "Passaram os {min} minutos máximos de um alerta e ele fechou sozinho. Sua localização não é mais enviada.",
+  "fin_atendida": "O alerta foi marcado como atendido. Sua localização não é mais enviada.",
+  "fin_cancelada": "O alerta foi cancelado. Sua localização não é mais enviada.",
+  "fin_pregunta": "Você ainda está em perigo?",
+  "fin_otra": "Sim, ativar outro alerta",
+  "fin_bien": "Estou bem, sair"
 },
     "alertaContacto": {
     "badgeActiva": "Alerta ativo em tempo real",

@@ -353,9 +353,49 @@ export default function AlertaActivaScreen() {
           </TouchableOpacity>
         </View>
       </Modal>
+
+      {/* La alerta terminó en el servidor (venció, atendida o cancelada): ya no se envía la ubicación */}
+      <Modal visible={!!vm.fin} transparent animationType="fade" onRequestClose={vm.salirTrasFin}>
+        <View style={finEstilos.fondo}>
+          <View style={[finEstilos.tarjeta, { backgroundColor: theme.containerBackground }]}>
+            <View style={[finEstilos.icono, { backgroundColor: theme.icono + "22" }]}>
+              <MaterialIcons name="timer-off" size={30} color={theme.icono} />
+            </View>
+            <Text style={[finEstilos.titulo, { color: theme.text }]}>{t.alertaActiva.fin_titulo}</Text>
+            <Text style={[finEstilos.texto, { color: theme.text }]}>
+              {vm.fin?.estado === "resolved"
+                ? t.alertaActiva.fin_atendida
+                : vm.fin?.estado === "cancelled"
+                  ? t.alertaActiva.fin_cancelada
+                  : t.alertaActiva.fin_vencida.replace("{min}", String(vm.fin?.minutos ?? ""))}
+            </Text>
+            <Text style={[finEstilos.pregunta, { color: theme.text }]}>{t.alertaActiva.fin_pregunta}</Text>
+            <TouchableOpacity onPress={vm.activarOtraAlerta} style={[finEstilos.boton, { backgroundColor: theme.icono }]}>
+              <MaterialIcons name="notifications-active" size={20} color="#fff" />
+              <Text style={finEstilos.botonTexto}>{t.alertaActiva.fin_otra}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={vm.salirTrasFin} style={[finEstilos.secundario, { borderColor: theme.icono }]}>
+              <Text style={[finEstilos.secundarioTexto, { color: theme.icono }]}>{t.alertaActiva.fin_bien}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
+
+const finEstilos = StyleSheet.create({
+  fondo: { flex: 1, backgroundColor: "rgba(0,0,0,0.55)", justifyContent: "center", padding: 24 },
+  tarjeta: { borderRadius: 22, padding: 22, alignItems: "center" },
+  icono: { width: 60, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center" },
+  titulo: { fontSize: 18, fontWeight: "800", marginTop: 12, textAlign: "center" },
+  texto: { fontSize: 13, lineHeight: 19, opacity: 0.8, textAlign: "center", marginTop: 6 },
+  pregunta: { fontSize: 15, fontWeight: "700", marginTop: 14, textAlign: "center" },
+  boton: { alignSelf: "stretch", flexDirection: "row", gap: 8, height: 50, borderRadius: 14, alignItems: "center", justifyContent: "center", marginTop: 14 },
+  botonTexto: { color: "#fff", fontSize: 15, fontWeight: "800" },
+  secundario: { alignSelf: "stretch", height: 46, borderRadius: 14, borderWidth: 1.5, alignItems: "center", justifyContent: "center", marginTop: 10 },
+  secundarioTexto: { fontSize: 14, fontWeight: "700" },
+});
 const envioEstilos = StyleSheet.create({
   caja: { flexDirection: "row", alignItems: "flex-start", gap: 10, borderWidth: 1.5, borderRadius: 16, padding: 12, marginTop: 12, marginHorizontal: 4 },
   texto: { fontSize: 13, fontWeight: "700", lineHeight: 19 },
