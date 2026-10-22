@@ -9,13 +9,18 @@ import type { MainStackParamList } from "../../../navigation/types";
 import {
   getSeguimientoAlerta,
   getSeguimientoPublico,
+  type EvidenciaSeguimiento,
   type PuntoUbicacion,
 } from "../../../services/alert-tracking.service";
+import { getAjustesPublicos } from "../../../services/settings.service";
 import { detenerAlarmaSos } from "../../../notifications/alarmaSos";
 import { descripcionLugar, obtenerLugar } from "../../../services/geocoding.service";
 
 // Ciclo de actualización: cada 30 s se actualiza la ubicación; tras 10 actualizaciones
 // se entra en reposo 5 minutos (ahorra batería) y luego se repite el ciclo.
+// Refresco del seguimiento que ve el contacto
+const REFRESCO_CONTACTO_MS = 10 * 1000;
+const REFRESCO_CONTACTO_LENTO_MS = 30 * 1000;
 const INTERVALO_ACTUALIZACION_MS = 30 * 1000;
 const ACTUALIZACIONES_POR_CICLO = 10;
 const REPOSO_MS = 5 * 60 * 1000;
@@ -95,6 +100,15 @@ export function useAlertaContactoViewModel() {
       : [],
   );
   const [activa, setActiva] = useState(true);
+  // Número de emergencias que define la administración (123 en Colombia)
+  const [numeroEmergencia, setNumeroEmergencia] = useState("123");
+  useEffect(() => {
+    getAjustesPublicos()
+      .then((a) => a.emergencyPhoneNumber && setNumeroEmergencia(a.emergencyPhoneNumber))
+      .catch(() => {});
+  }, []);
+  // Grabaciones de la alerta (video y audio por partes): el contacto las ve para ayudar a ubicarla
+  const [evidencias, setEvidencias] = useState<EvidenciaSeguimiento[]>([]);
   const [cargando, setCargando] = useState(true);
   const [errorConexion, setErrorConexion] = useState(false);
   const [ahora, setAhora] = useState(Date.now());
@@ -154,6 +168,7 @@ export function useAlertaContactoViewModel() {
 
         setErrorConexion(false);
         if (seguimiento.puntos.length > 0) setPuntos(seguimiento.puntos);
+        if (seguimiento.evidencias) setEvidencias(seguimiento.evidencias);
         setCargando(false);
 
         const sigueActiva = !ESTADOS_FINALES.includes(seguimiento.estado);
@@ -164,7 +179,9 @@ export function useAlertaContactoViewModel() {
         setErrorConexion(true);
         setCargando(false);
       }
-      if (mounted) timer = setTimeout(cargar, esperaTrasActualizacion(hechas));
+      // Quien ayuda necesita ver el movimiento casi en vivo: cada 10 s los primeros 10 minutos y
+      // luego cada 30 s (no el ciclo de ahorro de batería que usa el celular de la usuaria)
+      if (mounted) timer = setTimeout(cargar, hechas <= 60 ? REFRESCO_CONTACTO_MS : REFRESCO_CONTACTO_LENTO_MS);
     };
 
     cargar();
@@ -320,12 +337,17 @@ export function useAlertaContactoViewModel() {
   }, [ajustarEn]);
 
   const llamarEmergencias = useCallback(() => {
-    const url = Platform.OS === "android" ? "tel:911" : "telprompt:911";
+    const url = Platform.OS === "android" ? `tel:${numeroEmergencia}` : `telprompt:${numeroEmergencia}`;
     Linking.openURL(url).catch(() => {});
-  }, []);
+  }, [numeroEmergencia]);
+
+  const videos = evidencias.filter((e) => e.tipo === "video");
+  const audios = evidencias.filter((e) => e.tipo === "audio");
 
   return {
     codigo: params.codigo,
+    videos,
+    audios,
     nombreUsuaria: params.nombreUsuaria,
     mapRef,
     mapaCompletoRef,
@@ -349,5 +371,6 @@ export function useAlertaContactoViewModel() {
     cerrarMapa,
     verTodosLosPuntos,
     llamarEmergencias,
+    numeroEmergencia,
   };
 }

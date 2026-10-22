@@ -806,7 +806,6 @@
   "confirmarDescripcion": "Your contacts will receive an automatic notification letting them know you are safe and that the alert has been deactivated.",
   "confirmarSi": "Yes, cancel",
   "confirmarNo": "No, keep alert",
-  "llamar911": "Call 911",
   "salirBloqueadoTitulo": "Your alert is still active",
   "salirBloqueadoDescripcion": "To leave this screen, tap \"I'm okay\" and confirm you are safe.",
   "envio_enviando": "Alerting your contacts…",
@@ -821,7 +820,10 @@
   "fin_cancelada": "The alert was cancelled. Your location is no longer being sent.",
   "fin_pregunta": "Are you still in danger?",
   "fin_otra": "Yes, trigger another alert",
-  "fin_bien": "I'm okay, exit"
+  "fin_bien": "I'm okay, exit",
+  "vista": "view",
+  "viendo_ahora": "{n} watching now",
+  "llamar_numero": "Call {numero}"
 },
     "alertaContacto": {
     "badgeActiva": "Active alert in real time",
@@ -853,7 +855,13 @@
     "reciente": "Recent",
     "actual": "Current",
     "consejo": "If you believe the person is in imminent danger, contact the authorities immediately.",
-    "llamar911": "Call 911"
+    "grabaciones": "Alert recordings",
+    "grabaciones_desc": "What her phone recorded. It may help you know where she is or what's happening. Don't share them.",
+    "grabacion_video": "Video",
+    "grabacion_audio": "Audio",
+    "parte": "part",
+    "partes": "parts",
+    "llamar_numero": "Call {numero}"
   },
   "notificaciones": {
     "titulo_header": "Notifications",

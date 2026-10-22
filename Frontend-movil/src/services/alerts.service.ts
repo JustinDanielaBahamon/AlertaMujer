@@ -115,6 +115,12 @@ export const getAlerta = async (alertId: number): Promise<AlertaApi> => {
   return response.data;
 };
 
+/** Cuántas personas abrieron el seguimiento de la alerta y cuántas la están viendo ahora. */
+export const getVistas = async (alertId: number): Promise<{ total: number; viendoAhora: number }> => {
+  const response = await api.get<{ total: number; viendoAhora: number }>(`/api/alerts/${alertId}/views`);
+  return response.data;
+};
+
 export const finalizarAlerta = async (alertId: number, estado: 'resolved' | 'cancelled'): Promise<AlertaApi> => {
   const response = await api.put<AlertaApi>(`/api/alerts/${alertId}`, { status: estado });
   return response.data;
