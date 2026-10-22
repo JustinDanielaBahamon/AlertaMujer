@@ -3,7 +3,7 @@ import { Alert, Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { NavigationContainerRefWithCurrent } from "@react-navigation/native";
 import { useActivationMethods } from "../../contexts/MetodosActivacionContext";
-import SensorSacudidas from "../../../modules/sensor-sacudidas";
+import ShakeSensor from "../../../modules/shake-sensor";
 import type { MainStackParamList } from "../../navigation/types";
 import {
   onShakeAlertOpen,
@@ -24,7 +24,7 @@ const BATTERY_REASK_MS = 3 * 24 * 60 * 60 * 1000;
  * siempre; si la usuaria dice que no, se vuelve a preguntar a los 3 días.
  */
 async function askNoBatterySaver(name: string) {
-  if (Platform.OS !== "android" || SensorSacudidas.ignoraOptimizacionBateria()) return;
+  if (Platform.OS !== "android" || ShakeSensor.ignoresBatteryOptimization()) return;
   const latest = Number((await AsyncStorage.getItem(BATTERY_KEY)) ?? 0);
   if (Date.now() - latest < BATTERY_REASK_MS) return;
   await AsyncStorage.setItem(BATTERY_KEY, String(Date.now()));
@@ -33,7 +33,7 @@ async function askNoBatterySaver(name: string) {
     "Para que la alerta funcione con la app cerrada o la pantalla apagada, permite que AlertaMujer se ejecute siempre en segundo plano.",
     [
       { text: "Ahora no", style: "cancel" },
-      { text: "Permitir", onPress: () => SensorSacudidas.pedirIgnorarOptimizacionBateria() },
+      { text: "Permitir", onPress: () => ShakeSensor.requestIgnoreBatteryOptimization() },
     ],
   );
 }

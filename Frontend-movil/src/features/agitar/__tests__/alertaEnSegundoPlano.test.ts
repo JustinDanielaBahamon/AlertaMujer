@@ -1,8 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-jest.mock("../../../../modules/sensor-sacudidas", () => ({
+jest.mock("../../../../modules/shake-sensor", () => ({
   __esModule: true,
-  default: { esperar: jest.fn(() => Promise.resolve()) },
+  default: { wait: jest.fn(() => Promise.resolve()) },
 }));
 jest.mock("expo-location", () => ({
   Accuracy: { Balanced: 3 },

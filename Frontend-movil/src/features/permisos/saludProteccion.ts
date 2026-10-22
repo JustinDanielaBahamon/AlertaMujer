@@ -1,5 +1,5 @@
 import { Platform } from "react-native";
-import SensorSacudidas, { type CierreApp } from "../../../modules/sensor-sacudidas";
+import ShakeSensor, { type AppExit } from "../../../modules/shake-sensor";
 
 /**
  * ¿La protección se ha detenido sin que la usuaria lo sepa? Android registra cada cierre de la app
@@ -21,15 +21,15 @@ const ANR = 6;
 const EXIT_SELF = 1;
 const PACKAGE_UPDATED = 16;
 
-export function classifyExit(c: CierreApp): Interruption | null {
-  if (c.importancia > FOREGROUND_SERVICE_IMPORTANCE) return null; // la protección no corría
-  if (c.motivo === EXIT_SELF || c.motivo === PACKAGE_UPDATED) return null; // la app terminó o se actualizó
-  if (c.motivo === USER_REQUESTED) {
+export function classifyExit(c: AppExit): Interruption | null {
+  if (c.importance > FOREGROUND_SERVICE_IMPORTANCE) return null; // la protección no corría
+  if (c.reason === EXIT_SELF || c.reason === PACKAGE_UPDATED) return null; // la app terminó o se actualizó
+  if (c.reason === USER_REQUESTED) {
     // Deslizar la app en "Recientes" (XOS: "remove task ... SwipeUpClean") la mata entera
-    const recent = /remove task|swipe/i.test(c.descripcion);
+    const recent = /remove task|swipe/i.test(c.description);
     return { when: c.timestamp, cause: recent ? "recientes" : "detenida" };
   }
-  if (c.motivo === CRASH || c.motivo === CRASH_NATIVE || c.motivo === ANR) return { when: c.timestamp, cause: "error" };
+  if (c.reason === CRASH || c.reason === CRASH_NATIVE || c.reason === ANR) return { when: c.timestamp, cause: "error" };
   // Memoria, ahorro de energía, "demasiados procesos", congelado...: lo hizo el sistema o la marca
   return { when: c.timestamp, cause: "sistema" };
 }
@@ -38,7 +38,7 @@ export function classifyExit(c: CierreApp): Interruption | null {
 export function recentInterruptions(days = 7): Interruption[] {
   if (Platform.OS !== "android") return [];
   try {
-    return SensorSacudidas.motivosDeCierre(Date.now() - days * 24 * 60 * 60 * 1000)
+    return ShakeSensor.exitReasons(Date.now() - days * 24 * 60 * 60 * 1000)
       .map(classifyExit)
       .filter((i): i is Interruption => i !== null)
       .sort((a, b) => b.when - a.when);

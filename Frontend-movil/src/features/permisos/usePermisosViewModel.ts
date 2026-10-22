@@ -4,7 +4,7 @@ import { AppState } from "react-native";
 import { useActivationMethods } from "../../contexts/MetodosActivacionContext";
 import { grantPermission, PERMISSIONS, checkPermissions, type PermissionStatus, type PermissionId } from "./permisos";
 import { EXPLANATION, recentInterruptions, type Interruption } from "./saludProteccion";
-import SensorSacudidas from "../../../modules/sensor-sacudidas";
+import ShakeSensor from "../../../modules/shake-sensor";
 import { useAutomaticRecording } from "./useGrabacionAutomatica";
 
 // Cámara y micrófono se muestran junto a sus interruptores de grabación automática
@@ -63,7 +63,7 @@ export function usePermissionsViewModel() {
         // Si la cortó el sistema, el arreglo es el inicio automático de la marca
         canFix: latest?.cause === "sistema",
         fix: () => {
-          SensorSacudidas.abrirInicioAutomatico();
+          ShakeSensor.openAutoStart();
         },
       };
 

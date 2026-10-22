@@ -3,7 +3,7 @@ import { Camera } from "expo-camera";
 import * as Contacts from "expo-contacts";
 import * as Location from "expo-location";
 import { Linking, Platform, Alert } from "react-native";
-import SensorSacudidas from "../../../modules/sensor-sacudidas";
+import ShakeSensor from "../../../modules/shake-sensor";
 import { reportPermissions } from "../../services/devices.service";
 import { inPermissionQueue, notificationsPermission, locationPermission } from "../../services/permisosSeguros";
 import { registrarPush } from "../../services/push.service";
@@ -129,9 +129,9 @@ export async function checkPermissions(
     Contacts.getPermissionsAsync().then(toStatus),
   ]);
   const android = Platform.OS === "android";
-  const battery = !android || SensorSacudidas.ignoraOptimizacionBateria();
-  const fullScreen = !android || SensorSacudidas.puedePantallaCompleta();
-  const withAutoStart = android && SensorSacudidas.tieneAjusteInicioAutomatico();
+  const battery = !android || ShakeSensor.ignoresBatteryOptimization();
+  const fullScreen = !android || ShakeSensor.canUseFullScreen();
+  const withAutoStart = android && ShakeSensor.hasAutoStartSetting();
   // La web muestra si el celular está listo para una emergencia
   void reportPermissions({
     ubicacion: location.granted === true,
@@ -186,7 +186,7 @@ export async function grantPermission(id: Exclude<PermissionId, "agitar">, statu
       return;
     case "bateria":
       // Si no salió el diálogo del sistema se abrió la página de la app: se explica qué tocar
-      if (!SensorSacudidas.pedirIgnorarOptimizacionBateria()) {
+      if (!ShakeSensor.requestIgnoreBatteryOptimization()) {
         Alert.alert(
           "Batería sin restricciones",
           "En la página de AlertaMujer que se abrió entra a \"Batería\" y elige \"Sin restricciones\" (en Samsung: Batería → Sin restricciones).",
@@ -194,10 +194,10 @@ export async function grantPermission(id: Exclude<PermissionId, "agitar">, statu
       }
       return;
     case "pantallaCompleta":
-      SensorSacudidas.pedirPantallaCompleta();
+      ShakeSensor.requestFullScreen();
       return;
     case "inicioAutomatico":
-      if (!SensorSacudidas.abrirInicioAutomatico()) {
+      if (!ShakeSensor.openAutoStart()) {
         Alert.alert(
           "Inicio automático",
           "En la página de AlertaMujer que se abrió busca \"Inicio automático\" o \"Batería\" y permite que la app se ejecute en segundo plano.",

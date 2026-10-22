@@ -25,15 +25,15 @@ jest.mock("expo-location", () => ({
 }));
 jest.mock("../../../services/push.service", () => ({ registrarPush: jest.fn(async () => {}) }));
 jest.mock("../../../services/devices.service", () => ({ reportPermissions: jest.fn(async () => {}) }));
-jest.mock("../../../../modules/sensor-sacudidas", () => ({
+jest.mock("../../../../modules/shake-sensor", () => ({
   __esModule: true,
   default: {
-    ignoraOptimizacionBateria: jest.fn(() => false),
-    pedirIgnorarOptimizacionBateria: jest.fn(),
-    puedePantallaCompleta: jest.fn(() => false),
-    pedirPantallaCompleta: jest.fn(),
-    tieneAjusteInicioAutomatico: jest.fn(() => true),
-    abrirInicioAutomatico: jest.fn(() => true),
+    ignoresBatteryOptimization: jest.fn(() => false),
+    requestIgnoreBatteryOptimization: jest.fn(),
+    canUseFullScreen: jest.fn(() => false),
+    requestFullScreen: jest.fn(),
+    hasAutoStartSetting: jest.fn(() => true),
+    openAutoStart: jest.fn(() => true),
   },
 }));
 

@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import SensorSacudidas from "../../../../modules/sensor-sacudidas";
+import ShakeSensor from "../../../../modules/shake-sensor";
 import { uploadEvidence } from "../../../services/evidencias.service";
 import { _resetQueue, setAudioAlert, enqueueChunk, uploadStatus, processQueue } from "../colaSubidas";
 
@@ -21,11 +21,11 @@ jest.mock("@react-native-async-storage/async-storage", () => {
 });
 
 let mockChunk: ((t: { uri: string; durationMs: number }) => void) | null = null;
-jest.mock("../../../../modules/sensor-sacudidas", () => ({
+jest.mock("../../../../modules/shake-sensor", () => ({
   __esModule: true,
   default: {
-    borrarArchivo: jest.fn(() => true),
-    audiosPendientes: jest.fn(() => []),
+    deleteFile: jest.fn(() => true),
+    pendingAudios: jest.fn(() => []),
     addListener: jest.fn((_e: string, l) => {
       mockChunk = l;
       return { remove: () => (mockChunk = null) };
@@ -36,7 +36,7 @@ jest.mock("../../../../modules/sensor-sacudidas", () => ({
 jest.mock("../../../services/evidencias.service", () => ({ uploadEvidence: jest.fn() }));
 
 const upload = uploadEvidence as jest.Mock;
-const sensor = SensorSacudidas as unknown as Record<string, jest.Mock>;
+const sensor = ShakeSensor as unknown as Record<string, jest.Mock>;
 const waitQueue = () => new Promise((r) => setTimeout(r, 0));
 
 describe("colaSubidas", () => {
@@ -54,7 +54,7 @@ describe("colaSubidas", () => {
     await waitQueue();
 
     expect(upload).toHaveBeenCalledWith(7, "file:///cache/a.mp4", "video");
-    expect(sensor.borrarArchivo).toHaveBeenCalledWith("file:///cache/a.mp4");
+    expect(sensor.deleteFile).toHaveBeenCalledWith("file:///cache/a.mp4");
     expect(uploadStatus()).toMatchObject({ uploaded: 1, pendingItems: 0 });
   });
 
@@ -65,7 +65,7 @@ describe("colaSubidas", () => {
     await enqueueChunk({ uri: "file:///cache/b.m4a", alertaId: 7, tipo: "audio" });
     await processQueue();
     expect(uploadStatus().pendingItems).toBe(1);
-    expect(sensor.borrarArchivo).not.toHaveBeenCalled();
+    expect(sensor.deleteFile).not.toHaveBeenCalled();
     expect(JSON.parse((await AsyncStorage.getItem("alertamujer_evidencias_pendientes"))!)).toHaveLength(1);
 
     jest.advanceTimersByTime(15000);
@@ -88,7 +88,7 @@ describe("colaSubidas", () => {
 
   it("los audios del servicio nativo se suben con la alerta asignada, también los que quedaron", async () => {
     upload.mockResolvedValue(undefined);
-    sensor.audiosPendientes.mockReturnValue(["file:///cache/evidencias/viejo.m4a"]);
+    sensor.pendingAudios.mockReturnValue(["file:///cache/evidencias/viejo.m4a"]);
 
     setAudioAlert(9);
     mockChunk?.({ uri: "file:///cache/evidencias/nuevo.m4a", durationMs: 30000 });

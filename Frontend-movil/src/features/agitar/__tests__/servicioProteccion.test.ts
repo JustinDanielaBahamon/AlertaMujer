@@ -19,15 +19,15 @@ jest.mock("@notifee/react-native", () => ({
 }));
 
 let mockReader: ((m: { x: number; y: number; z: number }) => void) | null = null;
-jest.mock("../../../../modules/sensor-sacudidas", () => ({
+jest.mock("../../../../modules/shake-sensor", () => ({
   __esModule: true,
   default: {
-    disponible: jest.fn(() => true),
-    iniciar: jest.fn(() => true),
-    detener: jest.fn(),
-    iniciarBotonEncendido: jest.fn(),
-    detenerBotonEncendido: jest.fn(),
-    esperar: jest.fn((ms: number) => new Promise((r) => setTimeout(r, ms))),
+    available: jest.fn(() => true),
+    start: jest.fn(() => true),
+    stop: jest.fn(),
+    startPowerButton: jest.fn(),
+    stopPowerButton: jest.fn(),
+    wait: jest.fn((ms: number) => new Promise((r) => setTimeout(r, ms))),
     addListener: jest.fn((_event: string, l) => {
       mockReader = l;
       return { remove: () => (mockReader = null) };
@@ -49,7 +49,7 @@ import notifee from "@notifee/react-native";
 import { AppState } from "react-native";
 import * as Location from "expo-location";
 import { createShakeAlert } from "../alertaEnSegundoPlano";
-import SensorSacudidas from "../../../../modules/sensor-sacudidas";
+import ShakeSensor from "../../../../modules/shake-sensor";
 import {
   onShakeAlertOpen,
   onShakeOnScreen,
@@ -96,10 +96,10 @@ describe("servicioProteccion", () => {
 
   it("lee el acelerómetro nativo, que sigue con la app minimizada, y lo suelta al apagar", async () => {
     await turnOn();
-    expect(SensorSacudidas.iniciar).toHaveBeenCalledWith(40);
+    expect(ShakeSensor.start).toHaveBeenCalledWith(40);
 
     await stopProtection();
-    expect(SensorSacudidas.detener).toHaveBeenCalled();
+    expect(ShakeSensor.stop).toHaveBeenCalled();
     expect(mockReader).toBeNull();
   });
 
@@ -151,8 +151,8 @@ describe("servicioProteccion", () => {
     const run = (notifee.registerForegroundService as jest.Mock).mock.calls.at(-1)[0];
     expect(await startProtection(false, { shake: false, powerButton: true })).toBe("activa");
     run();
-    expect(SensorSacudidas.iniciarBotonEncendido).toHaveBeenCalled();
-    expect(SensorSacudidas.iniciar).not.toHaveBeenCalled(); // sin acelerómetro si no se pidió agitar
+    expect(ShakeSensor.startPowerButton).toHaveBeenCalled();
+    expect(ShakeSensor.start).not.toHaveBeenCalled(); // sin acelerómetro si no se pidió agitar
 
     for (let i = 0; i < 4; i++) {
       jest.setSystemTime(Date.now() + 400);

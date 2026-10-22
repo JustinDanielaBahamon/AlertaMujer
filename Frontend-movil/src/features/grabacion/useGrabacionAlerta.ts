@@ -3,7 +3,7 @@ import { Camera, type CameraView } from "expo-camera";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AppState, Linking } from "react-native";
 
-import SensorSacudidas from "../../../modules/sensor-sacudidas";
+import ShakeSensor from "../../../modules/shake-sensor";
 import { useEvidence } from "../../contexts/EvidenciaContext";
 import { inPermissionQueue } from "../../services/permisosSeguros";
 import { setAudioAlert, enqueueChunk, listenUploads, processQueue, type UploadStatus } from "./colaSubidas";
@@ -57,7 +57,7 @@ export function useAlertRecording(alertId: number | null) {
   }, []);
 
   useEffect(() => {
-    const sub = SensorSacudidas.addListener("onErrorGrabacion", ({ mensaje: message }) => setError(message));
+    const sub = ShakeSensor.addListener("onRecordingError", ({ message: message }) => setError(message));
     return () => sub.remove();
   }, []);
 
@@ -93,7 +93,7 @@ export function useAlertRecording(alertId: number | null) {
     if (!active || !permissions?.microphone || !alertId) return;
     setAudioAlert(alertId);
     const recordNow = conAudio && !(canVideo && AppState.currentState === "active");
-    if (!SensorSacudidas.iniciarGrabacionAudio(SECONDS_PER_CHUNK, recordNow)) {
+    if (!ShakeSensor.startAudioRecording(SECONDS_PER_CHUNK, recordNow)) {
       setError("No se pudo encender el micrófono");
       return;
     }
@@ -101,7 +101,7 @@ export function useAlertRecording(alertId: number | null) {
     setServiceReady(true);
     return () => {
       setServiceReady(false);
-      SensorSacudidas.detenerGrabacionAudio();
+      ShakeSensor.stopAudioRecording();
     };
     // puedeVideo solo decide cómo arranca; los cambios después los maneja el efecto del video
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -112,8 +112,8 @@ export function useAlertRecording(alertId: number | null) {
     if (!recordingVideo || !alertId) return;
     let alive = true;
     (async () => {
-      SensorSacudidas.pausarGrabacionAudio();
-      await SensorSacudidas.esperar(400); // que el servicio suelte el micrófono antes de la cámara
+      ShakeSensor.pauseAudioRecording();
+      await ShakeSensor.wait(400); // que el servicio suelte el micrófono antes de la cámara
       while (alive) {
         try {
           const startTime = Date.now();
@@ -122,7 +122,7 @@ export function useAlertRecording(alertId: number | null) {
           if (video.uri && Date.now() - startTime >= MIN_CHUNK_MS) {
             void enqueueChunk({ uri: video.uri, alertaId: alertId, tipo: "video" });
           } else if (video.uri) {
-            SensorSacudidas.borrarArchivo(video.uri);
+            ShakeSensor.deleteFile(video.uri);
           }
         } catch (e) {
           if (alive) {
@@ -160,7 +160,7 @@ export function useAlertRecording(alertId: number | null) {
   // Sin video (minimizada, sin permiso o la cámara falló) sigue el audio. Mientras la cámara se
   // prepara o cambia de lado no: dejaría trocitos de audio de 1–2 segundos.
   useEffect(() => {
-    if (active && serviceReady && conAudio && !showCamera) SensorSacudidas.reanudarGrabacionAudio();
+    if (active && serviceReady && conAudio && !showCamera) ShakeSensor.resumeAudioRecording();
   }, [active, serviceReady, conAudio, showCamera]);
 
   // Si la cámara nunca avisa que está lista, se sigue solo con audio en vez de quedarse sin grabar

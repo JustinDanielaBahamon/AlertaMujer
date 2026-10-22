@@ -1,10 +1,10 @@
-jest.mock("../../../../modules/sensor-sacudidas", () => ({ __esModule: true, default: {} }));
+jest.mock("../../../../modules/shake-sensor", () => ({ __esModule: true, default: {} }));
 
 import { classifyExit } from "../saludProteccion";
 
 // Casos reales registrados en un Infinix X678B (Android 14)
 const exit = (reason: number, importance: number, description = "") => ({
-  timestamp: 1, motivo: reason, importancia: importance, descripcion: description,
+  timestamp: 1, reason: reason, importance: importance, description: description,
 });
 
 describe("clasificarCierre", () => {

@@ -3,7 +3,7 @@ import * as Location from "expo-location";
 import { createAlertWithRetries, getAlert } from "../../services/alerts.service";
 import { getOrCreateDevice } from "../../services/devices.service";
 import { reportLocation } from "../../services/location-reporter.service";
-import SensorSacudidas from "../../../modules/sensor-sacudidas";
+import ShakeSensor from "../../../modules/shake-sensor";
 
 /**
  * Alerta activada al agitar el teléfono sin tener la app en pantalla: se crea directamente en el
@@ -23,7 +23,7 @@ async function currentLocation(): Promise<Location.LocationObject | null> {
   try {
     return await Promise.race([
       Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }),
-      SensorSacudidas.esperar(10000).then(() => null),
+      ShakeSensor.wait(10000).then(() => null),
     ]);
   } catch {
     return null;
@@ -64,7 +64,7 @@ export async function createShakeAlert(method: keyof typeof METHODS = "agitar"):
 
 async function followLocation(alertId: number, startTime: number) {
   while (alertInProgress === alertId && Date.now() - startTime <= MAX_MS) {
-    await SensorSacudidas.esperar(INTERVAL_MS);
+    await ShakeSensor.wait(INTERVAL_MS);
     if (alertInProgress !== alertId) return;
     // Si la alerta ya terminó (la cerró un contacto o la administración, o venció), se suelta: si no,
     // el servicio la seguiría dando por "en curso" e ignoraría las sacudidas siguientes

@@ -2,7 +2,7 @@ import notifee, { AndroidImportance } from "@notifee/react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useCallback, useEffect, useState } from "react";
 import { Alert, AppState, Platform, Vibration } from "react-native";
-import SensorSacudidas from "../../../../modules/sensor-sacudidas";
+import ShakeSensor from "../../../../modules/shake-sensor";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { useNotifications } from "../../../contexts/NotificacionesContext";
 import { bigStyle } from "../../../notifications/estiloNotificacion";
@@ -24,7 +24,7 @@ export function useNotificationsViewModel() {
 
   const refresh = useCallback(() => {
     notificationsPermission(false).then(setPermission).catch(() => setPermission(false));
-    setFullScreen(Platform.OS !== "android" || SensorSacudidas.puedePantallaCompleta());
+    setFullScreen(Platform.OS !== "android" || ShakeSensor.canUseFullScreen());
   }, []);
 
   // Al entrar y al volver de los ajustes de Android
@@ -44,7 +44,7 @@ export function useNotificationsViewModel() {
   }, [refresh]);
 
   const enableFullScreen = useCallback(() => {
-    SensorSacudidas.pedirPantallaCompleta();
+    ShakeSensor.requestFullScreen();
   }, []);
 
   // Al activar la vibración vibra una vez para que la usuaria la sienta

@@ -1,13 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-  <!-- Mantener la CPU despierta mientras la protección por sacudida está encendida -->
+  <!-- Keep the CPU awake while shake protection is on -->
   <uses-permission android:name="android.permission.WAKE_LOCK" />
-  <!-- Pedir que el sistema no duerma la app (ahorro de batería de Android y de cada marca) -->
+  <!-- Ask the system not to put the app to sleep (Android and brand battery savers) -->
   <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-  <!-- Grabar el micrófono durante una alerta, también con la pantalla apagada -->
+  <!-- Record the microphone during an alert, also with the screen off -->
   <uses-permission android:name="android.permission.RECORD_AUDIO" />
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
-  <!-- Android 11+: para poder abrir el "inicio automático" de cada marca hay que declarar sus apps -->
+  <!-- Android 11+: to open each brand's "auto start" screen its apps must be declared -->
   <queries>
     <package android:name="com.transsion.phonemaster" />
     <package android:name="com.miui.securitycenter" />
@@ -21,7 +21,7 @@
   </queries>
   <application>
     <service
-      android:name="expo.modules.sensorsacudidas.GrabadoraAudioService"
+      android:name="expo.modules.shakesensor.AudioRecorderService"
       android:exported="false"
       android:foregroundServiceType="microphone" />
   </application>

@@ -7,7 +7,7 @@ group = 'com.alertamujer'
 version = '1.0.0'
 
 android {
-  namespace "expo.modules.sensorsacudidas"
+  namespace "expo.modules.shakesensor"
   defaultConfig {
     versionCode 1
     versionName '1.0.0'

@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import SensorSacudidas from "../../../modules/sensor-sacudidas";
+import ShakeSensor from "../../../modules/shake-sensor";
 import { uploadEvidence, type RecordingType } from "../../services/evidencias.service";
 
 /**
@@ -109,7 +109,7 @@ export async function processQueue(): Promise<void> {
       current.shift();
       await save();
       try {
-        SensorSacudidas.borrarArchivo(chunk.uri);
+        ShakeSensor.deleteFile(chunk.uri);
       } catch {
         // Si no se puede borrar, Android limpia el caché por su cuenta
       }
@@ -129,11 +129,11 @@ let audioListener: { remove: () => void } | null = null;
 /** Los próximos trozos de audio (y los que quedaron sin subir) son de esta alerta. */
 export function setAudioAlert(alertId: number): void {
   audioAlert = alertId;
-  audioListener ??= SensorSacudidas.addListener("onTrozoAudio", ({ uri }) => {
+  audioListener ??= ShakeSensor.addListener("onAudioChunk", ({ uri }) => {
     if (audioAlert !== null) void enqueueChunk({ uri, alertaId: audioAlert, tipo: "audio" });
   });
   // Audios que se grabaron pero no llegaron a la cola (la app se cerró a mitad de la alerta)
-  for (const uri of SensorSacudidas.audiosPendientes()) {
+  for (const uri of ShakeSensor.pendingAudios()) {
     void enqueueChunk({ uri, alertaId: alertId, tipo: "audio" });
   }
 }

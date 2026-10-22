@@ -8,7 +8,7 @@ import notifee, {
 } from "@notifee/react-native";
 import { AppState, Vibration } from "react-native";
 import { bigStyle } from "../../notifications/estiloNotificacion";
-import SensorSacudidas from "../../../modules/sensor-sacudidas";
+import ShakeSensor from "../../../modules/shake-sensor";
 import { createShakeDetector } from "./detectorSacudidas";
 import { createPowerButtonDetector } from "./detectorBotonEncendido";
 import { backgroundAlert, createShakeAlert } from "./alertaEnSegundoPlano";
@@ -110,24 +110,24 @@ function setUpDetectors() {
 
 function listenPowerButton() {
   const detect = createPowerButtonDetector();
-  const sub = SensorSacudidas.addListener("onPantalla", () => {
+  const sub = ShakeSensor.addListener("onScreenChange", () => {
     if (detect(Date.now())) onActivate("encendido");
   });
-  SensorSacudidas.iniciarBotonEncendido();
+  ShakeSensor.startPowerButton();
   stopButton = () => {
-    SensorSacudidas.detenerBotonEncendido();
+    ShakeSensor.stopPowerButton();
     sub.remove();
   };
 }
 
 function listenSensor() {
   const detect = createShakeDetector();
-  const sub = SensorSacudidas.addListener("onLectura", ({ x, y, z }) => {
+  const sub = ShakeSensor.addListener("onReading", ({ x, y, z }) => {
     if (detect(x, y, z, Date.now())) onActivate("agitar");
   });
-  SensorSacudidas.iniciar(SENSOR_INTERVAL_MS);
+  ShakeSensor.start(SENSOR_INTERVAL_MS);
   stopSensor = () => {
-    SensorSacudidas.detener();
+    ShakeSensor.stop();
     sub.remove();
   };
 }
@@ -186,7 +186,7 @@ async function startCountdown(method: ProtectionMethod) {
           actions: [{ title: "Cancelar", pressAction: { id: ACTION_CANCEL } }],
         },
       });
-      await SensorSacudidas.esperar(1000);
+      await ShakeSensor.wait(1000);
     }
     if (countdown.cancelled) return;
     await notifee.cancelNotification(ACCOUNT_ID);
@@ -261,7 +261,7 @@ export async function startProtection(
   requestPermissions = false,
   newItems: ProtectionOptions = { shake: true, powerButton: false },
 ): Promise<ProtectionStatus> {
-  if (newItems.shake && !SensorSacudidas.disponible()) return "sin_sensor";
+  if (newItems.shake && !ShakeSensor.available()) return "sin_sensor";
   // El servicio es de tipo ubicación (para poder enviarla con la pantalla bloqueada) y Android
   // exige el permiso antes de iniciarlo
   if (!(await locationPermission(requestPermissions))) return "sin_ubicacion";
