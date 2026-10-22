@@ -249,10 +249,10 @@ export function useAlertaContactoViewModel() {
   }, [DEMO]);
   // ===== FIN TEMPORAL =====
 
-  // Reloj para el "hace X segundos".
+  // Reloj para el "hace X". Cada 5 s: un tic por segundo volvía a dibujar toda la pantalla con el mapa.
   useEffect(() => {
     if (!activa) return undefined;
-    const id = setInterval(() => setAhora(Date.now()), 1000);
+    const id = setInterval(() => setAhora(Date.now()), 5000);
     return () => clearInterval(id);
   }, [activa]);
 

@@ -21,6 +21,7 @@ import { useAlertaActivaViewModel } from "../viewModel/useAlertaActivaViewModel"
 import { useChatSobreTeclado } from "../../../hooks/useChatSobreTeclado";
 import GrabacionAlerta from "../../grabacion/GrabacionAlerta";
 import ChatAlerta, { RAPIDOS_DE_ELLA } from "../../chatAlerta/ChatAlerta";
+import CuentaRegresiva from "./CuentaRegresiva";
 
 type Estilos = ReturnType<typeof createStyles>;
 
@@ -192,7 +193,7 @@ export default function AlertaActivaScreen() {
         <View style={styles.circleWrapper}>
           <View style={styles.circle}>
             <MaterialIcons name="notifications-active" size={22} color={theme.icono} />
-            <Text style={styles.number}>{vm.formattedTime}</Text>
+            <CuentaRegresiva fin={vm.finAlerta} duracionMin={vm.duracionMaximaMin} style={styles.number} />
             <Text style={styles.timeLabel}>{t.alertaActiva.tiempoRestante}</Text>
           </View>
         </View>
