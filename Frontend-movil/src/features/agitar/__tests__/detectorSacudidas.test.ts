@@ -64,4 +64,25 @@ describe("detectorSacudidas", () => {
     const r = simular([...quieto(1500), ...hachazos(4), ...quieto(1000), ...hachazos(4), ...quieto(2000)]);
     expect(r.filter(Boolean)).toHaveLength(1);
   });
+
+  describe("con datos reales de un celular (Infinix X678B, 2 minutos)", () => {
+    // Medidos por ADB: en reposo, luego varias rondas de hachazos fuertes sin detenerse entre golpes
+    // (picos de 11-13 g sobre 6-8 g) separadas por pausas cortas. Tiempo en ms y fuerza en g.
+    const serie: [number, number][] = require("./datos/hachazos-infinix.json");
+    const disparos = (() => {
+      const detectar = crearDetectorSacudidas();
+      return serie.filter(([t, g]) => detectar(g, 0, 0, t)).map(([t]) => t / 1000);
+    })();
+
+    it("detecta los hachazos aunque el celular no se detenga entre golpe y golpe", () => {
+      expect(disparos.length).toBeGreaterThanOrEqual(2);
+      // La primera ronda termina a los ~59,3 s: la alerta sale al quedarse quieta
+      expect(disparos[0]).toBeGreaterThan(59);
+      expect(disparos[0]).toBeLessThan(61);
+    });
+
+    it("no dispara mientras el celular está quieto o se manipula suave", () => {
+      expect(disparos.every((s) => s > 54)).toBe(true);
+    });
+  });
 });
