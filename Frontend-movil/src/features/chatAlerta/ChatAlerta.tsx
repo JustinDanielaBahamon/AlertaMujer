@@ -34,9 +34,11 @@ type Props = {
   nombreElla?: string;
   titulo: string;
   rapidos: string[];
+  /** Al enfocar el campo de texto (la pantalla se desplaza para que el teclado no lo tape). */
+  alEnfocar?: () => void;
 };
 
-export default function ChatAlerta({ participante, activo, soyElla, nombreElla, titulo, rapidos }: Props) {
+export default function ChatAlerta({ participante, activo, soyElla, nombreElla, titulo, rapidos, alEnfocar }: Props) {
   const { theme } = useTheme();
   const s = useMemo(() => crearEstilos(theme), [theme]);
   const { mensajes, enviar, enviando, error } = useChatAlerta(participante, activo);
@@ -100,6 +102,7 @@ export default function ChatAlerta({ participante, activo, soyElla, nombreElla, 
               maxLength={500}
               onSubmitEditing={() => mandar(texto)}
               returnKeyType="send"
+              onFocus={alEnfocar}
             />
             <TouchableOpacity
               style={[s.enviar, (!texto.trim() || enviando) && s.enviarApagado]}
