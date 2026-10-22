@@ -49,6 +49,16 @@ export const TutorialPager = ({ children, paginasConBloqueo = {} }: TutorialPage
     setActiveIndex(destino);
   };
 
+  // La página activa sale de la posición real. Al frenar el scroll con scrollTo, Android a veces no
+  // avisa el final del deslizamiento: la página quedaba desfasada y ya no dejaba avanzar.
+  const sincronizar = (x: number) => {
+    const index = Math.min(Math.round(x / width), indiceMaximo());
+    if (index !== activeIndexRef.current) {
+      activeIndexRef.current = index;
+      setActiveIndex(index);
+    }
+  };
+
   // Mientras el usuario arrastra: si intenta pasar una página bloqueada, el scroll
   // se queda pegado en esa página (no se desliza a la siguiente y regresa)
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -57,9 +67,8 @@ export const TutorialPager = ({ children, paginasConBloqueo = {} }: TutorialPage
     const limite = maximo * width;
 
     if (x > limite + 1) {
-      if (maximo === activeIndexRef.current) {
-        intentoAvanceRef.current = Math.max(intentoAvanceRef.current, x - limite);
-      }
+      if (maximo !== activeIndexRef.current) sincronizar(limite);
+      intentoAvanceRef.current = Math.max(intentoAvanceRef.current, x - limite);
       scrollRef.current?.scrollTo({ x: limite, animated: false });
     }
   };
@@ -89,20 +98,16 @@ export const TutorialPager = ({ children, paginasConBloqueo = {} }: TutorialPage
   };
 
   // Al soltar el dedo: si quería avanzar y la página está bloqueada, corre la verificación
-  const handleScrollEndDrag = async () => {
+  const handleScrollEndDrag = async (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const quiereAvanzar = intentoAvanceRef.current > ARRASTRE_MINIMO;
     intentoAvanceRef.current = 0;
+    if (quiereAvanzar) sincronizar(event.nativeEvent.contentOffset.x);
     if (quiereAvanzar && estaBloqueada(activeIndexRef.current)) await avanzar();
   };
 
   // Al terminar de deslizar: actualiza la página activa (nunca más allá de un bloqueo)
   const handleMomentumEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const index = Math.round(event.nativeEvent.contentOffset.x / width);
-    const permitido = Math.min(index, indiceMaximo());
-    if (permitido !== activeIndexRef.current) {
-      activeIndexRef.current = permitido;
-      setActiveIndex(permitido);
-    }
+    sincronizar(event.nativeEvent.contentOffset.x);
   };
 
   return (

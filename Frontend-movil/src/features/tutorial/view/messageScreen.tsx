@@ -8,9 +8,11 @@ import { useMessagesTutorialViewModel, type FeatureItem } from "../viewModel/use
 import { LinearGradient } from 'expo-linear-gradient';
 import { TUTORIAL_GRADIENT } from "../styles/tutorialTheme";
 import { useLocale } from "../../../contexts/LocaleContext";
+import { useTutorialPage } from "../component/TutorialPager";
 
 // ─── Círculos de fondo decorativos ───────────────────────────────────────────
 function BackgroundCircles() {
+  const { isActive } = useTutorialPage();
   const f1 = useRef(new Animated.Value(0)).current;
   const f2 = useRef(new Animated.Value(0)).current;
   const f3 = useRef(new Animated.Value(0)).current;
@@ -23,10 +25,16 @@ function BackgroundCircles() {
           Animated.timing(anim, { toValue: 0,   duration: dur,         useNativeDriver: true }),
         ])
       );
-    float(f1, 3200, 0).start();
-    float(f2, 2800, 600).start();
-    float(f3, 3600, 1200).start();
-  }, []);
+    // Solo se animan los círculos de la página que se está viendo (antes corrían los de todas)
+    if (!isActive) return;
+    const loops = [
+      float(f1, 3200, 0),
+      float(f2, 2800, 600),
+      float(f3, 3600, 1200),
+    ];
+    loops.forEach((l) => l.start());
+    return () => loops.forEach((l) => l.stop());
+  }, [isActive]);
 
   return (
     <>
