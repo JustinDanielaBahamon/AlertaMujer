@@ -23,14 +23,18 @@ export interface DeviceApi {
 const CLAVE_UUID = '@alerta_mujer:device_uuid';
 const CLAVE_SESION = '@alerta_mujer:auth'; // la misma de AuthContext
 
-async function claveUuid(): Promise<string> {
+async function usuariaEnSesion(): Promise<number | null> {
   try {
     const raw = await AsyncStorage.getItem(CLAVE_SESION);
-    const id = raw ? JSON.parse(raw)?.user?.id : null;
-    return id != null ? `${CLAVE_UUID}:${id}` : CLAVE_UUID;
+    return raw ? (JSON.parse(raw)?.user?.id ?? null) : null;
   } catch {
-    return CLAVE_UUID;
+    return null;
   }
+}
+
+async function claveUuid(): Promise<string> {
+  const id = await usuariaEnSesion();
+  return id != null ? `${CLAVE_UUID}:${id}` : CLAVE_UUID;
 }
 // Así registraban el celular las versiones anteriores (sin datos reales)
 const MODELO_ANTIGUO = 'Dispositivo Expo';
@@ -57,7 +61,21 @@ export function datosDelCelular(): Partial<DeviceApi> {
   };
 }
 
-const nuevoUuid = () => `${Platform.OS}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+/**
+ * Identificador de este celular para esta cuenta. En Android se basa en el ANDROID_ID, que no cambia
+ * al reinstalar la app ni al borrar sus datos: así el mismo celular no se registra dos veces. Lleva
+ * el id de la cuenta porque device_uuid es único en la base y varias cuentas pueden usar el celular.
+ */
+function uuidEstable(userId: number | null): string {
+  let base: string | null = null;
+  try {
+    base = Platform.OS === "android" ? Application.getAndroidId() : null;
+  } catch {
+    base = null;
+  }
+  if (!base) return `${Platform.OS}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+  return `${Platform.OS}-${base}${userId != null ? `-${userId}` : ""}`;
+}
 
 let enCurso: Promise<DeviceApi> | null = null;
 // Id del dispositivo de esta instalación, una vez conocido (va con cada ubicación que se envía)
@@ -86,7 +104,10 @@ async function obtener(): Promise<DeviceApi> {
   const [devices, guardado] = await Promise.all([getDevices(), AsyncStorage.getItem(clave)]);
   const datos = datosDelCelular();
 
-  let device = guardado ? devices.find((d) => d.deviceUuid === guardado) : undefined;
+  const estable = uuidEstable(await usuariaEnSesion());
+  let device =
+    (guardado ? devices.find((d) => d.deviceUuid === guardado) : undefined) ??
+    devices.find((d) => d.deviceUuid === estable);
   if (!device && !guardado) {
     // Instalación anterior a este cambio: se queda con el registro antiguo en vez de duplicarlo
     device = devices.find((d) => d.model === MODELO_ANTIGUO);
@@ -95,7 +116,7 @@ async function obtener(): Promise<DeviceApi> {
   if (!device) {
     device = await createDevice({
       ...datos,
-      deviceUuid: guardado ?? nuevoUuid(),
+      deviceUuid: estable,
       gpsStatus: 'unknown',
       status: 'active',
     });
