@@ -793,8 +793,8 @@
 "alertaActiva": {
   "titulo": "Active alert",
   "subtitulo": "Your network has been notified",
-  "tiempoRestante": "Time remaining",
-  "mensajeReenvio": "When the time runs out, the alert will be sent again to your contacts with your new location. To cancel the alert, tap \"I'm okay\" and then \"Yes, cancel\".",
+  "tiempoRestante": "Alert still active",
+  "mensajeReenvio": "Your contacts see your location while the alert is active. The timer shows how long until it closes on its own; to end it sooner tap \"I'm okay\".",
   "serviciosTitulo": "Emergency services active",
   "serviciosDescripcion": "When you are safe, press \"I'm okay\" to notify.",
   "compartiendoUbicacion": "Sharing location",
@@ -814,7 +814,14 @@
   "envio_enviada": "Your contacts have been alerted",
   "envio_fallida": "We couldn't send the alert. Check your signal or ask for help directly.",
   "envio_reintentar": "Try again",
-  "envio_llamar": "Call 123"
+  "envio_llamar": "Call 123",
+  "fin_titulo": "The alert ended",
+  "fin_vencida": "The {min}-minute maximum for an alert passed and it closed on its own. Your location is no longer being sent.",
+  "fin_atendida": "The alert was marked as resolved. Your location is no longer being sent.",
+  "fin_cancelada": "The alert was cancelled. Your location is no longer being sent.",
+  "fin_pregunta": "Are you still in danger?",
+  "fin_otra": "Yes, trigger another alert",
+  "fin_bien": "I'm okay, exit"
 },
     "alertaContacto": {
     "badgeActiva": "Active alert in real time",

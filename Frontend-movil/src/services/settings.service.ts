@@ -4,9 +4,15 @@ import api from "./api";
 export interface AjustesPublicos {
   minAppVersion: string | null;
   emergencyPhoneNumber: string | null;
+  /** Minutos tras los cuales el servidor da por terminada una alerta activa. */
+  sosMaxDurationMinutes: number | null;
 }
 
 export async function getAjustesPublicos(): Promise<AjustesPublicos> {
   const { data } = await api.get<Partial<AjustesPublicos>>("/api/settings");
-  return { minAppVersion: data.minAppVersion ?? null, emergencyPhoneNumber: data.emergencyPhoneNumber ?? null };
+  return {
+    minAppVersion: data.minAppVersion ?? null,
+    emergencyPhoneNumber: data.emergencyPhoneNumber ?? null,
+    sosMaxDurationMinutes: data.sosMaxDurationMinutes ?? null,
+  };
 }
