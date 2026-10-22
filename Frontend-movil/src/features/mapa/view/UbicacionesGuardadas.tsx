@@ -26,43 +26,43 @@ import {
 
 type NavigationProp = NativeStackNavigationProp<MainStackParamList>;
 
-type UbicacionGuardada = {
+type SavedLocation = {
   id: string;
-  nombre: string;
+  name: string;
   latitude: number;
   longitude: number;
-  direccion: string;
-  barrio: string;
-  municipio: string;
-  ciudad: string;
-  departamento: string;
-  pais: string;
-  fecha: string;
-  estado: "Activo" | "Inactivo";
+  address: string;
+  neighborhood: string;
+  municipality: string;
+  city: string;
+  department: string;
+  country: string;
+  date: string;
+  status: "Activo" | "Inactivo";
   precision: string;
-  notas?: string;
-  nivelRiesgo: "muy_segura" | "moderada" | "muy_insegura";
-  descripcion: string;
+  notes?: string;
+  riskLevel: "muy_segura" | "moderada" | "muy_insegura";
+  description: string;
 };
 
-const mapearFrecuenteAUbicacion = (u: FrequentLocationApi): UbicacionGuardada => ({
+const mapFrequentToLocation = (u: FrequentLocationApi): SavedLocation => ({
   id: String(u.id),
-  nombre: u.name,
+  name: u.name,
   latitude: Number(u.latitude),
   longitude: Number(u.longitude),
-  direccion: u.address ?? "",
-  barrio: "",
-  municipio: u.city ?? "",
-  ciudad: u.city ?? "",
-  departamento: "",
-  pais: "",
-  fecha: u.createdAt,
-  estado: u.isActive ? "Activo" : "Inactivo",
+  address: u.address ?? "",
+  neighborhood: "",
+  municipality: u.city ?? "",
+  city: u.city ?? "",
+  department: "",
+  country: "",
+  date: u.createdAt,
+  status: u.isActive ? "Activo" : "Inactivo",
   precision: "Alta",
-  notas: u.notes,
-  nivelRiesgo:
+  notes: u.notes,
+  riskLevel:
     u.riskLevel === "muy_segura" || u.riskLevel === "muy_insegura" ? u.riskLevel : "moderada",
-  descripcion: u.notes ?? "",
+  description: u.notes ?? "",
 });
 
 export default function UbicacionesGuardadas() {
@@ -73,50 +73,50 @@ export default function UbicacionesGuardadas() {
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
 
-  const [ubicaciones, setUbicaciones] = useState<UbicacionGuardada[]>([]);
-  const [filtroRiesgo, setFiltroRiesgo] = useState<string | null>(null);
-  const [busqueda, setBusqueda] = useState("");
+  const [locations, setLocations] = useState<SavedLocation[]>([]);
+  const [riskFilter, setRiskFilter] = useState<string | null>(null);
+  const [searchText, setSearchText] = useState("");
 
   // Volver siempre lleva al módulo de Mapa (también justo después de guardar una ubicación,
   // cuando por detrás todavía está la pantalla de "Clasificar zona").
-  const irAlMapa = useCallback(() => {
-    const destino = { screen: "Inicio", params: { screen: "Mapa" } } as never;
+  const goToMap = useCallback(() => {
+    const destination = { screen: "Inicio", params: { screen: "Mapa" } } as never;
     try {
-      (navigation as any).popTo("DrawerHome", destino);
+      (navigation as any).popTo("DrawerHome", destination);
     } catch {
-      navigation.navigate("DrawerHome", destino);
+      navigation.navigate("DrawerHome", destination);
     }
   }, [navigation]);
 
-  const cargarUbicaciones = useCallback(async () => {
+  const loadLocations = useCallback(async () => {
     try {
       if (!user?.id) {
-        setUbicaciones([]);
+        setLocations([]);
         return;
       }
-      const ubicacionesApi = await frequentLocationsService.getByUser(user.id);
-      setUbicaciones(ubicacionesApi.map(mapearFrecuenteAUbicacion));
+      const apiLocations = await frequentLocationsService.getByUser(user.id);
+      setLocations(apiLocations.map(mapFrequentToLocation));
     } catch (error) {
       console.error("Error al cargar ubicaciones:", error);
-      setUbicaciones([]);
+      setLocations([]);
     }
   }, [user?.id]);
 
   useFocusEffect(
     useCallback(() => {
-      cargarUbicaciones();
+      loadLocations();
 
       // Botón "atrás" del celular: mismo comportamiento que la flecha del encabezado
       const sub = BackHandler.addEventListener("hardwareBackPress", () => {
-        irAlMapa();
+        goToMap();
         return true;
       });
       return () => sub.remove();
-    }, [cargarUbicaciones, irAlMapa])
+    }, [loadLocations, goToMap])
   );
 
-  const getRiskColor = (nivel: string) => {
-    switch (nivel) {
+  const getRiskColor = (level: string) => {
+    switch (level) {
       case "muy_segura":
         return "#27AE60";
       case "moderada":
@@ -128,8 +128,8 @@ export default function UbicacionesGuardadas() {
     }
   };
 
-  const getRiskLabel = (nivel: string) => {
-    switch (nivel) {
+  const getRiskLabel = (level: string) => {
+    switch (level) {
       case "muy_segura":
         return "Muy segura";
       case "moderada":
@@ -141,8 +141,8 @@ export default function UbicacionesGuardadas() {
     }
   };
 
-  const getRiskIcon = (nivel: string) => {
-    switch (nivel) {
+  const getRiskIcon = (level: string) => {
+    switch (level) {
       case "muy_segura":
         return "verified-user";
       case "moderada":
@@ -154,16 +154,16 @@ export default function UbicacionesGuardadas() {
     }
   };
 
-  const handleCardPress = (ubicacion: UbicacionGuardada) => {
+  const handleCardPress = (location: SavedLocation) => {
     navigation.navigate("ClasificarZona", {
-      latitude: ubicacion.latitude,
-      longitude: ubicacion.longitude,
+      latitude: location.latitude,
+      longitude: location.longitude,
       editarUbicacion: {
-        id: ubicacion.id,
-        nombre: ubicacion.nombre,
-        notas: ubicacion.notas,
-        nivelRiesgo: ubicacion.nivelRiesgo,
-        descripcion: ubicacion.descripcion,
+        id: location.id,
+        nombre: location.name,
+        notas: location.notes,
+        nivelRiesgo: location.riskLevel,
+        descripcion: location.description,
       },
     });
   };
@@ -182,7 +182,7 @@ export default function UbicacionesGuardadas() {
               // delete via API (no local storage)
               try {
                 await frequentLocationsService.remove(id);
-                setUbicaciones((prev) => prev.filter((u) => u.id !== id));
+                setLocations((prev) => prev.filter((u) => u.id !== id));
               } catch (apiErr) {
                 console.error("Error al eliminar en backend:", apiErr);
                 Alert.alert("Error", "No se pudo eliminar la ubicación");
@@ -197,17 +197,17 @@ export default function UbicacionesGuardadas() {
     }
   };
 
-  const ubicacionesFiltradas = ubicaciones.filter((ubicacion) => {
-    if (filtroRiesgo && ubicacion.nivelRiesgo !== filtroRiesgo) {
+  const filteredLocations = locations.filter((location) => {
+    if (riskFilter && location.riskLevel !== riskFilter) {
       return false;
     }
 
-    if (busqueda.trim()) {
-      const terminoBusqueda = busqueda.toLowerCase();
+    if (searchText.trim()) {
+      const searchTerm = searchText.toLowerCase();
       return (
-        ubicacion.nombre.toLowerCase().includes(terminoBusqueda) ||
-        ubicacion.direccion.toLowerCase().includes(terminoBusqueda) ||
-        ubicacion.ciudad.toLowerCase().includes(terminoBusqueda)
+        location.name.toLowerCase().includes(searchTerm) ||
+        location.address.toLowerCase().includes(searchTerm) ||
+        location.city.toLowerCase().includes(searchTerm)
       );
     }
 
@@ -215,14 +215,14 @@ export default function UbicacionesGuardadas() {
   });
 
   // Encabezado redondeado (mismo diseño que el de "Tu ubicación")
-  const encabezado = (
+  const heading = (
     <LinearGradient
       colors={[theme.headercolor1, theme.headercolor2]}
       start={{ x: 1, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={[styles.header, { paddingTop: insets.top + 20 }]}
     >
-      <TouchableOpacity style={styles.backButton} onPress={irAlMapa}>
+      <TouchableOpacity style={styles.backButton} onPress={goToMap}>
         <MaterialIcons name="arrow-back" size={26} color="#fff" />
       </TouchableOpacity>
 
@@ -237,10 +237,10 @@ export default function UbicacionesGuardadas() {
     </LinearGradient>
   );
 
-  if (ubicaciones.length === 0) {
+  if (locations.length === 0) {
     return (
       <View style={[styles.container, { backgroundColor: theme.background }]}>
-        {encabezado}
+        {heading}
 
         {/* ESTADO VACÍO */}
         <View style={styles.emptyContainer}>
@@ -266,7 +266,7 @@ export default function UbicacionesGuardadas() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {encabezado}
+        {heading}
 
         {/* BARRA DE BÚSQUEDA */}
         <View style={styles.searchContainer}>
@@ -280,11 +280,11 @@ export default function UbicacionesGuardadas() {
               style={[styles.searchText, { color: theme.text }]}
               placeholder="Buscar por nombre, dirección o ciudad"
               placeholderTextColor={theme.contactSubtext}
-              value={busqueda}
-              onChangeText={setBusqueda}
+              value={searchText}
+              onChangeText={setSearchText}
             />
-            {busqueda.length > 0 && (
-              <TouchableOpacity onPress={() => setBusqueda("")}>
+            {searchText.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchText("")}>
                 <MaterialIcons
                   name="close"
                   size={18}
@@ -300,15 +300,15 @@ export default function UbicacionesGuardadas() {
           <TouchableOpacity
             style={[
               styles.filterChip,
-              filtroRiesgo === null && styles.filterChipActive,
-              { backgroundColor: filtroRiesgo === null ? "#7B1DB2" : theme.card },
+              riskFilter === null && styles.filterChipActive,
+              { backgroundColor: riskFilter === null ? "#7B1DB2" : theme.card },
             ]}
-            onPress={() => setFiltroRiesgo(null)}
+            onPress={() => setRiskFilter(null)}
           >
             <Text
               style={[
                 styles.filterText,
-                { color: filtroRiesgo === null ? "#fff" : theme.text },
+                { color: riskFilter === null ? "#fff" : theme.text },
               ]}
             >
               Todas
@@ -318,20 +318,20 @@ export default function UbicacionesGuardadas() {
           <TouchableOpacity
             style={[
               styles.filterChip,
-              filtroRiesgo === "muy_segura" && styles.filterChipActive,
-              { backgroundColor: filtroRiesgo === "muy_segura" ? "#27AE60" : theme.card },
+              riskFilter === "muy_segura" && styles.filterChipActive,
+              { backgroundColor: riskFilter === "muy_segura" ? "#27AE60" : theme.card },
             ]}
-            onPress={() => setFiltroRiesgo("muy_segura")}
+            onPress={() => setRiskFilter("muy_segura")}
           >
             <MaterialIcons
               name="verified-user"
               size={14}
-              color={filtroRiesgo === "muy_segura" ? "#fff" : "#27AE60"}
+              color={riskFilter === "muy_segura" ? "#fff" : "#27AE60"}
             />
             <Text
               style={[
                 styles.filterText,
-                { color: filtroRiesgo === "muy_segura" ? "#fff" : theme.text },
+                { color: riskFilter === "muy_segura" ? "#fff" : theme.text },
               ]}
             >
               Seguras
@@ -341,20 +341,20 @@ export default function UbicacionesGuardadas() {
           <TouchableOpacity
             style={[
               styles.filterChip,
-              filtroRiesgo === "moderada" && styles.filterChipActive,
-              { backgroundColor: filtroRiesgo === "moderada" ? "#D89B00" : theme.card },
+              riskFilter === "moderada" && styles.filterChipActive,
+              { backgroundColor: riskFilter === "moderada" ? "#D89B00" : theme.card },
             ]}
-            onPress={() => setFiltroRiesgo("moderada")}
+            onPress={() => setRiskFilter("moderada")}
           >
             <MaterialIcons
               name="warning"
               size={14}
-              color={filtroRiesgo === "moderada" ? "#fff" : "#D89B00"}
+              color={riskFilter === "moderada" ? "#fff" : "#D89B00"}
             />
             <Text
               style={[
                 styles.filterText,
-                { color: filtroRiesgo === "moderada" ? "#fff" : theme.text },
+                { color: riskFilter === "moderada" ? "#fff" : theme.text },
               ]}
             >
               Moderadas
@@ -364,20 +364,20 @@ export default function UbicacionesGuardadas() {
           <TouchableOpacity
             style={[
               styles.filterChip,
-              filtroRiesgo === "muy_insegura" && styles.filterChipActive,
-              { backgroundColor: filtroRiesgo === "muy_insegura" ? "#E74C3C" : theme.card },
+              riskFilter === "muy_insegura" && styles.filterChipActive,
+              { backgroundColor: riskFilter === "muy_insegura" ? "#E74C3C" : theme.card },
             ]}
-            onPress={() => setFiltroRiesgo("muy_insegura")}
+            onPress={() => setRiskFilter("muy_insegura")}
           >
             <MaterialIcons
               name="report"
               size={14}
-              color={filtroRiesgo === "muy_insegura" ? "#fff" : "#E74C3C"}
+              color={riskFilter === "muy_insegura" ? "#fff" : "#E74C3C"}
             />
             <Text
               style={[
                 styles.filterText,
-                { color: filtroRiesgo === "muy_insegura" ? "#fff" : theme.text },
+                { color: riskFilter === "muy_insegura" ? "#fff" : theme.text },
               ]}
             >
               Inseguras
@@ -386,19 +386,19 @@ export default function UbicacionesGuardadas() {
         </View>
 
         {/* CONTADOR DE RESULTADOS */}
-        {ubicacionesFiltradas.length !== ubicaciones.length && (
+        {filteredLocations.length !== locations.length && (
           <Text style={[styles.resultsCount, { color: theme.contactSubtext }]}>
-            {ubicacionesFiltradas.length} de {ubicaciones.length} ubicaciones
+            {filteredLocations.length} de {locations.length} ubicaciones
           </Text>
         )}
 
         {/* LISTA DE UBICACIONES */}
         <View style={styles.listContainer}>
-          {ubicacionesFiltradas.map((ubicacion) => (
+          {filteredLocations.map((location) => (
             <TouchableOpacity
-              key={ubicacion.id}
+              key={location.id}
               style={[styles.card, { backgroundColor: theme.card }]}
-              onPress={() => handleCardPress(ubicacion)}
+              onPress={() => handleCardPress(location)}
               activeOpacity={0.85}
             >
               {/* HEADER DE LA CARD */}
@@ -407,28 +407,28 @@ export default function UbicacionesGuardadas() {
                   <View
                     style={[
                       styles.riskBadge,
-                      { backgroundColor: getRiskColor(ubicacion.nivelRiesgo) + "20" },
+                      { backgroundColor: getRiskColor(location.riskLevel) + "20" },
                     ]}
                   >
                     <MaterialIcons
-                      name={getRiskIcon(ubicacion.nivelRiesgo) as any}
+                      name={getRiskIcon(location.riskLevel) as any}
                       size={16}
-                      color={getRiskColor(ubicacion.nivelRiesgo)}
+                      color={getRiskColor(location.riskLevel)}
                     />
                     <Text
                       style={[
                         styles.riskText,
-                        { color: getRiskColor(ubicacion.nivelRiesgo) },
+                        { color: getRiskColor(location.riskLevel) },
                       ]}
                     >
-                      {getRiskLabel(ubicacion.nivelRiesgo)}
+                      {getRiskLabel(location.riskLevel)}
                     </Text>
                   </View>
                 </View>
 
                 <TouchableOpacity
                   style={styles.deleteButton}
-                  onPress={() => handleDelete(ubicacion.id)}
+                  onPress={() => handleDelete(location.id)}
                 >
                   <MaterialIcons
                     name="delete-outline"
@@ -440,17 +440,17 @@ export default function UbicacionesGuardadas() {
 
               {/* NOMBRE */}
               <Text style={[styles.cardTitle, { color: theme.text }]}>
-                {ubicacion.nombre}
+                {location.name}
               </Text>
 
               {/* DIRECCIÓN */}
               <Text style={[styles.cardAddress, { color: theme.contactSubtext }]}>
-                {ubicacion.direccion}
+                {location.address}
               </Text>
 
               {/* CIUDAD */}
               <Text style={[styles.cardCity, { color: theme.contactSubtext }]}>
-                {ubicacion.ciudad}, {ubicacion.departamento}
+                {location.city}, {location.department}
               </Text>
 
               {/* FOOTER */}
@@ -461,8 +461,8 @@ export default function UbicacionesGuardadas() {
                     size={12}
                     color={theme.contactSubtext}
                   />
-                  <Text style={[styles.cardCoords, { color: theme.contactSubtext }]}>
-                    {ubicacion.latitude.toFixed(5)}, {ubicacion.longitude.toFixed(5)}
+                  <Text style={[styles.coordsCard, { color: theme.contactSubtext }]}>
+                    {location.latitude.toFixed(5)}, {location.longitude.toFixed(5)}
                   </Text>
                 </View>
 

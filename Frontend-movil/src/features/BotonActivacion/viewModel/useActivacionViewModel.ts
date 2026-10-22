@@ -3,51 +3,51 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import type { RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Vibration } from "react-native";
-import { useEvidencia } from "../../../contexts/EvidenciaContext";
-import { useNotificaciones } from "../../../contexts/NotificacionesContext";
+import { useEvidence } from "../../../contexts/EvidenciaContext";
+import { useNotifications } from "../../../contexts/NotificacionesContext";
 import type { MainStackParamList } from "../../../navigation/types";
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
-type ActivacionRoute = RouteProp<MainStackParamList, "Activacion">;
+type ActivationRoute = RouteProp<MainStackParamList, "Activacion">;
 
-export function useActivacionViewModel() {
+export function useActivationViewModel() {
   const navigation = useNavigation<Nav>();
-  const route = useRoute<ActivacionRoute>();
+  const route = useRoute<ActivationRoute>();
   // Si viene un contacto, la alerta es solo para esa persona (no para todos)
-  const contacto = route.params?.contacto;
-  const metodo = route.params?.metodo;
-  const { config } = useNotificaciones();
-  const { grabarVideo, grabarAudio } = useEvidencia();
-  const [contador, setContador] = useState(5);
+  const contact = route.params?.contacto;
+  const method = route.params?.metodo;
+  const { config } = useNotifications();
+  const { recordVideo, recordAudio } = useEvidence();
+  const [counter, setCounter] = useState(5);
 
   // Evita navegar dos veces (por ejemplo, si se toca "Activar ahora" justo cuando el conteo llega a 0)
-  const yaNavegoRef = useRef(false);
+  const alreadyNavigatedRef = useRef(false);
 
-  const irAAlertaActiva = useCallback(() => {
-    if (yaNavegoRef.current) return;
-    yaNavegoRef.current = true;
-    navigation.replace("AlertaActiva", contacto || metodo ? { contacto, metodo } : undefined);
-  }, [navigation, contacto, metodo]);
+  const goToActiveAlert = useCallback(() => {
+    if (alreadyNavigatedRef.current) return;
+    alreadyNavigatedRef.current = true;
+    navigation.replace("AlertaActiva", contact || method ? { contacto: contact, metodo: method } : undefined);
+  }, [navigation, contact, method]);
 
   useEffect(() => {
-    if (contador > 0) {
+    if (counter > 0) {
       // Una vibración corta por cada segundo del conteo (5, 4, 3, 2, 1)
       if (config.vibracion) Vibration.vibrate(200);
-      const timer = setTimeout(() => setContador((c) => c - 1), 1000);
+      const timer = setTimeout(() => setCounter((c) => c - 1), 1000);
       return () => clearTimeout(timer);
     }
-    irAAlertaActiva();
+    goToActiveAlert();
     return undefined;
-  }, [contador, irAAlertaActiva, config.vibracion]);
+  }, [counter, goToActiveAlert, config.vibracion]);
 
   // Salta el conteo y va directo a la pantalla de alerta activa
-  const activarAhora = useCallback(() => {
-    irAAlertaActiva();
-  }, [irAAlertaActiva]);
+  const activateNow = useCallback(() => {
+    goToActiveAlert();
+  }, [goToActiveAlert]);
 
-  const cancelar = useCallback(() => {
+  const cancel = useCallback(() => {
     navigation.goBack();
   }, [navigation]);
 
-  return { contador, cancelar, activarAhora, grabarVideo, grabarAudio };
+  return { counter: counter, cancel: cancel, activateNow: activateNow, recordVideo: recordVideo, recordAudio: recordAudio };
 }

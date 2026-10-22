@@ -1,17 +1,17 @@
 import axios from "axios";
 import Constants from "expo-constants";
-import { servicioPara } from "./servicios";
+import { serviceFor } from "./servicios";
 
 // La URL del backend no es secreta, pero el log solo interesa en desarrollo
-const registrarInicio = (...partes: unknown[]) => {
-  if (__DEV__) console.log(...partes);
+const logStart = (...parts: unknown[]) => {
+  if (__DEV__) console.log(...parts);
 };
 
 function getApiBaseUrl(): string {
   // 1) Variable de entorno explícita (seteada por update-env.js al hacer npm start)
   const envApiUrl = process.env.EXPO_PUBLIC_API_URL;
   if (envApiUrl) {
-    registrarInicio(" [api.ts] Usando EXPO_PUBLIC_API_URL:", envApiUrl);
+    logStart(" [api.ts] Usando EXPO_PUBLIC_API_URL:", envApiUrl);
     return envApiUrl;
   }
 
@@ -26,7 +26,7 @@ function getApiBaseUrl(): string {
   if (hostUri) {
     const host = hostUri.split(":")[0];
     const url = `http://${host}:8080`;
-    registrarInicio(" [api.ts] Usando hostUri detectado:", url);
+    logStart(" [api.ts] Usando hostUri detectado:", url);
     return url;
   }
 
@@ -36,21 +36,21 @@ function getApiBaseUrl(): string {
 }
 
 const API_BASE_URL = getApiBaseUrl();
-registrarInicio(" [api.ts] API_BASE_URL:", API_BASE_URL);
+logStart(" [api.ts] API_BASE_URL:", API_BASE_URL);
 
 // Sin tiempo de espera, si el backend no responde (p. ej. dormido en Render) la app se quedaba
 // esperando indefinidamente. 20 s alcanzan para que el servidor despierte en la mayoría de los casos.
-export const TIEMPO_ESPERA_MS = 20000;
+export const WAIT_TIME_MS = 20000;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: TIEMPO_ESPERA_MS,
+  timeout: WAIT_TIME_MS,
 });
 
 // Registro de peticiones solo en desarrollo, y nunca el contenido: el cuerpo trae contraseñas
 // (inicio de sesión) y las respuestas traen tokens; en un APK quedaría en el log de Android.
-const registrar = (...partes: unknown[]) => {
-  if (__DEV__) console.log(...partes);
+const registrar = (...parts: unknown[]) => {
+  if (__DEV__) console.log(...parts);
 };
 
 // Tokens de la sesión (los actualiza AuthContext)
@@ -67,15 +67,15 @@ export const setRefreshToken = (token: string | null) => {
 };
 
 // AuthContext se suscribe para guardar el token renovado y para cerrar la sesión cuando ya no es válida
-let alRenovarToken: ((token: string) => void) | null = null;
-let alExpirarSesion: (() => void) | null = null;
+let onTokenRenewed: ((token: string) => void) | null = null;
+let onSessionExpired: (() => void) | null = null;
 
-export const escucharSesion = (oyentes: { renovado: (token: string) => void; expirada: () => void }) => {
-  alRenovarToken = oyentes.renovado;
-  alExpirarSesion = oyentes.expirada;
+export const listenSession = (listeners: { renewed: (token: string) => void; expired: () => void }) => {
+  onTokenRenewed = listeners.renewed;
+  onSessionExpired = listeners.expired;
   return () => {
-    alRenovarToken = null;
-    alExpirarSesion = null;
+    onTokenRenewed = null;
+    onSessionExpired = null;
   };
 };
 
@@ -84,8 +84,8 @@ api.interceptors.request.use((config) => {
   registrar(" [api] Request:", config.method?.toUpperCase(), config.url);
 
   // Cada ruta va a su microservicio (Alert o Evidence); el resto, a la URL principal (Auth)
-  const servicio = config.url ? servicioPara(config.url) : null;
-  if (servicio) config.baseURL = servicio;
+  const service = config.url ? serviceFor(config.url) : null;
+  if (service) config.baseURL = service;
 
   if (authToken) {
     config.headers.Authorization = `Bearer ${authToken}`;
@@ -98,18 +98,18 @@ api.interceptors.request.use((config) => {
  * URL y cabecera de sesión para que un reproductor (video, audio, imagen) cargue un archivo
  * protegido directamente, sin descargarlo antes.
  */
-export const fuenteConToken = (ruta: string): { uri: string; headers: Record<string, string> } => ({
-  uri: `${servicioPara(ruta) ?? API_BASE_URL}${ruta}`,
+export const sourceWithToken = (route: string): { uri: string; headers: Record<string, string> } => ({
+  uri: `${serviceFor(route) ?? API_BASE_URL}${route}`,
   headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
 });
 
 // Una sola renovación a la vez aunque fallen varias peticiones juntas
-let renovando: Promise<string | null> | null = null;
+let renewing: Promise<string | null> | null = null;
 
-async function renovarToken(): Promise<string | null> {
+async function renewToken(): Promise<string | null> {
   if (!refreshToken) return null;
-  renovando ??= axios
-    .post<{ token: string }>(`${API_BASE_URL}/api/auth/refresh`, { refreshToken }, { timeout: TIEMPO_ESPERA_MS })
+  renewing ??= axios
+    .post<{ token: string }>(`${API_BASE_URL}/api/auth/refresh`, { refreshToken }, { timeout: WAIT_TIME_MS })
     .then((r) => r.data.token ?? null)
     .catch((e) => {
       // Sin conexión o servidor caído: no es motivo para cerrar la sesión
@@ -117,9 +117,9 @@ async function renovarToken(): Promise<string | null> {
       return null;
     })
     .finally(() => {
-      renovando = null;
+      renewing = null;
     });
-  return renovando;
+  return renewing;
 }
 
 api.interceptors.response.use(
@@ -130,24 +130,24 @@ api.interceptors.response.use(
   async (error) => {
     registrar("❌ [api] Error:", error.config?.url, error.response?.status ?? error.message);
     const original = error.config;
-    const esDeAutenticacion = String(original?.url ?? "").startsWith("/api/auth/");
+    const isAuthRequest = String(original?.url ?? "").startsWith("/api/auth/");
 
     // Token vencido: se renueva con el refresh token y se repite la petición una vez
-    if (error.response?.status === 401 && authToken && original && !original._reintento && !esDeAutenticacion) {
+    if (error.response?.status === 401 && authToken && original && !original._reintento && !isAuthRequest) {
       original._reintento = true;
-      let nuevo: string | null = null;
+      let newItem: string | null = null;
       try {
-        nuevo = await renovarToken();
+        newItem = await renewToken();
       } catch {
         return Promise.reject(error);
       }
-      if (nuevo) {
-        setAuthToken(nuevo);
-        alRenovarToken?.(nuevo);
-        original.headers.Authorization = `Bearer ${nuevo}`;
+      if (newItem) {
+        setAuthToken(newItem);
+        onTokenRenewed?.(newItem);
+        original.headers.Authorization = `Bearer ${newItem}`;
         return api(original);
       }
-      alExpirarSesion?.();
+      onSessionExpired?.();
     }
     return Promise.reject(error);
   }

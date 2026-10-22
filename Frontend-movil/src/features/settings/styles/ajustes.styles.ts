@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-export const obtenerEstilos = (theme: any) => StyleSheet.create({
+export const getStyles = (theme: any) => StyleSheet.create({
   container: {
     backgroundColor: theme.card,
     borderRadius: 14,
@@ -19,19 +19,19 @@ export const obtenerEstilos = (theme: any) => StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: 'rgba(0,0,0,0.08)',
   },
-  filaSwitch: {
+  switchRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  textoSwitch: {
+  switchText: {
     fontSize: 14,
     fontWeight: '500',
   },
-  filaConChevron: {
+  chevronRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  tituloSeccion: {
+  sectionTitle: {
     fontSize: 12,
     fontWeight: '600',
     marginBottom: 10,
@@ -39,22 +39,22 @@ export const obtenerEstilos = (theme: any) => StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
-  filaColores: {
+  colorsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
   },
-  circuloWrapper: {
+  circleWrapper: {
     padding: 3,
   },
-  circulo: {
+  circle: {
     width: 36,
     height: 36,
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  circuloActivo: {
+  activeCircle: {
     borderWidth: 3,
     borderColor: '#ffffff',
     elevation: 6,

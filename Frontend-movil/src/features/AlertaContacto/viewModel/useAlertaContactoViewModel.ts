@@ -7,73 +7,73 @@ import { useRoute } from "@react-navigation/native";
 import type { RouteProp } from "@react-navigation/native";
 import type { MainStackParamList } from "../../../navigation/types";
 import {
-  getSeguimientoAlerta,
-  getSeguimientoPublico,
-  type EvidenciaSeguimiento,
-  type PuntoUbicacion,
+  getAlertTracking,
+  getPublicTracking,
+  type TrackingEvidence,
+  type LocationPoint,
 } from "../../../services/alert-tracking.service";
-import { getAjustesPublicos } from "../../../services/settings.service";
-import { detenerAlarmaSos } from "../../../notifications/alarmaSos";
-import { descripcionLugar, obtenerLugar } from "../../../services/geocoding.service";
+import { getPublicSettings } from "../../../services/settings.service";
+import { stopSosAlarm } from "../../../notifications/alarmaSos";
+import { placeDescription, getPlace } from "../../../services/geocoding.service";
 
 // Ciclo de actualización: cada 30 s se actualiza la ubicación; tras 10 actualizaciones
 // se entra en reposo 5 minutos (ahorra batería) y luego se repite el ciclo.
 // Refresco del seguimiento que ve el contacto
-const REFRESCO_CONTACTO_MS = 10 * 1000;
-const REFRESCO_CONTACTO_LENTO_MS = 30 * 1000;
-const INTERVALO_ACTUALIZACION_MS = 30 * 1000;
-const ACTUALIZACIONES_POR_CICLO = 10;
-const REPOSO_MS = 5 * 60 * 1000;
-const MAX_HISTORIAL = 15; // registros que se muestran en la lista (el mapa muestra todos)
-const ZONA = "America/Bogota";
-const ESTADOS_FINALES = ["cancelled", "cancelada", "resolved", "atendida", "finalizada"];
+const CONTACT_REFRESH_MS = 10 * 1000;
+const CONTACT_SLOW_REFRESH_MS = 30 * 1000;
+const UPDATE_INTERVAL_MS = 30 * 1000;
+const UPDATES_PER_CYCLE = 10;
+const REST_MS = 5 * 60 * 1000;
+const MAX_HISTORY = 15; // registros que se muestran en la lista (el mapa muestra todos)
+const TIME_ZONE = "America/Bogota";
+const FINAL_STATUSES = ["cancelled", "cancelada", "resolved", "atendida", "finalizada"];
 
 // TEMPORAL (modo demo): coordenadas de respaldo para los puntos simulados.
 const DEMO_COORDS = { latitude: 2.9273, longitude: -75.2895 };
 
 type Padding = { top: number; right: number; bottom: number; left: number };
-const PADDING_MAPA: Padding = { top: 80, right: 60, bottom: 80, left: 60 };
-const PADDING_MAPA_COMPLETO: Padding = { top: 130, right: 60, bottom: 120, left: 60 };
+const MAP_PADDING: Padding = { top: 80, right: 60, bottom: 80, left: 60 };
+const FULL_MAP_PADDING: Padding = { top: 130, right: 60, bottom: 120, left: 60 };
 
 // Cuánto esperar antes de la siguiente actualización, según cuántas van en el ciclo actual.
-const esperaTrasActualizacion = (hechas: number) =>
-  hechas % ACTUALIZACIONES_POR_CICLO === 0 ? REPOSO_MS : INTERVALO_ACTUALIZACION_MS;
+const delayAfterUpdate = (done: number) =>
+  done % UPDATES_PER_CYCLE === 0 ? REST_MS : UPDATE_INTERVAL_MS;
 
-const formatHora = (d: Date) =>
+const formatTime = (d: Date) =>
   d.toLocaleTimeString("es-CO", {
-    timeZone: ZONA,
+    timeZone: TIME_ZONE,
     hour: "numeric",
     minute: "2-digit",
     second: "2-digit",
   });
 
-const formatFecha = (d: Date) =>
+const formatDate = (d: Date) =>
   d.toLocaleDateString("es-CO", {
-    timeZone: ZONA,
+    timeZone: TIME_ZONE,
     day: "2-digit",
     month: "long",
     year: "numeric",
   });
 
-const formatDuracion = (segundos: number) => {
-  const s = Math.max(0, Math.round(segundos));
+const formatDuration = (seconds: number) => {
+  const s = Math.max(0, Math.round(seconds));
   if (s < 60) return `${s}s`;
   if (s < 3600) return `${Math.floor(s / 60)} min`;
   return `${Math.floor(s / 3600)} h`;
 };
 
-export type ItemHistorial = {
+export type HistoryItem = {
   id: string;
-  numero: string;
-  hora: string;
+  number: string;
+  time: string;
   lat: string;
   lng: string;
   offset: string | null;
-  barrio: string | null;
-  esActual: boolean;
+  neighborhood: string | null;
+  isCurrent: boolean;
 };
 
-export function useAlertaContactoViewModel() {
+export function useContactAlertViewModel() {
   const { params } = useRoute<RouteProp<MainStackParamList, "AlertaContacto">>();
 
   // TEMPORAL: en modo demo no se consulta el backend, se simulan los puntos.
@@ -81,13 +81,13 @@ export function useAlertaContactoViewModel() {
 
   // Mapa pequeño de la pantalla y mapa de la ventana emergente.
   const mapRef = useRef<MapView>(null);
-  const [mapaListo, setMapaListo] = useState(false);
-  const mapaCompletoRef = useRef<MapView>(null);
-  const [mapaCompletoListo, setMapaCompletoListo] = useState(false);
-  const [mapaVisible, setMapaVisible] = useState(false);
+  const [mapReady, setMapReady] = useState(false);
+  const fullMapRef = useRef<MapView>(null);
+  const [fullMapReady, setFullMapReady] = useState(false);
+  const [mapVisible, setMapVisible] = useState(false);
 
   // Si la notificación trae coordenadas, se muestran de inmediato mientras llega el primer fetch.
-  const [puntos, setPuntos] = useState<PuntoUbicacion[]>(() =>
+  const [points, setPoints] = useState<LocationPoint[]>(() =>
     !DEMO && params.latitude != null && params.longitude != null
       ? [
           {
@@ -99,54 +99,54 @@ export function useAlertaContactoViewModel() {
         ]
       : [],
   );
-  const [activa, setActiva] = useState(true);
+  const [active, setActive] = useState(true);
   // Número de emergencias que define la administración (123 en Colombia)
-  const [numeroEmergencia, setNumeroEmergencia] = useState("123");
+  const [emergencyNumber, setEmergencyNumber] = useState("123");
   useEffect(() => {
-    getAjustesPublicos()
-      .then((a) => a.emergencyPhoneNumber && setNumeroEmergencia(a.emergencyPhoneNumber))
+    getPublicSettings()
+      .then((a) => a.emergencyPhoneNumber && setEmergencyNumber(a.emergencyPhoneNumber))
       .catch(() => {});
   }, []);
   // Grabaciones de la alerta (video y audio por partes): el contacto las ve para ayudar a ubicarla
-  const [evidencias, setEvidencias] = useState<EvidenciaSeguimiento[]>([]);
-  const [cargando, setCargando] = useState(true);
-  const [errorConexion, setErrorConexion] = useState(false);
-  const [ahora, setAhora] = useState(Date.now());
+  const [evidence, setEvidence] = useState<TrackingEvidence[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [connectionError, setConnectionError] = useState(false);
+  const [now, setNow] = useState(Date.now());
 
   // Barrio y lugar de cada punto (id del punto -> "Carrera 7 · Barrio X"), por geocodificación inversa.
   const [barrios, setBarrios] = useState<Record<string, string>>({});
-  const barriosConsultados = useRef<Set<string>>(new Set());
-  const vivo = useRef(true);
-  const demoContador = useRef(0); // ids únicos para los puntos simulados (no se reinicia)
+  const queriedNeighborhoods = useRef<Set<string>>(new Set());
+  const alive = useRef(true);
+  const demoCounter = useRef(0); // ids únicos para los puntos simulados (no se reinicia)
   useEffect(() => {
-    vivo.current = true;
+    alive.current = true;
     return () => {
-      vivo.current = false;
+      alive.current = false;
     };
   }, []);
 
   // Consulta el barrio/lugar solo de los puntos nuevos (los del historial), uno por uno y empezando
   // por el más reciente. Se espera 1,1 s entre consultas para respetar el límite del servicio.
   useEffect(() => {
-    const pendientes = puntos
-      .slice(-MAX_HISTORIAL)
-      .filter((p) => !barriosConsultados.current.has(p.id))
+    const pendingItems = points
+      .slice(-MAX_HISTORY)
+      .filter((p) => !queriedNeighborhoods.current.has(p.id))
       .reverse();
-    if (pendientes.length === 0) return;
-    pendientes.forEach((p) => barriosConsultados.current.add(p.id));
+    if (pendingItems.length === 0) return;
+    pendingItems.forEach((p) => queriedNeighborhoods.current.add(p.id));
 
     (async () => {
-      for (const p of pendientes) {
-        if (!vivo.current) return;
-        const lugar = await obtenerLugar(p.latitude, p.longitude);
-        const texto = lugar ? descripcionLugar(lugar) : "";
-        if (texto && vivo.current) {
-          setBarrios((prev) => ({ ...prev, [p.id]: texto }));
+      for (const p of pendingItems) {
+        if (!alive.current) return;
+        const place = await getPlace(p.latitude, p.longitude);
+        const text = place ? placeDescription(place) : "";
+        if (text && alive.current) {
+          setBarrios((prev) => ({ ...prev, [p.id]: text }));
         }
         await new Promise((r) => setTimeout(r, 1100));
       }
     })();
-  }, [puntos]);
+  }, [points]);
 
   // Consulta la alerta al abrir la pantalla y luego en ciclos: cada 30 s (10 veces) y 5 min de reposo;
   // se detiene cuando la usuaria la cancela o finaliza.
@@ -155,36 +155,36 @@ export function useAlertaContactoViewModel() {
 
     let mounted = true;
     let timer: ReturnType<typeof setTimeout> | undefined;
-    let hechas = 0; // actualizaciones hechas (se cuentan todas, también las fallidas)
+    let done = 0; // actualizaciones hechas (se cuentan todas, también las fallidas)
 
-    const cargar = async () => {
-      hechas += 1;
+    const load = async () => {
+      done += 1;
       try {
         // Contacto de emergencia (llega por push): endpoint público con el código de seguimiento
-        const seguimiento = params.codigo
-          ? await getSeguimientoPublico(params.codigo)
-          : await getSeguimientoAlerta(params.alertaId);
+        const tracking = params.codigo
+          ? await getPublicTracking(params.codigo)
+          : await getAlertTracking(params.alertaId);
         if (!mounted) return;
 
-        setErrorConexion(false);
-        if (seguimiento.puntos.length > 0) setPuntos(seguimiento.puntos);
-        if (seguimiento.evidencias) setEvidencias(seguimiento.evidencias);
-        setCargando(false);
+        setConnectionError(false);
+        if (tracking.points.length > 0) setPoints(tracking.points);
+        if (tracking.evidence) setEvidence(tracking.evidence);
+        setLoading(false);
 
-        const sigueActiva = !ESTADOS_FINALES.includes(seguimiento.estado);
-        setActiva(sigueActiva);
-        if (!sigueActiva) return; // última consulta hecha, no se reprograma
+        const stillActive = !FINAL_STATUSES.includes(tracking.status);
+        setActive(stillActive);
+        if (!stillActive) return; // última consulta hecha, no se reprograma
       } catch {
         if (!mounted) return;
-        setErrorConexion(true);
-        setCargando(false);
+        setConnectionError(true);
+        setLoading(false);
       }
       // Quien ayuda necesita ver el movimiento casi en vivo: cada 10 s los primeros 10 minutos y
       // luego cada 30 s (no el ciclo de ahorro de batería que usa el celular de la usuaria)
-      if (mounted) timer = setTimeout(cargar, hechas <= 60 ? REFRESCO_CONTACTO_MS : REFRESCO_CONTACTO_LENTO_MS);
+      if (mounted) timer = setTimeout(load, done <= 60 ? CONTACT_REFRESH_MS : CONTACT_SLOW_REFRESH_MS);
     };
 
-    cargar();
+    load();
     return () => {
       mounted = false;
       if (timer) clearTimeout(timer);
@@ -193,7 +193,7 @@ export function useAlertaContactoViewModel() {
 
   // Al abrir la pantalla de la alerta se apaga la alarma
   useEffect(() => {
-    if (!DEMO) detenerAlarmaSos(params.alertaId).catch(() => undefined);
+    if (!DEMO) stopSosAlarm(params.alertaId).catch(() => undefined);
   }, [params.alertaId, DEMO]);
 
   // ===== TEMPORAL (modo demo): agrega un punto nuevo con la ubicación real del teléfono =====
@@ -205,25 +205,25 @@ export function useAlertaContactoViewModel() {
       longitude: params.longitude ?? DEMO_COORDS.longitude,
     };
     let mounted = true;
-    let hechas = 0;
+    let done = 0;
     let timer: ReturnType<typeof setTimeout> | undefined;
 
-    const agregarPunto = async () => {
-      hechas += 1;
+    const addPoint = async () => {
+      done += 1;
 
       // Primer punto: la ubicación con la que se abrió la pantalla. Los siguientes: el GPS real,
       // así que si no te mueves el punto se queda en el mismo lugar (si falla, se usa la base).
       let coords = base;
-      if (hechas > 1) {
+      if (done > 1) {
         try {
           const { status } = await Location.getForegroundPermissionsAsync();
           if (status === "granted") {
-            const actual = await Location.getCurrentPositionAsync({
+            const current = await Location.getCurrentPositionAsync({
               accuracy: Location.Accuracy.Balanced,
             });
             coords = {
-              latitude: actual.coords.latitude,
-              longitude: actual.coords.longitude,
+              latitude: current.coords.latitude,
+              longitude: current.coords.longitude,
             };
           }
         } catch {
@@ -232,15 +232,15 @@ export function useAlertaContactoViewModel() {
       }
       if (!mounted) return;
 
-      demoContador.current += 1;
-      const id = `demo-${demoContador.current}`;
-      setPuntos((prev) => [...prev, { id, ...coords, recordedAt: new Date() }]);
-      setCargando(false);
+      demoCounter.current += 1;
+      const id = `demo-${demoCounter.current}`;
+      setPoints((prev) => [...prev, { id, ...coords, recordedAt: new Date() }]);
+      setLoading(false);
       // Mismo ciclo que el real: 30 s entre puntos y reposo de 5 min cada 10.
-      timer = setTimeout(agregarPunto, esperaTrasActualizacion(hechas));
+      timer = setTimeout(addPoint, delayAfterUpdate(done));
     };
 
-    agregarPunto();
+    addPoint();
     return () => {
       mounted = false;
       if (timer) clearTimeout(timer);
@@ -251,47 +251,47 @@ export function useAlertaContactoViewModel() {
 
   // Reloj para el "hace X". Cada 5 s: un tic por segundo volvía a dibujar toda la pantalla con el mapa.
   useEffect(() => {
-    if (!activa) return undefined;
-    const id = setInterval(() => setAhora(Date.now()), 5000);
+    if (!active) return undefined;
+    const id = setInterval(() => setNow(Date.now()), 5000);
     return () => clearInterval(id);
-  }, [activa]);
+  }, [active]);
 
-  const ultimo = puntos.length > 0 ? puntos[puntos.length - 1] : null;
+  const lastItem = points.length > 0 ? points[points.length - 1] : null;
 
   // Texto relativo: "5s", "3 min"... (la vista le agrega "hace" / "ago" según el idioma).
-  const tiempoDesdeUltimo = ultimo
-    ? formatDuracion((ahora - ultimo.recordedAt.getTime()) / 1000)
+  const timeSinceLast = lastItem
+    ? formatDuration((now - lastItem.recordedAt.getTime()) / 1000)
     : "";
 
   // Historial: más reciente arriba, con la misma numeración de los pines (1 = primer punto enviado).
-  const historial: ItemHistorial[] = useMemo(() => {
-    if (puntos.length === 0) return [];
-    const ult = puntos[puntos.length - 1];
-    return puntos
+  const history: HistoryItem[] = useMemo(() => {
+    if (points.length === 0) return [];
+    const last = points[points.length - 1];
+    return points
       .map((p, i) => {
-        const esActual = i === puntos.length - 1;
+        const isCurrent = i === points.length - 1;
         return {
           id: p.id,
-          numero: String(i + 1).padStart(2, "0"),
-          hora: formatHora(p.recordedAt),
+          number: String(i + 1).padStart(2, "0"),
+          time: formatTime(p.recordedAt),
           lat: p.latitude.toFixed(4),
           lng: p.longitude.toFixed(4),
-          offset: esActual
+          offset: isCurrent
             ? null
-            : `-${formatDuracion((ult.recordedAt.getTime() - p.recordedAt.getTime()) / 1000)}`,
-          barrio: barrios[p.id] ?? null,
-          esActual,
+            : `-${formatDuration((last.recordedAt.getTime() - p.recordedAt.getTime()) / 1000)}`,
+          neighborhood: barrios[p.id] ?? null,
+          isCurrent: isCurrent,
         };
       })
       .reverse()
-      .slice(0, MAX_HISTORIAL);
-  }, [puntos, barrios]);
+      .slice(0, MAX_HISTORY);
+  }, [points, barrios]);
 
   // Encuadra todos los pines en el mapa indicado.
-  const ajustarEn = useCallback(
+  const fitTo = useCallback(
     (ref: RefObject<MapView | null>, padding: Padding) => {
-      if (!ref.current || puntos.length === 0) return;
-      const coords = puntos.map((p) => ({
+      if (!ref.current || points.length === 0) return;
+      const coords = points.map((p) => ({
         latitude: p.latitude,
         longitude: p.longitude,
       }));
@@ -304,73 +304,73 @@ export function useAlertaContactoViewModel() {
         ref.current.fitToCoordinates(coords, { edgePadding: padding, animated: true });
       }
     },
-    [puntos],
+    [points],
   );
 
   // Mapa pequeño: se reencuadra cuando llega un punto nuevo (no en cada consulta).
   useEffect(() => {
-    if (mapaListo) ajustarEn(mapRef, PADDING_MAPA);
+    if (mapReady) fitTo(mapRef, MAP_PADDING);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapaListo, puntos.length]);
+  }, [mapReady, points.length]);
 
   // Mapa de la ventana emergente: igual, mientras esté abierta.
   useEffect(() => {
-    if (mapaVisible && mapaCompletoListo) ajustarEn(mapaCompletoRef, PADDING_MAPA_COMPLETO);
+    if (mapVisible && fullMapReady) fitTo(fullMapRef, FULL_MAP_PADDING);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapaVisible, mapaCompletoListo, puntos.length]);
+  }, [mapVisible, fullMapReady, points.length]);
 
-  const onMapReady = useCallback(() => setMapaListo(true), []);
-  const onMapaCompletoReady = useCallback(() => setMapaCompletoListo(true), []);
+  const onMapReady = useCallback(() => setMapReady(true), []);
+  const onFullMapReady = useCallback(() => setFullMapReady(true), []);
 
   // Abre la ventana emergente con el mapa (no se sale de la app ni se abre Google Maps).
-  const abrirMapa = useCallback(() => {
-    if (ultimo) setMapaVisible(true);
-  }, [ultimo]);
+  const openMap = useCallback(() => {
+    if (lastItem) setMapVisible(true);
+  }, [lastItem]);
 
-  const cerrarMapa = useCallback(() => {
-    setMapaVisible(false);
-    setMapaCompletoListo(false);
+  const closeMap = useCallback(() => {
+    setMapVisible(false);
+    setFullMapReady(false);
   }, []);
 
-  const verTodosLosPuntos = useCallback(() => {
-    ajustarEn(mapaCompletoRef, PADDING_MAPA_COMPLETO);
-  }, [ajustarEn]);
+  const showAllPoints = useCallback(() => {
+    fitTo(fullMapRef, FULL_MAP_PADDING);
+  }, [fitTo]);
 
-  const llamarEmergencias = useCallback(() => {
-    const url = Platform.OS === "android" ? `tel:${numeroEmergencia}` : `telprompt:${numeroEmergencia}`;
+  const callEmergency = useCallback(() => {
+    const url = Platform.OS === "android" ? `tel:${emergencyNumber}` : `telprompt:${emergencyNumber}`;
     Linking.openURL(url).catch(() => {});
-  }, [numeroEmergencia]);
+  }, [emergencyNumber]);
 
-  const videos = evidencias.filter((e) => e.tipo === "video");
-  const audios = evidencias.filter((e) => e.tipo === "audio");
+  const videos = evidence.filter((e) => e.type === "video");
+  const audios = evidence.filter((e) => e.type === "audio");
 
   return {
-    codigo: params.codigo,
+    code: params.codigo,
     videos,
     audios,
-    nombreUsuaria: params.nombreUsuaria,
+    userName: params.nombreUsuaria,
     mapRef,
-    mapaCompletoRef,
-    puntos,
-    ultimo,
-    activa,
-    cargando,
-    errorConexion,
-    tiempoDesdeUltimo,
-    historial,
-    barrioUltimo: ultimo ? (barrios[ultimo.id] ?? null) : null,
-    fechaUltimo: ultimo ? formatFecha(ultimo.recordedAt) : "",
-    horaUltimo: ultimo ? formatHora(ultimo.recordedAt) : "",
-    coordsUltimo: ultimo
-      ? `${ultimo.latitude.toFixed(4)}, ${ultimo.longitude.toFixed(4)}`
+    fullMapRef: fullMapRef,
+    points: points,
+    lastItem: lastItem,
+    active: active,
+    loading: loading,
+    connectionError: connectionError,
+    timeSinceLast: timeSinceLast,
+    history: history,
+    lastNeighborhood: lastItem ? (barrios[lastItem.id] ?? null) : null,
+    lastDate: lastItem ? formatDate(lastItem.recordedAt) : "",
+    lastTime: lastItem ? formatTime(lastItem.recordedAt) : "",
+    lastCoords: lastItem
+      ? `${lastItem.latitude.toFixed(4)}, ${lastItem.longitude.toFixed(4)}`
       : "",
-    mapaVisible,
+    mapVisible: mapVisible,
     onMapReady,
-    onMapaCompletoReady,
-    abrirMapa,
-    cerrarMapa,
-    verTodosLosPuntos,
-    llamarEmergencias,
-    numeroEmergencia,
+    onFullMapReady: onFullMapReady,
+    openMap: openMap,
+    closeMap: closeMap,
+    showAllPoints: showAllPoints,
+    callEmergency: callEmergency,
+    emergencyNumber: emergencyNumber,
   };
 }

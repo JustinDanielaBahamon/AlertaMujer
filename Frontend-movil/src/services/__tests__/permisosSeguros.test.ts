@@ -13,44 +13,44 @@ jest.mock("expo-location", () => ({
 
 import notifee from "@notifee/react-native";
 import * as Location from "expo-location";
-import { enColaDePermisos, permisoNotificaciones, permisoUbicacion } from "../permisosSeguros";
+import { inPermissionQueue, notificationsPermission, locationPermission } from "../permisosSeguros";
 
 describe("permisosSeguros", () => {
   beforeEach(() => jest.clearAllMocks());
 
   it("no pide un permiso que ya está concedido (pedirlo puede trabar la app)", async () => {
-    expect(await permisoUbicacion()).toBe(true);
-    expect(await permisoNotificaciones()).toBe(true);
+    expect(await locationPermission()).toBe(true);
+    expect(await notificationsPermission()).toBe(true);
     expect(Location.requestForegroundPermissionsAsync).not.toHaveBeenCalled();
     expect(notifee.requestPermission).not.toHaveBeenCalled();
   });
 
   it("lo pide si falta", async () => {
     (Location.getForegroundPermissionsAsync as jest.Mock).mockResolvedValueOnce({ granted: false });
-    expect(await permisoUbicacion()).toBe(true);
+    expect(await locationPermission()).toBe(true);
     expect(Location.requestForegroundPermissionsAsync).toHaveBeenCalledTimes(1);
   });
 
   it("nunca hace dos peticiones a la vez, aunque una falle", async () => {
-    let enCurso = 0;
-    let maximo = 0;
-    const pedir = (falla: boolean) => () =>
-      new Promise<void>((resolver, rechazar) => {
-        enCurso += 1;
-        maximo = Math.max(maximo, enCurso);
+    let inProgress = 0;
+    let maximum = 0;
+    const ask = (failure: boolean) => () =>
+      new Promise<void>((resolver, reject) => {
+        inProgress += 1;
+        maximum = Math.max(maximum, inProgress);
         setTimeout(() => {
-          enCurso -= 1;
-          if (falla) rechazar(new Error("x"));
+          inProgress -= 1;
+          if (failure) reject(new Error("x"));
           else resolver();
         }, 10);
       });
 
     await Promise.allSettled([
-      enColaDePermisos(pedir(false)),
-      enColaDePermisos(pedir(true)),
-      enColaDePermisos(pedir(false)),
+      inPermissionQueue(ask(false)),
+      inPermissionQueue(ask(true)),
+      inPermissionQueue(ask(false)),
     ]);
 
-    expect(maximo).toBe(1);
+    expect(maximum).toBe(1);
   });
 });

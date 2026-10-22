@@ -6,15 +6,15 @@ import type { AppLocale } from "../../contexts/LocaleContext";
  * - usuario con letras, números y . _ % + -
  * - dominio válido y extensión de al menos 2 letras
  */
-export const REGEX_CORREO =
+export const EMAIL_REGEX =
   /^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/;
 
-export function esCorreoValido(correo: string): boolean {
-  const limpio = correo.trim();
-  return limpio.length > 0 && limpio.length <= 254 && REGEX_CORREO.test(limpio);
+export function isValidEmail(email: string): boolean {
+  const clean = email.trim();
+  return clean.length > 0 && clean.length <= 254 && EMAIL_REGEX.test(clean);
 }
 
-type TextosExtra = {
+type ExtraTexts = {
   label_correo: string;
   placeholder_correo: string;
   correo_requerido_titulo: string;
@@ -31,7 +31,7 @@ type TextosExtra = {
   alerta_error: string;
 };
 
-export const textosContactoExtra: Record<AppLocale, TextosExtra> = {
+export const contactExtraTexts: Record<AppLocale, ExtraTexts> = {
   es: {
     label_correo: "Correo electrónico",
     placeholder_correo: "correo@ejemplo.com",

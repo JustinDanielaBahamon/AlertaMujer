@@ -18,7 +18,7 @@ export default function Index() {
     >
       <Text style={{ color: "white" }}>{t.indexDemo.mensaje}</Text>
 
-      <TouchableOpacity onPress={vm.entrarComoDemo}>
+      <TouchableOpacity onPress={vm.enterAsDemo}>
         <Text
           style={{
             color: "white",

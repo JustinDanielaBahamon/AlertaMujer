@@ -25,16 +25,16 @@ import { StyleSheet, Text, TouchableOpacity, View, type StyleProp, type ViewStyl
 
 /** Estilo de mapa gratuito y sin clave (https://openfreemap.org). */
 /** Ancho mínimo (en grados, ~300 m) al encuadrar varios puntos. */
-const ANCHO_MINIMO_GRADOS = 0.003;
+const MIN_WIDTH_DEGREES = 0.003;
 
 /** Agranda un intervalo [min, max] alrededor de su centro hasta el ancho mínimo. */
-export function conAnchoMinimo(min: number, max: number, minimo = ANCHO_MINIMO_GRADOS): [number, number] {
-  if (max - min >= minimo) return [min, max];
-  const centro = (min + max) / 2;
-  return [centro - minimo / 2, centro + minimo / 2];
+export function withMinWidth(min: number, max: number, minimum = MIN_WIDTH_DEGREES): [number, number] {
+  if (max - min >= minimum) return [min, max];
+  const center = (min + max) / 2;
+  return [center - minimum / 2, center + minimum / 2];
 }
 
-export const ESTILO_MAPA = "https://tiles.openfreemap.org/styles/liberty";
+export const MAP_STYLE = "https://tiles.openfreemap.org/styles/liberty";
 
 export type LatLng = { latitude: number; longitude: number };
 export type Region = LatLng & { latitudeDelta: number; longitudeDelta: number };
@@ -54,7 +54,7 @@ const zoomDeRegion = (r: Region) => {
 const lngLat = (c: LatLng): [number, number] => [c.longitude, c.latitude];
 
 // Ids de fuentes y capas de MapLibre: deben ser únicos y sin caracteres especiales.
-const useIdMapa = (prefijo: string) => `${prefijo}-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
+const useMapId = (prefix: string) => `${prefix}-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
 
 // ─── MapView ────────────────────────────────────────────────────────────────
 
@@ -99,25 +99,25 @@ const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
   },
   ref,
 ) {
-  const camara = useRef<CameraRef>(null);
-  const inicial = initialRegion ?? region;
+  const camera = useRef<CameraRef>(null);
+  const initial = initialRegion ?? region;
 
   useImperativeHandle(ref, () => ({
     animateToRegion: (r, duration = 500) =>
-      camara.current?.easeTo({ center: lngLat(r), zoom: zoomDeRegion(r), duration }),
+      camera.current?.easeTo({ center: lngLat(r), zoom: zoomDeRegion(r), duration }),
     fitToCoordinates: (coords, options) => {
       if (coords.length === 0) return;
       if (coords.length === 1) {
-        camara.current?.easeTo({ center: lngLat(coords[0]), zoom: 16, duration: 500 });
+        camera.current?.easeTo({ center: lngLat(coords[0]), zoom: 16, duration: 500 });
         return;
       }
       const lngs = coords.map((c) => c.longitude);
       const lats = coords.map((c) => c.latitude);
       // Puntos muy juntos (alguien quieto: el GPS varía unos metros) darían un zoom mayor al que
       // tiene calles dibujadas y el mapa quedaría vacío: se encuadra como mínimo ~300 m
-      const [oeste, este] = conAnchoMinimo(Math.min(...lngs), Math.max(...lngs));
-      const [sur, norte] = conAnchoMinimo(Math.min(...lats), Math.max(...lats));
-      camara.current?.fitBounds([oeste, sur, este, norte], {
+      const [west, east] = withMinWidth(Math.min(...lngs), Math.max(...lngs));
+      const [south, north] = withMinWidth(Math.min(...lats), Math.max(...lats));
+      camera.current?.fitBounds([west, south, east, north], {
         padding: options?.edgePadding,
         duration: options?.animated === false ? 0 : 500,
       });
@@ -127,14 +127,14 @@ const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
   // Región controlada: si la pantalla cambia `region`, la cámara la sigue.
   useEffect(() => {
     if (!region) return;
-    camara.current?.easeTo({ center: lngLat(region), zoom: zoomDeRegion(region), duration: 400 });
+    camera.current?.easeTo({ center: lngLat(region), zoom: zoomDeRegion(region), duration: 400 });
   }, [region?.latitude, region?.longitude, region?.latitudeDelta, region?.longitudeDelta]);
 
   return (
     <Map
-      style={[styles.mapa, style]}
+      style={[styles.map, style]}
       pointerEvents={pointerEvents}
-      mapStyle={ESTILO_MAPA}
+      mapStyle={MAP_STYLE}
       dragPan={scrollEnabled}
       touchZoom={zoomEnabled}
       doubleTapZoom={zoomEnabled}
@@ -155,8 +155,8 @@ const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
       }
     >
       <Camera
-        ref={camara}
-        initialViewState={inicial ? { center: lngLat(inicial), zoom: zoomDeRegion(inicial) } : undefined}
+        ref={camera}
+        initialViewState={initial ? { center: lngLat(initial), zoom: zoomDeRegion(initial) } : undefined}
       />
       {children}
     </Map>
@@ -184,31 +184,31 @@ type MarkerProps = {
 };
 
 export function Marker({ coordinate, pinColor = "#E53935", title, description, anchor, onPress, zIndex, children }: MarkerProps) {
-  const [mostrarTitulo, setMostrarTitulo] = useState(false);
-  const centrado = anchor ? anchor.y <= 0.6 : false;
-  const tieneTexto = Boolean(title || description);
+  const [showTitle, setShowTitle] = useState(false);
+  const centered = anchor ? anchor.y <= 0.6 : false;
+  const hasText = Boolean(title || description);
 
-  const tocar = () => {
-    if (tieneTexto) setMostrarTitulo((v) => !v);
+  const tap = () => {
+    if (hasText) setShowTitle((v) => !v);
     onPress?.();
   };
 
   return (
-    <MarkerLibre lngLat={lngLat(coordinate)} anchor={children && centrado ? "center" : "bottom"}>
+    <MarkerLibre lngLat={lngLat(coordinate)} anchor={children && centered ? "center" : "bottom"}>
       {/* Tamaño fijo: si la vista no tiene ancho propio, Android la recorta al acercarse al borde del mapa. */}
       <TouchableOpacity
         activeOpacity={0.8}
-        onPress={tocar}
-        style={[styles.marcador, mostrarTitulo && tieneTexto && styles.marcadorConBurbuja, zIndex != null && { zIndex }]}
+        onPress={tap}
+        style={[styles.marker, showTitle && hasText && styles.markerWithBubble, zIndex != null && { zIndex }]}
       >
-        {mostrarTitulo && tieneTexto && (
-          <View style={styles.burbuja}>
-            {title ? <Text style={styles.burbujaTitulo} numberOfLines={2}>{title}</Text> : null}
-            {description ? <Text style={styles.burbujaTexto} numberOfLines={3}>{description}</Text> : null}
+        {showTitle && hasText && (
+          <View style={styles.bubble}>
+            {title ? <Text style={styles.bubbleTitle} numberOfLines={2}>{title}</Text> : null}
+            {description ? <Text style={styles.bubbleText} numberOfLines={3}>{description}</Text> : null}
           </View>
         )}
         {children ?? (
-          <View style={styles.pinCaja}>
+          <View style={styles.pinBox}>
             <Ionicons name="location-sharp" size={38} color={pinColor} style={styles.pin} />
           </View>
         )}
@@ -241,19 +241,19 @@ export function Polyline({
   lineDashPattern,
   onPress,
 }: PolylineProps) {
-  const id = useIdMapa("linea");
+  const id = useMapId("linea");
   if (coordinates.length < 2) return null;
 
-  const datos: GeoJSON.Feature = {
+  const data: GeoJSON.Feature = {
     type: "Feature",
     properties: {},
     geometry: { type: "LineString", coordinates: coordinates.map(lngLat) },
   };
   // MapLibre mide el patrón en múltiplos del grosor de la línea.
-  const guiones = lineDashPattern?.length ? lineDashPattern.map((v) => Math.max(v / strokeWidth, 0.1)) : undefined;
+  const dashes = lineDashPattern?.length ? lineDashPattern.map((v) => Math.max(v / strokeWidth, 0.1)) : undefined;
 
   return (
-    <GeoJSONSource id={id} data={datos} onPress={onPress ? () => onPress() : undefined} hitbox={{ top: 12, right: 12, bottom: 12, left: 12 }}>
+    <GeoJSONSource id={id} data={data} onPress={onPress ? () => onPress() : undefined} hitbox={{ top: 12, right: 12, bottom: 12, left: 12 }}>
       <Layer
         id={`${id}-capa`}
         type="line"
@@ -261,7 +261,7 @@ export function Polyline({
         paint={{
           "line-color": strokeColor,
           "line-width": strokeWidth,
-          ...(guiones ? { "line-dasharray": guiones } : {}),
+          ...(dashes ? { "line-dasharray": dashes } : {}),
         }}
       />
     </GeoJSONSource>
@@ -280,31 +280,31 @@ type CircleProps = {
 };
 
 /** Polígono de 64 lados que aproxima un círculo de `radio` metros alrededor de `centro`. */
-function poligonoCirculo(centro: LatLng, radio: number): number[][] {
-  const puntos: number[][] = [];
-  const latRad = (centro.latitude * Math.PI) / 180;
-  const metrosPorGradoLat = 111_320;
-  const metrosPorGradoLng = 111_320 * Math.cos(latRad);
+function circlePolygon(center: LatLng, radio: number): number[][] {
+  const points: number[][] = [];
+  const latRad = (center.latitude * Math.PI) / 180;
+  const metersPerDegreeLat = 111_320;
+  const metersPerDegreeLng = 111_320 * Math.cos(latRad);
   for (let i = 0; i <= 64; i++) {
-    const angulo = (i / 64) * 2 * Math.PI;
-    puntos.push([
-      centro.longitude + (radio * Math.cos(angulo)) / metrosPorGradoLng,
-      centro.latitude + (radio * Math.sin(angulo)) / metrosPorGradoLat,
+    const angle = (i / 64) * 2 * Math.PI;
+    points.push([
+      center.longitude + (radio * Math.cos(angle)) / metersPerDegreeLng,
+      center.latitude + (radio * Math.sin(angle)) / metersPerDegreeLat,
     ]);
   }
-  return puntos;
+  return points;
 }
 
 export function Circle({ center, radius, fillColor = "rgba(233,30,99,0.2)", strokeColor = "#E91E63", strokeWidth = 1 }: CircleProps) {
-  const id = useIdMapa("circulo");
-  const datos: GeoJSON.Feature = {
+  const id = useMapId("circulo");
+  const data: GeoJSON.Feature = {
     type: "Feature",
     properties: {},
-    geometry: { type: "Polygon", coordinates: [poligonoCirculo(center, radius)] },
+    geometry: { type: "Polygon", coordinates: [circlePolygon(center, radius)] },
   };
 
   return (
-    <GeoJSONSource id={id} data={datos}>
+    <GeoJSONSource id={id} data={data}>
       <Layer id={`${id}-relleno`} type="fill" paint={{ "fill-color": fillColor }} />
       <Layer id={`${id}-borde`} type="line" paint={{ "line-color": strokeColor, "line-width": strokeWidth }} />
     </GeoJSONSource>
@@ -312,16 +312,16 @@ export function Circle({ center, radius, fillColor = "rgba(233,30,99,0.2)", stro
 }
 
 const styles = StyleSheet.create({
-  mapa: { flex: 1 },
-  marcador: { alignItems: "center" },
-  marcadorConBurbuja: { width: 210 },
-  pinCaja: { width: 44, height: 44, alignItems: "center", justifyContent: "flex-end" },
+  map: { flex: 1 },
+  marker: { alignItems: "center" },
+  markerWithBubble: { width: 210 },
+  pinBox: { width: 44, height: 44, alignItems: "center", justifyContent: "flex-end" },
   pin: {
     textShadowColor: "rgba(0,0,0,0.35)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
-  burbuja: {
+  bubble: {
     maxWidth: 200,
     backgroundColor: "#FFFFFF",
     borderRadius: 8,
@@ -330,6 +330,6 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     elevation: 3,
   },
-  burbujaTitulo: { fontSize: 13, fontWeight: "700", color: "#222222" },
-  burbujaTexto: { fontSize: 12, color: "#555555", marginTop: 2 },
+  bubbleTitle: { fontSize: 13, fontWeight: "700", color: "#222222" },
+  bubbleText: { fontSize: 12, color: "#555555", marginTop: 2 },
 });

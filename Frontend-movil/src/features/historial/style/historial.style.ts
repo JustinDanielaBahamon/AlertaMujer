@@ -2,7 +2,7 @@ import { StyleSheet } from "react-native";
 import { AppTheme } from "../../../../src/contexts/ThemeContext";
 
 
-export function getEmergenciaColors(theme: AppTheme) {
+export function getEmergencyColors(theme: AppTheme) {
   if (theme.mode === "light") {
     return {
       border:    "#4A148C",
@@ -12,7 +12,7 @@ export function getEmergenciaColors(theme: AppTheme) {
       badgeBg:   "#EDE7F6",
       badgeText: "#6A1B9A",
       line:      "#4A148C",
-      hora:      "#9e83cf",
+      time:      "#9e83cf",
     };
   }
   return {
@@ -23,11 +23,11 @@ export function getEmergenciaColors(theme: AppTheme) {
     badgeBg:   theme.contactBadgeBg,
     badgeText: theme.contactBadgeText,
     line:      theme.contactAccent,
-    hora:      theme.contactAccent,
+    time:      theme.contactAccent,
   };
 }
 
-export function getAsistenciaColors(theme: AppTheme) {
+export function getAssistanceColors(theme: AppTheme) {
   // light → rojo original
   if (theme.mode === "light") {
     return {
@@ -38,7 +38,7 @@ export function getAsistenciaColors(theme: AppTheme) {
       badgeBg:   "#FFEBEE",
       badgeText: "#D32F2F",
       line:      "#C62828",
-      hora:      "#9e83cf",
+      time:      "#9e83cf",
     };
   }
   // rosa → morado
@@ -51,7 +51,7 @@ export function getAsistenciaColors(theme: AppTheme) {
       badgeBg:   "#F3E5F5",
       badgeText: "#6A1B9A",
       line:      "#7B1FA2",
-      hora:      "#AB47BC",
+      time:      "#AB47BC",
     };
   }
   // Azul → morado
@@ -64,7 +64,7 @@ export function getAsistenciaColors(theme: AppTheme) {
       badgeBg:   "#EDE7F6",
       badgeText: "#4A148C",
       line:      "#6A1B9A",
-      hora:      "#9C27B0",
+      time:      "#9C27B0",
     };
   }
   // dark → azul más bonito (celeste vibrante)
@@ -77,7 +77,7 @@ export function getAsistenciaColors(theme: AppTheme) {
       badgeBg:   "#0D2137",
       badgeText: "#4FC3F7",
       line:      "#29B6F6",
-      hora:      "#29B6F6",
+      time:      "#29B6F6",
     };
   }
   // magenta → rosado/morado claro
@@ -90,7 +90,7 @@ export function getAsistenciaColors(theme: AppTheme) {
       badgeBg:   "#F8E8FF",
       badgeText: "#AB47BC",
       line:      "#E040FB",
-      hora:      "#CE93D8",
+      time:      "#CE93D8",
     };
   }
   // vino → fucsia oscuro
@@ -103,7 +103,7 @@ export function getAsistenciaColors(theme: AppTheme) {
       badgeBg:   "#FCE4EC",
       badgeText: "#900cfc",
       line:      "#900dc4",
-      hora:      "#bc0af1",
+      time:      "#bc0af1",
     };
   }
   // fallback genérico
@@ -115,7 +115,7 @@ export function getAsistenciaColors(theme: AppTheme) {
     badgeBg:   theme.contactIconLocBg,
     badgeText: theme.contactIconLocColor,
     line:      theme.contactIconLocColor,
-    hora:      theme.contactIconLocColor,
+    time:      theme.contactIconLocColor,
   };
 }
 

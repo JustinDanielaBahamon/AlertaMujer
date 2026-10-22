@@ -14,44 +14,44 @@ import {
 import MapView, { Marker } from "../../../components/mapa/MapaLibre";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { useLocale } from "../../../contexts/LocaleContext";
-import { useRecorridos } from "../../../contexts/RecorridosContext";
+import { useRoutes } from "../../../contexts/RecorridosContext";
 import { useAuth } from "../../../contexts/AuthContext";
 import { frequentLocationsService } from "../../../services/frequent-locations.service";
-import { descripcionLugar, obtenerLugar } from "../../../services/geocoding.service";
-import { COLOR_PUNTO_A, COLOR_PUNTO_B } from "../coloresRecorrido";
+import { placeDescription, getPlace } from "../../../services/geocoding.service";
+import { POINT_A_COLOR, POINT_B_COLOR } from "../coloresRecorrido";
 import { styles } from "../styles/GuardarRecorrido.style";
 
-type PuntoSeleccionado = {
+type SelectedPoint = {
   latitude: number;
   longitude: number;
-  nombre?: string;
-  direccion?: string; // "Carrera 7 · Barrio Altico", por geocodificación inversa
+  name?: string;
+  address?: string; // "Carrera 7 · Barrio Altico", por geocodificación inversa
 };
 
 // Lo que se muestra y se guarda de un punto: el nombre que puso la usuaria y/o la dirección
-const etiquetaPunto = (nombre: string, punto: PuntoSeleccionado, porDefecto: string) =>
-  [nombre.trim() || punto.nombre, punto.direccion].filter(Boolean).join(" · ") || porDefecto;
+const pointLabel = (name: string, point: SelectedPoint, byDefault: string) =>
+  [name.trim() || point.name, point.address].filter(Boolean).join(" · ") || byDefault;
 
-type MetodoSeleccion = "mapa" | "ubicaciones";
+type MethodSelection = "mapa" | "ubicaciones";
 
 export default function GuardarRecorrido() {
   const { theme } = useTheme();
   const { t } = useLocale();
   const navigation = useNavigation<any>();
-  const { agregarRecorridoManual } = useRecorridos();
+  const { addManualRoute } = useRoutes();
 
-  const [puntoA, setPuntoA] = useState<PuntoSeleccionado | null>(null);
-  const [puntoB, setPuntoB] = useState<PuntoSeleccionado | null>(null);
-  const [nombrePuntoA, setNombrePuntoA] = useState("");
-  const [nombrePuntoB, setNombrePuntoB] = useState("");
-  const [nombreRecorrido, setNombreRecorrido] = useState("");
-  const [metodoSeleccion, setMetodoSeleccion] = useState<MetodoSeleccion>("mapa");
-  const [modalUbicacionesVisible, setModalUbicacionesVisible] = useState(false);
-  const [puntoSeleccionando, setPuntoSeleccionando] = useState<"A" | "B" | null>(null);
+  const [pointA, setPointA] = useState<SelectedPoint | null>(null);
+  const [pointB, setPointB] = useState<SelectedPoint | null>(null);
+  const [pointAName, setPointAName] = useState("");
+  const [pointBName, setPointBName] = useState("");
+  const [routeName, setRouteName] = useState("");
+  const [methodSelection, setMethodSelection] = useState<MethodSelection>("mapa");
+  const [locationsModalVisible, setLocationsModalVisible] = useState(false);
+  const [selectingPoint, setSelectingPoint] = useState<"A" | "B" | null>(null);
   const [mapFullscreen, setMapFullscreen] = useState(false);
 
   // Ubicaciones guardadas reales desde el backend
-  const [ubicacionesGuardadas, setUbicacionesGuardadas] = useState<Array<{ id: string; nombre: string; latitude: number; longitude: number; direccion: string }>>([]);
+  const [savedLocations, setSavedLocations] = useState<Array<{ id: string; name: string; latitude: number; longitude: number; address: string }>>([]);
   const { user } = useAuth();
 
   React.useEffect(() => {
@@ -59,15 +59,15 @@ export default function GuardarRecorrido() {
     (async () => {
       if (!user?.id) return;
       try {
-        const ubicaciones = await frequentLocationsService.getByUser(user.id);
+        const locations = await frequentLocationsService.getByUser(user.id);
         if (!mounted) return;
-        setUbicacionesGuardadas(
-          ubicaciones.map((u) => ({
+        setSavedLocations(
+          locations.map((u) => ({
             id: String(u.id),
-            nombre: u.name,
+            name: u.name,
             latitude: Number(u.latitude),
             longitude: Number(u.longitude),
-            direccion: u.address ?? u.city ?? "",
+            address: u.address ?? u.city ?? "",
           }))
         );
       } catch (err) {
@@ -80,70 +80,70 @@ export default function GuardarRecorrido() {
   }, [user?.id]);
 
   // Busca la dirección y el barrio del punto tocado en el mapa
-  const completarDireccion = async (
-    punto: PuntoSeleccionado,
-    asignar: React.Dispatch<React.SetStateAction<PuntoSeleccionado | null>>,
+  const completeAddress = async (
+    point: SelectedPoint,
+    assign: React.Dispatch<React.SetStateAction<SelectedPoint | null>>,
   ) => {
-    const lugar = await obtenerLugar(punto.latitude, punto.longitude);
-    const direccion = lugar ? descripcionLugar(lugar) : "";
-    if (!direccion) return;
+    const place = await getPlace(point.latitude, point.longitude);
+    const address = place ? placeDescription(place) : "";
+    if (!address) return;
     // Solo si la usuaria no cambió el punto mientras tanto
-    asignar((actual) =>
-      actual && actual.latitude === punto.latitude && actual.longitude === punto.longitude
-        ? { ...actual, direccion }
-        : actual,
+    assign((current) =>
+      current && current.latitude === point.latitude && current.longitude === point.longitude
+        ? { ...current, address }
+        : current,
     );
   };
 
   const handleMapPress = (event: any) => {
     const { latitude, longitude } = event.nativeEvent.coordinate;
-    const punto = { latitude, longitude };
+    const point = { latitude, longitude };
 
-    if (puntoSeleccionando === "A") {
-      setPuntoA(punto);
-      setPuntoSeleccionando(null);
-      completarDireccion(punto, setPuntoA);
-    } else if (puntoSeleccionando === "B") {
-      setPuntoB(punto);
-      setPuntoSeleccionando(null);
-      completarDireccion(punto, setPuntoB);
+    if (selectingPoint === "A") {
+      setPointA(point);
+      setSelectingPoint(null);
+      completeAddress(point, setPointA);
+    } else if (selectingPoint === "B") {
+      setPointB(point);
+      setSelectingPoint(null);
+      completeAddress(point, setPointB);
     }
   };
 
-  const seleccionarDesdeUbicaciones = (ubicacion: any, punto: "A" | "B") => {
-    const puntoSeleccionado = {
-      latitude: ubicacion.latitude,
-      longitude: ubicacion.longitude,
-      nombre: ubicacion.nombre,
-      direccion: ubicacion.direccion,
+  const selectFromLocations = (location: any, point: "A" | "B") => {
+    const selectedPointItem = {
+      latitude: location.latitude,
+      longitude: location.longitude,
+      name: location.nombre,
+      address: location.direccion,
     };
 
-    if (punto === "A") {
-      setPuntoA(puntoSeleccionado);
+    if (point === "A") {
+      setPointA(selectedPointItem);
     } else {
-      setPuntoB(puntoSeleccionado);
+      setPointB(selectedPointItem);
     }
-    setModalUbicacionesVisible(false);
+    setLocationsModalVisible(false);
   };
 
-  const iniciarSeleccionPunto = (punto: "A" | "B") => {
-    setPuntoSeleccionando(punto);
-    if (metodoSeleccion === "ubicaciones") {
-      setModalUbicacionesVisible(true);
+  const startPointSelection = (point: "A" | "B") => {
+    setSelectingPoint(point);
+    if (methodSelection === "ubicaciones") {
+      setLocationsModalVisible(true);
     }
   };
 
-  const [guardando, setGuardando] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const guardarRecorrido = async () => {
-    if (!puntoA || !puntoB) {
+  const saveRoute = async () => {
+    if (!pointA || !pointB) {
       alert("Por favor selecciona ambos puntos del recorrido");
       return;
     }
-    if (guardando) return;
+    if (saving) return;
 
     // Calcular distancia entre punto A y B usando fórmula Haversine
-    const calcularDistancia = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const computeDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
       const R = 6371; // Radio de la Tierra en km
       const dLat = (lat2 - lat1) * Math.PI / 180;
       const dLon = (lon2 - lon1) * Math.PI / 180;
@@ -154,43 +154,43 @@ export default function GuardarRecorrido() {
       return R * c; // Distancia en km
     };
 
-    const distanciaKm = calcularDistancia(puntoA.latitude, puntoA.longitude, puntoB.latitude, puntoB.longitude);
+    const distanceKm = computeDistance(pointA.latitude, pointA.longitude, pointB.latitude, pointB.longitude);
     // Tiempo estimado caminando a 5 km/h (igual que en la web)
-    const minutosEstimados = Math.round((distanciaKm / 5) * 60);
+    const estimatedMinutes = Math.round((distanceKm / 5) * 60);
 
-    const inicio = etiquetaPunto(nombrePuntoA, puntoA, "Punto A");
-    const fin = etiquetaPunto(nombrePuntoB, puntoB, "Punto B");
-    const nombreCorto = (nombre: string, punto: PuntoSeleccionado, porDefecto: string) =>
-      nombre.trim() || punto.nombre || punto.direccion?.split(" · ")[0] || porDefecto;
+    const startTime = pointLabel(pointAName, pointA, "Punto A");
+    const end = pointLabel(pointBName, pointB, "Punto B");
+    const shortName = (name: string, point: SelectedPoint, byDefault: string) =>
+      name.trim() || point.name || point.address?.split(" · ")[0] || byDefault;
 
-    setGuardando(true);
-    const resultado = await agregarRecorridoManual({
-      nombre:
-        nombreRecorrido.trim() ||
-        `Ruta ${nombreCorto(nombrePuntoA, puntoA, "A")} → ${nombreCorto(nombrePuntoB, puntoB, "B")}`,
-      inicio,
-      fin,
-      puntos: [
-        { latitude: puntoA.latitude, longitude: puntoA.longitude, timestamp: "" },
-        { latitude: puntoB.latitude, longitude: puntoB.longitude, timestamp: "" },
+    setSaving(true);
+    const result = await addManualRoute({
+      name:
+        routeName.trim() ||
+        `Ruta ${shortName(pointAName, pointA, "A")} → ${shortName(pointBName, pointB, "B")}`,
+      startTime,
+      end,
+      points: [
+        { latitude: pointA.latitude, longitude: pointA.longitude, timestamp: "" },
+        { latitude: pointB.latitude, longitude: pointB.longitude, timestamp: "" },
       ],
-      distanciaKm,
-      minutosEstimados,
+      distanceKm,
+      estimatedMinutes,
     });
-    setGuardando(false);
+    setSaving(false);
 
-    if (!resultado.ok) {
-      alert(resultado.motivo ?? "No se pudo guardar el recorrido");
+    if (!result.ok) {
+      alert(result.reason ?? "No se pudo guardar el recorrido");
       return;
     }
     alert("Recorrido guardado exitosamente");
     navigation.goBack();
   };
 
-  const limpiarSeleccion = () => {
-    setPuntoA(null);
-    setPuntoB(null);
-    setPuntoSeleccionando(null);
+  const clearSelection = () => {
+    setPointA(null);
+    setPointB(null);
+    setSelectingPoint(null);
   };
 
   return (
@@ -226,14 +226,14 @@ export default function GuardarRecorrido() {
           <Text style={[styles.sectionTitle, { color: theme.text }]}>
             Nombre del recorrido
           </Text>
-          <View style={[styles.nombreInputContainer, { backgroundColor: theme.background }]}>
+          <View style={[styles.nameInputContainer, { backgroundColor: theme.background }]}>
             <MaterialIcons name="route" size={18} color={theme.contactSubtext} style={{ marginRight: 8 }} />
             <TextInput
-              style={[styles.nombreInput, { color: theme.text }]}
+              style={[styles.nameInput, { color: theme.text }]}
               placeholder="Ej: Camino seguro Sanjuan - Plaza, Recorrido de la tarde..."
               placeholderTextColor={theme.contactSubtext}
-              value={nombreRecorrido}
-              onChangeText={setNombreRecorrido}
+              value={routeName}
+              onChangeText={setRouteName}
             />
           </View>
           <Text style={[styles.helperText, { color: theme.contactSubtext }]}>
@@ -247,23 +247,23 @@ export default function GuardarRecorrido() {
             Método de selección
           </Text>
           
-          <View style={styles.metodoContainer}>
+          <View style={styles.methodContainer}>
             <TouchableOpacity
               style={[
-                styles.metodoButton,
-                metodoSeleccion === "mapa" && styles.metodoButtonActive,
-                { borderColor: metodoSeleccion === "mapa" ? theme.tabActiveColor : theme.contactSubtext }
+                styles.methodButton,
+                methodSelection === "mapa" && styles.methodButtonActive,
+                { borderColor: methodSelection === "mapa" ? theme.tabActiveColor : theme.contactSubtext }
               ]}
-              onPress={() => setMetodoSeleccion("mapa")}
+              onPress={() => setMethodSelection("mapa")}
             >
               <MaterialIcons 
                 name="map" 
                 size={20} 
-                color={metodoSeleccion === "mapa" ? "#7B1DB2" : theme.contactSubtext} 
+                color={methodSelection === "mapa" ? "#7B1DB2" : theme.contactSubtext} 
               />
               <Text style={[
-                styles.metodoButtonText,
-                { color: metodoSeleccion === "mapa" ? "#7B1DB2" : theme.text }
+                styles.methodButtonText,
+                { color: methodSelection === "mapa" ? "#7B1DB2" : theme.text }
               ]}>
                 Mapa
               </Text>
@@ -271,20 +271,20 @@ export default function GuardarRecorrido() {
 
             <TouchableOpacity
               style={[
-                styles.metodoButton,
-                metodoSeleccion === "ubicaciones" && styles.metodoButtonActive,
-                { borderColor: metodoSeleccion === "ubicaciones" ? theme.tabActiveColor : theme.contactSubtext }
+                styles.methodButton,
+                methodSelection === "ubicaciones" && styles.methodButtonActive,
+                { borderColor: methodSelection === "ubicaciones" ? theme.tabActiveColor : theme.contactSubtext }
               ]}
-              onPress={() => setMetodoSeleccion("ubicaciones")}
+              onPress={() => setMethodSelection("ubicaciones")}
             >
               <MaterialIcons 
                 name="bookmark" 
                 size={20} 
-                color={metodoSeleccion === "ubicaciones" ? "#7B1DB2" : theme.contactSubtext} 
+                color={methodSelection === "ubicaciones" ? "#7B1DB2" : theme.contactSubtext} 
               />
               <Text style={[
-                styles.metodoButtonText,
-                { color: metodoSeleccion === "ubicaciones" ? "#7B1DB2" : theme.text }
+                styles.methodButtonText,
+                { color: methodSelection === "ubicaciones" ? "#7B1DB2" : theme.text }
               ]}>
                 Ubicaciones
               </Text>
@@ -308,29 +308,29 @@ export default function GuardarRecorrido() {
             pitchEnabled={false}
             onPress={handleMapPress}
           >
-            {puntoA && (
+            {pointA && (
               <Marker
-                coordinate={puntoA}
+                coordinate={pointA}
                 title="Punto A - Inicio"
-                description={puntoA.nombre || puntoA.direccion}
-                pinColor={COLOR_PUNTO_A}
+                description={pointA.name || pointA.address}
+                pinColor={POINT_A_COLOR}
               />
             )}
             
-            {puntoB && (
+            {pointB && (
               <Marker
-                coordinate={puntoB}
+                coordinate={pointB}
                 title="Punto B - Fin"
-                description={puntoB.nombre || puntoB.direccion}
-                pinColor={COLOR_PUNTO_B}
+                description={pointB.name || pointB.address}
+                pinColor={POINT_B_COLOR}
               />
             )}
           </MapView>
 
-          {puntoSeleccionando && (
+          {selectingPoint && (
             <View style={styles.instructionOverlay}>
               <Text style={styles.instructionText}>
-                Toca en el mapa para seleccionar {puntoSeleccionando === "A" ? "Punto A" : "Punto B"}
+                Toca en el mapa para seleccionar {selectingPoint === "A" ? "Punto A" : "Punto B"}
               </Text>
             </View>
           )}
@@ -353,26 +353,26 @@ export default function GuardarRecorrido() {
           {/* PUNTO A */}
           <TouchableOpacity
             style={[
-              styles.puntoButton,
-              puntoA && styles.puntoButtonSelected,
-              { borderColor: puntoA ? COLOR_PUNTO_A : theme.contactSubtext }
+              styles.pointButton,
+              pointA && styles.pointButtonSelected,
+              { borderColor: pointA ? POINT_A_COLOR : theme.contactSubtext }
             ]}
-            onPress={() => iniciarSeleccionPunto("A")}
+            onPress={() => startPointSelection("A")}
           >
-            <View style={[styles.puntoIcon, { backgroundColor: puntoA ? COLOR_PUNTO_A : "#E0E0E0" }]}>
+            <View style={[styles.pointIcon, { backgroundColor: pointA ? POINT_A_COLOR : "#E0E0E0" }]}>
               <MaterialIcons name="radio-button-checked" size={24} color="#fff" />
             </View>
-            <View style={styles.puntoInfo}>
-              <Text style={[styles.puntoLabel, { color: theme.text }]}>
+            <View style={styles.pointInfo}>
+              <Text style={[styles.pointLabel, { color: theme.text }]}>
                 Punto A - Inicio
               </Text>
-              {puntoA ? (
-                <Text style={[styles.puntoCoordenadas, { color: theme.contactSubtext }]}>
-                  {puntoA.nombre || puntoA.direccion || `${puntoA.latitude.toFixed(4)}, ${puntoA.longitude.toFixed(4)}`}
+              {pointA ? (
+                <Text style={[styles.pointCoordinates, { color: theme.contactSubtext }]}>
+                  {pointA.name || pointA.address || `${pointA.latitude.toFixed(4)}, ${pointA.longitude.toFixed(4)}`}
                 </Text>
               ) : (
-                <Text style={[styles.puntoPlaceholder, { color: theme.contactSubtext }]}>
-                  {metodoSeleccion === "mapa" ? "Toca el mapa para seleccionar" : "Selecciona de ubicaciones guardadas"}
+                <Text style={[styles.pointPlaceholder, { color: theme.contactSubtext }]}>
+                  {methodSelection === "mapa" ? "Toca el mapa para seleccionar" : "Selecciona de ubicaciones guardadas"}
                 </Text>
               )}
             </View>
@@ -380,15 +380,15 @@ export default function GuardarRecorrido() {
           </TouchableOpacity>
 
           {/* Campo de nombre para Punto A */}
-          {puntoA && (
-            <View style={[styles.nombreInputContainer, { backgroundColor: theme.background }]}>
+          {pointA && (
+            <View style={[styles.nameInputContainer, { backgroundColor: theme.background }]}>
               <MaterialIcons name="edit" size={18} color={theme.contactSubtext} style={{ marginRight: 8 }} />
               <TextInput
-                style={[styles.nombreInput, { color: theme.text }]}
+                style={[styles.nameInput, { color: theme.text }]}
                 placeholder="Nombre del punto A (ej: Casa, Trabajo)"
                 placeholderTextColor={theme.contactSubtext}
-                value={nombrePuntoA}
-                onChangeText={setNombrePuntoA}
+                value={pointAName}
+                onChangeText={setPointAName}
               />
             </View>
           )}
@@ -396,26 +396,26 @@ export default function GuardarRecorrido() {
           {/* PUNTO B */}
           <TouchableOpacity
             style={[
-              styles.puntoButton,
-              puntoB && styles.puntoButtonSelected,
-              { borderColor: puntoB ? COLOR_PUNTO_B : theme.contactSubtext }
+              styles.pointButton,
+              pointB && styles.pointButtonSelected,
+              { borderColor: pointB ? POINT_B_COLOR : theme.contactSubtext }
             ]}
-            onPress={() => iniciarSeleccionPunto("B")}
+            onPress={() => startPointSelection("B")}
           >
-            <View style={[styles.puntoIcon, { backgroundColor: puntoB ? COLOR_PUNTO_B : "#E0E0E0" }]}>
+            <View style={[styles.pointIcon, { backgroundColor: pointB ? POINT_B_COLOR : "#E0E0E0" }]}>
               <MaterialIcons name="radio-button-checked" size={24} color="#fff" />
             </View>
-            <View style={styles.puntoInfo}>
-              <Text style={[styles.puntoLabel, { color: theme.text }]}>
+            <View style={styles.pointInfo}>
+              <Text style={[styles.pointLabel, { color: theme.text }]}>
                 Punto B - Fin
               </Text>
-              {puntoB ? (
-                <Text style={[styles.puntoCoordenadas, { color: theme.contactSubtext }]}>
-                  {puntoB.nombre || puntoB.direccion || `${puntoB.latitude.toFixed(4)}, ${puntoB.longitude.toFixed(4)}`}
+              {pointB ? (
+                <Text style={[styles.pointCoordinates, { color: theme.contactSubtext }]}>
+                  {pointB.name || pointB.address || `${pointB.latitude.toFixed(4)}, ${pointB.longitude.toFixed(4)}`}
                 </Text>
               ) : (
-                <Text style={[styles.puntoPlaceholder, { color: theme.contactSubtext }]}>
-                  {metodoSeleccion === "mapa" ? "Toca el mapa para seleccionar" : "Selecciona de ubicaciones guardadas"}
+                <Text style={[styles.pointPlaceholder, { color: theme.contactSubtext }]}>
+                  {methodSelection === "mapa" ? "Toca el mapa para seleccionar" : "Selecciona de ubicaciones guardadas"}
                 </Text>
               )}
             </View>
@@ -423,15 +423,15 @@ export default function GuardarRecorrido() {
           </TouchableOpacity>
 
           {/* Campo de nombre para Punto B */}
-          {puntoB && (
-            <View style={[styles.nombreInputContainer, { backgroundColor: theme.background }]}>
+          {pointB && (
+            <View style={[styles.nameInputContainer, { backgroundColor: theme.background }]}>
               <MaterialIcons name="edit" size={18} color={theme.contactSubtext} style={{ marginRight: 8 }} />
               <TextInput
-                style={[styles.nombreInput, { color: theme.text }]}
+                style={[styles.nameInput, { color: theme.text }]}
                 placeholder="Nombre del punto B (ej: Gimnasio, Supermercado)"
                 placeholderTextColor={theme.contactSubtext}
-                value={nombrePuntoB}
-                onChangeText={setNombrePuntoB}
+                value={pointBName}
+                onChangeText={setPointBName}
               />
             </View>
           )}
@@ -442,7 +442,7 @@ export default function GuardarRecorrido() {
         <View style={styles.actionsContainer}>
           <TouchableOpacity
             style={[styles.actionButton, styles.secondaryButton]}
-            onPress={limpiarSeleccion}
+            onPress={clearSelection}
           >
             <Text style={styles.secondaryButtonText}>Limpiar</Text>
           </TouchableOpacity>
@@ -451,10 +451,10 @@ export default function GuardarRecorrido() {
             style={[
               styles.actionButton,
               styles.primaryButton,
-              (!puntoA || !puntoB) && styles.primaryButtonDisabled
+              (!pointA || !pointB) && styles.primaryButtonDisabled
             ]}
-            onPress={guardarRecorrido}
-            disabled={!puntoA || !puntoB}
+            onPress={saveRoute}
+            disabled={!pointA || !pointB}
           >
             <Text style={styles.primaryButtonText}>Guardar Recorrido</Text>
           </TouchableOpacity>
@@ -462,36 +462,36 @@ export default function GuardarRecorrido() {
       </ScrollView>
 
       {/* MODAL DE UBICACIONES GUARDADAS */}
-      <Modal visible={modalUbicacionesVisible} animationType="slide" transparent>
-        <TouchableWithoutFeedback onPress={() => setModalUbicacionesVisible(false)}>
+      <Modal visible={locationsModalVisible} animationType="slide" transparent>
+        <TouchableWithoutFeedback onPress={() => setLocationsModalVisible(false)}>
           <View style={styles.modalOverlay}>
             <TouchableWithoutFeedback>
               <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
                 <View style={styles.modalHeader}>
                   <Text style={[styles.modalTitle, { color: theme.text }]}>
-                    Seleccionar {puntoSeleccionando === "A" ? "Punto A" : "Punto B"}
+                    Seleccionar {selectingPoint === "A" ? "Punto A" : "Punto B"}
                   </Text>
-                  <TouchableOpacity onPress={() => setModalUbicacionesVisible(false)}>
+                  <TouchableOpacity onPress={() => setLocationsModalVisible(false)}>
                     <MaterialIcons name="close" size={24} color={theme.text} />
                   </TouchableOpacity>
                 </View>
 
                 <ScrollView style={styles.modalList}>
-                  {ubicacionesGuardadas.map((ubicacion) => (
+                  {savedLocations.map((location) => (
                     <TouchableOpacity
-                      key={ubicacion.id}
-                      style={[styles.ubicacionItem, { backgroundColor: theme.background }]}
-                      onPress={() => seleccionarDesdeUbicaciones(ubicacion, puntoSeleccionando!)}
+                      key={location.id}
+                      style={[styles.locationItem, { backgroundColor: theme.background }]}
+                      onPress={() => selectFromLocations(location, selectingPoint!)}
                     >
-                      <View style={styles.ubicacionIcon}>
+                      <View style={styles.locationIcon}>
                         <MaterialIcons name="place" size={20} color="#7B1DB2" />
                       </View>
-                      <View style={styles.ubicacionInfo}>
-                        <Text style={[styles.ubicacionNombre, { color: theme.text }]}>
-                          {ubicacion.nombre}
+                      <View style={styles.locationInfo}>
+                        <Text style={[styles.locationName, { color: theme.text }]}>
+                          {location.name}
                         </Text>
-                        <Text style={[styles.ubicacionDireccion, { color: theme.contactSubtext }]}>
-                          {ubicacion.direccion}
+                        <Text style={[styles.locationAddress, { color: theme.contactSubtext }]}>
+                          {location.address}
                         </Text>
                       </View>
                       <MaterialIcons name="chevron-right" size={20} color={theme.contactSubtext} />
@@ -517,21 +517,21 @@ export default function GuardarRecorrido() {
             }}
             onPress={handleMapPress}
           >
-            {puntoA && (
+            {pointA && (
               <Marker
-                coordinate={puntoA}
+                coordinate={pointA}
                 title="Punto A - Inicio"
-                description={puntoA.nombre || puntoA.direccion}
-                pinColor={COLOR_PUNTO_A}
+                description={pointA.name || pointA.address}
+                pinColor={POINT_A_COLOR}
               />
             )}
             
-            {puntoB && (
+            {pointB && (
               <Marker
-                coordinate={puntoB}
+                coordinate={pointB}
                 title="Punto B - Fin"
-                description={puntoB.nombre || puntoB.direccion}
-                pinColor={COLOR_PUNTO_B}
+                description={pointB.name || pointB.address}
+                pinColor={POINT_B_COLOR}
               />
             )}
           </MapView>

@@ -20,7 +20,7 @@ describe("saved-routes.service", () => {
 
   it("create envía el recorrido sin decidir la estrella (la decide el backend)", async () => {
     mockApi.post.mockResolvedValue({ data: { id: 5, isStarred: true } });
-    const nuevo = {
+    const newItem = {
       name: "Casa → U",
       points: [
         { latitude: 1, longitude: 1, timestamp: "" },
@@ -28,9 +28,9 @@ describe("saved-routes.service", () => {
       ],
     };
 
-    await savedRoutesService.create(nuevo);
+    await savedRoutesService.create(newItem);
 
-    expect(mockApi.post).toHaveBeenCalledWith("/api/saved-routes", nuevo);
+    expect(mockApi.post).toHaveBeenCalledWith("/api/saved-routes", newItem);
     expect(mockApi.post.mock.calls[0][1]).not.toHaveProperty("isStarred");
   });
 

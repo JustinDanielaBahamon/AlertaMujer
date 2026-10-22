@@ -5,42 +5,42 @@ import { ActivityIndicator, ScrollView, Switch, Text, TouchableOpacity, View } f
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { useTheme } from "../../../contexts/ThemeContext";
-import { createMetodosActivacionStyles, obtenerColoresHeader } from "../../settings/styles/metodosActivacion.styles";
-import { usePermisosViewModel } from "../usePermisosViewModel";
+import { createActivationMethodsStyles, getHeaderColors } from "../../settings/styles/metodosActivacion.styles";
+import { usePermissionsViewModel } from "../usePermisosViewModel";
 
 /** "Permisos y protección": qué falta para que una alerta funcione y un botón para activarlo. */
-export default function PermisosScreen() {
+export default function PermissionsScreen() {
   const { theme } = useTheme();
-  const styles = useMemo(() => createMetodosActivacionStyles(theme), [theme]);
-  const { texto } = obtenerColoresHeader(theme);
+  const styles = useMemo(() => createActivationMethodsStyles(theme), [theme]);
+  const { text } = getHeaderColors(theme);
   const insets = useSafeAreaInsets();
   const { t } = useLocale();
-  const { items, listos, total, cargando, activar, salud, evidencias, volver } = usePermisosViewModel();
-  const porcentaje = total > 0 ? Math.round((listos / total) * 100) : 0;
+  const { items, readyItems: readyItems, total, loading, activate: activate, health: health, evidence: evidence, goBack } = usePermissionsViewModel();
+  const percentage = total > 0 ? Math.round((readyItems / total) * 100) : 0;
 
   return (
-    <View style={styles.contenedor}>
-      <StatusBar style={texto === "#1a1a1a" ? "dark" : "light"} />
+    <View style={styles.container}>
+      <StatusBar style={text === "#1a1a1a" ? "dark" : "light"} />
 
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <View style={styles.headerFila}>
-          <TouchableOpacity onPress={volver} style={styles.btnVolver} accessibilityRole="button">
-            <Ionicons name="arrow-back" size={22} color={texto} />
+        <View style={styles.headerRow}>
+          <TouchableOpacity onPress={goBack} style={styles.returnBtn} accessibilityRole="button">
+            <Ionicons name="arrow-back" size={22} color={text} />
           </TouchableOpacity>
-          <View style={styles.headerTextos}>
-            <Text style={styles.tituloHeader}>Permisos y protección</Text>
-            <Text style={styles.subtituloHeader}>Lo que necesita la app para protegerte</Text>
+          <View style={styles.headerTexts}>
+            <Text style={styles.headerTitleText}>Permisos y protección</Text>
+            <Text style={styles.headerSubtitleText}>Lo que necesita la app para protegerte</Text>
           </View>
-          <View style={styles.headerIcono}>
-            <Ionicons name="shield-checkmark" size={22} color={texto} />
+          <View style={styles.headerIcon}>
+            <Ionicons name="shield-checkmark" size={22} color={text} />
           </View>
         </View>
-        <View style={styles.resumenFila}>
-          <Text style={styles.resumenTexto}>
-            {listos}/{total} listos
+        <View style={styles.summaryRow}>
+          <Text style={styles.summaryText}>
+            {readyItems}/{total} listos
           </Text>
-          <View style={styles.barraFondo}>
-            <View style={[styles.barraRelleno, { width: `${porcentaje}%` as `${number}%` }]} />
+          <View style={styles.barBackground}>
+            <View style={[styles.barFill, { width: `${percentage}%` as `${number}%` }]} />
           </View>
         </View>
       </View>
@@ -51,41 +51,41 @@ export default function PermisosScreen() {
           deja preguntar, el botón abre los ajustes de AlertaMujer.
         </Text>
 
-        {cargando && <ActivityIndicator color={theme.contactAccent} style={{ marginTop: 24 }} />}
+        {loading && <ActivityIndicator color={theme.contactAccent} style={{ marginTop: 24 }} />}
 
         {/* Protección sin interrupciones: comprobado con los cierres que registra Android */}
-        {!cargando && salud && (
-          <View style={styles.tarjeta}>
-            <View style={styles.filaTitulo}>
-              <View style={styles.iconoWrap}>
+        {!loading && health && (
+          <View style={styles.card}>
+            <View style={styles.titleRow}>
+              <View style={styles.iconWrap}>
                 <MaterialIcons
-                  name={salud.veces === 0 ? "verified-user" : "report"}
+                  name={health.times === 0 ? "verified-user" : "report"}
                   size={22}
-                  color={salud.veces === 0 ? theme.contactAccent : "#C026D3"}
+                  color={health.times === 0 ? theme.contactAccent : "#C026D3"}
                 />
               </View>
-              <View style={styles.tituloWrap}>
-                <Text style={styles.tituloMetodo}>
-                  {salud.veces === 0
+              <View style={styles.titleWrap}>
+                <Text style={styles.methodTitle}>
+                  {health.times === 0
                     ? "Protección sin interrupciones"
-                    : `La protección se detuvo ${salud.veces} ${salud.veces === 1 ? "vez" : "veces"}`}
+                    : `La protección se detuvo ${health.times} ${health.times === 1 ? "vez" : "veces"}`}
                 </Text>
                 <Text style={{ fontSize: 12, color: theme.contactSubtext }}>Últimos 7 días</Text>
               </View>
             </View>
-            {salud.explicacion ? (
+            {health.explanation ? (
               <>
-                <Text style={[styles.descripcionMetodo, { fontWeight: "700" }]}>{salud.explicacion.titulo}</Text>
-                <Text style={styles.descripcionMetodo}>{salud.explicacion.arreglo}</Text>
+                <Text style={[styles.methodDescription, { fontWeight: "700" }]}>{health.explanation.title}</Text>
+                <Text style={styles.methodDescription}>{health.explanation.fixItem}</Text>
               </>
             ) : (
-              <Text style={styles.descripcionMetodo}>
+              <Text style={styles.methodDescription}>
                 Tu teléfono no ha cerrado la protección. Lo revisamos cada vez que abres esta pantalla.
               </Text>
             )}
-            {salud.puedeArreglar && (
+            {health.canFix && (
               <TouchableOpacity
-                onPress={salud.arreglar}
+                onPress={health.fix}
                 accessibilityRole="button"
                 style={{
                   marginTop: 12,
@@ -106,32 +106,32 @@ export default function PermisosScreen() {
           </View>
         )}
 
-        {!cargando &&
+        {!loading &&
           items.map((item) => {
-            const listo = item.estado?.concedido === true;
-            const sinVerificar = item.estado?.concedido === null;
+            const ready = item.status?.granted === true;
+            const unverified = item.status?.granted === null;
             return (
-              <View key={item.id} style={[styles.tarjeta, !listo && styles.tarjetaInactiva]}>
-                <View style={styles.filaTitulo}>
-                  <View style={styles.iconoWrap}>
-                    <MaterialIcons name={item.icono as never} size={22} color={theme.contactAccent} />
+              <View key={item.id} style={[styles.card, !ready && styles.inactiveCard]}>
+                <View style={styles.titleRow}>
+                  <View style={styles.iconWrap}>
+                    <MaterialIcons name={item.icon as never} size={22} color={theme.contactAccent} />
                   </View>
-                  <View style={styles.tituloWrap}>
-                    <Text style={styles.tituloMetodo}>{item.titulo}</Text>
-                    {item.critico && !listo && (
+                  <View style={styles.titleWrap}>
+                    <Text style={styles.methodTitle}>{item.title}</Text>
+                    {item.critical && !ready && (
                       <Text style={{ fontSize: 12, fontWeight: "700", color: "#C026D3" }}>Importante</Text>
                     )}
                   </View>
-                  <View style={[styles.chipEstado, listo && styles.chipEstadoActivo]}>
-                    <Text style={[styles.chipTexto, listo && styles.chipTextoActivo]}>
-                      {listo ? "Activo" : sinVerificar ? "Revisar" : "Falta"}
+                  <View style={[styles.statusChip, ready && styles.activeStatusChip]}>
+                    <Text style={[styles.chipText, ready && styles.activeChipText]}>
+                      {ready ? "Activo" : unverified ? "Revisar" : "Falta"}
                     </Text>
                   </View>
                 </View>
-                <Text style={styles.descripcionMetodo}>{item.descripcion}</Text>
-                {!listo && (
+                <Text style={styles.methodDescription}>{item.description}</Text>
+                {!ready && (
                   <TouchableOpacity
-                    onPress={() => activar(item.id)}
+                    onPress={() => activate(item.id)}
                     accessibilityRole="button"
                     style={{
                       marginTop: 12,
@@ -146,12 +146,12 @@ export default function PermisosScreen() {
                     }}
                   >
                     <MaterialIcons
-                      name={item.estado?.puedePreguntar === false || sinVerificar ? "settings" : "check-circle"}
+                      name={item.status?.canAsk === false || unverified ? "settings" : "check-circle"}
                       size={16}
                       color="#FFFFFF"
                     />
                     <Text style={{ color: "#FFFFFF", fontWeight: "700", fontSize: 13 }}>
-                      {item.estado?.puedePreguntar === false || sinVerificar ? "Abrir ajuste" : "Activar"}
+                      {item.status?.canAsk === false || unverified ? "Abrir ajuste" : "Activar"}
                     </Text>
                   </TouchableOpacity>
                 )}
@@ -160,38 +160,38 @@ export default function PermisosScreen() {
           })}
 
         {/* Evidencias automáticas: qué se graba al activar una alerta */}
-        {!cargando && (
+        {!loading && (
           <>
             <Text style={[styles.intro, { fontWeight: "800", letterSpacing: 1.2, fontSize: 12, marginTop: 8 }]}>
               {t.permisos.seccion_evidencias}
             </Text>
             <Text style={styles.intro}>{t.permisos.seccion_evidencias_desc}</Text>
             {[
-              { id: "video", icono: "videocam", titulo: t.ajustes.grabar_video, desc: t.ajustes.grabar_video_desc, estado: evidencias.video, cambiar: evidencias.cambiarVideo },
-              { id: "audio", icono: "mic", titulo: t.ajustes.grabar_audio, desc: t.ajustes.grabar_audio_desc, estado: evidencias.audio, cambiar: evidencias.cambiarAudio },
+              { id: "video", icon: "videocam", title: t.ajustes.grabar_video, desc: t.ajustes.grabar_video_desc, status: evidence.video, change: evidence.changeVideo },
+              { id: "audio", icon: "mic", title: t.ajustes.grabar_audio, desc: t.ajustes.grabar_audio_desc, status: evidence.audio, change: evidence.changeAudio },
             ].map((g) => (
-              <View key={g.id} style={[styles.tarjeta, !g.estado.activo && styles.tarjetaInactiva]}>
-                <View style={styles.filaTitulo}>
-                  <View style={styles.iconoWrap}>
-                    <MaterialIcons name={g.icono as never} size={22} color={theme.contactAccent} />
+              <View key={g.id} style={[styles.card, !g.status.enabled && styles.inactiveCard]}>
+                <View style={styles.titleRow}>
+                  <View style={styles.iconWrap}>
+                    <MaterialIcons name={g.icon as never} size={22} color={theme.contactAccent} />
                   </View>
-                  <View style={styles.tituloWrap}>
-                    <Text style={styles.tituloMetodo}>{g.titulo}</Text>
-                    {g.estado.sinPermiso && (
+                  <View style={styles.titleWrap}>
+                    <Text style={styles.methodTitle}>{g.title}</Text>
+                    {g.status.noPermission && (
                       <Text style={{ fontSize: 12, fontWeight: "700", color: "#C026D3" }}>{t.permisos.sin_permiso_grabacion}</Text>
                     )}
                   </View>
                   <Switch
-                    value={g.estado.activo}
-                    onValueChange={g.cambiar}
+                    value={g.status.enabled}
+                    onValueChange={g.change}
                     trackColor={{ false: "#ccc", true: theme.contactAccent }}
                     thumbColor="#fff"
                   />
                 </View>
-                <Text style={styles.descripcionMetodo}>{g.desc}</Text>
-                {g.estado.sinPermiso && (
+                <Text style={styles.methodDescription}>{g.desc}</Text>
+                {g.status.noPermission && (
                   <TouchableOpacity
-                    onPress={() => g.cambiar(true)}
+                    onPress={() => g.change(true)}
                     accessibilityRole="button"
                     style={{
                       marginTop: 12,

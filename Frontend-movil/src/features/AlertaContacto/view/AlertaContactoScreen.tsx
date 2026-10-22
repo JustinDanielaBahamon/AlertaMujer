@@ -14,20 +14,20 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import MapView, { Marker, Polyline } from "../../../components/mapa/MapaLibre";
-import ChatAlerta, { RAPIDOS_DEL_CONTACTO } from "../../chatAlerta/ChatAlerta";
-import { useChatSobreTeclado } from "../../../hooks/useChatSobreTeclado";
-import ReproductorPartes from "../../../components/ui/reproductorPartes/ReproductorPartes";
+import AlertChat, { CONTACT_QUICK_REPLIES } from "../../chatAlerta/ChatAlerta";
+import { useChatAboveKeyboard } from "../../../hooks/useChatSobreTeclado";
+import PartsPlayer from "../../../components/ui/reproductorPartes/ReproductorPartes";
 import { useAuth } from "../../../contexts/AuthContext";
-import { useAlertaContactoViewModel } from "../viewModel/useAlertaContactoViewModel";
-import type { PuntoUbicacion } from "../../../services/alert-tracking.service";
+import { useContactAlertViewModel } from "../viewModel/useAlertaContactoViewModel";
+import type { LocationPoint } from "../../../services/alert-tracking.service";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { createStyles } from "../style/alertaContactoStyle";
 
-type Estilos = ReturnType<typeof createStyles>;
+type Styles = ReturnType<typeof createStyles>;
 
 // Punto con anillo que se expande (indicador "en vivo").
-function PuntoPulso({ color, size = 10 }: { color: string; size?: number }) {
+function PulseDot({ color, size = 10 }: { color: string; size?: number }) {
   const anim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -79,28 +79,28 @@ function PuntoPulso({ color, size = 10 }: { color: string; size?: number }) {
 }
 
 // Línea de recorrido + pines numerados. Se usa en el mapa pequeño y en la ventana emergente.
-function PinesMapa({
-  puntos,
-  colorLinea,
+function MapPins({
+  points,
+  lineColor,
   styles,
-  trackear,
-  etiqueta,
+  trackChanges,
+  label,
 }: {
-  puntos: PuntoUbicacion[];
-  colorLinea: string;
-  styles: Estilos;
-  trackear: boolean;
-  etiqueta: string;
+  points: LocationPoint[];
+  lineColor: string;
+  styles: Styles;
+  trackChanges: boolean;
+  label: string;
 }) {
   return (
     <>
-      {puntos.length > 1 && (
+      {points.length > 1 && (
         <Polyline
-          coordinates={puntos.map((p) => ({
+          coordinates={points.map((p) => ({
             latitude: p.latitude,
             longitude: p.longitude,
           }))}
-          strokeColor={colorLinea}
+          strokeColor={lineColor}
           strokeWidth={3}
           lineDashPattern={[6, 4]}
           lineCap="round"
@@ -108,20 +108,20 @@ function PinesMapa({
         />
       )}
 
-      {puntos.map((p, i) => {
-        const esUltimo = i === puntos.length - 1;
+      {points.map((p, i) => {
+        const isLast = i === points.length - 1;
         return (
           <Marker
             // La key cambia cuando un pin deja de ser el último, para que se redibuje.
-            key={`${p.id}-${esUltimo ? "a" : "p"}`}
+            key={`${p.id}-${isLast ? "a" : "p"}`}
             coordinate={{ latitude: p.latitude, longitude: p.longitude }}
             anchor={{ x: 0.5, y: 0.5 }}
-            tracksViewChanges={trackear}
-            zIndex={esUltimo ? 999 : i}
-            title={`${etiqueta} ${i + 1}`}
+            tracksViewChanges={trackChanges}
+            zIndex={isLast ? 999 : i}
+            title={`${label} ${i + 1}`}
           >
-            <View style={esUltimo ? styles.pinActual : styles.pin}>
-              <Text style={esUltimo ? styles.pinActualText : styles.pinText}>
+            <View style={isLast ? styles.currentPin : styles.pin}>
+              <Text style={isLast ? styles.currentPinText : styles.pinText}>
                 {i + 1}
               </Text>
             </View>
@@ -132,11 +132,11 @@ function PinesMapa({
   );
 }
 
-export default function AlertaContactoScreen() {
-  const vm = useAlertaContactoViewModel();
-  const teclado = useChatSobreTeclado();
+export default function ContactAlertScreen() {
+  const vm = useContactAlertViewModel();
+  const keyboard = useChatAboveKeyboard();
   const { user } = useAuth();
-  const miNombre = (user?.nombre ?? "").trim().split(/\s+/)[0] || "Contacto";
+  const myName = (user?.nombre ?? "").trim().split(/\s+/)[0] || "Contacto";
   const { theme } = useTheme();
   const { t } = useLocale();
   const { width, height } = useWindowDimensions();
@@ -146,46 +146,46 @@ export default function AlertaContactoScreen() {
 
   // Los pines personalizados se redibujan unos instantes cuando llega un punto nuevo
   // o cuando se abre la ventana emergente.
-  const [trackear, setTrackear] = useState(true);
+  const [trackChanges, setTrackChanges] = useState(true);
   useEffect(() => {
-    setTrackear(true);
-    const id = setTimeout(() => setTrackear(false), 600);
+    setTrackChanges(true);
+    const id = setTimeout(() => setTrackChanges(false), 600);
     return () => clearTimeout(id);
-  }, [vm.puntos.length, vm.mapaVisible]);
+  }, [vm.points.length, vm.mapVisible]);
 
-  const colorFinalizada = "#27ae60";
+  const endedColor = "#27ae60";
   // "hace 5s" / "5s ago" / "há 5s" / "il y a 5s": el orden lo define el texto de cada idioma.
-  const hace = tx.hace.replace("{{tiempo}}", vm.tiempoDesdeUltimo);
+  const ago = tx.hace.replace("{{tiempo}}", vm.timeSinceLast);
 
   return (
     <View style={styles.container}>
       <ScrollView
-        ref={teclado.scrollRef}
-        contentContainerStyle={[styles.content, { paddingBottom: teclado.alturaTeclado }]}
+        ref={keyboard.scrollRef}
+        contentContainerStyle={[styles.content, { paddingBottom: keyboard.keyboardHeight }]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
-        onScroll={teclado.alDesplazar}
+        onScroll={keyboard.onScroll}
         scrollEventThrottle={32}
       >
         <View style={styles.wrap}>
           {/* Estado de la alerta */}
           <View style={styles.badge}>
-            {vm.activa ? (
-              <PuntoPulso color={theme.icono} size={10} />
+            {vm.active ? (
+              <PulseDot color={theme.icon} size={10} />
             ) : (
               <View
                 style={{
                   width: 10,
                   height: 10,
                   borderRadius: 5,
-                  backgroundColor: colorFinalizada,
+                  backgroundColor: endedColor,
                 }}
               />
             )}
             <Text
-              style={[styles.badgeText, !vm.activa && { color: colorFinalizada }]}
+              style={[styles.badgeText, !vm.active && { color: endedColor }]}
             >
-              {vm.activa ? tx.badgeActiva : tx.badgeFinalizada}
+              {vm.active ? tx.badgeActiva : tx.badgeFinalizada}
             </Text>
           </View>
 
@@ -193,13 +193,13 @@ export default function AlertaContactoScreen() {
           <Text style={styles.subtitle}>
             {tx.ubicacionDe}{" "}
             <Text style={styles.subtitleName}>
-              {vm.nombreUsuaria || tx.usuariaDefault}
+              {vm.userName || tx.usuariaDefault}
             </Text>
           </Text>
 
           {/* Mapa pequeño (vista previa): al tocarlo abre la ventana emergente */}
           <View style={styles.mapCard}>
-            {vm.ultimo ? (
+            {vm.lastItem ? (
               <>
                 <MapView
                   ref={vm.mapRef}
@@ -212,39 +212,39 @@ export default function AlertaContactoScreen() {
                   pitchEnabled={false}
                   toolbarEnabled={false}
                   initialRegion={{
-                    latitude: vm.ultimo.latitude,
-                    longitude: vm.ultimo.longitude,
+                    latitude: vm.lastItem.latitude,
+                    longitude: vm.lastItem.longitude,
                     latitudeDelta: 0.005,
                     longitudeDelta: 0.005,
                   }}
                 >
-                  <PinesMapa
-                    puntos={vm.puntos}
-                    colorLinea={theme.icono}
+                  <MapPins
+                    points={vm.points}
+                    lineColor={theme.icon}
                     styles={styles}
-                    trackear={trackear}
-                    etiqueta={tx.punto}
+                    trackChanges={trackChanges}
+                    label={tx.punto}
                   />
                 </MapView>
 
                 {/* Capa transparente: intercepta el toque para abrir nuestra ventana y no Google Maps */}
                 <TouchableOpacity
                   style={StyleSheet.absoluteFillObject}
-                  onPress={vm.abrirMapa}
+                  onPress={vm.openMap}
                   activeOpacity={0.9}
                 />
 
                 {/* Etiqueta superior izquierda */}
-                <View style={styles.pillUbicacion} pointerEvents="none">
-                  {vm.activa ? (
-                    <PuntoPulso color={theme.icono} size={9} />
+                <View style={styles.locationPill} pointerEvents="none">
+                  {vm.active ? (
+                    <PulseDot color={theme.icon} size={9} />
                   ) : (
                     <View
                       style={{
                         width: 9,
                         height: 9,
                         borderRadius: 5,
-                        backgroundColor: colorFinalizada,
+                        backgroundColor: endedColor,
                       }}
                     />
                   )}
@@ -253,13 +253,13 @@ export default function AlertaContactoScreen() {
                       {tx.ubicacionActual}
                     </Text>
                     <Text style={styles.pillSub} numberOfLines={1}>
-                      {tx.actualizada} {hace}
+                      {tx.actualizada} {ago}
                     </Text>
-                    {vm.barrioUltimo && (
-                      <View style={styles.pillBarrioRow}>
-                        <MaterialIcons name="place" size={11} color={theme.icono} />
-                        <Text style={styles.pillBarrio} numberOfLines={2}>
-                          {vm.barrioUltimo}
+                    {vm.lastNeighborhood && (
+                      <View style={styles.neighborhoodPillRow}>
+                        <MaterialIcons name="place" size={11} color={theme.icon} />
+                        <Text style={styles.neighborhoodPill} numberOfLines={2}>
+                          {vm.lastNeighborhood}
                         </Text>
                       </View>
                     )}
@@ -268,26 +268,26 @@ export default function AlertaContactoScreen() {
 
                 {/* Abrir mapa en ventana emergente */}
                 <TouchableOpacity
-                  style={styles.btnMaps}
-                  onPress={vm.abrirMapa}
+                  style={styles.mapsBtn}
+                  onPress={vm.openMap}
                   activeOpacity={0.8}
                   accessibilityRole="button"
                   accessibilityLabel={tx.abrirMapa}
                 >
-                  <MaterialIcons name="open-in-full" size={16} color={theme.icono} />
-                  <Text style={styles.btnMapsText}>{tx.abrirMapa}</Text>
+                  <MaterialIcons name="open-in-full" size={16} color={theme.icon} />
+                  <Text style={styles.mapsBtnText}>{tx.abrirMapa}</Text>
                 </TouchableOpacity>
               </>
             ) : (
               <View style={styles.mapPlaceholder}>
-                {vm.cargando ? (
+                {vm.loading ? (
                   <>
-                    <ActivityIndicator size="large" color={theme.icono} />
+                    <ActivityIndicator size="large" color={theme.icon} />
                     <Text style={styles.mapPlaceholderText}>{tx.cargando}</Text>
                   </>
                 ) : (
                   <>
-                    <MaterialIcons name="location-off" size={32} color={theme.icono} />
+                    <MaterialIcons name="location-off" size={32} color={theme.icon} />
                     <Text style={styles.mapPlaceholderText}>{tx.sinUbicaciones}</Text>
                   </>
                 )}
@@ -296,61 +296,61 @@ export default function AlertaContactoScreen() {
           </View>
 
           {/* Última ubicación */}
-          {vm.ultimo && (
+          {vm.lastItem && (
             <View style={styles.card}>
               <View style={styles.cardHeader}>
                 <View style={styles.cardHeaderLeft}>
                   <View style={styles.cardIconWrap}>
-                    <MaterialIcons name="location-on" size={18} color={theme.icono} />
+                    <MaterialIcons name="location-on" size={18} color={theme.icon} />
                   </View>
                   <Text style={styles.cardTitle}>{tx.ultimaUbicacion}</Text>
                 </View>
                 <View style={styles.liveBadge}>
                   <Text style={styles.liveBadgeText}>
-                    {vm.activa ? tx.enTiempoReal : tx.finalizada}
+                    {vm.active ? tx.enTiempoReal : tx.finalizada}
                   </Text>
                 </View>
               </View>
 
               <View style={styles.dataRow}>
                 <Text style={styles.dataLabel}>{tx.coordenadas}</Text>
-                <Text style={styles.dataValueMono}>{vm.coordsUltimo}</Text>
+                <Text style={styles.dataValueMono}>{vm.lastCoords}</Text>
               </View>
               <View style={styles.dataRow}>
                 <Text style={styles.dataLabel}>{tx.fechaHora}</Text>
                 <Text style={styles.dataValue}>
-                  {vm.fechaUltimo} — {vm.horaUltimo}
+                  {vm.lastDate} — {vm.lastTime}
                 </Text>
               </View>
             </View>
           )}
 
           {/* Aviso de estado */}
-          <View style={styles.avisoCard}>
-            <View style={styles.avisoIcon}>
+          <View style={styles.noticeCard}>
+            <View style={styles.noticeIcon}>
               <MaterialIcons
-                name={vm.activa ? "info" : "check-circle"}
+                name={vm.active ? "info" : "check-circle"}
                 size={20}
-                color={vm.activa ? theme.icono : colorFinalizada}
+                color={vm.active ? theme.icon : endedColor}
               />
             </View>
             <View style={{ flex: 1 }}>
               <Text
-                style={[styles.avisoTitle, !vm.activa && { color: colorFinalizada }]}
+                style={[styles.noticeTitle, !vm.active && { color: endedColor }]}
               >
-                {vm.activa ? tx.alertaActivaTitulo : tx.alertaFinalizadaTitulo}
+                {vm.active ? tx.alertaActivaTitulo : tx.alertaFinalizadaTitulo}
               </Text>
-              <Text style={styles.avisoText}>
-                {vm.activa ? (
+              <Text style={styles.noticeText}>
+                {vm.active ? (
                   <>
                     {tx.alertaActivaDesc}{" "}
-                    <Text style={styles.avisoBold}>{vm.ultimo ? hace : "—"}</Text>.
+                    <Text style={styles.noticeBold}>{vm.lastItem ? ago : "—"}</Text>.
                   </>
                 ) : (
                   tx.alertaFinalizadaDesc
                 )}
               </Text>
-              {vm.errorConexion && (
+              {vm.connectionError && (
                 <Text style={styles.errorText}>{tx.errorConexion}</Text>
               )}
             </View>
@@ -358,25 +358,25 @@ export default function AlertaContactoScreen() {
 
           {/* Historial de ubicación */}
           <View style={styles.card}>
-            <View style={styles.historialHeader}>
-              <View style={styles.historialTitleRow}>
-                <View style={styles.historialDot} />
+            <View style={styles.historyHeader}>
+              <View style={styles.historyTitleRow}>
+                <View style={styles.historyDot} />
                 <Text style={styles.cardTitle}>{tx.historial}</Text>
               </View>
-              <Text style={styles.historialSub}>{tx.ultimosRegistros}</Text>
+              <Text style={styles.historySub}>{tx.ultimosRegistros}</Text>
             </View>
 
-            {vm.historial.length === 0 ? (
-              <Text style={styles.sinRegistros}>{tx.sinUbicaciones}</Text>
+            {vm.history.length === 0 ? (
+              <Text style={styles.noRecords}>{tx.sinUbicaciones}</Text>
             ) : (
               <View style={styles.timeline}>
                 <View style={styles.timelineLine} />
-                {vm.historial.map((item) => (
+                {vm.history.map((item) => (
                   <View key={item.id} style={styles.timelineItem}>
                     <View style={styles.timelineNode}>
-                      {item.esActual && vm.activa ? (
-                        <PuntoPulso color={theme.icono} size={12} />
-                      ) : item.esActual ? (
+                      {item.isCurrent && vm.active ? (
+                        <PulseDot color={theme.icon} size={12} />
+                      ) : item.isCurrent ? (
                         <View
                           style={[
                             styles.timelineNodeSmall,
@@ -392,25 +392,25 @@ export default function AlertaContactoScreen() {
                       <View style={styles.timelineRowTop}>
                         <Text
                           style={
-                            item.esActual
-                              ? styles.timelineTimeActual
+                            item.isCurrent
+                              ? styles.timelineTimeCurrent
                               : styles.timelineTime
                           }
                         >
-                          {item.numero} — {item.hora}
+                          {item.number} — {item.time}
                         </Text>
-                        {item.esActual && (
-                          <Text style={styles.recienteTag}>{tx.reciente}</Text>
+                        {item.isCurrent && (
+                          <Text style={styles.recentTag}>{tx.reciente}</Text>
                         )}
                       </View>
                       <Text style={styles.timelineCoords}>
                         Lat: {item.lat} • Lng: {item.lng}
                       </Text>
-                      {item.barrio && (
-                        <View style={styles.timelineBarrioRow}>
-                          <MaterialIcons name="place" size={12} color={theme.icono} />
-                          <Text style={styles.timelineBarrio} numberOfLines={2}>
-                            {item.barrio}
+                      {item.neighborhood && (
+                        <View style={styles.timelineNeighborhoodRow}>
+                          <MaterialIcons name="place" size={12} color={theme.icon} />
+                          <Text style={styles.timelineNeighborhood} numberOfLines={2}>
+                            {item.neighborhood}
                           </Text>
                         </View>
                       )}
@@ -418,10 +418,10 @@ export default function AlertaContactoScreen() {
 
                     <Text
                       style={
-                        item.esActual ? styles.timelineActual : styles.timelineOffset
+                        item.isCurrent ? styles.timelineCurrent : styles.timelineOffset
                       }
                     >
-                      {item.esActual ? tx.actual : item.offset}
+                      {item.isCurrent ? tx.actual : item.offset}
                     </Text>
                   </View>
                 ))}
@@ -433,47 +433,47 @@ export default function AlertaContactoScreen() {
           {(vm.videos.length > 0 || vm.audios.length > 0) && (
             <View style={styles.card}>
               <Text style={styles.cardTitle}>{tx.grabaciones}</Text>
-              <Text style={styles.historialSub}>{tx.grabaciones_desc}</Text>
+              <Text style={styles.historySub}>{tx.grabaciones_desc}</Text>
               {vm.videos.length > 0 && (
                 <View style={{ marginTop: 12 }}>
-                  <Text style={[styles.historialSub, { fontWeight: "700" }]}>
+                  <Text style={[styles.historySub, { fontWeight: "700" }]}>
                     {tx.grabacion_video} · {vm.videos.length} {vm.videos.length === 1 ? tx.parte : tx.partes}
                   </Text>
-                  <ReproductorPartes tipo="video" partes={vm.videos} color={theme.icono} />
+                  <PartsPlayer type="video" parts={vm.videos} color={theme.icon} />
                 </View>
               )}
               {vm.audios.length > 0 && (
                 <View style={{ marginTop: 16 }}>
-                  <Text style={[styles.historialSub, { fontWeight: "700" }]}>
+                  <Text style={[styles.historySub, { fontWeight: "700" }]}>
                     {tx.grabacion_audio} · {vm.audios.length} {vm.audios.length === 1 ? tx.parte : tx.partes}
                   </Text>
-                  <ReproductorPartes tipo="audio" partes={vm.audios} color={theme.icono} />
+                  <PartsPlayer type="audio" parts={vm.audios} color={theme.icon} />
                 </View>
               )}
             </View>
           )}
 
-          <Text style={styles.consejo}>{tx.consejo}</Text>
+          <Text style={styles.tip}>{tx.consejo}</Text>
 
           <TouchableOpacity
             style={styles.callButton}
-            onPress={vm.llamarEmergencias}
+            onPress={vm.callEmergency}
             activeOpacity={0.85}
           >
-            <MaterialIcons name="call" size={20} color={theme.icono} />
-            <Text style={styles.callText}>{tx.llamar_numero.replace("{numero}", vm.numeroEmergencia)}</Text>
+            <MaterialIcons name="call" size={20} color={theme.icon} />
+            <Text style={styles.callText}>{tx.llamar_numero.replace("{numero}", vm.emergencyNumber)}</Text>
           </TouchableOpacity>
           {/* Chat con ella: respuestas rápidas o texto (con el código del seguimiento) */}
-          {!!vm.codigo && (
-            <View ref={teclado.chatRef} collapsable={false}>
-              <ChatAlerta
-                participante={{ tipo: "contacto", codigo: vm.codigo, nombre: miNombre }}
-                activo={vm.activa}
+          {!!vm.code && (
+            <View ref={keyboard.chatRef} collapsable={false}>
+              <AlertChat
+                participant={{ type: "contacto", code: vm.code, name: myName }}
+                enabled={vm.active}
                 soyElla={false}
-                nombreElla={vm.nombreUsuaria}
-                titulo={`Mensajes con ${vm.nombreUsuaria || "ella"}`}
-                rapidos={RAPIDOS_DEL_CONTACTO}
-                alEnfocar={teclado.alEnfocarChat}
+                herName={vm.userName}
+                title={`Mensajes con ${vm.userName || "ella"}`}
+                quickReplies={CONTACT_QUICK_REPLIES}
+                onFocus={keyboard.onChatFocus}
               />
             </View>
           )}
@@ -482,31 +482,31 @@ export default function AlertaContactoScreen() {
 
       {/* Ventana emergente con el mapa completo */}
       <Modal
-        visible={vm.mapaVisible}
+        visible={vm.mapVisible}
         animationType="slide"
         statusBarTranslucent
-        onRequestClose={vm.cerrarMapa}
+        onRequestClose={vm.closeMap}
       >
         <View style={styles.modalContainer}>
-          {vm.ultimo && (
+          {vm.lastItem && (
             <MapView
-              ref={vm.mapaCompletoRef}
+              ref={vm.fullMapRef}
               style={styles.modalMap}
-              onMapReady={vm.onMapaCompletoReady}
+              onMapReady={vm.onFullMapReady}
               toolbarEnabled={false}
               initialRegion={{
-                latitude: vm.ultimo.latitude,
-                longitude: vm.ultimo.longitude,
+                latitude: vm.lastItem.latitude,
+                longitude: vm.lastItem.longitude,
                 latitudeDelta: 0.005,
                 longitudeDelta: 0.005,
               }}
             >
-              <PinesMapa
-                puntos={vm.puntos}
-                colorLinea={theme.icono}
+              <MapPins
+                points={vm.points}
+                lineColor={theme.icon}
                 styles={styles}
-                trackear={trackear}
-                etiqueta={tx.punto}
+                trackChanges={trackChanges}
+                label={tx.punto}
               />
             </MapView>
           )}
@@ -515,34 +515,34 @@ export default function AlertaContactoScreen() {
           <View style={styles.modalTopBar} pointerEvents="box-none">
             <TouchableOpacity
               style={styles.modalCloseBtn}
-              onPress={vm.cerrarMapa}
+              onPress={vm.closeMap}
               activeOpacity={0.85}
               accessibilityRole="button"
               accessibilityLabel={tx.cerrarMapa}
             >
-              <MaterialIcons name="close" size={20} color={theme.icono} />
+              <MaterialIcons name="close" size={20} color={theme.icon} />
               <Text style={styles.modalCloseText}>{tx.cerrarMapa}</Text>
             </TouchableOpacity>
 
             <View style={styles.modalTitlePill} pointerEvents="none">
               <Text style={styles.modalTitle} numberOfLines={1}>
-                {tx.ubicacionDe} {vm.nombreUsuaria || tx.usuariaDefault}
+                {tx.ubicacionDe} {vm.userName || tx.usuariaDefault}
               </Text>
               <Text style={styles.modalSub} numberOfLines={1}>
-                {tx.actualizada} {hace}
+                {tx.actualizada} {ago}
               </Text>
             </View>
           </View>
 
           {/* Última coordenada */}
-          {vm.ultimo && (
+          {vm.lastItem && (
             <View style={styles.modalInfo} pointerEvents="none">
               <Text style={styles.modalInfoText} numberOfLines={1}>
-                {tx.punto} {vm.puntos.length} · {vm.coordsUltimo}
+                {tx.punto} {vm.points.length} · {vm.lastCoords}
               </Text>
-              {vm.barrioUltimo && (
-                <Text style={styles.modalInfoBarrio} numberOfLines={2}>
-                  {vm.barrioUltimo}
+              {vm.lastNeighborhood && (
+                <Text style={styles.neighborhoodInfoModal} numberOfLines={2}>
+                  {vm.lastNeighborhood}
                 </Text>
               )}
             </View>
@@ -551,12 +551,12 @@ export default function AlertaContactoScreen() {
           {/* Encuadrar todos los puntos */}
           <TouchableOpacity
             style={styles.modalFitBtn}
-            onPress={vm.verTodosLosPuntos}
+            onPress={vm.showAllPoints}
             activeOpacity={0.85}
             accessibilityRole="button"
             accessibilityLabel={tx.verTodosPuntos}
           >
-            <MaterialIcons name="zoom-out-map" size={22} color={theme.icono} />
+            <MaterialIcons name="zoom-out-map" size={22} color={theme.icon} />
           </TouchableOpacity>
         </View>
       </Modal>

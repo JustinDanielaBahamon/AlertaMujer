@@ -6,60 +6,60 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { useTheme } from "../../../contexts/ThemeContext";
 import {
-  createMetodosActivacionStyles,
-  obtenerColoresHeader,
+  createActivationMethodsStyles,
+  getHeaderColors,
 } from "../styles/metodosActivacion.styles";
-import { useMetodosActivacionViewModel } from "../viewModel/useMetodosActivacionViewModel";
+import { useActivationMethodsViewModel } from "../viewModel/useMetodosActivacionViewModel";
 
-export default function MetodosActivacionScreen() {
+export default function ActivationMethodsScreen() {
   const { theme } = useTheme();
   const { t } = useLocale();
-  const styles = useMemo(() => createMetodosActivacionStyles(theme), [theme]);
-  const { texto } = obtenerColoresHeader(theme);
+  const styles = useMemo(() => createActivationMethodsStyles(theme), [theme]);
+  const { text } = getHeaderColors(theme);
   const insets = useSafeAreaInsets();
-  const { metodos, activos, total, cambiarMetodo, volver } =
-    useMetodosActivacionViewModel();
+  const { methods: methods, activeItems: activeItems, total, setMethod: setMethod, goBack: goBack } =
+    useActivationMethodsViewModel();
   const m = t.metodosActivacion;
 
-  const porcentaje = total > 0 ? Math.round((activos / total) * 100) : 0;
+  const percentage = total > 0 ? Math.round((activeItems / total) * 100) : 0;
 
   // Íconos de la barra de estado claros u oscuros según el color del header
-  const estiloBarraEstado = texto === "#1a1a1a" ? "dark" : "light";
+  const statusBarStyle = text === "#1a1a1a" ? "dark" : "light";
 
   return (
-    <View style={styles.contenedor}>
-      <StatusBar style={estiloBarraEstado} />
+    <View style={styles.container}>
+      <StatusBar style={statusBarStyle} />
 
       {/* Header (mismo color que la barra lateral) */}
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <View style={styles.headerFila}>
+        <View style={styles.headerRow}>
           <TouchableOpacity
-            onPress={volver}
-            style={styles.btnVolver}
+            onPress={goBack}
+            style={styles.returnBtn}
             accessibilityRole="button"
           >
-            <Ionicons name="arrow-back" size={22} color={texto} />
+            <Ionicons name="arrow-back" size={22} color={text} />
           </TouchableOpacity>
 
-          <View style={styles.headerTextos}>
-            <Text style={styles.tituloHeader}>{m.titulo_header}</Text>
-            <Text style={styles.subtituloHeader}>{m.subtitulo_header}</Text>
+          <View style={styles.headerTexts}>
+            <Text style={styles.headerTitleText}>{m.titulo_header}</Text>
+            <Text style={styles.headerSubtitleText}>{m.subtitulo_header}</Text>
           </View>
 
-          <View style={styles.headerIcono}>
-            <Ionicons name="flash" size={22} color={texto} />
+          <View style={styles.headerIcon}>
+            <Ionicons name="flash" size={22} color={text} />
           </View>
         </View>
 
-        <View style={styles.resumenFila}>
-          <Text style={styles.resumenTexto}>
-            {activos}/{total} {m.resumen_activos}
+        <View style={styles.summaryRow}>
+          <Text style={styles.summaryText}>
+            {activeItems}/{total} {m.resumen_activos}
           </Text>
-          <View style={styles.barraFondo}>
+          <View style={styles.barBackground}>
             <View
               style={[
-                styles.barraRelleno,
-                { width: `${porcentaje}%` as `${number}%` },
+                styles.barFill,
+                { width: `${percentage}%` as `${number}%` },
               ]}
             />
           </View>
@@ -72,112 +72,112 @@ export default function MetodosActivacionScreen() {
       >
         <Text style={styles.intro}>{m.intro}</Text>
 
-        {metodos.map((metodo) => (
+        {methods.map((method) => (
           <View
-            key={metodo.id}
-            style={[styles.tarjeta, !metodo.activo && styles.tarjetaInactiva]}
+            key={method.id}
+            style={[styles.card, !method.enabled && styles.inactiveCard]}
           >
-            <View style={styles.filaTitulo}>
-              <View style={styles.iconoWrap}>
+            <View style={styles.titleRow}>
+              <View style={styles.iconWrap}>
                 <Ionicons
-                  name={metodo.icono as any}
+                  name={method.icon as any}
                   size={22}
-                  color={theme.icono}
+                  color={theme.icon}
                 />
               </View>
 
-              <View style={styles.tituloWrap}>
-                <Text style={styles.tituloMetodo}>{metodo.titulo}</Text>
+              <View style={styles.titleWrap}>
+                <Text style={styles.methodTitle}>{method.title}</Text>
                 <View
                   style={[
-                    styles.chipEstado,
-                    metodo.activo && styles.chipEstadoActivo,
+                    styles.statusChip,
+                    method.enabled && styles.activeStatusChip,
                   ]}
                 >
                   <Text
                     style={[
-                      styles.chipTexto,
-                      metodo.activo && styles.chipTextoActivo,
+                      styles.chipText,
+                      method.enabled && styles.activeChipText,
                     ]}
                   >
-                    {metodo.activo ? m.estado_activo : m.estado_inactivo}
+                    {method.enabled ? m.estado_activo : m.estado_inactivo}
                   </Text>
                 </View>
               </View>
 
               <Switch
-                value={metodo.activo}
-                onValueChange={(valor) => cambiarMetodo(metodo.id, valor)}
-                trackColor={{ false: "#ccc", true: theme.icono }}
+                value={method.enabled}
+                onValueChange={(value) => setMethod(method.id, value)}
+                trackColor={{ false: "#ccc", true: theme.icon }}
                 thumbColor="#fff"
               />
             </View>
 
-            <Text style={styles.descripcionMetodo}>{metodo.descripcion}</Text>
+            <Text style={styles.methodDescription}>{method.description}</Text>
 
-            <View style={metodo.activo ? styles.pasos : styles.pasosInactivos}>
-              {metodo.pasos.map((paso, index) => (
-                <View key={index} style={styles.pasoFila}>
-                  <View style={styles.pasoNumero}>
-                    <Text style={styles.pasoNumeroTexto}>{index + 1}</Text>
+            <View style={method.enabled ? styles.steps : styles.inactiveSteps}>
+              {method.steps.map((step, index) => (
+                <View key={index} style={styles.stepRow}>
+                  <View style={styles.stepNumber}>
+                    <Text style={styles.stepNumberText}>{index + 1}</Text>
                   </View>
-                  <Text style={styles.pasoTexto}>{paso.texto}</Text>
+                  <Text style={styles.stepText}>{step.text}</Text>
                 </View>
               ))}
             </View>
 
-            {(!!metodo.recomendacionMarca || !!metodo.recomendaciones?.length) && (
-              <View style={styles.recomendacionesWrap}>
-                <View style={styles.recomendacionesTituloFila}>
-                  <Ionicons name="bulb-outline" size={16} color={theme.icono} />
-                  <Text style={styles.recomendacionesTitulo}>{m.recomendaciones_titulo}</Text>
+            {(!!method.brandRecommendation || !!method.recommendations?.length) && (
+              <View style={styles.recommendationsWrap}>
+                <View style={styles.recommendationsTitleRow}>
+                  <Ionicons name="bulb-outline" size={16} color={theme.icon} />
+                  <Text style={styles.recommendationsTitle}>{m.recomendaciones_titulo}</Text>
                 </View>
-                {!!metodo.recomendacionMarca && (
-                  <View style={styles.recomendacionMarca}>
+                {!!method.brandRecommendation && (
+                  <View style={styles.brandRecommendation}>
                     <Ionicons name="warning-outline" size={16} color="#b45309" />
-                    <Text style={styles.recomendacionMarcaTexto}>{metodo.recomendacionMarca}</Text>
+                    <Text style={styles.brandRecommendationText}>{method.brandRecommendation}</Text>
                   </View>
                 )}
-                {metodo.recomendaciones?.map((texto, i) => (
-                  <View key={i} style={styles.recomendacionFila}>
-                    <Text style={styles.recomendacionVineta}>•</Text>
-                    <Text style={styles.recomendacionTexto}>{texto}</Text>
+                {method.recommendations?.map((text, i) => (
+                  <View key={i} style={styles.recommendationRow}>
+                    <Text style={styles.recommendationBullet}>•</Text>
+                    <Text style={styles.recommendationText}>{text}</Text>
                   </View>
                 ))}
               </View>
             )}
 
-            {!!metodo.accion && (
+            {!!method.action && (
               <TouchableOpacity
-                style={styles.accionMetodo}
-                onPress={metodo.accion.alPresionar}
+                style={styles.methodAction}
+                onPress={method.action.onPressed}
                 accessibilityRole="button"
               >
-                <Ionicons name={metodo.accion.icono as never} size={18} color="#fff" />
-                <Text style={styles.accionMetodoTexto}>{metodo.accion.texto}</Text>
+                <Ionicons name={method.action.icon as never} size={18} color="#fff" />
+                <Text style={styles.methodActionText}>{method.action.text}</Text>
               </TouchableOpacity>
             )}
 
-            {metodo.pendiente && (
-              <View style={styles.avisoWrap}>
+            {method.pending && (
+              <View style={styles.noticeWrap}>
                 <Ionicons
                   name="construct-outline"
                   size={16}
-                  color={theme.icono}
+                  color={theme.icon}
                 />
-                <Text style={styles.avisoTexto}>{m.aviso_pendiente}</Text>
+                <Text style={styles.noticeText}>{m.aviso_pendiente}</Text>
               </View>
             )}
           </View>
         ))}
 
-        <View style={styles.notaWrap}>
+        <View style={styles.noteWrap}>
           <Ionicons
             name="information-circle-outline"
             size={18}
-            color={theme.icono}
+            color={theme.icon}
           />
-          <Text style={styles.notaTexto}>{m.nota}</Text>
+          <Text style={styles.noteText}>{m.nota}</Text>
         </View>
       </ScrollView>
     </View>

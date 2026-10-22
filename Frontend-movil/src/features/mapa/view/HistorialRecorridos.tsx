@@ -15,53 +15,53 @@ import {
 import MapView, { Marker, Polyline } from "../../../components/mapa/MapaLibre";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { useLocale } from "../../../contexts/LocaleContext";
-import { useAjustesViewModel } from "../../settings/viewModel/useAjustesViewModel";
-import { formatearFechaRecorrido, useRecorridos } from "../../../contexts/RecorridosContext";
-import { descripcionLugar, obtenerLugar } from "../../../services/geocoding.service";
-import { COLOR_PUNTO_A, COLOR_PUNTO_B } from "../coloresRecorrido";
+import { useSettingsViewModel } from "../../settings/viewModel/useAjustesViewModel";
+import { formatRouteDate, useRoutes } from "../../../contexts/RecorridosContext";
+import { placeDescription, getPlace } from "../../../services/geocoding.service";
+import { POINT_A_COLOR, POINT_B_COLOR } from "../coloresRecorrido";
 import { styles } from "../styles/HistorialRecorridos.style";
 import { Alert } from "react-native";
 
-type PuntoGPS = {
+type GpsPoint = {
   latitude: number;
   longitude: number;
   timestamp: string;
 };
 
-type Recorrido = {
+type SavedRoute = {
   id: string;
-  fecha: string;
-  tiempoEstimado: string;
-  distanciaEstimada: string;
-  barrioInicio: string;
-  barrioFin: string;
-  municipio: string;
-  departamento: string;
-  pais: string;
-  puntos: PuntoGPS[];
-  cantidadPuntos: number;
+  date: string;
+  estimatedTime: string;
+  estimatedDistance: string;
+  startNeighborhood: string;
+  endNeighborhood: string;
+  municipality: string;
+  department: string;
+  country: string;
+  points: GpsPoint[];
+  pointCount: number;
   esManual: boolean;
-  nombrePersonalizado?: string;
-  importante: boolean;
+  customName?: string;
+  important: boolean;
 };
 
 // Estilos extra: acciones en vertical (estrella arriba, borrar abajo) y botón de borrar más grande
 const extra = StyleSheet.create({
-  accionesVertical: {
+  verticalActions: {
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
     gap: 10,
     marginLeft: 8,
   },
-  botonEstrella: {
+  starButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
     justifyContent: "center",
     alignItems: "center",
   },
-  botonBorrar: {
+  deleteButton: {
     width: 52,
     height: 52,
     borderRadius: 26,
@@ -71,84 +71,84 @@ const extra = StyleSheet.create({
   },
 });
 
-const formatearCoordenada = (p?: { latitude: number; longitude: number }) =>
+const formatCoordinate = (p?: { latitude: number; longitude: number }) =>
   p ? `${p.latitude.toFixed(5)}, ${p.longitude.toFixed(5)}` : "--";
 
 // Recorridos guardados antes de que se guardara la dirección: su etiqueta es genérica
-const ETIQUETA_GENERICA = /^(punto [ab]|inicio|fin)$/i;
+const GENERIC_LABEL = /^(punto [ab]|inicio|fin)$/i;
 
-type Direcciones = Record<string, { inicio?: string; fin?: string }>;
+type Addresses = Record<string, { start?: string; end?: string }>;
 
 /**
  * Dirección y barrio de inicio y fin de cada recorrido. Si la etiqueta guardada ya los tiene se usa
  * tal cual; si es genérica ("Punto A") se buscan con las coordenadas, una consulta por segundo.
  */
-function useDireccionesRecorridos(recorridos: Recorrido[]): Direcciones {
-  const [direcciones, setDirecciones] = useState<Direcciones>({});
+function useRouteAddresses(routes: SavedRoute[]): Addresses {
+  const [addresses, setAddresses] = useState<Addresses>({});
 
   useEffect(() => {
-    let vivo = true;
+    let alive = true;
     (async () => {
-      for (const r of recorridos) {
-        if (r.puntos.length === 0 || direcciones[r.id]) continue;
-        const buscar = async (texto: string, p: PuntoGPS) => {
-          if (!ETIQUETA_GENERICA.test(texto.trim())) return texto;
-          const lugar = await obtenerLugar(p.latitude, p.longitude);
+      for (const r of routes) {
+        if (r.points.length === 0 || addresses[r.id]) continue;
+        const search = async (text: string, p: GpsPoint) => {
+          if (!GENERIC_LABEL.test(text.trim())) return text;
+          const place = await getPlace(p.latitude, p.longitude);
           await new Promise((res) => setTimeout(res, 1100));
-          return lugar ? descripcionLugar(lugar) || undefined : undefined;
+          return place ? placeDescription(place) || undefined : undefined;
         };
-        const inicio = await buscar(r.barrioInicio, r.puntos[0]);
-        const fin = await buscar(r.barrioFin, r.puntos[r.puntos.length - 1]);
-        if (!vivo) return;
-        setDirecciones((prev) => ({ ...prev, [r.id]: { inicio, fin } }));
+        const start = await search(r.startNeighborhood, r.points[0]);
+        const end = await search(r.endNeighborhood, r.points[r.points.length - 1]);
+        if (!alive) return;
+        setAddresses((prev) => ({ ...prev, [r.id]: { start, end } }));
       }
     })();
     return () => {
-      vivo = false;
+      alive = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recorridos]);
+  }, [routes]);
 
-  return direcciones;
+  return addresses;
 }
 
 export default function HistorialRecorridos() {
   const { theme } = useTheme();
   const { t } = useLocale();
   const navigation = useNavigation<any>();
-  const { mostrarRecorridos } = useAjustesViewModel();
-  const { recorridos: recorridosManuales, eliminarRecorrido, toggleImportante } = useRecorridos();
+  const { showRoutes: showRoutes } = useSettingsViewModel();
+  const { routes: manualRoutes, deleteRoute, toggleImportant } = useRoutes();
 
   const [fullscreen, setFullscreen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<Recorrido | null>(null);
-  const mapaDetalleRef = useRef<MapView>(null);
+  const [selectedItem, setSelectedItem] = useState<SavedRoute | null>(null);
+  const detailMapRef = useRef<MapView>(null);
 
   // Encuadra todo el recorrido (inicio, fin y los puntos intermedios) en el mapa del detalle
-  const encuadrarRecorrido = () => {
-    const puntos = selectedItem?.puntos ?? [];
-    if (puntos.length < 2) return;
-    mapaDetalleRef.current?.fitToCoordinates(
-      puntos.map((p) => ({ latitude: p.latitude, longitude: p.longitude })),
+  const fitRoute = () => {
+    const points = selectedItem?.points ?? [];
+    if (points.length < 2) return;
+    detailMapRef.current?.fitToCoordinates(
+      points.map((p) => ({ latitude: p.latitude, longitude: p.longitude })),
       { edgePadding: { top: 50, right: 50, bottom: 50, left: 50 }, animated: false },
     );
   };
 
-  const todosLosRecorridos: Recorrido[] = recorridosManuales;
-  const direcciones = useDireccionesRecorridos(todosLosRecorridos);
+  const allRoutes: SavedRoute[] = manualRoutes;
+  const addresses = useRouteAddresses(allRoutes);
 
   // Dirección de inicio o fin para mostrar; mientras se busca, la etiqueta guardada
-  const direccionDe = (r: Recorrido, extremo: "inicio" | "fin") => {
-    const encontrada = direcciones[r.id]?.[extremo];
-    if (encontrada) return encontrada;
-    const guardada = extremo === "inicio" ? r.barrioInicio : r.barrioFin;
-    if (!ETIQUETA_GENERICA.test(guardada.trim())) return guardada;
-    return direcciones[r.id] ? "Dirección no disponible" : "Buscando dirección…";
+  const addressOf = (r: SavedRoute, end: "start" | "end") => {
+    const found = addresses[r.id]?.[end];
+    if (found) return found;
+    const saved = end === "start" ? r.startNeighborhood : r.endNeighborhood;
+    if (!GENERIC_LABEL.test(saved.trim())) return saved;
+    return addresses[r.id] ? "Dirección no disponible" : "Buscando dirección…";
   };
 
-  const confirmarEliminar = (id: string, nombre: string) => {
+  const confirmRemove = (id: string, name: string) => {
     Alert.alert(
       "Eliminar recorrido",
-      `¿Estás segura de que quieres eliminar el recorrido "${nombre}"?`,
+      `¿Estás segura de que quieres eliminar el recorrido "${name}"?`,
       [
         {
           text: "Cancelar",
@@ -158,9 +158,9 @@ export default function HistorialRecorridos() {
           text: "Eliminar",
           style: "destructive",
           onPress: async () => {
-            const resultado = await eliminarRecorrido(id);
-            if (!resultado.ok && resultado.motivo) {
-              Alert.alert("No se pudo eliminar", resultado.motivo);
+            const result = await deleteRoute(id);
+            if (!result.ok && result.reason) {
+              Alert.alert("No se pudo eliminar", result.reason);
             }
           },
         },
@@ -168,10 +168,10 @@ export default function HistorialRecorridos() {
     );
   };
 
-  const toggleImportanteHandler = async (id: string) => {
-    const resultado = await toggleImportante(id);
-    if (!resultado.ok && resultado.motivo) {
-      Alert.alert("Límite alcanzado", resultado.motivo);
+  const toggleImportantHandler = async (id: string) => {
+    const result = await toggleImportant(id);
+    if (!result.ok && result.reason) {
+      Alert.alert("Límite alcanzado", result.reason);
     }
   };
 
@@ -209,7 +209,7 @@ export default function HistorialRecorridos() {
           {t.mapa.historial_reciente}
         </Text>
 
-        {!mostrarRecorridos ? (
+        {!showRoutes ? (
           <View style={[styles.emptyState, { backgroundColor: theme.card }]}>
             <MaterialIcons name="location-off" size={48} color={theme.contactSubtext} />
             <Text style={[styles.emptyStateText, { color: theme.contactSubtext }]}>
@@ -220,7 +220,7 @@ export default function HistorialRecorridos() {
             </Text>
           </View>
         ) : (
-          todosLosRecorridos.map((item) => (
+          allRoutes.map((item) => (
             <TouchableOpacity
               key={item.id}
               style={[styles.historyCard, { backgroundColor: theme.card }]}
@@ -233,7 +233,7 @@ export default function HistorialRecorridos() {
 
             <View style={styles.historyInfo}>
               <Text style={[styles.locationText, { color: theme.text }]} numberOfLines={2}>
-                {item.nombrePersonalizado || `${item.barrioInicio} → ${item.barrioFin}`}
+                {item.customName || `${item.startNeighborhood} → ${item.endNeighborhood}`}
               </Text>
 
               <View style={styles.dateRow}>
@@ -243,56 +243,56 @@ export default function HistorialRecorridos() {
                   color={theme.contactSubtext}
                 />
                 <Text style={[styles.timeText, { color: theme.contactSubtext }]}>
-                  {formatearFechaRecorrido(item.fecha)}
+                  {formatRouteDate(item.date)}
                 </Text>
               </View>
 
               <View style={styles.locationRow}>
-                <MaterialIcons name="trip-origin" size={14} color={COLOR_PUNTO_A} />
+                <MaterialIcons name="trip-origin" size={14} color={POINT_A_COLOR} />
                 <Text
                   style={[styles.addressText, { color: theme.text }]}
                   numberOfLines={2}
                 >
-                  {direccionDe(item, "inicio")}
+                  {addressOf(item, "start")}
                 </Text>
               </View>
 
               <View style={[styles.locationRow, { marginTop: 4 }]}>
-                <MaterialIcons name="flag" size={14} color={COLOR_PUNTO_B} />
+                <MaterialIcons name="flag" size={14} color={POINT_B_COLOR} />
                 <Text
                   style={[styles.addressText, { color: theme.text }]}
                   numberOfLines={2}
                 >
-                  {direccionDe(item, "fin")}
+                  {addressOf(item, "end")}
                 </Text>
               </View>
             </View>
 
             {/* ACCIONES: estrella y borrar, una debajo de la otra */}
-            <View style={extra.accionesVertical}>
+            <View style={extra.verticalActions}>
               <TouchableOpacity
-                style={extra.botonEstrella}
-                onPress={() => toggleImportanteHandler(item.id)}
+                style={extra.starButton}
+                onPress={() => toggleImportantHandler(item.id)}
                 activeOpacity={0.7}
               >
                 <MaterialIcons
-                  name={item.importante ? "star" : "star-border"}
+                  name={item.important ? "star" : "star-border"}
                   size={28}
-                  color={item.importante ? "#FFD700" : theme.contactSubtext}
+                  color={item.important ? "#FFD700" : theme.contactSubtext}
                 />
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={extra.botonBorrar}
+                style={extra.deleteButton}
                 onPress={() =>
-                  confirmarEliminar(
+                  confirmRemove(
                     item.id,
-                    item.nombrePersonalizado || `${item.barrioInicio} → ${item.barrioFin}`
+                    item.customName || `${item.startNeighborhood} → ${item.endNeighborhood}`
                   )
                 }
                 activeOpacity={0.7}
               >
-                <MaterialIcons name="delete" size={30} color={COLOR_PUNTO_B} />
+                <MaterialIcons name="delete" size={30} color={POINT_B_COLOR} />
               </TouchableOpacity>
             </View>
             </TouchableOpacity>
@@ -314,7 +314,7 @@ export default function HistorialRecorridos() {
                         <MaterialIcons name="route" size={32} color="#7B1DB2" />
                       </View>
                       <Text style={[styles.modalTitle, { color: theme.text }]}>
-                        {selectedItem.nombrePersonalizado || `Recorrido #${selectedItem.id}`}
+                        {selectedItem.customName || `Recorrido #${selectedItem.id}`}
                       </Text>
                     </View>
 
@@ -322,46 +322,46 @@ export default function HistorialRecorridos() {
                       <InfoRow
                         icon="calendar-today"
                         label="Fecha"
-                        value={formatearFechaRecorrido(selectedItem.fecha, true)}
+                        value={formatRouteDate(selectedItem.date, true)}
                         theme={theme}
                       />
                       <InfoRow
                         icon="trip-origin"
                         label="Inicio"
-                        value={direccionDe(selectedItem, "inicio")}
+                        value={addressOf(selectedItem, "start")}
                         theme={theme}
                       />
                       <InfoRow
                         icon="flag"
                         label="Fin"
-                        value={direccionDe(selectedItem, "fin")}
+                        value={addressOf(selectedItem, "end")}
                         theme={theme}
                       />
-                      {!!selectedItem.municipio && (
+                      {!!selectedItem.municipality && (
                         <InfoRow
                           icon="location-city"
                           label="Municipio"
-                          value={[selectedItem.municipio, selectedItem.departamento].filter(Boolean).join(", ")}
+                          value={[selectedItem.municipality, selectedItem.department].filter(Boolean).join(", ")}
                           theme={theme}
                         />
                       )}
                       <InfoRow
                         icon="straighten"
                         label="Distancia"
-                        value={selectedItem.distanciaEstimada}
+                        value={selectedItem.estimatedDistance}
                         theme={theme}
                       />
                       <InfoRow
                         icon="schedule"
                         label="Tiempo a pie"
-                        value={selectedItem.tiempoEstimado}
+                        value={selectedItem.estimatedTime}
                         theme={theme}
                       />
                       <InfoRow
                         icon="my-location"
                         label="Coordenadas"
-                        value={`${formatearCoordenada(selectedItem.puntos[0])} → ${formatearCoordenada(
-                          selectedItem.puntos[selectedItem.puntos.length - 1],
+                        value={`${formatCoordinate(selectedItem.points[0])} → ${formatCoordinate(
+                          selectedItem.points[selectedItem.points.length - 1],
                         )}`}
                         theme={theme}
                       />
@@ -370,15 +370,15 @@ export default function HistorialRecorridos() {
                     {/* MAPA PREVIEW CON POLYLINE */}
                     <View style={styles.mapPreview}>
                       <MapView
-                        ref={mapaDetalleRef}
+                        ref={detailMapRef}
                         style={styles.map}
                         initialRegion={{
-                          latitude: selectedItem.puntos[0].latitude,
-                          longitude: selectedItem.puntos[0].longitude,
+                          latitude: selectedItem.points[0].latitude,
+                          longitude: selectedItem.points[0].longitude,
                           latitudeDelta: 0.02,
                           longitudeDelta: 0.02,
                         }}
-                        onMapReady={encuadrarRecorrido}
+                        onMapReady={fitRoute}
                         scrollEnabled={false}
                         zoomEnabled={false}
                         rotateEnabled={false}
@@ -386,9 +386,9 @@ export default function HistorialRecorridos() {
                       >
                         {/* Línea del recorrido */}
                         <Polyline
-                          coordinates={selectedItem.puntos.map(punto => ({
-                            latitude: punto.latitude,
-                            longitude: punto.longitude,
+                          coordinates={selectedItem.points.map(point => ({
+                            latitude: point.latitude,
+                            longitude: point.longitude,
                           }))}
                           strokeWidth={4}
                           strokeColor="#7B1DB2"
@@ -396,16 +396,16 @@ export default function HistorialRecorridos() {
 
                         {/* Marcador de inicio */}
                         <Marker
-                          coordinate={selectedItem.puntos[0]}
+                          coordinate={selectedItem.points[0]}
                           title="Inicio"
-                          pinColor={COLOR_PUNTO_A}
+                          pinColor={POINT_A_COLOR}
                         />
 
                         {/* Marcador de fin */}
                         <Marker
-                          coordinate={selectedItem.puntos[selectedItem.puntos.length - 1]}
+                          coordinate={selectedItem.points[selectedItem.points.length - 1]}
                           title="Fin"
-                          pinColor={COLOR_PUNTO_B}
+                          pinColor={POINT_B_COLOR}
                         />
                       </MapView>
                     </View>

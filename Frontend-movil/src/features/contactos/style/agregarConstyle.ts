@@ -77,7 +77,7 @@ export const createStyles = (theme: AppTheme) =>
       width: 40,
       height: 40,
       borderRadius: 25,
-      backgroundColor: theme.contactCousserBg,
+      backgroundColor: theme.contactCounterBg,
       alignItems: "center",
       justifyContent: "center",
       marginRight: 8,
@@ -87,7 +87,7 @@ export const createStyles = (theme: AppTheme) =>
     sectionTitle: {
       fontSize: 18,
       fontWeight: "700",
-      color: theme.contactNombre,
+      color: theme.contactName,
     },
 
     // --- INPUTS ---
@@ -95,7 +95,7 @@ export const createStyles = (theme: AppTheme) =>
     inputCard: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: theme.contactBuscadorBg,
+      backgroundColor: theme.contactSearchBg,
       borderRadius: 18,
       borderWidth: 1,
       borderColor: theme.contactCardBorder,
@@ -116,7 +116,7 @@ export const createStyles = (theme: AppTheme) =>
     inputValue: {
       fontSize: 18,
       fontWeight: "600",
-      color: theme.contactNombre,
+      color: theme.contactName,
     },
 
     contactIconButton: {
@@ -174,7 +174,7 @@ export const createStyles = (theme: AppTheme) =>
       width: 55,
       height: 55,
       borderRadius: 30,
-      backgroundColor: theme.contactCousserBg,
+      backgroundColor: theme.contactCounterBg,
       alignItems: "center",
       justifyContent: "center",
       marginRight: 10,
@@ -193,7 +193,7 @@ export const createStyles = (theme: AppTheme) =>
     previewName: {
       fontSize: 17,
       fontWeight: "800",
-      color: theme.contactNombre,
+      color: theme.contactName,
     },
 
     previewChip: {

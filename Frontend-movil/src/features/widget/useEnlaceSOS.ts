@@ -1,41 +1,41 @@
 import { useEffect, useRef, useState } from "react";
 import { Alert, Linking } from "react-native";
 import type { NavigationContainerRefWithCurrent } from "@react-navigation/native";
-import { useMetodosActivacion } from "../../contexts/MetodosActivacionContext";
+import { useActivationMethods } from "../../contexts/MetodosActivacionContext";
 import type { MainStackParamList } from "../../navigation/types";
-import { ENLACE_SOS } from "./WidgetSOS";
+import { SOS_LINK } from "./WidgetSOS";
 
-const PANTALLAS_DE_ALERTA = new Set(["Activacion", "AlertaActiva"]);
-const esEnlaceSOS = (url: string | null) => !!url && url.toLowerCase().startsWith(ENLACE_SOS);
+const ALERT_SCREENS = new Set(["Activacion", "AlertaActiva"]);
+const isSosLink = (url: string | null) => !!url && url.toLowerCase().startsWith(SOS_LINK);
 
 /**
  * El widget abre alertamujer://sos: con sesión iniciada lleva a la cuenta regresiva de la alerta
  * (método "widget"). Si se tocó antes de iniciar sesión, se atiende al entrar.
  */
-export function useEnlaceSOS(
-  navegacion: NavigationContainerRefWithCurrent<MainStackParamList>,
-  conSesion: boolean,
+export function useSosLink(
+  navigation: NavigationContainerRefWithCurrent<MainStackParamList>,
+  withSession: boolean,
 ): void {
-  const { config, cargado } = useMetodosActivacion();
-  const pendiente = useRef(false);
+  const { config, loaded } = useActivationMethods();
+  const pending = useRef(false);
   // Cambia con cada toque del widget para volver a correr el efecto que lo atiende
   const [toques, setToques] = useState(0);
 
   useEffect(() => {
-    const recibir = (url: string | null) => {
-      if (!esEnlaceSOS(url)) return;
-      pendiente.current = true;
+    const receive = (url: string | null) => {
+      if (!isSosLink(url)) return;
+      pending.current = true;
       setToques((n) => n + 1);
     };
-    Linking.getInitialURL().then(recibir).catch(() => {});
-    const sub = Linking.addEventListener("url", ({ url }) => recibir(url));
+    Linking.getInitialURL().then(receive).catch(() => {});
+    const sub = Linking.addEventListener("url", ({ url }) => receive(url));
     return () => sub.remove();
   }, []);
 
   // Se atiende en cuanto hay sesión y ajustes (el toque pudo llegar antes de iniciar sesión)
   useEffect(() => {
-    if (!pendiente.current || !conSesion || !cargado) return;
-    pendiente.current = false;
+    if (!pending.current || !withSession || !loaded) return;
+    pending.current = false;
     if (!config.widget) {
       Alert.alert(
         "Widget de alerta",
@@ -43,15 +43,15 @@ export function useEnlaceSOS(
       );
       return;
     }
-    const ir = (intentos = 20) => {
-      if (!navegacion.isReady()) {
-        if (intentos > 0) setTimeout(() => ir(intentos - 1), 300);
+    const ir = (attempts = 20) => {
+      if (!navigation.isReady()) {
+        if (attempts > 0) setTimeout(() => ir(attempts - 1), 300);
         return;
       }
-      const actual = navegacion.getCurrentRoute()?.name;
-      if (actual && PANTALLAS_DE_ALERTA.has(actual)) return;
-      navegacion.navigate("Activacion", { metodo: "widget" });
+      const current = navigation.getCurrentRoute()?.name;
+      if (current && ALERT_SCREENS.has(current)) return;
+      navigation.navigate("Activacion", { metodo: "widget" });
     };
     ir();
-  }, [toques, conSesion, cargado, config.widget, navegacion]);
+  }, [toques, withSession, loaded, config.widget, navigation]);
 }

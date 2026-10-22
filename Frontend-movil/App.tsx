@@ -1,48 +1,48 @@
 import "react-native-gesture-handler";
 import { useCallback, useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
-import AlertaGlobalHost from "./src/components/ui/alertaGlobal/alertaGlobal";
-import AvisoActualizacion from "./src/features/version/AvisoActualizacion";
-import PrecargaImagenes from "./src/components/ui/PrecargaImagenes/PrecargaImagenes";
+import GlobalAlertHost from "./src/components/ui/alertaGlobal/alertaGlobal";
+import UpdateNotice from "./src/features/version/AvisoActualizacion";
+import ImagePreload from "./src/components/ui/PrecargaImagenes/PrecargaImagenes";
 import { AuthProvider } from "./src/contexts/AuthContext";
-import { ContactosProvider } from "./src/contexts/ContactosContext";
-import { EvidenciaProvider } from "./src/contexts/EvidenciaContext";
+import { ContactsProvider } from "./src/contexts/ContactosContext";
+import { EvidenceProvider } from "./src/contexts/EvidenciaContext";
 import { LocaleProvider } from "./src/contexts/LocaleContext";
-import { MetodosActivacionProvider } from "./src/contexts/MetodosActivacionContext";
-import { NotificacionesProvider } from "./src/contexts/NotificacionesContext";
-import { RecorridosProvider } from "./src/contexts/RecorridosContext";
+import { ActivationMethodsProvider } from "./src/contexts/MetodosActivacionContext";
+import { NotificationsProvider } from "./src/contexts/NotificacionesContext";
+import { RoutesProvider } from "./src/contexts/RecorridosContext";
 import { ThemeProvider } from "./src/contexts/ThemeContext";
 import AppNavigator from "./src/navigation/AppNavigator";
-import ReporteUbicacion from "./src/components/ReporteUbicacion";
-import SplashAnimado from "./src/components/ui/SplashAnimado/SplashAnimado";
+import LocationReport from "./src/components/ReporteUbicacion";
+import AnimatedSplash from "./src/components/ui/SplashAnimado/SplashAnimado";
 
 // El splash nativo se mantiene hasta que la animación de apertura esté dibujada encima
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
 export default function App() {
-  const [mostrarSplash, setMostrarSplash] = useState(true);
-  const terminarSplash = useCallback(() => setMostrarSplash(false), []);
+  const [showSplash, setShowSplash] = useState(true);
+  const finishSplash = useCallback(() => setShowSplash(false), []);
 
   return (
     <ThemeProvider>
       <LocaleProvider>
         <AuthProvider>
-          <ReporteUbicacion />
-          <ContactosProvider>
-            <RecorridosProvider>
-              <EvidenciaProvider>
-                <NotificacionesProvider>
-                  <MetodosActivacionProvider>
-                    <PrecargaImagenes />
+          <LocationReport />
+          <ContactsProvider>
+            <RoutesProvider>
+              <EvidenceProvider>
+                <NotificationsProvider>
+                  <ActivationMethodsProvider>
+                    <ImagePreload />
                     <AppNavigator />
-                    <AlertaGlobalHost />
-                    <AvisoActualizacion />
-                    {mostrarSplash && <SplashAnimado onTerminar={terminarSplash} />}
-                  </MetodosActivacionProvider>
-                </NotificacionesProvider>
-              </EvidenciaProvider>
-            </RecorridosProvider>
-          </ContactosProvider>
+                    <GlobalAlertHost />
+                    <UpdateNotice />
+                    {showSplash && <AnimatedSplash onFinish={finishSplash} />}
+                  </ActivationMethodsProvider>
+                </NotificationsProvider>
+              </EvidenceProvider>
+            </RoutesProvider>
+          </ContactsProvider>
         </AuthProvider>
       </LocaleProvider>
     </ThemeProvider>

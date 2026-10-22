@@ -11,7 +11,7 @@ jest.mock("expo-application", () => ({ nativeApplicationVersion: "1.0.0" }));
 jest.mock("../api", () => ({ __esModule: true, default: { get: jest.fn(), post: jest.fn(), put: jest.fn() } }));
 
 import api from "../api";
-import { getOrCreateDevice, olvidarSesionDispositivo, reportarPermisos } from "../devices.service";
+import { getOrCreateDevice, forgetDeviceSession, reportPermissions } from "../devices.service";
 
 const mockApi = api as unknown as { get: jest.Mock; post: jest.Mock; put: jest.Mock };
 
@@ -20,8 +20,8 @@ describe("devices.service", () => {
     jest.clearAllMocks();
     await AsyncStorage.clear();
     await AsyncStorage.setItem("@alerta_mujer:auth", JSON.stringify({ user: { id: 5 } }));
-    olvidarSesionDispositivo();
-    mockApi.put.mockImplementation(async (_url: string, datos: object) => ({ data: { id: 1, deviceUuid: "x", ...datos } }));
+    forgetDeviceSession();
+    mockApi.put.mockImplementation(async (_url: string, data: object) => ({ data: { id: 1, deviceUuid: "x", ...data } }));
   });
 
   it("adopta el registro antiguo y le envía los datos reales del celular", async () => {
@@ -59,12 +59,12 @@ describe("devices.service", () => {
   it("informa los permisos del celular solo cuando cambian", async () => {
     mockApi.get.mockResolvedValue({ data: [{ id: 1, deviceUuid: "expo-viejo", model: "Dispositivo Expo" }] });
 
-    await reportarPermisos({ ubicacion: true, agitar: false });
-    await reportarPermisos({ ubicacion: true, agitar: false });
-    await reportarPermisos({ ubicacion: true, agitar: true });
+    await reportPermissions({ ubicacion: true, agitar: false });
+    await reportPermissions({ ubicacion: true, agitar: false });
+    await reportPermissions({ ubicacion: true, agitar: true });
 
-    const envios = mockApi.put.mock.calls.filter(([, datos]) => "permissions" in datos);
-    expect(envios.map(([, d]) => d.permissions)).toEqual([
+    const deliveries = mockApi.put.mock.calls.filter(([, data]) => "permissions" in data);
+    expect(deliveries.map(([, d]) => d.permissions)).toEqual([
       JSON.stringify({ ubicacion: true, agitar: false }),
       JSON.stringify({ ubicacion: true, agitar: true }),
     ]);

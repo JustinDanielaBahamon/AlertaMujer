@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import TutorialLottie from "../component/TutorialLottie";
 import { useTutorialPage } from "../component/TutorialPager";
 import Card from "../../../components/ui/card/card";
-import PermisosModal from "../../../components/ui/modalMesanje/permisosMLL";
+import PermissionsModal from "../../../components/ui/modalMesanje/permisosMLL";
 import { useNotificationTutorialViewModel, type NotifFeatureItem, } from "../viewModel/useNotificationTutorialViewModel";
 import { notificationStyle, NOTIF_COLORS } from "../styles/notificationStyle";
 import { LinearGradient } from 'expo-linear-gradient';
@@ -112,7 +112,7 @@ export default function NotificationTutorial({ externalVm }: NotificationTutoria
   const { t } = useLocale();
   const internalVM = useNotificationTutorialViewModel();
   const vm = externalVm ?? internalVM;
-  const { avanzar } = useTutorialPage();
+  const { advance } = useTutorialPage();
 
   // ── Spring card entrance animation ────────────────────────────────────────
   const cardAnim = useRef(new Animated.Value(0)).current;
@@ -203,12 +203,12 @@ export default function NotificationTutorial({ externalVm }: NotificationTutoria
                   <View style={notificationStyle.sectionLine} />
                 </View>
 
-                <View style={notificationStyle.permisosCard}>
-                  <View style={notificationStyle.permisosRow}>
-                    <Text style={notificationStyle.permisosEmoji}>🔔</Text>
-                    <View style={notificationStyle.permisosTitleWrap}>
-                      <Text style={notificationStyle.permisosTitle}>{t.tutorial.notificacion_permisos_push_titulo}</Text>
-                      <Text style={notificationStyle.permisosDesc}>
+                <View style={notificationStyle.permissionsCard}>
+                  <View style={notificationStyle.permissionsRow}>
+                    <Text style={notificationStyle.permissionsEmoji}>🔔</Text>
+                    <View style={notificationStyle.permissionsTitleWrap}>
+                      <Text style={notificationStyle.permissionsTitle}>{t.tutorial.notificacion_permisos_push_titulo}</Text>
+                      <Text style={notificationStyle.permissionsDesc}>
                         {t.tutorial.notificacion_permisos_push_desc}
                       </Text>
                     </View>
@@ -217,12 +217,12 @@ export default function NotificationTutorial({ externalVm }: NotificationTutoria
 
                 {/* Finish button — inside scroll so it's always visible */}
                 <TouchableOpacity
-                  onPress={avanzar}
-                  style={notificationStyle.btnFinalizar}
+                  onPress={advance}
+                  style={notificationStyle.finishBtn}
                   activeOpacity={0.85}
                 >
                   <Text style={{ fontSize: 18 }}>🚀</Text>
-                  <Text style={notificationStyle.btnFinalizarText}>{t.tutorial.notificacion_btn_finalizar}</Text>
+                  <Text style={notificationStyle.finishBtnText}>{t.tutorial.notificacion_btn_finalizar}</Text>
                 </TouchableOpacity>
 
                 {/* Bottom badge */}
@@ -254,11 +254,11 @@ export default function NotificationTutorial({ externalVm }: NotificationTutoria
           </View>
         )}
 
-        <PermisosModal
+        <PermissionsModal
           visible={vm.modalVisible}
-          tipo="notificacion"
-          onConfirmar={vm.confirmModal}
-          onCancelar={vm.cancelModal}
+          type="notificacion"
+          onConfirm={vm.confirmModal}
+          onCancel={vm.cancelModal}
         />
       </LinearGradient>
     </View>

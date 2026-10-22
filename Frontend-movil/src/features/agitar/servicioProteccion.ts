@@ -7,12 +7,12 @@ import notifee, {
   type Event,
 } from "@notifee/react-native";
 import { AppState, Vibration } from "react-native";
-import { estiloGrande } from "../../notifications/estiloNotificacion";
+import { bigStyle } from "../../notifications/estiloNotificacion";
 import SensorSacudidas from "../../../modules/sensor-sacudidas";
-import { crearDetectorSacudidas } from "./detectorSacudidas";
-import { crearDetectorBotonEncendido } from "./detectorBotonEncendido";
-import { alertaEnSegundoPlano, crearAlertaPorSacudida } from "./alertaEnSegundoPlano";
-import { permisoNotificaciones, permisoUbicacion } from "../../services/permisosSeguros";
+import { createShakeDetector } from "./detectorSacudidas";
+import { createPowerButtonDetector } from "./detectorBotonEncendido";
+import { backgroundAlert, createShakeAlert } from "./alertaEnSegundoPlano";
+import { notificationsPermission, locationPermission } from "../../services/permisosSeguros";
 
 /**
  * "Agitar el teléfono": un servicio en primer plano de Android (notificación fija "Protección
@@ -30,131 +30,131 @@ import { permisoNotificaciones, permisoUbicacion } from "../../services/permisos
  */
 
 /** Método con el que se pidió la alerta. */
-export type MetodoProteccion = "agitar" | "encendido";
-export type OpcionesProteccion = { agitar: boolean; encendido: boolean };
+export type ProtectionMethod = "agitar" | "encendido";
+export type ProtectionOptions = { shake: boolean; powerButton: boolean };
 
-const CANAL_PROTECCION = "proteccion_activa";
-const CANAL_AVISO = "agitar_aviso";
-const ID_SERVICIO = "proteccion-agitar";
-const ID_CUENTA = "agitar-cuenta";
-const ID_ENVIADA = "agitar-enviada";
-const ACCION_CANCELAR = "cancelar_agitar";
-const ACCION_ABRIR = "abrir_alerta_agitar";
-const SEGUNDOS_CUENTA = 5;
+const PROTECTION_CHANNEL = "proteccion_activa";
+const NOTICE_CHANNEL = "agitar_aviso";
+const SERVICE_ID = "proteccion-agitar";
+const ACCOUNT_ID = "agitar-cuenta";
+const SENT_ID = "agitar-enviada";
+const ACTION_CANCEL = "cancelar_agitar";
+const ACTION_OPEN = "abrir_alerta_agitar";
+const COUNTDOWN_SECONDS = 5;
 // Cada 40 ms: con menos lecturas un hachazo se confunde con varios picos sueltos
-const INTERVALO_SENSOR_MS = 40;
+const SENSOR_INTERVAL_MS = 40;
 
-export type EstadoProteccion = "activa" | "sin_ubicacion" | "sin_sensor";
+export type ProtectionStatus = "activa" | "sin_ubicacion" | "sin_sensor";
 
-let activa = false;
-let detenerSensor: (() => void) | null = null;
-let detenerBoton: (() => void) | null = null;
-let opciones: OpcionesProteccion = { agitar: true, encendido: false };
-let terminarTarea: (() => void) | null = null;
-let cuentaEnCurso: { cancelada: boolean } | null = null;
+let active = false;
+let stopSensor: (() => void) | null = null;
+let stopButton: (() => void) | null = null;
+let options: ProtectionOptions = { shake: true, powerButton: false };
+let finishTask: (() => void) | null = null;
+let countdownRunning: { cancelled: boolean } | null = null;
 
 // --- Sacudida con la app en pantalla: la navegación se suscribe y abre la cuenta regresiva ---
-const oyentesEnPantalla = new Set<(metodo: MetodoProteccion) => void>();
+const onScreenListeners = new Set<(method: ProtectionMethod) => void>();
 
-export function alSacudirEnPantalla(oyente: (metodo: MetodoProteccion) => void): () => void {
-  oyentesEnPantalla.add(oyente);
+export function onShakeOnScreen(listener: (method: ProtectionMethod) => void): () => void {
+  onScreenListeners.add(listener);
   return () => {
-    oyentesEnPantalla.delete(oyente);
+    onScreenListeners.delete(listener);
   };
 }
 
 // --- Alerta creada en segundo plano: al tocar la notificación se abre su pantalla ---
-let alertaPorAbrir: number | null = null;
-const oyentesAbrir = new Set<(alertaId: number) => void>();
+let alertToOpen: number | null = null;
+const openListeners = new Set<(alertId: number) => void>();
 
-export function alAbrirAlertaPorSacudida(oyente: (alertaId: number) => void): () => void {
-  oyentesAbrir.add(oyente);
-  if (alertaPorAbrir !== null) {
-    const id = alertaPorAbrir;
-    alertaPorAbrir = null;
-    oyente(id);
+export function onShakeAlertOpen(listener: (alertId: number) => void): () => void {
+  openListeners.add(listener);
+  if (alertToOpen !== null) {
+    const id = alertToOpen;
+    alertToOpen = null;
+    listener(id);
   }
   return () => {
-    oyentesAbrir.delete(oyente);
+    openListeners.delete(listener);
   };
 }
 
-function abrirAlerta(alertaId: number) {
-  if (oyentesAbrir.size === 0) {
-    alertaPorAbrir = alertaId;
+function openAlert(alertId: number) {
+  if (openListeners.size === 0) {
+    alertToOpen = alertId;
     return;
   }
-  oyentesAbrir.forEach((o) => o(alertaId));
+  openListeners.forEach((o) => o(alertId));
 }
 
 /** Se registra una sola vez al arrancar (index.ts), antes de montar la app. */
-export function registrarServicioProteccion(): void {
+export function registerProtectionService(): void {
   notifee.registerForegroundService(
     () =>
       new Promise<void>((resolver) => {
-        terminarTarea = resolver;
-        configurarDetectores();
+        finishTask = resolver;
+        setUpDetectors();
       }),
   );
 }
 
 /** Enciende solo lo que la usuaria activó: acelerómetro, botón de encendido o ambos. */
-function configurarDetectores() {
-  detenerSensor?.();
-  detenerSensor = null;
-  detenerBoton?.();
-  detenerBoton = null;
-  if (opciones.agitar) escucharSensor();
-  if (opciones.encendido) escucharBotonEncendido();
+function setUpDetectors() {
+  stopSensor?.();
+  stopSensor = null;
+  stopButton?.();
+  stopButton = null;
+  if (options.shake) listenSensor();
+  if (options.powerButton) listenPowerButton();
 }
 
-function escucharBotonEncendido() {
-  const detectar = crearDetectorBotonEncendido();
+function listenPowerButton() {
+  const detect = createPowerButtonDetector();
   const sub = SensorSacudidas.addListener("onPantalla", () => {
-    if (detectar(Date.now())) alActivar("encendido");
+    if (detect(Date.now())) onActivate("encendido");
   });
   SensorSacudidas.iniciarBotonEncendido();
-  detenerBoton = () => {
+  stopButton = () => {
     SensorSacudidas.detenerBotonEncendido();
     sub.remove();
   };
 }
 
-function escucharSensor() {
-  const detectar = crearDetectorSacudidas();
+function listenSensor() {
+  const detect = createShakeDetector();
   const sub = SensorSacudidas.addListener("onLectura", ({ x, y, z }) => {
-    if (detectar(x, y, z, Date.now())) alActivar("agitar");
+    if (detect(x, y, z, Date.now())) onActivate("agitar");
   });
-  SensorSacudidas.iniciar(INTERVALO_SENSOR_MS);
-  detenerSensor = () => {
+  SensorSacudidas.iniciar(SENSOR_INTERVAL_MS);
+  stopSensor = () => {
     SensorSacudidas.detener();
     sub.remove();
   };
 }
 
-function alActivar(metodo: MetodoProteccion) {
-  if (cuentaEnCurso || alertaEnSegundoPlano() !== null) return;
-  if (AppState.currentState === "active" && oyentesEnPantalla.size > 0) {
-    oyentesEnPantalla.forEach((o) => o(metodo));
+function onActivate(method: ProtectionMethod) {
+  if (countdownRunning || backgroundAlert() !== null) return;
+  if (AppState.currentState === "active" && onScreenListeners.size > 0) {
+    onScreenListeners.forEach((o) => o(method));
     return;
   }
-  cuentaRegresiva(metodo);
+  startCountdown(method);
 }
 
-const MOTIVO: Record<MetodoProteccion, string> = {
+const REASON: Record<ProtectionMethod, string> = {
   agitar: "Agitaste el teléfono",
   encendido: "Presionaste 4 veces el botón de encendido",
 };
 
-async function crearCanales() {
+async function createChannels() {
   await notifee.createChannel({
-    id: CANAL_PROTECCION,
+    id: PROTECTION_CHANNEL,
     name: "Protección activa",
     description: "Aviso fijo mientras la activación por sacudida está encendida",
     importance: AndroidImportance.LOW,
   });
   await notifee.createChannel({
-    id: CANAL_AVISO,
+    id: NOTICE_CHANNEL,
     name: "Alerta rápida",
     description: "Cuenta regresiva y confirmación al agitar el teléfono o presionar el botón de encendido",
     importance: AndroidImportance.HIGH,
@@ -163,63 +163,63 @@ async function crearCanales() {
   });
 }
 
-async function cuentaRegresiva(metodo: MetodoProteccion) {
-  const cuenta = { cancelada: false };
-  cuentaEnCurso = cuenta;
+async function startCountdown(method: ProtectionMethod) {
+  const countdown = { cancelled: false };
+  countdownRunning = countdown;
   try {
-    for (let s = SEGUNDOS_CUENTA; s > 0; s--) {
-      if (cuenta.cancelada) return;
+    for (let s = COUNTDOWN_SECONDS; s > 0; s--) {
+      if (countdown.cancelled) return;
       Vibration.vibrate(300);
       await notifee.displayNotification({
-        id: ID_CUENTA,
+        id: ACCOUNT_ID,
         title: `🚨 Se enviará una alerta en ${s} s`,
-        body: `${MOTIVO[metodo]}. Toca Cancelar si fue un error.`,
+        body: `${REASON[method]}. Toca Cancelar si fue un error.`,
         android: {
-          channelId: CANAL_AVISO,
-          ...estiloGrande(`${MOTIVO[metodo]}. Toca Cancelar si fue un error.`),
+          channelId: NOTICE_CHANNEL,
+          ...bigStyle(`${REASON[method]}. Toca Cancelar si fue un error.`),
           category: AndroidCategory.ALARM,
           importance: AndroidImportance.HIGH,
           visibility: AndroidVisibility.PUBLIC,
           onlyAlertOnce: true,
           ongoing: true,
           autoCancel: false,
-          actions: [{ title: "Cancelar", pressAction: { id: ACCION_CANCELAR } }],
+          actions: [{ title: "Cancelar", pressAction: { id: ACTION_CANCEL } }],
         },
       });
       await SensorSacudidas.esperar(1000);
     }
-    if (cuenta.cancelada) return;
-    await notifee.cancelNotification(ID_CUENTA);
+    if (countdown.cancelled) return;
+    await notifee.cancelNotification(ACCOUNT_ID);
 
     try {
-      const alertaId = await crearAlertaPorSacudida(metodo);
+      const alertId = await createShakeAlert(method);
       Vibration.vibrate([0, 600, 200, 600]);
       await notifee.displayNotification({
-        id: ID_ENVIADA,
+        id: SENT_ID,
         title: "🚨 Alerta enviada",
         body: "Tus contactos recibieron tu ubicación. Toca para ver la alerta.",
-        data: { alertaId: String(alertaId) },
+        data: { alertaId: String(alertId) },
         android: {
-          channelId: CANAL_AVISO,
-          ...estiloGrande("Tus contactos recibieron tu ubicación. Toca para ver la alerta, escribirles y ver lo que se graba."),
+          channelId: NOTICE_CHANNEL,
+          ...bigStyle("Tus contactos recibieron tu ubicación. Toca para ver la alerta, escribirles y ver lo que se graba."),
           visibility: AndroidVisibility.PUBLIC,
-          pressAction: { id: ACCION_ABRIR, launchActivity: "default" },
+          pressAction: { id: ACTION_OPEN, launchActivity: "default" },
         },
       });
     } catch {
       await notifee.displayNotification({
-        id: ID_ENVIADA,
+        id: SENT_ID,
         title: "No se pudo enviar la alerta",
         body: "Abre la app y usa el botón SOS, o llama a la línea de emergencias.",
         android: {
-          channelId: CANAL_AVISO,
-          ...estiloGrande("Abre la app y usa el botón SOS, o llama a la línea de emergencias."),
+          channelId: NOTICE_CHANNEL,
+          ...bigStyle("Abre la app y usa el botón SOS, o llama a la línea de emergencias."),
           pressAction: { id: "default", launchActivity: "default" },
         },
       });
     }
   } finally {
-    if (cuentaEnCurso === cuenta) cuentaEnCurso = null;
+    if (countdownRunning === countdown) countdownRunning = null;
   }
 }
 
@@ -228,28 +228,28 @@ async function cuentaRegresiva(metodo: MetodoProteccion) {
  * Devuelve true si el evento era suyo. Se llama desde los manejadores de Notifee de primer y
  * segundo plano.
  */
-export function manejarEventoProteccion({ type, detail }: Event): boolean {
+export function handleProtectionEvent({ type, detail }: Event): boolean {
   if (type !== EventType.ACTION_PRESS && type !== EventType.PRESS) return false;
-  const accion = detail.pressAction?.id;
-  if (accion === ACCION_CANCELAR) {
-    if (cuentaEnCurso) cuentaEnCurso.cancelada = true;
-    notifee.cancelNotification(ID_CUENTA);
+  const action = detail.pressAction?.id;
+  if (action === ACTION_CANCEL) {
+    if (countdownRunning) countdownRunning.cancelled = true;
+    notifee.cancelNotification(ACCOUNT_ID);
     return true;
   }
-  if (accion === ACCION_ABRIR || detail.notification?.id === ID_ENVIADA) {
+  if (action === ACTION_OPEN || detail.notification?.id === SENT_ID) {
     const id = Number(detail.notification?.data?.alertaId);
-    if (id) abrirAlerta(id);
-    notifee.cancelNotification(ID_ENVIADA);
+    if (id) openAlert(id);
+    notifee.cancelNotification(SENT_ID);
     return true;
   }
   return false;
 }
 
-function textoProteccion(): string {
-  if (opciones.agitar && opciones.encendido) {
+function protectionText(): string {
+  if (options.shake && options.powerButton) {
     return "Agita el teléfono con fuerza o presiona 4 veces el botón de encendido para enviar una alerta a tus contactos.";
   }
-  if (opciones.encendido) return "Presiona 4 veces rápido el botón de encendido para enviar una alerta a tus contactos.";
+  if (options.powerButton) return "Presiona 4 veces rápido el botón de encendido para enviar una alerta a tus contactos.";
   return "Agita el teléfono con fuerza para enviar una alerta a tus contactos.";
 }
 
@@ -257,49 +257,49 @@ function textoProteccion(): string {
  * pedirPermisos = true solo cuando la usuaria enciende un método (no al abrir la app). Si ya
  * estaba activa con otros métodos, solo cambia lo que se escucha.
  */
-export async function iniciarProteccion(
-  pedirPermisos = false,
-  nuevas: OpcionesProteccion = { agitar: true, encendido: false },
-): Promise<EstadoProteccion> {
-  if (nuevas.agitar && !SensorSacudidas.disponible()) return "sin_sensor";
+export async function startProtection(
+  requestPermissions = false,
+  newItems: ProtectionOptions = { shake: true, powerButton: false },
+): Promise<ProtectionStatus> {
+  if (newItems.shake && !SensorSacudidas.disponible()) return "sin_sensor";
   // El servicio es de tipo ubicación (para poder enviarla con la pantalla bloqueada) y Android
   // exige el permiso antes de iniciarlo
-  if (!(await permisoUbicacion(pedirPermisos))) return "sin_ubicacion";
-  const cambiaron = opciones.agitar !== nuevas.agitar || opciones.encendido !== nuevas.encendido;
-  opciones = nuevas;
-  if (activa && !cambiaron) return "activa";
-  if (activa) configurarDetectores();
+  if (!(await locationPermission(requestPermissions))) return "sin_ubicacion";
+  const changed = options.shake !== newItems.shake || options.powerButton !== newItems.powerButton;
+  options = newItems;
+  if (active && !changed) return "activa";
+  if (active) setUpDetectors();
 
-  await permisoNotificaciones(pedirPermisos);
-  await crearCanales();
+  await notificationsPermission(requestPermissions);
+  await createChannels();
   // Mostrar la notificación del servicio otra vez la actualiza (y la primera vez lo arranca)
   await notifee.displayNotification({
-    id: ID_SERVICIO,
+    id: SERVICE_ID,
     title: "Protección activa",
-    body: textoProteccion(),
+    body: protectionText(),
     android: {
-      channelId: CANAL_PROTECCION,
-      ...estiloGrande(textoProteccion()),
+      channelId: PROTECTION_CHANNEL,
+      ...bigStyle(protectionText()),
       asForegroundService: true,
       foregroundServiceTypes: [AndroidForegroundServiceType.FOREGROUND_SERVICE_TYPE_LOCATION],
       ongoing: true,
       pressAction: { id: "default", launchActivity: "default" },
     },
   });
-  activa = true;
+  active = true;
   return "activa";
 }
 
-export async function detenerProteccion(): Promise<void> {
-  if (!activa) return;
-  activa = false;
-  detenerSensor?.();
-  detenerSensor = null;
-  detenerBoton?.();
-  detenerBoton = null;
-  if (cuentaEnCurso) cuentaEnCurso.cancelada = true;
-  await notifee.cancelNotification(ID_CUENTA);
+export async function stopProtection(): Promise<void> {
+  if (!active) return;
+  active = false;
+  stopSensor?.();
+  stopSensor = null;
+  stopButton?.();
+  stopButton = null;
+  if (countdownRunning) countdownRunning.cancelled = true;
+  await notifee.cancelNotification(ACCOUNT_ID);
   await notifee.stopForegroundService();
-  terminarTarea?.();
-  terminarTarea = null;
+  finishTask?.();
+  finishTask = null;
 }

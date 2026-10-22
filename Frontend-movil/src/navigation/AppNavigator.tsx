@@ -1,50 +1,50 @@
 import { NavigationContainer, useNavigationContainerRef } from "@react-navigation/native";
 import { useEffect, useRef, useState } from "react";
-import CompletarRegistroScreen from "../features/completarRegistro/CompletarRegistroScreen";
-import { perfilIncompleto } from "../features/completarRegistro/perfilIncompleto";
+import CompleteSignUpScreen from "../features/completarRegistro/CompletarRegistroScreen";
+import { profileIncomplete } from "../features/completarRegistro/perfilIncompleto";
 import { getMe } from "../services/users.service";
 import { useAuth } from "../contexts/AuthContext";
 import type { MainStackParamList } from "./types";
 import AuthNavigator from "./AuthNavigator";
 import MainNavigator from "./MainNavigator";
-import { useAlertasSos } from "../notifications/useAlertasSos";
-import { useProteccionAgitar } from "../features/agitar/useProteccionAgitar";
-import { useRecordatorioProteccion } from "../features/permisos/useRecordatorioProteccion";
-import { useReanudarAlerta } from "../features/AlertaActiva/useReanudarAlerta";
-import { useEnlaceSOS } from "../features/widget/useEnlaceSOS";
+import { useSosAlerts } from "../notifications/useAlertasSos";
+import { useShakeProtection } from "../features/agitar/useProteccionAgitar";
+import { useProtectionReminder } from "../features/permisos/useRecordatorioProteccion";
+import { useResumeAlert } from "../features/AlertaActiva/useReanudarAlerta";
+import { useSosLink } from "../features/widget/useEnlaceSOS";
 
 export default function AppNavigator() {
   const { user, pendingMainRoute, restoring } = useAuth();
   const mainEntryRef = useRef<keyof MainStackParamList | null>(null);
-  const navegacion = useNavigationContainerRef<MainStackParamList>();
+  const navigation = useNavigationContainerRef<MainStackParamList>();
   // Alarma de emergencia cuando una persona que tiene a esta usuaria como contacto activa una alerta
-  useAlertasSos(navegacion, !!user && !restoring);
+  useSosAlerts(navigation, !!user && !restoring);
   // Activación de la alerta al agitar el teléfono (si la usuaria la encendió en Ajustes)
-  useProteccionAgitar(navegacion, !!user && !restoring && user.id !== 0);
+  useShakeProtection(navigation, !!user && !restoring && user.id !== 0);
   // Aviso si falta algo para que las alertas funcionen (agitar apagado, permisos...)
-  useRecordatorioProteccion(navegacion, !!user && !restoring && user.id !== 0);
+  useProtectionReminder(navigation, !!user && !restoring && user.id !== 0);
   // Si hay una alerta propia activa (la app se cerró con la alerta en curso), se vuelve a ella
-  useReanudarAlerta(navegacion, !!user && !restoring && user.id !== 0);
+  useResumeAlert(navigation, !!user && !restoring && user.id !== 0);
   // Toque en el widget "SOS" de la pantalla de inicio (abre alertamujer://sos)
-  useEnlaceSOS(navegacion, !!user && !restoring && user.id !== 0);
+  useSosLink(navigation, !!user && !restoring && user.id !== 0);
 
   // Cuentas creadas con Google: faltan teléfono, documento y fecha de nacimiento. Si la consulta
   // falla (sin señal) no se bloquea la app: se vuelve a revisar en la próxima apertura.
-  const [faltanDatos, setFaltanDatos] = useState(false);
-  const sesionReal = !!user && !restoring && user.id !== 0 && user.role_id !== 2;
+  const [missingData, setMissingData] = useState(false);
+  const realSession = !!user && !restoring && user.id !== 0 && user.role_id !== 2;
   useEffect(() => {
-    if (!sesionReal) {
-      setFaltanDatos(false);
+    if (!realSession) {
+      setMissingData(false);
       return;
     }
-    let vigente = true;
+    let valid = true;
     getMe()
-      .then((u) => vigente && setFaltanDatos(perfilIncompleto(u)))
+      .then((u) => valid && setMissingData(profileIncomplete(u)))
       .catch(() => {});
     return () => {
-      vigente = false;
+      valid = false;
     };
-  }, [sesionReal, user?.correo]);
+  }, [realSession, user?.correo]);
 
   if (user && mainEntryRef.current === null) {
     mainEntryRef.current = pendingMainRoute ?? "DrawerHome";
@@ -59,9 +59,9 @@ export default function AppNavigator() {
   }
 
   return (
-    <NavigationContainer ref={navegacion}>
-      {user && faltanDatos ? (
-        <CompletarRegistroScreen alTerminar={() => setFaltanDatos(false)} />
+    <NavigationContainer ref={navigation}>
+      {user && missingData ? (
+        <CompleteSignUpScreen onDone={() => setMissingData(false)} />
       ) : user ? (
         <MainNavigator
           key={user.correo}

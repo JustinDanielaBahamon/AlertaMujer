@@ -178,7 +178,7 @@ export const createStyles = (theme: AppTheme) => {
       gap: 4,
     },
 
-    cardCoords: {
+    coordsCard: {
       fontSize: 10,
     },
 

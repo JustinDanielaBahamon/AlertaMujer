@@ -4,33 +4,33 @@ import { Modal, Text, TouchableOpacity, View } from 'react-native';
 import { AppLocale, useLocale } from '../../../contexts/LocaleContext';
 import { localStyles } from './modalIdioma.style';
 
-export type OpcionIdioma = {
+export type LanguageOption = {
   code: AppLocale;
   label: string;
 };
 
-interface ModalIdiomaProps {
+interface LanguageModalProps {
   visible: boolean;
   locale: AppLocale;
-  opciones: OpcionIdioma[];
+  options: LanguageOption[];
   theme: any;
-  onSeleccionar: (locale: AppLocale) => void;
-  onCerrar: () => void;
+  onSelect: (locale: AppLocale) => void;
+  onClose: () => void;
 }
 
-export default function ModalIdioma({
+export default function LanguageModal({
   visible,
   locale,
-  opciones,
+  options,
   theme,
-  onSeleccionar,
-  onCerrar,
-}: ModalIdiomaProps) {
+  onSelect,
+  onClose,
+}: LanguageModalProps) {
   const { t } = useLocale();
   const accent = theme.tabActiveColor;
 
   // Nombre de cada idioma en el idioma actual, debajo de su nombre propio
-  const nombreTraducido: Record<AppLocale, string> = {
+  const translatedName: Record<AppLocale, string> = {
     es: t.modal.idioma_es,
     en: t.modal.idioma_en,
     pt: t.modal.idioma_pt,
@@ -38,45 +38,45 @@ export default function ModalIdioma({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onCerrar}>
-      <TouchableOpacity style={localStyles.overlay} activeOpacity={1} onPress={onCerrar}>
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+      <TouchableOpacity style={localStyles.overlay} activeOpacity={1} onPress={onClose}>
         <TouchableOpacity activeOpacity={1} style={[localStyles.modalCard, { backgroundColor: theme.card }]}>
-          <View style={[localStyles.iconoHeader, { backgroundColor: accent + '22' }]}>
+          <View style={[localStyles.headerIconBox, { backgroundColor: accent + '22' }]}>
             <Ionicons name="language" size={26} color={accent} />
           </View>
           <Text style={[localStyles.modalTitle, { color: theme.text }]}>{t.modal.seleccionar_idioma}</Text>
           <Text style={[localStyles.modalSub, { color: theme.text }]}>{t.modal.idioma_subtitulo}</Text>
 
-          {opciones.map((opcion) => {
-            const seleccionado = opcion.code === locale;
+          {options.map((option) => {
+            const selected = option.code === locale;
             return (
               <TouchableOpacity
-                key={opcion.code}
+                key={option.code}
                 style={[
-                  localStyles.opcion,
-                  { borderColor: seleccionado ? accent : accent + '30' },
-                  seleccionado && { backgroundColor: accent + '18' },
+                  localStyles.option,
+                  { borderColor: selected ? accent : accent + '30' },
+                  selected && { backgroundColor: accent + '18' },
                 ]}
-                onPress={() => onSeleccionar(opcion.code)}
+                onPress={() => onSelect(option.code)}
                 accessibilityRole="radio"
-                accessibilityState={{ selected: seleccionado }}
+                accessibilityState={{ selected: selected }}
               >
-                <View style={[localStyles.codigo, { backgroundColor: seleccionado ? accent : accent + '22' }]}>
-                  <Text style={[localStyles.codigoTexto, { color: seleccionado ? '#fff' : accent }]}>
-                    {opcion.code.toUpperCase()}
+                <View style={[localStyles.code, { backgroundColor: selected ? accent : accent + '22' }]}>
+                  <Text style={[localStyles.codeText, { color: selected ? '#fff' : accent }]}>
+                    {option.code.toUpperCase()}
                   </Text>
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={[localStyles.opcionTexto, { color: theme.text }]}>{opcion.label}</Text>
-                  <Text style={[localStyles.opcionSub, { color: theme.text }]}>{nombreTraducido[opcion.code]}</Text>
+                  <Text style={[localStyles.optionText, { color: theme.text }]}>{option.label}</Text>
+                  <Text style={[localStyles.optionSub, { color: theme.text }]}>{translatedName[option.code]}</Text>
                 </View>
-                {seleccionado && <Ionicons name="checkmark-circle" size={22} color={accent} />}
+                {selected && <Ionicons name="checkmark-circle" size={22} color={accent} />}
               </TouchableOpacity>
             );
           })}
 
-          <TouchableOpacity style={localStyles.btnCerrar} onPress={onCerrar}>
-            <Text style={[localStyles.btnCerrarTexto, { color: accent }]}>{t.modal.cerrar}</Text>
+          <TouchableOpacity style={localStyles.closeBtn} onPress={onClose}>
+            <Text style={[localStyles.closeBtnText, { color: accent }]}>{t.modal.cerrar}</Text>
           </TouchableOpacity>
         </TouchableOpacity>
       </TouchableOpacity>

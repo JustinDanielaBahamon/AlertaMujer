@@ -1,49 +1,49 @@
 import api from "./api";
-import { aFecha } from "./alert-tracking.service";
+import { toDate } from "./alert-tracking.service";
 
 /** Trayecto de "Avísame si no llego". */
-export interface Trayecto {
+export interface Trip {
   id: number;
-  destino: string;
-  inicio: Date;
-  llegada: Date;
-  estado: "active" | "arrived" | "cancelled" | "alerted";
+  destination: string;
+  startTime: Date;
+  arrival: Date;
+  status: "active" | "arrived" | "cancelled" | "alerted";
 }
 
-const aTrayecto = (t: any): Trayecto => ({
+const toTrip = (t: any): Trip => ({
   id: Number(t.id),
-  destino: t.destination,
-  inicio: aFecha(t.startedAt),
-  llegada: aFecha(t.expectedArrival),
-  estado: t.status,
+  destination: t.destination,
+  startTime: toDate(t.startedAt),
+  arrival: toDate(t.expectedArrival),
+  status: t.status,
 });
 
-export async function iniciarTrayecto(datos: {
-  destino: string;
-  minutos: number;
+export async function startTrip(trip: {
+  destination: string;
+  minutes: number;
   deviceId: number;
   latitude?: number;
   longitude?: number;
-}): Promise<Trayecto> {
+}): Promise<Trip> {
   const { data } = await api.post("/api/safe-trips", {
-    destination: datos.destino,
-    minutes: datos.minutos,
-    deviceId: datos.deviceId,
-    latitude: datos.latitude,
-    longitude: datos.longitude,
+    destination: trip.destination,
+    minutes: trip.minutes,
+    deviceId: trip.deviceId,
+    latitude: trip.latitude,
+    longitude: trip.longitude,
   });
-  return aTrayecto(data);
+  return toTrip(data);
 }
 
 /** El trayecto en curso o null (el backend responde 204 si no hay). */
-export async function trayectoActivo(): Promise<Trayecto | null> {
+export async function activeTrip(): Promise<Trip | null> {
   const r = await api.get("/api/safe-trips/active");
-  return r.status === 204 || !r.data ? null : aTrayecto(r.data);
+  return r.status === 204 || !r.data ? null : toTrip(r.data);
 }
 
-export const confirmarLlegada = async (id: number) => aTrayecto((await api.post(`/api/safe-trips/${id}/arrived`)).data);
+export const confirmArrival = async (id: number) => toTrip((await api.post(`/api/safe-trips/${id}/arrived`)).data);
 
-export const alargarTrayecto = async (id: number, minutos: number) =>
-  aTrayecto((await api.post(`/api/safe-trips/${id}/extend`, { minutes: minutos })).data);
+export const extendTrip = async (id: number, minutes: number) =>
+  toTrip((await api.post(`/api/safe-trips/${id}/extend`, { minutes: minutes })).data);
 
-export const cancelarTrayecto = async (id: number) => aTrayecto((await api.post(`/api/safe-trips/${id}/cancel`)).data);
+export const cancelTrip = async (id: number) => toTrip((await api.post(`/api/safe-trips/${id}/cancel`)).data);

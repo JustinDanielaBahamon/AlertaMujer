@@ -3,12 +3,12 @@ import { AppTheme } from "../../../../src/contexts/ThemeContext";
 
 export const createStyles = (theme: AppTheme) =>
   StyleSheet.create({
-    ContenedorPrincipal: {
+    MainContainer: {
       flex: 1,
       backgroundColor: theme.background,
     },
 
-    Gradiente: {
+    Gradient: {
       paddingTop: 50,
       paddingHorizontal: 20,
       paddingBottom: 32,
@@ -16,7 +16,7 @@ export const createStyles = (theme: AppTheme) =>
       borderBottomRightRadius: 40,
     },
 
-    BotonVolver: {
+    BackButton: {
       width: 38,
       height: 38,
       borderRadius: 19,
@@ -26,11 +26,11 @@ export const createStyles = (theme: AppTheme) =>
       marginBottom: 20,
     },
 
-    HeaderContenido: {
+    HeaderContent: {
       width: "100%",
     },
 
-    IconoTipo: {
+    TypeIcon: {
       width: 56,
       height: 56,
       borderRadius: 18,
@@ -38,13 +38,13 @@ export const createStyles = (theme: AppTheme) =>
       justifyContent: "center",
     },
 
-    TipoTexto: {
+    TypeText: {
       color: "white",
       fontSize: 24,
       fontWeight: "bold",
     },
 
-    BadgeEstado: {
+    StatusBadge: {
       flexDirection: "row",
       alignItems: "center",
       gap: 6,
@@ -56,24 +56,24 @@ export const createStyles = (theme: AppTheme) =>
       marginTop: 6,
     },
 
-    PuntoEstado: {
+    StatusDot: {
       width: 7,
       height: 7,
       borderRadius: 4,
       backgroundColor: "#69ff9a",
     },
 
-    TextoEstado: {
+    StatusText: {
       color: "white",
       fontSize: 12,
     },
 
-    Cuerpo: {
+    Body: {
       padding: 20,
       paddingTop: 14,
     },
 
-    TarjetaResumen: {
+    SummaryCard: {
       flexDirection: "row",
       alignItems: "center",
       gap: 12,
@@ -85,7 +85,7 @@ export const createStyles = (theme: AppTheme) =>
       marginBottom: 14,
     },
 
-    IconoResumen: {
+    SummaryIcon: {
       width: 46,
       height: 46,
       borderRadius: 23,
@@ -93,40 +93,40 @@ export const createStyles = (theme: AppTheme) =>
       justifyContent: "center",
     },
 
-    ResumenTipo: {
+    SummaryType: {
       fontSize: 20,
       fontWeight: "800",
       color: theme.text,
       marginBottom: 3,
     },
 
-    ResumenFilaMeta: {
+    SummaryMetaRow: {
       flexDirection: "row",
       alignItems: "center",
       gap: 5,
       marginTop: 3,
     },
 
-    ResumenMetaTexto: {
+    SummaryMetaText: {
       fontSize: 13,
       color: theme.contactSubtext,
       flex: 1,
     },
 
-    BadgeResumenEstado: {
+    SummaryStatusBadge: {
       borderRadius: 999,
       paddingHorizontal: 10,
       paddingVertical: 6,
       alignSelf: "flex-start",
     },
 
-    BadgeResumenEstadoTexto: {
+    SummaryStatusBadgeText: {
       fontSize: 11,
       fontWeight: "700",
       letterSpacing: 0.4,
     },
 
-    TarjetaMapa: {
+    MapCard: {
       borderRadius: 16,
       overflow: "hidden",
       marginBottom: 20,
@@ -136,12 +136,12 @@ export const createStyles = (theme: AppTheme) =>
      
     },
 
-    MapaFondo: {
+    MapBackground: {
       height: 220,
       width: "100%",
     },
 
-    BotonCentroMapa: {
+    MapCenterButton: {
       width: 42,
       height: 42,
       borderRadius: 21,
@@ -150,14 +150,14 @@ export const createStyles = (theme: AppTheme) =>
       justifyContent: "center",
     },
 
-    SeccionTitulo: {
+    SectionTitle: {
       fontSize: 25,
       fontWeight: "600",
       color: theme.text,
       marginBottom: 14,
     },
 
-    GridInformacion: {
+    InfoGrid: {
       flexDirection: "row",
       flexWrap: "wrap",
       justifyContent: "space-between",
@@ -194,7 +194,7 @@ export const createStyles = (theme: AppTheme) =>
       lineHeight: 22,
     },
 
-    TarjetaDescripcion: {
+    DescriptionCard: {
       backgroundColor: theme.containerBackground,
       borderRadius: 14,
       borderWidth: 1,
@@ -203,32 +203,32 @@ export const createStyles = (theme: AppTheme) =>
       marginBottom: 18,
     },
 
-    DescripcionTitulo: {
+    DescriptionTitle: {
       fontSize: 15,
       color: 'purple',
       marginBottom: 6,
       fontWeight:'800'
     },
 
-    DescripcionTexto: {
+    DescriptionText: {
       fontSize: 16,
       color: theme.text,
       lineHeight: 22,
     },
 
-    FilaAcciones: {
+    ActionsRow: {
       flexDirection: "row",
       justifyContent: "space-between",
       marginBottom: 20,
     },
 
-    AccionItem: {
+    ActionItem: {
       alignItems: "center",
       width: "24%",
       gap: 8,
     },
 
-    AccionCirculo: {
+    ActionCircle: {
       width: 52,
       height: 52,
       borderRadius: 26,
@@ -237,13 +237,13 @@ export const createStyles = (theme: AppTheme) =>
       justifyContent: "center",
     },
 
-    AccionTexto: {
+    ActionText: {
       fontSize: 14,
       color: theme.text,
       textAlign: "center",
     },
 
-    SeparadorFinal: {
+    EndSeparator: {
       height: 2,
     },
     Footer:{

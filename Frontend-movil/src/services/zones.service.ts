@@ -16,12 +16,12 @@ export interface ZoneApi {
   createdAt: string;
 }
 
-export const getZonas = async (): Promise<ZoneApi[]> => {
+export const getZones = async (): Promise<ZoneApi[]> => {
   const response = await api.get<ZoneApi[]>('/api/zones');
   return response.data;
 };
 
-export const getZonasByCity = async (city: string): Promise<ZoneApi[]> => {
+export const getZonesByCity = async (city: string): Promise<ZoneApi[]> => {
   const response = await api.get<ZoneApi[]>(`/api/zones/city/${city}`);
   return response.data;
 };

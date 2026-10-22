@@ -18,34 +18,34 @@ interface Props {
 export default function TutorialLottie({ source, style, resizeMode = "contain" }: Props) {
   const { isActive } = useTutorialPage();
   const [progress, setProgress] = useState(0);
-  const transcurrido = useRef(0);
+  const elapsed = useRef(0);
 
   // Duración real de la animación (frames / fps)
-  const duracion = Math.max(500, ((source.op - source.ip) / source.fr) * 1000);
+  const duration = Math.max(500, ((source.op - source.ip) / source.fr) * 1000);
 
   useEffect(() => {
     if (!isActive) return;
 
     let frame = 0;
-    let ultimo = Date.now();
-    let ultimoRender = 0;
+    let lastItem = Date.now();
+    let lastRender = 0;
 
     const tick = () => {
-      const ahora = Date.now();
-      transcurrido.current = (transcurrido.current + (ahora - ultimo)) % duracion;
-      ultimo = ahora;
+      const now = Date.now();
+      elapsed.current = (elapsed.current + (now - lastItem)) % duration;
+      lastItem = now;
 
       // ~30 actualizaciones por segundo es suficiente y cuida la batería
-      if (ahora - ultimoRender >= 33) {
-        ultimoRender = ahora;
-        setProgress(transcurrido.current / duracion);
+      if (now - lastRender >= 33) {
+        lastRender = now;
+        setProgress(elapsed.current / duration);
       }
       frame = requestAnimationFrame(tick);
     };
 
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [isActive, duracion]);
+  }, [isActive, duration]);
 
   return <LottieView source={source} progress={progress} resizeMode={resizeMode} style={style} />;
 }

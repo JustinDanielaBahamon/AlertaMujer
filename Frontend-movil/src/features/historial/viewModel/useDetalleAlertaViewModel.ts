@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, Share } from "react-native";
-import type { Alerta } from "../models/Alerta";
-import { getContactosNotificados, type AlertaApi, type ContactoNotificado } from "../../../services/alerts.service";
-import { aFecha, getSeguimientoAlerta, type PuntoUbicacion } from "../../../services/alert-tracking.service";
-import { descripcionLugar, obtenerLugar } from "../../../services/geocoding.service";
+import type { AlertRecord } from "../models/Alerta";
+import { getNotifiedContacts, type AlertApi, type NotifiedContact } from "../../../services/alerts.service";
+import { toDate, getAlertTracking, type LocationPoint } from "../../../services/alert-tracking.service";
+import { placeDescription, getPlace } from "../../../services/geocoding.service";
 
-const ZONA = "America/Bogota";
+const TIME_ZONE = "America/Bogota";
 
-const METODOS: Record<string, string> = {
+const METHODS: Record<string, string> = {
   panic_button: "Botón SOS",
   manual: "Botón SOS",
   suspicious_movement: "Agitando el teléfono",
@@ -17,9 +17,9 @@ const METODOS: Record<string, string> = {
   timer: "Temporizador",
 };
 
-const hora = (d: Date) => d.toLocaleTimeString("es-CO", { timeZone: ZONA, hour: "numeric", minute: "2-digit" });
+const time = (d: Date) => d.toLocaleTimeString("es-CO", { timeZone: TIME_ZONE, hour: "numeric", minute: "2-digit" });
 
-const duracion = (ms: number) => {
+const duration = (ms: number) => {
   const min = Math.max(0, Math.round(ms / 60000));
   if (min < 1) return "menos de 1 min";
   if (min < 60) return `${min} min`;
@@ -27,158 +27,158 @@ const duracion = (ms: number) => {
 };
 
 /** Paso de la línea de tiempo del detalle. */
-export type PasoAlerta = { icono: "alerta" | "ubicacion" | "fin" | "curso"; titulo: string; detalle: string };
+export type AlertStep = { icon: "alerta" | "ubicacion" | "fin" | "curso"; title: string; detail: string };
 
-interface UseDetalleAlertaViewModelResult {
-  esEmergencia: boolean;
-  compartiendo: boolean;
-  compartirReporte: () => Promise<void>;
-  contactosNotificados: ContactoNotificado[];
-  cargandoContactos: boolean;
-  errorContactos: boolean;
+interface UseAlertDetailViewModelResult {
+  isEmergency: boolean;
+  sharing: boolean;
+  shareReport: () => Promise<void>;
+  notifiedContacts: NotifiedContact[];
+  loadingContacts: boolean;
+  contactsError: boolean;
   /** Recorrido de la alerta (puntos de ubicación enviados), del más antiguo al más reciente. */
-  puntos: PuntoUbicacion[];
-  cargandoDetalle: boolean;
+  points: LocationPoint[];
+  loadingDetail: boolean;
   /** "Carrera 7 · Altico" del punto inicial, si se pudo obtener. */
-  direccion: string | null;
-  metodo: string | null;
-  mensaje: string | null;
-  pasos: PasoAlerta[];
+  address: string | null;
+  method: string | null;
+  message: string | null;
+  steps: AlertStep[];
 }
 
-export function useDetalleAlertaViewModel(alerta: Alerta): UseDetalleAlertaViewModelResult {
-  const [compartiendo, setCompartiendo] = useState(false);
+export function useAlertDetailViewModel(alert: AlertRecord): UseAlertDetailViewModelResult {
+  const [sharing, setSharing] = useState(false);
 
-  const esEmergencia = useMemo(() => alerta.tipo === "Emergencia", [alerta.tipo]);
+  const isEmergency = useMemo(() => alert.type === "Emergencia", [alert.type]);
 
   // Contactos avisados en esta alerta y el estado de cada canal.
-  const [contactosNotificados, setContactosNotificados] = useState<ContactoNotificado[]>([]);
-  const [cargandoContactos, setCargandoContactos] = useState(true);
-  const [errorContactos, setErrorContactos] = useState(false);
+  const [notifiedContacts, setNotifiedContacts] = useState<NotifiedContact[]>([]);
+  const [loadingContacts, setLoadingContacts] = useState(true);
+  const [contactsError, setContactsError] = useState(false);
 
   // Datos completos de la alerta y su recorrido
-  const [datos, setDatos] = useState<AlertaApi | null>(null);
-  const [puntos, setPuntos] = useState<PuntoUbicacion[]>([]);
-  const [cargandoDetalle, setCargandoDetalle] = useState(true);
-  const [direccion, setDireccion] = useState<string | null>(null);
+  const [data, setData] = useState<AlertApi | null>(null);
+  const [points, setPoints] = useState<LocationPoint[]>([]);
+  const [loadingDetail, setLoadingDetail] = useState(true);
+  const [address, setAddress] = useState<string | null>(null);
 
   useEffect(() => {
-    let activo = true;
-    setCargandoContactos(true);
-    setErrorContactos(false);
-    getContactosNotificados(alerta.id)
-      .then((lista) => activo && setContactosNotificados(lista))
-      .catch(() => activo && setErrorContactos(true))
-      .finally(() => activo && setCargandoContactos(false));
+    let enabled = true;
+    setLoadingContacts(true);
+    setContactsError(false);
+    getNotifiedContacts(alert.id)
+      .then((list) => enabled && setNotifiedContacts(list))
+      .catch(() => enabled && setContactsError(true))
+      .finally(() => enabled && setLoadingContacts(false));
     return () => {
-      activo = false;
+      enabled = false;
     };
-  }, [alerta.id]);
+  }, [alert.id]);
 
   useEffect(() => {
-    let activo = true;
-    setCargandoDetalle(true);
-    getSeguimientoAlerta(Number(alerta.id))
+    let enabled = true;
+    setLoadingDetail(true);
+    getAlertTracking(Number(alert.id))
       .then(async (s) => {
-        if (!activo) return;
-        setDatos(s.alerta ?? null);
-        setPuntos(s.puntos);
-        const inicio = s.puntos[0] ?? alerta.coords;
-        if (inicio) {
-          const lugar = await obtenerLugar(inicio.latitude, inicio.longitude);
-          if (activo && lugar) setDireccion(descripcionLugar(lugar) || null);
+        if (!enabled) return;
+        setData(s.alert ?? null);
+        setPoints(s.points);
+        const startTime = s.points[0] ?? alert.coords;
+        if (startTime) {
+          const place = await getPlace(startTime.latitude, startTime.longitude);
+          if (enabled && place) setAddress(placeDescription(place) || null);
         }
       })
       .catch(() => {
         // Sin conexión: se muestra lo que trae el historial
-        if (activo && alerta.coords) setPuntos([{ id: "inicio", ...alerta.coords, recordedAt: new Date() }]);
+        if (enabled && alert.coords) setPoints([{ id: "inicio", ...alert.coords, recordedAt: new Date() }]);
       })
-      .finally(() => activo && setCargandoDetalle(false));
+      .finally(() => enabled && setLoadingDetail(false));
     return () => {
-      activo = false;
+      enabled = false;
     };
-  }, [alerta.id, alerta.coords]);
+  }, [alert.id, alert.coords]);
 
-  const metodo = datos ? METODOS[datos.activationMethod] ?? null : null;
-  const mensaje = datos?.message?.trim() || null;
+  const method = data ? METHODS[data.activationMethod] ?? null : null;
+  const message = data?.message?.trim() || null;
 
-  const pasos = useMemo<PasoAlerta[]>(() => {
-    if (!datos) return [];
-    const inicio = aFecha(datos.startedAt || datos.createdAt);
-    const lista: PasoAlerta[] = [
-      { icono: "alerta", titulo: "Alerta activada", detalle: [hora(inicio), metodo].filter(Boolean).join(" · ") },
+  const steps = useMemo<AlertStep[]>(() => {
+    if (!data) return [];
+    const startTime = toDate(data.startedAt || data.createdAt);
+    const list: AlertStep[] = [
+      { icon: "alerta", title: "Alerta activada", detail: [time(startTime), method].filter(Boolean).join(" · ") },
     ];
-    if (puntos.length > 0) {
-      lista.push({
-        icono: "ubicacion",
-        titulo: puntos.length === 1 ? "Ubicación compartida" : `Ubicación compartida ${puntos.length} veces`,
-        detalle:
-          puntos.length > 1
-            ? `Última a las ${hora(puntos[puntos.length - 1].recordedAt)}`
+    if (points.length > 0) {
+      list.push({
+        icon: "ubicacion",
+        title: points.length === 1 ? "Ubicación compartida" : `Ubicación compartida ${points.length} veces`,
+        detail:
+          points.length > 1
+            ? `Última a las ${time(points[points.length - 1].recordedAt)}`
             : "Se envió tu ubicación al activar la alerta",
       });
     }
-    const estado = (datos.status || "").toLowerCase();
-    const finIso = datos.cancelledAt || datos.endedAt;
-    if (estado === "active" || !finIso) {
-      lista.push({ icono: "curso", titulo: "Alerta en curso", detalle: `Activa desde hace ${duracion(Date.now() - inicio.getTime())}` });
+    const status = (data.status || "").toLowerCase();
+    const endIso = data.cancelledAt || data.endedAt;
+    if (status === "active" || !endIso) {
+      list.push({ icon: "curso", title: "Alerta en curso", detail: `Activa desde hace ${duration(Date.now() - startTime.getTime())}` });
     } else {
-      const fin = aFecha(finIso);
-      const titulo =
-        estado === "cancelled" ? "Cancelaste la alerta" : estado === "expired" ? "La alerta expiró" : "Alerta terminada";
-      lista.push({ icono: "fin", titulo, detalle: `${hora(fin)} · duró ${duracion(fin.getTime() - inicio.getTime())}` });
+      const end = toDate(endIso);
+      const title =
+        status === "cancelled" ? "Cancelaste la alerta" : status === "expired" ? "La alerta expiró" : "Alerta terminada";
+      list.push({ icon: "fin", title, detail: `${time(end)} · duró ${duration(end.getTime() - startTime.getTime())}` });
     }
-    return lista;
-  }, [datos, puntos, metodo]);
+    return list;
+  }, [data, points, method]);
 
-  const mensajeCompartir = useMemo(
+  const shareMessage = useMemo(
     () =>
       [
         "Reporte de alerta - AlertaMujer",
         "",
-        `Tipo: ${alerta.tipo}`,
-        `Estado: ${alerta.estado}`,
-        `Fecha: ${alerta.fecha} ${alerta.hora}`,
-        metodo ? `Activada: ${metodo}` : null,
-        direccion ? `Lugar: ${direccion}` : null,
-        ...pasos.slice(1).map((p) => `${p.titulo}: ${p.detalle}`),
-        contactosNotificados.length > 0
-          ? `Contactos avisados: ${contactosNotificados.map((c) => c.name).join(", ")}`
+        `Tipo: ${alert.type}`,
+        `Estado: ${alert.status}`,
+        `Fecha: ${alert.date} ${alert.time}`,
+        method ? `Activada: ${method}` : null,
+        address ? `Lugar: ${address}` : null,
+        ...steps.slice(1).map((p) => `${p.title}: ${p.detail}`),
+        notifiedContacts.length > 0
+          ? `Contactos avisados: ${notifiedContacts.map((c) => c.name).join(", ")}`
           : null,
       ]
         .filter((l): l is string => l !== null)
         .join("\n"),
-    [alerta.estado, alerta.fecha, alerta.hora, alerta.tipo, metodo, direccion, pasos, contactosNotificados],
+    [alert.status, alert.date, alert.time, alert.type, method, address, steps, notifiedContacts],
   );
 
-  const compartirReporte = useCallback(async () => {
-    if (compartiendo) return;
+  const shareReport = useCallback(async () => {
+    if (sharing) return;
 
-    setCompartiendo(true);
+    setSharing(true);
     try {
       await Share.share({
         title: "Reporte de alerta",
-        message: mensajeCompartir,
+        message: shareMessage,
       });
     } catch (error) {
       Alert.alert("No fue posible compartir", "Intentalo nuevamente en unos segundos.");
     } finally {
-      setCompartiendo(false);
+      setSharing(false);
     }
-  }, [compartiendo, mensajeCompartir]);
+  }, [sharing, shareMessage]);
 
   return {
-    esEmergencia,
-    compartiendo,
-    compartirReporte,
-    contactosNotificados,
-    cargandoContactos,
-    errorContactos,
-    puntos,
-    cargandoDetalle,
-    direccion,
-    metodo,
-    mensaje,
-    pasos,
+    isEmergency,
+    sharing,
+    shareReport,
+    notifiedContacts,
+    loadingContacts,
+    contactsError,
+    points,
+    loadingDetail,
+    address,
+    method,
+    message,
+    steps,
   };
 }

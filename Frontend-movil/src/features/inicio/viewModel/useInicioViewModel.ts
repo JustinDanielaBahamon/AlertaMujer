@@ -4,80 +4,80 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Vibration } from "react-native";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useLocale } from "../../../contexts/LocaleContext";
-import { useNotificaciones } from "../../../contexts/NotificacionesContext";
+import { useNotifications } from "../../../contexts/NotificacionesContext";
 import type { MainStackParamList } from "../../../navigation/types";
 import {
   LocationPermissionDeniedError,
   LocationService,
   LocationServicesDisabledError,
-  type UbicacionDetallada,
+  type DetailedLocation,
 } from "../../../services/location.service";
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
 
 // Estado de la ubicacion, independiente del idioma (el texto se traduce aparte)
-type EstadoUbicacion = "cargando" | "lista" | "denegado" | "gps_apagado" | "error";
+type LocationStatus = "cargando" | "lista" | "denegado" | "gps_apagado" | "error";
 
-export function useInicioViewModel() {
+export function useHomeViewModel() {
   const navigation = useNavigation<Nav>();
   const { signOut } = useAuth();
   const { t } = useLocale();
-  const { config } = useNotificaciones();
+  const { config } = useNotifications();
 
   const [pressed, setPressed] = useState(false);
-  const [estadoUbicacion, setEstadoUbicacion] =
-    useState<EstadoUbicacion>("cargando");
-  const [ubicacionResuelta, setUbicacionResuelta] = useState("");
-  const [ubicacionDetallada, setUbicacionDetallada] =
-    useState<UbicacionDetallada | null>(null);
-  const [cargando, setCargando] = useState(false);
+  const [locationStatus, setLocationStatus] =
+    useState<LocationStatus>("cargando");
+  const [resolvedLocation, setResolvedLocation] = useState("");
+  const [detailedLocation, setDetailedLocation] =
+    useState<DetailedLocation | null>(null);
+  const [loading, setLoading] = useState(false);
 
   // pedirPermiso = false al abrir la pantalla: los permisos se piden en el tutorial o al tocar "actualizar"
-  const cargarUbicacion = useCallback(async (pedirPermiso: boolean) => {
+  const loadLocation = useCallback(async (requestPermission: boolean) => {
     try {
-      setCargando(true);
-      setEstadoUbicacion("cargando");
+      setLoading(true);
+      setLocationStatus("cargando");
 
       // Usar el servicio centralizado de ubicación con alta precisión
-      const ubicacion = await LocationService.getFullLocation(pedirPermiso);
+      const location = await LocationService.getFullLocation(requestPermission);
 
-      if (ubicacion) {
-        setUbicacionDetallada(ubicacion);
+      if (location) {
+        setDetailedLocation(location);
 
-        const nombreCompleto = LocationService.formatAddress(ubicacion);
-        setUbicacionResuelta(nombreCompleto);
-        setEstadoUbicacion("lista");
+        const fullName = LocationService.formatAddress(location);
+        setResolvedLocation(fullName);
+        setLocationStatus("lista");
 
       } else {
-        setEstadoUbicacion("error");
+        setLocationStatus("error");
       }
     } catch (error) {
       if (error instanceof LocationServicesDisabledError) {
         // GPS / servicios de ubicación del dispositivo apagados
         console.warn("GPS del dispositivo desactivado:", error.message);
-        setEstadoUbicacion("gps_apagado");
+        setLocationStatus("gps_apagado");
       } else if (error instanceof LocationPermissionDeniedError) {
         // El usuario negó el permiso a la app
         console.warn("Permiso de ubicación denegado:", error.message);
-        setEstadoUbicacion("denegado");
+        setLocationStatus("denegado");
       } else {
         console.error("Error al obtener ubicación mejorada:", error);
-        setEstadoUbicacion("error");
+        setLocationStatus("error");
       }
     } finally {
-      setCargando(false);
+      setLoading(false);
     }
   }, [t]);
 
   useEffect(() => {
-    void cargarUbicacion(false);
-  }, [cargarUbicacion]);
+    void loadLocation(false);
+  }, [loadLocation]);
 
-  const obtenerUbicacion = useCallback(() => cargarUbicacion(true), [cargarUbicacion]);
+  const getLocation = useCallback(() => loadLocation(true), [loadLocation]);
 
   // Texto de ubicacion ya traducido segun el idioma activo
-  const ubicacionNombre = useMemo(() => {
-    switch (estadoUbicacion) {
+  const locationName = useMemo(() => {
+    switch (locationStatus) {
       case "cargando":
         return t.mapa.cargando;
       case "denegado":
@@ -87,14 +87,14 @@ export function useInicioViewModel() {
       case "error":
         return t.inicio.error_actualizar;
       default:
-        return ubicacionResuelta;
+        return resolvedLocation;
     }
-  }, [estadoUbicacion, ubicacionResuelta, t]);
+  }, [locationStatus, resolvedLocation, t]);
 
   // true solo cuando ya se resolvio una ubicacion real (para mostrar "GPS activo")
-  const ubicacionLista = estadoUbicacion === "lista";
+  const locationList = locationStatus === "lista";
 
-  const activarAlerta = useCallback(() => {
+  const activateAlert = useCallback(() => {
     if (config.vibracion) Vibration.vibrate(200);
     const stackNav = navigation.getParent()?.getParent();
     if (stackNav && "navigate" in stackNav) {
@@ -107,11 +107,11 @@ export function useInicioViewModel() {
   }, [navigation, config.vibracion]);
 
   // Vibra mientras el botón está presionado y se detiene al soltarlo
-  const onPressInBoton = useCallback(() => {
+  const onButtonPressIn = useCallback(() => {
     setPressed(true);
     if (config.vibracion) Vibration.vibrate([0, 400, 200], true);
   }, [config.vibracion]);
-  const onPressOutBoton = useCallback(() => {
+  const onButtonPressOut = useCallback(() => {
     setPressed(false);
     Vibration.cancel();
   }, []);
@@ -119,20 +119,20 @@ export function useInicioViewModel() {
   // Si se sale de la pantalla con el botón presionado, no deja el teléfono vibrando
   useEffect(() => () => Vibration.cancel(), []);
 
-  const cerrarSesion = useCallback(() => {
+  const signOutNow = useCallback(() => {
     signOut();
   }, [signOut]);
 
   return {
     pressed,
-    ubicacionNombre,
-    ubicacionLista,
-    ubicacionDetallada,
-    cargando,
-    obtenerUbicacion,
-    activarAlerta,
-    onPressInBoton,
-    onPressOutBoton,
-    cerrarSesion,
+    locationName: locationName,
+    locationList: locationList,
+    detailedLocation: detailedLocation,
+    loading: loading,
+    getLocation: getLocation,
+    activateAlert: activateAlert,
+    onButtonPressIn: onButtonPressIn,
+    onButtonPressOut: onButtonPressOut,
+    signOutNow: signOutNow,
   };
 }

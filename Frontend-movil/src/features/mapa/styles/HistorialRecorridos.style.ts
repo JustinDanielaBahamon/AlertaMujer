@@ -87,7 +87,7 @@ export const styles = StyleSheet.create({
     marginRight: 14,
   },
 
-  rutaText: {
+  routeText: {
     fontSize: 14,
     fontWeight: "600" as const,
     color: "#7B1DB2",

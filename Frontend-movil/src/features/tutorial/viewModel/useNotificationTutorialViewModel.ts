@@ -73,7 +73,7 @@ export function useNotificationTutorialViewModel() {
   const resolvePermission = useRef<(value: boolean) => void>(() => {});
 
   // Android 12 o menor no pide permiso de notificaciones; en Android 13+ se revisa si ya está concedido
-  const yaTienePermiso = async (): Promise<boolean> => {
+  const alreadyHasPermission = async (): Promise<boolean> => {
     if (Platform.OS !== "android") return false;
     if (Platform.Version < 33) return true;
     try {
@@ -84,7 +84,7 @@ export function useNotificationTutorialViewModel() {
   };
 
   const requestPermissions = useCallback(async (): Promise<boolean> => {
-    if (await yaTienePermiso()) return true;
+    if (await alreadyHasPermission()) return true;
 
     return new Promise((resolve) => {
       resolvePermission.current = resolve;
@@ -100,7 +100,7 @@ export function useNotificationTutorialViewModel() {
     if (Platform.OS === "android" && Platform.Version >= 33) {
       await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS).catch(() => null);
     }
-    if (await yaTienePermiso()) registrarPush().catch(() => {});
+    if (await alreadyHasPermission()) registrarPush().catch(() => {});
     resolvePermission.current(true);
   }, []);
 

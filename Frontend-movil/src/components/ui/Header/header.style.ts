@@ -24,7 +24,7 @@ export const styles = StyleSheet.create({
     gap: 8,
   },
 
-  icono: {
+  icon: {
     fontSize: 20,
   },
   chip: {

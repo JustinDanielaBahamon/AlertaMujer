@@ -4,7 +4,7 @@ import notifee, {
   AndroidVisibility,
   type Notification,
 } from "@notifee/react-native";
-import { estiloGrande } from "./estiloNotificacion";
+import { bigStyle } from "./estiloNotificacion";
 
 /**
  * Alarma que recibe un contacto de emergencia cuando una usuaria activa una alerta. Llega como
@@ -12,69 +12,69 @@ import { estiloGrande } from "./estiloNotificacion";
  * llamada entrante: pantalla completa sobre el bloqueo, sonido de alarma en bucle y vibración.
  */
 
-export const CANAL_SOS = "alertas_sos";
-const SONIDO = "alarma_sos"; // res/raw/alarma_sos.wav (plugins/withAlarmSound.js)
+export const SOS_CHANNEL = "alertas_sos";
+const SOUND = "alarma_sos"; // res/raw/alarma_sos.wav (plugins/withAlarmSound.js)
 
 /** Datos del push que envía el backend (AlertNotificationService). */
-export type DatosAlertaSos = {
+export type SosAlertData = {
   tipo: "ALERTA_SOS";
   alertaId: string;
   nombre: string;
   codigo: string; // código de seguimiento público
 };
 
-export function esAlertaSos(data: Record<string, unknown> | undefined): data is DatosAlertaSos {
+export function isSosAlert(data: Record<string, unknown> | undefined): data is SosAlertData {
   return !!data && data.tipo === "ALERTA_SOS" && typeof data.alertaId === "string" && typeof data.codigo === "string";
 }
 
 /** Push que llega cuando la alerta termina (atendida, cancelada o expirada). */
-export type DatosAlertaFinalizada = {
+export type EndedAlertData = {
   tipo: "ALERTA_FINALIZADA";
   alertaId: string;
   nombre: string;
   estado: string;
 };
 
-export function esAlertaFinalizada(data: Record<string, unknown> | undefined): data is DatosAlertaFinalizada {
+export function isEndedAlert(data: Record<string, unknown> | undefined): data is EndedAlertData {
   return !!data && data.tipo === "ALERTA_FINALIZADA" && typeof data.alertaId === "string";
 }
 
-const CANAL_AVISOS = "avisos_alertas";
+const NOTICES_CHANNEL = "avisos_alertas";
 
 /** Apaga la alarma de esa alerta y deja un aviso silencioso de que terminó. */
-export async function mostrarAlertaFinalizada(datos: DatosAlertaFinalizada): Promise<void> {
-  await detenerAlarmaSos(datos.alertaId);
+export async function showEndedAlert(data: EndedAlertData): Promise<void> {
+  await stopSosAlarm(data.alertaId);
   await notifee.createChannel({
-    id: CANAL_AVISOS,
+    id: NOTICES_CHANNEL,
     name: "Avisos de alertas",
     description: "Cuando termina una alerta de un contacto",
     importance: AndroidImportance.DEFAULT,
   });
-  const nombre = datos.nombre?.trim() || "tu contacto";
-  const que =
-    datos.estado === "resolved" ? "fue marcada como atendida"
-    : datos.estado === "cancelled" ? "fue cancelada"
+  const name = data.nombre?.trim() || "tu contacto";
+  const what =
+    data.estado === "resolved" ? "fue marcada como atendida"
+    : data.estado === "cancelled" ? "fue cancelada"
     : "terminó";
-  const texto = `La alerta de ${nombre} ${que}. Si aún no sabes de ella, comunícate para confirmar que está bien.`;
+  const text = `La alerta de ${name} ${what}. Si aún no sabes de ella, comunícate para confirmar que está bien.`;
   await notifee.displayNotification({
-    id: `fin-${datos.alertaId}`,
+    id: `fin-${data.alertaId}`,
     title: "Alerta terminada",
-    body: texto,
+    body: text,
     android: {
-      channelId: CANAL_AVISOS,
-      ...estiloGrande(texto),
+      channelId: NOTICES_CHANNEL,
+      ...bigStyle(text),
       pressAction: { id: "default", launchActivity: "default" },
     },
   });
 }
 
-export async function crearCanalSos(): Promise<void> {
+export async function createSosChannel(): Promise<void> {
   await notifee.createChannel({
-    id: CANAL_SOS,
+    id: SOS_CHANNEL,
     name: "Alertas de emergencia",
     description: "Alarma cuando una persona que te registró como contacto activa una alerta",
     importance: AndroidImportance.HIGH,
-    sound: SONIDO,
+    sound: SOUND,
     vibration: true,
     vibrationPattern: [400, 600, 400, 600],
     bypassDnd: true,
@@ -82,22 +82,22 @@ export async function crearCanalSos(): Promise<void> {
   });
 }
 
-export async function mostrarAlarmaSos(datos: DatosAlertaSos): Promise<void> {
-  await crearCanalSos();
-  const nombre = datos.nombre?.trim() || "Una persona";
-  const texto = `${nombre} activó una alerta y puede estar en peligro. Toca para ver su ubicación en tiempo real y escribirle.`;
+export async function showSosAlarm(data: SosAlertData): Promise<void> {
+  await createSosChannel();
+  const name = data.nombre?.trim() || "Una persona";
+  const text = `${name} activó una alerta y puede estar en peligro. Toca para ver su ubicación en tiempo real y escribirle.`;
   await notifee.displayNotification({
-    id: idNotificacion(datos.alertaId),
-    title: `🚨 ${nombre} necesita ayuda`,
-    body: texto,
-    data: datos,
+    id: notificationId(data.alertaId),
+    title: `🚨 ${name} necesita ayuda`,
+    body: text,
+    data: data,
     android: {
-      channelId: CANAL_SOS,
-      ...estiloGrande(texto),
+      channelId: SOS_CHANNEL,
+      ...bigStyle(text),
       category: AndroidCategory.ALARM,
       importance: AndroidImportance.HIGH,
       visibility: AndroidVisibility.PUBLIC,
-      sound: SONIDO,
+      sound: SOUND,
       loopSound: true,
       ongoing: true,
       autoCancel: false,
@@ -111,39 +111,39 @@ export async function mostrarAlarmaSos(datos: DatosAlertaSos): Promise<void> {
 }
 
 /** Detiene la alarma (al abrir la pantalla de la alerta). */
-export async function detenerAlarmaSos(alertaId: string | number): Promise<void> {
-  await notifee.cancelNotification(idNotificacion(String(alertaId)));
+export async function stopSosAlarm(alertId: string | number): Promise<void> {
+  await notifee.cancelNotification(notificationId(String(alertId)));
 }
 
-export function datosDeNotificacion(n: Notification | undefined): DatosAlertaSos | null {
+export function notificationData(n: Notification | undefined): SosAlertData | null {
   const data = n?.data as Record<string, unknown> | undefined;
-  return esAlertaSos(data) ? data : null;
+  return isSosAlert(data) ? data : null;
 }
 
-const idNotificacion = (alertaId: string) => `sos-${alertaId}`;
+const notificationId = (alertId: string) => `sos-${alertId}`;
 
 // Alerta pendiente de abrir: llega antes de que la navegación esté lista (app recién abierta
 // desde la notificación) o mientras no hay sesión iniciada.
-let pendiente: DatosAlertaSos | null = null;
-const oyentes = new Set<(d: DatosAlertaSos) => void>();
+let pending: SosAlertData | null = null;
+const listeners = new Set<(d: SosAlertData) => void>();
 
-export function abrirAlertaSos(datos: DatosAlertaSos): void {
-  if (oyentes.size === 0) {
-    pendiente = datos;
+export function openSosAlert(data: SosAlertData): void {
+  if (listeners.size === 0) {
+    pending = data;
     return;
   }
-  oyentes.forEach((o) => o(datos));
+  listeners.forEach((o) => o(data));
 }
 
 /** La navegación se suscribe aquí; si había una alerta pendiente, se entrega de inmediato. */
-export function alAbrirAlertaSos(oyente: (d: DatosAlertaSos) => void): () => void {
-  oyentes.add(oyente);
-  if (pendiente) {
-    const d = pendiente;
-    pendiente = null;
-    oyente(d);
+export function onSosAlertOpen(listener: (d: SosAlertData) => void): () => void {
+  listeners.add(listener);
+  if (pending) {
+    const d = pending;
+    pending = null;
+    listener(d);
   }
   return () => {
-    oyentes.delete(oyente);
+    listeners.delete(listener);
   };
 }

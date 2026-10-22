@@ -6,31 +6,31 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SwipeListView } from "react-native-swipe-list-view";
 
 import { useTheme } from "../../../../src/contexts/ThemeContext";
-import ModalAccionesContacto from "../../../components/ui/modalAccionesContacto/modalAccionesContacto";
+import ContactActionsModal from "../../../components/ui/modalAccionesContacto/modalAccionesContacto";
 import { useLocale } from "../../../contexts/LocaleContext";
-import { textosContactoExtra } from "../contactosExtra";
+import { contactExtraTexts } from "../contactosExtra";
 import { createStyles } from "../style/contactos.styles";
-import { useContactosTabViewModel } from "../viewModel/useContactosViewModel";
+import { useContactsTabViewModel } from "../viewModel/useContactosViewModel";
 
-type Contacto = ReturnType<typeof useContactosTabViewModel>["contactos"][0];
+type Contact = ReturnType<typeof useContactsTabViewModel>["contacts"][0];
 
-export default function Contactos() {
-  const vm = useContactosTabViewModel();
+export default function ContactsTab() {
+  const vm = useContactsTabViewModel();
   const { theme } = useTheme();
   const { t, locale } = useLocale();
   const styles = createStyles(theme);
   const insets = useSafeAreaInsets();
-  const extra = textosContactoExtra[locale];
+  const extra = contactExtraTexts[locale];
 
   const headerGradient: [string, string] = [theme.headercolor1, theme.headercolor2];
 
   // Estado real: con la app (violeta lleno), con cuenta sin celular (violeta claro) o solo correo (gris)
-  const estadoDe = (c: Contacto) => {
-    const e = vm.estadoApp[String(c.id)];
-    if (e === "app") return { color: theme.contactAccent, texto: t.contactos.estado_app, invitar: false };
-    if (e === "account") return { color: theme.contactAccent + "99", texto: t.contactos.estado_cuenta, invitar: true };
-    if (e === "none") return { color: "#9E9E9E", texto: t.contactos.estado_correo, invitar: true };
-    return { color: "#BDBDBD", texto: t.contactos.estado_revisando, invitar: false };
+  const statusOf = (c: Contact) => {
+    const e = vm.appStatus[String(c.id)];
+    if (e === "app") return { color: theme.contactAccent, text: t.contactos.estado_app, invite: false };
+    if (e === "account") return { color: theme.contactAccent + "99", text: t.contactos.estado_cuenta, invite: true };
+    if (e === "none") return { color: "#9E9E9E", text: t.contactos.estado_correo, invite: true };
+    return { color: "#BDBDBD", text: t.contactos.estado_revisando, invite: false };
   };
 
   const makeCall = (phoneNumber: string) => {
@@ -84,10 +84,10 @@ export default function Contactos() {
       {/* CONTEO — fijo, nunca se recrea */}
       <View style={styles.countRow}>
         <View style={styles.countIcon}>
-          <Feather name="users" size={18} color={theme.contactCousserIcon} />
+          <Feather name="users" size={18} color={theme.contactCounterIcon} />
         </View>
         <Text style={[styles.countText, { color: theme.text }]}>
-          {t.contactos.tus_contactos} ({vm.contactosFiltrados.length})
+          {t.contactos.tus_contactos} ({vm.filteredContacts.length})
         </Text>
       </View>
 
@@ -98,19 +98,19 @@ export default function Contactos() {
           style={styles.searchInput}
           placeholder={t.contactos.buscar_placeholder}
           placeholderTextColor="#9E9E9E"
-          value={vm.busqueda}
-          onChangeText={vm.setBusqueda}
+          value={vm.searchText}
+          onChangeText={vm.setSearchText}
         />
-        {vm.busqueda.length > 0 && (
-          <TouchableOpacity onPress={() => vm.setBusqueda("")}>
+        {vm.searchText.length > 0 && (
+          <TouchableOpacity onPress={() => vm.setSearchText("")}>
             <Feather name="x" size={18} color="#9E9E9E" />
           </TouchableOpacity>
         )}
       </View>
 
       {/* LISTA — solo maneja los items */}
-      <SwipeListView<Contacto>
-        data={vm.contactosFiltrados}
+      <SwipeListView<Contact>
+        data={vm.filteredContacts}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         rightOpenValue={-100}
@@ -126,9 +126,9 @@ export default function Contactos() {
         }
 
         ListHeaderComponent={
-          vm.faltanContactos > 0 && !vm.loading ? (
+          vm.missingContacts > 0 && !vm.loading ? (
             <View style={[styles.suggestionCard, {
-              backgroundColor: theme.contactSugerenciaBg,
+              backgroundColor: theme.contactSuggestionBg,
               borderColor: theme.contactAccent,
               borderStyle: "solid",
               marginTop: 0,
@@ -139,20 +139,20 @@ export default function Contactos() {
                   {t.contactos.minimo_titulo.replace("{total}", "5")}
                 </Text>
                 <Text style={{ fontSize: 12, color: theme.contactSubtext, marginTop: 2 }}>
-                  {t.contactos.minimo_desc.replace("{n}", String(5 - vm.faltanContactos)).replace("{total}", "5")}
+                  {t.contactos.minimo_desc.replace("{n}", String(5 - vm.missingContacts)).replace("{total}", "5")}
                 </Text>
                 <View style={{ flexDirection: "row", gap: 4, marginTop: 8 }}>
                   {[0, 1, 2, 3, 4].map((i) => (
                     <View key={i} style={{
                       flex: 1, height: 5, borderRadius: 3,
-                      backgroundColor: i < 5 - vm.faltanContactos ? theme.contactAccent : theme.contactAccent + "30",
+                      backgroundColor: i < 5 - vm.missingContacts ? theme.contactAccent : theme.contactAccent + "30",
                     }} />
                   ))}
                 </View>
               </View>
               <TouchableOpacity
-                style={[styles.addSmallButton, { backgroundColor: theme.contactBotonAgregarBg }]}
-                onPress={vm.irAgregarContacto}
+                style={[styles.addSmallButton, { backgroundColor: theme.contactAddButtonBg }]}
+                onPress={vm.goToAddContact}
               >
                 <Text style={{ color: "white", fontWeight: "bold", fontSize: 12 }}>{t.contactos.minimo_boton}</Text>
               </TouchableOpacity>
@@ -160,7 +160,7 @@ export default function Contactos() {
           ) : null
         }
 
-        renderItem={({ item: c }) => { const estado = estadoDe(c); return (
+        renderItem={({ item: c }) => { const status = statusOf(c); return (
           <View style={styles.cardWrapper}>
             <View style={styles.contactCard}>
               {/* Sección superior: foto, info, botones */}
@@ -168,13 +168,13 @@ export default function Contactos() {
 
                 {/* ── AVATAR CON LÓGICA DE 3 NIVELES ─────────────────────── */}
                 <View style={styles.photoContainer}>
-                  {c.foto ? (
+                  {c.photo ? (
                     // Nivel 1: foto personalizada o traída de la agenda
                     <Image
-                      source={{ uri: c.foto }}
+                      source={{ uri: c.photo }}
                       style={[styles.profilePhoto, { borderColor: theme.contactAvatarBorder }]}
                     />
-                  ) : (c.nombre || '').trim() ? (
+                  ) : (c.name || '').trim() ? (
                     // Nivel 2: inicial del nombre sobre fondo de color
                     <View style={[
                       styles.profilePhoto,
@@ -191,7 +191,7 @@ export default function Contactos() {
                         fontWeight: "800",
                         color: theme.contactAccent,
                       }}>
-                        {(c.nombre || '').trim().charAt(0).toUpperCase()}
+                        {(c.name || '').trim().charAt(0).toUpperCase()}
                       </Text>
                     </View>
                   ) : (
@@ -201,13 +201,13 @@ export default function Contactos() {
                       style={[styles.profilePhoto, { borderColor: theme.contactAvatarBorder }]}
                     />
                   )}
-                  <View style={[styles.statusDot, { backgroundColor: estado.color }]} />
+                  <View style={[styles.statusDot, { backgroundColor: status.color }]} />
                 </View>
                 {/* ────────────────────────────────────────────────────────── */}
 
                 <View style={styles.contactInfo}>
-                  <Text style={[styles.contactName, { color: theme.contactNombre }]}>
-                    {c.nombre || ''}
+                  <Text style={[styles.contactName, { color: theme.contactName }]}>
+                    {c.name || ''}
                   </Text>
                   <View style={[styles.relationBadge, {
                     backgroundColor: theme.contactBadgeBg,
@@ -215,23 +215,23 @@ export default function Contactos() {
                   }]}>
                     <AntDesign name="heart" size={12} color={theme.contactAccent} />
                     <Text style={[styles.badgeText, { color: theme.contactBadgeText }]}>
-                      {c.parentesco || t.contactos.parentesco_default}
+                      {c.relationship || t.contactos.parentesco_default}
                     </Text>
                   </View>
                   <View style={styles.phoneRow}>
                     <Feather name="phone" size={12} color={theme.contactSubtext} />
                     <Text style={[styles.phoneText, { color: theme.contactSubtext }]}>
-                      {" "}{vm.formatearTelefonoMostrar(c.telefono)}
+                      {" "}{vm.formatPhoneForDisplay(c.phoneNumber)}
                     </Text>
                   </View>
                   <View style={{ flexDirection: "row", alignItems: "center", marginTop: 4 }}>
-                    <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: estado.color, marginRight: 5 }} />
-                    <Text style={{ flexShrink: 1, fontSize: 12, color: estado.color === "#9E9E9E" ? theme.contactSubtext : theme.contactAccent, fontWeight: "600" }}>
-                      {estado.texto}
+                    <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: status.color, marginRight: 5 }} />
+                    <Text style={{ flexShrink: 1, fontSize: 12, color: status.color === "#9E9E9E" ? theme.contactSubtext : theme.contactAccent, fontWeight: "600" }}>
+                      {status.text}
                     </Text>
                   </View>
-                  {estado.invitar && (
-                    <TouchableOpacity onPress={() => vm.invitarALaApp(c)} style={{ flexDirection: "row", alignItems: "center", marginTop: 6 }}>
+                  {status.invite && (
+                    <TouchableOpacity onPress={() => vm.inviteToApp(c)} style={{ flexDirection: "row", alignItems: "center", marginTop: 6 }}>
                       <Feather name="share-2" size={13} color={theme.contactAccent} />
                       <Text style={{ fontSize: 12, color: theme.contactAccent, fontWeight: "700", marginLeft: 5, textDecorationLine: "underline" }}>
                         {t.contactos.invitar}
@@ -242,14 +242,14 @@ export default function Contactos() {
 
                 <View style={styles.topIcons}>
                   <TouchableOpacity
-                    style={[styles.smallIconButton, { backgroundColor: theme.contactBotonEditar }]}
-                    onPress={() => vm.abrirModalAcciones(c)}
+                    style={[styles.smallIconButton, { backgroundColor: theme.contactEditButton }]}
+                    onPress={() => vm.openActionsModal(c)}
                   >
-                    <Feather name="edit-2" size={16} color={theme.contactBotonEditarIcon} />
+                    <Feather name="edit-2" size={16} color={theme.contactEditButtonIcon} />
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.smallIconButton, { backgroundColor: "#FFEBEE" }]}
-                    onPress={() => vm.abrirModalAcciones(c)}
+                    onPress={() => vm.openActionsModal(c)}
                   >
                     <Feather name="trash" size={16} color="#E53935" />
                   </TouchableOpacity>
@@ -260,7 +260,7 @@ export default function Contactos() {
               <View style={[styles.actionsSection, { borderTopColor: theme.contactDivider }]}>
                 <TouchableOpacity
                   style={styles.actionItem}
-                  onPress={() => makeCall(c.telefono)}
+                  onPress={() => makeCall(c.phoneNumber)}
                 >
                   <View style={[styles.actionCircle, { backgroundColor: theme.contactIconCallBg }]}>
                     <Feather name="phone" size={20} color={theme.contactIconCallColor} />
@@ -270,7 +270,7 @@ export default function Contactos() {
 
                 <TouchableOpacity
                   style={styles.actionItem}
-                  onPress={() => openWhatsApp(c.telefono)}
+                  onPress={() => openWhatsApp(c.phoneNumber)}
                 >
                   <View style={[styles.actionCircle, { backgroundColor: theme.contactIconWaBg }]}>
                     <MaterialCommunityIcons name="whatsapp" size={22} color="#2e7d32" />
@@ -280,7 +280,7 @@ export default function Contactos() {
 
                 <TouchableOpacity
                   style={styles.actionItem}
-                  onPress={() => vm.alertarContacto(c)}
+                  onPress={() => vm.alertContact(c)}
                 >
                   <View style={[styles.actionCircle, { backgroundColor: theme.contactIconLocBg }]}>
                     <Feather name="alert-triangle" size={20} color={theme.contactIconLocColor} />
@@ -296,7 +296,7 @@ export default function Contactos() {
           <View style={styles.swipeBack}>
             <TouchableOpacity
               style={styles.deleteSwipeButton}
-              onPress={() => vm.borrarConSwipe(c)}
+              onPress={() => vm.deleteWithSwipe(c)}
             >
               <MaterialIcons name="delete" size={28} color="white" />
               <Text style={styles.deleteSwipeText}>{t.contactos.eliminar}</Text>
@@ -306,11 +306,11 @@ export default function Contactos() {
 
         ListFooterComponent={() => (
           <View style={[styles.suggestionCard, {
-            backgroundColor: theme.contactSugerenciaBg,
-            borderColor: theme.contactSugerenciaBorder,
+            backgroundColor: theme.contactSuggestionBg,
+            borderColor: theme.contactSuggestionBorder,
           }]}>
-            <View style={[styles.dashedCircle, { borderColor: theme.contactSugerenciaBorder }]}>
-              <Feather name="user-plus" size={24} color={theme.contactSugerenciaIcon} />
+            <View style={[styles.dashedCircle, { borderColor: theme.contactSuggestionBorder }]}>
+              <Feather name="user-plus" size={24} color={theme.contactSuggestionIcon} />
             </View>
             <View style={{ flex: 1, marginRight: 10 }}>
               <Text style={[{ fontWeight: "bold", fontSize: 14 }, { color: theme.text }]}>
@@ -324,8 +324,8 @@ export default function Contactos() {
               </Text>
             </View>
             <TouchableOpacity
-              style={[styles.addSmallButton, { backgroundColor: theme.contactBotonAgregarBg }]}
-              onPress={vm.irAgregarContacto}
+              style={[styles.addSmallButton, { backgroundColor: theme.contactAddButtonBg }]}
+              onPress={vm.goToAddContact}
             >
               <Text style={{ color: "white", fontWeight: "bold", fontSize: 12 }}>
                 {t.contactos.agregar_corto}
@@ -337,18 +337,18 @@ export default function Contactos() {
 
       {/* BOTÓN FLOTANTE */}
       <TouchableOpacity
-        style={[styles.floatingButton, { backgroundColor: theme.contactFlotanteBg }]}
-        onPress={vm.irAgregarContacto}
+        style={[styles.floatingButton, { backgroundColor: theme.contactFloatingBg }]}
+        onPress={vm.goToAddContact}
       >
         <MaterialIcons name="person-add" size={28} color="white" />
       </TouchableOpacity>
 
-      <ModalAccionesContacto
+      <ContactActionsModal
         visible={vm.modalVisible}
-        nombreContacto={vm.contactoSeleccionado?.nombre || ""}
-        onActualizar={vm.handleActualizar}
-        onBorrar={vm.handleBorrar}
-        onCerrar={vm.cerrarModalAcciones}
+        contactNameValue={vm.selectedContact?.name || ""}
+        onUpdate={vm.handleUpdate}
+        onDelete={vm.handleDelete}
+        onClose={vm.closeActionsModal}
       />
     </View>
   );

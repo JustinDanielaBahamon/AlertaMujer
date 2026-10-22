@@ -5,49 +5,49 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { AuthStackParamList } from "../../../navigation/types";
 import { useAuth } from "../../../contexts/AuthContext";
 import { authService } from "../../../services/auth.service";
-import type { Usuario } from "../models/Usuario";
+import type { User } from "../models/Usuario";
 
-type ErroresType = {
-  nombre?: string;
-  telefono?: string;
-  documento?: string;
-  tipoDocumento?: string;
-  fechaNacimiento?: string;
-  correo?: string;
+type ErrorsType = {
+  name?: string;
+  phoneNumber?: string;
+  document?: string;
+  documentType?: string;
+  birthDate?: string;
+  email?: string;
   password?: string;
   confirmPassword?: string;
 };
 
-type RegistroNavigation = NativeStackNavigationProp<AuthStackParamList, "Registro">;
+type SignUpNavigation = NativeStackNavigationProp<AuthStackParamList, "Registro">;
 
-export function useRegistroViewModel() {
-  const navigation = useNavigation<RegistroNavigation>();
+export function useSignUpViewModel() {
+  const navigation = useNavigation<SignUpNavigation>();
   const { signIn } = useAuth();
 
-  const [mostrarPassword, setMostrarPassword] = useState(false);
-  const [mostrarLista, setMostrarLista] = useState(false);
-  const [tipoDocumento, setTipoDocumento] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showList, setShowList] = useState(false);
+  const [documentType, setDocumentType] = useState("");
 
-  const [nombre, setNombre] = useState("");
-  const [telefono, setTelefono] = useState("");
-  const [documento, setDocumento] = useState("");
-  const [correo, setCorreo] = useState("");
+  const [name, setName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [document, setDocument] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [mostrarConfirmPassword, setMostrarConfirmPassword] = useState(false);
-  const [fechaNacimiento, setFechaNacimientoRaw] = useState("");
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [birthDate, setBirthDateRaw] = useState("");
 
-  const [aceptaTerminos, setAceptaTerminos] = useState(false);
-  const [aceptaPrivacidad, setAceptaPrivacidad] = useState(false);
+  const [acceptsTerms, setAcceptsTerms] = useState(false);
+  const [acceptsPrivacy, setAcceptsPrivacy] = useState(false);
 
-  const [leyoTerminos, setLeyoTerminos] = useState(false);
-  const [leyoPrivacidad, setLeyoPrivacidad] = useState(false);
-  const [errorTerminos, setErrorTerminos] = useState("");
+  const [readTerms, setReadTerms] = useState(false);
+  const [readPrivacy, setReadPrivacy] = useState(false);
+  const [termsError, setTermsError] = useState("");
 
-  const [errores, setErrores] = useState<ErroresType>({});
+  const [errors, setErrors] = useState<ErrorsType>({});
 
   // ── Formato automático DD/MM/AAAA ─────────────────────────────────────────
-  const setFechaNacimiento = useCallback((text: string) => {
+  const setBirthDate = useCallback((text: string) => {
     // Solo dígitos
     const digits = text.replace(/\D/g, "");
     let formatted = "";
@@ -58,139 +58,139 @@ export function useRegistroViewModel() {
     } else {
       formatted = digits.slice(0, 2) + "/" + digits.slice(2, 4) + "/" + digits.slice(4, 8);
     }
-    setFechaNacimientoRaw(formatted);
+    setBirthDateRaw(formatted);
   }, []);
 
-  const validarFormulario = useCallback(() => {
-    const nuevosErrores: ErroresType = {};
+  const validateForm = useCallback(() => {
+    const newErrors: ErrorsType = {};
 
-    if (!nombre.trim()) {
-      nuevosErrores.nombre = "El nombre es obligatorio";
+    if (!name.trim()) {
+      newErrors.name = "El nombre es obligatorio";
     }
 
-    if (!telefono.trim()) {
-      nuevosErrores.telefono = "El teléfono es obligatorio";
+    if (!phoneNumber.trim()) {
+      newErrors.phoneNumber = "El teléfono es obligatorio";
     }
 
-    if (!documento.trim()) {
-      nuevosErrores.documento = "El número de documento es obligatorio";
+    if (!document.trim()) {
+      newErrors.document = "El número de documento es obligatorio";
     }
 
-    if (!tipoDocumento) {
-      nuevosErrores.tipoDocumento = "El tipo de documento es obligatorio";
+    if (!documentType) {
+      newErrors.documentType = "El tipo de documento es obligatorio";
     }
 
-    if (!fechaNacimiento.trim()) {
-      nuevosErrores.fechaNacimiento = "La fecha de nacimiento es obligatoria";
-    } else if (fechaNacimiento.length < 10) {
-      nuevosErrores.fechaNacimiento = "Ingresa una fecha completa DD/MM/AAAA";
+    if (!birthDate.trim()) {
+      newErrors.birthDate = "La fecha de nacimiento es obligatoria";
+    } else if (birthDate.length < 10) {
+      newErrors.birthDate = "Ingresa una fecha completa DD/MM/AAAA";
     }
 
-    if (!correo) {
-      nuevosErrores.correo = "El correo es obligatorio";
-    } else if (!correo.includes("@")) {
-      nuevosErrores.correo = "Correo inválido";
+    if (!email) {
+      newErrors.email = "El correo es obligatorio";
+    } else if (!email.includes("@")) {
+      newErrors.email = "Correo inválido";
     }
 
     if (!password) {
-      nuevosErrores.password = "La contraseña es obligatoria";
+      newErrors.password = "La contraseña es obligatoria";
     } else if (password.length < 8) {
-      nuevosErrores.password = "Mínimo 8 caracteres";
+      newErrors.password = "Mínimo 8 caracteres";
     }
 
     if (password !== confirmPassword) {
-      nuevosErrores.confirmPassword = "Las contraseñas no coinciden";
+      newErrors.confirmPassword = "Las contraseñas no coinciden";
     }
 
-    setErrores(nuevosErrores);
-    return Object.keys(nuevosErrores).length === 0;
-  }, [nombre, telefono, documento, tipoDocumento, fechaNacimiento, correo, password, confirmPassword]);
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }, [name, phoneNumber, document, documentType, birthDate, email, password, confirmPassword]);
 
-  const irATerminos = useCallback(() => {
-    setErrorTerminos("");
-    setLeyoTerminos(true);
+  const goToTerms = useCallback(() => {
+    setTermsError("");
+    setReadTerms(true);
     navigation.navigate("PoliticaTerminos");
   }, [navigation]);
 
-  const irAPrivacidad = useCallback(() => {
-    setErrorTerminos("");
-    setLeyoPrivacidad(true);
+  const goToPrivacy = useCallback(() => {
+    setTermsError("");
+    setReadPrivacy(true);
     navigation.navigate("PoliticaPrivacidad");
   }, [navigation]);
 
-  const toggleAceptaTerminos = useCallback(() => {
-    if (!leyoTerminos) {
-      setErrorTerminos("Debes leer los términos primero");
+  const toggleAcceptsTerms = useCallback(() => {
+    if (!readTerms) {
+      setTermsError("Debes leer los términos primero");
       return;
     }
-    setErrorTerminos("");
-    setAceptaTerminos((v) => !v);
-  }, [leyoTerminos]);
+    setTermsError("");
+    setAcceptsTerms((v) => !v);
+  }, [readTerms]);
 
-  const toggleAceptaPrivacidad = useCallback(() => {
-    if (!leyoPrivacidad) {
-      setErrorTerminos("Debes leer la política primero");
+  const toggleAcceptsPrivacy = useCallback(() => {
+    if (!readPrivacy) {
+      setTermsError("Debes leer la política primero");
       return;
     }
-    setErrorTerminos("");
-    setAceptaPrivacidad((v) => !v);
-  }, [leyoPrivacidad]);
+    setTermsError("");
+    setAcceptsPrivacy((v) => !v);
+  }, [readPrivacy]);
 
-  const toggleListaTipoDocumento = useCallback(() => {
-    setMostrarLista((v) => !v);
+  const toggleDocumentTypeList = useCallback(() => {
+    setShowList((v) => !v);
   }, []);
 
-  const toggleMostrarPassword = useCallback(() => {
-    setMostrarPassword((v) => !v);
+  const toggleShowPassword = useCallback(() => {
+    setShowPassword((v) => !v);
   }, []);
 
-  const toggleMostrarConfirmPassword = useCallback(() => {
-    setMostrarConfirmPassword((v) => !v);
+  const toggleShowConfirmPassword = useCallback(() => {
+    setShowConfirmPassword((v) => !v);
   }, []);
 
-  const seleccionarTipoDocumento = useCallback((tipo: string) => {
-    setTipoDocumento(tipo);
-    setMostrarLista(false);
+  const selectDocumentType = useCallback((type: string) => {
+    setDocumentType(type);
+    setShowList(false);
   }, []);
 
-  const registrarYContinuar = useCallback(async () => {
-    if (!aceptaTerminos || !aceptaPrivacidad) {
-      setErrorTerminos("Debes aceptar términos y privacidad");
+  const registerAndContinue = useCallback(async () => {
+    if (!acceptsTerms || !acceptsPrivacy) {
+      setTermsError("Debes aceptar términos y privacidad");
       return;
     }
 
-    if (!validarFormulario()) return;
+    if (!validateForm()) return;
 
     try {
       const response = await authService.register({
-        nombre: nombre.trim(),
-        correo: correo.trim(),
+        name: name.trim(),
+        email: email.trim(),
         password: password,
-        telefono: telefono,
-        tipoDocumento: tipoDocumento,
-        numeroDocumento: documento.trim(),
-        fechaNacimiento: fechaNacimiento,
-        municipio: "Neiva",
-        aceptaTerminos: aceptaTerminos && aceptaPrivacidad,
+        phoneNumber: phoneNumber,
+        documentType: documentType,
+        documentNumber: document.trim(),
+        birthDate: birthDate,
+        municipality: "Neiva",
+        acceptsTerms: acceptsTerms && acceptsPrivacy,
       });
 
       if ('error' in response) {
         // Datos que ya usa otra cuenta: el aviso va debajo de cada campo
         if (response.campos) {
-          setErrores({
-            correo: response.campos.email,
-            telefono: response.campos.telefono,
-            documento: response.campos.numeroDocumento,
+          setErrors({
+            email: response.campos.email,
+            phoneNumber: response.campos.telefono,
+            document: response.campos.numeroDocumento,
           });
           return;
         }
-        setErrorTerminos(response.error);
+        setTermsError(response.error);
         return;
       }
 
       // Adaptar la respuesta del backend al modelo Usuario del móvil
       const backendUser = response.user;
-      const usuario: Usuario = {
+      const user: User = {
         id: backendUser.id,
         nombre: `${backendUser.firstName} ${backendUser.lastName}`,
         correo: backendUser.email,
@@ -203,58 +203,58 @@ export function useRegistroViewModel() {
         last_name: backendUser.lastName,
       };
 
-      signIn(usuario, response.token, { initialMainRoute: "TutorialBienvenida", refreshToken: response.refreshToken });
+      signIn(user, response.token, { initialMainRoute: "TutorialBienvenida", refreshToken: response.refreshToken });
     } catch (error) {
-      setErrorTerminos("Error al registrar. Intenta nuevamente.");
+      setTermsError("Error al registrar. Intenta nuevamente.");
     }
   }, [
-    aceptaTerminos,
-    aceptaPrivacidad,
-    validarFormulario,
-    nombre,
-    correo,
+    acceptsTerms,
+    acceptsPrivacy,
+    validateForm,
+    name,
+    email,
     password,
-    telefono,
-    tipoDocumento,
-    documento,
-    fechaNacimiento,
+    phoneNumber,
+    documentType,
+    document,
+    birthDate,
     signIn,
   ]);
 
   return {
-    nombre,
-    setNombre,
-    telefono,
-    setTelefono,
-    mostrarPassword,
-    setMostrarPassword,
-    mostrarLista,
-    setMostrarLista,
-    tipoDocumento,
-    documento,
-    setDocumento,
-    correo,
-    setCorreo,
+    name: name,
+    setName: setName,
+    phoneNumber: phoneNumber,
+    setPhoneNumber: setPhoneNumber,
+    showPassword: showPassword,
+    setShowPassword: setShowPassword,
+    showList: showList,
+    setShowList: setShowList,
+    documentType: documentType,
+    document: document,
+    setDocument: setDocument,
+    email: email,
+    setEmail: setEmail,
     password,
     setPassword,
     confirmPassword,
     setConfirmPassword,
-    mostrarConfirmPassword,
-    setMostrarConfirmPassword,
-    fechaNacimiento,
-    setFechaNacimiento,
-    aceptaTerminos,
-    aceptaPrivacidad,
-    errorTerminos,
-    errores,
-    irATerminos,
-    irAPrivacidad,
-    toggleAceptaTerminos,
-    toggleAceptaPrivacidad,
-    seleccionarTipoDocumento,
-    toggleListaTipoDocumento,
-    toggleMostrarPassword,
-    toggleMostrarConfirmPassword,
-    registrarYContinuar,
+    showConfirmPassword: showConfirmPassword,
+    setShowConfirmPassword: setShowConfirmPassword,
+    birthDate: birthDate,
+    setBirthDate: setBirthDate,
+    acceptsTerms: acceptsTerms,
+    acceptsPrivacy: acceptsPrivacy,
+    termsError: termsError,
+    errors: errors,
+    goToTerms: goToTerms,
+    goToPrivacy: goToPrivacy,
+    toggleAcceptsTerms: toggleAcceptsTerms,
+    toggleAcceptsPrivacy: toggleAcceptsPrivacy,
+    selectDocumentType: selectDocumentType,
+    toggleDocumentTypeList: toggleDocumentTypeList,
+    toggleShowPassword: toggleShowPassword,
+    toggleShowConfirmPassword: toggleShowConfirmPassword,
+    registerAndContinue: registerAndContinue,
   };
 }

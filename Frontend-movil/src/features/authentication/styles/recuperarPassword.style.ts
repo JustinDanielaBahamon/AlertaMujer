@@ -3,7 +3,7 @@ import { StyleSheet, Dimensions } from "react-native";
 const { width } = Dimensions.get('window');
 
 export const styles = StyleSheet.create({
-    ContenedorPrincipal: {
+    MainContainer: {
         flex: 1,
         backgroundColor: 'rgb(202, 171, 222)', // Fondo morado claro
     },
@@ -27,17 +27,17 @@ export const styles = StyleSheet.create({
         shadowOpacity: 0.15,
         shadowRadius: 12,
     },
-    ContenedorLogo: {
+    LogoContainer: {
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 25,
     },
-    ImagenLogo: {
+    LogoImage: {
         width: 140, // Ajustado para no saturar la card
         height: 120,
         resizeMode: 'contain',
     },
-    titulo: { 
+    title: { 
         fontSize: 24, 
         fontWeight: 'bold', 
         color: '#6B3FA0', 
@@ -45,7 +45,7 @@ export const styles = StyleSheet.create({
         marginBottom: 12,
         paddingHorizontal: 10,
     },
-    subtitulo: { 
+    subtitle: { 
         textAlign: 'center', 
         color: '#777', 
         fontSize: 15,
@@ -65,19 +65,19 @@ export const styles = StyleSheet.create({
         borderColor: '#EEE'
     },
     // Texto dentro de los inputs con icono (correo y contraseñas)
-    inputTexto: {
+    inputText: {
         flex: 1,
         height: 50,
         marginLeft: 10,
         color: '#333',
     },
-    codigoContainer: { 
+    codeContainer: { 
         flexDirection: 'row', 
         justifyContent: 'space-between', 
         marginBottom: 15,
         paddingHorizontal: 5,
     },
-    inputCuadro: {
+    boxInput: {
         width: 46,
         height: 56,
         borderWidth: 2, 
@@ -90,23 +90,23 @@ export const styles = StyleSheet.create({
         backgroundColor: '#FDFDFF'
     },
     // Cuadros del código cuando ya venció el tiempo
-    inputCuadroExpirado: {
+    expiredBoxInput: {
         borderColor: '#9333EA',
         backgroundColor: '#F5F5F5',
         opacity: 0.6,
     },
     // Temporizador del código (1:30)
-    timerTexto: {
+    timerText: {
         textAlign: 'center',
         color: '#6B3FA0',
         fontSize: 15,
         fontWeight: '600',
         marginBottom: 25,
     },
-    timerExpirado: {
+    timerExpired: {
         color: '#9333EA',
     },
-    botonPrincipal: {
+    primaryButton: {
         backgroundColor: '#6B3FA0', 
         height: 60, 
         borderRadius: 18, // Botón con curvas similares a la card
@@ -119,16 +119,16 @@ export const styles = StyleSheet.create({
         shadowRadius: 5,
         elevation: 4,
     },
-    botonDeshabilitado: {
+    disabledButton: {
         opacity: 0.5,
     },
-    botonTexto: { 
+    buttonText: { 
         color: '#FFF', 
         fontSize: 18, 
         fontWeight: 'bold',
         letterSpacing: 0.5 
     },
-    linkTexto: { 
+    linkText: { 
         color: '#6B3FA0', 
         textAlign: 'center', 
         fontWeight: '600',

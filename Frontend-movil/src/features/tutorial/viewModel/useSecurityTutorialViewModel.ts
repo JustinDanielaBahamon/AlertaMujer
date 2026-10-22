@@ -83,7 +83,7 @@ export function useSecurityTutorialViewModel() {
 
   // Revisa qué permisos faltan para arrancar desde el paso que corresponde.
   // Devuelve null si ya tiene cámara y micrófono (no se pide nada).
-  const pasoPendiente = async (): Promise<"camara" | "audio" | null> => {
+  const pendingStep = async (): Promise<"camara" | "audio" | null> => {
     try {
       const cam = await Camera.getCameraPermissionsAsync();
       const mic = await Audio.getPermissionsAsync();
@@ -97,13 +97,13 @@ export function useSecurityTutorialViewModel() {
   };
 
   const requestPermissions = useCallback(async (): Promise<boolean> => {
-    const paso = await pasoPendiente();
-    if (paso === null) return true;
+    const step = await pendingStep();
+    if (step === null) return true;
 
     return new Promise((resolve) => {
       resolvePermission.current = resolve;
       flowStateRef.current = 0;
-      updatePermissionType(paso);
+      updatePermissionType(step);
       setShowWarning(false);
       setModalVisible(true);
     });
@@ -177,8 +177,8 @@ export function useSecurityTutorialViewModel() {
   const retryPermissions = useCallback(async () => {
     flowStateRef.current = 0;
     setShowWarning(false);
-    const paso = await pasoPendiente();
-    updatePermissionType(paso ?? "camara");
+    const step = await pendingStep();
+    updatePermissionType(step ?? "camara");
     setModalVisible(true);
   }, []);
 

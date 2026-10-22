@@ -6,44 +6,44 @@ jest.mock("react-native-android-widget", () => ({
   TextWidget: "TextWidget",
 }));
 
-let mockWidgetActivo = true;
+let mockWidgetEnabled = true;
 jest.mock("../../../contexts/MetodosActivacionContext", () => ({
-  useMetodosActivacion: () => ({ config: { widget: mockWidgetActivo }, cargado: true }),
+  useActivationMethods: () => ({ config: { widget: mockWidgetEnabled }, loaded: true }),
 }));
 
-import { tareaWidget } from "../tareaWidget";
-import { useEnlaceSOS } from "../useEnlaceSOS";
+import { widgetTask } from "../tareaWidget";
+import { useSosLink } from "../useEnlaceSOS";
 
-const navegacionFalsa = () =>
+const fakeNavigation = () =>
   ({ isReady: () => true, getCurrentRoute: () => ({ name: "DrawerHome" }), navigate: jest.fn() }) as never;
 
 describe("widget SOS", () => {
   it("se dibuja al agregarlo y no al tocarlo (el toque abre el enlace)", async () => {
     const renderWidget = jest.fn();
-    await tareaWidget({ widgetAction: "WIDGET_ADDED", renderWidget, widgetInfo: {} as never });
-    await tareaWidget({ widgetAction: "WIDGET_CLICK", renderWidget, widgetInfo: {} as never });
+    await widgetTask({ widgetAction: "WIDGET_ADDED", renderWidget, widgetInfo: {} as never });
+    await widgetTask({ widgetAction: "WIDGET_CLICK", renderWidget, widgetInfo: {} as never });
     expect(renderWidget).toHaveBeenCalledTimes(1);
   });
 
   it("al abrir la app desde el widget lleva a la cuenta regresiva", async () => {
-    mockWidgetActivo = true;
+    mockWidgetEnabled = true;
     jest.spyOn(Linking, "getInitialURL").mockResolvedValue("alertamujer://sos");
-    const nav = navegacionFalsa() as unknown as { navigate: jest.Mock };
+    const nav = fakeNavigation() as unknown as { navigate: jest.Mock };
 
-    renderHook(() => useEnlaceSOS(nav as never, true));
+    renderHook(() => useSosLink(nav as never, true));
 
     await waitFor(() => expect(nav.navigate).toHaveBeenCalledWith("Activacion", { metodo: "widget" }));
   });
 
   it("si el widget está desactivado en Ajustes, solo avisa", async () => {
-    mockWidgetActivo = false;
+    mockWidgetEnabled = false;
     jest.spyOn(Linking, "getInitialURL").mockResolvedValue("alertamujer://sos");
-    const aviso = jest.spyOn(Alert, "alert").mockImplementation(() => {});
-    const nav = navegacionFalsa() as unknown as { navigate: jest.Mock };
+    const notice = jest.spyOn(Alert, "alert").mockImplementation(() => {});
+    const nav = fakeNavigation() as unknown as { navigate: jest.Mock };
 
-    renderHook(() => useEnlaceSOS(nav as never, true));
+    renderHook(() => useSosLink(nav as never, true));
 
-    await waitFor(() => expect(aviso).toHaveBeenCalled());
+    await waitFor(() => expect(notice).toHaveBeenCalled());
     expect(nav.navigate).not.toHaveBeenCalled();
   });
 });

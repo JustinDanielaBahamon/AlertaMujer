@@ -27,44 +27,44 @@ export function useLoginViewModel() {
   const navigation = useNavigation<LoginNavigation>();
   const { signIn } = useAuth();
 
-  const [correo, setCorreo]                   = useState("");
+  const [email, setEmail]                   = useState("");
   const [password, setPassword]               = useState("");
-  const [mostrarPassword, setMostrarPassword] = useState(false);
-  const [cargando, setCargando]               = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading]               = useState(false);
 
-  const [errorCorreo, setErrorCorreo]     = useState("");
+  const [emailError, setEmailError]     = useState("");
   const [errorPassword, setErrorPassword] = useState("");
-  const [errorGeneral, setErrorGeneral]   = useState("");
+  const [generalError, setGeneralError]   = useState("");
 
-  const toggleMostrarPassword = useCallback(() => {
-    setMostrarPassword((v) => !v);
+  const toggleShowPassword = useCallback(() => {
+    setShowPassword((v) => !v);
   }, []);
 
-  const irARecuperarContrasena = useCallback(() => {
+  const goToRecoverPassword = useCallback(() => {
     navigation.navigate("RecuperarContrasena");
   }, [navigation]);
 
-  const irARegistro = useCallback(() => {
+  const goToSignUp = useCallback(() => {
     navigation.navigate("Registro");
   }, [navigation]);
 
-  const limpiarErrores = () => {
-    setErrorCorreo("");
+  const clearErrors = () => {
+    setEmailError("");
     setErrorPassword("");
-    setErrorGeneral("");
+    setGeneralError("");
   };
 
-  const iniciarSesion = useCallback(async () => {
-    limpiarErrores();
+  const signInWithEmail = useCallback(async () => {
+    clearErrors();
     let hayError = false;
 
-    if (!correo.trim()) {
-      setErrorCorreo("Ingresa tu correo");
+    if (!email.trim()) {
+      setEmailError("Ingresa tu correo");
       hayError = true;
     } else {
-      const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo.trim());
-      if (!emailValido) {
-        setErrorCorreo("El correo no tiene un formato válido");
+      const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+      if (!validEmail) {
+        setEmailError("El correo no tiene un formato válido");
         hayError = true;
       }
     }
@@ -76,10 +76,10 @@ export function useLoginViewModel() {
 
     if (hayError) return;
 
-    setCargando(true);
+    setLoading(true);
     try {
-      const { usuario, token, refreshToken } = await loginWithEmail(correo.trim(), password);
-      signIn(usuario, token, { refreshToken });
+      const { user, token, refreshToken } = await loginWithEmail(email.trim(), password);
+      signIn(user, token, { refreshToken });
     } catch (e: any) {
       const msg = e?.message ?? "";
       if (
@@ -89,64 +89,64 @@ export function useLoginViewModel() {
         msg.includes("EMAIL_NOT_FOUND") ||
         msg.includes("Invalid credentials")
       ) {
-        setErrorCorreo("Este correo no está registrado.");
-        setErrorGeneral("¿Eres nueva? Regístrate para continuar.");
+        setEmailError("Este correo no está registrado.");
+        setGeneralError("¿Eres nueva? Regístrate para continuar.");
         setTimeout(() => navigation.navigate("Registro"), 2000);
       } else {
-        setErrorGeneral("Correo o contraseña incorrectos");
+        setGeneralError("Correo o contraseña incorrectos");
       }
     } finally {
-      setCargando(false);
+      setLoading(false);
     }
-  }, [correo, password, signIn, navigation]);
+  }, [email, password, signIn, navigation]);
 
   // Google: se pide el ID token (identidad verificable) y se envía al backend.
-  const continuarConGoogle = useCallback(async () => {
-    limpiarErrores();
+  const continueWithGoogle = useCallback(async () => {
+    clearErrors();
     try {
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
       // Google recuerda la última cuenta y entra directo con ella; al olvidarla, siempre muestra el
       // selector con todas las cuentas del teléfono (y la opción de agregar otra)
       await GoogleSignin.signOut().catch(() => {});
-      const respuesta = await GoogleSignin.signIn();
-      if (!isSuccessResponse(respuesta)) return; // la usuaria cerró la ventana de Google
-      const idToken = respuesta.data.idToken;
+      const response = await GoogleSignin.signIn();
+      if (!isSuccessResponse(response)) return; // la usuaria cerró la ventana de Google
+      const idToken = response.data.idToken;
       if (!idToken) {
-        setErrorGeneral("Google no devolvió la identidad. Intenta de nuevo.");
+        setGeneralError("Google no devolvió la identidad. Intenta de nuevo.");
         return;
       }
-      setCargando(true);
-      const { usuario, token, refreshToken } = await loginWithGoogleIdToken(idToken);
-      signIn(usuario, token, { refreshToken });
+      setLoading(true);
+      const { user, token, refreshToken } = await loginWithGoogleIdToken(idToken);
+      signIn(user, token, { refreshToken });
     } catch (e: unknown) {
       if (isErrorWithCode(e) && e.code === statusCodes.IN_PROGRESS) return;
       if (isErrorWithCode(e) && e.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        setErrorGeneral("Este teléfono no tiene Google Play Services actualizado.");
+        setGeneralError("Este teléfono no tiene Google Play Services actualizado.");
       } else if (e instanceof Error && !isErrorWithCode(e)) {
-        setErrorGeneral(e.message); // errores del backend (cuenta bloqueada, etc.)
+        setGeneralError(e.message); // errores del backend (cuenta bloqueada, etc.)
       } else {
         console.warn("Google Sign-In falló:", isErrorWithCode(e) ? e.code : e);
-        setErrorGeneral("No se pudo iniciar sesión con Google. Intenta de nuevo.");
+        setGeneralError("No se pudo iniciar sesión con Google. Intenta de nuevo.");
       }
     } finally {
-      setCargando(false);
+      setLoading(false);
     }
   }, [signIn]);
 
   return {
-    correo,
-    setCorreo,
+    email: email,
+    setEmail: setEmail,
     password,
     setPassword,
-    mostrarPassword,
-    toggleMostrarPassword,
-    irARecuperarContrasena,
-    irARegistro,
-    iniciarSesion,
-    continuarConGoogle,
-    cargando,
-    errorCorreo,
+    showPassword: showPassword,
+    toggleShowPassword: toggleShowPassword,
+    goToRecoverPassword: goToRecoverPassword,
+    goToSignUp: goToSignUp,
+    signIn: signInWithEmail,
+    continueWithGoogle: continueWithGoogle,
+    loading: loading,
+    emailError: emailError,
     errorPassword,
-    errorGeneral,
+    generalError: generalError,
   };
 }

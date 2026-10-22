@@ -2,82 +2,82 @@ import { StyleSheet } from "react-native";
 import type { AppTheme } from "../../../contexts/ThemeContext";
 
 // Colores del header: los mismos que la barra lateral en su estado normal
-export function obtenerColoresHeader(theme: AppTheme): {
-  fondo: string;
-  texto: string;
+export function getHeaderColors(theme: AppTheme): {
+  background: string;
+  text: string;
 } {
-  return { fondo: theme.headerBackground, texto: theme.headerText };
+  return { background: theme.headerBackground, text: theme.headerText };
 }
 
-export function createMetodosActivacionStyles(theme: AppTheme) {
-  const accent = theme.icono;
+export function createActivationMethodsStyles(theme: AppTheme) {
+  const accent = theme.icon;
   const accentSoft = accent + "25";
-  const { fondo, texto } = obtenerColoresHeader(theme);
+  const { background, text } = getHeaderColors(theme);
 
   return StyleSheet.create({
-    contenedor: {
+    container: {
       flex: 1,
       backgroundColor: theme.background,
     },
 
     // Header (mismo color plano que la barra lateral)
     header: {
-      backgroundColor: fondo,
+      backgroundColor: background,
       paddingHorizontal: 20,
       paddingBottom: 22,
       borderBottomLeftRadius: 28,
       borderBottomRightRadius: 28,
       gap: 16,
     },
-    headerFila: {
+    headerRow: {
       flexDirection: "row",
       alignItems: "center",
       gap: 12,
     },
-    btnVolver: {
+    returnBtn: {
       width: 38,
       height: 38,
       borderRadius: 19,
-      backgroundColor: texto + "26",
+      backgroundColor: text + "26",
       alignItems: "center",
       justifyContent: "center",
     },
-    headerTextos: { flex: 1 },
-    tituloHeader: {
-      color: texto,
+    headerTexts: { flex: 1 },
+    headerTitleText: {
+      color: text,
       fontSize: 20,
       fontWeight: "700",
     },
-    subtituloHeader: {
-      color: texto,
+    headerSubtitleText: {
+      color: text,
       opacity: 0.85,
       fontSize: 12.5,
       marginTop: 2,
     },
-    headerIcono: {
+    headerIcon: {
       width: 42,
       height: 42,
       borderRadius: 21,
-      backgroundColor: texto + "26",
+      backgroundColor: text + "26",
       alignItems: "center",
       justifyContent: "center",
     },
-    resumenFila: { gap: 8 },
-    resumenTexto: {
-      color: texto,
+    summaryRow: { gap: 8 },
+    summaryText: {
+      color: text,
       fontSize: 12.5,
       fontWeight: "600",
     },
-    barraFondo: {
+    barBackground: {
       height: 6,
       borderRadius: 3,
-      backgroundColor: texto + "33",
+      backgroundColor: text + "33",
       overflow: "hidden",
     },
-    barraRelleno: {
+    barFill: {
       height: 6,
       borderRadius: 3,
-      backgroundColor: texto,
+      backgroundColor: text,
     },
 
     // Contenido
@@ -95,7 +95,7 @@ export function createMetodosActivacionStyles(theme: AppTheme) {
     },
 
     // Tarjeta de método
-    tarjeta: {
+    card: {
       backgroundColor: theme.containerBackground,
       borderRadius: 18,
       padding: 16,
@@ -107,14 +107,14 @@ export function createMetodosActivacionStyles(theme: AppTheme) {
       shadowRadius: 8,
       elevation: 3,
     },
-    tarjetaInactiva: { opacity: 0.8 },
-    filaTitulo: {
+    inactiveCard: { opacity: 0.8 },
+    titleRow: {
       flexDirection: "row",
       alignItems: "center",
       gap: 12,
       marginBottom: 10,
     },
-    iconoWrap: {
+    iconWrap: {
       width: 42,
       height: 42,
       borderRadius: 14,
@@ -122,27 +122,27 @@ export function createMetodosActivacionStyles(theme: AppTheme) {
       justifyContent: "center",
       backgroundColor: accentSoft,
     },
-    tituloWrap: { flex: 1, gap: 4 },
-    tituloMetodo: {
+    titleWrap: { flex: 1, gap: 4 },
+    methodTitle: {
       color: theme.text,
       fontSize: 15,
       fontWeight: "700",
     },
-    chipEstado: {
+    statusChip: {
       alignSelf: "flex-start",
       paddingHorizontal: 8,
       paddingVertical: 2,
       borderRadius: 10,
       backgroundColor: accentSoft,
     },
-    chipEstadoActivo: { backgroundColor: accent },
-    chipTexto: {
+    activeStatusChip: { backgroundColor: accent },
+    chipText: {
       color: theme.text,
       fontSize: 10.5,
       fontWeight: "700",
     },
-    chipTextoActivo: { color: "#ffffff" },
-    descripcionMetodo: {
+    activeChipText: { color: "#ffffff" },
+    methodDescription: {
       color: theme.text,
       opacity: 0.75,
       fontSize: 13,
@@ -151,15 +151,15 @@ export function createMetodosActivacionStyles(theme: AppTheme) {
     },
 
     // Pasos
-    pasos: { opacity: 1 },
-    pasosInactivos: { opacity: 0.55 },
-    pasoFila: {
+    steps: { opacity: 1 },
+    inactiveSteps: { opacity: 0.55 },
+    stepRow: {
       flexDirection: "row",
       alignItems: "flex-start",
       gap: 10,
       marginBottom: 8,
     },
-    pasoNumero: {
+    stepNumber: {
       width: 20,
       height: 20,
       borderRadius: 10,
@@ -168,12 +168,12 @@ export function createMetodosActivacionStyles(theme: AppTheme) {
       justifyContent: "center",
       marginTop: 1,
     },
-    pasoNumeroTexto: {
+    stepNumberText: {
       color: theme.text,
       fontSize: 11,
       fontWeight: "700",
     },
-    pasoTexto: {
+    stepText: {
       color: theme.text,
       opacity: 0.85,
       fontSize: 12.5,
@@ -182,24 +182,24 @@ export function createMetodosActivacionStyles(theme: AppTheme) {
     },
 
     // Aviso dentro de la tarjeta (métodos que llegan en una próxima versión)
-    recomendacionesWrap: {
+    recommendationsWrap: {
       backgroundColor: accentSoft,
       borderRadius: 12,
       padding: 10,
       marginTop: 4,
       gap: 6,
     },
-    recomendacionesTituloFila: {
+    recommendationsTitleRow: {
       flexDirection: "row",
       alignItems: "center",
       gap: 6,
     },
-    recomendacionesTitulo: {
+    recommendationsTitle: {
       color: theme.text,
       fontSize: 12.5,
       fontWeight: "700",
     },
-    recomendacionMarca: {
+    brandRecommendation: {
       flexDirection: "row",
       alignItems: "flex-start",
       gap: 6,
@@ -207,22 +207,22 @@ export function createMetodosActivacionStyles(theme: AppTheme) {
       borderRadius: 8,
       padding: 8,
     },
-    recomendacionMarcaTexto: {
+    brandRecommendationText: {
       color: "#78350f",
       fontSize: 11.5,
       lineHeight: 16,
       flex: 1,
     },
-    recomendacionFila: {
+    recommendationRow: {
       flexDirection: "row",
       gap: 6,
     },
-    recomendacionVineta: {
-      color: theme.icono,
+    recommendationBullet: {
+      color: theme.icon,
       fontSize: 12,
       lineHeight: 16,
     },
-    recomendacionTexto: {
+    recommendationText: {
       color: theme.text,
       fontSize: 11.5,
       lineHeight: 16,
@@ -230,23 +230,23 @@ export function createMetodosActivacionStyles(theme: AppTheme) {
       opacity: 0.85,
     },
 
-    accionMetodo: {
+    methodAction: {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
       gap: 8,
-      backgroundColor: theme.icono,
+      backgroundColor: theme.icon,
       borderRadius: 12,
       paddingVertical: 11,
       marginTop: 6,
     },
-    accionMetodoTexto: {
+    methodActionText: {
       color: "#fff",
       fontSize: 14,
       fontWeight: "700",
     },
 
-    avisoWrap: {
+    noticeWrap: {
       flexDirection: "row",
       alignItems: "flex-start",
       gap: 8,
@@ -255,7 +255,7 @@ export function createMetodosActivacionStyles(theme: AppTheme) {
       padding: 10,
       marginTop: 4,
     },
-    avisoTexto: {
+    noticeText: {
       color: theme.text,
       fontSize: 11.5,
       lineHeight: 16,
@@ -263,7 +263,7 @@ export function createMetodosActivacionStyles(theme: AppTheme) {
       opacity: 0.85,
     },
 
-    notaWrap: {
+    noteWrap: {
       flexDirection: "row",
       alignItems: "flex-start",
       gap: 8,
@@ -272,7 +272,7 @@ export function createMetodosActivacionStyles(theme: AppTheme) {
       padding: 12,
       marginTop: 4,
     },
-    notaTexto: {
+    noteText: {
       color: theme.text,
       fontSize: 12,
       lineHeight: 17,

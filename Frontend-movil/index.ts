@@ -8,33 +8,33 @@ import { getApp } from "@react-native-firebase/app";
 import { getMessaging, setBackgroundMessageHandler } from "@react-native-firebase/messaging";
 import App from "./App";
 import { registerWidgetTaskHandler } from "react-native-android-widget";
-import { tareaWidget } from "./src/features/widget/tareaWidget";
-import { esNuevoCelular, mostrarNuevoCelular } from "./src/notifications/nuevoCelular";
-import { esTrayectoPorVencer, mostrarTrayectoPorVencer } from "./src/notifications/trayectoPorVencer";
-import { esPedidoUbicacion, responderPedidoUbicacion } from "./src/services/pedidoUbicacion";
-import { manejarEventoProteccion, registrarServicioProteccion } from "./src/features/agitar/servicioProteccion";
+import { widgetTask } from "./src/features/widget/tareaWidget";
+import { isNewPhone, showNewPhone } from "./src/notifications/nuevoCelular";
+import { isTripDueSoon, showTripDueSoon } from "./src/notifications/trayectoPorVencer";
+import { isLocationRequest, answerLocationRequest } from "./src/services/pedidoUbicacion";
+import { handleProtectionEvent, registerProtectionService } from "./src/features/agitar/servicioProteccion";
 import {
-  abrirAlertaSos,
-  datosDeNotificacion,
-  esAlertaFinalizada,
-  esAlertaSos,
-  mostrarAlarmaSos,
-  mostrarAlertaFinalizada,
+  openSosAlert,
+  notificationData,
+  isEndedAlert,
+  isSosAlert,
+  showSosAlarm,
+  showEndedAlert,
 } from "./src/notifications/alarmaSos";
 
 if (Constants.expoConfig?.extra?.pushConfigurado === true) {
   try {
-    setBackgroundMessageHandler(getMessaging(getApp()), async (mensaje) => {
-      if (esAlertaSos(mensaje.data)) {
-        await mostrarAlarmaSos(mensaje.data);
-      } else if (esAlertaFinalizada(mensaje.data)) {
-        await mostrarAlertaFinalizada(mensaje.data);
-      } else if (esPedidoUbicacion(mensaje.data)) {
-        await responderPedidoUbicacion();
-      } else if (esNuevoCelular(mensaje.data)) {
-        await mostrarNuevoCelular(mensaje.data);
-      } else if (esTrayectoPorVencer(mensaje.data)) {
-        await mostrarTrayectoPorVencer(mensaje.data);
+    setBackgroundMessageHandler(getMessaging(getApp()), async (message) => {
+      if (isSosAlert(message.data)) {
+        await showSosAlarm(message.data);
+      } else if (isEndedAlert(message.data)) {
+        await showEndedAlert(message.data);
+      } else if (isLocationRequest(message.data)) {
+        await answerLocationRequest();
+      } else if (isNewPhone(message.data)) {
+        await showNewPhone(message.data);
+      } else if (isTripDueSoon(message.data)) {
+        await showTripDueSoon(message.data);
       }
     });
   } catch (error) {
@@ -43,16 +43,16 @@ if (Constants.expoConfig?.extra?.pushConfigurado === true) {
 }
 
 // Servicio de "agitar el teléfono" (notificación fija "Protección activa")
-registrarServicioProteccion();
+registerProtectionService();
 
 // Widget "SOS" de la pantalla de inicio: Android pide dibujarlo aunque la app esté cerrada
-registerWidgetTaskHandler(tareaWidget);
+registerWidgetTaskHandler(widgetTask);
 
 notifee.onBackgroundEvent(async ({ type, detail }) => {
-  if (manejarEventoProteccion({ type, detail })) return;
-  const datos = datosDeNotificacion(detail.notification);
-  if (datos && (type === EventType.PRESS || type === EventType.ACTION_PRESS)) {
-    abrirAlertaSos(datos);
+  if (handleProtectionEvent({ type, detail })) return;
+  const data = notificationData(detail.notification);
+  if (data && (type === EventType.PRESS || type === EventType.ACTION_PRESS)) {
+    openSosAlert(data);
   }
 });
 

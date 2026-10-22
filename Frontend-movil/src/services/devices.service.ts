@@ -20,24 +20,24 @@ export interface DeviceApi {
 
 // Identificador de esta instalación de la app para cada cuenta: distingue los celulares de una
 // cuenta y, como device_uuid es único en la base, cada cuenta que entre en el celular tiene el suyo.
-const CLAVE_UUID = '@alerta_mujer:device_uuid';
-const CLAVE_SESION = '@alerta_mujer:auth'; // la misma de AuthContext
+const UUID_KEY = '@alerta_mujer:device_uuid';
+const SESSION_KEY = '@alerta_mujer:auth'; // la misma de AuthContext
 
-async function usuariaEnSesion(): Promise<number | null> {
+async function signedInUser(): Promise<number | null> {
   try {
-    const raw = await AsyncStorage.getItem(CLAVE_SESION);
+    const raw = await AsyncStorage.getItem(SESSION_KEY);
     return raw ? (JSON.parse(raw)?.user?.id ?? null) : null;
   } catch {
     return null;
   }
 }
 
-async function claveUuid(): Promise<string> {
-  const id = await usuariaEnSesion();
-  return id != null ? `${CLAVE_UUID}:${id}` : CLAVE_UUID;
+async function uuidKey(): Promise<string> {
+  const id = await signedInUser();
+  return id != null ? `${UUID_KEY}:${id}` : UUID_KEY;
 }
 // Así registraban el celular las versiones anteriores (sin datos reales)
-const MODELO_ANTIGUO = 'Dispositivo Expo';
+const OLD_MODEL = 'Dispositivo Expo';
 
 export const getDevices = async (): Promise<DeviceApi[]> => {
   const response = await api.get<DeviceApi[]>('/api/devices/user');
@@ -50,7 +50,7 @@ export const createDevice = async (device: Partial<DeviceApi>): Promise<DeviceAp
 };
 
 /** Datos reales del celular (marca, modelo, nombre que le puso la usuaria, versiones). */
-export function datosDelCelular(): Partial<DeviceApi> {
+export function phoneData(): Partial<DeviceApi> {
   return {
     brand: Device.brand ?? Device.manufacturer ?? undefined,
     model: Device.modelName ?? undefined,
@@ -66,7 +66,7 @@ export function datosDelCelular(): Partial<DeviceApi> {
  * al reinstalar la app ni al borrar sus datos: así el mismo celular no se registra dos veces. Lleva
  * el id de la cuenta porque device_uuid es único en la base y varias cuentas pueden usar el celular.
  */
-function uuidEstable(userId: number | null): string {
+function stableUuid(userId: number | null): string {
   let base: string | null = null;
   try {
     base = Platform.OS === "android" ? Application.getAndroidId() : null;
@@ -77,15 +77,15 @@ function uuidEstable(userId: number | null): string {
   return `${Platform.OS}-${base}${userId != null ? `-${userId}` : ""}`;
 }
 
-let enCurso: Promise<DeviceApi> | null = null;
+let inProgress: Promise<DeviceApi> | null = null;
 // Id del dispositivo de esta instalación, una vez conocido (va con cada ubicación que se envía)
-let idActual: number | null = null;
+let currentId: number | null = null;
 
 /** Id de este celular en el backend, si ya se obtuvo en esta sesión. */
-export function idDispositivoActual(): number | null {
-  return idActual;
+export function currentDeviceId(): number | null {
+  return currentId;
 }
-let actualizadoEnEstaSesion = false;
+let updatedThisSession = false;
 
 /**
  * El dispositivo de esta instalación; si no existe en el backend, lo crea. Una vez por sesión le
@@ -93,70 +93,70 @@ let actualizadoEnEstaSesion = false;
  * Necesario porque POST /api/alerts exige un deviceId válido y el push se guarda por dispositivo.
  */
 export const getOrCreateDevice = (): Promise<DeviceApi> => {
-  enCurso ??= obtener().finally(() => {
-    enCurso = null;
+  inProgress ??= get().finally(() => {
+    inProgress = null;
   });
-  return enCurso;
+  return inProgress;
 };
 
-async function obtener(): Promise<DeviceApi> {
-  const clave = await claveUuid();
-  const [devices, guardado] = await Promise.all([getDevices(), AsyncStorage.getItem(clave)]);
-  const datos = datosDelCelular();
+async function get(): Promise<DeviceApi> {
+  const key = await uuidKey();
+  const [devices, savedItem] = await Promise.all([getDevices(), AsyncStorage.getItem(key)]);
+  const data = phoneData();
 
-  const estable = uuidEstable(await usuariaEnSesion());
+  const stable = stableUuid(await signedInUser());
   let device =
-    (guardado ? devices.find((d) => d.deviceUuid === guardado) : undefined) ??
-    devices.find((d) => d.deviceUuid === estable);
-  if (!device && !guardado) {
+    (savedItem ? devices.find((d) => d.deviceUuid === savedItem) : undefined) ??
+    devices.find((d) => d.deviceUuid === stable);
+  if (!device && !savedItem) {
     // Instalación anterior a este cambio: se queda con el registro antiguo en vez de duplicarlo
-    device = devices.find((d) => d.model === MODELO_ANTIGUO);
+    device = devices.find((d) => d.model === OLD_MODEL);
   }
 
   if (!device) {
     device = await createDevice({
-      ...datos,
-      deviceUuid: estable,
+      ...data,
+      deviceUuid: stable,
       gpsStatus: 'unknown',
       status: 'active',
     });
-    actualizadoEnEstaSesion = true;
+    updatedThisSession = true;
   }
-  if (device.deviceUuid !== guardado) await AsyncStorage.setItem(clave, device.deviceUuid);
+  if (device.deviceUuid !== savedItem) await AsyncStorage.setItem(key, device.deviceUuid);
 
-  if (!actualizadoEnEstaSesion) {
-    actualizadoEnEstaSesion = true;
+  if (!updatedThisSession) {
+    updatedThisSession = true;
     try {
-      device = (await api.put<DeviceApi>(`/api/devices/${device.id}/info`, datos)).data;
+      device = (await api.put<DeviceApi>(`/api/devices/${device.id}/info`, data)).data;
     } catch {
       // Si falla, el dispositivo sigue sirviendo para las alertas
     }
   }
-  idActual = device.id;
+  currentId = device.id;
   return device;
 }
 
-let ultimosPermisos: string | null = null;
+let lastPermissions: string | null = null;
 
 /**
  * Informa al backend qué permisos tiene el celular (true/false por permiso) para que la usuaria
  * los vea en la web. Solo envía cuando algo cambió; un fallo no afecta a la app.
  */
-export async function reportarPermisos(permisos: Record<string, boolean>): Promise<void> {
-  const json = JSON.stringify(permisos);
-  if (json === ultimosPermisos) return;
+export async function reportPermissions(permissions: Record<string, boolean>): Promise<void> {
+  const json = JSON.stringify(permissions);
+  if (json === lastPermissions) return;
   try {
     const device = await getOrCreateDevice();
     await api.put(`/api/devices/${device.id}/info`, { permissions: json });
-    ultimosPermisos = json;
+    lastPermissions = json;
   } catch {
     // Se reintenta en la próxima revisión de permisos
   }
 }
 
 /** Al cerrar sesión: la próxima cuenta vuelve a informar los datos del celular. */
-export function olvidarSesionDispositivo(): void {
-  actualizadoEnEstaSesion = false;
-  idActual = null;
-  ultimosPermisos = null;
+export function forgetDeviceSession(): void {
+  updatedThisSession = false;
+  currentId = null;
+  lastPermissions = null;
 }

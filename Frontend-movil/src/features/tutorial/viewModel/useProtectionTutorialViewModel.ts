@@ -4,34 +4,34 @@ import * as Location from "expo-location";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AppState } from "react-native";
 import { useLocale } from "../../../contexts/LocaleContext";
-import { useMetodosActivacion } from "../../../contexts/MetodosActivacionContext";
+import { useActivationMethods } from "../../../contexts/MetodosActivacionContext";
 import type { MainStackParamList } from "../../../navigation/types";
-import { activarPermiso, revisarPermisos, type EstadoPermiso, type IdPermiso } from "../../permisos/permisos";
+import { grantPermission, checkPermissions, type PermissionStatus, type PermissionId } from "../../permisos/permisos";
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
 type LocaleT = ReturnType<typeof useLocale>["t"];
 
-export type IdProteccion = "gps" | "bateria" | "pantallaCompleta" | "inicioAutomatico" | "agitar";
+export type ProtectionId = "gps" | "bateria" | "pantallaCompleta" | "inicioAutomatico" | "agitar";
 
-export interface ProteccionItem {
-  id: IdProteccion;
-  icono: string; // MaterialIcons
-  titulo: string;
+export interface ProtectionItem {
+  id: ProtectionId;
+  icon: string; // MaterialIcons
+  title: string;
   desc: string;
   /** true listo, false falta, null no se puede comprobar (hay que revisarlo en los ajustes). */
-  listo: boolean | null;
+  ready: boolean | null;
   /** El botón abre los ajustes del sistema en vez de pedir directamente. */
-  abreAjustes: boolean;
+  opensSettings: boolean;
 }
 
-type Estados = Record<IdPermiso, EstadoPermiso> & { gpsEncendido: boolean };
+type Statuses = Record<PermissionId, PermissionStatus> & { gpsOn: boolean };
 
-const textos = (t: LocaleT): Record<IdProteccion, { icono: string; titulo: string; desc: string }> => ({
-  gps: { icono: "my-location", titulo: t.tutorial.proteccion_gps_titulo, desc: t.tutorial.proteccion_gps_desc },
-  bateria: { icono: "battery-charging-full", titulo: t.tutorial.proteccion_bateria_titulo, desc: t.tutorial.proteccion_bateria_desc },
-  pantallaCompleta: { icono: "fullscreen", titulo: t.tutorial.proteccion_pantalla_titulo, desc: t.tutorial.proteccion_pantalla_desc },
-  inicioAutomatico: { icono: "autorenew", titulo: t.tutorial.proteccion_inicio_titulo, desc: t.tutorial.proteccion_inicio_desc },
-  agitar: { icono: "vibration", titulo: t.tutorial.proteccion_agitar_titulo, desc: t.tutorial.proteccion_agitar_desc },
+const texts = (t: LocaleT): Record<ProtectionId, { icon: string; title: string; desc: string }> => ({
+  gps: { icon: "my-location", title: t.tutorial.proteccion_gps_titulo, desc: t.tutorial.proteccion_gps_desc },
+  bateria: { icon: "battery-charging-full", title: t.tutorial.proteccion_bateria_titulo, desc: t.tutorial.proteccion_bateria_desc },
+  pantallaCompleta: { icon: "fullscreen", title: t.tutorial.proteccion_pantalla_titulo, desc: t.tutorial.proteccion_pantalla_desc },
+  inicioAutomatico: { icon: "autorenew", title: t.tutorial.proteccion_inicio_titulo, desc: t.tutorial.proteccion_inicio_desc },
+  agitar: { icon: "vibration", title: t.tutorial.proteccion_agitar_titulo, desc: t.tutorial.proteccion_agitar_desc },
 });
 
 /**
@@ -41,69 +41,69 @@ const textos = (t: LocaleT): Record<IdProteccion, { icono: string; titulo: strin
 export function useProtectionTutorialViewModel() {
   const { t } = useLocale();
   const navigation = useNavigation<Nav>();
-  const { config, cambiar } = useMetodosActivacion();
-  const [estados, setEstados] = useState<Estados | null>(null);
+  const { config, change } = useActivationMethods();
+  const [statuses, setStatuses] = useState<Statuses | null>(null);
 
-  const refrescar = useCallback(() => {
-    Promise.all([revisarPermisos(config.agitar), Location.hasServicesEnabledAsync().catch(() => false)])
-      .then(([permisos, gpsEncendido]) => setEstados({ ...permisos, gpsEncendido }))
+  const refresh = useCallback(() => {
+    Promise.all([checkPermissions(config.agitar), Location.hasServicesEnabledAsync().catch(() => false)])
+      .then(([permissions, gpsOn]) => setStatuses({ ...permissions, gpsOn }))
       .catch((e) => console.warn("No se pudieron revisar los ajustes de protección:", e));
   }, [config.agitar]);
 
   // Al entrar y al volver de los ajustes de Android
   useEffect(() => {
-    refrescar();
-    const sub = AppState.addEventListener("change", (estado) => {
-      if (estado === "active") refrescar();
+    refresh();
+    const sub = AppState.addEventListener("change", (status) => {
+      if (status === "active") refresh();
     });
     return () => sub.remove();
-  }, [refrescar]);
+  }, [refresh]);
 
-  const items = useMemo<ProteccionItem[]>(() => {
-    if (!estados) return [];
-    const info = textos(t);
-    const lista: ProteccionItem[] = [
+  const items = useMemo<ProtectionItem[]>(() => {
+    if (!statuses) return [];
+    const info = texts(t);
+    const list: ProtectionItem[] = [
       {
         id: "gps",
         ...info.gps,
-        listo: estados.gpsEncendido && estados.ubicacion.concedido === true,
-        abreAjustes: !estados.ubicacion.puedePreguntar,
+        ready: statuses.gpsOn && statuses.ubicacion.granted === true,
+        opensSettings: !statuses.ubicacion.canAsk,
       },
-      { id: "bateria", ...info.bateria, listo: estados.bateria.concedido, abreAjustes: false },
-      { id: "pantallaCompleta", ...info.pantallaCompleta, listo: estados.pantallaCompleta.concedido, abreAjustes: false },
+      { id: "bateria", ...info.bateria, ready: statuses.bateria.granted, opensSettings: false },
+      { id: "pantallaCompleta", ...info.pantallaCompleta, ready: statuses.pantallaCompleta.granted, opensSettings: false },
     ];
-    if (!estados.inicioAutomatico.oculto) {
-      lista.push({ id: "inicioAutomatico", ...info.inicioAutomatico, listo: estados.inicioAutomatico.concedido, abreAjustes: true });
+    if (!statuses.inicioAutomatico.hidden) {
+      list.push({ id: "inicioAutomatico", ...info.inicioAutomatico, ready: statuses.inicioAutomatico.granted, opensSettings: true });
     }
-    lista.push({ id: "agitar", ...info.agitar, listo: config.agitar, abreAjustes: false });
-    return lista;
-  }, [estados, config.agitar, t]);
+    list.push({ id: "agitar", ...info.agitar, ready: config.agitar, opensSettings: false });
+    return list;
+  }, [statuses, config.agitar, t]);
 
-  const activar = useCallback(
-    async (id: IdProteccion) => {
-      if (!estados) return;
+  const activate = useCallback(
+    async (id: ProtectionId) => {
+      if (!statuses) return;
       if (id === "agitar") {
-        cambiar("agitar", true);
+        change("agitar", true);
         return;
       }
       if (id === "gps") {
-        if (estados.ubicacion.concedido !== true) await activarPermiso("ubicacion", estados.ubicacion);
+        if (statuses.ubicacion.granted !== true) await grantPermission("ubicacion", statuses.ubicacion);
         // Muestra el aviso de Android para encender la ubicación: aquí sí lo pidió la usuaria
-        if (!estados.gpsEncendido) await Location.enableNetworkProviderAsync().catch(() => undefined);
+        if (!statuses.gpsOn) await Location.enableNetworkProviderAsync().catch(() => undefined);
       } else {
-        await activarPermiso(id, estados[id]);
+        await grantPermission(id, statuses[id]);
       }
-      refrescar();
+      refresh();
     },
-    [estados, cambiar, refrescar],
+    [statuses, change, refresh],
   );
 
   // Desde Ajustes se vuelve a donde estaba; después del registro entra a la app
-  const empezar = useCallback(() => {
+  const start = useCallback(() => {
     if (navigation.canGoBack()) navigation.goBack();
     else navigation.replace("DrawerHome");
   }, [navigation]);
 
-  const listos = items.filter((i) => i.listo === true).length;
-  return { items, listos, total: items.length, cargando: !estados, activar, empezar };
+  const readyItems = items.filter((i) => i.ready === true).length;
+  return { items, readyItems: readyItems, total: items.length, loading: !statuses, activate: activate, start: start };
 }

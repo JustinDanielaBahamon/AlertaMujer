@@ -56,7 +56,7 @@ export const createStyles = (theme: AppTheme) =>
     },
 
     countIcon: {
-      backgroundColor: theme.contactCousserBg,
+      backgroundColor: theme.contactCounterBg,
       borderRadius: 12,
       padding: 8,
       marginRight: 10,
@@ -72,7 +72,7 @@ export const createStyles = (theme: AppTheme) =>
     searchContainer: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: theme.contactBuscadorBg,
+      backgroundColor: theme.contactSearchBg,
       borderRadius: 12,
       paddingHorizontal: 12,
       paddingVertical: 10,
@@ -85,7 +85,7 @@ export const createStyles = (theme: AppTheme) =>
     searchInput: {
       flex: 1,
       fontSize: 14,
-      color: theme.contactBuscadorText,
+      color: theme.contactSearchText,
       padding: 0, // reset del padding por defecto en Android
     },
 
@@ -153,7 +153,7 @@ export const createStyles = (theme: AppTheme) =>
     contactName: {
       fontSize: 19,
       fontWeight: "bold",
-      color: theme.contactNombre,
+      color: theme.contactName,
     },
 
     relationBadge: {

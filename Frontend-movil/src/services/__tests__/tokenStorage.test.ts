@@ -1,32 +1,32 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const mockAlmacen = new Map<string, string>();
+const mockStorage = new Map<string, string>();
 jest.mock("expo-secure-store", () => ({
-  setItemAsync: jest.fn(async (k: string, v: string) => void mockAlmacen.set(k, v)),
-  getItemAsync: jest.fn(async (k: string) => mockAlmacen.get(k) ?? null),
-  deleteItemAsync: jest.fn(async (k: string) => void mockAlmacen.delete(k)),
+  setItemAsync: jest.fn(async (k: string, v: string) => void mockStorage.set(k, v)),
+  getItemAsync: jest.fn(async (k: string) => mockStorage.get(k) ?? null),
+  deleteItemAsync: jest.fn(async (k: string) => void mockStorage.delete(k)),
 }));
 
-import { borrarTokens, guardarTokens, leerTokens } from "../tokenStorage";
+import { clearTokens, saveTokens, leerTokens } from "../tokenStorage";
 
 describe("tokenStorage", () => {
   beforeEach(async () => {
-    mockAlmacen.clear();
+    mockStorage.clear();
     await AsyncStorage.clear();
   });
 
   it("guarda los tokens en el almacén cifrado y no en AsyncStorage", async () => {
-    await guardarTokens({ token: "acceso", refreshToken: "renovar" });
+    await saveTokens({ token: "acceso", refreshToken: "renovar" });
 
     expect(await leerTokens()).toEqual({ token: "acceso", refreshToken: "renovar" });
     expect(await AsyncStorage.getAllKeys()).toEqual([]);
   });
 
   it("al cerrar sesión no queda ningún token", async () => {
-    await guardarTokens({ token: "acceso", refreshToken: "renovar" });
-    await borrarTokens();
+    await saveTokens({ token: "acceso", refreshToken: "renovar" });
+    await clearTokens();
 
     expect(await leerTokens()).toBeNull();
-    expect(mockAlmacen.size).toBe(0);
+    expect(mockStorage.size).toBe(0);
   });
 });

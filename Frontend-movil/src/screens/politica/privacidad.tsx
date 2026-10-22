@@ -5,21 +5,21 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocale } from '../../contexts/LocaleContext';
 
 type Props = {
-  titulo: string;
-  descripcion: string;
+  title: string;
+  description: string;
 };
 
-export default function Privacidad(){
+export default function Privacy(){
   const navigation = useNavigation<any>();
   const { t } = useLocale();
 
-  const ItemPrivacidad = ({ titulo, descripcion }: Props) => (
+  const PrivacyItem = ({ title, description }: Props) => (
     <View style={{ marginBottom: 12 }}>
       <Text style={{ fontWeight: 'bold', fontSize: 16, color: '#4B1FA8' }}>
-        {titulo}
+        {title}
       </Text>
       <Text style={{ fontSize: 16, lineHeight: 24, color: '#000' }}>
-        {descripcion}
+        {description}
       </Text>
     </View>
   );
@@ -55,10 +55,10 @@ export default function Privacidad(){
         }}>
 
           {items.map((n) => (
-            <ItemPrivacidad
+            <PrivacyItem
               key={n}
-              titulo={t.politicaPrivacidad[`item${n}_titulo` as keyof typeof t.politicaPrivacidad]}
-              descripcion={t.politicaPrivacidad[`item${n}_desc` as keyof typeof t.politicaPrivacidad]}
+              title={t.politicaPrivacidad[`item${n}_titulo` as keyof typeof t.politicaPrivacidad]}
+              description={t.politicaPrivacidad[`item${n}_desc` as keyof typeof t.politicaPrivacidad]}
             />
           ))}
 

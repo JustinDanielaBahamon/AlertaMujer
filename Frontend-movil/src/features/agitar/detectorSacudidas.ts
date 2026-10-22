@@ -13,90 +13,90 @@
  * Dar más de 4 hachazos también cuenta. Tras una detección hay una pausa para no disparar dos veces.
  */
 
-export type OpcionesDetector = {
+export type DetectorOptions = {
   /** Fuerza mínima de un pico (hachazo), en g. */
-  umbralG: number;
+  thresholdG: number;
   /** Por debajo de esta fuerza el teléfono se considera quieto. */
-  reposoG: number;
+  restG: number;
   /** Tiempo quieto (bajo `reposoG`) para dar por terminada la secuencia (ms). */
-  reposoMinimoMs: number;
+  minRestMs: number;
   /** Picos necesarios. */
-  golpesNecesarios: number;
+  requiredHits: number;
   /** Duración máxima de la secuencia de picos, contada desde el primero (ms). */
-  ventanaMs: number;
+  windowMs: number;
   /** Separación mínima entre dos picos: lo que llega antes es el rebote del mismo hachazo (ms). */
-  separacionMinimaMs: number;
+  minGapMs: number;
   /** Separación máxima entre dos picos seguidos de la misma secuencia (ms). */
-  separacionMaximaMs: number;
+  maxGapMs: number;
   /** Tiempo sin picos antes del primero (ms). */
-  calmaPreviaMs: number;
+  calmBeforeMs: number;
   /** Tiempo sin picos después del último para confirmar (ms). */
-  calmaPosteriorMs: number;
+  calmAfterMs: number;
   /** Pausa después de una detección (ms). */
-  pausaMs: number;
+  pauseMs: number;
 };
 
-export const OPCIONES_POR_DEFECTO: OpcionesDetector = {
-  umbralG: 4.5,
-  reposoG: 2.0,
-  reposoMinimoMs: 200,
-  golpesNecesarios: 4,
-  ventanaMs: 8000,
-  separacionMinimaMs: 200,
-  separacionMaximaMs: 1000,
-  calmaPreviaMs: 400,
-  calmaPosteriorMs: 600,
-  pausaMs: 8000,
+export const DEFAULT_OPTIONS: DetectorOptions = {
+  thresholdG: 4.5,
+  restG: 2.0,
+  minRestMs: 200,
+  requiredHits: 4,
+  windowMs: 8000,
+  minGapMs: 200,
+  maxGapMs: 1000,
+  calmBeforeMs: 400,
+  calmAfterMs: 600,
+  pauseMs: 8000,
 };
 
-export type DetectorSacudidas = (x: number, y: number, z: number, tiempoMs: number) => boolean;
+export type ShakeDetector = (x: number, y: number, z: number, timeMs: number) => boolean;
 
-export function crearDetectorSacudidas(opciones: Partial<OpcionesDetector> = {}): DetectorSacudidas {
-  const o = { ...OPCIONES_POR_DEFECTO, ...opciones };
+export function createShakeDetector(options: Partial<DetectorOptions> = {}): ShakeDetector {
+  const o = { ...DEFAULT_OPTIONS, ...options };
 
   // Las dos lecturas anteriores: un pico se confirma cuando la siguiente lectura ya es menor
-  let anterior: { g: number; t: number } | null = null;
-  let antepenultima = 0;
-  let ultimoPico = Number.NEGATIVE_INFINITY;
-  let picos: number[] = [];
-  let quietoDesde: number | null = null;
-  let pausaHasta = 0;
+  let previous: { g: number; t: number } | null = null;
+  let thirdToLast = 0;
+  let lastPeak = Number.NEGATIVE_INFINITY;
+  let peaks: number[] = [];
+  let stillSince: number | null = null;
+  let pausedUntil = 0;
 
-  const registrarPico = (t: number) => {
-    if (t - ultimoPico < o.separacionMinimaMs) return; // rebote del mismo hachazo
-    const huboCalma = t - ultimoPico >= o.calmaPreviaMs;
-    const sigue = picos.length > 0 && t - ultimoPico <= o.separacionMaximaMs && t - picos[0] <= o.ventanaMs;
-    if (sigue) picos.push(t);
-    else picos = huboCalma ? [t] : []; // sin calma previa es actividad continua (p. ej. correr)
-    ultimoPico = t;
+  const registerPeak = (t: number) => {
+    if (t - lastPeak < o.minGapMs) return; // rebote del mismo hachazo
+    const hadCalm = t - lastPeak >= o.calmBeforeMs;
+    const continues = peaks.length > 0 && t - lastPeak <= o.maxGapMs && t - peaks[0] <= o.windowMs;
+    if (continues) peaks.push(t);
+    else peaks = hadCalm ? [t] : []; // sin calma previa es actividad continua (p. ej. correr)
+    lastPeak = t;
   };
 
   return (x, y, z, t) => {
-    const fuerza = Math.sqrt(x * x + y * y + z * z);
-    if (t < pausaHasta) {
-      anterior = null;
+    const strength = Math.sqrt(x * x + y * y + z * z);
+    if (t < pausedUntil) {
+      previous = null;
       return false;
     }
 
     // ¿La lectura anterior fue un máximo local fuerte?
-    if (anterior && anterior.g >= o.umbralG && anterior.g >= antepenultima && anterior.g > fuerza) {
-      registrarPico(anterior.t);
+    if (previous && previous.g >= o.thresholdG && previous.g >= thirdToLast && previous.g > strength) {
+      registerPeak(previous.t);
     }
-    antepenultima = anterior?.g ?? fuerza;
-    anterior = { g: fuerza, t };
+    thirdToLast = previous?.g ?? strength;
+    previous = { g: strength, t };
 
-    quietoDesde = fuerza < o.reposoG ? (quietoDesde ?? t) : null;
+    stillSince = strength < o.restG ? (stillSince ?? t) : null;
 
     // Secuencia completa: sin picos nuevos durante la calma posterior y el teléfono ya quieto
-    const quieto = quietoDesde !== null && t - quietoDesde >= o.reposoMinimoMs;
-    if (picos.length >= o.golpesNecesarios && t - ultimoPico >= o.calmaPosteriorMs && quieto) {
-      picos = [];
-      pausaHasta = t + o.pausaMs;
+    const still = stillSince !== null && t - stillSince >= o.minRestMs;
+    if (peaks.length >= o.requiredHits && t - lastPeak >= o.calmAfterMs && still) {
+      peaks = [];
+      pausedUntil = t + o.pauseMs;
       return true;
     }
     // Pasó demasiado tiempo sin completar la secuencia: se descarta
-    if (picos.length > 0 && t - ultimoPico > o.separacionMaximaMs && picos.length < o.golpesNecesarios) {
-      picos = [];
+    if (peaks.length > 0 && t - lastPeak > o.maxGapMs && peaks.length < o.requiredHits) {
+      peaks = [];
     }
     return false;
   };

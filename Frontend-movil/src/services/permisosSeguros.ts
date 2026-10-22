@@ -21,35 +21,35 @@ import * as Location from "expo-location";
 let cola: Promise<unknown> = Promise.resolve();
 
 /** Ejecuta la petición de permiso cuando termine la anterior (nunca dos a la vez). */
-export function enColaDePermisos<T>(pedir: () => Promise<T>): Promise<T> {
-  const resultado = cola.then(pedir, pedir);
-  cola = resultado.catch(() => undefined);
-  return resultado;
+export function inPermissionQueue<T>(ask: () => Promise<T>): Promise<T> {
+  const result = cola.then(ask, ask);
+  cola = result.catch(() => undefined);
+  return result;
 }
 
 /** true si la app tiene (o acaba de recibir) permiso de ubicación mientras se usa. */
-export async function permisoUbicacion(pedir = true): Promise<boolean> {
-  const actual = await Location.getForegroundPermissionsAsync();
-  if (actual.granted) return true;
-  if (!pedir) return false;
-  const pedido = await enColaDePermisos(() => Location.requestForegroundPermissionsAsync());
-  return pedido.granted;
+export async function locationPermission(ask = true): Promise<boolean> {
+  const current = await Location.getForegroundPermissionsAsync();
+  if (current.granted) return true;
+  if (!ask) return false;
+  const request = await inPermissionQueue(() => Location.requestForegroundPermissionsAsync());
+  return request.granted;
 }
 
 /** true si la app puede mostrar notificaciones (las pide si hace falta y pedir = true). */
-export async function permisoNotificaciones(pedir = true): Promise<boolean> {
-  const actual = await notifee.getNotificationSettings();
-  if (actual.authorizationStatus === AuthorizationStatus.AUTHORIZED) return true;
-  if (!pedir) return false;
-  const pedido = await enColaDePermisos(() => notifee.requestPermission());
-  return pedido.authorizationStatus === AuthorizationStatus.AUTHORIZED;
+export async function notificationsPermission(ask = true): Promise<boolean> {
+  const current = await notifee.getNotificationSettings();
+  if (current.authorizationStatus === AuthorizationStatus.AUTHORIZED) return true;
+  if (!ask) return false;
+  const request = await inPermissionQueue(() => notifee.requestPermission());
+  return request.authorizationStatus === AuthorizationStatus.AUTHORIZED;
 }
 
 /**
  * Ubicación sin que Android muestre su aviso de "activa la ubicación del dispositivo": si el GPS
  * está apagado devuelve null. Para lo que corre solo (ubicación diaria, alerta en segundo plano).
  */
-export async function ubicacionSinAvisos(
+export async function locationWithoutNotices(
   precision: Location.Accuracy = Location.Accuracy.Balanced,
 ): Promise<Location.LocationObject | null> {
   if (!(await Location.hasServicesEnabledAsync().catch(() => false))) return null;

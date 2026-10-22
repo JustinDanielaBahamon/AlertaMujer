@@ -4,34 +4,34 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Location from "expo-location";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Image, Linking, Modal, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { useContactosContext } from "../../../contexts/ContactosContext";
+import { useContactsContext } from "../../../contexts/ContactosContext";
 import MapView, { Marker, Polyline } from "../../../components/mapa/MapaLibre";
-import { COLOR_PUNTO_A, COLOR_PUNTO_B } from "../../mapa/coloresRecorrido";
-import { useDetalleAlertaViewModel, type PasoAlerta } from "../viewModel/useDetalleAlertaViewModel";
-import ContactosNotificadosModal, { ESTADOS, ICONO_CANAL } from "./ContactosNotificadosModal";
-import EvidenciasAlerta from "./EvidenciasAlerta";
+import { POINT_A_COLOR, POINT_B_COLOR } from "../../mapa/coloresRecorrido";
+import { useAlertDetailViewModel, type AlertStep } from "../viewModel/useDetalleAlertaViewModel";
+import NotifiedContactsModal, { STATUSES, CHANNEL_ICON } from "./ContactosNotificadosModal";
+import AlertEvidence from "./EvidenciasAlerta";
 import { useTheme } from "../../../../src/contexts/ThemeContext";
 import { useLocale } from "../../../../src/contexts/LocaleContext";
 import { getMainStackNavigation } from "../../../navigation/navigationHelpers";
 import type { MainStackParamList } from "../../../navigation/types";
 import { createStyles } from "../style/detalle.Style";
-import { getAsistenciaColors, getEmergenciaColors } from "../style/historial.style";
+import { getAssistanceColors, getEmergencyColors } from "../style/historial.style";
 
-type DetalleAlertaRouteProp = RouteProp<MainStackParamList, "DetalleAlerta">;
-type Coordenada = { latitude: number; longitude: number };
+type AlertDetailRouteProp = RouteProp<MainStackParamList, "DetalleAlerta">;
+type Coordinate = { latitude: number; longitude: number };
 
-const ICONO_PASO: Record<PasoAlerta["icono"], keyof typeof MaterialIcons.glyphMap> = {
+const STEP_ICON: Record<AlertStep["icon"], keyof typeof MaterialIcons.glyphMap> = {
   alerta: "notifications-active",
   ubicacion: "my-location",
   fin: "check",
   curso: "radio-button-checked",
 };
 
-const COLOR_PASO: Record<PasoAlerta["icono"], string> = {
-  alerta: COLOR_PUNTO_B,
+const STEP_COLOR: Record<AlertStep["icon"], string> = {
+  alerta: POINT_B_COLOR,
   ubicacion: "#9333EA",
-  fin: COLOR_PUNTO_A,
-  curso: COLOR_PUNTO_B,
+  fin: POINT_A_COLOR,
+  curso: POINT_B_COLOR,
 };
 
 export default function DetalleAlerta() {
@@ -40,51 +40,51 @@ export default function DetalleAlerta() {
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
-  const route = useRoute<DetalleAlertaRouteProp>();
-  const { alerta } = route.params;
+  const route = useRoute<AlertDetailRouteProp>();
+  const { alerta: alert } = route.params;
   const {
-    esEmergencia, compartiendo, compartirReporte, contactosNotificados, cargandoContactos, errorContactos,
-    puntos, cargandoDetalle, direccion, metodo, mensaje, pasos,
-  } = useDetalleAlertaViewModel(alerta);
-  const recorrido = useMemo(() => puntos.map((p) => ({ latitude: p.latitude, longitude: p.longitude })), [puntos]);
-  const mapaRef = useRef<MapView>(null);
-  const [mapaListo, setMapaListo] = useState(false);
-  const [verNotificados, setVerNotificados] = useState(false);
+    isEmergency, sharing, shareReport, notifiedContacts, loadingContacts, contactsError,
+    points, loadingDetail, address, method, message, steps,
+  } = useAlertDetailViewModel(alert);
+  const path = useMemo(() => points.map((p) => ({ latitude: p.latitude, longitude: p.longitude })), [points]);
+  const mapRef = useRef<MapView>(null);
+  const [mapReady, setMapReady] = useState(false);
+  const [showNotified, setShowNotified] = useState(false);
 
   // El teléfono sale de la lista de contactos (el registro de envíos solo guarda el nombre)
-  const { contactos } = useContactosContext();
-  const telefonoDe = (contactId: number) =>
-    contactos.find((x) => String(x.id) === String(contactId))?.telefono?.replace(/\D/g, "") ?? "";
-  const abrirWhatsApp = (telefono: string, nombre: string) => {
-    const numero = telefono.length === 10 ? `57${telefono}` : telefono;
-    const texto = t.detalle.whatsapp_mensaje
-      .replace("{nombre}", (nombre || "").split(" ")[0])
-      .replace("{fecha}", `${alerta.fecha} · ${alerta.hora}`);
-    Linking.openURL(`https://wa.me/${numero}?text=${encodeURIComponent(texto)}`).catch(() => {});
+  const { contacts } = useContactsContext();
+  const phoneOf = (contactId: number) =>
+    contacts.find((x) => String(x.id) === String(contactId))?.phoneNumber?.replace(/\D/g, "") ?? "";
+  const openWhatsApp = (phoneNumber: string, name: string) => {
+    const number = phoneNumber.length === 10 ? `57${phoneNumber}` : phoneNumber;
+    const text = t.detalle.whatsapp_mensaje
+      .replace("{nombre}", (name || "").split(" ")[0])
+      .replace("{fecha}", `${alert.date} · ${alert.time}`);
+    Linking.openURL(`https://wa.me/${number}?text=${encodeURIComponent(text)}`).catch(() => {});
   };
-  const textoEstado = (estado: string) =>
+  const statusLabel = (status: string) =>
     ({
       pending: t.detalle.estado_pending,
       sent: t.detalle.estado_sent,
       delivered: t.detalle.estado_delivered,
       failed: t.detalle.estado_failed,
       expired: t.detalle.estado_expired,
-    })[estado] ?? estado;
-  const [coordenadaAlerta, setCoordenadaAlerta] = useState<Coordenada | null>(null);
-  const [cargandoMapa, setCargandoMapa] = useState(true);
-  const [mapaPantallaCompleta, setMapaPantallaCompleta] = useState(false);
+    })[status] ?? status;
+  const [alertCoordinate, setAlertCoordinate] = useState<Coordinate | null>(null);
+  const [loadingMap, setLoadingMap] = useState(true);
+  const [fullScreenMap, setFullScreenMap] = useState(false);
 
-  const emergencyColors = useMemo(() => getEmergenciaColors(theme), [theme]);
-  const assistanceColors = useMemo(() => getAsistenciaColors(theme), [theme]);
-  const alertColors = esEmergencia ? emergencyColors : assistanceColors;
+  const emergencyColors = useMemo(() => getEmergencyColors(theme), [theme]);
+  const assistanceColors = useMemo(() => getAssistanceColors(theme), [theme]);
+  const alertColors = isEmergency ? emergencyColors : assistanceColors;
 
-  const irAMapaInterno = () => {
+  const goToInternalMap = () => {
     const main = getMainStackNavigation(navigation);
     main?.navigate("DrawerHome", {
       screen: "Inicio",
       params: {
         screen: "Mapa",
-        params: { direccionObjetivo: alerta.ubicacion },
+        params: { targetAddress: alert.location },
       },
     } as never);
   };
@@ -94,56 +94,56 @@ export default function DetalleAlerta() {
     (async () => {
       try {
         // Si la alerta ya tiene coordenadas del backend, usarlas directamente
-        if (recorrido.length > 0) {
-          setCoordenadaAlerta(recorrido[0]);
-          if (mounted) setCargandoMapa(false);
+        if (path.length > 0) {
+          setAlertCoordinate(path[0]);
+          if (mounted) setLoadingMap(false);
           return;
         }
-        if (alerta.coords) {
-          setCoordenadaAlerta(alerta.coords);
-          if (mounted) setCargandoMapa(false);
+        if (alert.coords) {
+          setAlertCoordinate(alert.coords);
+          if (mounted) setLoadingMap(false);
           return;
         }
 
-        const direccion = alerta.ubicacion?.trim();
-        if (!direccion) {
-          if (mounted) setCoordenadaAlerta(null);
+        const address = alert.location?.trim();
+        if (!address) {
+          if (mounted) setAlertCoordinate(null);
           return;
         }
-        const resultados = await Location.geocodeAsync(`${direccion}, Colombia`);
+        const results = await Location.geocodeAsync(`${address}, Colombia`);
         if (!mounted) return;
-        if (resultados.length > 0) {
-          const { latitude, longitude } = resultados[0];
-          setCoordenadaAlerta({ latitude, longitude });
+        if (results.length > 0) {
+          const { latitude, longitude } = results[0];
+          setAlertCoordinate({ latitude, longitude });
         } else {
-          setCoordenadaAlerta(null);
+          setAlertCoordinate(null);
         }
       } catch {
-        if (mounted) setCoordenadaAlerta(null);
+        if (mounted) setAlertCoordinate(null);
       } finally {
-        if (mounted) setCargandoMapa(false);
+        if (mounted) setLoadingMap(false);
       }
     })();
     return () => {
       mounted = false;
     };
-  }, [alerta.ubicacion, alerta.coords, recorrido]);
+  }, [alert.location, alert.coords, path]);
 
   // Encuadra todo el recorrido en el mapa pequeño
   useEffect(() => {
-    if (!mapaListo || recorrido.length < 2) return;
-    mapaRef.current?.fitToCoordinates(recorrido, {
+    if (!mapReady || path.length < 2) return;
+    mapRef.current?.fitToCoordinates(path, {
       edgePadding: { top: 40, right: 40, bottom: 60, left: 40 },
       animated: false,
     });
-  }, [mapaListo, recorrido]);
+  }, [mapReady, path]);
 
-  const abrirMapaCompleto = () => coordenadaAlerta && setMapaPantallaCompleta(true);
+  const openFullMap = () => alertCoordinate && setFullScreenMap(true);
 
   return (
     <>
       <ScrollView
-        style={styles.ContenedorPrincipal}
+        style={styles.MainContainer}
         showsVerticalScrollIndicator={false}
         bounces={false}
         overScrollMode="never"
@@ -152,13 +152,13 @@ export default function DetalleAlerta() {
           colors={[theme.headercolor1, theme.headercolor2]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={styles.Gradiente}
+          style={styles.Gradient}
         >
-          <TouchableOpacity style={styles.BotonVolver} onPress={() => navigation.goBack()}>
+          <TouchableOpacity style={styles.BackButton} onPress={() => navigation.goBack()}>
             <Feather name="arrow-left" size={22} color="white" />
           </TouchableOpacity>
 
-          <View style={styles.HeaderContenido}>
+          <View style={styles.HeaderContent}>
             <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
               <View style={{ flex: 1 }}>
                 <Text style={{ color: "white", fontSize: 25, fontWeight: "800" }}>{t.detalle.titulo}</Text>
@@ -174,61 +174,61 @@ export default function DetalleAlerta() {
           </View>
         </LinearGradient>
 
-        <View style={styles.Cuerpo}>
+        <View style={styles.Body}>
           {/* RESUMEN */}
-          <View style={styles.TarjetaResumen}>
-            <View style={[styles.IconoResumen, { backgroundColor: alertColors.iconBg }]}>
-              <MaterialIcons name={esEmergencia ? "warning" : "medical-services"} size={22} color={alertColors.iconTint} />
+          <View style={styles.SummaryCard}>
+            <View style={[styles.SummaryIcon, { backgroundColor: alertColors.iconBg }]}>
+              <MaterialIcons name={isEmergency ? "warning" : "medical-services"} size={22} color={alertColors.iconTint} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.ResumenTipo}>{alerta.tipo}</Text>
-              <View style={styles.ResumenFilaMeta}>
+              <Text style={styles.SummaryType}>{alert.type}</Text>
+              <View style={styles.SummaryMetaRow}>
                 <MaterialIcons name="access-time" size={14} color={theme.contactSubtext} />
-                <Text style={styles.ResumenMetaTexto}>
-                  {alerta.fecha} · {alerta.hora}
+                <Text style={styles.SummaryMetaText}>
+                  {alert.date} · {alert.time}
                 </Text>
               </View>
-              {!!direccion && (
-                <View style={styles.ResumenFilaMeta}>
+              {!!address && (
+                <View style={styles.SummaryMetaRow}>
                   <MaterialIcons name="place" size={14} color={theme.contactSubtext} />
-                  <Text style={styles.ResumenMetaTexto} numberOfLines={2}>{direccion}</Text>
+                  <Text style={styles.SummaryMetaText} numberOfLines={2}>{address}</Text>
                 </View>
               )}
-              {!!metodo && (
+              {!!method && (
                 <View style={[extra.chip, { backgroundColor: `${theme.contactAccent}1A` }]}>
                   <MaterialIcons name="bolt" size={13} color={theme.contactAccent} />
-                  <Text style={[extra.chipTexto, { color: theme.contactAccent }]}>{metodo}</Text>
+                  <Text style={[extra.chipText, { color: theme.contactAccent }]}>{method}</Text>
                 </View>
               )}
             </View>
-            <View style={[styles.BadgeResumenEstado, { backgroundColor: alertColors.badgeBg }]}>
-              <Text style={[styles.BadgeResumenEstadoTexto, { color: alertColors.badgeText }]}>
-                {alerta.estado.toUpperCase()}
+            <View style={[styles.SummaryStatusBadge, { backgroundColor: alertColors.badgeBg }]}>
+              <Text style={[styles.SummaryStatusBadgeText, { color: alertColors.badgeText }]}>
+                {alert.status.toUpperCase()}
               </Text>
             </View>
           </View>
 
           {/* MAPA CON EL RECORRIDO */}
-          <View style={styles.TarjetaMapa}>
-            {coordenadaAlerta ? (
+          <View style={styles.MapCard}>
+            {alertCoordinate ? (
               <MapView
-                ref={mapaRef}
-                style={styles.MapaFondo}
+                ref={mapRef}
+                style={styles.MapBackground}
                 initialRegion={{
-                  latitude: coordenadaAlerta.latitude,
-                  longitude: coordenadaAlerta.longitude,
+                  latitude: alertCoordinate.latitude,
+                  longitude: alertCoordinate.longitude,
                   latitudeDelta: 0.01,
                   longitudeDelta: 0.01,
                 }}
-                onMapReady={() => setMapaListo(true)}
+                onMapReady={() => setMapReady(true)}
                 pointerEvents="none"
               >
-                {recorrido.length > 1 && (
-                  <Polyline coordinates={recorrido} strokeWidth={4} strokeColor={COLOR_PUNTO_A} />
+                {path.length > 1 && (
+                  <Polyline coordinates={path} strokeWidth={4} strokeColor={POINT_A_COLOR} />
                 )}
-                <Marker coordinate={recorrido[0] ?? coordenadaAlerta} title="Inicio" pinColor={COLOR_PUNTO_A} />
-                {recorrido.length > 1 && (
-                  <Marker coordinate={recorrido[recorrido.length - 1]} title="Última ubicación" pinColor={COLOR_PUNTO_B} />
+                <Marker coordinate={path[0] ?? alertCoordinate} title="Inicio" pinColor={POINT_A_COLOR} />
+                {path.length > 1 && (
+                  <Marker coordinate={path[path.length - 1]} title="Última ubicación" pinColor={POINT_B_COLOR} />
                 )}
               </MapView>
             ) : (
@@ -236,9 +236,9 @@ export default function DetalleAlerta() {
                 colors={theme.mode === "dark" ? ["#2a1446", "#160a29"] : ["#efe3ff", "#dcc6fb"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                style={[styles.MapaFondo, { alignItems: "center", justifyContent: "center" }]}
+                style={[styles.MapBackground, { alignItems: "center", justifyContent: "center" }]}
               >
-                {cargandoMapa || cargandoDetalle ? (
+                {loadingMap || loadingDetail ? (
                   <ActivityIndicator size="small" color={theme.contactAccent} />
                 ) : (
                   <Text style={{ color: theme.text, fontSize: 13, fontWeight: "600", textAlign: "center" }}>
@@ -248,14 +248,14 @@ export default function DetalleAlerta() {
               </LinearGradient>
             )}
 
-            <Pressable onPress={abrirMapaCompleto} style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }} />
+            <Pressable onPress={openFullMap} style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }} />
 
-            {coordenadaAlerta && (
-              <View style={extra.mapaPie}>
-                <TouchableOpacity style={extra.mapaBoton} onPress={abrirMapaCompleto}>
+            {alertCoordinate && (
+              <View style={extra.mapFooter}>
+                <TouchableOpacity style={extra.mapButton} onPress={openFullMap}>
                   <MaterialIcons name="open-in-full" size={14} color="white" />
-                  <Text style={extra.mapaBotonTexto}>
-                    {recorrido.length > 1 ? `Ver recorrido (${recorrido.length} puntos)` : t.detalle.ver_mapa}
+                  <Text style={extra.mapButtonText}>
+                    {path.length > 1 ? `Ver recorrido (${path.length} puntos)` : t.detalle.ver_mapa}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -263,21 +263,21 @@ export default function DetalleAlerta() {
           </View>
 
           {/* LÍNEA DE TIEMPO */}
-          {pasos.length > 0 && (
+          {steps.length > 0 && (
             <>
-              <Text style={styles.SeccionTitulo}>Qué pasó</Text>
-              <View style={[extra.tarjeta, { backgroundColor: theme.containerBackground }]}>
-                {pasos.map((paso, i) => (
-                  <View key={paso.titulo} style={extra.paso}>
-                    <View style={extra.pasoGuia}>
-                      <View style={[extra.pasoPunto, { backgroundColor: COLOR_PASO[paso.icono] }]}>
-                        <MaterialIcons name={ICONO_PASO[paso.icono]} size={14} color="white" />
+              <Text style={styles.SectionTitle}>Qué pasó</Text>
+              <View style={[extra.card, { backgroundColor: theme.containerBackground }]}>
+                {steps.map((step, i) => (
+                  <View key={step.title} style={extra.step}>
+                    <View style={extra.stepGuide}>
+                      <View style={[extra.stepDot, { backgroundColor: STEP_COLOR[step.icon] }]}>
+                        <MaterialIcons name={STEP_ICON[step.icon]} size={14} color="white" />
                       </View>
-                      {i < pasos.length - 1 && <View style={[extra.pasoLinea, { backgroundColor: `${theme.contactAccent}40` }]} />}
+                      {i < steps.length - 1 && <View style={[extra.stepLine, { backgroundColor: `${theme.contactAccent}40` }]} />}
                     </View>
-                    <View style={extra.pasoTexto}>
-                      <Text style={[extra.pasoTitulo, { color: theme.text }]}>{paso.titulo}</Text>
-                      <Text style={[extra.pasoDetalle, { color: theme.contactSubtext }]}>{paso.detalle}</Text>
+                    <View style={extra.stepText}>
+                      <Text style={[extra.stepTitle, { color: theme.text }]}>{step.title}</Text>
+                      <Text style={[extra.stepDetail, { color: theme.contactSubtext }]}>{step.detail}</Text>
                     </View>
                   </View>
                 ))}
@@ -286,82 +286,82 @@ export default function DetalleAlerta() {
           )}
 
           {/* EVIDENCIAS GRABADAS */}
-          <Text style={styles.SeccionTitulo}>{t.detalle.evidencias_titulo}</Text>
-          <EvidenciasAlerta alertaId={Number(alerta.id)} />
+          <Text style={styles.SectionTitle}>{t.detalle.evidencias_titulo}</Text>
+          <AlertEvidence alertId={Number(alert.id)} />
 
           {/* CONTACTOS AVISADOS */}
-          <View style={extra.seccionFila}>
-            <Text style={styles.SeccionTitulo}>{t.detalle.notificados_titulo}</Text>
-            {contactosNotificados.length > 0 && (
-              <TouchableOpacity onPress={() => setVerNotificados(true)}>
-                <Text style={[extra.verTodo, { color: theme.contactAccent }]}>Ver detalle</Text>
+          <View style={extra.sectionRow}>
+            <Text style={styles.SectionTitle}>{t.detalle.notificados_titulo}</Text>
+            {notifiedContacts.length > 0 && (
+              <TouchableOpacity onPress={() => setShowNotified(true)}>
+                <Text style={[extra.seeAll, { color: theme.contactAccent }]}>Ver detalle</Text>
               </TouchableOpacity>
             )}
           </View>
-          <View style={[extra.tarjeta, { backgroundColor: theme.containerBackground }]}>
-            {cargandoContactos ? (
+          <View style={[extra.card, { backgroundColor: theme.containerBackground }]}>
+            {loadingContacts ? (
               <ActivityIndicator size="small" color={theme.contactAccent} />
-            ) : errorContactos ? (
-              <Text style={[extra.pasoDetalle, { color: theme.contactSubtext }]}>{t.detalle.notificados_error}</Text>
-            ) : contactosNotificados.length === 0 ? (
-              <Text style={[extra.pasoDetalle, { color: theme.contactSubtext }]}>{t.detalle.notificados_vacio}</Text>
+            ) : contactsError ? (
+              <Text style={[extra.stepDetail, { color: theme.contactSubtext }]}>{t.detalle.notificados_error}</Text>
+            ) : notifiedContacts.length === 0 ? (
+              <Text style={[extra.stepDetail, { color: theme.contactSubtext }]}>{t.detalle.notificados_vacio}</Text>
             ) : (
-              contactosNotificados.map((c, i) => {
-                const telefono = telefonoDe(c.contactId);
+              notifiedContacts.map((c, i) => {
+                const phoneNumber = phoneOf(c.contactId);
                 return (
                   <View
                     key={String(c.contactId)}
-                    style={[extra.contactoTarjeta, i > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: theme.contactDivider }]}
+                    style={[extra.contactCard, i > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: theme.contactDivider }]}
                   >
-                    <View style={extra.contacto}>
+                    <View style={extra.contact}>
                       <View style={[extra.avatar, { backgroundColor: `${theme.contactAccent}1A` }]}>
-                        <Text style={[extra.avatarTexto, { color: theme.contactAccent }]}>
+                        <Text style={[extra.avatarText, { color: theme.contactAccent }]}>
                           {(c.name || "?").trim().charAt(0).toUpperCase()}
                         </Text>
                       </View>
                       <View style={{ flex: 1 }}>
-                        <Text style={[extra.pasoTitulo, { color: theme.text }]} numberOfLines={1}>{c.name}</Text>
+                        <Text style={[extra.stepTitle, { color: theme.text }]} numberOfLines={1}>{c.name}</Text>
                         {!!c.relationship && (
-                          <Text style={[extra.pasoDetalle, { color: theme.contactSubtext, textTransform: "capitalize" }]}>{c.relationship}</Text>
+                          <Text style={[extra.stepDetail, { color: theme.contactSubtext, textTransform: "capitalize" }]}>{c.relationship}</Text>
                         )}
                       </View>
                     </View>
                     {/* Por dónde le llegó, en palabras: "Correo · Recibida" */}
-                    <View style={extra.canales}>
-                      {c.channels.map((canal) => {
-                        const estado = ESTADOS[canal.status] ?? ESTADOS.pending;
+                    <View style={extra.channels}>
+                      {c.channels.map((channel) => {
+                        const status = STATUSES[channel.status] ?? STATUSES.pending;
                         return (
                           <View
-                            key={canal.channel}
-                            style={[extra.canal, { backgroundColor: `${estado.color}14`, borderColor: `${estado.color}66` }]}
+                            key={channel.channel}
+                            style={[extra.channel, { backgroundColor: `${status.color}14`, borderColor: `${status.color}66` }]}
                           >
-                            <MaterialIcons name={ICONO_CANAL[canal.channel] ?? "chat"} size={14} color={estado.color} />
-                            <Text style={[extra.canalTexto, { color: estado.color }]}>
-                              {canal.channel === "email" ? t.detalle.canal_corto_email : canal.channel === "push" ? t.detalle.canal_corto_push : canal.channel}
+                            <MaterialIcons name={CHANNEL_ICON[channel.channel] ?? "chat"} size={14} color={status.color} />
+                            <Text style={[extra.channelText, { color: status.color }]}>
+                              {channel.channel === "email" ? t.detalle.canal_corto_email : channel.channel === "push" ? t.detalle.canal_corto_push : channel.channel}
                               {" · "}
-                              {textoEstado(canal.status)}
+                              {statusLabel(channel.status)}
                             </Text>
                           </View>
                         );
                       })}
                     </View>
-                    {!!telefono && (
-                      <View style={extra.acciones}>
+                    {!!phoneNumber && (
+                      <View style={extra.actions}>
                         <TouchableOpacity
-                          style={[extra.accion, { backgroundColor: theme.contactAccent }]}
-                          onPress={() => abrirWhatsApp(telefono, c.name)}
+                          style={[extra.action, { backgroundColor: theme.contactAccent }]}
+                          onPress={() => openWhatsApp(phoneNumber, c.name)}
                           accessibilityRole="button"
                         >
                           <MaterialIcons name="chat" size={16} color="#fff" />
-                          <Text style={extra.accionTexto}>{t.detalle.escribir_whatsapp}</Text>
+                          <Text style={extra.actionText}>{t.detalle.escribir_whatsapp}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                          style={[extra.accion, extra.accionSecundaria, { borderColor: theme.contactAccent }]}
-                          onPress={() => Linking.openURL(`tel:${telefono}`).catch(() => {})}
+                          style={[extra.action, extra.secondaryAction, { borderColor: theme.contactAccent }]}
+                          onPress={() => Linking.openURL(`tel:${phoneNumber}`).catch(() => {})}
                           accessibilityRole="button"
                         >
                           <MaterialIcons name="call" size={16} color={theme.contactAccent} />
-                          <Text style={[extra.accionTexto, { color: theme.contactAccent }]}>{t.detalle.llamar_contacto}</Text>
+                          <Text style={[extra.actionText, { color: theme.contactAccent }]}>{t.detalle.llamar_contacto}</Text>
                         </TouchableOpacity>
                       </View>
                     )}
@@ -372,51 +372,51 @@ export default function DetalleAlerta() {
           </View>
 
           {/* NOTA DE LA ALERTA */}
-          {!!mensaje && (
-            <View style={styles.TarjetaDescripcion}>
-              <Text style={styles.DescripcionTitulo}>{t.detalle.descripcion}</Text>
-              <Text style={styles.DescripcionTexto}>{mensaje}</Text>
+          {!!message && (
+            <View style={styles.DescriptionCard}>
+              <Text style={styles.DescriptionTitle}>{t.detalle.descripcion}</Text>
+              <Text style={styles.DescriptionText}>{message}</Text>
             </View>
           )}
         </View>
         <View style={styles.Footer}>
-            <Text style={styles.SeccionTitulo}>{t.detalle.acciones_rapidas}</Text>
-            <View style={styles.FilaAcciones}>
-              <TouchableOpacity style={styles.AccionItem} onPress={compartirReporte} disabled={compartiendo}>
-                <View style={styles.AccionCirculo}>
+            <Text style={styles.SectionTitle}>{t.detalle.acciones_rapidas}</Text>
+            <View style={styles.ActionsRow}>
+              <TouchableOpacity style={styles.ActionItem} onPress={shareReport} disabled={sharing}>
+                <View style={styles.ActionCircle}>
                   <Feather name="share-2" size={18} color={theme.contactAccent} />
                 </View>
-                <Text style={styles.AccionTexto}>{compartiendo ? t.detalle.enviando : t.detalle.compartir}</Text>
+                <Text style={styles.ActionText}>{sharing ? t.detalle.enviando : t.detalle.compartir}</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.AccionItem} onPress={irAMapaInterno}>
-                <View style={styles.AccionCirculo}>
+              <TouchableOpacity style={styles.ActionItem} onPress={goToInternalMap}>
+                <View style={styles.ActionCircle}>
                   <Feather name="navigation" size={18} color={theme.contactAccent} />
                 </View>
-                <Text style={styles.AccionTexto}>{t.detalle.navegar}</Text>
+                <Text style={styles.ActionText}>{t.detalle.navegar}</Text>
               </TouchableOpacity>
             </View>
-            <View style={styles.SeparadorFinal} />
+            <View style={styles.EndSeparator} />
           </View>
       </ScrollView>
 
-      <Modal visible={mapaPantallaCompleta} animationType="slide" onRequestClose={() => setMapaPantallaCompleta(false)}>
+      <Modal visible={fullScreenMap} animationType="slide" onRequestClose={() => setFullScreenMap(false)}>
         <View style={{ flex: 1, backgroundColor: theme.background }}>
-          {coordenadaAlerta ? (
+          {alertCoordinate ? (
             <MapView
               style={{ flex: 1 }}
               initialRegion={{
-                latitude: coordenadaAlerta.latitude,
-                longitude: coordenadaAlerta.longitude,
+                latitude: alertCoordinate.latitude,
+                longitude: alertCoordinate.longitude,
                 latitudeDelta: 0.01,
                 longitudeDelta: 0.01,
               }}
             >
-              {recorrido.length > 1 && (
-                <Polyline coordinates={recorrido} strokeWidth={4} strokeColor={COLOR_PUNTO_A} />
+              {path.length > 1 && (
+                <Polyline coordinates={path} strokeWidth={4} strokeColor={POINT_A_COLOR} />
               )}
-              <Marker coordinate={recorrido[0] ?? coordenadaAlerta} title="Inicio" pinColor={COLOR_PUNTO_A} />
-              {recorrido.length > 1 && (
-                <Marker coordinate={recorrido[recorrido.length - 1]} title="Última ubicación" pinColor={COLOR_PUNTO_B} />
+              <Marker coordinate={path[0] ?? alertCoordinate} title="Inicio" pinColor={POINT_A_COLOR} />
+              {path.length > 1 && (
+                <Marker coordinate={path[path.length - 1]} title="Última ubicación" pinColor={POINT_B_COLOR} />
               )}
             </MapView>
           ) : (
@@ -425,7 +425,7 @@ export default function DetalleAlerta() {
             </View>
           )}
           <TouchableOpacity
-            onPress={() => setMapaPantallaCompleta(false)}
+            onPress={() => setFullScreenMap(false)}
             style={{
               position: "absolute",
               top: 50,
@@ -440,12 +440,12 @@ export default function DetalleAlerta() {
           </TouchableOpacity>
         </View>
       </Modal>
-      <ContactosNotificadosModal
-        visible={verNotificados}
-        onCerrar={() => setVerNotificados(false)}
-        contactos={contactosNotificados}
-        cargando={cargandoContactos}
-        error={errorContactos}
+      <NotifiedContactsModal
+        visible={showNotified}
+        onClose={() => setShowNotified(false)}
+        contacts={notifiedContacts}
+        loading={loadingContacts}
+        error={contactsError}
       />
     </>
   );
@@ -462,9 +462,9 @@ const extra = StyleSheet.create({
     paddingVertical: 3,
     marginTop: 6,
   },
-  chipTexto: { fontSize: 12, fontWeight: "700" },
-  mapaPie: { position: "absolute", left: 12, right: 12, bottom: 12, flexDirection: "row" },
-  mapaBoton: {
+  chipText: { fontSize: 12, fontWeight: "700" },
+  mapFooter: { position: "absolute", left: 12, right: 12, bottom: 12, flexDirection: "row" },
+  mapButton: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
@@ -473,26 +473,26 @@ const extra = StyleSheet.create({
     borderRadius: 18,
     backgroundColor: "rgba(76, 29, 149, 0.85)",
   },
-  mapaBotonTexto: { color: "white", fontSize: 12, fontWeight: "700" },
-  tarjeta: { borderRadius: 18, padding: 16, marginBottom: 18, gap: 4 },
-  paso: { flexDirection: "row", minHeight: 52 },
-  pasoGuia: { width: 28, alignItems: "center" },
-  pasoPunto: { width: 26, height: 26, borderRadius: 13, alignItems: "center", justifyContent: "center" },
-  pasoLinea: { flex: 1, width: 2, marginVertical: 2 },
-  pasoTexto: { flex: 1, paddingLeft: 10, paddingBottom: 10 },
-  pasoTitulo: { fontSize: 14, fontWeight: "700" },
-  pasoDetalle: { fontSize: 12, marginTop: 2 },
-  seccionFila: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  verTodo: { fontSize: 13, fontWeight: "700", marginBottom: 10 },
-  contactoTarjeta: { paddingVertical: 10, gap: 8 },
-  contacto: { flexDirection: "row", alignItems: "center", gap: 10 },
+  mapButtonText: { color: "white", fontSize: 12, fontWeight: "700" },
+  card: { borderRadius: 18, padding: 16, marginBottom: 18, gap: 4 },
+  step: { flexDirection: "row", minHeight: 52 },
+  stepGuide: { width: 28, alignItems: "center" },
+  stepDot: { width: 26, height: 26, borderRadius: 13, alignItems: "center", justifyContent: "center" },
+  stepLine: { flex: 1, width: 2, marginVertical: 2 },
+  stepText: { flex: 1, paddingLeft: 10, paddingBottom: 10 },
+  stepTitle: { fontSize: 14, fontWeight: "700" },
+  stepDetail: { fontSize: 12, marginTop: 2 },
+  sectionRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  seeAll: { fontSize: 13, fontWeight: "700", marginBottom: 10 },
+  contactCard: { paddingVertical: 10, gap: 8 },
+  contact: { flexDirection: "row", alignItems: "center", gap: 10 },
   avatar: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },
-  avatarTexto: { fontSize: 15, fontWeight: "800" },
-  canales: { flexDirection: "row", flexWrap: "wrap", gap: 6, paddingLeft: 46 },
-  canal: { flexDirection: "row", alignItems: "center", gap: 5, borderWidth: 1, borderRadius: 12, paddingHorizontal: 9, paddingVertical: 4 },
-  canalTexto: { fontSize: 12, fontWeight: "700" },
-  acciones: { flexDirection: "row", gap: 8, paddingLeft: 46 },
-  accion: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, height: 38, borderRadius: 12 },
-  accionSecundaria: { borderWidth: 1.5, backgroundColor: "transparent" },
-  accionTexto: { color: "#fff", fontSize: 13, fontWeight: "800" },
+  avatarText: { fontSize: 15, fontWeight: "800" },
+  channels: { flexDirection: "row", flexWrap: "wrap", gap: 6, paddingLeft: 46 },
+  channel: { flexDirection: "row", alignItems: "center", gap: 5, borderWidth: 1, borderRadius: 12, paddingHorizontal: 9, paddingVertical: 4 },
+  channelText: { fontSize: 12, fontWeight: "700" },
+  actions: { flexDirection: "row", gap: 8, paddingLeft: 46 },
+  action: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, height: 38, borderRadius: 12 },
+  secondaryAction: { borderWidth: 1.5, backgroundColor: "transparent" },
+  actionText: { color: "#fff", fontSize: 13, fontWeight: "800" },
 });

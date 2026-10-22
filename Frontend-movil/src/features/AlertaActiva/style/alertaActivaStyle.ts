@@ -18,7 +18,7 @@ export const createStyles = (
   const horizontalPadding = Math.max(16, Math.min(width * 0.06, 32));
   const circleSize = Math.round(Math.min(Math.max(width * 0.42, 130), 190));
 
-  const sombra = {
+  const shadow = {
     shadowColor: "#000",
     shadowOpacity: 0.2,
     shadowRadius: 6,
@@ -59,7 +59,7 @@ export const createStyles = (
       justifyContent: "center" as const,
       alignItems: "center" as const,
       borderWidth: 2,
-      borderColor: theme.icono,
+      borderColor: theme.icon,
     },
     headerMap: {
       width: "100%" as const,
@@ -75,7 +75,7 @@ export const createStyles = (
       width: 26,
       height: 26,
       borderRadius: 13,
-      backgroundColor: theme.icono,
+      backgroundColor: theme.icon,
       opacity: 0.65,
       borderWidth: 2,
       borderColor: "#FFFFFF",
@@ -87,18 +87,18 @@ export const createStyles = (
       fontSize: 11,
       fontWeight: "800" as const,
     },
-    pinActual: {
+    currentPin: {
       width: 38,
       height: 38,
       borderRadius: 19,
-      backgroundColor: theme.icono,
+      backgroundColor: theme.icon,
       borderWidth: 3,
       borderColor: "#FFFFFF",
       justifyContent: "center" as const,
       alignItems: "center" as const,
       elevation: 6,
     },
-    pinActualText: {
+    currentPinText: {
       color: "#FFFFFF",
       fontSize: 15,
       fontWeight: "900" as const,
@@ -106,7 +106,7 @@ export const createStyles = (
     title: {
       fontSize: isCompact ? 20 : isWide ? 28 : 24,
       fontWeight: "800" as const,
-      color: theme.icono,
+      color: theme.icon,
       marginTop: 1,
       textAlign: "center" as const,
     },
@@ -126,7 +126,7 @@ export const createStyles = (
       height: circleSize,
       borderRadius: circleSize / 2,
       borderWidth: 8,
-      borderColor: theme.icono,
+      borderColor: theme.icon,
       backgroundColor: theme.containerBackground,
       justifyContent: "center" as const,
       alignItems: "center" as const,
@@ -141,7 +141,7 @@ export const createStyles = (
       color: theme.text,
       opacity: 0.7,
     },
-    mensajeCard: {
+    messageCard: {
       flexDirection: "row" as const,
       alignItems: "flex-start" as const,
       backgroundColor: theme.containerBackground,
@@ -151,7 +151,7 @@ export const createStyles = (
       marginBottom: 15,
       gap: 10,
     },
-    mensajeText: {
+    messageText: {
       flex: 1,
       fontSize: 13,
       lineHeight: 18,
@@ -180,7 +180,7 @@ export const createStyles = (
     infoTitle: {
       fontSize: 15,
       fontWeight: "700" as const,
-      color: theme.icono,
+      color: theme.icon,
     },
     infoDescription: {
       fontSize: 13,
@@ -196,7 +196,7 @@ export const createStyles = (
     locationTitle: {
       fontSize: 16,
       fontWeight: "700" as const,
-      color: theme.icono,
+      color: theme.icon,
       marginBottom: 12,
     },
     locationRow: {
@@ -243,7 +243,7 @@ export const createStyles = (
     },
     callText: {
       marginLeft: 8,
-      color: theme.icono,
+      color: theme.icon,
       fontSize: 15,
       fontWeight: "600" as const,
     },
@@ -274,7 +274,7 @@ export const createStyles = (
     confirmTitle: {
       fontSize: 20,
       fontWeight: "800" as const,
-      color: theme.icono,
+      color: theme.icon,
       marginBottom: 8,
       textAlign: "center" as const,
     },
@@ -304,10 +304,10 @@ export const createStyles = (
       borderRadius: 16,
       alignItems: "center" as const,
       borderWidth: 2,
-      borderColor: theme.icono,
+      borderColor: theme.icon,
     },
     confirmButtonNoText: {
-      color: theme.icono,
+      color: theme.icon,
       fontSize: 15,
       fontWeight: "700" as const,
     },
@@ -337,12 +337,12 @@ export const createStyles = (
       paddingHorizontal: 16,
       borderRadius: 23,
       backgroundColor: theme.containerBackground,
-      ...sombra,
+      ...shadow,
     },
     modalCloseText: {
       fontSize: 13,
       fontWeight: "700" as const,
-      color: theme.icono,
+      color: theme.icon,
     },
     modalTitlePill: {
       flex: 1,
@@ -352,7 +352,7 @@ export const createStyles = (
       paddingVertical: 6,
       borderRadius: 23,
       backgroundColor: theme.containerBackground,
-      ...sombra,
+      ...shadow,
     },
     modalTitle: {
       fontSize: 12,
@@ -374,7 +374,7 @@ export const createStyles = (
       backgroundColor: theme.containerBackground,
       justifyContent: "center" as const,
       alignItems: "center" as const,
-      ...sombra,
+      ...shadow,
     },
     modalInfo: {
       position: "absolute" as const,
@@ -385,17 +385,17 @@ export const createStyles = (
       paddingVertical: 10,
       borderRadius: 18,
       backgroundColor: theme.containerBackground,
-      ...sombra,
+      ...shadow,
     },
     modalInfoText: {
       fontSize: 12,
       fontWeight: "700" as const,
       color: theme.text,
     },
-    modalInfoBarrio: {
+    neighborhoodInfoModal: {
       fontSize: 12,
       fontWeight: "600" as const,
-      color: theme.icono,
+      color: theme.icon,
       marginTop: 2,
     },
   };

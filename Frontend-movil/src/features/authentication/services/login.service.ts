@@ -1,24 +1,24 @@
-import type { Usuario } from "../models/Usuario";
+import type { User } from "../models/Usuario";
 
-export type Sesion = { usuario: Usuario; token: string; refreshToken?: string };
+export type Session = { user: User; token: string; refreshToken?: string };
 import { authService } from "../../../services/auth.service";
 
 /**
  * Capa de acceso a datos / API para autenticación.
  * Utiliza el servicio de autenticación que conecta al backend Spring Boot.
  */
-export async function loginWithEmail(correo: string, password: string): Promise<Sesion> {
+export async function loginWithEmail(email: string, password: string): Promise<Session> {
   try {
-    return aSesion(await authService.login(correo, password));
+    return toSession(await authService.login(email, password));
   } catch (error) {
     throw new Error("Error al iniciar sesión. Verifica tus credenciales.");
   }
 }
 
 /** Inicio de sesión con el ID token que entrega Google. */
-export async function loginWithGoogleIdToken(idToken: string): Promise<Sesion> {
+export async function loginWithGoogleIdToken(idToken: string): Promise<Session> {
   try {
-    return aSesion(await authService.loginWithGoogle(idToken));
+    return toSession(await authService.loginWithGoogle(idToken));
   } catch (error: any) {
     if (error?.response?.data?.message === "Account blocked") {
       throw new Error("Tu cuenta está bloqueada. Contacta al administrador.");
@@ -28,9 +28,9 @@ export async function loginWithGoogleIdToken(idToken: string): Promise<Sesion> {
 }
 
 // El backend devuelve {token, user}; se adapta al modelo Usuario del móvil
-function aSesion(response: Awaited<ReturnType<typeof authService.login>>): Sesion {
+function toSession(response: Awaited<ReturnType<typeof authService.login>>): Session {
     const backendUser = response.user;
-    const usuario: Usuario = {
+    const user: User = {
       id: backendUser.id,
       nombre: `${backendUser.firstName} ${backendUser.lastName}`.trim(),
       correo: backendUser.email,
@@ -44,7 +44,7 @@ function aSesion(response: Awaited<ReturnType<typeof authService.login>>): Sesio
     };
     
     return {
-      usuario,
+      user,
       token: response.token,
       refreshToken: response.refreshToken,
     };

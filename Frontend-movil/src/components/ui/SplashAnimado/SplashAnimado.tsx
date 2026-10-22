@@ -3,46 +3,46 @@ import { AccessibilityInfo, Animated, Easing, Image, StyleSheet, Text, View } fr
 import * as SplashScreen from "expo-splash-screen";
 
 // Mismo morado que el splash nativo (app.json) para que el cambio no se note
-export const COLOR_FONDO = "#2B0C3B";
-const DORADO = "#E9C46A";
-const TITULO = "ALERTA MUJER";
-const LEMA = "SEGURIDAD PARA TODAS";
+export const BACKGROUND_COLOR = "#2B0C3B";
+const GOLD = "#E9C46A";
+const TITLE = "ALERTA MUJER";
+const MOTTO = "SEGURIDAD PARA TODAS";
 
 // Tamaño inicial del logo = tamaño de la pantera en el splash nativo (imageWidth 200 * 58%)
-const LOGO_INICIAL = 116;
+const INITIAL_LOGO = 116;
 
-type Props = { onTerminar: () => void };
+type Props = { onFinish: () => void };
 
 /**
  * Animación de apertura: la pantera sube, las letras de ALERTA MUJER aparecen una a una,
  * luego el lema, y todo se desvanece para mostrar la app (que ya cargó por debajo).
  */
-export default function SplashAnimado({ onTerminar }: Props) {
-  const letras = useMemo(() => TITULO.split(""), []);
-  const fondo = useRef(new Animated.Value(1)).current;
-  const logoEscala = useRef(new Animated.Value(1)).current;
-  const logoSubida = useRef(new Animated.Value(0)).current;
+export default function AnimatedSplash({ onFinish }: Props) {
+  const letters = useMemo(() => TITLE.split(""), []);
+  const background = useRef(new Animated.Value(1)).current;
+  const logoScale = useRef(new Animated.Value(1)).current;
+  const logoRise = useRef(new Animated.Value(0)).current;
   const brillo = useRef(new Animated.Value(0)).current;
-  const lema = useRef(new Animated.Value(0)).current;
-  const valoresLetras = useRef(letras.map(() => new Animated.Value(0))).current;
+  const motto = useRef(new Animated.Value(0)).current;
+  const letterValues = useRef(letters.map(() => new Animated.Value(0))).current;
 
-  const iniciada = useRef(false);
+  const started = useRef(false);
 
-  const iniciar = async () => {
+  const start = async () => {
     // onLayout puede dispararse varias veces; la animación solo arranca una
-    if (iniciada.current) return;
-    iniciada.current = true;
+    if (started.current) return;
+    started.current = true;
     // El splash nativo se oculta justo cuando esta vista ya está dibujada encima
     await SplashScreen.hideAsync().catch(() => {});
-    const reducir = await AccessibilityInfo.isReduceMotionEnabled().catch(() => false);
+    const reduce = await AccessibilityInfo.isReduceMotionEnabled().catch(() => false);
 
-    if (reducir) {
-      valoresLetras.forEach((v) => v.setValue(1));
-      lema.setValue(1);
+    if (reduce) {
+      letterValues.forEach((v) => v.setValue(1));
+      motto.setValue(1);
       Animated.sequence([
         Animated.delay(700),
-        Animated.timing(fondo, { toValue: 0, duration: 250, useNativeDriver: true }),
-      ]).start(onTerminar);
+        Animated.timing(background, { toValue: 0, duration: 250, useNativeDriver: true }),
+      ]).start(onFinish);
       return;
     }
 
@@ -50,99 +50,99 @@ export default function SplashAnimado({ onTerminar }: Props) {
       Animated.delay(150),
       // 1) La pantera crece un poco y sube para dejar espacio al nombre
       Animated.parallel([
-        Animated.timing(logoEscala, { toValue: 1.35, duration: 650, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
-        Animated.timing(logoSubida, { toValue: -70, duration: 650, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+        Animated.timing(logoScale, { toValue: 1.35, duration: 650, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+        Animated.timing(logoRise, { toValue: -70, duration: 650, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
         Animated.timing(brillo, { toValue: 1, duration: 650, useNativeDriver: true }),
       ]),
       // 2) Letras una por una
       Animated.stagger(
         55,
-        valoresLetras.map((v) =>
+        letterValues.map((v) =>
           Animated.timing(v, { toValue: 1, duration: 320, easing: Easing.out(Easing.back(1.6)), useNativeDriver: true })
         )
       ),
       // 3) Lema
-      Animated.timing(lema, { toValue: 1, duration: 400, useNativeDriver: true }),
+      Animated.timing(motto, { toValue: 1, duration: 400, useNativeDriver: true }),
       Animated.delay(550),
       // 4) Salida
-      Animated.timing(fondo, { toValue: 0, duration: 380, easing: Easing.in(Easing.quad), useNativeDriver: true }),
-    ]).start(onTerminar);
+      Animated.timing(background, { toValue: 0, duration: 380, easing: Easing.in(Easing.quad), useNativeDriver: true }),
+    ]).start(onFinish);
   };
 
   useEffect(() => {
     // Por si algo falla, la app nunca se queda tapada
-    const seguro = setTimeout(onTerminar, 6000);
-    return () => clearTimeout(seguro);
-  }, [onTerminar]);
+    const safe = setTimeout(onFinish, 6000);
+    return () => clearTimeout(safe);
+  }, [onFinish]);
 
   return (
     <Animated.View
-      style={[styles.contenedor, { opacity: fondo }]}
-      onLayout={iniciar}
+      style={[styles.container, { opacity: background }]}
+      onLayout={start}
       accessible
       accessibilityLabel="Alerta Mujer, seguridad para todas"
     >
-      <Animated.View style={{ transform: [{ translateY: logoSubida }, { scale: logoEscala }] }}>
+      <Animated.View style={{ transform: [{ translateY: logoRise }, { scale: logoScale }] }}>
         <Animated.View style={[styles.halo, { opacity: brillo }]} />
         <Image source={require("../../../../assets/images/splash-logo.png")} style={styles.logo} resizeMode="contain" />
       </Animated.View>
 
-      <View style={styles.fila} importantForAccessibility="no-hide-descendants">
-        {letras.map((letra, i) => (
+      <View style={styles.row} importantForAccessibility="no-hide-descendants">
+        {letters.map((letter, i) => (
           <Animated.Text
             key={i}
             style={[
-              styles.letra,
-              letra === " " && styles.espacio,
+              styles.letter,
+              letter === " " && styles.space,
               {
-                opacity: valoresLetras[i],
+                opacity: letterValues[i],
                 transform: [
-                  { translateY: valoresLetras[i].interpolate({ inputRange: [0, 1], outputRange: [18, 0] }) },
-                  { scale: valoresLetras[i].interpolate({ inputRange: [0, 1], outputRange: [0.6, 1] }) },
+                  { translateY: letterValues[i].interpolate({ inputRange: [0, 1], outputRange: [18, 0] }) },
+                  { scale: letterValues[i].interpolate({ inputRange: [0, 1], outputRange: [0.6, 1] }) },
                 ],
               },
             ]}
           >
-            {letra}
+            {letter}
           </Animated.Text>
         ))}
       </View>
 
       <Animated.View
         style={{
-          opacity: lema,
-          transform: [{ translateY: lema.interpolate({ inputRange: [0, 1], outputRange: [8, 0] }) }],
+          opacity: motto,
+          transform: [{ translateY: motto.interpolate({ inputRange: [0, 1], outputRange: [8, 0] }) }],
         }}
       >
-        <View style={styles.linea} />
-        <Text style={styles.lema} importantForAccessibility="no">{LEMA}</Text>
+        <View style={styles.line} />
+        <Text style={styles.motto} importantForAccessibility="no">{MOTTO}</Text>
       </Animated.View>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  contenedor: {
+  container: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 9999,
     elevation: 9999,
-    backgroundColor: COLOR_FONDO,
+    backgroundColor: BACKGROUND_COLOR,
     alignItems: "center",
     justifyContent: "center",
   },
   halo: {
     position: "absolute",
     alignSelf: "center",
-    top: -LOGO_INICIAL * 0.15,
-    width: LOGO_INICIAL * 1.3,
-    height: LOGO_INICIAL * 1.3,
-    borderRadius: LOGO_INICIAL,
+    top: -INITIAL_LOGO * 0.15,
+    width: INITIAL_LOGO * 1.3,
+    height: INITIAL_LOGO * 1.3,
+    borderRadius: INITIAL_LOGO,
     backgroundColor: "rgba(233, 196, 106, 0.10)",
   },
-  logo: { width: LOGO_INICIAL, height: LOGO_INICIAL * 0.9 },
-  fila: { flexDirection: "row", marginTop: -20 },
-  letra: {
-    color: DORADO,
+  logo: { width: INITIAL_LOGO, height: INITIAL_LOGO * 0.9 },
+  row: { flexDirection: "row", marginTop: -20 },
+  letter: {
+    color: GOLD,
     fontSize: 34,
     fontWeight: "900",
     letterSpacing: 3,
@@ -150,8 +150,8 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 6,
   },
-  espacio: { width: 14 },
-  linea: {
+  space: { width: 14 },
+  line: {
     alignSelf: "center",
     width: 64,
     height: 2,
@@ -160,5 +160,5 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     backgroundColor: "rgba(233, 196, 106, 0.6)",
   },
-  lema: { color: "#F3E6C4", fontSize: 13, fontWeight: "700", letterSpacing: 4, textAlign: "center" },
+  motto: { color: "#F3E6C4", fontSize: 13, fontWeight: "700", letterSpacing: 4, textAlign: "center" },
 });

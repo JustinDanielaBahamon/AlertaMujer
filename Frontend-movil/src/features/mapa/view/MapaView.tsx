@@ -20,33 +20,33 @@ import {
 import MapView, { Circle, Marker, Polyline } from "../../../components/mapa/MapaLibre";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "../styles/MapaStyles";
-import { createMapaModalStyles } from "../styles/MapaModal.style";
-import { useMapaViewModel } from "../viewModel/useMapaViewModel";
+import { createMapModalStyles } from "../styles/MapaModal.style";
+import { useMapViewModel } from "../viewModel/useMapaViewModel";
 import {
-  formatearFechaRecorrido,
+  formatRouteDate,
   MAX_IMPORTANTES,
-  MAX_RECORRIDOS,
-  useRecorridos,
+  MAX_ROUTES,
+  useRoutes,
 } from "../../../contexts/RecorridosContext";
-import { COLOR_PUNTO_B } from "../coloresRecorrido";
+import { POINT_B_COLOR } from "../coloresRecorrido";
 import { useAuth } from "../../../contexts/AuthContext";
 import { frequentLocationsService } from "../../../services/frequent-locations.service";
-import BarraBusquedaDireccion from "./BarraBusquedaDireccion";
-import { getZonas } from "../../../services/zones.service";
-import { obtenerLugar } from "../../../services/geocoding.service";
+import AddressSearchBar from "./BarraBusquedaDireccion";
+import { getZones } from "../../../services/zones.service";
+import { getPlace } from "../../../services/geocoding.service";
 
 type Coord = { latitude: number; longitude: number };
 
-type InfoDireccion = {
-  zona: string; // barrio, o la ciudad si no hay barrio (se usa en el encabezado)
-  barrio: string;
-  ciudad: string;
-  direccion: string;
+type AddressInfoBlock = {
+  zone: string; // barrio, o la ciudad si no hay barrio (se usa en el encabezado)
+  neighborhood: string;
+  city: string;
+  address: string;
 };
 
 // Colores distintos para cada recorrido guardado, para que no se amontonen
 // Solo la paleta de la app: violetas, morados y neón
-const COLORES_RUTAS = [
+const ROUTE_COLORS = [
   "#7B1DB2", // Púrpura
   "#D946EF", // Morado neón
   "#9333EA", // Violeta
@@ -58,18 +58,18 @@ const COLORES_RUTAS = [
 ];
 
 // Zonas clasificadas por la usuaria (pantalla "Clasificar zona"), dibujadas como círculo en el mapa
-type ZonaClasificada = {
+type ClassifiedZone = {
   id: string;
-  nombre: string;
+  name: string;
   latitude: number;
   longitude: number;
-  nivelRiesgo: "muy_segura" | "moderada" | "muy_insegura";
+  riskLevel: "muy_segura" | "moderada" | "muy_insegura";
 };
 
-const RADIO_ZONA_METROS = 150;
+const ZONE_RADIUS_METERS = 150;
 
 // Zonas que clasificó la usuaria: tonos de la paleta de la app según el nivel
-const COLOR_NIVEL: Record<ZonaClasificada["nivelRiesgo"], string> = {
+const LEVEL_COLOR: Record<ClassifiedZone["riskLevel"], string> = {
   muy_segura: "#7C3AED",
   moderada: "#C084FC",
   muy_insegura: "#D946EF",
@@ -77,25 +77,25 @@ const COLOR_NIVEL: Record<ZonaClasificada["nivelRiesgo"], string> = {
 
 // Zonas de emergencia del sistema (policía, asistencia, zonas seguras): siempre visibles, en morado
 // oscuro y con ícono, para que no se confundan con las de la usuaria
-type ZonaOficial = {
+type OfficialZone = {
   id: string;
-  nombre: string;
-  tipo: string;
+  name: string;
+  type: string;
   latitude: number;
   longitude: number;
   radio: number;
 };
 
-const COLOR_ZONA_OFICIAL = "#4C1D95";
+const OFFICIAL_ZONE_COLOR = "#4C1D95";
 
-const ICONO_ZONA_OFICIAL: Record<string, keyof typeof MaterialIcons.glyphMap> = {
+const OFFICIAL_ZONE_ICON: Record<string, keyof typeof MaterialIcons.glyphMap> = {
   policia: "local-police",
   asistencia: "health-and-safety",
   help: "support",
   safe: "verified-user",
 };
 
-const distanciaMetros = (a: Coord, b: Coord) => {
+const distanceMeters = (a: Coord, b: Coord) => {
   const R = 6371000;
   const dLat = ((b.latitude - a.latitude) * Math.PI) / 180;
   const dLon = ((b.longitude - a.longitude) * Math.PI) / 180;
@@ -108,54 +108,54 @@ const distanciaMetros = (a: Coord, b: Coord) => {
 };
 
 // Consulta la dirección de unas coordenadas (barrio, ciudad y calle)
-const obtenerInfoDireccion = async (coord: Coord): Promise<InfoDireccion> => {
+const getAddressInfo = async (coord: Coord): Promise<AddressInfoBlock> => {
   const reverse = await Location.reverseGeocodeAsync(coord);
   const info = reverse?.[0];
 
-  const calle = info?.street || info?.name || "";
-  const numero = info?.streetNumber || "";
+  const street = info?.street || info?.name || "";
+  const number = info?.streetNumber || "";
   // En Colombia el geocodificador del celular casi nunca trae el barrio: se completa con OpenStreetMap
-  const barrio =
-    info?.district || (await obtenerLugar(coord.latitude, coord.longitude).catch(() => null))?.barrio || "";
-  const municipio = info?.city || info?.subregion || "";
+  const neighborhood =
+    info?.district || (await getPlace(coord.latitude, coord.longitude).catch(() => null))?.neighborhood || "";
+  const municipality = info?.city || info?.subregion || "";
 
   return {
-    zona: barrio || municipio,
-    barrio,
-    ciudad: [municipio, info?.region].filter(Boolean).join(", "),
-    direccion: `${calle} ${numero}`.trim(),
+    zone: neighborhood || municipality,
+    neighborhood,
+    city: [municipality, info?.region].filter(Boolean).join(", "),
+    address: `${street} ${number}`.trim(),
   };
 };
 
-type EstilosMapa = ReturnType<typeof createMapaModalStyles>;
+type MapStyles = ReturnType<typeof createMapModalStyles>;
 
 // Línea punteada + pines numerados del recorrido (mismo diseño que "Alerta de emergencia")
-function PinesHistorial({
-  puntos,
-  actual,
-  colorLinea,
+function HistoryPins({
+  points,
+  current,
+  lineColor,
   styles: ms,
-  trackear,
-  etiqueta,
-  tituloActual,
+  trackChanges,
+  label,
+  currentTitle,
 }: {
-  puntos: Coord[];
-  actual: Coord;
-  colorLinea: string;
-  styles: EstilosMapa;
-  trackear: boolean;
-  etiqueta: string;
-  tituloActual: string;
+  points: Coord[];
+  current: Coord;
+  lineColor: string;
+  styles: MapStyles;
+  trackChanges: boolean;
+  label: string;
+  currentTitle: string;
 }) {
   // La línea termina en la posición actual
-  const linea = [...puntos, actual];
+  const line = [...points, current];
 
   return (
     <>
-      {linea.length > 1 && (
+      {line.length > 1 && (
         <Polyline
-          coordinates={linea}
-          strokeColor={colorLinea}
+          coordinates={line}
+          strokeColor={lineColor}
           strokeWidth={3}
           lineDashPattern={[6, 4]}
           lineCap="round"
@@ -163,14 +163,14 @@ function PinesHistorial({
         />
       )}
 
-      {puntos.map((p, i) => (
+      {points.map((p, i) => (
         <Marker
           key={`hist-${i}`}
           coordinate={p}
           anchor={{ x: 0.5, y: 0.5 }}
-          tracksViewChanges={trackear}
+          tracksViewChanges={trackChanges}
           zIndex={i}
-          title={`${etiqueta} ${i + 1}`}
+          title={`${label} ${i + 1}`}
         >
           <View style={ms.pin}>
             <Text style={ms.pinText}>{i + 1}</Text>
@@ -180,13 +180,13 @@ function PinesHistorial({
 
       {/* Posición actual: pin grande al frente */}
       <Marker
-        coordinate={actual}
+        coordinate={current}
         anchor={{ x: 0.5, y: 0.5 }}
-        tracksViewChanges={trackear}
+        tracksViewChanges={trackChanges}
         zIndex={999}
-        title={tituloActual}
+        title={currentTitle}
       >
-        <View style={ms.pinActual}>
+        <View style={ms.currentPin}>
           <MaterialIcons name="my-location" size={18} color="#FFFFFF" />
         </View>
       </Marker>
@@ -194,30 +194,30 @@ function PinesHistorial({
   );
 }
 
-export default function MapaView() {
+export default function MapScreen() {
   const navigation = useNavigation<any>();
-  const { recorridos } = useRecorridos();
+  const { routes } = useRoutes();
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
-  const mapaRef = useRef<MapView>(null);
-  const montado = useRef(true);
-  const ultimaGeocodificada = useRef<Coord | null>(null);
+  const mapRef = useRef<MapView>(null);
+  const mounted = useRef(true);
+  const lastGeocoded = useRef<Coord | null>(null);
 
-  const [mostrarRecorridosEnMapa, setMostrarRecorridosEnMapa] = useState(true); // Activado por defecto
-  const [soloImportantes, setSoloImportantes] = useState(false); // Mostrar todos por defecto
-  const [infoDireccion, setInfoDireccion] = useState<InfoDireccion | null>(null);
-  const [recorridoInfoVisible, setRecorridoInfoVisible] = useState(false);
-  const [recorridoInfo, setRecorridoInfo] = useState<any>(null);
-  const [mapaListo, setMapaListo] = useState(false); // el mapa grande se dibuja cuando termina la animación del modal
-  const [trackear, setTrackear] = useState(true); // los pines personalizados se redibujan solo unos instantes
-  const [zonasClasificadas, setZonasClasificadas] = useState<ZonaClasificada[]>([]);
-  const [zonasOficiales, setZonasOficiales] = useState<ZonaOficial[]>([]);
-  const [mostrarMisZonas, setMostrarMisZonas] = useState(true);
-  const [opcionesAbiertas, setOpcionesAbiertas] = useState(false);
-  const [textoBusqueda, setTextoBusqueda] = useState("");
-  const [resultadoBusqueda, setResultadoBusqueda] = useState<{
+  const [showRoutesOnMap, setShowRoutesOnMap] = useState(true); // Activado por defecto
+  const [onlyImportant, setOnlyImportant] = useState(false); // Mostrar todos por defecto
+  const [addressInfoText, setAddressInfoText] = useState<AddressInfoBlock | null>(null);
+  const [routeInfoVisible, setRouteInfoVisible] = useState(false);
+  const [routeInfo, setRouteInfo] = useState<any>(null);
+  const [mapReady, setMapReady] = useState(false); // el mapa grande se dibuja cuando termina la animación del modal
+  const [trackChanges, setTrackChanges] = useState(true); // los pines personalizados se redibujan solo unos instantes
+  const [classifiedZones, setClassifiedZones] = useState<ClassifiedZone[]>([]);
+  const [officialZones, setOfficialZones] = useState<OfficialZone[]>([]);
+  const [showMyZones, setShowMyZones] = useState(true);
+  const [optionsOpen, setOptionsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResult, setSearchResult] = useState<{
     coord: Coord;
-    texto: string;
+    text: string;
   } | null>(null);
 
   const {
@@ -226,68 +226,68 @@ export default function MapaView() {
     location,
     fullscreen,
     setFullscreen,
-    historial,
-    destinoAlerta,
-    coordenadaCentro,
-    ultimaActualizacion,
+    historial: history,
+    destinoAlerta: alertDestination,
+    coordenadaCentro: centerCoordinate,
+    ultimaActualizacion: lastUpdate,
     precisionMetros,
-    formatearHora,
-    refrescarUbicacion,
-    reintentarPermisos,
-    irAUbicacionesGuardadas,
-    irAZonasAuxiliares,
-    irAHistorialRecorridos,
-    permisoDenegado,
-    serviciosDesactivados,
-    cargando,
-  } = useMapaViewModel() as any;
+    formatearHora: formatHour,
+    refrescarUbicacion: refreshLocation,
+    reintentarPermisos: retryPermissions,
+    irAUbicacionesGuardadas: goToSavedLocations,
+    irAZonasAuxiliares: goToHelpZones,
+    irAHistorialRecorridos: goToRouteHistory,
+    permisoDenegado: permissionDenied,
+    serviciosDesactivados: disabledServices,
+    cargando: loading,
+  } = useMapViewModel() as any;
 
-  const ms = useMemo(() => createMapaModalStyles(theme, insets), [theme, insets]);
+  const ms = useMemo(() => createMapModalStyles(theme, insets), [theme, insets]);
 
-  const direccionActual = infoDireccion
-    ? infoDireccion.zona
-      ? `${infoDireccion.zona}, ${infoDireccion.direccion}`.replace(/, $/, "")
-      : infoDireccion.direccion
+  const currentAddress = addressInfoText
+    ? addressInfoText.zone
+      ? `${addressInfoText.zone}, ${addressInfoText.address}`.replace(/, $/, "")
+      : addressInfoText.address
     : "";
 
   // Recorridos guardados que se dibujan en el mapa grande (misma lógica de siempre)
-  const recorridosVisibles = useMemo(
+  const visibleRoutes = useMemo(
     () =>
-      !mostrarRecorridosEnMapa
+      !showRoutesOnMap
         ? []
-        : (recorridos as any[]).filter(
-            (r) => r?.puntos?.length > 0 && (!soloImportantes || r.importante)
+        : (routes as any[]).filter(
+            (r) => r?.puntos?.length > 0 && (!onlyImportant || r.importante)
           ),
-    [recorridos, mostrarRecorridosEnMapa, soloImportantes]
+    [routes, showRoutesOnMap, onlyImportant]
   );
 
-  const irAGuardarRecorrido = () => {
+  const goToSaveRoute = () => {
     navigation.navigate("GuardarRecorrido");
   };
 
   // Zonas clasificadas (seguras / moderadas / inseguras): se recargan cada vez que se vuelve al mapa
   useFocusEffect(
     useCallback(() => {
-      let activo = true;
+      let enabled = true;
       (async () => {
         try {
           if (!user?.id) {
-            if (activo) setZonasClasificadas([]);
+            if (enabled) setClassifiedZones([]);
             return;
           }
-          const guardadas = await frequentLocationsService.getByUser(user.id);
-          if (!activo) return;
-          setZonasClasificadas(
-            guardadas
+          const savedOnes = await frequentLocationsService.getByUser(user.id);
+          if (!enabled) return;
+          setClassifiedZones(
+            savedOnes
               .filter(
                 (u) => u.isActive !== false && u.latitude != null && u.longitude != null
               )
               .map((u) => ({
                 id: String(u.id),
-                nombre: u.name,
+                name: u.name,
                 latitude: Number(u.latitude),
                 longitude: Number(u.longitude),
-                nivelRiesgo:
+                riskLevel:
                   u.riskLevel === "muy_segura" || u.riskLevel === "muy_insegura"
                     ? u.riskLevel
                     : "moderada",
@@ -298,98 +298,98 @@ export default function MapaView() {
         }
       })();
       return () => {
-        activo = false;
+        enabled = false;
       };
     }, [user?.id])
   );
 
   // Al buscar una dirección con el mapa grande abierto, la cámara se mueve hasta ahí
   useEffect(() => {
-    if (!fullscreen || !mapaListo || !resultadoBusqueda) return;
-    mapaRef.current?.animateToRegion(
+    if (!fullscreen || !mapReady || !searchResult) return;
+    mapRef.current?.animateToRegion(
       {
-        latitude: resultadoBusqueda.coord.latitude,
-        longitude: resultadoBusqueda.coord.longitude,
+        latitude: searchResult.coord.latitude,
+        longitude: searchResult.coord.longitude,
         latitudeDelta: 0.006,
         longitudeDelta: 0.006,
       },
       500
     );
-  }, [resultadoBusqueda, fullscreen, mapaListo]);
+  }, [searchResult, fullscreen, mapReady]);
 
-  const manejarResultadoBusqueda = (coord: Coord, texto: string) => {
-    setResultadoBusqueda({ coord, texto });
+  const handleSearchResult = (coord: Coord, text: string) => {
+    setSearchResult({ coord, text });
     setFullscreen(true);
   };
 
-  const limpiarBusqueda = () => {
-    setTextoBusqueda("");
-    setResultadoBusqueda(null);
+  const clearSearch = () => {
+    setSearchQuery("");
+    setSearchResult(null);
   };
 
   useEffect(() => {
-    montado.current = true;
+    mounted.current = true;
     return () => {
-      montado.current = false;
+      mounted.current = false;
     };
   }, []);
 
   // El mapa grande se monta al terminar de deslizar el modal para que la animación no se trabe
   useEffect(() => {
     if (!fullscreen) {
-      setMapaListo(false);
+      setMapReady(false);
       return;
     }
-    const id = setTimeout(() => setMapaListo(true), 300);
+    const id = setTimeout(() => setMapReady(true), 300);
     return () => clearTimeout(id);
   }, [fullscreen]);
 
   // Los pines personalizados se redibujan unos instantes cuando cambian o se abre el mapa
   useEffect(() => {
-    setTrackear(true);
-    const id = setTimeout(() => setTrackear(false), 600);
+    setTrackChanges(true);
+    const id = setTimeout(() => setTrackChanges(false), 600);
     return () => clearTimeout(id);
-  }, [historial?.length, fullscreen, mapaListo, recorridosVisibles.length]);
+  }, [history?.length, fullscreen, mapReady, visibleRoutes.length]);
 
   // Dirección actual (reverse geocoding). Solo se consulta al inicio o si se movió más de 40 m,
   // así no se hace una petición de red en cada actualización del GPS.
   useEffect(() => {
     if (!location) return;
 
-    const anterior = ultimaGeocodificada.current;
-    if (anterior && distanciaMetros(anterior, location) < 40) return;
-    ultimaGeocodificada.current = location;
+    const previous = lastGeocoded.current;
+    if (previous && distanceMeters(previous, location) < 40) return;
+    lastGeocoded.current = location;
 
     (async () => {
       try {
-        const info = await obtenerInfoDireccion(location);
-        if (montado.current) setInfoDireccion(info);
+        const info = await getAddressInfo(location);
+        if (mounted.current) setAddressInfoText(info);
       } catch (error) {
         console.error("Error al obtener dirección:", error);
       }
     })();
   }, [location]);
 
-  const handleCompartir = async () => {
+  const handleShare = async () => {
     if (!location) return;
 
     try {
-      let info = infoDireccion;
+      let info = addressInfoText;
       if (!info) {
         try {
-          info = await obtenerInfoDireccion(location);
+          info = await getAddressInfo(location);
         } catch {
           info = null;
         }
       }
 
-      const ahora = new Date();
-      const fecha = ahora.toLocaleDateString("es-CO", {
+      const now = new Date();
+      const date = now.toLocaleDateString("es-CO", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
       });
-      const hora = ahora.toLocaleTimeString("es-CO", {
+      const time = now.toLocaleTimeString("es-CO", {
         hour: "2-digit",
         minute: "2-digit",
       });
@@ -398,24 +398,24 @@ export default function MapaView() {
       const lng = location.longitude.toFixed(6);
 
       // Solo se incluyen las líneas de las que realmente hay dato
-      const lineas = [
+      const lines = [
         t.mapa.mensaje_ubicacion,
         "",
-        info?.barrio ? `🏘️ Barrio: ${info.barrio}` : null,
-        info?.ciudad ? `🏙️ Ciudad: ${info.ciudad}` : null,
-        info?.direccion ? `🛣️ Dirección: ${info.direccion}` : null,
+        info?.neighborhood ? `🏘️ Barrio: ${info.neighborhood}` : null,
+        info?.city ? `🏙️ Ciudad: ${info.city}` : null,
+        info?.address ? `🛣️ Dirección: ${info.address}` : null,
         `🧭 Coordenadas: ${lat}, ${lng}`,
         "",
         "🗺️ Ábrela en el mapa:",
         `https://www.google.com/maps?q=${lat},${lng}`,
         "",
-        `🕐 Enviado el ${fecha} a las ${hora}`,
+        `🕐 Enviado el ${date} a las ${time}`,
         "💜 Compartido desde AlertaMujer",
-      ].filter((linea): linea is string => linea !== null);
+      ].filter((line): line is string => line !== null);
 
       await Share.share({
         title: t.mapa.compartir_ubicacion,
-        message: lineas.join("\n"),
+        message: lines.join("\n"),
       });
     } catch (error) {
       console.error("Error al compartir ubicación:", error);
@@ -429,79 +429,79 @@ export default function MapaView() {
   // cantidad de hooks entre renders y React cierra la app.
   useFocusEffect(
     useCallback(() => {
-      let activo = true;
-      getZonas()
-        .then((zonas) => {
-          if (!activo) return;
-          setZonasOficiales(
-            zonas
+      let enabled = true;
+      getZones()
+        .then((zones) => {
+          if (!enabled) return;
+          setOfficialZones(
+            zones
               .filter((z) => z.isActive !== false && z.latitude != null && z.longitude != null)
               .map((z) => ({
                 id: String(z.id),
-                nombre: z.name,
-                tipo: (z.zoneType || "").toLowerCase(),
+                name: z.name,
+                type: (z.zoneType || "").toLowerCase(),
                 latitude: Number(z.latitude),
                 longitude: Number(z.longitude),
-                radio: Number(z.radiusMeters) > 0 ? Number(z.radiusMeters) : RADIO_ZONA_METROS,
+                radio: Number(z.radiusMeters) > 0 ? Number(z.radiusMeters) : ZONE_RADIUS_METERS,
               }))
           );
         })
         .catch((error) => console.warn("No se pudieron cargar las zonas de emergencia:", error));
       return () => {
-        activo = false;
+        enabled = false;
       };
     }, [])
   );
 
   if (!location) {
-    const esError = permisoDenegado || serviciosDesactivados;
+    const esError = permissionDenied || disabledServices;
     
     return (
       <View style={[styles.loadingContainer, { backgroundColor: theme.background }]}>
         <MaterialIcons 
-          name={serviciosDesactivados ? "settings" : (permisoDenegado ? "location-off" : "location-searching")} 
+          name={disabledServices ? "settings" : (permissionDenied ? "location-off" : "location-searching")} 
           size={48} 
           color={esError ? "#D946EF" : "#7B1DB2"} 
         />
         <Text style={[styles.loadingText, { color: theme.text }]}>
-          {serviciosDesactivados 
+          {disabledServices 
             ? "Ubicación desactivada" 
-            : (permisoDenegado 
+            : (permissionDenied 
               ? "Permiso de ubicación denegado" 
-              : (cargando ? t.mapa.cargando : "No se pudo obtener la ubicación"))}
+              : (loading ? t.mapa.cargando : "No se pudo obtener la ubicación"))}
         </Text>
-        {serviciosDesactivados && (
+        {disabledServices && (
           <Text style={[styles.loadingText, { color: theme.contactSubtext, fontSize: 13, marginTop: 4, textAlign: "center" }]}>
             Activa los servicios de ubicación en la configuración de tu dispositivo
           </Text>
         )}
-        {permisoDenegado && (
+        {permissionDenied && (
           <Text style={[styles.loadingText, { color: theme.contactSubtext, fontSize: 13, marginTop: 4, textAlign: "center" }]}>
             AlertaMujer necesita acceso a tu ubicación para mostrarte el mapa y garantizar tu seguridad
           </Text>
         )}
-        <TouchableOpacity style={styles.botonReintentar} onPress={reintentarPermisos}>
-          <Text style={styles.botonReintentarTexto}>{serviciosDesactivados ? "Verificar de nuevo" : t.mapa.intentar_nuevo}</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={retryPermissions}>
+          <Text style={styles.retryButtonText}>{disabledServices ? "Verificar de nuevo" : t.mapa.intentar_nuevo}</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
   // ─── COORDENADA CENTRO Y ACCIONES LOCALES ─────────────────────────────────
-  const centroCalculado = coordenadaCentro ?? destinoAlerta?.coordenada ?? location;
-  const centroMapa: Coord = resultadoBusqueda?.coord ?? centroCalculado;
+  const computedCenter = centerCoordinate ?? alertDestination?.coordenada ?? location;
+  const mapCenter: Coord = searchResult?.coord ?? computedCenter;
 
   // Círculo del color del nivel de seguridad de cada zona clasificada (si la usuaria las muestra)
-  const renderZonasClasificadas = () =>
-    !mostrarMisZonas
+  const renderClassifiedZones = () =>
+    !showMyZones
       ? null
-      : zonasClasificadas.map((zona) => {
-          const color = COLOR_NIVEL[zona.nivelRiesgo];
+      : classifiedZones.map((zone) => {
+          const color = LEVEL_COLOR[zone.riskLevel];
           return (
             <Circle
-              key={`zona-${zona.id}`}
-              center={{ latitude: zona.latitude, longitude: zona.longitude }}
-              radius={RADIO_ZONA_METROS}
+              key={`zona-${zone.id}`}
+              center={{ latitude: zone.latitude, longitude: zone.longitude }}
+              radius={ZONE_RADIUS_METERS}
               strokeColor={color}
               strokeWidth={1.5}
               fillColor={`${color}22`}
@@ -510,52 +510,52 @@ export default function MapaView() {
         });
 
   // Zonas de emergencia: círculo morado oscuro y un ícono del tipo de zona
-  const renderZonasOficiales = () =>
-    zonasOficiales.map((zona) => (
-      <React.Fragment key={`oficial-${zona.id}`}>
+  const renderOfficialZones = () =>
+    officialZones.map((zone) => (
+      <React.Fragment key={`oficial-${zone.id}`}>
         <Circle
-          center={{ latitude: zona.latitude, longitude: zona.longitude }}
-          radius={zona.radio}
-          strokeColor={COLOR_ZONA_OFICIAL}
+          center={{ latitude: zone.latitude, longitude: zone.longitude }}
+          radius={zone.radio}
+          strokeColor={OFFICIAL_ZONE_COLOR}
           strokeWidth={2.5}
-          fillColor={`${COLOR_ZONA_OFICIAL}26`}
+          fillColor={`${OFFICIAL_ZONE_COLOR}26`}
         />
         <Marker
-          coordinate={{ latitude: zona.latitude, longitude: zona.longitude }}
+          coordinate={{ latitude: zone.latitude, longitude: zone.longitude }}
           anchor={{ x: 0.5, y: 0.5 }}
-          title={zona.nombre}
+          title={zone.name}
         >
-          <View style={[ms.pinRuta, { backgroundColor: COLOR_ZONA_OFICIAL }]}>
-            <MaterialIcons name={ICONO_ZONA_OFICIAL[zona.tipo] ?? "place"} size={14} color="#FFFFFF" />
+          <View style={[ms.routePin, { backgroundColor: OFFICIAL_ZONE_COLOR }]}>
+            <MaterialIcons name={OFFICIAL_ZONE_ICON[zone.type] ?? "place"} size={14} color="#FFFFFF" />
           </View>
         </Marker>
       </React.Fragment>
     ));
 
-  const acciones = [
+  const actions = [
     {
-      icono: "share",
+      icon: "share",
       label: t.mapa.compartir,
-      accion: handleCompartir,
+      action: handleShare,
     },
     {
-      icono: "refresh",
+      icon: "refresh",
       label: t.mapa.actualizar,
-      accion: refrescarUbicacion,
+      action: refreshLocation,
     },
     {
-      icono: "navigation",
+      icon: "navigation",
       label: t.mapa.navegar,
-      accion: () => {
+      action: () => {
         if (location) {
           setFullscreen(true);
         }
       },
     },
     {
-      icono: "bookmark",
+      icon: "bookmark",
       label: t.mapa.guardar,
-      accion: () => {
+      action: () => {
         if (!location) return;
         navigation.navigate("ClasificarZona", {
           latitude: location.latitude,
@@ -567,31 +567,31 @@ export default function MapaView() {
 
   // ─── ENCUADRE DEL MAPA GRANDE ─────────────────────────────────────────────
   // Todos los puntos que están visibles: ubicación, dirección de alerta, historial y recorridos.
-  const puntosVisibles = (): Coord[] => {
+  const visiblePoints = (): Coord[] => {
     const pts: Coord[] = [location];
-    if (destinoAlerta) pts.push(destinoAlerta.coordenada);
-    if (resultadoBusqueda) pts.push(resultadoBusqueda.coord);
-    (historial ?? []).forEach((p: Coord) => pts.push(p));
-    recorridosVisibles.forEach((r: any) =>
+    if (alertDestination) pts.push(alertDestination.coordenada);
+    if (searchResult) pts.push(searchResult.coord);
+    (history ?? []).forEach((p: Coord) => pts.push(p));
+    visibleRoutes.forEach((r: any) =>
       r.puntos.forEach((p: any) => pts.push({ latitude: p.latitude, longitude: p.longitude }))
     );
     return pts;
   };
 
-  const verTodo = () => {
-    const pts = puntosVisibles();
+  const seeAll = () => {
+    const pts = visiblePoints();
     if (pts.length < 2) {
-      centrarEnMi();
+      centerOnMe();
       return;
     }
-    mapaRef.current?.fitToCoordinates(pts, {
+    mapRef.current?.fitToCoordinates(pts, {
       edgePadding: { top: insets.top + 90, right: 60, bottom: insets.bottom + 130, left: 60 },
       animated: true,
     });
   };
 
-  const centrarEnMi = () => {
-    mapaRef.current?.animateToRegion(
+  const centerOnMe = () => {
+    mapRef.current?.animateToRegion(
       {
         latitude: location.latitude,
         longitude: location.longitude,
@@ -602,13 +602,13 @@ export default function MapaView() {
     );
   };
 
-  const abrirInfoRecorrido = (recorrido: any) => {
-    setRecorridoInfo(recorrido);
-    setRecorridoInfoVisible(true);
+  const openRouteInfo = (route: any) => {
+    setRouteInfo(route);
+    setRouteInfoVisible(true);
   };
 
   return (
-    <View style={[styles.contenedorPrincipal, { backgroundColor: theme.background }]}>
+    <View style={[styles.mainContainer, { backgroundColor: theme.background }]}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         bounces={false}
@@ -620,16 +620,16 @@ export default function MapaView() {
           colors={[theme.headercolor1, theme.headercolor2]}
           start={{ x: 1, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={[styles.gradiente, { paddingTop: insets.top + 20 }]}
+          style={[styles.gradient, { paddingTop: insets.top + 20 }]}
         >
-          <View style={styles.headerContenido}>
+          <View style={styles.headerContent}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.tituloHeader}>{t.mapa.titulo}</Text>
-              <Text style={styles.SubtituloHeader}>{t.mapa.subtitulo}</Text>
-              <View style={styles.filaUbicacion}>
+              <Text style={styles.headerTitleText}>{t.mapa.titulo}</Text>
+              <Text style={styles.HeaderSubtitle}>{t.mapa.subtitulo}</Text>
+              <View style={styles.locationRow}>
                 <MaterialIcons name="place" size={14} color="rgba(255,255,255,0.9)" />
-                <Text style={styles.subtituloHeader}>
-                  {direccionActual || t.mapa.obteniendo}
+                <Text style={styles.headerSubtitleText}>
+                  {currentAddress || t.mapa.obteniendo}
                 </Text>
               </View>
             </View>
@@ -641,25 +641,25 @@ export default function MapaView() {
         </LinearGradient>
 
         {/* BARRA DE BÚSQUEDA DE DIRECCIÓN */}
-        <BarraBusquedaDireccion
+        <AddressSearchBar
           style={{ marginHorizontal: 20, marginTop: 20 }}
-          value={textoBusqueda}
-          onChangeText={setTextoBusqueda}
-          onResultado={manejarResultadoBusqueda}
-          onLimpiar={limpiarBusqueda}
-          ciudad={infoDireccion?.ciudad}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          onResult={handleSearchResult}
+          onClear={clearSearch}
+          city={addressInfoText?.city}
         />
 
         {/* MAPA */}
-        <View style={ms.mapaCard}>
+        <View style={ms.mapCard}>
           <MapView
-            style={ms.miniMapa}
+            style={ms.miniMap}
             liteMode
             pointerEvents="none"
             toolbarEnabled={false}
             region={{
-              latitude: centroMapa.latitude,
-              longitude: centroMapa.longitude,
+              latitude: mapCenter.latitude,
+              longitude: mapCenter.longitude,
               latitudeDelta: 0.01,
               longitudeDelta: 0.01,
             }}
@@ -668,21 +668,21 @@ export default function MapaView() {
             rotateEnabled={false}
             pitchEnabled={false}
           >
-            {renderZonasOficiales()}
-            {renderZonasClasificadas()}
+            {renderOfficialZones()}
+            {renderClassifiedZones()}
             <Marker coordinate={location} title={t.mapa.tu_ubicacion_marcador} pinColor={theme.icono} />
-            {resultadoBusqueda && (
+            {searchResult && (
               <Marker
-                coordinate={resultadoBusqueda.coord}
-                title={resultadoBusqueda.texto}
+                coordinate={searchResult.coord}
+                title={searchResult.text}
                 pinColor="#E91E63"
               />
             )}
-            {destinoAlerta && (
+            {alertDestination && (
               <Marker
-                coordinate={destinoAlerta.coordenada}
+                coordinate={alertDestination.coordenada}
                 title={t.mapa.direccion_alerta_marcador}
-                description={destinoAlerta.direccion}
+                description={alertDestination.direccion}
                 pinColor="#7B1DB2"
               />
             )}
@@ -695,86 +695,86 @@ export default function MapaView() {
             activeOpacity={0.9}
           >
             <View style={ms.miniBadge}>
-              <View style={ms.miniBadgePunto} />
-              <Text style={ms.miniBadgeTexto}>{t.mapa.activo}</Text>
+              <View style={ms.miniBadgeDot} />
+              <Text style={ms.miniBadgeText}>{t.mapa.activo}</Text>
             </View>
-            <View style={ms.abrirBtn}>
+            <View style={ms.openButton}>
               <MaterialIcons name="open-in-full" size={16} color={theme.icono} />
-              <Text style={ms.abrirTexto}>{t.mapa.abrir_mapa_completo}</Text>
+              <Text style={ms.openText}>{t.mapa.abrir_mapa_completo}</Text>
             </View>
           </TouchableOpacity>
         </View>
 
         {/* OPCIONES DEL MAPA: un solo cuadro con las capas que la usuaria quiere ver */}
-        <View style={[styles.switchRecorridosContainer, op.panel, { backgroundColor: theme.card }]}>
+        <View style={[styles.routesSwitchContainer, op.panel, { backgroundColor: theme.card }]}>
           <TouchableOpacity
-            style={op.cabecera}
-            onPress={() => setOpcionesAbiertas((v) => !v)}
+            style={op.header}
+            onPress={() => setOptionsOpen((v) => !v)}
             activeOpacity={0.7}
             accessibilityRole="button"
-            accessibilityState={{ expanded: opcionesAbiertas }}
+            accessibilityState={{ expanded: optionsOpen }}
           >
-            <View style={[op.iconoCabecera, { backgroundColor: theme.icono + "22" }]}>
+            <View style={[op.headerIconItem, { backgroundColor: theme.icono + "22" }]}>
               <MaterialIcons name="tune" size={20} color={theme.icono} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={[styles.switchRecorridosTitle, { color: theme.text }]}>{t.mapa.opciones_titulo}</Text>
-              <Text style={[styles.switchRecorridosSubtitle, { color: theme.contactSubtext }]}>
+              <Text style={[styles.routesSwitchTitle, { color: theme.text }]}>{t.mapa.opciones_titulo}</Text>
+              <Text style={[styles.routesSwitchSubtitle, { color: theme.contactSubtext }]}>
                 {t.mapa.opciones_resumen.replace(
                   "{n}",
-                  String([mostrarRecorridosEnMapa, mostrarMisZonas, mostrarRecorridosEnMapa && soloImportantes].filter(Boolean).length),
+                  String([showRoutesOnMap, showMyZones, showRoutesOnMap && onlyImportant].filter(Boolean).length),
                 )}
               </Text>
             </View>
-            <MaterialIcons name={opcionesAbiertas ? "expand-less" : "expand-more"} size={24} color={theme.icono} />
+            <MaterialIcons name={optionsOpen ? "expand-less" : "expand-more"} size={24} color={theme.icono} />
           </TouchableOpacity>
 
-          {opcionesAbiertas &&
+          {optionsOpen &&
             [
               {
                 id: "recorridos",
-                icono: "route",
-                titulo: t.mapa.opcion_recorridos,
-                detalle: t.mapa.opcion_recorridos_desc
-                  .replace("{n}", String(recorridos.length))
-                  .replace("{max}", String(MAX_RECORRIDOS)),
-                valor: mostrarRecorridosEnMapa,
-                cambiar: setMostrarRecorridosEnMapa,
-                deshabilitado: false,
+                icon: "route",
+                title: t.mapa.opcion_recorridos,
+                detail: t.mapa.opcion_recorridos_desc
+                  .replace("{n}", String(routes.length))
+                  .replace("{max}", String(MAX_ROUTES)),
+                value: showRoutesOnMap,
+                change: setShowRoutesOnMap,
+                disabled: false,
               },
               {
                 id: "importantes",
-                icono: "star",
-                titulo: t.mapa.opcion_importantes,
-                detalle: mostrarRecorridosEnMapa
+                icon: "star",
+                title: t.mapa.opcion_importantes,
+                detail: showRoutesOnMap
                   ? t.mapa.opcion_importantes_desc
-                      .replace("{n}", String(recorridos.filter((r: any) => r.importante).length))
+                      .replace("{n}", String(routes.filter((r: any) => r.importante).length))
                       .replace("{max}", String(MAX_IMPORTANTES))
                   : t.mapa.opcion_importantes_bloqueada,
-                valor: mostrarRecorridosEnMapa && soloImportantes,
-                cambiar: setSoloImportantes,
-                deshabilitado: !mostrarRecorridosEnMapa,
+                value: showRoutesOnMap && onlyImportant,
+                change: setOnlyImportant,
+                disabled: !showRoutesOnMap,
               },
               {
                 id: "zonas",
-                icono: "layers",
-                titulo: t.mapa.opcion_zonas,
-                detalle: t.mapa.opcion_zonas_desc.replace("{n}", String(zonasClasificadas.length)),
-                valor: mostrarMisZonas,
-                cambiar: setMostrarMisZonas,
-                deshabilitado: false,
+                icon: "layers",
+                title: t.mapa.opcion_zonas,
+                detail: t.mapa.opcion_zonas_desc.replace("{n}", String(classifiedZones.length)),
+                value: showMyZones,
+                change: setShowMyZones,
+                disabled: false,
               },
             ].map((o) => (
-              <View key={o.id} style={[op.fila, { borderTopColor: theme.icono + "22" }, o.deshabilitado && { opacity: 0.45 }]}>
-                <MaterialIcons name={o.icono as any} size={20} color={theme.icono} />
+              <View key={o.id} style={[op.row, { borderTopColor: theme.icono + "22" }, o.disabled && { opacity: 0.45 }]}>
+                <MaterialIcons name={o.icon as any} size={20} color={theme.icono} />
                 <View style={{ flex: 1 }}>
-                  <Text style={[op.tituloFila, { color: theme.text }]}>{o.titulo}</Text>
-                  <Text style={[op.detalleFila, { color: theme.contactSubtext }]}>{o.detalle}</Text>
+                  <Text style={[op.rowTitle, { color: theme.text }]}>{o.title}</Text>
+                  <Text style={[op.detailRow, { color: theme.contactSubtext }]}>{o.detail}</Text>
                 </View>
                 <Switch
-                  value={o.valor}
-                  onValueChange={o.cambiar}
-                  disabled={o.deshabilitado}
+                  value={o.value}
+                  onValueChange={o.change}
+                  disabled={o.disabled}
                   trackColor={{ false: "#ccc", true: theme.tabActiveColor }}
                   thumbColor="#fff"
                 />
@@ -783,78 +783,78 @@ export default function MapaView() {
         </View>
 
         {/* BOTONES DE ACCIÓN */}
-        <View style={styles.filaBotones}>
-          {acciones.map((a) => (
-            <TouchableOpacity key={a.label} style={styles.botonAccion} onPress={a.accion}>
-              <View style={styles.circuloBoton}>
-                <MaterialIcons name={a.icono} size={22} color="#7B1DB2" />
+        <View style={styles.buttonsRow}>
+          {actions.map((a) => (
+            <TouchableOpacity key={a.label} style={styles.actionButton} onPress={a.action}>
+              <View style={styles.buttonCircle}>
+                <MaterialIcons name={a.icon} size={22} color="#7B1DB2" />
               </View>
-              <Text style={[styles.labelBoton, { color: theme.text }]}>{a.label}</Text>
+              <Text style={[styles.buttonLabel, { color: theme.text }]}>{a.label}</Text>
             </TouchableOpacity>
           ))}
         </View>
 
         {/* TARJETA DE UBICACIÓN: barrio y dirección; radio y coordenadas en pequeño */}
-        <View style={[styles.tarjetaCoordenadas, { backgroundColor: theme.card }]}>
-          <View style={op.filaLugar}>
-            <View style={[op.iconoLugar, { backgroundColor: theme.icono }]}>
+        <View style={[styles.coordinatesCard, { backgroundColor: theme.card }]}>
+          <View style={op.placeRow}>
+            <View style={[op.placeIcon, { backgroundColor: theme.icono }]}>
               <MaterialIcons name="place" size={22} color="#fff" />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={[op.etiqueta, { color: theme.contactSubtext }]}>{t.mapa.barrio}</Text>
-              <Text style={[op.barrio, { color: theme.text }]} numberOfLines={1}>
-                {infoDireccion ? infoDireccion.barrio || infoDireccion.ciudad || t.mapa.barrio_desconocido : t.mapa.obteniendo}
+              <Text style={[op.label, { color: theme.contactSubtext }]}>{t.mapa.barrio}</Text>
+              <Text style={[op.neighborhood, { color: theme.text }]} numberOfLines={1}>
+                {addressInfoText ? addressInfoText.neighborhood || addressInfoText.city || t.mapa.barrio_desconocido : t.mapa.obteniendo}
               </Text>
-              <Text style={[op.etiqueta, { color: theme.contactSubtext, marginTop: 8 }]}>{t.mapa.direccion}</Text>
-              <Text style={[op.direccion, { color: theme.text }]} numberOfLines={2}>
-                {infoDireccion ? infoDireccion.direccion || t.mapa.direccion_desconocida : t.mapa.obteniendo}
+              <Text style={[op.label, { color: theme.contactSubtext, marginTop: 8 }]}>{t.mapa.direccion}</Text>
+              <Text style={[op.address, { color: theme.text }]} numberOfLines={2}>
+                {addressInfoText ? addressInfoText.address || t.mapa.direccion_desconocida : t.mapa.obteniendo}
               </Text>
             </View>
           </View>
 
-          <View style={[op.filaTecnica, { backgroundColor: theme.icono + "12" }]}>
-            <View style={op.datoTecnico}>
+          <View style={[op.technicalRow, { backgroundColor: theme.icono + "12" }]}>
+            <View style={op.technicalDetail}>
               <MaterialIcons name="radar" size={14} color={theme.icono} />
-              <Text style={[op.textoTecnico, { color: theme.text }]}>
+              <Text style={[op.technicalText, { color: theme.text }]}>
                 {t.mapa.radio} {precisionMetros != null ? `± ${Math.round(precisionMetros)} m` : "--"}
               </Text>
             </View>
-            <View style={op.datoTecnico}>
+            <View style={op.technicalDetail}>
               <MaterialIcons name="my-location" size={14} color={theme.icono} />
-              <Text style={[op.textoTecnico, { color: theme.text }]} numberOfLines={1}>
+              <Text style={[op.technicalText, { color: theme.text }]} numberOfLines={1}>
                 {location.latitude.toFixed(5)}, {location.longitude.toFixed(5)}
               </Text>
             </View>
           </View>
 
-          <View style={styles.filaActivo}>
-            <Text style={[styles.textoActualizacion, { color: theme.contactSubtext }]}>
+          <View style={styles.activeRow}>
+            <Text style={[styles.updateText, { color: theme.contactSubtext }]}>
               {t.mapa.ultima_actualizacion}{" "}
-              {ultimaActualizacion ? `${t.inicio.hoy}, ${formatearHora(ultimaActualizacion)}` : "--"}
+              {lastUpdate ? `${t.inicio.hoy}, ${formatHour(lastUpdate)}` : "--"}
             </Text>
-            <View style={styles.badgeActivo}>
-              <View style={styles.puntoActivo} />
-              <Text style={styles.textoActivo}>{t.mapa.activo}</Text>
+            <View style={styles.activeBadge}>
+              <View style={styles.activeDot} />
+              <Text style={styles.activeText}>{t.mapa.activo}</Text>
             </View>
           </View>
         </View>
 
         {/* TÍTULO ACCIONES ADICIONALES */}
-        <Text style={[styles.tituloHistorial, { color: theme.text }]}>
+        <Text style={[styles.historyTitle, { color: theme.text }]}>
           {t.mapa.acciones_adicionales}
         </Text>
 
         {/* UBICACIONES GUARDADAS */}
         <TouchableOpacity
-          style={[styles.itemHistorial, { backgroundColor: theme.card }]}
-          onPress={irAUbicacionesGuardadas}
+          style={[styles.historyItem, { backgroundColor: theme.card }]}
+          onPress={goToSavedLocations}
           activeOpacity={0.85}
         >
-          <View style={[styles.numeroBurbuja, { backgroundColor: "rgb(237, 231, 246)" }]}>
+          <View style={[styles.bubbleNumber, { backgroundColor: "rgb(237, 231, 246)" }]}>
             <MaterialIcons name="bookmark" size={18} color="#6A1B9A" />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.fechaItem, { color: theme.text }]}>{t.mapa.ubicaciones_guardadas}</Text>
+            <Text style={[styles.dateItem, { color: theme.text }]}>{t.mapa.ubicaciones_guardadas}</Text>
             <Text style={[styles.coordItem, { color: theme.contactSubtext }]}>
               {t.mapa.ubicaciones_guardadas_desc}
             </Text>
@@ -864,15 +864,15 @@ export default function MapaView() {
 
         {/* ZONAS AUXILIARES */}
         <TouchableOpacity
-          style={[styles.itemHistorial, { backgroundColor: theme.card }]}
-          onPress={irAZonasAuxiliares}
+          style={[styles.historyItem, { backgroundColor: theme.card }]}
+          onPress={goToHelpZones}
           activeOpacity={0.85}
         >
-          <View style={[styles.numeroBurbuja, { backgroundColor: "rgb(237, 231, 246)" }]}>
+          <View style={[styles.bubbleNumber, { backgroundColor: "rgb(237, 231, 246)" }]}>
             <MaterialIcons name="shield" size={18} color="#6A1B9A" />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.fechaItem, { color: theme.text }]}>{t.mapa.zonas_auxiliares}</Text>
+            <Text style={[styles.dateItem, { color: theme.text }]}>{t.mapa.zonas_auxiliares}</Text>
             <Text style={[styles.coordItem, { color: theme.contactSubtext }]}>
               {t.mapa.zonas_auxiliares_desc}
             </Text>
@@ -882,15 +882,15 @@ export default function MapaView() {
 
            {/* GUARDAR RECORRIDO */}
         <TouchableOpacity
-          style={[styles.itemHistorial, { backgroundColor: theme.card }]}
-          onPress={irAGuardarRecorrido}
+          style={[styles.historyItem, { backgroundColor: theme.card }]}
+          onPress={goToSaveRoute}
           activeOpacity={0.85}
         >
-          <View style={[styles.numeroBurbuja, { backgroundColor: "rgb(237, 231, 246)" }]}>
+          <View style={[styles.bubbleNumber, { backgroundColor: "rgb(237, 231, 246)" }]}>
             <MaterialIcons name="add-location-alt" size={18} color="#6A1B9A" />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.fechaItem, { color: theme.text }]}>Guardar Recorrido</Text>
+            <Text style={[styles.dateItem, { color: theme.text }]}>Guardar Recorrido</Text>
             <Text style={[styles.coordItem, { color: theme.contactSubtext }]}>
               Crea rutas de punto A a punto B
             </Text>
@@ -900,15 +900,15 @@ export default function MapaView() {
 
         {/* HISTORIAL DE RECORRIDOS */}
         <TouchableOpacity
-          style={[styles.itemHistorial, { backgroundColor: theme.card }]}
-          onPress={irAHistorialRecorridos}
+          style={[styles.historyItem, { backgroundColor: theme.card }]}
+          onPress={goToRouteHistory}
           activeOpacity={0.85}
         >
-          <View style={[styles.numeroBurbuja, { backgroundColor: "rgb(237, 231, 246)" }]}>
+          <View style={[styles.bubbleNumber, { backgroundColor: "rgb(237, 231, 246)" }]}>
             <MaterialIcons name="history" size={18} color="#6A1B9A" />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.fechaItem, { color: theme.text }]}>{t.mapa.historial_recorridos}</Text>
+            <Text style={[styles.dateItem, { color: theme.text }]}>{t.mapa.historial_recorridos}</Text>
             <Text style={[styles.coordItem, { color: theme.contactSubtext }]}>
               {t.mapa.historial_recorridos_desc}
             </Text>
@@ -927,103 +927,103 @@ export default function MapaView() {
         onRequestClose={() => setFullscreen(false)}
       >
         <View style={ms.modalContainer}>
-          {mapaListo ? (
+          {mapReady ? (
             <MapView
-              ref={mapaRef}
+              ref={mapRef}
               style={ms.modalMap}
               toolbarEnabled={false}
               initialRegion={{
-                latitude: centroMapa.latitude,
-                longitude: centroMapa.longitude,
-                latitudeDelta: resultadoBusqueda ? 0.006 : 0.01,
-                longitudeDelta: resultadoBusqueda ? 0.006 : 0.01,
+                latitude: mapCenter.latitude,
+                longitude: mapCenter.longitude,
+                latitudeDelta: searchResult ? 0.006 : 0.01,
+                longitudeDelta: searchResult ? 0.006 : 0.01,
               }}
             >
               {/* Zonas clasificadas: círculo del color de su nivel de seguridad */}
-              {renderZonasOficiales()}
-            {renderZonasClasificadas()}
+              {renderOfficialZones()}
+            {renderClassifiedZones()}
 
-              <PinesHistorial
-                puntos={historial ?? []}
-                actual={location}
-                colorLinea={theme.icono}
+              <HistoryPins
+                points={history ?? []}
+                current={location}
+                lineColor={theme.icono}
                 styles={ms}
-                trackear={trackear}
-                etiqueta={t.mapa.historial}
-                tituloActual={t.mapa.tu_ubicacion_marcador}
+                trackChanges={trackChanges}
+                label={t.mapa.historial}
+                currentTitle={t.mapa.tu_ubicacion_marcador}
               />
 
-              {resultadoBusqueda && (
+              {searchResult && (
                 <Marker
-                  coordinate={resultadoBusqueda.coord}
-                  title={resultadoBusqueda.texto}
+                  coordinate={searchResult.coord}
+                  title={searchResult.text}
                   pinColor="#E91E63"
                 />
               )}
 
-              {destinoAlerta && (
+              {alertDestination && (
                 <Marker
-                  coordinate={destinoAlerta.coordenada}
+                  coordinate={alertDestination.coordenada}
                   anchor={{ x: 0.5, y: 0.5 }}
-                  tracksViewChanges={trackear}
+                  tracksViewChanges={trackChanges}
                   zIndex={998}
                   title={t.mapa.direccion_alerta_marcador}
-                  description={destinoAlerta.direccion}
+                  description={alertDestination.direccion}
                 >
-                  <View style={ms.pinActual}>
+                  <View style={ms.currentPin}>
                     <MaterialIcons name="place" size={20} color="#FFFFFF" />
                   </View>
                 </Marker>
               )}
 
               {/* Recorridos guardados (misma lógica: interruptores de la pantalla y toque para ver información) */}
-              {recorridosVisibles.map((recorrido: any, index: number) => {
-                const routeColor = COLORES_RUTAS[index % COLORES_RUTAS.length];
-                const puntos = recorrido.puntos.map((punto: any) => ({
-                  latitude: punto.latitude,
-                  longitude: punto.longitude,
+              {visibleRoutes.map((route: any, index: number) => {
+                const routeColor = ROUTE_COLORS[index % ROUTE_COLORS.length];
+                const points = route.puntos.map((point: any) => ({
+                  latitude: point.latitude,
+                  longitude: point.longitude,
                 }));
 
                 return (
-                  <React.Fragment key={recorrido.id}>
-                    {puntos.length > 1 && (
+                  <React.Fragment key={route.id}>
+                    {points.length > 1 && (
                       <Polyline
-                        coordinates={puntos}
+                        coordinates={points}
                         strokeWidth={4}
                         strokeColor={routeColor}
                         lineDashPattern={[6, 4]}
                         lineCap="round"
                         lineJoin="round"
                         tappable
-                        onPress={() => abrirInfoRecorrido(recorrido)}
+                        onPress={() => openRouteInfo(route)}
                       />
                     )}
 
                     {/* Marcador de inicio */}
                     <Marker
-                      coordinate={puntos[0]}
+                      coordinate={points[0]}
                       anchor={{ x: 0.5, y: 0.5 }}
-                      tracksViewChanges={trackear}
+                      tracksViewChanges={trackChanges}
                       title={
-                        recorrido.nombrePersonalizado ||
-                        `${recorrido.barrioInicio} → ${recorrido.barrioFin}`
+                        route.nombrePersonalizado ||
+                        `${route.barrioInicio} → ${route.barrioFin}`
                       }
                       description="Inicio del recorrido"
-                      onPress={() => abrirInfoRecorrido(recorrido)}
+                      onPress={() => openRouteInfo(route)}
                     >
-                      <View style={[ms.pinRuta, { backgroundColor: routeColor }]}>
+                      <View style={[ms.routePin, { backgroundColor: routeColor }]}>
                         <MaterialIcons name="trip-origin" size={14} color="#FFFFFF" />
                       </View>
                     </Marker>
 
                     {/* Marcador de fin */}
                     <Marker
-                      coordinate={puntos[puntos.length - 1]}
+                      coordinate={points[points.length - 1]}
                       anchor={{ x: 0.5, y: 0.5 }}
-                      tracksViewChanges={trackear}
+                      tracksViewChanges={trackChanges}
                       title="Fin"
                     >
-                      <View style={[ms.pinRuta, { backgroundColor: COLOR_PUNTO_B }]}>
+                      <View style={[ms.routePin, { backgroundColor: POINT_B_COLOR }]}>
                         <MaterialIcons name="flag" size={14} color="#FFFFFF" />
                       </View>
                     </Marker>
@@ -1056,28 +1056,28 @@ export default function MapaView() {
               </Text>
               <Text style={ms.modalSub} numberOfLines={1}>
                 {t.mapa.ultima_actualizacion}{" "}
-                {ultimaActualizacion ? formatearHora(ultimaActualizacion) : "--"}
+                {lastUpdate ? formatHour(lastUpdate) : "--"}
               </Text>
             </View>
           </View>
 
           {/* Búsqueda de dirección dentro del mapa grande */}
-          <BarraBusquedaDireccion
+          <AddressSearchBar
             style={{
               position: "absolute",
               top: insets.top + 66,
               left: insets.left + 12,
               right: insets.right + 12,
             }}
-            value={textoBusqueda}
-            onChangeText={setTextoBusqueda}
-            onResultado={(coord, texto) => setResultadoBusqueda({ coord, texto })}
-            onLimpiar={limpiarBusqueda}
-            ciudad={infoDireccion?.ciudad}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            onResult={(coord, text) => setSearchResult({ coord, text })}
+            onClear={clearSearch}
+            city={addressInfoText?.city}
           />
 
           {/* Leyenda de niveles de seguridad */}
-          {mostrarMisZonas && zonasClasificadas.length > 0 && (
+          {showMyZones && classifiedZones.length > 0 && (
             <View
               pointerEvents="none"
               style={{
@@ -1099,18 +1099,18 @@ export default function MapaView() {
                   ["moderada", "Moderada"],
                   ["muy_insegura", "Insegura"],
                 ] as const
-              ).map(([nivel, etiqueta]) => (
-                <View key={nivel} style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+              ).map(([level, label]) => (
+                <View key={level} style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
                   <View
                     style={{
                       width: 10,
                       height: 10,
                       borderRadius: 5,
-                      backgroundColor: COLOR_NIVEL[nivel],
+                      backgroundColor: LEVEL_COLOR[level],
                     }}
                   />
                   <Text style={{ fontSize: 10.5, fontWeight: "700", color: theme.text }}>
-                    {etiqueta}
+                    {label}
                   </Text>
                 </View>
               ))}
@@ -1122,9 +1122,9 @@ export default function MapaView() {
             <Text style={ms.modalInfoText} numberOfLines={1}>
               {location.latitude.toFixed(5)}, {location.longitude.toFixed(5)}
             </Text>
-            {!!direccionActual && (
-              <Text style={ms.modalInfoBarrio} numberOfLines={2}>
-                {direccionActual}
+            {!!currentAddress && (
+              <Text style={ms.neighborhoodInfoModal} numberOfLines={2}>
+                {currentAddress}
               </Text>
             )}
           </View>
@@ -1132,7 +1132,7 @@ export default function MapaView() {
           {/* Ir a mi ubicación / encuadrar todos los puntos */}
           <TouchableOpacity
             style={ms.modalLocBtn}
-            onPress={centrarEnMi}
+            onPress={centerOnMe}
             activeOpacity={0.85}
             accessibilityRole="button"
           >
@@ -1140,7 +1140,7 @@ export default function MapaView() {
           </TouchableOpacity>
           <TouchableOpacity
             style={ms.modalFitBtn}
-            onPress={verTodo}
+            onPress={seeAll}
             activeOpacity={0.85}
             accessibilityRole="button"
           >
@@ -1150,8 +1150,8 @@ export default function MapaView() {
       </Modal>
 
       {/* MODAL INFORMACIÓN DE RECORRIDO */}
-      <Modal visible={recorridoInfoVisible} animationType="slide" transparent>
-        <TouchableWithoutFeedback onPress={() => setRecorridoInfoVisible(false)}>
+      <Modal visible={routeInfoVisible} animationType="slide" transparent>
+        <TouchableWithoutFeedback onPress={() => setRouteInfoVisible(false)}>
           <View style={styles.modalOverlay}>
             <TouchableWithoutFeedback>
               <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
@@ -1159,53 +1159,53 @@ export default function MapaView() {
                   <Text style={[styles.modalTitle, { color: theme.text }]}>
                     Información del Recorrido
                   </Text>
-                  <TouchableOpacity onPress={() => setRecorridoInfoVisible(false)}>
+                  <TouchableOpacity onPress={() => setRouteInfoVisible(false)}>
                     <MaterialIcons name="close" size={24} color={theme.text} />
                   </TouchableOpacity>
                 </View>
                 
-                {recorridoInfo && (
+                {routeInfo && (
                   <View style={styles.modalBody}>
                     <View style={styles.infoRow}>
                       <MaterialIcons name="route" size={20} color="#7B1DB2" />
                       <Text style={[styles.infoLabel, { color: theme.contactSubtext }]}>Nombre:</Text>
                       <Text style={[styles.infoValue, { color: theme.text }]}>
-                        {recorridoInfo.nombrePersonalizado || `${recorridoInfo.barrioInicio} → ${recorridoInfo.barrioFin}`}
+                        {routeInfo.nombrePersonalizado || `${routeInfo.barrioInicio} → ${routeInfo.barrioFin}`}
                       </Text>
                     </View>
                     <View style={styles.infoRow}>
                       <MaterialIcons name="place" size={20} color="#7B1DB2" />
                       <Text style={[styles.infoLabel, { color: theme.contactSubtext }]}>Inicio:</Text>
                       <Text style={[styles.infoValue, { color: theme.text }]}>
-                        {recorridoInfo.barrioInicio}
+                        {routeInfo.barrioInicio}
                       </Text>
                     </View>
                     <View style={styles.infoRow}>
                       <MaterialIcons name="flag" size={20} color="#7B1DB2" />
                       <Text style={[styles.infoLabel, { color: theme.contactSubtext }]}>Fin:</Text>
                       <Text style={[styles.infoValue, { color: theme.text }]}>
-                        {recorridoInfo.barrioFin}
+                        {routeInfo.barrioFin}
                       </Text>
                     </View>
                     <View style={styles.infoRow}>
                       <MaterialIcons name="calendar-today" size={20} color="#7B1DB2" />
                       <Text style={[styles.infoLabel, { color: theme.contactSubtext }]}>Fecha:</Text>
                       <Text style={[styles.infoValue, { color: theme.text }]}>
-                        {formatearFechaRecorrido(recorridoInfo.fecha, true)}
+                        {formatRouteDate(routeInfo.fecha, true)}
                       </Text>
                     </View>
                     <View style={styles.infoRow}>
                       <MaterialIcons name="schedule" size={20} color="#7B1DB2" />
                       <Text style={[styles.infoLabel, { color: theme.contactSubtext }]}>Tiempo estimado:</Text>
                       <Text style={[styles.infoValue, { color: theme.text }]}>
-                        {recorridoInfo.tiempoEstimado}
+                        {routeInfo.tiempoEstimado}
                       </Text>
                     </View>
                     <View style={styles.infoRow}>
                       <MaterialIcons name="straighten" size={20} color="#7B1DB2" />
                       <Text style={[styles.infoLabel, { color: theme.contactSubtext }]}>Distancia:</Text>
                       <Text style={[styles.infoValue, { color: theme.text }]}>
-                        {recorridoInfo.distanciaEstimada}
+                        {routeInfo.distanciaEstimada}
                       </Text>
                     </View>
                   </View>
@@ -1213,7 +1213,7 @@ export default function MapaView() {
 
                 <TouchableOpacity
                   style={styles.modalCloseButton}
-                  onPress={() => setRecorridoInfoVisible(false)}
+                  onPress={() => setRouteInfoVisible(false)}
                 >
                   <Text style={styles.modalCloseText}>Cerrar</Text>
                 </TouchableOpacity>
@@ -1228,17 +1228,17 @@ export default function MapaView() {
 // Panel de opciones del mapa y tarjeta de ubicación
 const op = StyleSheet.create({
   panel: { flexDirection: "column", alignItems: "stretch" },
-  cabecera: { flexDirection: "row", alignItems: "center", gap: 12 },
-  iconoCabecera: { width: 36, height: 36, borderRadius: 12, alignItems: "center", justifyContent: "center" },
-  fila: { flexDirection: "row", alignItems: "center", gap: 12, paddingTop: 12, marginTop: 12, borderTopWidth: StyleSheet.hairlineWidth },
-  tituloFila: { fontSize: 14, fontWeight: "600" },
-  detalleFila: { fontSize: 12, marginTop: 2 },
-  filaLugar: { flexDirection: "row", gap: 12 },
-  iconoLugar: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
-  etiqueta: { fontSize: 11, fontWeight: "700", letterSpacing: 0.6, textTransform: "uppercase" },
-  barrio: { fontSize: 18, fontWeight: "800", marginTop: 2 },
-  direccion: { fontSize: 14, fontWeight: "500", marginTop: 2 },
-  filaTecnica: { flexDirection: "row", flexWrap: "wrap", gap: 14, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6, marginTop: 12 },
-  datoTecnico: { flexDirection: "row", alignItems: "center", gap: 4 },
-  textoTecnico: { fontSize: 11, fontWeight: "600" },
+  header: { flexDirection: "row", alignItems: "center", gap: 12 },
+  headerIconItem: { width: 36, height: 36, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+  row: { flexDirection: "row", alignItems: "center", gap: 12, paddingTop: 12, marginTop: 12, borderTopWidth: StyleSheet.hairlineWidth },
+  rowTitle: { fontSize: 14, fontWeight: "600" },
+  detailRow: { fontSize: 12, marginTop: 2 },
+  placeRow: { flexDirection: "row", gap: 12 },
+  placeIcon: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
+  label: { fontSize: 11, fontWeight: "700", letterSpacing: 0.6, textTransform: "uppercase" },
+  neighborhood: { fontSize: 18, fontWeight: "800", marginTop: 2 },
+  address: { fontSize: 14, fontWeight: "500", marginTop: 2 },
+  technicalRow: { flexDirection: "row", flexWrap: "wrap", gap: 14, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6, marginTop: 12 },
+  technicalDetail: { flexDirection: "row", alignItems: "center", gap: 4 },
+  technicalText: { fontSize: 11, fontWeight: "600" },
 });

@@ -1,24 +1,24 @@
 import { NativeModule, requireNativeModule } from "expo";
 
-export type Lectura = { x: number; y: number; z: number };
+export type Reading = { x: number; y: number; z: number };
 
 /** ApplicationExitInfo: motivo (REASON_*), importancia del proceso al morir y descripción. */
 export type CierreApp = { timestamp: number; motivo: number; importancia: number; descripcion: string };
 
 type Eventos = {
-  onLectura: (lectura: Lectura) => void;
+  onLectura: (reading: Reading) => void;
   /** Terminó un trozo de audio de la evidencia (archivo listo para subir). */
-  onTrozoAudio: (trozo: { uri: string; duracionMs: number }) => void;
+  onTrozoAudio: (chunk: { uri: string; duracionMs: number }) => void;
   onErrorGrabacion: (error: { mensaje: string }) => void;
   /** La pantalla se prendió o se apagó (cada pulsación del botón de encendido). No llega en llamadas. */
-  onPantalla: (cambio: { encendida: boolean }) => void;
+  onPantalla: (change: { encendida: boolean }) => void;
 };
 
 declare class SensorSacudidasModule extends NativeModule<Eventos> {
   /** El teléfono tiene acelerómetro. */
   disponible(): boolean;
   /** Empieza a emitir onLectura (en g) cada intervaloMs, también en segundo plano. */
-  iniciar(intervaloMs: number): boolean;
+  iniciar(intervalMs: number): boolean;
   detener(): void;
   /** Empieza a emitir onPantalla con cada pulsación del botón de encendido. */
   iniciarBotonEncendido(): void;
@@ -30,7 +30,7 @@ declare class SensorSacudidasModule extends NativeModule<Eventos> {
   pedirIgnorarOptimizacionBateria(): boolean;
   fabricante(): string;
   /** Cierres de la app registrados por Android (11+) desde desdeMs. */
-  motivosDeCierre(desdeMs: number): CierreApp[];
+  motivosDeCierre(sinceMs: number): CierreApp[];
   puedePantallaCompleta(): boolean;
   pedirPantallaCompleta(): void;
   tieneAjusteInicioAutomatico(): boolean;
@@ -41,7 +41,7 @@ declare class SensorSacudidasModule extends NativeModule<Eventos> {
    * apagada. Solo se puede encender con la app abierta; false si falta el permiso de micrófono.
    * grabar=false lo deja encendido sin usar el micrófono (mientras la cámara graba video).
    */
-  iniciarGrabacionAudio(segundosPorTrozo: number, grabar: boolean): boolean;
+  iniciarGrabacionAudio(secondsPerChunk: number, record: boolean): boolean;
   pausarGrabacionAudio(): void;
   reanudarGrabacionAudio(): void;
   detenerGrabacionAudio(): void;

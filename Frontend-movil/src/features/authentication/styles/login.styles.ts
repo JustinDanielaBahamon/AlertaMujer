@@ -2,19 +2,19 @@ import {StyleSheet } from 'react-native';
 import { rgbaColor } from 'react-native-reanimated/lib/typescript/Colors';
 
 export const styles = StyleSheet.create({
-    ContenedorPrincipal : {
+    MainContainer : {
         flex : 1,
         backgroundColor : 'rgb(202 ,171, 222)',
         paddingTop : 13
     },
 
-    ContenedorLogo:{
+    LogoContainer:{
         justifyContent : 'center',
         alignItems:'center',
         marginTop : 10, // baja esto un poco
         marginBottom: 10, //  agrega separación con el form
     },
-     ImagenLogo :{
+     LogoImage :{
         width: 155,
         height: 155,
         maxWidth: '90%',
@@ -23,7 +23,7 @@ export const styles = StyleSheet.create({
 
     //Comienzo contenedor Formulario
 
-   ContenedorFormulario:{
+   FormContainer:{
         backgroundColor: '#FFF',
         marginHorizontal: 20, // separación de los lados
         padding: 20, // espacio interno
@@ -37,9 +37,9 @@ export const styles = StyleSheet.create({
 
         elevation: 5, // para Android
     },
-    ContenedorTituloFormu:{
+    FormTitleContainer:{
     },
-    TituloFormu :{
+    FormTitle :{
         color: 'black',
         fontSize: 23,
         fontWeight: 'bold',
@@ -53,7 +53,7 @@ export const styles = StyleSheet.create({
     
 
     //Comienzo Diseño del contenedor del correo
-    contenedorInput: {
+    inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         borderWidth: 1,
@@ -68,14 +68,14 @@ export const styles = StyleSheet.create({
         backgroundColor:'#F3E8FF',
         
     },
-    IconoCorreo: {
+    EmailIcon: {
         width: 20,
         height: 20,
         marginRight: 10,
         tintColor: '#000000',
         resizeMode: 'contain', 
     },
-    inputCorreo: {
+    emailInput: {
         flex: 1,
         height: '100%',
         fontSize: 16,
@@ -86,7 +86,7 @@ export const styles = StyleSheet.create({
 
     //Comienzo diseño del contenedor de la contraseña
 
-    inputContraseña:{
+    passwordInput:{
         flex: 1,
         height: '100%',
         fontSize: 16,
@@ -94,7 +94,7 @@ export const styles = StyleSheet.create({
     },
     // Fin Contenedor contraseña
 
-    textoOlivarContra :{
+    forgotPasswordText :{
         color :'rgb(0, 174, 255)',
         textAlign: 'center',
         marginTop:10,
@@ -102,7 +102,7 @@ export const styles = StyleSheet.create({
     },
 
     //inicio de diseño boton sesion
-    botonSession:{
+    sessionButton:{
          backgroundColor: 'rgba(164, 7, 255, 0.67)',
         borderRadius : 25,
         margin : 10,
@@ -117,7 +117,7 @@ export const styles = StyleSheet.create({
         shadowRadius: 3,
     },
     
-    textoSession:{
+    sessionText:{
         color : 'white',
         fontSize  : 22,
         fontWeight : 'bold',
@@ -126,7 +126,7 @@ export const styles = StyleSheet.create({
         textShadowColor: '#000',
     },
     //Comienzo diseño de boton google
-    BotonGoogle: {
+    GoogleButton: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center', 
@@ -154,7 +154,7 @@ export const styles = StyleSheet.create({
         left: 20,             // Lo pegamos a la izquierda con un margen fijo
     },
 
-    textoGoogle: {
+    googleText: {
         fontSize: 16,
         color: '#A89486',
         fontWeight: '700',
@@ -164,14 +164,14 @@ export const styles = StyleSheet.create({
 
     //Contenedor de registro 
 
-    ContenedorRegistrarse:{
+    SignUpContainer:{
         alignItems: 'center'
     },
-    TextoTienesCuenta:{
+    HaveAccountText:{
         marginTop:-2,
         fontSize : 16
     },
-    BotonRegistrar:{
+    RegisterButton:{
         backgroundColor: '#7953e2',
         borderColor : 'black',
         borderWidth:1,
@@ -182,19 +182,19 @@ export const styles = StyleSheet.create({
         alignItems : 'center',
         justifyContent: 'center',
     },
-    textoRegistro:{
+    signUpText:{
         color : 'white',
         fontSize  : 19.5,
         fontWeight : 'bold',
         textShadowOffset: { width: 4, height: 1 },
         textShadowRadius: 5
     },
-    ContenedorTermCondi:{
+    TermsContainer:{
        marginLeft:20,
        marginRight:20,
        marginBottom:20
     },
-    textoTerminosCondiciones:{
+    termsText:{
        textAlign:'center'
     }
     //Fin registro

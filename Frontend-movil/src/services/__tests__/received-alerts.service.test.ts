@@ -1,5 +1,5 @@
 import api from "../api";
-import { getAlertasRecibidas, getCodigoSeguimiento } from "../received-alerts.service";
+import { getReceivedAlerts, getTrackingCode } from "../received-alerts.service";
 
 jest.mock("../api", () => ({ __esModule: true, default: { get: jest.fn(), post: jest.fn() } }));
 
@@ -16,18 +16,18 @@ describe("received-alerts.service", () => {
       ],
     } as never);
 
-    const [activa, anterior] = await getAlertasRecibidas();
+    const [active, previous] = await getReceivedAlerts();
 
     expect(mockedApi.get).toHaveBeenCalledWith("/api/received-alerts");
-    expect(activa).toMatchObject({ id: 7, nombre: "Ana", activa: true, estado: "active", fin: null, seguimientoDisponible: true });
-    expect(activa.inicio?.toISOString()).toBe("2026-10-20T14:00:00.000Z");
-    expect(anterior).toMatchObject({ id: 5, nombre: "", activa: false, estado: "cancelled", seguimientoDisponible: false });
-    expect(anterior.fin?.toISOString()).toBe("2026-10-19T10:12:00.000Z");
+    expect(active).toMatchObject({ id: 7, name: "Ana", active: true, status: "active", end: null, trackingAvailable: true });
+    expect(active.startTime?.toISOString()).toBe("2026-10-20T14:00:00.000Z");
+    expect(previous).toMatchObject({ id: 5, name: "", active: false, status: "cancelled", trackingAvailable: false });
+    expect(previous.end?.toISOString()).toBe("2026-10-19T10:12:00.000Z");
   });
 
   it("pide el código de seguimiento de una alerta recibida", async () => {
     mockedApi.post.mockResolvedValueOnce({ data: { code: "abc123" } } as never);
-    await expect(getCodigoSeguimiento(7)).resolves.toBe("abc123");
+    await expect(getTrackingCode(7)).resolves.toBe("abc123");
     expect(mockedApi.post).toHaveBeenCalledWith("/api/received-alerts/7/tracking", {});
   });
 });

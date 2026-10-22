@@ -201,26 +201,26 @@ export default function CameraAndMicrophoneTutorial({ externalVm }: Props) {
                 <View style={securityStyle.sectionLine} />
               </View>
 
-              <View style={securityStyle.permisosCard}>
+              <View style={securityStyle.permissionsCard}>
                 {/* Cámara */}
-                <View style={securityStyle.permisosRow}>
-                  <Text style={securityStyle.permisosEmoji}>📷</Text>
-                  <View style={securityStyle.permisosTitleWrap}>
-                    <Text style={securityStyle.permisosTitle}>{t.tutorial.seguridad_permisos_camara_titulo}</Text>
-                    <Text style={securityStyle.permisosDesc}>
+                <View style={securityStyle.permissionsRow}>
+                  <Text style={securityStyle.permissionsEmoji}>📷</Text>
+                  <View style={securityStyle.permissionsTitleWrap}>
+                    <Text style={securityStyle.permissionsTitle}>{t.tutorial.seguridad_permisos_camara_titulo}</Text>
+                    <Text style={securityStyle.permissionsDesc}>
                       {t.tutorial.seguridad_permisos_camara_desc}
                     </Text>
                   </View>
                 </View>
 
-                <View style={securityStyle.permisosSeparator} />
+                <View style={securityStyle.permissionsSeparator} />
 
                 {/* Micrófono */}
-                <View style={securityStyle.permisosRow}>
-                  <Text style={securityStyle.permisosEmoji}>🎙️</Text>
-                  <View style={securityStyle.permisosTitleWrap}>
-                    <Text style={securityStyle.permisosTitle}>{t.tutorial.seguridad_permisos_microfono_titulo}</Text>
-                    <Text style={securityStyle.permisosDesc}>
+                <View style={securityStyle.permissionsRow}>
+                  <Text style={securityStyle.permissionsEmoji}>🎙️</Text>
+                  <View style={securityStyle.permissionsTitleWrap}>
+                    <Text style={securityStyle.permissionsTitle}>{t.tutorial.seguridad_permisos_microfono_titulo}</Text>
+                    <Text style={securityStyle.permissionsDesc}>
                       {t.tutorial.seguridad_permisos_microfono_desc}
                     </Text>
                   </View>
@@ -257,9 +257,9 @@ export default function CameraAndMicrophoneTutorial({ externalVm }: Props) {
       )}
       <PermissionsModal
         visible={vm.modalVisible}
-        tipo={vm.permissionType}
-        onConfirmar={vm.confirmModal}
-        onCancelar={vm.cancelModal}
+        type={vm.permissionType}
+        onConfirm={vm.confirmModal}
+        onCancel={vm.cancelModal}
       />
       </LinearGradient>
     </View>

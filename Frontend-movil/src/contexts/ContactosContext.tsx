@@ -1,63 +1,63 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import type { Contacto } from "../features/contactos/models/Contacto";
-import { contactosService, type EmergencyContact } from "../services/contactos.service";
+import type { Contact } from "../features/contactos/models/Contacto";
+import { contactsService, type EmergencyContact } from "../services/contactos.service";
 import { useAuth } from "./AuthContext";
 
-type ContactosContextType = {
-  contactos: Contacto[];
+type ContactsContextType = {
+  contacts: Contact[];
   loading: boolean;
   error: string | null;
-  agregarContacto: (payload: Omit<Contacto, "id">) => Promise<void>;
-  actualizarContacto: (id: string, cambios: Omit<Contacto, "id">) => Promise<void>;
-  eliminarContacto: (id: string) => Promise<void>;
-  refrescarContactos: () => Promise<void>;
+  addContactItem: (payload: Omit<Contact, "id">) => Promise<void>;
+  updateContactItem: (id: string, changes: Omit<Contact, "id">) => Promise<void>;
+  removeContact: (id: string) => Promise<void>;
+  refreshContacts: () => Promise<void>;
 };
 
-const ContactosContext = createContext<ContactosContextType | null>(null);
+const ContactsContext = createContext<ContactsContextType | null>(null);
 
-const mapearEmergencyContactAContacto = (ec: EmergencyContact): Contacto => ({
+const mapEmergencyContactToContact = (ec: EmergencyContact): Contact => ({
   id: String(ec.id),
-  nombre: ec.contactName || '',
-  parentesco: ec.relationship,
-  telefono: ec.telephone,
+  name: ec.contactName || '',
+  relationship: ec.relationship,
+  phoneNumber: ec.telephone,
   email: ec.email,
-  foto: ec.photo ?? undefined,
+  photo: ec.photo ?? undefined,
 });
 
-export function ContactosProvider({ children }: { children: React.ReactNode }) {
-  const [contactos, setContactos] = useState<Contacto[]>([]);
+export function ContactsProvider({ children }: { children: React.ReactNode }) {
+  const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  const cargarContactos = useCallback(async () => {
+  const loadContacts = useCallback(async () => {
 
     if (!user?.id) {
-      setContactos([]);
+      setContacts([]);
       return;
     }
 
     setLoading(true);
     setError(null);
     try {
-      const emergencyContacts = await contactosService.getContactos(user.id);
+      const emergencyContacts = await contactsService.getContacts(user.id);
 
-      const contactosMapeados = emergencyContacts.map(mapearEmergencyContactAContacto);
-      setContactos(contactosMapeados);
+      const mappedContacts = emergencyContacts.map(mapEmergencyContactToContact);
+      setContacts(mappedContacts);
     } catch (err) {
       console.error('[ContactosContext] Error al cargar contactos:', err);
       setError("Error al cargar contactos");
-      setContactos([]);
+      setContacts([]);
     } finally {
       setLoading(false);
     }
   }, [user?.id]);
 
   useEffect(() => {
-    cargarContactos();
-  }, [cargarContactos]);
+    loadContacts();
+  }, [loadContacts]);
 
-  const agregarContacto = useCallback(async (payload: Omit<Contacto, "id">) => {
+  const addContactItem = useCallback(async (payload: Omit<Contact, "id">) => {
 
     if (!user?.id) {
       return;
@@ -67,18 +67,18 @@ export function ContactosProvider({ children }: { children: React.ReactNode }) {
     setError(null);
     try {
       // NO enviamos userProfileId, el backend lo establece automáticamente
-      const nuevoContacto = await contactosService.addContacto({
-        contactName: payload.nombre ?? '',
-        telephone: payload.telefono,
+      const newContact = await contactsService.addContact({
+        contactName: payload.name ?? '',
+        telephone: payload.phoneNumber,
         email: payload.email,
-        relationship: payload.parentesco,
-        photo: payload.foto,
+        relationship: payload.relationship,
+        photo: payload.photo,
       });
 
 
-      const contactoMapeado = mapearEmergencyContactAContacto(nuevoContacto);
+      const mappedContact = mapEmergencyContactToContact(newContact);
 
-      setContactos((prev) => [...prev, contactoMapeado]);
+      setContacts((prev) => [...prev, mappedContact]);
     } catch (err) {
       console.error('[ContactosContext] Error al agregar contacto:', err);
       setError("Error al agregar contacto");
@@ -88,22 +88,22 @@ export function ContactosProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user?.id]);
 
-  const actualizarContacto = useCallback(async (id: string, cambios: Omit<Contacto, "id">) => {
+  const updateContactItem = useCallback(async (id: string, changes: Omit<Contact, "id">) => {
 
     setLoading(true);
     setError(null);
     try {
-      await contactosService.updateContacto(id, {
-        contactName: cambios.nombre || '',
-        telephone: cambios.telefono,
-        email: cambios.email,
-        relationship: cambios.parentesco,
-        photo: cambios.foto ?? "", // sin foto = quitarla
+      await contactsService.updateContact(id, {
+        contactName: changes.name || '',
+        telephone: changes.phoneNumber,
+        email: changes.email,
+        relationship: changes.relationship,
+        photo: changes.photo ?? "", // sin foto = quitarla
       });
 
 
-      setContactos((prev) =>
-        prev.map((contacto) => (contacto.id === id ? { ...contacto, ...cambios } : contacto)),
+      setContacts((prev) =>
+        prev.map((contact) => (contact.id === id ? { ...contact, ...changes } : contact)),
       );
     } catch (err) {
       console.error('[ContactosContext] Error al actualizar contacto:', err);
@@ -114,12 +114,12 @@ export function ContactosProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const eliminarContacto = useCallback(async (id: string) => {
+  const removeContact = useCallback(async (id: string) => {
     setLoading(true);
     setError(null);
     try {
-      await contactosService.deleteContacto(id);
-      setContactos((prev) => prev.filter((contacto) => contacto.id !== id));
+      await contactsService.deleteContact(id);
+      setContacts((prev) => prev.filter((contact) => contact.id !== id));
     } catch (err) {
       setError("Error al eliminar contacto");
       throw err;
@@ -130,22 +130,22 @@ export function ContactosProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo(
     () => ({
-      contactos,
+      contacts: contacts,
       loading,
       error,
-      agregarContacto,
-      actualizarContacto,
-      eliminarContacto,
-      refrescarContactos: cargarContactos,
+      addContactItem: addContactItem,
+      updateContactItem: updateContactItem,
+      removeContact: removeContact,
+      refreshContacts: loadContacts,
     }),
-    [contactos, loading, error, agregarContacto, actualizarContacto, eliminarContacto, cargarContactos],
+    [contacts, loading, error, addContactItem, updateContactItem, removeContact, loadContacts],
   );
 
-  return <ContactosContext.Provider value={value}>{children}</ContactosContext.Provider>;
+  return <ContactsContext.Provider value={value}>{children}</ContactsContext.Provider>;
 }
 
-export function useContactosContext() {
-  const ctx = useContext(ContactosContext);
+export function useContactsContext() {
+  const ctx = useContext(ContactsContext);
   if (!ctx) {
     throw new Error("useContactosContext debe usarse dentro de ContactosProvider");
   }

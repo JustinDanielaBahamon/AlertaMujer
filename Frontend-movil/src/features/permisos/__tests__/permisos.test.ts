@@ -24,7 +24,7 @@ jest.mock("expo-location", () => ({
   requestForegroundPermissionsAsync: jest.fn(async () => ({ granted: true })),
 }));
 jest.mock("../../../services/push.service", () => ({ registrarPush: jest.fn(async () => {}) }));
-jest.mock("../../../services/devices.service", () => ({ reportarPermisos: jest.fn(async () => {}) }));
+jest.mock("../../../services/devices.service", () => ({ reportPermissions: jest.fn(async () => {}) }));
 jest.mock("../../../../modules/sensor-sacudidas", () => ({
   __esModule: true,
   default: {
@@ -40,7 +40,7 @@ jest.mock("../../../../modules/sensor-sacudidas", () => ({
 import notifee from "@notifee/react-native";
 import * as Location from "expo-location";
 import { Linking, Platform } from "react-native";
-import { activarPermiso, faltantesCriticos, revisarPermisos } from "../permisos";
+import { grantPermission, missingCritical, checkPermissions } from "../permisos";
 
 describe("permisos", () => {
   beforeAll(() => {
@@ -48,34 +48,34 @@ describe("permisos", () => {
   });
 
   it("detecta lo crítico que falta: agitar apagado, ubicación y batería", async () => {
-    const estados = await revisarPermisos(false);
+    const statuses = await checkPermissions(false);
 
-    expect(estados.notificaciones.concedido).toBe(true);
-    expect(estados.camara).toEqual({ concedido: false, puedePreguntar: false });
-    expect(faltantesCriticos(estados).map((p) => p.id)).toEqual(["agitar", "ubicacion", "bateria", "pantallaCompleta"]);
+    expect(statuses.notificaciones.granted).toBe(true);
+    expect(statuses.camara).toEqual({ granted: false, canAsk: false });
+    expect(missingCritical(statuses).map((p) => p.id)).toEqual(["agitar", "ubicacion", "bateria", "pantallaCompleta"]);
     // El inicio automático no se puede leer: queda "por revisar", no como faltante
-    expect(estados.inicioAutomatico.concedido).toBeNull();
+    expect(statuses.inicioAutomatico.granted).toBeNull();
   });
 
   it("si el teléfono ya cortó la protección, el inicio automático falta", async () => {
-    const estados = await revisarPermisos(true, 2);
-    expect(estados.inicioAutomatico.concedido).toBe(false);
+    const statuses = await checkPermissions(true, 2);
+    expect(statuses.inicioAutomatico.granted).toBe(false);
   });
 
   it("pide el permiso si Android todavía deja preguntar", async () => {
-    await activarPermiso("ubicacion", { concedido: false, puedePreguntar: true });
+    await grantPermission("ubicacion", { granted: false, canAsk: true });
     expect(Location.requestForegroundPermissionsAsync).toHaveBeenCalled();
   });
 
   it("abre los ajustes de la app si Android ya no deja preguntar", async () => {
-    const abrir = jest.spyOn(Linking, "openSettings").mockResolvedValue(undefined as never);
-    await activarPermiso("camara", { concedido: false, puedePreguntar: false });
-    expect(abrir).toHaveBeenCalled();
+    const open = jest.spyOn(Linking, "openSettings").mockResolvedValue(undefined as never);
+    await grantPermission("camara", { granted: false, canAsk: false });
+    expect(open).toHaveBeenCalled();
   });
 
   it("si la usuaria rechaza las notificaciones, abre sus ajustes", async () => {
     (notifee.getNotificationSettings as jest.Mock).mockResolvedValueOnce({ authorizationStatus: 0 });
-    await activarPermiso("notificaciones", { concedido: false, puedePreguntar: true });
+    await grantPermission("notificaciones", { granted: false, canAsk: true });
     expect(notifee.openNotificationSettings).toHaveBeenCalled();
   });
 });

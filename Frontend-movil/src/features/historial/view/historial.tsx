@@ -8,11 +8,11 @@ import { useTheme } from "../../../../src/contexts/ThemeContext";
 import { useLocale } from "../../../../src/contexts/LocaleContext";
 import { useAuth } from "../../../../src/contexts/AuthContext";
 import { getMainStackNavigation } from "../../../navigation/navigationHelpers";
-import type { Alerta } from "../models/Alerta";
-import { createStyles, getAsistenciaColors, getEmergenciaColors } from "../style/historial.style";
-import { getAlertasByUsuario, transformarAlerta } from "../../../../src/services/alerts.service";
+import type { AlertRecord } from "../models/Alerta";
+import { createStyles, getAssistanceColors, getEmergencyColors } from "../style/historial.style";
+import { getAlertsByUser, transformAlert } from "../../../../src/services/alerts.service";
 
-export default function Historial() {
+export default function HistoryTab() {
   const { theme } = useTheme();
   const { t } = useLocale();
   const { user } = useAuth();
@@ -20,17 +20,17 @@ export default function Historial() {
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   // Colores por tipo derivados del tema activo
-  const emergencyColors = useMemo(() => getEmergenciaColors(theme), [theme]);
-  const assistanceColors = useMemo(() => getAsistenciaColors(theme), [theme]);
+  const emergencyColors = useMemo(() => getEmergencyColors(theme), [theme]);
+  const assistanceColors = useMemo(() => getAssistanceColors(theme), [theme]);
 
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const [searchQuery, setSearchQuery]           = useState("");
-  const [filteredAlerts, setFilteredAlerts]     = useState<Alerta[]>([]);
+  const [filteredAlerts, setFilteredAlerts]     = useState<AlertRecord[]>([]);
   const [refreshing, setRefreshing]             = useState(false);
   const [loading, setLoading]                   = useState(false);
   const [error, setError]                       = useState<string | null>(null);
 
-  const cargarAlertas = useCallback(async () => {
+  const loadAlerts = useCallback(async () => {
     if (!user?.id) {
       setFilteredAlerts([]);
       setError("No hay usuario autenticated");
@@ -40,9 +40,9 @@ export default function Historial() {
     setLoading(true);
     setError(null);
     try {
-      const apiAlertas = await getAlertasByUsuario(user.id);
-      const alertasTransformadas = apiAlertas.map(transformarAlerta);
-      setFilteredAlerts(alertasTransformadas);
+      const apiAlerts = await getAlertsByUser(user.id);
+      const transformedAlerts = apiAlerts.map(transformAlert);
+      setFilteredAlerts(transformedAlerts);
     } catch (error) {
       console.error("Error al cargar alertas:", error);
       setError("Error al cargar alertas. Verifica tu conexión.");
@@ -56,44 +56,44 @@ export default function Historial() {
   const isFocused = useIsFocused();
   useFocusEffect(
     useCallback(() => {
-      cargarAlertas();
-    }, [cargarAlertas]),
+      loadAlerts();
+    }, [loadAlerts]),
   );
 
   // Respaldo: vuelve a cargar cuando el componente está montado y gana foco visible.
   useEffect(() => {
     if (isFocused) {
-      cargarAlertas();
+      loadAlerts();
     }
-  }, [isFocused, cargarAlertas]);
+  }, [isFocused, loadAlerts]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await cargarAlertas();
+      await loadAlerts();
       setSearchQuery("");
     } catch (error) {
       console.error("Error al refrescar:", error);
     } finally {
       setRefreshing(false);
     }
-  }, [cargarAlertas]);
+  }, [loadAlerts]);
 
   const handleSearch = (text: string) => {
     setSearchQuery(text);
     if (!text.trim()) {
-      cargarAlertas();
+      loadAlerts();
       return;
     }
     const filtered = filteredAlerts.filter((item) => {
       const itemData =
-        `${item.fecha} ${item.hora} ${item.ubicacion} ${item.estado} ${item.tipo}`.toLowerCase();
+        `${item.date} ${item.time} ${item.location} ${item.status} ${item.type}`.toLowerCase();
       return itemData.includes(text.toLowerCase());
     });
     setFilteredAlerts(filtered);
   };
 
-  const goToDetail = (alert: Alerta) => {
+  const goToDetail = (alert: AlertRecord) => {
     const main = getMainStackNavigation(navigation);
     main?.navigate("DetalleAlerta", { alerta: alert });
   };
@@ -101,22 +101,22 @@ export default function Historial() {
   const stats = useMemo(
     () => ({
       total:     filteredAlerts.length,
-      sent:      filteredAlerts.filter((a) => a.estado === "Enviada").length,
-      cancelled: filteredAlerts.filter((a) => a.estado === "Cancelada").length,
-      ongoing:   filteredAlerts.filter((a) => a.estado === "En curso").length,
+      sent:      filteredAlerts.filter((a) => a.status === "Enviada").length,
+      cancelled: filteredAlerts.filter((a) => a.status === "Cancelada").length,
+      ongoing:   filteredAlerts.filter((a) => a.status === "En curso").length,
     }),
     [filteredAlerts]
   );
 
   // ─── Render de cada card ──────────────────────────────────────────────────
 
-  const renderItem = ({ item }: { item: Alerta }) => {
-    const isEmergency = item.tipo === "Emergencia";
+  const renderItem = ({ item }: { item: AlertRecord }) => {
+    const isEmergency = item.type === "Emergencia";
     const colors = isEmergency ? emergencyColors : assistanceColors;
 
     // Estado: "Enviada" comparte colores con emergencia / "Cancelada" con asistencia
-    const badgeBg   = item.estado === "Cancelada" ? assistanceColors.badgeBg   : emergencyColors.badgeBg;
-    const badgeText = item.estado === "Cancelada" ? assistanceColors.badgeText : emergencyColors.badgeText;
+    const badgeBg   = item.status === "Cancelada" ? assistanceColors.badgeBg   : emergencyColors.badgeBg;
+    const badgeText = item.status === "Cancelada" ? assistanceColors.badgeText : emergencyColors.badgeText;
 
     return (
       <TouchableOpacity
@@ -144,26 +144,26 @@ export default function Historial() {
             <View style={styles.headerRow}>
               <View style={styles.typePill}>
                 <Text style={[styles.alertType, { color: colors.text }]}>
-                  {item.tipo}
+                  {item.type}
                 </Text>
               </View>
               <View style={styles.timeRow}>
-                <MaterialIcons name="access-time" size={13} color={colors.hora} />
-                <Text style={[styles.timeText, { color: colors.hora }]}>{item.hora}</Text>
+                <MaterialIcons name="access-time" size={13} color={colors.time} />
+                <Text style={[styles.timeText, { color: colors.time }]}>{item.time}</Text>
               </View>
             </View>
 
             {/* Fecha */}
             <Text style={styles.dateText}>
               <MaterialIcons name="event" size={12} color={theme.contactSubtext} />{" "}
-              {item.fecha}
+              {item.date}
             </Text>
 
             {/* Ubicación + flecha */}
             <View style={styles.locationRow}>
               <Text style={styles.locationText}>
                 <MaterialIcons name="place" size={12} color={theme.contactSubtext} />{" "}
-                {item.ubicacion}
+                {item.location}
               </Text>
               <MaterialIcons name="chevron-right" size={22} color={theme.contactSubtext} />
             </View>
@@ -171,7 +171,7 @@ export default function Historial() {
             {/* Badge de estado */}
             <View style={[styles.statusBadge, { backgroundColor: badgeBg }]}>
               <Text style={[styles.statusText, { color: badgeText }]}>
-                {item.estado.toUpperCase()}
+                {item.status.toUpperCase()}
               </Text>
             </View>
 

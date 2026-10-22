@@ -10,30 +10,30 @@ import { useTheme } from "../../../contexts/ThemeContext";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { styles } from "../styles/historialMapa.style";
 
-type HistorialRouteProp = RouteProp<
+type HistoryRouteProp = RouteProp<
   MainStackParamList,
   "historialMapa"
 >;
 
-export default function HistorialMapa() {
+export default function HistoryMap() {
 
   const { theme } = useTheme();
   const { t } = useLocale();
 
-  const route = useRoute<HistorialRouteProp>();
+  const route = useRoute<HistoryRouteProp>();
 
   const navigation =
     useNavigation<NativeStackNavigationProp<MainStackParamList>>();
 
-  const { ubicacion } = route.params;
+  const { ubicacion: location } = route.params;
 
   const [fullscreen, setFullscreen] =
     useState(false);
 
-  const fecha = new Date(ubicacion.fecha);
+  const date = new Date(location.fecha);
 
-  const horaFormateada =
-    fecha.toLocaleTimeString("es-CO", {
+  const formattedTime =
+    date.toLocaleTimeString("es-CO", {
       hour: "2-digit",
       minute: "2-digit",
     });
@@ -112,7 +112,7 @@ export default function HistorialMapa() {
                   },
                 ]}
               >
-                {t.historialMapa.hoy}, {horaFormateada}
+                {t.historialMapa.hoy}, {formattedTime}
               </Text>
 
               <Text
@@ -123,8 +123,8 @@ export default function HistorialMapa() {
                   },
                 ]}
               >
-                {ubicacion.municipio},{" "}
-                {ubicacion.departamento}
+                {location.municipio},{" "}
+                {location.departamento}
               </Text>
 
               <Text
@@ -135,9 +135,9 @@ export default function HistorialMapa() {
                   },
                 ]}
               >
-                {ubicacion.latitude.toFixed(5)}
+                {location.latitude.toFixed(5)}
                 {" , "}
-                {ubicacion.longitude.toFixed(5)}
+                {location.longitude.toFixed(5)}
               </Text>
 
             </View>
@@ -158,10 +158,10 @@ export default function HistorialMapa() {
 
               initialRegion={{
                 latitude:
-                  ubicacion.latitude,
+                  location.latitude,
 
                 longitude:
-                  ubicacion.longitude,
+                  location.longitude,
 
                 latitudeDelta: 0.01,
                 longitudeDelta: 0.01,
@@ -177,16 +177,16 @@ export default function HistorialMapa() {
               <Marker
                 coordinate={{
                   latitude:
-                    ubicacion.latitude,
+                    location.latitude,
 
                   longitude:
-                    ubicacion.longitude,
+                    location.longitude,
                 }}
 
                 title={t.historialMapa.ubicacion_guardada_marcador}
 
                 description={
-                  ubicacion.direccion
+                  location.direccion
                 }
 
                 pinColor="#6C2BD9"
@@ -236,63 +236,63 @@ export default function HistorialMapa() {
             <InfoRow
               icon="calendar-today"
               label={t.historialMapa.fecha_hora}
-              value={`${t.historialMapa.hoy}, ${horaFormateada}`}
+              value={`${t.historialMapa.hoy}, ${formattedTime}`}
               theme={theme}
             />
 
             <InfoRow
               icon="place"
               label={t.historialMapa.direccion}
-              value={ubicacion.direccion}
+              value={location.direccion}
               theme={theme}
             />
 
             <InfoRow
               icon="home"
               label={t.historialMapa.barrio}
-              value={ubicacion.barrio}
+              value={location.barrio}
               theme={theme}
             />
 
             <InfoRow
               icon="location-city"
               label={t.historialMapa.municipio}
-              value={ubicacion.municipio}
+              value={location.municipio}
               theme={theme}
             />
 
             <InfoRow
               icon="public"
               label={t.historialMapa.pais}
-              value={ubicacion.pais}
+              value={location.pais}
               theme={theme}
             />
 
             <InfoRow
               icon="my-location"
               label={t.historialMapa.latitud}
-              value={ubicacion.latitude.toFixed(5)}
+              value={location.latitude.toFixed(5)}
               theme={theme}
             />
 
             <InfoRow
               icon="location-on"
               label={t.historialMapa.longitud}
-              value={ubicacion.longitude.toFixed(5)}
+              value={location.longitude.toFixed(5)}
               theme={theme}
             />
 
             <InfoRow
               icon="gps-fixed"
               label={t.historialMapa.precision}
-              value={ubicacion.precision}
+              value={location.precision}
               theme={theme}
             />
 
             <InfoRow
               icon="check-circle"
               label={t.historialMapa.estado}
-              value={ubicacion.estado}
+              value={location.estado}
               theme={theme}
               active
             />
@@ -316,10 +316,10 @@ export default function HistorialMapa() {
 
             initialRegion={{
               latitude:
-                ubicacion.latitude,
+                location.latitude,
 
               longitude:
-                ubicacion.longitude,
+                location.longitude,
 
               latitudeDelta: 0.01,
               longitudeDelta: 0.01,
@@ -333,16 +333,16 @@ export default function HistorialMapa() {
             <Marker
               coordinate={{
                 latitude:
-                  ubicacion.latitude,
+                  location.latitude,
 
                 longitude:
-                  ubicacion.longitude,
+                  location.longitude,
               }}
 
               title={t.historialMapa.ubicacion_guardada_marcador}
 
               description={
-                ubicacion.direccion
+                location.direccion
               }
 
               pinColor="#6C2BD9"

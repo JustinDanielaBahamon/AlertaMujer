@@ -2,22 +2,22 @@ import { Audio } from "expo-av";
 import { Camera } from "expo-camera";
 import { useCallback } from "react";
 import { Alert, Linking } from "react-native";
-import { useEvidencia } from "../../contexts/EvidenciaContext";
+import { useEvidence } from "../../contexts/EvidenciaContext";
 import { useLocale } from "../../contexts/LocaleContext";
-import { enColaDePermisos } from "../../services/permisosSeguros";
+import { inPermissionQueue } from "../../services/permisosSeguros";
 
 /**
  * Interruptores "Grabar video / audio automáticamente al activar una emergencia". Apagar se guarda
  * directo; encender primero pide el permiso (cámara o micrófono) y, si se niega, deja el interruptor
  * apagado y ofrece abrir los ajustes.
  */
-export function useGrabacionAutomatica(alCambiar?: () => void) {
+export function useAutomaticRecording(onChange?: () => void) {
   const { t } = useLocale();
-  const { grabarVideo, setGrabarVideo, grabarAudio, setGrabarAudio } = useEvidencia();
+  const { recordVideo, setRecordVideo, recordAudio, setRecordAudio } = useEvidence();
 
-  const avisarPermisoDenegado = useCallback(
-    (mensaje: string) => {
-      Alert.alert(t.ajustes.permiso_requerido_titulo, mensaje, [
+  const notifyPermissionDenied = useCallback(
+    (message: string) => {
+      Alert.alert(t.ajustes.permiso_requerido_titulo, message, [
         { text: t.permisos.btn_regresar, style: "cancel" },
         { text: t.ajustes.abrir_ajustes, onPress: () => Linking.openSettings() },
       ]);
@@ -25,35 +25,35 @@ export function useGrabacionAutomatica(alCambiar?: () => void) {
     [t],
   );
 
-  const cambiar = useCallback(
+  const change = useCallback(
     async (
-      activar: boolean,
-      guardar: (valor: boolean) => void,
-      pedir: () => Promise<{ granted: boolean }>,
-      mensajeDenegado: string,
+      activate: boolean,
+      save: (value: boolean) => void,
+      ask: () => Promise<{ granted: boolean }>,
+      deniedMessage: string,
     ) => {
-      if (!activar) {
-        guardar(false);
-        alCambiar?.();
+      if (!activate) {
+        save(false);
+        onChange?.();
         return;
       }
       try {
-        const permiso = await enColaDePermisos(pedir);
-        if (permiso.granted) guardar(true);
-        else avisarPermisoDenegado(mensajeDenegado);
+        const permission = await inPermissionQueue(ask);
+        if (permission.granted) save(true);
+        else notifyPermissionDenied(deniedMessage);
       } catch (e) {
         console.error("Error al pedir permiso de grabación:", e);
       }
-      alCambiar?.();
+      onChange?.();
     },
-    [avisarPermisoDenegado, alCambiar],
+    [notifyPermissionDenied, onChange],
   );
 
-  const cambiarGrabarVideo = (activar: boolean) =>
-    cambiar(activar, setGrabarVideo, () => Camera.requestCameraPermissionsAsync(), t.ajustes.permiso_camara_msg);
+  const toggleRecordVideo = (activate: boolean) =>
+    change(activate, setRecordVideo, () => Camera.requestCameraPermissionsAsync(), t.ajustes.permiso_camara_msg);
 
-  const cambiarGrabarAudio = (activar: boolean) =>
-    cambiar(activar, setGrabarAudio, () => Audio.requestPermissionsAsync(), t.ajustes.permiso_microfono_msg);
+  const toggleRecordAudio = (activate: boolean) =>
+    change(activate, setRecordAudio, () => Audio.requestPermissionsAsync(), t.ajustes.permiso_microfono_msg);
 
-  return { grabarVideo, grabarAudio, cambiarGrabarVideo, cambiarGrabarAudio };
+  return { recordVideo, recordAudio, toggleRecordVideo, toggleRecordAudio };
 }

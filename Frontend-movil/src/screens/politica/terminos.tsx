@@ -5,22 +5,22 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocale } from '../../contexts/LocaleContext';
 
 type Props = {
-  titulo: string;
-  descripcion: string;
+  title: string;
+  description: string;
 };
 
-export default function Terminos(){
+export default function Terms(){
   const navigation = useNavigation<any>();
   const { t } = useLocale();
 
   //  componente reutilizable
-  const ItemTermino = ({ titulo, descripcion }: Props) => (
+  const TermItem = ({ title, description }: Props) => (
     <View style={{ marginBottom: 12 }}>
       <Text style={{ fontWeight: 'bold', fontSize: 16, color: '#4B1FA8' }}>
-        {titulo}
+        {title}
       </Text>
       <Text style={{ fontSize: 16, lineHeight: 24, color: '#000' }}>
-        {descripcion}
+        {description}
       </Text>
     </View>
   );
@@ -56,10 +56,10 @@ export default function Terminos(){
         }}>
 
           {items.map((n) => (
-            <ItemTermino
+            <TermItem
               key={n}
-              titulo={t.politicaTerminos[`item${n}_titulo` as keyof typeof t.politicaTerminos]}
-              descripcion={t.politicaTerminos[`item${n}_desc` as keyof typeof t.politicaTerminos]}
+              title={t.politicaTerminos[`item${n}_titulo` as keyof typeof t.politicaTerminos]}
+              description={t.politicaTerminos[`item${n}_desc` as keyof typeof t.politicaTerminos]}
             />
           ))}
 

@@ -4,18 +4,18 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AppState, Linking } from "react-native";
 
 import SensorSacudidas from "../../../modules/sensor-sacudidas";
-import { useEvidencia } from "../../contexts/EvidenciaContext";
-import { enColaDePermisos } from "../../services/permisosSeguros";
-import { asignarAlertaDelAudio, encolarTrozo, escucharSubidas, procesarCola, type EstadoSubidas } from "./colaSubidas";
+import { useEvidence } from "../../contexts/EvidenciaContext";
+import { inPermissionQueue } from "../../services/permisosSeguros";
+import { setAudioAlert, enqueueChunk, listenUploads, processQueue, type UploadStatus } from "./colaSubidas";
 
 /** Largo de cada trozo: lo grabado se sube cada 45 s, así se pierde poco si le quitan el teléfono. */
-export const SEGUNDOS_POR_TROZO = 45;
+export const SECONDS_PER_CHUNK = 45;
 /** Trozos más cortos (al cambiar de cámara, al volver a la app...) no aportan nada: se descartan. */
-export const MINIMO_TROZO_MS = 3000;
+export const MIN_CHUNK_MS = 3000;
 /** Si la cámara no avisa que está lista en este tiempo, se sigue solo con audio. */
-const ESPERA_CAMARA_MS = 6000;
+const CAMERA_WAIT_MS = 6000;
 
-type Permisos = { camara: boolean; micro: boolean; puedePreguntar: boolean };
+type Permissions = { camera: boolean; microphone: boolean; canAsk: boolean };
 
 /**
  * Grabación automática de evidencia durante la alerta activa.
@@ -24,196 +24,196 @@ type Permisos = { camara: boolean; micro: boolean; puedePreguntar: boolean };
  * Android no deja usar la cámara y sigue solo el audio con el servicio nativo de micrófono.
  * Lo que se graba en Ajustes (video, audio o ambos) decide el modo; el botón la pausa o reanuda.
  */
-export function useGrabacionAlerta(alertaId: number | null) {
-  const { grabarVideo, grabarAudio, cargado } = useEvidencia();
+export function useAlertRecording(alertId: number | null) {
+  const { recordVideo, recordAudio, loaded } = useEvidence();
   // null = la usuaria no tocó el botón: se sigue lo elegido en Ajustes
-  const [elegida, setElegida] = useState<boolean | null>(null);
-  const [permisos, setPermisos] = useState<Permisos | null>(null);
-  const [enPantalla, setEnPantalla] = useState(AppState.currentState === "active");
-  const [servicioListo, setServicioListo] = useState(false);
-  const [camaraLista, setCamaraLista] = useState(false);
-  const [videoFallo, setVideoFallo] = useState(false);
+  const [chosen, setChosen] = useState<boolean | null>(null);
+  const [permissions, setPermissions] = useState<Permissions | null>(null);
+  const [onScreen, setOnScreen] = useState(AppState.currentState === "active");
+  const [serviceReady, setServiceReady] = useState(false);
+  const [cameraReady, setCameraReady] = useState(false);
+  const [videoFailed, setVideoFailed] = useState(false);
   const [frontal, setFrontal] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [subidas, setSubidas] = useState<EstadoSubidas>({ subidos: 0, pendientes: 0, subiendo: false });
-  const camaraRef = useRef<CameraView>(null);
+  const [uploads, setUploads] = useState<UploadStatus>({ uploaded: 0, pendingItems: 0, uploading: false });
+  const cameraRef = useRef<CameraView>(null);
 
   // Si apagó las dos en Ajustes pero toca "Grabar", se graba video con sonido
-  const conVideo = grabarVideo || !grabarAudio;
-  const conAudio = grabarAudio || !grabarVideo;
-  const encendida = elegida ?? (grabarVideo || grabarAudio);
-  const activa = !!alertaId && cargado && encendida;
-  const puedeVideo = conVideo && !!permisos?.camara && !!permisos?.micro && !videoFallo;
-  const grabandoVideo = activa && servicioListo && puedeVideo && enPantalla && camaraLista;
+  const conVideo = recordVideo || !recordAudio;
+  const conAudio = recordAudio || !recordVideo;
+  const turnedOn = chosen ?? (recordVideo || recordAudio);
+  const active = !!alertId && loaded && turnedOn;
+  const canVideo = conVideo && !!permissions?.camera && !!permissions?.microphone && !videoFailed;
+  const recordingVideo = active && serviceReady && canVideo && onScreen && cameraReady;
 
-  useEffect(() => escucharSubidas(setSubidas), []);
+  useEffect(() => listenUploads(setUploads), []);
   useEffect(() => {
-    void procesarCola();
+    void processQueue();
   }, []);
 
   useEffect(() => {
-    const sub = AppState.addEventListener("change", (estado) => setEnPantalla(estado === "active"));
+    const sub = AppState.addEventListener("change", (status) => setOnScreen(status === "active"));
     return () => sub.remove();
   }, []);
 
   useEffect(() => {
-    const sub = SensorSacudidas.addListener("onErrorGrabacion", ({ mensaje }) => setError(mensaje));
+    const sub = SensorSacudidas.addListener("onErrorGrabacion", ({ mensaje: message }) => setError(message));
     return () => sub.remove();
   }, []);
 
   // Permisos: se piden al empezar a grabar (de uno en uno, ver permisosSeguros)
-  const pedirPermisos = useCallback(async () => {
-    let micro = await Camera.getMicrophonePermissionsAsync();
-    if (!micro.granted && micro.canAskAgain) {
-      micro = await enColaDePermisos(() => Camera.requestMicrophonePermissionsAsync());
+  const requestPermissions = useCallback(async () => {
+    let microphone = await Camera.getMicrophonePermissionsAsync();
+    if (!microphone.granted && microphone.canAskAgain) {
+      microphone = await inPermissionQueue(() => Camera.requestMicrophonePermissionsAsync());
     }
-    let camara = await Camera.getCameraPermissionsAsync();
-    if (conVideo && !camara.granted && camara.canAskAgain) {
-      camara = await enColaDePermisos(() => Camera.requestCameraPermissionsAsync());
+    let camera = await Camera.getCameraPermissionsAsync();
+    if (conVideo && !camera.granted && camera.canAskAgain) {
+      camera = await inPermissionQueue(() => Camera.requestCameraPermissionsAsync());
     }
-    setPermisos({
-      camara: camara.granted,
-      micro: micro.granted,
-      puedePreguntar: micro.canAskAgain && (camara.canAskAgain || !conVideo),
+    setPermissions({
+      camera: camera.granted,
+      microphone: microphone.granted,
+      canAsk: microphone.canAskAgain && (camera.canAskAgain || !conVideo),
     });
   }, [conVideo]);
 
   useEffect(() => {
-    if (activa && permisos === null) {
-      pedirPermisos().catch((e) => {
+    if (active && permissions === null) {
+      requestPermissions().catch((e) => {
         console.warn("No se pudieron pedir los permisos de grabación:", e);
-        setPermisos({ camara: false, micro: false, puedePreguntar: false });
+        setPermissions({ camera: false, microphone: false, canAsk: false });
       });
     }
-  }, [activa, permisos, pedirPermisos]);
+  }, [active, permissions, requestPermissions]);
 
   // Servicio de micrófono: se enciende con la app abierta y queda encendido toda la alerta, para
   // poder seguir grabando audio cuando se minimiza o se apaga la pantalla
   useEffect(() => {
-    if (!activa || !permisos?.micro || !alertaId) return;
-    asignarAlertaDelAudio(alertaId);
-    const grabarYa = conAudio && !(puedeVideo && AppState.currentState === "active");
-    if (!SensorSacudidas.iniciarGrabacionAudio(SEGUNDOS_POR_TROZO, grabarYa)) {
+    if (!active || !permissions?.microphone || !alertId) return;
+    setAudioAlert(alertId);
+    const recordNow = conAudio && !(canVideo && AppState.currentState === "active");
+    if (!SensorSacudidas.iniciarGrabacionAudio(SECONDS_PER_CHUNK, recordNow)) {
       setError("No se pudo encender el micrófono");
       return;
     }
     setError(null);
-    setServicioListo(true);
+    setServiceReady(true);
     return () => {
-      setServicioListo(false);
+      setServiceReady(false);
       SensorSacudidas.detenerGrabacionAudio();
     };
     // puedeVideo solo decide cómo arranca; los cambios después los maneja el efecto del video
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activa, permisos?.micro, alertaId, conAudio]);
+  }, [active, permissions?.microphone, alertId, conAudio]);
 
   // Video en trozos mientras la app está en pantalla; el micrófono del servicio queda en pausa
   useEffect(() => {
-    if (!grabandoVideo || !alertaId) return;
-    let vivo = true;
+    if (!recordingVideo || !alertId) return;
+    let alive = true;
     (async () => {
       SensorSacudidas.pausarGrabacionAudio();
       await SensorSacudidas.esperar(400); // que el servicio suelte el micrófono antes de la cámara
-      while (vivo) {
+      while (alive) {
         try {
-          const inicio = Date.now();
-          const video = await camaraRef.current?.recordAsync({ maxDuration: SEGUNDOS_POR_TROZO });
+          const startTime = Date.now();
+          const video = await cameraRef.current?.recordAsync({ maxDuration: SECONDS_PER_CHUNK });
           if (!video) break;
-          if (video.uri && Date.now() - inicio >= MINIMO_TROZO_MS) {
-            void encolarTrozo({ uri: video.uri, alertaId, tipo: "video" });
+          if (video.uri && Date.now() - startTime >= MIN_CHUNK_MS) {
+            void enqueueChunk({ uri: video.uri, alertaId: alertId, tipo: "video" });
           } else if (video.uri) {
             SensorSacudidas.borrarArchivo(video.uri);
           }
         } catch (e) {
-          if (vivo) {
+          if (alive) {
             console.warn("No se pudo grabar video, se sigue con audio:", e);
-            setVideoFallo(true);
+            setVideoFailed(true);
           }
           break;
         }
       }
     })();
     return () => {
-      vivo = false;
-      camaraRef.current?.stopRecording();
+      alive = false;
+      cameraRef.current?.stopRecording();
       // El audio lo retoma el efecto de abajo solo si ya no se va a grabar video
     };
-  }, [grabandoVideo, alertaId, frontal]);
+  }, [recordingVideo, alertId, frontal]);
 
-  const mostrarCamara = activa && servicioListo && puedeVideo && enPantalla;
+  const showCamera = active && serviceReady && canVideo && onScreen;
 
   // La cámara frontal casi no tiene luz y el video salía muy oscuro: mientras graba con ella, la
   // pantalla se pone al máximo para iluminar la cara. Al cambiar de cámara o terminar, se restaura.
   useEffect(() => {
-    if (!grabandoVideo || !frontal) return;
+    if (!recordingVideo || !frontal) return;
     Brightness.setBrightnessAsync(1).catch(() => {});
     return () => {
       Brightness.restoreSystemBrightnessAsync().catch(() => {});
     };
-  }, [grabandoVideo, frontal]);
+  }, [recordingVideo, frontal]);
 
   // La vista de la cámara se desmonta al minimizar: al volver hay que esperar que esté lista otra vez
   useEffect(() => {
-    if (!mostrarCamara) setCamaraLista(false);
-  }, [mostrarCamara]);
+    if (!showCamera) setCameraReady(false);
+  }, [showCamera]);
 
   // Sin video (minimizada, sin permiso o la cámara falló) sigue el audio. Mientras la cámara se
   // prepara o cambia de lado no: dejaría trocitos de audio de 1–2 segundos.
   useEffect(() => {
-    if (activa && servicioListo && conAudio && !mostrarCamara) SensorSacudidas.reanudarGrabacionAudio();
-  }, [activa, servicioListo, conAudio, mostrarCamara]);
+    if (active && serviceReady && conAudio && !showCamera) SensorSacudidas.reanudarGrabacionAudio();
+  }, [active, serviceReady, conAudio, showCamera]);
 
   // Si la cámara nunca avisa que está lista, se sigue solo con audio en vez de quedarse sin grabar
   useEffect(() => {
-    if (!mostrarCamara || camaraLista) return;
-    const t = setTimeout(() => setVideoFallo(true), ESPERA_CAMARA_MS);
+    if (!showCamera || cameraReady) return;
+    const t = setTimeout(() => setVideoFailed(true), CAMERA_WAIT_MS);
     return () => clearTimeout(t);
-  }, [mostrarCamara, camaraLista]);
+  }, [showCamera, cameraReady]);
 
   // Al cambiar de cámara, la nueva avisa cuando está lista
-  const cambiarCamara = useCallback(() => {
-    setCamaraLista(false);
+  const switchCamera = useCallback(() => {
+    setCameraReady(false);
     setFrontal((f) => !f);
   }, []);
 
-  const alternar = useCallback(() => {
-    setVideoFallo(false);
-    setElegida(!encendida);
-  }, [encendida]);
+  const toggle = useCallback(() => {
+    setVideoFailed(false);
+    setChosen(!turnedOn);
+  }, [turnedOn]);
 
-  const darPermiso = useCallback(async () => {
-    if (permisos && !permisos.puedePreguntar) {
+  const givePermission = useCallback(async () => {
+    if (permissions && !permissions.canAsk) {
       await Linking.openSettings();
       return;
     }
-    await pedirPermisos();
-  }, [permisos, pedirPermisos]);
+    await requestPermissions();
+  }, [permissions, requestPermissions]);
 
-  const sinPermiso = activa && permisos !== null && !permisos.micro;
-  const modo: "video" | "audio" | "pausada" | "sin_permiso" = !activa
+  const noPermission = active && permissions !== null && !permissions.microphone;
+  const mode: "video" | "audio" | "pausada" | "sin_permiso" = !active
     ? "pausada"
-    : sinPermiso
+    : noPermission
       ? "sin_permiso"
-      : grabandoVideo
+      : recordingVideo
         ? "video"
-        : servicioListo && conAudio
+        : serviceReady && conAudio
           ? "audio"
           : "pausada";
 
   return {
-    modo,
-    encendida,
+    mode: mode,
+    turnedOn: turnedOn,
     // La vista de la cámara se monta cuando corresponde grabar video (aunque aún no esté lista)
-    mostrarCamara,
-    camaraRef,
+    showCamera: showCamera,
+    cameraRef: cameraRef,
     frontal,
-    sinSonido: !conAudio,
-    alListaCamara: () => setCamaraLista(true),
-    alFallarCamara: () => setVideoFallo(true),
-    cambiarCamara,
-    alternar,
-    darPermiso,
-    subidas,
+    muted: !conAudio,
+    onCameraReady: () => setCameraReady(true),
+    onCameraError: () => setVideoFailed(true),
+    switchCamera: switchCamera,
+    toggle: toggle,
+    givePermission: givePermission,
+    uploads: uploads,
     error,
   };
 }

@@ -2,109 +2,109 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { AuthStackParamList } from "../../../navigation/types";
-import type { AlertaTipo } from "../../../components/ui/modalAlerta/modalAlerta";
+import type { AlertType } from "../../../components/ui/modalAlerta/modalAlerta";
 import { authService } from "../../../services/auth.service";
 
 type Nav = NativeStackNavigationProp<AuthStackParamList, "RecuperarContrasena">;
 
 // El código que envía el backend tiene 6 dígitos y vence a los 15 minutos;
 // se puede pedir otro pasado 1 minuto (el backend no acepta más seguido).
-export const DIGITOS_CODIGO = 6;
-const TIEMPO_CODIGO = 15 * 60;
-const ESPERA_REENVIO = 60;
-const codigoVacio = () => Array<string>(DIGITOS_CODIGO).fill('');
+export const CODE_DIGITS = 6;
+const CODE_TIME = 15 * 60;
+const RESEND_WAIT = 60;
+const emptyCode = () => Array<string>(CODE_DIGITS).fill('');
 
 /** Mensaje entendible a partir del error de la API. */
-function mensajeDeError(e: any, porDefecto: string): string {
+function errorMessage(e: any, byDefault: string): string {
   if (e?.response?.status === 429) return 'Hiciste muchos intentos. Espera un minuto e inténtalo de nuevo.';
   if (!e?.response) return 'No hay conexión con el servidor. Revisa tu internet e inténtalo de nuevo.';
-  return e.response.data?.message ?? porDefecto;
+  return e.response.data?.message ?? byDefault;
 }
 
 // Estado del mensaje (modal) que se muestra en pantalla
-type AlertaState = {
+type AlertState = {
   visible: boolean;
-  tipo: AlertaTipo;
-  titulo: string;
-  mensaje: string;
-  textoBoton: string;
-  onCerrar?: () => void;
+  type: AlertType;
+  title: string;
+  message: string;
+  buttonTextValue: string;
+  onClose?: () => void;
 };
 
-export function useRecuperarContrasenaViewModel() {
+export function useRecoverPasswordViewModel() {
   const navigation = useNavigation<Nav>();
 
   // Estados para el paso 1 (Email)
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [paso, setPaso] = useState(1); // 1: Email, 2: Código, 3: Nueva contraseña
+  const [step, setStep] = useState(1); // 1: Email, 2: Código, 3: Nueva contraseña
 
   // Estados para el paso 2 (Código)
-  const [codigo, setCodigo] = useState<string[]>(codigoVacio());
-  const [segundos, setSegundos] = useState(TIEMPO_CODIGO);
-  const [esperaReenvio, setEsperaReenvio] = useState(ESPERA_REENVIO);
-  const finCodigo = useRef(0); // momento exacto en que vence el código
-  const inicioCodigo = useRef(0);
-  const verificando = useRef(false);
+  const [code, setCode] = useState<string[]>(emptyCode());
+  const [seconds, setSeconds] = useState(CODE_TIME);
+  const [resendWait, setResendWait] = useState(RESEND_WAIT);
+  const codeEnd = useRef(0); // momento exacto en que vence el código
+  const codeStart = useRef(0);
+  const verifying = useRef(false);
 
   // Estados para el paso 3 (Nueva contraseña)
-  const [nuevaPassword, setNuevaPassword] = useState('');
-  const [confirmarPassword, setConfirmarPassword] = useState('');
-  const [mostrarNueva, setMostrarNueva] = useState(false);
-  const [mostrarConfirmar, setMostrarConfirmar] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   // Mensaje bonito (modal) en vez del Alert genérico
-  const [alerta, setAlerta] = useState<AlertaState>({
+  const [alert, setAlert] = useState<AlertState>({
     visible: false,
-    tipo: 'error',
-    titulo: '',
-    mensaje: '',
-    textoBoton: 'Entendido',
+    type: 'error',
+    title: '',
+    message: '',
+    buttonTextValue: 'Entendido',
   });
 
-  const mostrarAlerta = (
-    tipo: AlertaTipo,
-    titulo: string,
-    mensaje: string,
-    textoBoton: string = 'Entendido',
-    onCerrar?: () => void
+  const showAlert = (
+    type: AlertType,
+    title: string,
+    message: string,
+    buttonTextValue: string = 'Entendido',
+    onClose?: () => void
   ) => {
-    setAlerta({ visible: true, tipo, titulo, mensaje, textoBoton, onCerrar });
+    setAlert({ visible: true, type, title, message, buttonTextValue, onClose });
   };
 
-  const cerrarAlerta = () => {
-    const accion = alerta.onCerrar;
-    setAlerta((a) => ({ ...a, visible: false, onCerrar: undefined }));
-    accion?.();
+  const closeAlert = () => {
+    const action = alert.onClose;
+    setAlert((a) => ({ ...a, visible: false, onClose: undefined }));
+    action?.();
   };
 
   // Arranca (o reinicia) el contador de vencimiento y la espera para reenviar
-  const iniciarTemporizador = () => {
-    inicioCodigo.current = Date.now();
-    finCodigo.current = Date.now() + TIEMPO_CODIGO * 1000;
-    setSegundos(TIEMPO_CODIGO);
-    setEsperaReenvio(ESPERA_REENVIO);
+  const startTimer = () => {
+    codeStart.current = Date.now();
+    codeEnd.current = Date.now() + CODE_TIME * 1000;
+    setSeconds(CODE_TIME);
+    setResendWait(RESEND_WAIT);
   };
 
   // Cuenta regresiva: solo corre mientras estamos en el paso 2
   useEffect(() => {
-    if (paso !== 2) return;
+    if (step !== 2) return;
     const id = setInterval(() => {
-      const restante = Math.max(0, Math.ceil((finCodigo.current - Date.now()) / 1000));
-      setSegundos(restante);
-      setEsperaReenvio(Math.max(0, ESPERA_REENVIO - Math.floor((Date.now() - inicioCodigo.current) / 1000)));
+      const remaining = Math.max(0, Math.ceil((codeEnd.current - Date.now()) / 1000));
+      setSeconds(remaining);
+      setResendWait(Math.max(0, RESEND_WAIT - Math.floor((Date.now() - codeStart.current) / 1000)));
     }, 500);
     return () => clearInterval(id);
-  }, [paso]);
+  }, [step]);
 
-  const expirado = paso === 2 && segundos === 0;
-  const tiempoFormateado = `${Math.floor(segundos / 60)}:${String(segundos % 60).padStart(2, '0')}`;
-  const puedeReenviar = esperaReenvio === 0;
+  const expiredItem = step === 2 && seconds === 0;
+  const formattedDuration = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+  const canResend = resendWait === 0;
 
-  const enviarEnlace = async () => {
-    const correo = email.trim();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
-      mostrarAlerta(
+  const sendLink = async () => {
+    const cleanEmail = email.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      showAlert(
         'error',
         'Correo no válido',
         'Revisa que tu correo esté bien escrito, por ejemplo: nombre@correo.com'
@@ -113,101 +113,101 @@ export function useRecuperarContrasenaViewModel() {
     }
     setIsLoading(true);
     try {
-      await authService.pedirCodigoRecuperacion(correo);
-      setCodigo(codigoVacio());
-      iniciarTemporizador();
-      setPaso(2);
+      await authService.requestRecoveryCode(cleanEmail);
+      setCode(emptyCode());
+      startTimer();
+      setStep(2);
     } catch (e) {
-      mostrarAlerta('error', 'No se pudo enviar el código', mensajeDeError(e, 'Inténtalo de nuevo en un momento.'));
+      showAlert('error', 'No se pudo enviar el código', errorMessage(e, 'Inténtalo de nuevo en un momento.'));
     } finally {
       setIsLoading(false);
     }
   };
 
-  const comprobarCodigo = async (digitos: string) => {
-    if (verificando.current) return;
-    verificando.current = true;
+  const checkCode = async (digits: string) => {
+    if (verifying.current) return;
+    verifying.current = true;
     setIsLoading(true);
     try {
-      await authService.verificarCodigoRecuperacion(email.trim(), digitos);
-      setPaso(3);
+      await authService.verifyRecoveryCode(email.trim(), digits);
+      setStep(3);
     } catch (e) {
-      setCodigo(codigoVacio());
-      mostrarAlerta('error', 'Código no válido', mensajeDeError(e, 'El código no es válido o ya venció. Pide uno nuevo.'));
+      setCode(emptyCode());
+      showAlert('error', 'Código no válido', errorMessage(e, 'El código no es válido o ya venció. Pide uno nuevo.'));
     } finally {
-      verificando.current = false;
+      verifying.current = false;
       setIsLoading(false);
     }
   };
 
   /** Escribe en una casilla; si llegan varios dígitos (pegar o autocompletar) se reparten. */
-  const handleCodigoChange = (text: string, index: number): number => {
-    if (expirado) return index;
-    const digitos = text.replace(/\D/g, '');
-    const nuevoCodigo = [...codigo];
-    let ultimo = index;
-    if (digitos.length <= 1) {
-      nuevoCodigo[index] = digitos;
+  const handleCodeChange = (text: string, index: number): number => {
+    if (expiredItem) return index;
+    const digits = text.replace(/\D/g, '');
+    const newCode = [...code];
+    let lastItem = index;
+    if (digits.length <= 1) {
+      newCode[index] = digits;
     } else {
-      digitos.slice(0, DIGITOS_CODIGO - index).split('').forEach((d, i) => {
-        nuevoCodigo[index + i] = d;
-        ultimo = index + i;
+      digits.slice(0, CODE_DIGITS - index).split('').forEach((d, i) => {
+        newCode[index + i] = d;
+        lastItem = index + i;
       });
     }
-    setCodigo(nuevoCodigo);
+    setCode(newCode);
     // Al completar los 6 dígitos se comprueba solo
-    if (nuevoCodigo.every((d) => d !== '')) comprobarCodigo(nuevoCodigo.join(''));
-    return ultimo;
+    if (newCode.every((d) => d !== '')) checkCode(newCode.join(''));
+    return lastItem;
   };
 
   // Botón "Confirmar Código" (por si el avance automático no se disparó)
-  const verificarCodigo = () => {
-    if (expirado) {
-      mostrarAlerta(
+  const verifyCode = () => {
+    if (expiredItem) {
+      showAlert(
         'aviso',
         'Código vencido',
         'Se acabó el tiempo. Solicita un nuevo código para continuar.'
       );
       return;
     }
-    if (codigo.join('').length < DIGITOS_CODIGO) {
-      mostrarAlerta(
+    if (code.join('').length < CODE_DIGITS) {
+      showAlert(
         'aviso',
         'Código incompleto',
         'Escribe los 6 dígitos del código que te enviamos.'
       );
       return;
     }
-    comprobarCodigo(codigo.join(''));
+    checkCode(code.join(''));
   };
 
   // "Solicitar un nuevo código": pide otro al backend (el anterior deja de servir)
-  const reenviarCodigo = async () => {
-    if (!puedeReenviar) return;
+  const resendCode = async () => {
+    if (!canResend) return;
     setIsLoading(true);
     try {
-      await authService.pedirCodigoRecuperacion(email.trim());
-      setCodigo(codigoVacio());
-      iniciarTemporizador();
-      mostrarAlerta('exito', 'Código enviado', 'Te enviamos un código nuevo. El anterior ya no sirve.');
+      await authService.requestRecoveryCode(email.trim());
+      setCode(emptyCode());
+      startTimer();
+      showAlert('exito', 'Código enviado', 'Te enviamos un código nuevo. El anterior ya no sirve.');
     } catch (e) {
-      mostrarAlerta('error', 'No se pudo reenviar', mensajeDeError(e, 'Inténtalo de nuevo en un momento.'));
+      showAlert('error', 'No se pudo reenviar', errorMessage(e, 'Inténtalo de nuevo en un momento.'));
     } finally {
       setIsLoading(false);
     }
   };
 
-  const guardarNuevaContrasena = () => {
-    if (nuevaPassword.length < 8) {
-      mostrarAlerta(
+  const saveNewPassword = () => {
+    if (newPassword.length < 8) {
+      showAlert(
         'error',
         'Contraseña muy corta',
         'Usa mínimo 8 caracteres para proteger tu cuenta.'
       );
       return;
     }
-    if (nuevaPassword !== confirmarPassword) {
-      mostrarAlerta(
+    if (newPassword !== confirmPassword) {
+      showAlert(
         'error',
         'Las contraseñas no coinciden',
         'Escribe la misma contraseña en los dos campos.'
@@ -216,9 +216,9 @@ export function useRecuperarContrasenaViewModel() {
     }
     setIsLoading(true);
     authService
-      .restablecerContrasena(email.trim(), codigo.join(''), nuevaPassword)
+      .resetPassword(email.trim(), code.join(''), newPassword)
       .then(() =>
-        mostrarAlerta(
+        showAlert(
           'exito',
           '¡Contraseña actualizada!',
           'Ya puedes iniciar sesión con tu nueva contraseña.',
@@ -227,7 +227,7 @@ export function useRecuperarContrasenaViewModel() {
         )
       )
       .catch((e) =>
-        mostrarAlerta('error', 'No se pudo guardar', mensajeDeError(e, 'El código ya no es válido. Pide uno nuevo.'))
+        showAlert('error', 'No se pudo guardar', errorMessage(e, 'El código ya no es válido. Pide uno nuevo.'))
       )
       .finally(() => setIsLoading(false));
   };
@@ -236,31 +236,31 @@ export function useRecuperarContrasenaViewModel() {
     email,
     setEmail,
     isLoading,
-    paso,
-    setPaso,
-    codigo,
-    enviarEnlace,
-    handleCodigoChange,
-    verificarCodigo,
+    step: step,
+    setStep: setStep,
+    code: code,
+    sendLink: sendLink,
+    handleCodeChange: handleCodeChange,
+    verifyCode: verifyCode,
     // temporizador
-    expirado,
-    tiempoFormateado,
-    reenviarCodigo,
-    puedeReenviar,
-    esperaReenvio,
+    expiredItem: expiredItem,
+    formattedDuration: formattedDuration,
+    resendCode: resendCode,
+    canResend: canResend,
+    resendWait: resendWait,
     // paso 3
-    nuevaPassword,
-    setNuevaPassword,
-    confirmarPassword,
-    setConfirmarPassword,
-    mostrarNueva,
-    toggleMostrarNueva: () => setMostrarNueva((v) => !v),
-    mostrarConfirmar,
-    toggleMostrarConfirmar: () => setMostrarConfirmar((v) => !v),
-    guardarNuevaContrasena,
+    newPassword: newPassword,
+    setNewPassword: setNewPassword,
+    confirmPassword: confirmPassword,
+    setConfirmPassword: setConfirmPassword,
+    showNew: showNew,
+    toggleShowNew: () => setShowNew((v) => !v),
+    showConfirm: showConfirm,
+    toggleShowConfirm: () => setShowConfirm((v) => !v),
+    saveNewPassword: saveNewPassword,
     // mensajes (modal)
-    alerta,
-    cerrarAlerta,
-    cancelar: () => navigation.goBack()
+    alert: alert,
+    closeAlert: closeAlert,
+    cancel: () => navigation.goBack()
   };
 }

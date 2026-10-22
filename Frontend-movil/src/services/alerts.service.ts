@@ -1,8 +1,8 @@
 import api from './api';
-import type { Alerta, EstadoAlerta } from '../features/historial/models/Alerta';
+import type { AlertRecord, AlertStatus } from '../features/historial/models/Alerta';
 
 // Estructura real que devuelve el backend (Alert entity, schema alert.alert)
-export interface AlertaApi {
+export interface AlertApi {
   id: number;
   userProfileId: number;
   deviceId: number;
@@ -18,8 +18,8 @@ export interface AlertaApi {
   createdAt: string;
 }
 
-export const getAlertasByUsuario = async (usuarioId: number): Promise<AlertaApi[]> => {
-  const response = await api.get<AlertaApi[]>(`/api/alerts/user/${usuarioId}`);
+export const getAlertsByUser = async (userId: number): Promise<AlertApi[]> => {
+  const response = await api.get<AlertApi[]>(`/api/alerts/user/${userId}`);
   // Más recientes primero (por fecha de inicio, o por id como respaldo)
   return [...response.data].sort((a, b) => {
     const na = a.startedAt || a.createdAt || '';
@@ -42,17 +42,17 @@ export interface CreateAlertData {
 }
 
 /** Alertas de la usuaria en sesión, de la más reciente a la más antigua. */
-export const getMisAlertas = async (): Promise<AlertaApi[]> => {
-  const response = await api.get<AlertaApi[]>('/api/alerts/me');
+export const getMyAlerts = async (): Promise<AlertApi[]> => {
+  const response = await api.get<AlertApi[]>('/api/alerts/me');
   return response.data;
 };
 
 /** La alerta propia que sigue activa (solo puede haber una), o null. */
-export const alertaActivaPropia = (alertas: AlertaApi[]): AlertaApi | null =>
-  alertas.find((a) => (a.status || '').toLowerCase() === 'active') ?? null;
+export const ownActiveAlert = (alerts: AlertApi[]): AlertApi | null =>
+  alerts.find((a) => (a.status || '').toLowerCase() === 'active') ?? null;
 
-export const createAlert = async (data: CreateAlertData): Promise<AlertaApi> => {
-  const response = await api.post<AlertaApi>('/api/alerts', {
+export const createAlert = async (data: CreateAlertData): Promise<AlertApi> => {
+  const response = await api.post<AlertApi>('/api/alerts', {
     alertType: data.alertType ?? 'main',
     activationMethod: data.activationMethod ?? 'panic_button',
     status: data.status ?? 'active',
@@ -67,75 +67,76 @@ export const createAlert = async (data: CreateAlertData): Promise<AlertaApi> => 
 };
 
 // Esperas antes de cada intento: cubren una red mala o el servidor de Render despertando (~1 min)
-const ESPERAS_REINTENTO_MS = [0, 2000, 5000, 10000, 20000];
+const RETRY_DELAYS_MS = [0, 2000, 5000, 10000, 20000];
 // Una alerta activa más reciente que esto puede ser la de un intento que sí llegó al servidor
-const VENTANA_INTENTO_PREVIO_MS = 3 * 60 * 1000;
+const PREVIOUS_ATTEMPT_WINDOW_MS = 3 * 60 * 1000;
 
-const esReintentable = (e: any) => {
-  const estado = e?.response?.status;
-  return !estado || estado >= 500 || estado === 408 || estado === 429;
+const isRetryable = (e: any) => {
+  const status = e?.response?.status;
+  return !status || status >= 500 || status === 408 || status === 429;
 };
 
 const aMs = (iso?: string) => (iso ? Date.parse(/[zZ]|[+-]\d{2}:?\d{2}$/.test(iso) ? iso : `${iso}Z`) : NaN);
 
-export type IntentoAlerta = { intento: number; total: number };
+export type AlertAttempt = { attempt: number; total: number };
 
 /**
  * Crea la alerta y, si no hay red o el servidor no responde, la reintenta varias veces. Antes de
  * cada reintento revisa si el intento anterior sí alcanzó a crearla (se perdió la respuesta), para
  * no avisar dos veces a los contactos.
  */
-export async function crearAlertaConReintentos(
+export async function createAlertWithRetries(
   data: CreateAlertData,
-  opciones: { alIntentar?: (i: IntentoAlerta) => void; esperar?: (ms: number) => Promise<void> } = {},
-): Promise<AlertaApi> {
-  const esperar = opciones.esperar ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
-  const total = ESPERAS_REINTENTO_MS.length;
-  let ultimoError: unknown;
+  options: { onAttempt?: (i: AlertAttempt) => void; wait?: (ms: number) => Promise<void> } = {},
+): Promise<AlertApi> {
+  const wait = options.wait ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
+  const total = RETRY_DELAYS_MS.length;
+  let lastError: unknown;
   for (let i = 0; i < total; i++) {
-    if (ESPERAS_REINTENTO_MS[i] > 0) await esperar(ESPERAS_REINTENTO_MS[i]);
-    opciones.alIntentar?.({ intento: i + 1, total });
+    if (RETRY_DELAYS_MS[i] > 0) await wait(RETRY_DELAYS_MS[i]);
+    options.onAttempt?.({ attempt: i + 1, total });
     if (i > 0) {
-      const previa = await getMisAlertas().then(alertaActivaPropia).catch(() => null);
-      if (previa && Date.now() - aMs(previa.startedAt || previa.createdAt) < VENTANA_INTENTO_PREVIO_MS) return previa;
+      const previousValue = await getMyAlerts().then(ownActiveAlert).catch(() => null);
+      if (previousValue && Date.now() - aMs(previousValue.startedAt || previousValue.createdAt) < PREVIOUS_ATTEMPT_WINDOW_MS) return previousValue;
     }
     try {
       return await createAlert(data);
     } catch (e) {
-      ultimoError = e;
-      if (!esReintentable(e)) throw e;
+      lastError = e;
+      if (!isRetryable(e)) throw e;
     }
   }
-  throw ultimoError;
+  throw lastError;
 }
 
 /** Una alerta propia (para saber si sigue activa). */
-export const getAlerta = async (alertId: number): Promise<AlertaApi> => {
-  const response = await api.get<AlertaApi>(`/api/alerts/${alertId}`);
+export const getAlert = async (alertId: number): Promise<AlertApi> => {
+  const response = await api.get<AlertApi>(`/api/alerts/${alertId}`);
   return response.data;
 };
 
 /** Cuántas personas abrieron el seguimiento de la alerta y cuántas la están viendo ahora. */
-export const getVistas = async (alertId: number): Promise<{ total: number; viendoAhora: number }> => {
+export const getViews = async (alertId: number): Promise<{ total: number; watchingNow: number }> => {
   const response = await api.get<{ total: number; viendoAhora: number }>(`/api/alerts/${alertId}/views`);
+  // The backend still sends this key in Spanish
+  return { total: response.data.total, watchingNow: response.data.viendoAhora };
+};
+
+export const endAlert = async (alertId: number, status: 'resolved' | 'cancelled'): Promise<AlertApi> => {
+  const response = await api.put<AlertApi>(`/api/alerts/${alertId}`, { status: status });
   return response.data;
 };
 
-export const finalizarAlerta = async (alertId: number, estado: 'resolved' | 'cancelled'): Promise<AlertaApi> => {
-  const response = await api.put<AlertaApi>(`/api/alerts/${alertId}`, { status: estado });
-  return response.data;
-};
-
-const transformarTipo = (apiTipo: string, message?: string): string => {
-  const t = (apiTipo || '').toLowerCase();
+const transformType = (apiType: string, message?: string): string => {
+  const t = (apiType || '').toLowerCase();
   if (t.includes('medical') || t.includes('asistencia') || t.includes('salud')) return 'Asistencia';
   const m = (message || '').toLowerCase();
   if (m.includes('médic') || m.includes('salud')) return 'Asistencia';
   return 'Emergencia';
 };
 
-const transformarEstado = (apiEstado: string): EstadoAlerta => {
-  const e = (apiEstado || '').toLowerCase();
+const transformStatus = (apiStatus: string): AlertStatus => {
+  const e = (apiStatus || '').toLowerCase();
   if (e === 'cancelled' || e === 'cancelada') return 'Cancelada';
   // Expirada = terminó sola por tiempo: no debe seguir apareciendo "En curso"
   if (e === 'resolved' || e === 'expired' || e === 'atendida' || e === 'finalizada') return 'Enviada';
@@ -143,34 +144,34 @@ const transformarEstado = (apiEstado: string): EstadoAlerta => {
 };
 
 // Adapta una alerta real del backend al modelo usado por el historial/inicio
-export const transformarAlerta = (apiAlerta: AlertaApi): Alerta => {
-  const fechaIso = apiAlerta.startedAt || apiAlerta.createdAt;
+export const transformAlert = (apiAlert: AlertApi): AlertRecord => {
+  const isoDate = apiAlert.startedAt || apiAlert.createdAt;
   // El backend devuelve LocalDateTime en UTC sin sufijo 'Z'; si no se marca como UTC, JS lo interpreta
   // como hora local y muestra la fecha/hora corrida.
-  const fechaObj = fechaIso
-    ? new Date(fechaIso + (fechaIso.endsWith('Z') || fechaIso.includes('+') ? '' : 'Z'))
+  const dateObj = isoDate
+    ? new Date(isoDate + (isoDate.endsWith('Z') || isoDate.includes('+') ? '' : 'Z'))
     : null;
-  const opcionesZona: Intl.DateTimeFormatOptions = { timeZone: 'America/Bogota' };
+  const zoneOptions: Intl.DateTimeFormatOptions = { timeZone: 'America/Bogota' };
   return {
-    id: String(apiAlerta.id),
-    tipo: transformarTipo(apiAlerta.alertType, apiAlerta.message),
-    fecha: fechaObj && !isNaN(fechaObj.getTime())
-      ? fechaObj.toLocaleDateString('es-CO', opcionesZona)
+    id: String(apiAlert.id),
+    type: transformType(apiAlert.alertType, apiAlert.message),
+    date: dateObj && !isNaN(dateObj.getTime())
+      ? dateObj.toLocaleDateString('es-CO', zoneOptions)
       : '',
-    hora: fechaObj && !isNaN(fechaObj.getTime())
-      ? fechaObj.toLocaleTimeString('es-CO', { ...opcionesZona, hour: '2-digit', minute: '2-digit' })
+    time: dateObj && !isNaN(dateObj.getTime())
+      ? dateObj.toLocaleTimeString('es-CO', { ...zoneOptions, hour: '2-digit', minute: '2-digit' })
       : '',
-    ubicacion: apiAlerta.message || 'Sin ubicación registrada',
-    estado: transformarEstado(apiAlerta.status),
+    location: apiAlert.message || 'Sin ubicación registrada',
+    status: transformStatus(apiAlert.status),
     coords:
-      apiAlerta.latitude != null && apiAlerta.longitude != null
-        ? { latitude: Number(apiAlerta.latitude), longitude: Number(apiAlerta.longitude) }
+      apiAlert.latitude != null && apiAlert.longitude != null
+        ? { latitude: Number(apiAlert.latitude), longitude: Number(apiAlert.longitude) }
         : undefined,
   };
 };
 
 /** Canal por el que se avisó a un contacto y su estado (GET /api/alerts/{id}/contacts). */
-export interface CanalNotificacion {
+export interface NotificationChannel {
   channel: "email" | "push" | string;
   destination?: string | null;
   status: "pending" | "sent" | "delivered" | "failed" | "expired" | string;
@@ -178,14 +179,14 @@ export interface CanalNotificacion {
   deliveredAt?: string | null;
 }
 
-export interface ContactoNotificado {
+export interface NotifiedContact {
   contactId: number;
   name: string;
   relationship?: string | null;
-  channels: CanalNotificacion[];
+  channels: NotificationChannel[];
 }
 
-export const getContactosNotificados = async (alertaId: number | string): Promise<ContactoNotificado[]> => {
-  const response = await api.get<ContactoNotificado[]>(`/api/alerts/${alertaId}/contacts`);
+export const getNotifiedContacts = async (alertId: number | string): Promise<NotifiedContact[]> => {
+  const response = await api.get<NotifiedContact[]>(`/api/alerts/${alertId}/contacts`);
   return response.data;
 };

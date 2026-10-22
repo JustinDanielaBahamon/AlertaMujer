@@ -15,7 +15,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { getMe } from "../../services/users.service";
 import { useTheme } from "../../contexts/ThemeContext";
 import { useLocale } from "../../contexts/LocaleContext";
-import { obtenerEstilosDrawer } from "../drawer/drawer.style";
+import { getDrawerStyles } from "../drawer/drawer.style";
 import TabNavigator from "../TabNavigator";
 import AjustesSubmenu from "../../features/settings/components/ajustesComponent";
 
@@ -31,46 +31,46 @@ function HeaderWithTabs() {
 }
 
 function CustomDrawerContent(props: DrawerContentComponentProps) {
-  const { signOut, user, actualizarUsuario } = useAuth();
+  const { signOut, user, updateUser } = useAuth();
   const { theme } = useTheme();
 
   // La foto de perfil está en el backend: se trae una vez por sesión si aún no se tiene
   const userId = user?.id;
-  const tieneFoto = !!user?.fotoPerfil;
+  const hasPhoto = !!user?.fotoPerfil;
   useEffect(() => {
-    if (!userId || tieneFoto) return;
+    if (!userId || hasPhoto) return;
     getMe()
       .then((me) => {
-        if (me.profilePhoto) actualizarUsuario({ fotoPerfil: me.profilePhoto });
+        if (me.profilePhoto) updateUser({ fotoPerfil: me.profilePhoto });
       })
       .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
   const { t } = useLocale();
-  const styles = obtenerEstilosDrawer(theme);
+  const styles = getDrawerStyles(theme);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const isDarkMode = theme.mode === "dark";
 
   // Invita a otras personas: el enlace lleva a la web, donde pueden descargar la app
-  const compartirEnlace = () => {
+  const shareLink = () => {
     Share.share({ message: `${t.menu.compartir_mensaje}\n${WEB_URL}` }).catch(() => {});
   };
 
   const whiteIconThemes = ["rosa", "vino", "magenta", "Azul"];
-  const cardIconColor = whiteIconThemes.includes(theme.mode) ? "#ffffff" : theme.icono;
+  const cardIconColor = whiteIconThemes.includes(theme.mode) ? "#ffffff" : theme.icon;
   const cardIconBg    = whiteIconThemes.includes(theme.mode)
-    ? theme.icono + "cc"
-    : theme.icono + "22";
+    ? theme.icon + "cc"
+    : theme.icon + "22";
 
-  const shareButtonBg   = isDarkMode ? theme.icono : "#ffffff";
-  const shareButtonText = isDarkMode ? "#ffffff" : theme.icono;
+  const shareButtonBg   = isDarkMode ? theme.icon : "#ffffff";
+  const shareButtonText = isDarkMode ? "#ffffff" : theme.icon;
 
   const logoutButtonBg   = theme.headercolor2;
   const logoutButtonText = "#ffffff";
 
   const whiteAccentThemes = ["dark", "vino", "Azul", "magenta", "rosa"];
-  const accentLineColor = whiteAccentThemes.includes(theme.mode) ? "#ffffff" : theme.icono;
+  const accentLineColor = whiteAccentThemes.includes(theme.mode) ? "#ffffff" : theme.icon;
 
   const navigateToTab = (tabName: string) => {
     setIsSettingsOpen(false);
@@ -91,7 +91,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
   };
 
   return (
-    <View style={styles.drawerFondo}>
+    <View style={styles.drawerBackground}>
       <SafeAreaView style={{ flex: 1 }}>
         <DrawerContentScrollView
           {...props}
@@ -101,11 +101,11 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
 
           {/* ✅ Perfil tappable con datos dinámicos del usuario */}
           <TouchableOpacity
-            style={styles.headerZona}
+            style={styles.zoneHeader}
             onPress={() => navigateTo("Perfil")}
             activeOpacity={0.75}
           >
-            <View style={styles.avatarFila}>
+            <View style={styles.avatarRow}>
               {/* ✅ Foto dinámica: usa la del usuario o la imagen por defecto */}
               <Image
                 source={
@@ -117,76 +117,76 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
               />
             </View>
             {/* ✅ Nombre dinámico */}
-            <Text style={styles.nombre}>
+            <Text style={styles.name}>
               {user?.nombre || "Isabella Quintero"}
             </Text>
             {/* ✅ Correo dinámico */}
-            <Text style={styles.correo}>
+            <Text style={styles.email}>
               {user?.correo || "isabella@gmail.com"}
             </Text>
-            <View style={[styles.lineaAccento, { backgroundColor: accentLineColor }]} />
+            <View style={[styles.accentLine, { backgroundColor: accentLineColor }]} />
           </TouchableOpacity>
 
           {/* Menú */}
-          <View style={styles.listaMenu}>
+          <View style={styles.menuList}>
 
-            <TouchableOpacity style={styles.tarjetaItem} onPress={() => navigateTo("DrawerHome")} activeOpacity={0.7}>
-              <View style={[styles.iconoCirculo, { backgroundColor: cardIconBg }]}>
+            <TouchableOpacity style={styles.cardItem} onPress={() => navigateTo("DrawerHome")} activeOpacity={0.7}>
+              <View style={[styles.circleIcon, { backgroundColor: cardIconBg }]}>
                 <Ionicons name="home-outline" size={20} color={cardIconColor} />
               </View>
-              <Text style={styles.textoItem}>{t.menu.inicio}</Text>
+              <Text style={styles.itemText}>{t.menu.inicio}</Text>
               <Ionicons name="chevron-forward" size={16} color={cardIconColor} style={styles.chevron} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.tarjetaItem} onPress={() => navigateToTab("Contactos")} activeOpacity={0.7}>
-              <View style={[styles.iconoCirculo, { backgroundColor: cardIconBg }]}>
+            <TouchableOpacity style={styles.cardItem} onPress={() => navigateToTab("Contactos")} activeOpacity={0.7}>
+              <View style={[styles.circleIcon, { backgroundColor: cardIconBg }]}>
                 <Ionicons name="people-outline" size={20} color={cardIconColor} />
               </View>
-              <Text style={styles.textoItem}>{t.menu.contactos}</Text>
+              <Text style={styles.itemText}>{t.menu.contactos}</Text>
               <Ionicons name="chevron-forward" size={16} color={cardIconColor} style={styles.chevron} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.tarjetaItem} onPress={() => navigateToTab("Historial")} activeOpacity={0.7}>
-              <View style={[styles.iconoCirculo, { backgroundColor: cardIconBg }]}>
+            <TouchableOpacity style={styles.cardItem} onPress={() => navigateToTab("Historial")} activeOpacity={0.7}>
+              <View style={[styles.circleIcon, { backgroundColor: cardIconBg }]}>
                 <Ionicons name="time-outline" size={20} color={cardIconColor} />
               </View>
-              <Text style={styles.textoItem}>{t.menu.historial}</Text>
+              <Text style={styles.itemText}>{t.menu.historial}</Text>
               <Ionicons name="chevron-forward" size={16} color={cardIconColor} style={styles.chevron} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.tarjetaItem} onPress={() => navigateTo("Trayecto")} activeOpacity={0.7}>
-              <View style={[styles.iconoCirculo, { backgroundColor: cardIconBg }]}>
+            <TouchableOpacity style={styles.cardItem} onPress={() => navigateTo("Trayecto")} activeOpacity={0.7}>
+              <View style={[styles.circleIcon, { backgroundColor: cardIconBg }]}>
                 <Ionicons name="navigate-circle-outline" size={20} color={cardIconColor} />
               </View>
-              <Text style={styles.textoItem}>{t.menu.trayecto}</Text>
+              <Text style={styles.itemText}>{t.menu.trayecto}</Text>
               <Ionicons name="chevron-forward" size={16} color={cardIconColor} style={styles.chevron} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.tarjetaItem} onPress={() => navigateTo("AlertasRecibidas")} activeOpacity={0.7}>
-              <View style={[styles.iconoCirculo, { backgroundColor: cardIconBg }]}>
+            <TouchableOpacity style={styles.cardItem} onPress={() => navigateTo("AlertasRecibidas")} activeOpacity={0.7}>
+              <View style={[styles.circleIcon, { backgroundColor: cardIconBg }]}>
                 <Ionicons name="notifications-circle-outline" size={20} color={cardIconColor} />
               </View>
-              <Text style={styles.textoItem}>{t.menu.alertas_recibidas}</Text>
+              <Text style={styles.itemText}>{t.menu.alertas_recibidas}</Text>
               <Ionicons name="chevron-forward" size={16} color={cardIconColor} style={styles.chevron} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.tarjetaItem} onPress={() => navigateTo("Permisos")} activeOpacity={0.7}>
-              <View style={[styles.iconoCirculo, { backgroundColor: cardIconBg }]}>
+            <TouchableOpacity style={styles.cardItem} onPress={() => navigateTo("Permisos")} activeOpacity={0.7}>
+              <View style={[styles.circleIcon, { backgroundColor: cardIconBg }]}>
                 <Ionicons name="shield-checkmark-outline" size={20} color={cardIconColor} />
               </View>
-              <Text style={styles.textoItem}>Permisos y protección</Text>
+              <Text style={styles.itemText}>Permisos y protección</Text>
               <Ionicons name="chevron-forward" size={16} color={cardIconColor} style={styles.chevron} />
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.tarjetaItem}
+              style={styles.cardItem}
               onPress={() => setIsSettingsOpen(!isSettingsOpen)}
               activeOpacity={0.7}
             >
-              <View style={[styles.iconoCirculo, { backgroundColor: cardIconBg }]}>
+              <View style={[styles.circleIcon, { backgroundColor: cardIconBg }]}>
                 <Ionicons name="settings-outline" size={20} color={cardIconColor} />
               </View>
-              <Text style={styles.textoItem}>{t.menu.configuracion}</Text>
+              <Text style={styles.itemText}>{t.menu.configuracion}</Text>
               <Ionicons
                 name={isSettingsOpen ? "chevron-down" : "chevron-forward"}
                 size={16}
@@ -196,7 +196,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
             </TouchableOpacity>
 
             {isSettingsOpen && (
-              <View style={styles.submenuContenedor}>
+              <View style={styles.submenuContainer}>
                 <AjustesSubmenu navigation={props.navigation} />
               </View>
             )}
@@ -209,34 +209,34 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
           <View style={styles.footer}>
 
             <TouchableOpacity
-              style={[styles.btnCompartir, { backgroundColor: shareButtonBg }]}
+              style={[styles.shareButton, { backgroundColor: shareButtonBg }]}
               activeOpacity={0.8}
-              onPress={compartirEnlace}
+              onPress={shareLink}
             >
-              <View style={styles.btnInterior}>
-                <View style={[styles.btnIconoFondo, {
-                  backgroundColor: isDarkMode ? "rgba(255,255,255,0.25)" : theme.icono + "22"
+              <View style={styles.btnInner}>
+                <View style={[styles.btnIconBackground, {
+                  backgroundColor: isDarkMode ? "rgba(255,255,255,0.25)" : theme.icon + "22"
                 }]}>
                   <Ionicons name="share-social-outline" size={20} color={shareButtonText} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={[styles.btnTitulo, { color: shareButtonText }]}>{t.menu.compartir_titulo}</Text>
-                  <Text style={[styles.btnSubtitulo, { color: shareButtonText }]}>{t.menu.compartir_desc}</Text>
+                  <Text style={[styles.btnTitle, { color: shareButtonText }]}>{t.menu.compartir_titulo}</Text>
+                  <Text style={[styles.btnSubtitle, { color: shareButtonText }]}>{t.menu.compartir_desc}</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={16} color={shareButtonText} />
               </View>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.btnCerrar, { backgroundColor: logoutButtonBg }]}
+              style={[styles.closeBtn, { backgroundColor: logoutButtonBg }]}
               onPress={signOut}
               activeOpacity={0.8}
             >
-              <View style={styles.btnInterior}>
-                <View style={[styles.btnIconoFondo, { backgroundColor: "rgba(255,255,255,0.25)" }]}>
+              <View style={styles.btnInner}>
+                <View style={[styles.btnIconBackground, { backgroundColor: "rgba(255,255,255,0.25)" }]}>
                   <Ionicons name="log-out-outline" size={20} color={logoutButtonText} />
                 </View>
-                <Text style={[styles.btnTitulo, { flex: 1, color: logoutButtonText }]}>{t.menu.cerrar_sesion}</Text>
+                <Text style={[styles.btnTitle, { flex: 1, color: logoutButtonText }]}>{t.menu.cerrar_sesion}</Text>
                 <Ionicons name="chevron-forward" size={16} color={logoutButtonText} />
               </View>
             </TouchableOpacity>
@@ -244,7 +244,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
             <View style={styles.branding}>
               <Ionicons name="shield-checkmark-outline" size={20} color={theme.headerText} />
               <View style={{ marginLeft: 8 }}>
-                <Text style={[styles.brandingNombre, { color: theme.headerText }]}>Alerta Mujer</Text>
+                <Text style={[styles.brandingName, { color: theme.headerText }]}>Alerta Mujer</Text>
                 <Text style={[styles.brandingSlogan, { color: theme.headerText }]}>{t.menu.slogan}</Text>
               </View>
               <Ionicons name="heart" size={14} color={theme.headerText} style={{ marginLeft: 8 }} />

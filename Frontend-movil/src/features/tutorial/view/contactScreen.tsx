@@ -108,7 +108,7 @@ interface Props {
    externalVm?: ReturnType<typeof useContactTutorialViewModel>;
 }
 
-export default function ContactosScreen({  externalVm }: Props) {
+export default function ContactsScreen({  externalVm }: Props) {
   const { t } = useLocale();
   const internalVm = useContactTutorialViewModel();
   const vm =  externalVm ?? internalVm;
@@ -205,12 +205,12 @@ export default function ContactosScreen({  externalVm }: Props) {
                 <View style={contactStyle.sectionLine} />
               </View>
 
-              <View style={contactStyle.permisosCard}>
-                <View style={contactStyle.permisosRow}>
-                  <Text style={contactStyle.permisosEmoji}>👥</Text>
+              <View style={contactStyle.permissionsCard}>
+                <View style={contactStyle.permissionsRow}>
+                  <Text style={contactStyle.permissionsEmoji}>👥</Text>
                   <View style={{ flex: 1 }}>
-                    <Text style={contactStyle.permisosTitle}>{t.tutorial.contacto_permisos_acceso_titulo}</Text>
-                    <Text style={contactStyle.permisosDesc}>
+                    <Text style={contactStyle.permissionsTitle}>{t.tutorial.contacto_permisos_acceso_titulo}</Text>
+                    <Text style={contactStyle.permissionsDesc}>
                       {t.tutorial.contacto_permisos_acceso_desc}
                     </Text>
                   </View>
@@ -248,9 +248,9 @@ export default function ContactosScreen({  externalVm }: Props) {
 
       <PermissionsModal
         visible={vm.modalVisible}
-        tipo="contacto"
-        onConfirmar={vm.confirmModal}
-        onCancelar={vm.cancelModal}
+        type="contacto"
+        onConfirm={vm.confirmModal}
+        onCancel={vm.cancelModal}
       />
       </LinearGradient>
     </View>

@@ -9,62 +9,62 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WEB_URL } from "../../../constants/enlaces";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { useTheme } from "../../../contexts/ThemeContext";
-import { createAjustesPantallaStyles } from "../styles/ajustesPantalla.styles";
+import { createSettingsScreenStyles } from "../styles/ajustesPantalla.styles";
 
-type IconoIon = React.ComponentProps<typeof Ionicons>["name"];
+type IonIcon = React.ComponentProps<typeof Ionicons>["name"];
 
 /** Acerca de: qué es la app, cómo cuida tu información y sus documentos legales. */
-export default function AcercaDeScreen() {
+export default function AboutScreen() {
   const navigation = useNavigation<any>();
   const { theme } = useTheme();
   const { t } = useLocale();
   const a = t.acercaDe;
-  const styles = useMemo(() => createAjustesPantallaStyles(theme), [theme]);
+  const styles = useMemo(() => createSettingsScreenStyles(theme), [theme]);
   const insets = useSafeAreaInsets();
-  const accent = theme.icono;
+  const accent = theme.icon;
 
   // Se lee de "version" en app.json
   const version = Constants.expoConfig?.version ?? "-";
 
-  const filaEnlace = (icono: IconoIon, titulo: string, desc: string | null, onPress: () => void, externo = false) => (
-    <TouchableOpacity style={local.fila} activeOpacity={0.7} onPress={onPress} accessibilityRole="button">
-      <View style={[local.iconoFila, { backgroundColor: accent + "25" }]}>
-        <Ionicons name={icono} size={18} color={accent} />
+  const linkRow = (icon: IonIcon, title: string, desc: string | null, onPress: () => void, external = false) => (
+    <TouchableOpacity style={local.row} activeOpacity={0.7} onPress={onPress} accessibilityRole="button">
+      <View style={[local.rowIcon, { backgroundColor: accent + "25" }]}>
+        <Ionicons name={icon} size={18} color={accent} />
       </View>
       <View style={{ flex: 1 }}>
-        <Text style={[local.tituloFila, { color: theme.text }]}>{titulo}</Text>
-        {desc && <Text style={[local.descFila, { color: theme.text }]}>{desc}</Text>}
+        <Text style={[local.rowTitle, { color: theme.text }]}>{title}</Text>
+        {desc && <Text style={[local.descRow, { color: theme.text }]}>{desc}</Text>}
       </View>
-      <Ionicons name={externo ? "open-outline" : "chevron-forward"} size={16} color={accent} />
+      <Ionicons name={external ? "open-outline" : "chevron-forward"} size={16} color={accent} />
     </TouchableOpacity>
   );
 
-  const puntosPrivacidad: { icono: IconoIon; texto: string }[] = [
-    { icono: "hand-left-outline", texto: a.privacidad_punto_venta },
-    { icono: "videocam-outline", texto: a.privacidad_punto_grabacion },
-    { icono: "time-outline", texto: a.privacidad_punto_borrado },
+  const privacyPoints: { icon: IonIcon; text: string }[] = [
+    { icon: "hand-left-outline", text: a.privacidad_punto_venta },
+    { icon: "videocam-outline", text: a.privacidad_punto_grabacion },
+    { icon: "time-outline", text: a.privacidad_punto_borrado },
   ];
 
   return (
-    <View style={[styles.contenedor, { paddingTop: insets.top }]}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <StatusBar style="light" backgroundColor={theme.headercolor1} />
 
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.btnVolver}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.returnBtn}>
           <Ionicons name="arrow-back" size={22} color={theme.headerText} />
         </TouchableOpacity>
-        <Text style={styles.tituloHeader}>{a.titulo_header}</Text>
+        <Text style={styles.headerTitleText}>{a.titulo_header}</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Presentación de la app */}
-        <View style={[styles.tarjeta, { padding: 0, overflow: "hidden" }]}>
+        <View style={[styles.card, { padding: 0, overflow: "hidden" }]}>
           <LinearGradient colors={[accent + "30", accent + "08"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={local.hero}>
             <Image source={require("../../../../assets/images/icon.png")} style={local.logo} />
-            <Text style={[local.nombre, { color: theme.text }]}>AlertaMujer</Text>
-            <Text style={[local.lema, { color: theme.text }]}>{a.descripcion}</Text>
+            <Text style={[local.name, { color: theme.text }]}>AlertaMujer</Text>
+            <Text style={[local.motto, { color: theme.text }]}>{a.descripcion}</Text>
             <View style={[local.chipVersion, { backgroundColor: accent }]}>
-              <Text style={local.chipVersionTexto}>
+              <Text style={local.versionChipText}>
                 {a.version} {version}
               </Text>
             </View>
@@ -72,29 +72,29 @@ export default function AcercaDeScreen() {
         </View>
 
         {/* Privacidad */}
-        <Text style={[local.seccion, { color: theme.headerText }]}>{a.seccion_privacidad}</Text>
-        <View style={styles.tarjeta}>
-          {puntosPrivacidad.map((p) => (
-            <View key={p.icono} style={local.punto}>
-              <Ionicons name={p.icono} size={18} color={accent} />
-              <Text style={[local.textoPunto, { color: theme.text }]}>{p.texto}</Text>
+        <Text style={[local.section, { color: theme.headerText }]}>{a.seccion_privacidad}</Text>
+        <View style={styles.card}>
+          {privacyPoints.map((p) => (
+            <View key={p.icon} style={local.point}>
+              <Ionicons name={p.icon} size={18} color={accent} />
+              <Text style={[local.pointText, { color: theme.text }]}>{p.text}</Text>
             </View>
           ))}
           <View style={styles.divisor} />
-          {filaEnlace("server-outline", a.retencion_titulo, a.retencion_desc, () => navigation.navigate("RetencionDatos"))}
+          {linkRow("server-outline", a.retencion_titulo, a.retencion_desc, () => navigation.navigate("RetencionDatos"))}
           <View style={styles.divisor} />
-          {filaEnlace("shield-checkmark-outline", a.politica_privacidad, null, () => navigation.navigate("PoliticaPrivacidad"))}
+          {linkRow("shield-checkmark-outline", a.politica_privacidad, null, () => navigation.navigate("PoliticaPrivacidad"))}
           <View style={styles.divisor} />
-          {filaEnlace("document-text-outline", a.terminos, null, () => navigation.navigate("PoliticaTerminos"))}
+          {linkRow("document-text-outline", a.terminos, null, () => navigation.navigate("PoliticaTerminos"))}
         </View>
 
         {/* La app en la web */}
-        <Text style={[local.seccion, { color: theme.headerText }]}>{a.seccion_app}</Text>
-        <View style={styles.tarjeta}>
-          {filaEnlace("globe-outline", a.web, a.web_desc, () => Linking.openURL(WEB_URL), true)}
+        <Text style={[local.section, { color: theme.headerText }]}>{a.seccion_app}</Text>
+        <View style={styles.card}>
+          {linkRow("globe-outline", a.web, a.web_desc, () => Linking.openURL(WEB_URL), true)}
         </View>
 
-        <Text style={[local.creditos, { color: theme.headerText }]}>{a.proyecto}</Text>
+        <Text style={[local.credits, { color: theme.headerText }]}>{a.proyecto}</Text>
       </ScrollView>
     </View>
   );
@@ -103,16 +103,16 @@ export default function AcercaDeScreen() {
 const local = StyleSheet.create({
   hero: { alignItems: "center", paddingVertical: 24, paddingHorizontal: 20 },
   logo: { width: 76, height: 76, borderRadius: 20 },
-  nombre: { fontSize: 22, fontWeight: "800", marginTop: 12 },
-  lema: { fontSize: 13, lineHeight: 19, opacity: 0.8, textAlign: "center", marginTop: 6 },
+  name: { fontSize: 22, fontWeight: "800", marginTop: 12 },
+  motto: { fontSize: 13, lineHeight: 19, opacity: 0.8, textAlign: "center", marginTop: 6 },
   chipVersion: { marginTop: 14, paddingHorizontal: 14, paddingVertical: 5, borderRadius: 14 },
-  chipVersionTexto: { color: "#fff", fontSize: 12, fontWeight: "700" },
-  seccion: { fontSize: 11, fontWeight: "800", letterSpacing: 1.3, opacity: 0.9, marginTop: 6 },
-  punto: { flexDirection: "row", gap: 10, alignItems: "flex-start", marginBottom: 10 },
-  textoPunto: { flex: 1, fontSize: 13, lineHeight: 19 },
-  fila: { flexDirection: "row", alignItems: "center", gap: 12 },
-  iconoFila: { width: 34, height: 34, borderRadius: 11, alignItems: "center", justifyContent: "center" },
-  tituloFila: { fontSize: 14, fontWeight: "700" },
-  descFila: { fontSize: 12, opacity: 0.7, marginTop: 2 },
-  creditos: { fontSize: 12, textAlign: "center", opacity: 0.75, marginTop: 8 },
+  versionChipText: { color: "#fff", fontSize: 12, fontWeight: "700" },
+  section: { fontSize: 11, fontWeight: "800", letterSpacing: 1.3, opacity: 0.9, marginTop: 6 },
+  point: { flexDirection: "row", gap: 10, alignItems: "flex-start", marginBottom: 10 },
+  pointText: { flex: 1, fontSize: 13, lineHeight: 19 },
+  row: { flexDirection: "row", alignItems: "center", gap: 12 },
+  rowIcon: { width: 34, height: 34, borderRadius: 11, alignItems: "center", justifyContent: "center" },
+  rowTitle: { fontSize: 14, fontWeight: "700" },
+  descRow: { fontSize: 12, opacity: 0.7, marginTop: 2 },
+  credits: { fontSize: 12, textAlign: "center", opacity: 0.75, marginTop: 8 },
 });

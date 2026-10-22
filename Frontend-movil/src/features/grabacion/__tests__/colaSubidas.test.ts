@@ -1,102 +1,102 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import SensorSacudidas from "../../../../modules/sensor-sacudidas";
-import { subirEvidencia } from "../../../services/evidencias.service";
-import { _reiniciarCola, asignarAlertaDelAudio, encolarTrozo, estadoSubidas, procesarCola } from "../colaSubidas";
+import { uploadEvidence } from "../../../services/evidencias.service";
+import { _resetQueue, setAudioAlert, enqueueChunk, uploadStatus, processQueue } from "../colaSubidas";
 
 jest.mock("@react-native-async-storage/async-storage", () => {
-  let datos: Record<string, string> = {};
+  let data: Record<string, string> = {};
   return {
     __esModule: true,
     default: {
-      getItem: jest.fn(async (k: string) => datos[k] ?? null),
+      getItem: jest.fn(async (k: string) => data[k] ?? null),
       setItem: jest.fn(async (k: string, v: string) => {
-        datos[k] = v;
+        data[k] = v;
       }),
-      _limpiar: () => {
-        datos = {};
+      _clear: () => {
+        data = {};
       },
     },
   };
 });
 
-let mockTrozo: ((t: { uri: string; duracionMs: number }) => void) | null = null;
+let mockChunk: ((t: { uri: string; durationMs: number }) => void) | null = null;
 jest.mock("../../../../modules/sensor-sacudidas", () => ({
   __esModule: true,
   default: {
     borrarArchivo: jest.fn(() => true),
     audiosPendientes: jest.fn(() => []),
     addListener: jest.fn((_e: string, l) => {
-      mockTrozo = l;
-      return { remove: () => (mockTrozo = null) };
+      mockChunk = l;
+      return { remove: () => (mockChunk = null) };
     }),
   },
 }));
 
-jest.mock("../../../services/evidencias.service", () => ({ subirEvidencia: jest.fn() }));
+jest.mock("../../../services/evidencias.service", () => ({ uploadEvidence: jest.fn() }));
 
-const subir = subirEvidencia as jest.Mock;
+const upload = uploadEvidence as jest.Mock;
 const sensor = SensorSacudidas as unknown as Record<string, jest.Mock>;
-const esperarCola = () => new Promise((r) => setTimeout(r, 0));
+const waitQueue = () => new Promise((r) => setTimeout(r, 0));
 
 describe("colaSubidas", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    _reiniciarCola();
-    (AsyncStorage as any)._limpiar();
+    _resetQueue();
+    (AsyncStorage as any)._clear();
   });
 
   it("sube cada trozo, lo borra del teléfono y cuenta los enviados", async () => {
-    subir.mockResolvedValue(undefined);
+    upload.mockResolvedValue(undefined);
 
-    await encolarTrozo({ uri: "file:///cache/a.mp4", alertaId: 7, tipo: "video" });
-    await procesarCola();
-    await esperarCola();
+    await enqueueChunk({ uri: "file:///cache/a.mp4", alertaId: 7, tipo: "video" });
+    await processQueue();
+    await waitQueue();
 
-    expect(subir).toHaveBeenCalledWith(7, "file:///cache/a.mp4", "video");
+    expect(upload).toHaveBeenCalledWith(7, "file:///cache/a.mp4", "video");
     expect(sensor.borrarArchivo).toHaveBeenCalledWith("file:///cache/a.mp4");
-    expect(estadoSubidas()).toMatchObject({ subidos: 1, pendientes: 0 });
+    expect(uploadStatus()).toMatchObject({ uploaded: 1, pendingItems: 0 });
   });
 
   it("sin señal conserva el archivo para reintentar", async () => {
     jest.useFakeTimers();
-    subir.mockRejectedValueOnce(new Error("Network Error")).mockResolvedValue(undefined);
+    upload.mockRejectedValueOnce(new Error("Network Error")).mockResolvedValue(undefined);
 
-    await encolarTrozo({ uri: "file:///cache/b.m4a", alertaId: 7, tipo: "audio" });
-    await procesarCola();
-    expect(estadoSubidas().pendientes).toBe(1);
+    await enqueueChunk({ uri: "file:///cache/b.m4a", alertaId: 7, tipo: "audio" });
+    await processQueue();
+    expect(uploadStatus().pendingItems).toBe(1);
     expect(sensor.borrarArchivo).not.toHaveBeenCalled();
     expect(JSON.parse((await AsyncStorage.getItem("alertamujer_evidencias_pendientes"))!)).toHaveLength(1);
 
     jest.advanceTimersByTime(15000);
     jest.useRealTimers();
-    await esperarCola();
-    await procesarCola();
-    expect(estadoSubidas()).toMatchObject({ subidos: 1, pendientes: 0 });
+    await waitQueue();
+    await processQueue();
+    expect(uploadStatus()).toMatchObject({ uploaded: 1, pendingItems: 0 });
   });
 
   it("descarta lo que el servidor rechaza para no trabar la cola", async () => {
-    subir.mockRejectedValueOnce({ response: { status: 400 } }).mockResolvedValue(undefined);
+    upload.mockRejectedValueOnce({ response: { status: 400 } }).mockResolvedValue(undefined);
 
-    await encolarTrozo({ uri: "file:///cache/malo.mp4", alertaId: 7, tipo: "video" });
-    await encolarTrozo({ uri: "file:///cache/bueno.mp4", alertaId: 7, tipo: "video" });
-    await procesarCola();
-    await esperarCola();
+    await enqueueChunk({ uri: "file:///cache/malo.mp4", alertaId: 7, tipo: "video" });
+    await enqueueChunk({ uri: "file:///cache/bueno.mp4", alertaId: 7, tipo: "video" });
+    await processQueue();
+    await waitQueue();
 
-    expect(estadoSubidas()).toMatchObject({ subidos: 1, pendientes: 0 });
+    expect(uploadStatus()).toMatchObject({ uploaded: 1, pendingItems: 0 });
   });
 
   it("los audios del servicio nativo se suben con la alerta asignada, también los que quedaron", async () => {
-    subir.mockResolvedValue(undefined);
+    upload.mockResolvedValue(undefined);
     sensor.audiosPendientes.mockReturnValue(["file:///cache/evidencias/viejo.m4a"]);
 
-    asignarAlertaDelAudio(9);
-    mockTrozo?.({ uri: "file:///cache/evidencias/nuevo.m4a", duracionMs: 30000 });
-    await esperarCola();
-    await procesarCola();
-    await esperarCola();
+    setAudioAlert(9);
+    mockChunk?.({ uri: "file:///cache/evidencias/nuevo.m4a", durationMs: 30000 });
+    await waitQueue();
+    await processQueue();
+    await waitQueue();
 
-    expect(subir).toHaveBeenCalledWith(9, "file:///cache/evidencias/viejo.m4a", "audio");
-    expect(subir).toHaveBeenCalledWith(9, "file:///cache/evidencias/nuevo.m4a", "audio");
+    expect(upload).toHaveBeenCalledWith(9, "file:///cache/evidencias/viejo.m4a", "audio");
+    expect(upload).toHaveBeenCalledWith(9, "file:///cache/evidencias/nuevo.m4a", "audio");
   });
 });

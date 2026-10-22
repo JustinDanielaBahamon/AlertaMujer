@@ -1,105 +1,105 @@
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useCallback, useMemo, useState } from "react";
-import { useContactosContext } from "../../../contexts/ContactosContext";
+import { useContactsContext } from "../../../contexts/ContactosContext";
 import { useLocale } from "../../../contexts/LocaleContext";
-import { useMetodosActivacion } from "../../../contexts/MetodosActivacionContext";
+import { useActivationMethods } from "../../../contexts/MetodosActivacionContext";
 import type { MainStackParamList } from "../../../navigation/types";
-import { faltantesCriticos, revisarPermisos } from "../../permisos/permisos";
+import { missingCritical, checkPermissions } from "../../permisos/permisos";
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
 
-export type Requisito = {
+export type Requirement = {
   id: "datos" | "contactos" | "correos" | "permisos" | "foto";
-  icono: string; // Ionicons
-  titulo: string;
-  detalle: string;
-  cumple: boolean;
+  icon: string; // Ionicons
+  title: string;
+  detail: string;
+  meets: boolean;
   /** false = recomendado: no impide que las alertas funcionen. */
-  necesario: boolean;
-  accion?: { texto: string; ir: () => void };
+  required: boolean;
+  action?: { text: string; ir: () => void };
 };
 
-type DatosPerfil = { nombre: string; telefono: string; fechaNacimiento: string; documento: string; fotoPerfil: string | null };
+type ProfileData = { name: string; phoneNumber: string; birthDate: string; document: string; profilePhoto: string | null };
 
-const fechaValida = (f: string) => /^\d{2}\/\d{2}\/\d{4}$/.test(f.trim());
+const validDate = (f: string) => /^\d{2}\/\d{2}\/\d{4}$/.test(f.trim());
 
 /** Revisa si la cuenta tiene lo necesario para que una alerta llegue y sirva de algo. */
-export function useRequisitosCuenta(perfil: DatosPerfil) {
+export function useAccountRequirements(profile: ProfileData) {
   const navigation = useNavigation<Nav>();
   const { t } = useLocale();
   const r = t.perfil;
-  const { contactos } = useContactosContext();
-  const { config } = useMetodosActivacion();
-  const [permisosFaltantes, setPermisosFaltantes] = useState<number | null>(null);
+  const { contacts } = useContactsContext();
+  const { config } = useActivationMethods();
+  const [missingPermissions, setMissingPermissions] = useState<number | null>(null);
 
   useFocusEffect(
     useCallback(() => {
-      revisarPermisos(config.agitar)
-        .then((estados) => setPermisosFaltantes(faltantesCriticos(estados).length))
-        .catch(() => setPermisosFaltantes(null));
+      checkPermissions(config.agitar)
+        .then((statuses) => setMissingPermissions(missingCritical(statuses).length))
+        .catch(() => setMissingPermissions(null));
     }, [config.agitar]),
   );
 
-  const requisitos = useMemo<Requisito[]>(() => {
-    const faltanDatos = [
-      perfil.nombre.trim().split(/\s+/).length < 2 && r.req_dato_apellido,
-      perfil.telefono.trim().length < 7 && r.req_dato_telefono,
-      !fechaValida(perfil.fechaNacimiento) && r.req_dato_fecha,
-      !perfil.documento.trim() && r.req_dato_documento,
+  const requirements = useMemo<Requirement[]>(() => {
+    const missingData = [
+      profile.name.trim().split(/\s+/).length < 2 && r.req_dato_apellido,
+      profile.phoneNumber.trim().length < 7 && r.req_dato_telefono,
+      !validDate(profile.birthDate) && r.req_dato_fecha,
+      !profile.document.trim() && r.req_dato_documento,
     ].filter(Boolean) as string[];
-    const sinCorreo = contactos.filter((c) => !c.email?.trim()).length;
-    const irAContactos = () => navigation.navigate("DrawerHome", { screen: "Inicio", params: { screen: "Contactos" } } as never);
+    const noEmail = contacts.filter((c) => !c.email?.trim()).length;
+    const goToContacts = () => navigation.navigate("DrawerHome", { screen: "Inicio", params: { screen: "Contactos" } } as never);
 
     return [
       {
         id: "datos",
-        icono: "id-card-outline",
-        titulo: r.req_datos_titulo,
-        detalle: faltanDatos.length === 0 ? r.req_datos_ok : `${r.req_datos_falta} ${faltanDatos.join(", ")}.`,
-        cumple: faltanDatos.length === 0,
-        necesario: true,
+        icon: "id-card-outline",
+        title: r.req_datos_titulo,
+        detail: missingData.length === 0 ? r.req_datos_ok : `${r.req_datos_falta} ${missingData.join(", ")}.`,
+        meets: missingData.length === 0,
+        required: true,
       },
       {
         id: "contactos",
-        icono: "people-outline",
-        titulo: r.req_contactos_titulo,
-        detalle: contactos.length > 0 ? r.req_contactos_ok.replace("{n}", String(contactos.length)) : r.req_contactos_falta,
-        cumple: contactos.length > 0,
-        necesario: true,
-        accion: contactos.length > 0 ? undefined : { texto: r.req_contactos_accion, ir: irAContactos },
+        icon: "people-outline",
+        title: r.req_contactos_titulo,
+        detail: contacts.length > 0 ? r.req_contactos_ok.replace("{n}", String(contacts.length)) : r.req_contactos_falta,
+        meets: contacts.length > 0,
+        required: true,
+        action: contacts.length > 0 ? undefined : { text: r.req_contactos_accion, ir: goToContacts },
       },
       {
         id: "correos",
-        icono: "mail-outline",
-        titulo: r.req_correos_titulo,
-        detalle: sinCorreo === 0 ? r.req_correos_ok : r.req_correos_falta.replace("{n}", String(sinCorreo)),
-        cumple: contactos.length > 0 && sinCorreo === 0,
-        necesario: true,
-        accion: sinCorreo > 0 ? { texto: r.req_correos_accion, ir: irAContactos } : undefined,
+        icon: "mail-outline",
+        title: r.req_correos_titulo,
+        detail: noEmail === 0 ? r.req_correos_ok : r.req_correos_falta.replace("{n}", String(noEmail)),
+        meets: contacts.length > 0 && noEmail === 0,
+        required: true,
+        action: noEmail > 0 ? { text: r.req_correos_accion, ir: goToContacts } : undefined,
       },
       {
         id: "permisos",
-        icono: "shield-checkmark-outline",
-        titulo: r.req_permisos_titulo,
-        detalle:
-          permisosFaltantes === 0 ? r.req_permisos_ok : r.req_permisos_falta.replace("{n}", String(permisosFaltantes ?? "?")),
-        cumple: permisosFaltantes === 0,
-        necesario: true,
-        accion: permisosFaltantes === 0 ? undefined : { texto: r.req_permisos_accion, ir: () => navigation.navigate("Permisos") },
+        icon: "shield-checkmark-outline",
+        title: r.req_permisos_titulo,
+        detail:
+          missingPermissions === 0 ? r.req_permisos_ok : r.req_permisos_falta.replace("{n}", String(missingPermissions ?? "?")),
+        meets: missingPermissions === 0,
+        required: true,
+        action: missingPermissions === 0 ? undefined : { text: r.req_permisos_accion, ir: () => navigation.navigate("Permisos") },
       },
       {
         id: "foto",
-        icono: "camera-outline",
-        titulo: r.req_foto_titulo,
-        detalle: perfil.fotoPerfil ? r.req_foto_ok : r.req_foto_falta,
-        cumple: !!perfil.fotoPerfil,
-        necesario: false,
+        icon: "camera-outline",
+        title: r.req_foto_titulo,
+        detail: profile.profilePhoto ? r.req_foto_ok : r.req_foto_falta,
+        meets: !!profile.profilePhoto,
+        required: false,
       },
     ];
-  }, [perfil, contactos, permisosFaltantes, navigation, r]);
+  }, [profile, contacts, missingPermissions, navigation, r]);
 
-  const necesarios = requisitos.filter((q) => q.necesario);
-  const cumplidos = necesarios.filter((q) => q.cumple).length;
-  return { requisitos, cumplidos, total: necesarios.length, lista: cumplidos === necesarios.length };
+  const requiredItems = requirements.filter((q) => q.required);
+  const met = requiredItems.filter((q) => q.meets).length;
+  return { requirements: requirements, met: met, total: requiredItems.length, list: met === requiredItems.length };
 }

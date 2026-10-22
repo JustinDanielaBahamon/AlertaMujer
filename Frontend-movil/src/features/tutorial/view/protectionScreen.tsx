@@ -8,49 +8,49 @@ import { useLocale } from "../../../contexts/LocaleContext";
 import TutorialLottie from "../component/TutorialLottie";
 import { notificationStyle } from "../styles/notificationStyle";
 import { TUTORIAL_GRADIENT, TUTORIAL_PALETTE as P } from "../styles/tutorialTheme";
-import { useProtectionTutorialViewModel, type ProteccionItem } from "../viewModel/useProtectionTutorialViewModel";
+import { useProtectionTutorialViewModel, type ProtectionItem } from "../viewModel/useProtectionTutorialViewModel";
 
 // ─── Tarjeta de un ajuste: estado + botón para activarlo ──────────────────────
-function TarjetaAjuste({ item, onActivar, enterDelay }: { item: ProteccionItem; onActivar: () => void; enterDelay: number }) {
+function SettingCard({ item, onActivatePress, enterDelay }: { item: ProtectionItem; onActivatePress: () => void; enterDelay: number }) {
   const { t } = useLocale();
-  const entrada = useRef(new Animated.Value(0)).current;
+  const input = useRef(new Animated.Value(0)).current;
   useEffect(() => {
-    Animated.timing(entrada, { toValue: 1, duration: 380, delay: enterDelay, useNativeDriver: true }).start();
+    Animated.timing(input, { toValue: 1, duration: 380, delay: enterDelay, useNativeDriver: true }).start();
   }, []);
 
-  const listo = item.listo === true;
-  const sinVerificar = item.listo === null;
-  const abreAjustes = item.abreAjustes || sinVerificar;
+  const ready = item.ready === true;
+  const unverified = item.ready === null;
+  const opensSettings = item.opensSettings || unverified;
 
   return (
     <Animated.View
       style={{
-        opacity: entrada,
-        transform: [{ translateY: entrada.interpolate({ inputRange: [0, 1], outputRange: [24, 0] }) }],
+        opacity: input,
+        transform: [{ translateY: input.interpolate({ inputRange: [0, 1], outputRange: [24, 0] }) }],
       }}
     >
-      <View style={[estilos.tarjeta, listo ? estilos.tarjetaLista : estilos.tarjetaPendiente]}>
-        <View style={[estilos.acento, { backgroundColor: listo ? P.row2Color : P.row1Border }]} />
-        <View style={estilos.fila}>
-          <View style={estilos.iconoWrap}>
-            <MaterialIcons name={item.icono as never} size={22} color={P.accent} />
+      <View style={[styles.card, ready ? styles.listCard : styles.pendingCard]}>
+        <View style={[styles.accent, { backgroundColor: ready ? P.row2Color : P.row1Border }]} />
+        <View style={styles.row}>
+          <View style={styles.iconWrap}>
+            <MaterialIcons name={item.icon as never} size={22} color={P.accent} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={estilos.titulo}>{item.titulo}</Text>
-            <Text style={estilos.desc}>{item.desc}</Text>
+            <Text style={styles.title}>{item.title}</Text>
+            <Text style={styles.desc}>{item.desc}</Text>
           </View>
-          <View style={[estilos.chip, listo && estilos.chipListo]}>
-            {listo && <MaterialIcons name="check" size={12} color="#FFFFFF" />}
-            <Text style={[estilos.chipTexto, listo && estilos.chipTextoListo]}>
-              {listo ? t.tutorial.proteccion_activo : sinVerificar ? t.tutorial.proteccion_revisar : t.tutorial.proteccion_falta}
+          <View style={[styles.chip, ready && styles.doneChip]}>
+            {ready && <MaterialIcons name="check" size={12} color="#FFFFFF" />}
+            <Text style={[styles.chipText, ready && styles.doneChipText]}>
+              {ready ? t.tutorial.proteccion_activo : unverified ? t.tutorial.proteccion_revisar : t.tutorial.proteccion_falta}
             </Text>
           </View>
         </View>
-        {!listo && (
-          <TouchableOpacity onPress={onActivar} style={estilos.boton} activeOpacity={0.85} accessibilityRole="button">
-            <MaterialIcons name={abreAjustes ? "settings" : "check-circle"} size={16} color="#FFFFFF" />
-            <Text style={estilos.botonTexto}>
-              {abreAjustes ? t.tutorial.proteccion_abrir_ajuste : t.tutorial.proteccion_activar}
+        {!ready && (
+          <TouchableOpacity onPress={onActivatePress} style={styles.button} activeOpacity={0.85} accessibilityRole="button">
+            <MaterialIcons name={opensSettings ? "settings" : "check-circle"} size={16} color="#FFFFFF" />
+            <Text style={styles.buttonText}>
+              {opensSettings ? t.tutorial.proteccion_abrir_ajuste : t.tutorial.proteccion_activar}
             </Text>
           </TouchableOpacity>
         )}
@@ -63,7 +63,7 @@ function TarjetaAjuste({ item, onActivar, enterDelay }: { item: ProteccionItem; 
 export default function ProtectionScreen() {
   const { t } = useLocale();
   const vm = useProtectionTutorialViewModel();
-  const porcentaje = vm.total > 0 ? Math.round((vm.listos / vm.total) * 100) : 0;
+  const percentage = vm.total > 0 ? Math.round((vm.readyItems / vm.total) * 100) : 0;
 
   const cardAnim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
@@ -96,28 +96,28 @@ export default function ProtectionScreen() {
                 showsVerticalScrollIndicator={false}
                 nestedScrollEnabled
               >
-                <Text style={estilos.intro}>{t.tutorial.proteccion_intro}</Text>
+                <Text style={styles.intro}>{t.tutorial.proteccion_intro}</Text>
 
                 <View style={notificationStyle.sectionRow}>
                   <Text style={notificationStyle.sectionLabel}>{t.tutorial.proteccion_seccion}</Text>
                   <View style={notificationStyle.sectionLine} />
-                  <Text style={estilos.contador}>
-                    {vm.listos}/{vm.total}
+                  <Text style={styles.counter}>
+                    {vm.readyItems}/{vm.total}
                   </Text>
                 </View>
-                <View style={estilos.barraFondo}>
-                  <View style={[estilos.barraRelleno, { width: `${porcentaje}%` as `${number}%` }]} />
+                <View style={styles.barBackground}>
+                  <View style={[styles.barFill, { width: `${percentage}%` as `${number}%` }]} />
                 </View>
 
-                {vm.cargando && <ActivityIndicator color={P.accent} style={{ marginVertical: 20 }} />}
+                {vm.loading && <ActivityIndicator color={P.accent} style={{ marginVertical: 20 }} />}
                 {vm.items.map((item, i) => (
-                  <TarjetaAjuste key={item.id} item={item} onActivar={() => vm.activar(item.id)} enterDelay={150 + i * 90} />
+                  <SettingCard key={item.id} item={item} onActivatePress={() => vm.activate(item.id)} enterDelay={150 + i * 90} />
                 ))}
 
-                <TouchableOpacity onPress={vm.empezar} style={notificationStyle.btnFinalizar} activeOpacity={0.85}>
-                  <Text style={notificationStyle.btnFinalizarText}>{t.tutorial.proteccion_empezar}</Text>
+                <TouchableOpacity onPress={vm.start} style={notificationStyle.finishBtn} activeOpacity={0.85}>
+                  <Text style={notificationStyle.finishBtnText}>{t.tutorial.proteccion_empezar}</Text>
                 </TouchableOpacity>
-                <Text style={estilos.nota}>{t.tutorial.proteccion_nota}</Text>
+                <Text style={styles.note}>{t.tutorial.proteccion_nota}</Text>
               </ScrollView>
             </Card>
           </Animated.View>
@@ -127,12 +127,12 @@ export default function ProtectionScreen() {
   );
 }
 
-const estilos = StyleSheet.create({
+const styles = StyleSheet.create({
   intro: { fontSize: 13, lineHeight: 19, color: "#4B5563", marginBottom: 14 },
-  contador: { fontSize: 11, fontWeight: "800", color: P.accent },
-  barraFondo: { height: 6, borderRadius: 3, backgroundColor: P.sectionLine, marginBottom: 14, overflow: "hidden" },
-  barraRelleno: { height: 6, borderRadius: 3, backgroundColor: P.row2Color },
-  tarjeta: {
+  counter: { fontSize: 11, fontWeight: "800", color: P.accent },
+  barBackground: { height: 6, borderRadius: 3, backgroundColor: P.sectionLine, marginBottom: 14, overflow: "hidden" },
+  barFill: { height: 6, borderRadius: 3, backgroundColor: P.row2Color },
+  card: {
     borderRadius: 18,
     padding: 13,
     paddingLeft: 17,
@@ -145,11 +145,11 @@ const estilos = StyleSheet.create({
     shadowRadius: 6,
     elevation: 2,
   },
-  tarjetaLista: { backgroundColor: P.row2Light, borderColor: P.row2Border },
-  tarjetaPendiente: { backgroundColor: "#FFFFFF", borderColor: P.row1Border },
-  acento: { position: "absolute", left: 0, top: 0, bottom: 0, width: 4 },
-  fila: { flexDirection: "row", alignItems: "center", gap: 12 },
-  iconoWrap: {
+  listCard: { backgroundColor: P.row2Light, borderColor: P.row2Border },
+  pendingCard: { backgroundColor: "#FFFFFF", borderColor: P.row1Border },
+  accent: { position: "absolute", left: 0, top: 0, bottom: 0, width: 4 },
+  row: { flexDirection: "row", alignItems: "center", gap: 12 },
+  iconWrap: {
     width: 40,
     height: 40,
     borderRadius: 12,
@@ -159,7 +159,7 @@ const estilos = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: P.accent + "30",
   },
-  titulo: { fontSize: 14, fontWeight: "800", color: P.accentDark },
+  title: { fontSize: 14, fontWeight: "800", color: P.accentDark },
   desc: { fontSize: 12, lineHeight: 17, color: "#4B5563", marginTop: 2 },
   chip: {
     flexDirection: "row",
@@ -172,10 +172,10 @@ const estilos = StyleSheet.create({
     borderWidth: 1,
     borderColor: P.row1Border,
   },
-  chipListo: { backgroundColor: P.row2Color, borderColor: P.row2Color },
-  chipTexto: { fontSize: 11, fontWeight: "800", color: P.accent },
-  chipTextoListo: { color: "#FFFFFF" },
-  boton: {
+  doneChip: { backgroundColor: P.row2Color, borderColor: P.row2Color },
+  chipText: { fontSize: 11, fontWeight: "800", color: P.accent },
+  doneChipText: { color: "#FFFFFF" },
+  button: {
     marginTop: 10,
     alignSelf: "flex-start",
     flexDirection: "row",
@@ -186,6 +186,6 @@ const estilos = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: P.accent,
   },
-  botonTexto: { color: "#FFFFFF", fontWeight: "700", fontSize: 13 },
-  nota: { fontSize: 11, color: "#6B7280", textAlign: "center", marginTop: 10 },
+  buttonText: { color: "#FFFFFF", fontWeight: "700", fontSize: 13 },
+  note: { fontSize: 11, color: "#6B7280", textAlign: "center", marginTop: 10 },
 });

@@ -17,7 +17,7 @@ export const localStyles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 8,
   },
-  iconoHeader: {
+  headerIconBox: {
     alignSelf: 'center',
     width: 52,
     height: 52,
@@ -38,7 +38,7 @@ export const localStyles = StyleSheet.create({
     marginTop: 4,
     marginBottom: 16,
   },
-  opcion: {
+  option: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
@@ -48,34 +48,34 @@ export const localStyles = StyleSheet.create({
     borderWidth: 1.5,
     marginBottom: 8,
   },
-  codigo: {
+  code: {
     width: 38,
     height: 38,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  codigoTexto: {
+  codeText: {
     fontSize: 13,
     fontWeight: '800',
     letterSpacing: 0.5,
   },
-  opcionTexto: {
+  optionText: {
     fontSize: 15,
     fontWeight: '700',
   },
-  opcionSub: {
+  optionSub: {
     fontSize: 12,
     opacity: 0.6,
     marginTop: 1,
   },
-  btnCerrar: {
+  closeBtn: {
     marginTop: 6,
     paddingVertical: 10,
     borderRadius: 10,
     alignItems: 'center',
   },
-  btnCerrarTexto: {
+  closeBtnText: {
     fontSize: 14,
     fontWeight: '700',
   },

@@ -10,79 +10,79 @@ import * as ImagePicker from "expo-image-picker";
 import { Alert } from "react-native";
 
 import type { MainStackParamList } from "../../../navigation/types";
-import { useContactosContext } from "../../../contexts/ContactosContext";
-import { aFotoGuardable } from "../../../services/fotos.service";
+import { useContactsContext } from "../../../contexts/ContactosContext";
+import { toStorablePhoto } from "../../../services/fotos.service";
 import { useLocale } from "../../../contexts/LocaleContext";
-import { esCorreoValido, textosContactoExtra } from "../contactosExtra";
+import { isValidEmail, contactExtraTexts } from "../contactosExtra";
 
-type AgregarNav = NativeStackNavigationProp<
+type AddNav = NativeStackNavigationProp<
   MainStackParamList,
   "AgregarContacto"
 >;
 
-type AgregarRoute = RouteProp<
+type AddRoute = RouteProp<
   MainStackParamList,
   "AgregarContacto"
 >;
 
-export function useAgregarContactoViewModel() {
-  const navigation = useNavigation<AgregarNav>();
-  const route = useRoute<AgregarRoute>();
+export function useAddContactViewModel() {
+  const navigation = useNavigation<AddNav>();
+  const route = useRoute<AddRoute>();
 
   const {
-    contactos,
-    agregarContacto,
-    actualizarContacto,
-  } = useContactosContext();
+    contacts,
+    addContactItem,
+    updateContactItem,
+  } = useContactsContext();
 
   const { t, locale } = useLocale();
 
-  const contactoParam = route.params?.contacto;
-  const esEdicion = Boolean(contactoParam);
+  const contactParam = route.params?.contacto;
+  const isEditing = Boolean(contactParam);
 
-  const [nombre, setNombre] = useState("");
-  const [parentesco, setParentesco] = useState("");
-  const [telefono, setTelefono] = useState("");
-  const [correo, setCorreoState] = useState("");
-  const [fotoUri, setFotoUri] = useState<string | null>(null);
+  const [name, setName] = useState("");
+  const [relationship, setRelationship] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmailState] = useState("");
+  const [photoUri, setPhotoUri] = useState<string | null>(null);
 
   /**
    * El correo no admite espacios: se eliminan mientras se escribe.
    */
-  const setCorreo = useCallback((valor: string) => {
-    setCorreoState(valor.replace(/\s/g, ""));
+  const setEmail = useCallback((value: string) => {
+    setEmailState(value.replace(/\s/g, ""));
   }, []);
 
   /**
    * Cargar datos cuando estamos editando un contacto
    */
   useEffect(() => {
-    if (contactoParam) {
-      setNombre(contactoParam.nombre ?? '');
-      setParentesco(contactoParam.parentesco ?? "");
-      setTelefono(contactoParam.telefono);
-      setCorreoState(contactoParam.email ?? "");
-      setFotoUri(contactoParam.foto ?? null);
+    if (contactParam) {
+      setName(contactParam.name ?? '');
+      setRelationship(contactParam.relationship ?? "");
+      setPhoneNumber(contactParam.phoneNumber);
+      setEmailState(contactParam.email ?? "");
+      setPhotoUri(contactParam.photo ?? null);
     } else {
-      setNombre("");
-      setParentesco("");
-      setTelefono("");
-      setCorreoState("");
-      setFotoUri(null);
+      setName("");
+      setRelationship("");
+      setPhoneNumber("");
+      setEmailState("");
+      setPhotoUri(null);
     }
   }, [
-    contactoParam?.id,
-    contactoParam?.nombre,
-    contactoParam?.telefono,
-    contactoParam?.parentesco,
-    contactoParam?.email,
-    contactoParam?.foto,
+    contactParam?.id,
+    contactParam?.name,
+    contactParam?.phoneNumber,
+    contactParam?.relationship,
+    contactParam?.email,
+    contactParam?.photo,
   ]);
 
   // La foto se reduce y se guarda como data URI: así queda en el backend y no se pierde
-  const ponerFoto = useCallback(async (uri: string) => {
+  const setPhoto = useCallback(async (uri: string) => {
     try {
-      setFotoUri(await aFotoGuardable(uri));
+      setPhotoUri(await toStorablePhoto(uri));
     } catch (error) {
       console.warn("No se pudo procesar la foto del contacto:", error);
       Alert.alert("Foto", "No se pudo usar esa foto. Intenta con otra.");
@@ -92,7 +92,7 @@ export function useAgregarContactoViewModel() {
   /**
    * Seleccionar foto desde la galería
    */
-  const seleccionarFoto = useCallback(async () => {
+  const selectPhoto = useCallback(async () => {
     const { status } =
       await ImagePicker.requestMediaLibraryPermissionsAsync();
 
@@ -113,56 +113,56 @@ export function useAgregarContactoViewModel() {
       });
 
     if (!result.canceled && result.assets.length > 0) {
-      ponerFoto(result.assets[0].uri);
+      setPhoto(result.assets[0].uri);
     }
-  }, [t, ponerFoto]);
+  }, [t, setPhoto]);
 
   /**
    * Quitar foto
    */
-  const quitarFoto = useCallback(() => {
-    setFotoUri(null);
+  const removePhoto = useCallback(() => {
+    setPhotoUri(null);
   }, []);
 
   /**
    * Abrir agenda del teléfono
    */
-  const abrirAgenda = async () => {
+  const openPhoneContacts = async () => {
     const { status } =
       await Contacts.requestPermissionsAsync();
 
     if (status === "granted") {
       try {
-        const contactoSeleccionado =
+        const selectedContact =
           await Contacts.presentContactPickerAsync();
 
-        if (contactoSeleccionado) {
-          const nombreDesdeAgenda =
-            contactoSeleccionado.name ||
-            `${contactoSeleccionado.firstName || ""} ${
-              contactoSeleccionado.lastName || ""
+        if (selectedContact) {
+          const nameFromContacts =
+            selectedContact.name ||
+            `${selectedContact.firstName || ""} ${
+              selectedContact.lastName || ""
             }`.trim();
 
-          setNombre(nombreDesdeAgenda);
+          setName(nameFromContacts);
 
           if (
-            contactoSeleccionado.phoneNumbers &&
-            contactoSeleccionado.phoneNumbers.length > 0
+            selectedContact.phoneNumbers &&
+            selectedContact.phoneNumbers.length > 0
           ) {
-            const numeroLimpio =
-              contactoSeleccionado.phoneNumbers[0].number?.replace(
+            const cleanNumber =
+              selectedContact.phoneNumbers[0].number?.replace(
                 /[^\d+]/g,
                 ""
               );
 
-            setTelefono(numeroLimpio || "");
+            setPhoneNumber(cleanNumber || "");
           }
 
           if (
-            contactoSeleccionado.imageAvailable &&
-            (contactoSeleccionado as any).image?.uri
+            selectedContact.imageAvailable &&
+            (selectedContact as any).image?.uri
           ) {
-            ponerFoto((contactoSeleccionado as any).image.uri);
+            setPhoto((selectedContact as any).image.uri);
           }
         }
       } catch (error) {
@@ -182,15 +182,15 @@ export function useAgregarContactoViewModel() {
   /**
    * Guardar o actualizar contacto
    */
-  const guardar = useCallback(() => {
-    const extra = textosContactoExtra[locale];
+  const save = useCallback(() => {
+    const extra = contactExtraTexts[locale];
 
-    const nombreNormalizado = nombre.trim();
-    const parentescoNormalizado = parentesco.trim();
-    const telefonoNormalizado = telefono.replace(/\D/g, "");
-    const correoNormalizado = correo.trim().toLowerCase();
+    const normalizedName = name.trim();
+    const normalizedRelationship = relationship.trim();
+    const normalizedPhone = phoneNumber.replace(/\D/g, "");
+    const normalizedEmail = email.trim().toLowerCase();
 
-    if (!nombreNormalizado || !telefonoNormalizado) {
+    if (!normalizedName || !normalizedPhone) {
       Alert.alert(
         t.agregar.campos_incompletos,
         t.agregar.campos_incompletos_desc
@@ -198,7 +198,7 @@ export function useAgregarContactoViewModel() {
       return;
     }
 
-    if (telefonoNormalizado.length < 10) {
+    if (normalizedPhone.length < 10) {
       Alert.alert(
         t.agregar.telefono_invalido,
         t.agregar.telefono_invalido_desc
@@ -209,7 +209,7 @@ export function useAgregarContactoViewModel() {
     /**
      * Validación del correo electrónico (obligatorio y con formato válido)
      */
-    if (!correoNormalizado) {
+    if (!normalizedEmail) {
       Alert.alert(
         extra.correo_requerido_titulo,
         extra.correo_requerido_desc
@@ -217,7 +217,7 @@ export function useAgregarContactoViewModel() {
       return;
     }
 
-    if (!esCorreoValido(correoNormalizado)) {
+    if (!isValidEmail(normalizedEmail)) {
       Alert.alert(
         extra.correo_invalido_titulo,
         extra.correo_invalido_desc
@@ -231,32 +231,32 @@ export function useAgregarContactoViewModel() {
      * En modo edición se excluye el contacto actual
      * para permitir modificarlo sin bloquear el teléfono.
      */
-    const duplicado = contactos.find((c) => {
-      const mismoTelefono =
-        c.telefono.replace(/\D/g, "") ===
-        telefonoNormalizado;
+    const duplicate = contacts.find((c) => {
+      const samePhone =
+        c.phoneNumber.replace(/\D/g, "") ===
+        normalizedPhone;
 
-      const esElMismo =
-        esEdicion &&
-        c.id === contactoParam?.id;
+      const isSame =
+        isEditing &&
+        c.id === contactParam?.id;
 
-      return mismoTelefono && !esElMismo;
+      return samePhone && !isSame;
     });
 
-    if (duplicado) {
+    if (duplicate) {
       Alert.alert(
         t.agregar.duplicado_titulo,
         t.agregar.duplicado_desc
           .replace(
             "{telefono}",
-            telefonoNormalizado.replace(
+            normalizedPhone.replace(
               /(\d{3})(\d{3})(\d{4})/,
               "$1 $2 $3"
             )
           )
           .replace(
             "{nombre}",
-            duplicado.nombre ?? ""
+            duplicate.name ?? ""
           ),
         [
           {
@@ -270,36 +270,36 @@ export function useAgregarContactoViewModel() {
     }
 
     const payload = {
-      nombre: nombreNormalizado,
-      parentesco:
-        parentescoNormalizado || undefined,
-      telefono: telefonoNormalizado,
-      email: correoNormalizado,
-      foto: fotoUri ?? undefined,
+      name: normalizedName,
+      relationship:
+        normalizedRelationship || undefined,
+      phoneNumber: normalizedPhone,
+      email: normalizedEmail,
+      photo: photoUri ?? undefined,
     };
 
-    if (esEdicion && contactoParam) {
-      actualizarContacto(
-        contactoParam.id,
+    if (isEditing && contactParam) {
+      updateContactItem(
+        contactParam.id,
         payload
       );
     } else {
-      agregarContacto(payload);
+      addContactItem(payload);
     }
 
     navigation.goBack();
   }, [
-    contactos,
-    actualizarContacto,
-    agregarContacto,
-    contactoParam,
-    esEdicion,
-    fotoUri,
+    contacts,
+    updateContactItem,
+    addContactItem,
+    contactParam,
+    isEditing,
+    photoUri,
     navigation,
-    nombre,
-    parentesco,
-    telefono,
-    correo,
+    name,
+    relationship,
+    phoneNumber,
+    email,
     locale,
     t,
   ]);
@@ -307,39 +307,39 @@ export function useAgregarContactoViewModel() {
   /**
    * Cancelar
    */
-  const cancelar = useCallback(() => {
+  const cancel = useCallback(() => {
     navigation.goBack();
   }, [navigation]);
 
   return {
-    nombre,
-    setNombre,
+    name: name,
+    setName: setName,
 
-    parentesco,
-    setParentesco,
+    relationship: relationship,
+    setRelationship: setRelationship,
 
-    telefono,
-    setTelefono,
+    phoneNumber: phoneNumber,
+    setPhoneNumber: setPhoneNumber,
 
-    correo,
-    setCorreo,
+    email: email,
+    setEmail: setEmail,
 
-    fotoUri,
+    photoUri: photoUri,
 
-    seleccionarFoto,
-    quitarFoto,
-    abrirAgenda,
+    selectPhoto: selectPhoto,
+    removePhoto: removePhoto,
+    openPhoneContacts: openPhoneContacts,
 
-    guardar,
-    cancelar,
+    save: save,
+    cancel: cancel,
 
-    esEdicion,
+    isEditing: isEditing,
 
-    tituloPantalla: esEdicion
+    screenTitle: isEditing
       ? t.agregar.titulo_editar
       : t.agregar.titulo_agregar,
 
-    etiquetaBotonGuardar: esEdicion
+    saveButtonLabel: isEditing
       ? t.agregar.boton_guardar_edicion
       : t.agregar.boton_guardar_nuevo,
   };

@@ -1,8 +1,8 @@
 import { StyleSheet } from "react-native";
 import type { AppTheme } from "../../../contexts/ThemeContext";
 
-export function createPerfilStyles(theme: AppTheme) {
-  const accent      = theme.icono;
+export function createProfileStyles(theme: AppTheme) {
+  const accent      = theme.icon;
   const header1     = theme.headercolor1;
   const bg          = theme.background;
   const cardBg      = theme.containerBackground;
@@ -14,7 +14,7 @@ export function createPerfilStyles(theme: AppTheme) {
   const inputBg    = accent + "0d";
 
   return StyleSheet.create({
-    contenedor: {
+    container: {
       flex: 1,
       backgroundColor: header1,
     },
@@ -25,7 +25,7 @@ export function createPerfilStyles(theme: AppTheme) {
       paddingVertical: 14,
       gap: 12,
     },
-    btnVolver: {
+    returnBtn: {
       width: 36,
       height: 36,
       borderRadius: 18,
@@ -33,7 +33,7 @@ export function createPerfilStyles(theme: AppTheme) {
       alignItems: "center",
       justifyContent: "center",
     },
-    tituloHeader: {
+    headerTitleText: {
       color: textHeader,
       fontSize: 20,
       fontWeight: "600",
@@ -44,7 +44,7 @@ export function createPerfilStyles(theme: AppTheme) {
     },
 
     // ── Zona avatar ───────────────────────────────────────────────
-    contenedorFoto: {
+    photoContainer: {
       alignItems: "center",
       paddingTop: 12,
       paddingBottom: 32,
@@ -53,7 +53,7 @@ export function createPerfilStyles(theme: AppTheme) {
     avatarWrap: {
       position: "relative",
     },
-    circuloFoto: {
+    photoCircle: {
       width: 96,
       height: 96,
       borderRadius: 48,
@@ -64,16 +64,16 @@ export function createPerfilStyles(theme: AppTheme) {
       alignItems: "center",
       justifyContent: "center",
     },
-    foto: {
+    photo: {
       width: "100%",
       height: "100%",
     },
-    inicialesText: {
+    initialsText: {
       fontSize: 34,
       fontWeight: "700",
       color: "rgba(255,255,255,0.92)",
     },
-    camaraIcono: {
+    cameraIcon: {
       position: "absolute",
       bottom: 2,
       right: 2,
@@ -83,19 +83,19 @@ export function createPerfilStyles(theme: AppTheme) {
       borderWidth: 2,
       borderColor: "#fff",
     },
-    nombreUsuario: {
+    userNameValue: {
       fontSize: 17,
       fontWeight: "600",
       color: textHeader,
       marginTop: 8,
     },
-    correoUsuario: {
+    userEmail: {
       fontSize: 12,
       color: "rgba(255,255,255,0.70)",
     },
 
     // ── Cuerpo ────────────────────────────────────────────────────
-    cuerpo: {
+    body: {
       backgroundColor: bg,
       borderTopLeftRadius: 30,
       borderTopRightRadius: 30,
@@ -107,7 +107,7 @@ export function createPerfilStyles(theme: AppTheme) {
     },
 
     // ── Tarjeta ───────────────────────────────────────────────────
-    tarjeta: {
+    card: {
       backgroundColor: cardBg,
       borderRadius: 18,
       padding: 18,
@@ -120,7 +120,7 @@ export function createPerfilStyles(theme: AppTheme) {
       shadowRadius: 8,
       elevation: 3,
     },
-    tituloSeccion: {
+    sectionTitle: {
       fontSize: 10,
       fontWeight: "700",
       color: accent,
@@ -130,7 +130,7 @@ export function createPerfilStyles(theme: AppTheme) {
     },
 
     // ── Campo individual ──────────────────────────────────────────
-    campoWrap: {
+    fieldWrap: {
       gap: 3,
     },
     inputLabel: {
@@ -139,7 +139,7 @@ export function createPerfilStyles(theme: AppTheme) {
       fontWeight: "600",
       marginLeft: 2,
     },
-    contenedorInput: {
+    inputContainer: {
       flexDirection: "row",
       alignItems: "center",
       borderWidth: 1.5,
@@ -150,7 +150,7 @@ export function createPerfilStyles(theme: AppTheme) {
       backgroundColor: inputBg,
       gap: 8,
     },
-    contenedorInputReadonly: {
+    readonlyInputContainer: {
       flexDirection: "row",
       alignItems: "center",
       borderWidth: 1.5,
@@ -172,13 +172,13 @@ export function createPerfilStyles(theme: AppTheme) {
       color: textPrimary,
       opacity: 0.65,
     },
-    badgeFijo: {
+    fixedBadge: {
       backgroundColor: accentSoft,
       borderRadius: 8,
       paddingHorizontal: 8,
       paddingVertical: 3,
     },
-    badgeFijoText: {
+    fixedBadgeText: {
       fontSize: 10,
       color: accent,
       fontWeight: "700",
@@ -191,7 +191,7 @@ export function createPerfilStyles(theme: AppTheme) {
     },
 
     // ── Botones ───────────────────────────────────────────────────
-    btnGuardar: {
+    saveBtn: {
       backgroundColor: accent,
       borderRadius: 15,
       height: 50,
@@ -203,7 +203,7 @@ export function createPerfilStyles(theme: AppTheme) {
       shadowRadius: 10,
       elevation: 6,
     },
-    textoGuardar: {
+    saveText: {
       color: "#fff",
       fontSize: 15,
       fontWeight: "700",
@@ -211,14 +211,14 @@ export function createPerfilStyles(theme: AppTheme) {
     },
 
     // ── Mensajes ──────────────────────────────────────────────────
-    mensajeExito: {
+    successMessage: {
       textAlign: "center",
       color: "#27ae60",
       fontSize: 13,
       fontWeight: "600",
       paddingVertical: 4,
     },
-    mensajeError: {
+    errorText: {
       textAlign: "center",
       color: "#C026D3",
       fontSize: 13,

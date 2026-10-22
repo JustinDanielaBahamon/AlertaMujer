@@ -59,7 +59,7 @@ export const styles = StyleSheet.create({
   },
   
   // BOTÓN ACTUALIZAR (morado sólido)
-  btnActualizar: {
+  updateBtn: {
     width: '100%',
     height: 55,
     backgroundColor: '#6B3FA0',
@@ -72,14 +72,14 @@ export const styles = StyleSheet.create({
     gap: 12, // Aumentamos de 8 a 12 para que el lápiz no choque con la T de Tatiana o la A de Actualizar
     paddingHorizontal: 60, 
   },
-  btnTextActualizar: {
+  updateBtnText: {
     color: '#FFF',
     fontSize: 16,
     fontWeight: '600',
   },
   
   // BOTÓN BORRAR (blanco con borde rojo)
-  btnBorrar: {
+  deleteBtn: {
     width: '100%',
     height: 55,
     backgroundColor: '#FFF',
@@ -94,20 +94,20 @@ export const styles = StyleSheet.create({
     gap: 12, // Mantenemos la simetría con el botón de arriba
     paddingHorizontal: 50,
   },
-  btnTextBorrar: {
+  deleteBtnText: {
     color: '#E53935',
     fontSize: 16,
     fontWeight: '600',
   },
   
   // BOTÓN CANCELAR (transparente, solo texto)
-  btnCancelar: {
+  cancelBtn: {
     width: '100%',
     height: 45,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  btnTextCancelar: {
+  cancelBtnText: {
     color: '#999',
     fontSize: 15,
     fontWeight: '500',

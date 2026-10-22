@@ -5,49 +5,49 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { MainStackParamList } from "../../../navigation/types";
 import { useAuth } from "../../../contexts/AuthContext";
 import * as ImagePicker from "expo-image-picker";
-import { STORAGE_KEY_UBICACION } from "../../tutorial/viewModel/useLocationTutorialViewModel";
-import { eliminarMiCuenta, getMe, updateMe } from "../../../services/users.service";
-import { aFotoGuardable } from "../../../services/fotos.service";
+import { STORAGE_KEY_LOCATION } from "../../tutorial/viewModel/useLocationTutorialViewModel";
+import { deleteMyAccount, getMe, updateMe } from "../../../services/users.service";
+import { toStorablePhoto } from "../../../services/fotos.service";
 
-type PerfilNavigation = NativeStackNavigationProp<MainStackParamList, "Perfil">;
+type ProfileNavigation = NativeStackNavigationProp<MainStackParamList, "Perfil">;
 
-export function usePerfilViewModel() {
-  const navigation = useNavigation<PerfilNavigation>();
-  const { user, token, signIn, signOut, actualizarUsuario } = useAuth();
+export function useProfileViewModel() {
+  const navigation = useNavigation<ProfileNavigation>();
+  const { user, token, signIn, signOut, updateUser } = useAuth();
 
-  const [nombre,          setNombre]          = useState(user?.nombre        ?? "");
-  const [correo,          setCorreo]          = useState(user?.correo        ?? "");
-  const [telefono,        setTelefono]        = useState(user?.telefono      ?? "");
-  const [fechaNacimiento, setFechaNacimiento] = useState(user?.fechaNacimiento ?? "");
-  const [fotoPerfil,      setFotoPerfil]      = useState<string | null>(user?.fotoPerfil ?? null);
-  const [documento,       setDocumento]       = useState("");
+  const [name,          setName]          = useState(user?.nombre        ?? "");
+  const [email,          setEmail]          = useState(user?.correo        ?? "");
+  const [phoneNumber,        setPhoneNumber]        = useState(user?.telefono      ?? "");
+  const [birthDate, setBirthDate] = useState(user?.fechaNacimiento ?? "");
+  const [profilePhoto,      setProfilePhoto]      = useState<string | null>(user?.fotoPerfil ?? null);
+  const [document,       setDocument]       = useState("");
 
   // Municipio viene del tutorial — solo lectura en el perfil
-  const [municipio,  setMunicipio]  = useState(user?.municipio ?? "");
+  const [municipality,  setMunicipality]  = useState(user?.municipio ?? "");
   const [department, setDepartment] = useState("Huila");
 
-  const [cargando, setCargando] = useState(false);
-  const [mensaje,  setMensaje]  = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message,  setMessage]  = useState("");
 
   // ── Al montar: carga datos reales del backend ─────────────────────────────
   useEffect(() => {
-    const cargarDatos = async () => {
+    const loadData = async () => {
       try {
         if (user?.id) {
           const me = await getMe();
-          const nombreCompleto = `${me.firstName ?? ""} ${me.lastName ?? ""}`.trim();
-          if (nombreCompleto) setNombre(nombreCompleto);
-          if (me.email)       setCorreo(me.email);
-          if (me.telephone)   setTelefono(me.telephone);
-          setDocumento(me.documentNumber ?? "");
+          const fullName = `${me.firstName ?? ""} ${me.lastName ?? ""}`.trim();
+          if (fullName) setName(fullName);
+          if (me.email)       setEmail(me.email);
+          if (me.telephone)   setPhoneNumber(me.telephone);
+          setDocument(me.documentNumber ?? "");
           if (me.birthdate) {
             // Backend devuelve "yyyy-MM-dd"; el perfil usa "DD/MM/YYYY"
             const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(me.birthdate));
-            if (m) setFechaNacimiento(`${m[3]}/${m[2]}/${m[1]}`);
+            if (m) setBirthDate(`${m[3]}/${m[2]}/${m[1]}`);
           }
           // La foto vive en el backend (antes solo en el celular y se perdía)
-          setFotoPerfil(me.profilePhoto ?? null);
-          actualizarUsuario({ fotoPerfil: me.profilePhoto ?? undefined });
+          setProfilePhoto(me.profilePhoto ?? null);
+          updateUser({ fotoPerfil: me.profilePhoto ?? undefined });
         }
       } catch (error) {
         console.error("Error al cargar el perfil desde el backend:", error);
@@ -55,24 +55,24 @@ export function usePerfilViewModel() {
 
       try {
         // Municipio del tutorial de ubicación
-        const ubicacionRaw = await AsyncStorage.getItem(STORAGE_KEY_UBICACION);
-        if (ubicacionRaw) {
-          const ubicacion = JSON.parse(ubicacionRaw);
-          if (ubicacion.municipality) setMunicipio(ubicacion.municipality);
-          if (ubicacion.department)   setDepartment(ubicacion.department);
+        const rawLocation = await AsyncStorage.getItem(STORAGE_KEY_LOCATION);
+        if (rawLocation) {
+          const location = JSON.parse(rawLocation);
+          if (location.municipality) setMunicipality(location.municipality);
+          if (location.department)   setDepartment(location.department);
         }
       } catch {
         // Si falla la lectura mostramos los valores por defecto
       }
     };
-    cargarDatos();
+    loadData();
   }, [user?.id]);
 
   // ── Selección de foto ─────────────────────────────────────────────────────
-  const seleccionarFoto = useCallback(async () => {
-    const permiso = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permiso.granted) {
-      setMensaje("Necesitas dar permiso para acceder a la galería.");
+  const selectPhoto = useCallback(async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      setMessage("Necesitas dar permiso para acceder a la galería.");
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -83,85 +83,85 @@ export function usePerfilViewModel() {
     });
     if (result.canceled) return;
     // Se guarda en el backend en cuanto se elige, sin esperar a "Guardar cambios"
-    const anterior = fotoPerfil;
+    const previous = profilePhoto;
     try {
-      const foto = await aFotoGuardable(result.assets[0].uri);
-      setFotoPerfil(foto);
-      await updateMe({ profilePhoto: foto });
-      actualizarUsuario({ fotoPerfil: foto });
+      const photo = await toStorablePhoto(result.assets[0].uri);
+      setProfilePhoto(photo);
+      await updateMe({ profilePhoto: photo });
+      updateUser({ fotoPerfil: photo });
     } catch (error) {
       console.warn("No se pudo guardar la foto de perfil:", error);
-      setFotoPerfil(anterior);
-      setMensaje("No se pudo guardar la foto. Intenta de nuevo.");
-      setTimeout(() => setMensaje(""), 3000);
+      setProfilePhoto(previous);
+      setMessage("No se pudo guardar la foto. Intenta de nuevo.");
+      setTimeout(() => setMessage(""), 3000);
     }
-  }, [fotoPerfil, actualizarUsuario]);
+  }, [profilePhoto, updateUser]);
 
   // ── Validación de fecha DD/MM/YYYY ────────────────────────────────────────
-  const validarFecha = (fecha: string): boolean => {
-    if (!fecha.trim()) return true; // campo opcional
+  const validateDate = (date: string): boolean => {
+    if (!date.trim()) return true; // campo opcional
     const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
-    const match = fecha.match(regex);
+    const match = date.match(regex);
     if (!match) return false;
-    const dia = parseInt(match[1], 10);
-    const mes = parseInt(match[2], 10);
-    const anio = parseInt(match[3], 10);
-    if (mes < 1 || mes > 12) return false;
-    if (dia < 1 || dia > 31) return false;
-    if (anio < 1900 || anio > new Date().getFullYear()) return false;
+    const day = parseInt(match[1], 10);
+    const month = parseInt(match[2], 10);
+    const year = parseInt(match[3], 10);
+    if (month < 1 || month > 12) return false;
+    if (day < 1 || day > 31) return false;
+    if (year < 1900 || year > new Date().getFullYear()) return false;
     return true;
   };
 
   // ── Formateo automático de fecha mientras escribe ─────────────────────────
-  const handleFechaChange = useCallback((texto: string) => {
+  const handleDateChange = useCallback((text: string) => {
     // Solo dígitos y "/"
-    const limpio = texto.replace(/[^\d/]/g, "");
+    const clean = text.replace(/[^\d/]/g, "");
     // Agrega "/" automáticamente en posición 2 y 5
-    let formateado = limpio;
-    if (limpio.length === 2 && !limpio.includes("/")) {
-      formateado = limpio + "/";
-    } else if (limpio.length === 5 && limpio.split("/").length === 2) {
-      formateado = limpio + "/";
+    let formatted = clean;
+    if (clean.length === 2 && !clean.includes("/")) {
+      formatted = clean + "/";
+    } else if (clean.length === 5 && clean.split("/").length === 2) {
+      formatted = clean + "/";
     }
-    setFechaNacimiento(formateado.slice(0, 10));
+    setBirthDate(formatted.slice(0, 10));
   }, []);
 
   // ── Guardar cambios ───────────────────────────────────────────────────────
-  const guardarCambios = useCallback(async () => {
-    if (!nombre.trim()) {
-      setMensaje("El nombre no puede estar vacío.");
+  const saveChanges = useCallback(async () => {
+    if (!name.trim()) {
+      setMessage("El nombre no puede estar vacío.");
       return;
     }
-    const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo.trim());
-    if (!emailValido) {
-      setMensaje("El correo no tiene un formato válido.");
+    const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+    if (!validEmail) {
+      setMessage("El correo no tiene un formato válido.");
       return;
     }
-    if (telefono.trim() && telefono.trim().length < 7) {
-      setMensaje("El teléfono no es válido.");
+    if (phoneNumber.trim() && phoneNumber.trim().length < 7) {
+      setMessage("El teléfono no es válido.");
       return;
     }
-    if (!validarFecha(fechaNacimiento)) {
-      setMensaje("La fecha debe tener formato DD/MM/YYYY.");
+    if (!validateDate(birthDate)) {
+      setMessage("La fecha debe tener formato DD/MM/YYYY.");
       return;
     }
 
-    setCargando(true);
+    setLoading(true);
     try {
       // Persiste en el backend
-      const partes = nombre.trim().split(/\s+/);
-      const firstName = partes[0] ?? "";
-      const lastName = partes.slice(1).join(" ");
+      const parts = name.trim().split(/\s+/);
+      const firstName = parts[0] ?? "";
+      const lastName = parts.slice(1).join(" ");
 
       // Convierte DD/MM/YYYY a yyyy-MM-dd para el backend
       let birthdate: string | undefined;
-      const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(fechaNacimiento.trim());
+      const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(birthDate.trim());
       if (m) birthdate = `${m[3]}-${m[2]}-${m[1]}`;
 
       await updateMe({
         firstName,
         lastName,
-        telephone: telefono.trim(),
+        telephone: phoneNumber.trim(),
         birthdate,
       });
 
@@ -169,68 +169,68 @@ export function usePerfilViewModel() {
       if (user) {
         signIn({
           ...user,
-          nombre:          nombre.trim(),
-          correo:          correo.trim(),
-          telefono:        telefono.trim(),
-          fechaNacimiento: fechaNacimiento.trim(),
-          fotoPerfil:      fotoPerfil ?? undefined,
-          municipio,
+          nombre:          name.trim(),
+          email:          email.trim(),
+          telefono:        phoneNumber.trim(),
+          fechaNacimiento: birthDate.trim(),
+          fotoPerfil:      profilePhoto ?? undefined,
+          municipio: municipality,
         }, token ?? "");
       }
-      setMensaje("¡Perfil actualizado correctamente!");
+      setMessage("¡Perfil actualizado correctamente!");
     } catch {
-      setMensaje("Error al guardar los cambios.");
+      setMessage("Error al guardar los cambios.");
     } finally {
-      setCargando(false);
-      setTimeout(() => setMensaje(""), 3000);
+      setLoading(false);
+      setTimeout(() => setMessage(""), 3000);
     }
-  }, [nombre, correo, telefono, fechaNacimiento, fotoPerfil, municipio, user, signIn]);
+  }, [name, email, phoneNumber, birthDate, profilePhoto, municipality, user, signIn]);
 
   // ── Eliminar la cuenta ────────────────────────────────────────────────────
-  const [eliminarVisible, setEliminarVisible] = useState(false);
-  const [eliminando, setEliminando] = useState(false);
-  const [errorEliminar, setErrorEliminar] = useState<string | null>(null);
+  const [deleteVisible, setDeleteVisible] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  const confirmarEliminar = useCallback(async (confirmacion: string) => {
-    setEliminando(true);
-    setErrorEliminar(null);
+  const confirmRemove = useCallback(async (confirmation: string) => {
+    setDeleting(true);
+    setDeleteError(null);
     try {
-      await eliminarMiCuenta(confirmacion.trim().toUpperCase());
-      setEliminarVisible(false);
+      await deleteMyAccount(confirmation.trim().toUpperCase());
+      setDeleteVisible(false);
       // Sin sesión, la app vuelve sola a la pantalla de inicio de sesión
       signOut();
     } catch {
-      setErrorEliminar("No se pudo eliminar la cuenta. Revisa tu conexión e inténtalo de nuevo.");
+      setDeleteError("No se pudo eliminar la cuenta. Revisa tu conexión e inténtalo de nuevo.");
     } finally {
-      setEliminando(false);
+      setDeleting(false);
     }
   }, [signOut]);
 
-  const volver = useCallback(() => {
+  const goBack = useCallback(() => {
     navigation.goBack();
   }, [navigation]);
 
   return {
-    nombre,          setNombre,
-    correo,          setCorreo,
-    telefono,        setTelefono,
-    fechaNacimiento, handleFechaChange,
-    fotoPerfil,      seleccionarFoto,
-    documento,
-    municipio,
+    name: name,          setName: setName,
+    email: email,          setEmail: setEmail,
+    phoneNumber: phoneNumber,        setPhoneNumber: setPhoneNumber,
+    birthDate: birthDate, handleDateChange: handleDateChange,
+    profilePhoto: profilePhoto,      selectPhoto: selectPhoto,
+    document: document,
+    municipality: municipality,
     department,
-    guardarCambios,
-    volver,
-    eliminarVisible,
-    abrirEliminar: () => {
-      setErrorEliminar(null);
-      setEliminarVisible(true);
+    saveChanges: saveChanges,
+    goBack: goBack,
+    deleteVisible: deleteVisible,
+    openDelete: () => {
+      setDeleteError(null);
+      setDeleteVisible(true);
     },
-    cerrarEliminar: () => setEliminarVisible(false),
-    confirmarEliminar,
-    eliminando,
-    errorEliminar,
-    cargando,
-    mensaje,
+    closeDelete: () => setDeleteVisible(false),
+    confirmRemove: confirmRemove,
+    deleting: deleting,
+    deleteError: deleteError,
+    loading: loading,
+    message: message,
   };
 }

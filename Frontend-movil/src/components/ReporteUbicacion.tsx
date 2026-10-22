@@ -1,7 +1,7 @@
-import { useReporteUbicacion } from "../hooks/use-reporte-ubicacion";
+import { useLocationReporting } from "../hooks/use-reporte-ubicacion";
 
 /** Componente sin interfaz que mantiene activo el envío de ubicación mientras hay sesión. */
-export default function ReporteUbicacion() {
-  useReporteUbicacion();
+export default function LocationReport() {
+  useLocationReporting();
   return null;
 }

@@ -162,7 +162,7 @@ export const notificationStyle = StyleSheet.create({
   },
 
   // ── Card de permisos ───────────────────────────────────────────────────────
-  permisosCard: {
+  permissionsCard: {
     borderRadius: 18,
     padding: 16,
     gap: 10,
@@ -170,23 +170,23 @@ export const notificationStyle = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: NOTIF_COLORS.row2Border,
   },
-  permisosRow: {
+  permissionsRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
   },
-  permisosEmoji: {
+  permissionsEmoji: {
     fontSize: 22,
   },
-  permisosTitleWrap: {
+  permissionsTitleWrap: {
     flex: 1,
   },
-  permisosTitle: {
+  permissionsTitle: {
     fontSize: 13,
     fontWeight: "700",
     color: "#990cb6",
   },
-  permisosDesc: {
+  permissionsDesc: {
     fontSize: 12,
     color: "#6B7280",
     lineHeight: 18,
@@ -194,7 +194,7 @@ export const notificationStyle = StyleSheet.create({
   },
 
   // ── Botón finalizar ────────────────────────────────────────────────────────
-  btnFinalizar: {
+  finishBtn: {
     marginTop: 16,
     borderRadius: 20,
     paddingVertical: 15,
@@ -210,7 +210,7 @@ export const notificationStyle = StyleSheet.create({
     flexDirection: "row",
     gap: 8,
   },
-  btnFinalizarText: {
+  finishBtnText: {
     fontSize: 15,
     fontWeight: "800",
     color: "#FFFFFF",

@@ -3,10 +3,10 @@ import api from './api';
 export interface LoginResponse {
   token: string;
   refreshToken?: string;
-  user: Usuario;
+  user: User;
 }
 
-export interface Usuario {
+export interface User {
   id: number;
   firstName: string;
   lastName: string;
@@ -20,21 +20,20 @@ export interface Usuario {
 }
 
 export interface RegisterData {
-  nombre: string;
-  correo: string;
-  email?: string;
+  name: string;
+  email: string;
   password: string;
-  telefono?: string;
-  tipoDocumento?: string;
-  numeroDocumento?: string;
-  fechaNacimiento?: string;
-  municipio?: string;
+  phoneNumber?: string;
+  documentType?: string;
+  documentNumber?: string;
+  birthDate?: string;
+  municipality?: string;
   /** Marcó las casillas de términos y privacidad (el backend guarda la constancia). */
-  aceptaTerminos?: boolean;
+  acceptsTerms?: boolean;
 }
 
 /** Campos que ya usa otra cuenta, con el aviso para mostrar debajo de cada uno. */
-export type CamposRepetidos = Partial<Record<"email" | "telefono" | "numeroDocumento", string>>;
+export type DuplicateFields = Partial<Record<"email" | "telefono" | "numeroDocumento", string>>;
 
 export interface RegisterError {
   message: string;
@@ -43,23 +42,23 @@ export interface RegisterError {
 
 export const authService = {
   /** Recuperación de contraseña: el backend envía un código de 6 dígitos al correo. */
-  async pedirCodigoRecuperacion(email: string): Promise<void> {
+  async requestRecoveryCode(email: string): Promise<void> {
     await api.post('/api/auth/forgot-password', { email });
   },
 
-  async verificarCodigoRecuperacion(email: string, code: string): Promise<void> {
+  async verifyRecoveryCode(email: string, code: string): Promise<void> {
     await api.post('/api/auth/verify-reset-code', { email, code });
   },
 
-  async restablecerContrasena(email: string, code: string, newPassword: string): Promise<void> {
+  async resetPassword(email: string, code: string, newPassword: string): Promise<void> {
     await api.post('/api/auth/reset-password', { email, code, newPassword });
   },
 
-  async login(correo: string, password: string): Promise<LoginResponse> {
+  async login(email: string, password: string): Promise<LoginResponse> {
 
     // Conectar al backend Spring Boot
     const response = await api.post<LoginResponse>('/api/auth/login', {
-      email: correo,
+      email: email,
       password: password
     });
 
@@ -79,18 +78,18 @@ export const authService = {
    * Registro de nuevo usuario con manejo de errores mejorado
    * Muestra mensajes amigables en lugar de "API error"
    */
-  async register(data: RegisterData): Promise<LoginResponse | { error: string; campos?: CamposRepetidos }> {
+  async register(data: RegisterData): Promise<LoginResponse | { error: string; campos?: DuplicateFields }> {
 
     try {
       const response = await api.post<LoginResponse>('/api/auth/register', {
-        nombre: data.nombre,
-        email: data.correo || data.email,
+        nombre: data.name,
+        email: data.email,
         password: data.password,
-        telefono: data.telefono,
-        tipoDocumento: data.tipoDocumento,
-        numeroDocumento: data.numeroDocumento,
-        fechaNacimiento: data.fechaNacimiento,
-        aceptaTerminos: data.aceptaTerminos,
+        telefono: data.phoneNumber,
+        tipoDocumento: data.documentType,
+        numeroDocumento: data.documentNumber,
+        fechaNacimiento: data.birthDate,
+        aceptaTerminos: data.acceptsTerms,
       });
 
       return response.data;
@@ -105,7 +104,7 @@ export const authService = {
         const errorMessage = error.response.data?.message || error.response.data?.error || error.message;
         
         // 409 con fieldErrors: correo, teléfono o documento que ya usa otra cuenta
-        const campos: CamposRepetidos | undefined = error.response.data?.fieldErrors;
+        const campos: DuplicateFields | undefined = error.response.data?.fieldErrors;
         if (status === 409 && campos && Object.keys(campos).length > 0) {
           return { error: 'Algunos datos ya están registrados en otra cuenta.', campos };
         }

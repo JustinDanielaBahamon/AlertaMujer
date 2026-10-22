@@ -1,18 +1,18 @@
-import type { Usuario } from "../models/Usuario";
+import type { User } from "../models/Usuario";
 import { authService } from "../../../services/auth.service";
 
 export interface RegisterData {
-  nombre: string;
-  correo: string;
+  name: string;
+  email: string;
   password: string;
-  telefono?: string;
+  phoneNumber?: string;
 }
 
 /**
  * Capa de acceso a datos / API para registro.
  * Utiliza el servicio de autenticación que conecta al backend Spring Boot.
  */
-export async function registerWithEmail(data: RegisterData): Promise<Usuario> {
+export async function registerWithEmail(data: RegisterData): Promise<User> {
   const response = await authService.register(data);
   
   // Verificar si la respuesta contiene un error
@@ -24,7 +24,7 @@ export async function registerWithEmail(data: RegisterData): Promise<Usuario> {
   const backendUser = response.user;
   
   // Adaptar el formato del backend al modelo del móvil
-  const usuario: Usuario = {
+  const user: User = {
     id: backendUser.id,
     nombre: `${backendUser.firstName} ${backendUser.lastName}`,
     correo: backendUser.email,
@@ -37,5 +37,5 @@ export async function registerWithEmail(data: RegisterData): Promise<Usuario> {
     last_name: backendUser.lastName,
   };
   
-  return usuario;
+  return user;
 }

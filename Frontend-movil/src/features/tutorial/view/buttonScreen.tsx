@@ -136,7 +136,7 @@ function TapRow({ item, isActive, onPress, enterDelay }: {
 }
 
 // ─── Animated SOS button ──────────────────────────────────────────────────────
-function SOSButton({ onTap, sosLabel, tocaAquiLabel }: { onTap: (msg: string) => void; sosLabel: string; tocaAquiLabel: string }) {
+function SOSButton({ onTap, sosLabel, tapHereLabel }: { onTap: (msg: string) => void; sosLabel: string; tapHereLabel: string }) {
   const scaleAnim    = useRef(new Animated.Value(1)).current;
   const ring1Anim    = useRef(new Animated.Value(1)).current;
   const ring1Opacity = useRef(new Animated.Value(0.5)).current;
@@ -180,7 +180,7 @@ function SOSButton({ onTap, sosLabel, tocaAquiLabel }: { onTap: (msg: string) =>
       <TouchableOpacity onPress={handlePress} activeOpacity={0.9}>
         <Animated.View style={[buttonStyle.sosBtn, { transform: [{ scale: scaleAnim }] }]}>
           <Text style={buttonStyle.sosBtnText}>SOS</Text>
-          <Text style={buttonStyle.sosBtnSub}>{tocaAquiLabel}</Text>
+          <Text style={buttonStyle.sosBtnSub}>{tapHereLabel}</Text>
         </Animated.View>
       </TouchableOpacity>
     </View>
@@ -276,7 +276,7 @@ export default function ActivationTutorial() {
 
                 <View style={buttonStyle.demoContainer}>
                   <Text style={buttonStyle.demoHint}>{t.tutorial.boton_prueba_hint}</Text>
-                  <SOSButton onTap={handleSOSTap} sosLabel={t.tutorial.boton_sos_activado} tocaAquiLabel={t.tutorial.boton_toca_aqui} />
+                  <SOSButton onTap={handleSOSTap} sosLabel={t.tutorial.boton_sos_activado} tapHereLabel={t.tutorial.boton_toca_aqui} />
                   <Animated.View style={[buttonStyle.feedbackPill, { opacity: feedbackOpacity }]}>
                     <Text style={buttonStyle.feedbackText}>{feedback}</Text>
                   </Animated.View>

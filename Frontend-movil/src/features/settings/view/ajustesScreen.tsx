@@ -1,9 +1,9 @@
-import AjustesComponent from "../components/ajustesComponent";
+import SettingsComponent from "../components/ajustesComponent";
 
 type Props = {
   navigation: any;
 };
 
-export default function AjustesScreen({ navigation }: Props) {
-  return <AjustesComponent navigation={navigation} />;
+export default function SettingsScreen({ navigation }: Props) {
+  return <SettingsComponent navigation={navigation} />;
 }

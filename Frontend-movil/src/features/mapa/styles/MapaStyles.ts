@@ -2,7 +2,7 @@ import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
 
-  contenedorPrincipal: {
+  mainContainer: {
     flex: 1,
   },
 
@@ -17,53 +17,53 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 8,
   },
-  botonReintentar: {
+  retryButton: {
     backgroundColor: "#7B1DB2",
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 12,
     marginTop: 8,
   },
-  botonReintentarTexto: {
+  retryButtonText: {
     color: "white",
     fontWeight: "600",
     fontSize: 14,
   },
 
   /* HEADER */
-  gradiente: {
+  gradient: {
     paddingTop: 10,
     paddingHorizontal: 20,
     paddingBottom: 30,
     borderBottomLeftRadius: 50,
     borderBottomRightRadius: 50,
   },
-  headerContenido: {
+  headerContent: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  SubtituloHeader:{
+  HeaderSubtitle:{
     fontSize: 12,
     color: "#FFFFFF",
     marginLeft:1
   },
-  tituloHeader: {
+  headerTitleText: {
     fontSize: 26,
     fontWeight: "bold",
     color: "#FFFFFF",
   },
-  filaUbicacion: {
+  locationRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
     marginTop: 4,
   },
-  subtituloHeader: {
+  headerSubtitleText: {
     fontSize: 13,
     color: "rgba(255,255,255,0.85)",
   },
-  badgeEnVivo: {
+  liveBadge: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
@@ -72,20 +72,20 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
   },
-  puntoBadge: {
+  badgeDot: {
     width: 7,
     height: 7,
     borderRadius: 4,
     backgroundColor: "#69ff9a",
   },
-  textoBadge: {
+  badgeTextValue: {
     color: "white",
     fontSize: 13,
     fontWeight: "600",
   },
 
   /* MAPA */
-  contenedorMapa: {
+  mapWrapper: {
     height: 250,
     margin: 20,
     borderRadius: 16,
@@ -118,7 +118,7 @@ export const styles = StyleSheet.create({
   },
 
   /* SWITCH DE RECORRIDOS */
-  switchRecorridosContainer: {
+  routesSwitchContainer: {
     flexDirection: "row" as const,
     justifyContent: "space-between",
     alignItems: "center",
@@ -133,12 +133,12 @@ export const styles = StyleSheet.create({
     shadowRadius: 4,
   },
 
-  switchRecorridosTitle: {
+  routesSwitchTitle: {
     fontSize: 15,
     fontWeight: "600",
   },
 
-  switchRecorridosSubtitle: {
+  routesSwitchSubtitle: {
     fontSize: 12,
     marginTop: 2,
   },
@@ -192,17 +192,17 @@ export const styles = StyleSheet.create({
   },
 
   /* BOTONES ACCIÓN */
-  filaBotones: {
+  buttonsRow: {
     flexDirection: "row",
     justifyContent: "space-around",
     paddingHorizontal: 16,
     paddingVertical: 16,
   },
-  botonAccion: {
+  actionButton: {
     alignItems: "center",
     gap: 6,
   },
-  circuloBoton: {
+  buttonCircle: {
     width: 52,
     height: 52,
     borderRadius: 26,
@@ -210,13 +210,13 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  labelBoton: {
+  buttonLabel: {
     fontSize: 12,
     fontWeight: "500",
   },
 
   /* TARJETA COORDENADAS */
-  tarjetaCoordenadas: {
+  coordinatesCard: {
     marginHorizontal: 16,
     borderRadius: 16,
     padding: 16,
@@ -227,7 +227,7 @@ export const styles = StyleSheet.create({
     shadowRadius: 4,
   
   },
-  filaActivo: {
+  activeRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -236,28 +236,28 @@ export const styles = StyleSheet.create({
     borderTopWidth: 0.5,
     borderTopColor: "#EEE",
   },
-  textoActualizacion: {
+  updateText: {
     fontSize: 12,
   },
-  badgeActivo: {
+  activeBadge: {
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
   },
-  puntoActivo: {
+  activeDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
     backgroundColor: "#D946EF",
   },
-  textoActivo: {
+  activeText: {
     fontSize: 12,
     color: "#C026D3",
     fontWeight: "600",
   },
 
   /* HISTORIAL */
-  filaTituloHistorial: {
+  historyTitleRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -265,7 +265,7 @@ export const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 10,
   },
-  tituloHistorial: {
+  historyTitle: {
     fontSize: 19,
     fontWeight: "800",
     textAlign: "center",
@@ -273,7 +273,7 @@ export const styles = StyleSheet.create({
     paddingBottom : 15
   },
   
-  itemHistorial: {
+  historyItem: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
@@ -287,14 +287,14 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 4,
   },
-  numeroBurbuja: {
+  bubbleNumber: {
     width: 36,
     height: 36,
     borderRadius: 18,
     justifyContent: "center",
     alignItems: "center",
   },
-  fechaItem: {
+  dateItem: {
     fontSize: 14.7,
     fontWeight: "600",
   },
@@ -302,7 +302,7 @@ export const styles = StyleSheet.create({
     fontSize: 12.3,
     marginTop: 2,
   },
-  recorridoMeta: {
+  routeMeta: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
@@ -312,16 +312,16 @@ export const styles = StyleSheet.create({
     fontSize: 11,
     fontStyle: "italic",
   },
-  sinHistorial: {
+  noHistory: {
     alignItems: "center",
     marginTop: 20,
   },
-  textoSinHistorial: {
+  noHistoryText: {
     fontSize: 14
   },
 
   /* MODAL CERRAR */
-  botonCerrarMapa: {
+  closeMapButton: {
     position: "absolute",
     top: 20,
     right: 10,
@@ -329,7 +329,7 @@ export const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 50,
   },
-  textoCerrar: {
+  closeText: {
     color: "white",
     fontWeight: "bold",
   },
@@ -396,7 +396,7 @@ export const styles = StyleSheet.create({
   bottomContainer: { flex: 1, alignItems: "center", padding: 10 },
   title:           { fontSize: 20, fontWeight: "bold" },
   subtitle:        { fontSize: 16, marginBottom: 10, fontWeight: "600" },
-  historialText:   { fontSize: 14 },
+  historyText:   { fontSize: 14 },
   center:          { flex: 1, justifyContent: "center", alignItems: "center" },
   loading:         { marginBottom: 10 },
   table:           { width: "100%" },

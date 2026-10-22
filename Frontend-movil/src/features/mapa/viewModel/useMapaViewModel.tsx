@@ -1,60 +1,60 @@
 import { useEffect, useRef, useState } from "react";
 import { Animated, Linking } from "react-native";
 import * as Location from "expo-location";
-import { permisoUbicacion } from "../../../services/permisosSeguros";
+import { locationPermission } from "../../../services/permisosSeguros";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { useLocale } from "../../../contexts/LocaleContext";
 import type { MainStackParamList } from "../../../navigation/types";
 
-export type Coordenada = {
+export type Coordinate = {
   latitude: number;
   longitude: number;
 };
 
-export type MapaRouteParams = {
-  direccionObjetivo?: string;
+export type MapRouteParams = {
+  targetAddress?: string;
 };
 
 // Última ubicación conocida. Vive fuera del hook para que, al volver a abrir el mapa
 // (por ejemplo desde un acceso rápido), se pinte al instante sin esperar al GPS.
-let ubicacionCache: Coordenada | null = null;
+let locationCache: Coordinate | null = null;
 
-export const useMapaViewModel = () => {
+export const useMapViewModel = () => {
   const { theme } = useTheme();
   const { t } = useLocale();
   const route = useRoute();
   const navigation =
     useNavigation<NativeStackNavigationProp<MainStackParamList>>();
-  const params = (route.params ?? {}) as MapaRouteParams;
+  const params = (route.params ?? {}) as MapRouteParams;
 
-  const [location, setLocation] = useState<Coordenada | null>(ubicacionCache);
+  const [location, setLocation] = useState<Coordinate | null>(locationCache);
   const [fullscreen, setFullscreen] = useState(false);
   const [showClose, setShowClose] = useState(false);
-  const [historial, setHistorial] = useState<Coordenada[]>([]);
-  const [intentosPermiso, setIntentosPermiso] = useState(0);
-  const [permisoDenegado, setPermisoDenegado] = useState(false);
-  const [serviciosDesactivados, setServiciosDesactivados] = useState(false);
-  const [cargando, setCargando] = useState(!ubicacionCache);
+  const [history, setHistory] = useState<Coordinate[]>([]);
+  const [permissionAttempts, setPermissionAttempts] = useState(0);
+  const [permissionDenied, setPermissionDenied] = useState(false);
+  const [disabledServices, setDisabledServices] = useState(false);
+  const [loading, setLoading] = useState(!locationCache);
   // Radio de precisión del GPS en metros (el celular estima qué tan exacta es la posición)
   const [precisionMetros, setPrecisionMetros] = useState<number | null>(null);
-  const [ultimaActualizacion, setUltimaActualizacion] = useState<Date | null>(
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(
     null
   );
-  const [destinoAlerta, setDestinoAlerta] = useState<{
-    direccion: string;
-    coordenada: Coordenada;
+  const [alertDestination, setAlertDestination] = useState<{
+    address: string;
+    coordinate: Coordinate;
   } | null>(null);
 
   const closeOpacity = useRef(new Animated.Value(0)).current;
 
   // ─── GEOLOCALIZAR DIRECCIÓN RECIBIDA POR PARÁMETRO ───────────────────────
   useEffect(() => {
-    const direccion = params.direccionObjetivo?.trim();
+    const address = params.targetAddress?.trim();
 
-    if (!direccion) {
-      setDestinoAlerta(null);
+    if (!address) {
+      setAlertDestination(null);
       return;
     }
 
@@ -62,30 +62,30 @@ export const useMapaViewModel = () => {
 
     (async () => {
       try {
-        const resultados = await Location.geocodeAsync(
-          `${direccion}, Colombia`
+        const results = await Location.geocodeAsync(
+          `${address}, Colombia`
         );
 
         if (!mounted) return;
 
-        if (resultados.length > 0) {
-          const { latitude, longitude } = resultados[0];
-          setDestinoAlerta({
-            direccion,
-            coordenada: { latitude, longitude },
+        if (results.length > 0) {
+          const { latitude, longitude } = results[0];
+          setAlertDestination({
+            address,
+            coordinate: { latitude, longitude },
           });
         } else {
-          setDestinoAlerta(null);
+          setAlertDestination(null);
         }
       } catch {
-        if (mounted) setDestinoAlerta(null);
+        if (mounted) setAlertDestination(null);
       }
     })();
 
     return () => {
       mounted = false;
     };
-  }, [params.direccionObjetivo]);
+  }, [params.targetAddress]);
 
   // ─── FÓRMULA HAVERSINE ───────────────────────────────────────────────────
   const getDistanceFromLatLonInMeters = (
@@ -109,33 +109,33 @@ export const useMapaViewModel = () => {
   // ─── GPS PRINCIPAL ────────────────────────────────────────────────────────
   useEffect(() => {
     let subscription: Location.LocationSubscription | null = null;
-    let historialInterval: ReturnType<typeof setInterval> | undefined;
-    let cancelado = false;
-    let tieneUbicacion = ubicacionCache !== null;
+    let historyInterval: ReturnType<typeof setInterval> | undefined;
+    let canceled = false;
+    let hasLocation = locationCache !== null;
 
     // Guarda la posición en el estado y en el caché para la próxima vez que se abra el mapa
-    const aplicarUbicacion = (coord: Coordenada, precision?: number | null) => {
-      ubicacionCache = coord;
+    const applyLocation = (coord: Coordinate, precision?: number | null) => {
+      locationCache = coord;
       setPrecisionMetros(precision ?? null);
-      tieneUbicacion = true;
+      hasLocation = true;
       setLocation(coord);
-      setUltimaActualizacion(new Date());
+      setLastUpdate(new Date());
     };
 
     // Agrega un punto al historial solo si se movió al menos 10 m
-    const agregarAlHistorial = (newLoc: Coordenada) => {
-      setHistorial((prev) => {
-        const ultimo = prev[prev.length - 1];
-        if (!ultimo) return [newLoc];
+    const addToHistory = (newLoc: Coordinate) => {
+      setHistory((prev) => {
+        const lastItem = prev[prev.length - 1];
+        if (!lastItem) return [newLoc];
 
-        const distancia = getDistanceFromLatLonInMeters(
-          ultimo.latitude,
-          ultimo.longitude,
+        const distance = getDistanceFromLatLonInMeters(
+          lastItem.latitude,
+          lastItem.longitude,
           newLoc.latitude,
           newLoc.longitude
         );
 
-        if (distancia >= 10) {
+        if (distance >= 10) {
           return [...prev, newLoc].slice(-20);
         }
 
@@ -143,22 +143,22 @@ export const useMapaViewModel = () => {
       });
     };
 
-    const iniciarUbicacion = async () => {
+    const startLocation = async () => {
       try {
         // Solo mostramos la pantalla de carga si todavía no hay ninguna ubicación que pintar
-        if (!tieneUbicacion) setCargando(true);
-        setPermisoDenegado(false);
+        if (!hasLocation) setLoading(true);
+        setPermissionDenied(false);
 
         // Servicios y permiso se consultan al mismo tiempo (antes eran uno tras otro)
-        const [servicioHabilitado, permisoActual] = await Promise.all([
+        const [serviceEnabled, currentPermission] = await Promise.all([
           Location.hasServicesEnabledAsync(),
           Location.getForegroundPermissionsAsync(),
         ]);
-        if (cancelado) return;
+        if (canceled) return;
 
-        if (!servicioHabilitado) {
-          setCargando(false);
-          setServiciosDesactivados(true);
+        if (!serviceEnabled) {
+          setLoading(false);
+          setDisabledServices(true);
           alert(
             "⚠️ UBICACIÓN DESACTIVADA\n\n" +
             "Para usar el mapa, necesitas activar los servicios de ubicación de tu dispositivo.\n\n" +
@@ -172,17 +172,17 @@ export const useMapaViewModel = () => {
         }
 
         // Solo se pide el permiso si todavía no está concedido
-        let status = permisoActual.status;
+        let status = currentPermission.status;
         if (status !== "granted") {
-          status = (await permisoUbicacion()) ? Location.PermissionStatus.GRANTED : Location.PermissionStatus.DENIED;
+          status = (await locationPermission()) ? Location.PermissionStatus.GRANTED : Location.PermissionStatus.DENIED;
         }
-        if (cancelado) return;
+        if (canceled) return;
 
         if (status !== "granted") {
-          setCargando(false);
-          setPermisoDenegado(true);
+          setLoading(false);
+          setPermissionDenied(true);
 
-          if (intentosPermiso === 0) {
+          if (permissionAttempts === 0) {
             alert(
               "⚠️ PERMISO DE UBICACIÓN REQUERIDO\n\n" +
               "AlertaMujer necesita acceso a tu ubicación para mostrarte el mapa y garantizar tu seguridad.\n\n" +
@@ -190,7 +190,7 @@ export const useMapaViewModel = () => {
             );
             return;
           }
-          if (intentosPermiso === 1) {
+          if (permissionAttempts === 1) {
             alert(
               "⚠️ PERMISO DE UBICACIÓN NECESARIO\n\n" +
               "Sin acceso a tu ubicación, no podemos mostrarte el mapa ni garantizar tu seguridad.\n\n" +
@@ -198,7 +198,7 @@ export const useMapaViewModel = () => {
             );
             return;
           }
-          if (intentosPermiso >= 2) {
+          if (permissionAttempts >= 2) {
             alert(
               "⚠️ CONFIGURACIÓN DE UBICACIÓN\n\n" +
               "Para usar el mapa, debes habilitar el permiso de ubicación desde la configuración de la aplicación.\n\n" +
@@ -211,17 +211,17 @@ export const useMapaViewModel = () => {
 
         // 1) Pintar el mapa YA con la última posición conocida (es casi instantáneo).
         //    Después se afina con el GPS en segundo plano.
-        if (!tieneUbicacion) {
+        if (!hasLocation) {
           try {
-            const ultima = await Location.getLastKnownPositionAsync({
+            const latest = await Location.getLastKnownPositionAsync({
               maxAge: 10 * 60 * 1000,
             });
-            if (ultima && !cancelado) {
-              aplicarUbicacion(
-                { latitude: ultima.coords.latitude, longitude: ultima.coords.longitude },
-                ultima.coords.accuracy,
+            if (latest && !canceled) {
+              applyLocation(
+                { latitude: latest.coords.latitude, longitude: latest.coords.longitude },
+                latest.coords.accuracy,
               );
-              setCargando(false);
+              setLoading(false);
             }
           } catch {
             // Si no hay posición previa seguimos con el GPS normal
@@ -232,16 +232,16 @@ export const useMapaViewModel = () => {
         const currentLocation = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.Balanced,
         });
-        if (cancelado) return;
+        if (canceled) return;
 
-        const firstLoc: Coordenada = {
+        const firstLoc: Coordinate = {
           latitude: currentLocation.coords.latitude,
           longitude: currentLocation.coords.longitude,
         };
 
-        aplicarUbicacion(firstLoc, currentLocation.coords.accuracy);
-        setHistorial([firstLoc]);
-        setCargando(false);
+        applyLocation(firstLoc, currentLocation.coords.accuracy);
+        setHistory([firstLoc]);
+        setLoading(false);
 
         subscription = await Location.watchPositionAsync(
           {
@@ -250,78 +250,78 @@ export const useMapaViewModel = () => {
             distanceInterval: 30,
           },
           (loc) => {
-            const newLoc: Coordenada = {
+            const newLoc: Coordinate = {
               latitude: loc.coords.latitude,
               longitude: loc.coords.longitude,
             };
 
-            aplicarUbicacion(newLoc, loc.coords.accuracy);
-            agregarAlHistorial(newLoc);
+            applyLocation(newLoc, loc.coords.accuracy);
+            addToHistory(newLoc);
           }
         );
 
         // Si la pantalla se cerró mientras se creaba la suscripción, se libera de inmediato
-        if (cancelado) {
+        if (canceled) {
           subscription.remove();
           subscription = null;
           return;
         }
 
-        historialInterval = setInterval(async () => {
+        historyInterval = setInterval(async () => {
           try {
             const current = await Location.getCurrentPositionAsync({
               accuracy: Location.Accuracy.Balanced,
             });
 
-            const newLoc: Coordenada = {
+            const newLoc: Coordinate = {
               latitude: current.coords.latitude,
               longitude: current.coords.longitude,
             };
 
-            aplicarUbicacion(newLoc, current.coords.accuracy);
-            agregarAlHistorial(newLoc);
+            applyLocation(newLoc, current.coords.accuracy);
+            addToHistory(newLoc);
           } catch (error) {
             console.error("Error en refresh automático:", error);
           }
         }, 60000);
       } catch (error) {
         console.error("Error al obtener ubicación:", error);
-        if (cancelado) return;
-        setCargando(false);
+        if (canceled) return;
+        setLoading(false);
         // Si ya hay una ubicación en pantalla no se muestra como "permiso denegado"
-        if (!tieneUbicacion) setPermisoDenegado(true);
+        if (!hasLocation) setPermissionDenied(true);
       }
     };
 
-    iniciarUbicacion();
+    startLocation();
 
     return () => {
-      cancelado = true;
+      canceled = true;
       if (subscription) subscription.remove();
-      if (historialInterval) clearInterval(historialInterval);
+      if (historyInterval) clearInterval(historyInterval);
     };
-  }, [intentosPermiso]);
+  }, [permissionAttempts]);
 
   // ─── REFRESH MANUAL ───────────────────────────────────────────────────────
-  const refrescarUbicacion = async () => {
+  const refreshLocation = async () => {
     try {
       const current = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
       });
 
-      const newLoc: Coordenada = {
+      const newLoc: Coordinate = {
         latitude: current.coords.latitude,
         longitude: current.coords.longitude,
       };
 
-      ubicacionCache = newLoc;
+      locationCache = newLoc;
       setLocation(newLoc);
       setPrecisionMetros(current.coords.accuracy ?? null);
-      setUltimaActualizacion(new Date());
+      setLastUpdate(new Date());
 
-      setHistorial((prev) => {
-        const nuevoHistorial = [...prev, newLoc];
-        return nuevoHistorial.slice(-20);
+      setHistory((prev) => {
+        const newHistory = [...prev, newLoc];
+        return newHistory.slice(-20);
       });
     } catch (error) {
       console.error("Error al refrescar ubicación:", error);
@@ -351,28 +351,28 @@ export const useMapaViewModel = () => {
   };
 
   // ─── FORMATEO DE HORA ─────────────────────────────────────────────────────
-  const formatearHora = (fecha: Date) =>
-    fecha.toLocaleTimeString("es-CO", {
+  const formatHour = (date: Date) =>
+    date.toLocaleTimeString("es-CO", {
       hour: "2-digit",
       minute: "2-digit",
     });
 
   // ─── ACCIONES DE BOTONES ─────────────────────────────────────────────────
-  const acciones = [
+  const actions = [
     {
-      icono: "share",
+      icon: "share",
       label: t.mapa.compartir,
-      accion: () => console.log("Compartir ubicación"),
+      action: () => console.log("Compartir ubicación"),
     },
     {
-      icono: "refresh",
+      icon: "refresh",
       label: t.mapa.actualizar,
-      accion: refrescarUbicacion,
+      action: refreshLocation,
     },
     {
-      icono: "navigation",
+      icon: "navigation",
       label: t.mapa.navegar,
-      accion: () => {
+      action: () => {
         if (location) {
           const url = `https://www.google.com/maps/dir/?api=1&destination=${location.latitude},${location.longitude}`;
           Linking.openURL(url);
@@ -380,9 +380,9 @@ export const useMapaViewModel = () => {
       },
     },
     {
-      icono: "bookmark",
+      icon: "bookmark",
       label: t.mapa.guardar,
-      accion: async () => {
+      action: async () => {
         if (!location) return;
         navigation.navigate("ClasificarZona", {
           latitude: location.latitude,
@@ -393,7 +393,7 @@ export const useMapaViewModel = () => {
   ] as const;
 
   // ─── NAVEGACIÓN A ACCIONES ADICIONALES ────────────────────────────────────
-  const irAClasificarZona = () => {
+  const goToClassifyZone = () => {
     if (!location) return;
     navigation.navigate("ClasificarZona", {
       latitude: location.latitude,
@@ -401,26 +401,26 @@ export const useMapaViewModel = () => {
     });
   };
 
-  const irAUbicacionesGuardadas = () => {
+  const goToSavedLocations = () => {
     navigation.navigate("UbicacionesGuardadas");
   };
 
-  const irAZonasAuxiliares = () => {
+  const goToHelpZones = () => {
     navigation.navigate("ZonasAuxiliares");
   };
 
-  const irAHistorialRecorridos = () => {
+  const goToRouteHistory = () => {
     navigation.navigate("HistorialRecorridos");
   };
 
   // ─── PROCESAMIENTO FINAL Y RETORNO ────────────────────────────────────────
-  const rawCoordenada = destinoAlerta?.coordenada ?? location;
-  const coordenadaCentro: Coordenada = rawCoordenada ?? {
+  const rawCoordinate = alertDestination?.coordinate ?? location;
+  const centerCoordinate: Coordinate = rawCoordinate ?? {
     latitude: 0,
     longitude: 0,
   };
 
-  const irClasificarZona =() =>{
+  const openClassifyZone =() =>{
      navigation.navigate("ClasificarZona")
   };
 
@@ -433,29 +433,29 @@ export const useMapaViewModel = () => {
     fullscreen,
     setFullscreen,
     showClose,
-    historial,
-    destinoAlerta,
-    coordenadaCentro,
+    history: history,
+    alertDestination: alertDestination,
+    centerCoordinate: centerCoordinate,
     closeOpacity,
-    ultimaActualizacion,
+    lastUpdate: lastUpdate,
     precisionMetros,
-    acciones,
+    actions: actions,
     handleMapPress,
-    formatearHora,
-    refrescarUbicacion,
-    reintentarPermisos: () => {
-      setIntentosPermiso((prev) => prev + 1);
-      setPermisoDenegado(false);
-      setServiciosDesactivados(false);
+    formatHour: formatHour,
+    refreshLocation: refreshLocation,
+    retryPermissions: () => {
+      setPermissionAttempts((prev) => prev + 1);
+      setPermissionDenied(false);
+      setDisabledServices(false);
     },
-    permisoDenegado,
-    serviciosDesactivados,
-    cargando,
-    irAClasificarZona,
-    irAUbicacionesGuardadas,
-    irClasificarZona,
-    irAZonasAuxiliares,
-    irAHistorialRecorridos
+    permissionDenied: permissionDenied,
+    disabledServices: disabledServices,
+    loading: loading,
+    goToClassifyZone: goToClassifyZone,
+    goToSavedLocations: goToSavedLocations,
+    openClassifyZone: openClassifyZone,
+    goToHelpZones: goToHelpZones,
+    goToRouteHistory: goToRouteHistory
 
   };
 };

@@ -1,25 +1,25 @@
 import { StyleSheet } from "react-native";  
 
 export const styles = StyleSheet.create({
-    ContenedorPrincipal: {
+    MainContainer: {
         flex: 1
     },
-    ContenedorCabezera: {
+    HeaderContainer: {
         alignItems: 'center',
         flexDirection: 'row',
         paddingVertical: 20, // Un poco más de espacio en cabecera
         justifyContent: 'center'
     },
-    TextoCabezera: {
+    HeaderText: {
         fontSize: 28,
         fontWeight: 'bold',
         color:'purple'
     },
-    ContenedorCuadros: {
+    BoxesContainer: {
         padding: 10, // Aumentado ligeramente para mejor respiro en bordes
     },
     // --- MEJORA RESPONSIVE: Botón de emergencia ---
-    BotonPolicia: {
+    PoliceButton: {
         borderColor: 'rgba(255, 255, 255, 0.25)',
         borderWidth: 1,
         backgroundColor: 'rgba(255, 255, 255, 0.18)',
@@ -30,33 +30,33 @@ export const styles = StyleSheet.create({
         width: '100%', // Que ocupe el ancho del padre en móviles
         maxWidth: 220,  // Pero que no crezca infinito en tablets
     },
-    LlamarIcono: {
+    CallIcon: {
         flexDirection: 'row',
         alignItems: 'center',
     },
-    llamarTexto: {
+    callText: {
         fontSize: 18,
         color: 'white',
         marginLeft: 8
     },
-    SegundaSeccion: {
+    SecondSection: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginTop: 0,
     },
     // --- MEJORA RESPONSIVE: Cuadros laterales ---
-    ContenedorViolencia: {
+    ViolenceContainer: {
         borderRadius: 22,
         padding: 20,
         width: '48%', // Usa porcentaje para que siempre quepan dos
     },
-    ContenedorMental: {
+    MentalContainer: {
         borderRadius: 22,
         padding: 20,
         width: '48%', // Usa porcentaje
         alignItems: 'flex-end'
     },
-    llamarViolencia: {
+    callViolenceLine: {
         borderColor: 'rgba(255, 255, 255, 0.25)',
         borderWidth: 1,
         backgroundColor: 'rgba(255, 255, 255, 0.18)',
@@ -66,7 +66,7 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    llamarMental: {
+    callMentalHealth: {
         borderColor: 'rgba(255, 255, 255, 0.25)',
         borderWidth: 1,
         backgroundColor: 'rgba(255, 255, 255, 0.18)',
@@ -77,7 +77,7 @@ export const styles = StyleSheet.create({
         width: '100%', // Se adapta al cuadro
     },
     // --- Iconos y otros elementos ---
-    iconoUser: {
+    userIcon: {
         backgroundColor: 'purple',
         width: 47,
         height: 47,
@@ -86,7 +86,7 @@ export const styles = StyleSheet.create({
         justifyContent: 'center',
         marginBottom: 10
     },
-    iconoBombillo: {
+    bulbIcon: {
         backgroundColor: 'rgba(205, 117, 230, 0.29)',
         width: 47,
         height: 47,
@@ -95,21 +95,21 @@ export const styles = StyleSheet.create({
         justifyContent: 'center',
         marginBottom: 10,
     },
-    TerceraSeccion: {
+    ThirdSection: {
         marginTop: 15
     },
-    ContenedorPueblo: {
+    TownContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between'
     },
-    iconoEstrella: {
+    starIcon: {
         backgroundColor: 'purple',
         borderRadius: 15,
         padding: 10,
         marginRight: 10,
     },
-    llamadaSegundaSeccion: {
+    secondSectionCall: {
         color: 'white',
         fontWeight: '700',
     },
@@ -117,31 +117,31 @@ export const styles = StyleSheet.create({
     marginBottom: 0, 
 
   },
-  Gradiente: {
+  Gradient: {
     paddingTop: 0.1,
     paddingHorizontal: 15,
     paddingBottom: 25,
     borderBottomLeftRadius: 14,
     borderBottomRightRadius: 14,
   },
-  HeaderContenido: {
+  HeaderContent: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  TituloHeader: {
+  HeaderTitle: {
     fontSize: 24.3,
     fontWeight: "bold",
     color: "#FFFFFF",
     width: 220,
   },
-  SubtituloHeader: {
+  HeaderSubtitle: {
     fontSize: 14,
     color: "rgba(255, 255, 255, 0.8)",
     marginTop: 8,
     lineHeight: 20,
     width: 220,
-  },Cuerpo: {
+  },Body: {
     flex: 1,  // ← sin esto, el ScrollView hijo no tiene espacio para expandirse
 },Scroll: {
     flex: 1,

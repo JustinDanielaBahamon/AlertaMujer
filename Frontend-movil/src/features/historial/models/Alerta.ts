@@ -1,11 +1,11 @@
-export type EstadoAlerta = "Enviada" | "Cancelada" | "En curso";
+export type AlertStatus = "Enviada" | "Cancelada" | "En curso";
 
-export interface Alerta {
+export interface AlertRecord {
   id: string;
-  tipo: string;
-  fecha: string;
-  hora: string;
-  ubicacion: string;
-  estado: EstadoAlerta;
+  type: string;
+  date: string;
+  time: string;
+  location: string;
+  status: AlertStatus;
   coords?: { latitude: number; longitude: number };
 }

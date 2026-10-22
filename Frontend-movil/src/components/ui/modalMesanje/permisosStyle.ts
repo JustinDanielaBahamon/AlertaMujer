@@ -48,7 +48,7 @@ export const localStyles = StyleSheet.create({
     marginBottom: 26,
     lineHeight: 22
   },
-  btnConfirmar: {
+  confirmBtn: {
     width: '100%',
     height: 52,
     borderRadius: 25,
@@ -62,14 +62,14 @@ export const localStyles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 4,
   },
-  btnConfirmarText: {
+  confirmBtnText: {
     fontWeight: 'bold',
     fontSize: 17,
     letterSpacing: 0.5,
     color: '#ffffff',
   },
 
-  btnRegresar: {
+  backBtn: {
     width: '100%',
     height: 52,
     borderRadius: 25,
@@ -79,5 +79,5 @@ export const localStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  btnRegresarText: { color: '#6B3FA0', fontWeight: 'bold', fontSize: 17, letterSpacing: 0.5 },
+  backBtnText: { color: '#6B3FA0', fontWeight: 'bold', fontSize: 17, letterSpacing: 0.5 },
 });

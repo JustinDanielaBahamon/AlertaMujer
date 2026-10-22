@@ -46,7 +46,7 @@ export default function Welcome() {
       >
         <SafeAreaView style={localStyles.safeArea} edges={['top', 'bottom']}>
           <TutorialPager
-            paginasConBloqueo={{
+            lockedPages={{
               3: locationVM.requestLocationConfirmation,
               4: contactsVM.requestPermissions,
               5: securityVM.requestPermissions,

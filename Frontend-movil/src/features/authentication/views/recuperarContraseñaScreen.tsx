@@ -1,82 +1,82 @@
 import React, { useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Image, ScrollView } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { DIGITOS_CODIGO, useRecuperarContrasenaViewModel } from '../viewModel/useRecuperarContrasenaViewModel';
+import { CODE_DIGITS, useRecoverPasswordViewModel } from '../viewModel/useRecuperarContrasenaViewModel';
 import { styles } from "../styles/recuperarPassword.style";
 // Traemos el hook del idioma para usar los textos del JSON
 import { useLocale } from "../../../contexts/LocaleContext";
 // Modal bonito para los mensajes (error, éxito, aviso)
-import ModalAlerta from "../../../components/ui/modalAlerta/modalAlerta";
+import AlertModal from "../../../components/ui/modalAlerta/modalAlerta";
 
-export default function RecuperarContrasenaScreen() {
-  const vm = useRecuperarContrasenaViewModel();
+export default function RecoverPasswordScreen() {
+  const vm = useRecoverPasswordViewModel();
   const { t } = useLocale(); // "t" tiene todos los textos del idioma activo
   const inputs = useRef<Array<TextInput | null>>([]);
 
   // Textos y acciones que cambian según el paso (1, 2 o 3)
-  const titulo =
-    vm.paso === 1 ? t.recuperar.titulo_paso1 :
-    vm.paso === 2 ? t.recuperar.titulo_paso2 :
+  const title =
+    vm.step === 1 ? t.recuperar.titulo_paso1 :
+    vm.step === 2 ? t.recuperar.titulo_paso2 :
     t.recuperar.titulo_paso3;
 
-  const subtitulo =
-    vm.paso === 1 ? t.recuperar.subtitulo_paso1 :
-    vm.paso === 2 ? t.recuperar.subtitulo_paso2 :
+  const subtitle =
+    vm.step === 1 ? t.recuperar.subtitulo_paso1 :
+    vm.step === 2 ? t.recuperar.subtitulo_paso2 :
     t.recuperar.subtitulo_paso3;
 
-  const textoBoton =
-    vm.paso === 1 ? t.recuperar.boton_paso1 :
-    vm.paso === 2 ? t.recuperar.boton_paso2 :
+  const buttonTextValue =
+    vm.step === 1 ? t.recuperar.boton_paso1 :
+    vm.step === 2 ? t.recuperar.boton_paso2 :
     t.recuperar.boton_paso3;
 
-  const accionBoton =
-    vm.paso === 1 ? vm.enviarEnlace :
-    vm.paso === 2 ? vm.verificarCodigo :
-    vm.guardarNuevaContrasena;
+  const actionButton =
+    vm.step === 1 ? vm.sendLink :
+    vm.step === 2 ? vm.verifyCode :
+    vm.saveNewPassword;
 
-  const textoLink =
-    vm.paso !== 2 ? t.recuperar.volver :
-    vm.puedeReenviar ? t.recuperar.nuevo_codigo :
-    `${t.recuperar.nuevo_codigo} (${vm.esperaReenvio} s)`;
+  const linkTextValue =
+    vm.step !== 2 ? t.recuperar.volver :
+    vm.canResend ? t.recuperar.nuevo_codigo :
+    `${t.recuperar.nuevo_codigo} (${vm.resendWait} s)`;
 
-  const accionLink = () => {
-    if (vm.paso === 2) {
-      if (!vm.puedeReenviar) return;
-      vm.reenviarCodigo();
+  const actionLink = () => {
+    if (vm.step === 2) {
+      if (!vm.canResend) return;
+      vm.resendCode();
       setTimeout(() => inputs.current[0]?.focus(), 100); // vuelve al primer cuadro
     } else {
-      vm.cancelar();
+      vm.cancel();
     }
   };
 
-  const botonDeshabilitado = vm.paso === 2 && vm.expirado;
+  const disabledButton = vm.step === 2 && vm.expiredItem;
 
   return (
     <ScrollView
-      style={styles.ContenedorPrincipal}
+      style={styles.MainContainer}
       contentContainerStyle={styles.ScrollContent}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
     >
       <View style={styles.container}>
         {/* LOGO */}
-        <View style={styles.ContenedorLogo}>
+        <View style={styles.LogoContainer}>
           <Image 
             source={require('@assets/imagesAlertaMujer/logos/logoAlertaMujer.png')} 
-            style={styles.ImagenLogo} 
+            style={styles.LogoImage} 
           />
         </View>
 
         {/* TEXTOS DINAMICOS: cambian segun el paso (1, 2 o 3) */}
-        <Text style={styles.titulo}>{titulo}</Text>
-        <Text style={styles.subtitulo}>{subtitulo}</Text>
+        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.subtitle}>{subtitle}</Text>
 
         {/* PASO 1: EMAIL */}
-        {vm.paso === 1 && (
+        {vm.step === 1 && (
           <View style={styles.inputContainer}>
             <MaterialIcons name="email" size={22} color="#6B3FA0" />
             <TextInput
-              style={styles.inputTexto}
+              style={styles.inputText}
               placeholder={t.recuperar.placeholder_correo}
               placeholderTextColor="#999"
               value={vm.email}
@@ -88,30 +88,30 @@ export default function RecuperarContrasenaScreen() {
         )}
 
         {/* PASO 2: CODIGO OTP + TEMPORIZADOR */}
-        {vm.paso === 2 && (
+        {vm.step === 2 && (
           <>
-            <View style={styles.codigoContainer}>
-              {vm.codigo.map((digito, index) => (
+            <View style={styles.codeContainer}>
+              {vm.code.map((digit, index) => (
                 <TextInput
                   key={index}
                   ref={(el) => { inputs.current[index] = el; }}
-                  style={[styles.inputCuadro, vm.expirado && styles.inputCuadroExpirado]}
-                  maxLength={DIGITOS_CODIGO}
+                  style={[styles.boxInput, vm.expiredItem && styles.expiredBoxInput]}
+                  maxLength={CODE_DIGITS}
                   keyboardType="number-pad"
                   textContentType="oneTimeCode"
                   autoComplete="sms-otp"
                   autoFocus={index === 0}
-                  editable={!vm.expirado}
-                  value={digito}
+                  editable={!vm.expiredItem}
+                  value={digit}
                   onChangeText={(text) => {
-                    const limpio = text.replace(/\D/g, '');
+                    const clean = text.replace(/\D/g, '');
                     // Si se pega el código completo en una casilla, se reparte entre las siguientes
-                    const ultimo = vm.handleCodigoChange(limpio, index);
-                    if (limpio && ultimo < DIGITOS_CODIGO - 1) inputs.current[ultimo + 1]?.focus();
+                    const lastItem = vm.handleCodeChange(clean, index);
+                    if (clean && lastItem < CODE_DIGITS - 1) inputs.current[lastItem + 1]?.focus();
                   }}
                   onKeyPress={({ nativeEvent }) => {
                     // Borrar en un cuadro vacío regresa al anterior
-                    if (nativeEvent.key === 'Backspace' && !digito && index > 0) {
+                    if (nativeEvent.key === 'Backspace' && !digit && index > 0) {
                       inputs.current[index - 1]?.focus();
                     }
                   }}
@@ -119,31 +119,31 @@ export default function RecuperarContrasenaScreen() {
               ))}
             </View>
 
-            <Text style={[styles.timerTexto, vm.expirado && styles.timerExpirado]}>
-              {vm.expirado
+            <Text style={[styles.timerText, vm.expiredItem && styles.timerExpired]}>
+              {vm.expiredItem
                 ? t.recuperar.codigo_expirado
-                : `${t.recuperar.tiempo_restante} ${vm.tiempoFormateado}`}
+                : `${t.recuperar.tiempo_restante} ${vm.formattedDuration}`}
             </Text>
           </>
         )}
 
         {/* PASO 3: NUEVA CONTRASEÑA + CONFIRMAR */}
-        {vm.paso === 3 && (
+        {vm.step === 3 && (
           <>
             <View style={[styles.inputContainer, { marginBottom: 16 }]}>
               <MaterialIcons name="lock" size={22} color="#6B3FA0" />
               <TextInput
-                style={styles.inputTexto}
+                style={styles.inputText}
                 placeholder={t.recuperar.placeholder_nueva}
                 placeholderTextColor="#999"
-                secureTextEntry={!vm.mostrarNueva}
+                secureTextEntry={!vm.showNew}
                 autoCapitalize="none"
-                value={vm.nuevaPassword}
-                onChangeText={vm.setNuevaPassword}
+                value={vm.newPassword}
+                onChangeText={vm.setNewPassword}
               />
-              <TouchableOpacity onPress={vm.toggleMostrarNueva}>
+              <TouchableOpacity onPress={vm.toggleShowNew}>
                 <MaterialIcons
-                  name={vm.mostrarNueva ? "visibility" : "visibility-off"}
+                  name={vm.showNew ? "visibility" : "visibility-off"}
                   size={22}
                   color="#6B3FA0"
                 />
@@ -153,17 +153,17 @@ export default function RecuperarContrasenaScreen() {
             <View style={styles.inputContainer}>
               <MaterialIcons name="lock" size={22} color="#6B3FA0" />
               <TextInput
-                style={styles.inputTexto}
+                style={styles.inputText}
                 placeholder={t.recuperar.placeholder_confirmar}
                 placeholderTextColor="#999"
-                secureTextEntry={!vm.mostrarConfirmar}
+                secureTextEntry={!vm.showConfirm}
                 autoCapitalize="none"
-                value={vm.confirmarPassword}
-                onChangeText={vm.setConfirmarPassword}
+                value={vm.confirmPassword}
+                onChangeText={vm.setConfirmPassword}
               />
-              <TouchableOpacity onPress={vm.toggleMostrarConfirmar}>
+              <TouchableOpacity onPress={vm.toggleShowConfirm}>
                 <MaterialIcons
-                  name={vm.mostrarConfirmar ? "visibility" : "visibility-off"}
+                  name={vm.showConfirm ? "visibility" : "visibility-off"}
                   size={22}
                   color="#6B3FA0"
                 />
@@ -174,32 +174,32 @@ export default function RecuperarContrasenaScreen() {
 
         {/* BOTON ACCION: cambia segun el paso */}
         <TouchableOpacity 
-          style={[styles.botonPrincipal, botonDeshabilitado && styles.botonDeshabilitado]} 
-          onPress={accionBoton}
-          disabled={botonDeshabilitado}
+          style={[styles.primaryButton, disabledButton && styles.disabledButton]} 
+          onPress={actionButton}
+          disabled={disabledButton}
           activeOpacity={0.8}
         >
           {vm.isLoading ? (
             <ActivityIndicator color="#FFF" />
           ) : (
-            <Text style={styles.botonTexto}>{textoBoton}</Text>
+            <Text style={styles.buttonText}>{buttonTextValue}</Text>
           )}
         </TouchableOpacity>
 
         {/* LINK: nuevo código (paso 2) o volver al login (pasos 1 y 3) */}
-        <TouchableOpacity onPress={accionLink} style={{ marginTop: 25 }}>
-          <Text style={styles.linkTexto}>{textoLink}</Text>
+        <TouchableOpacity onPress={actionLink} style={{ marginTop: 25 }}>
+          <Text style={styles.linkText}>{linkTextValue}</Text>
         </TouchableOpacity>
       </View>
 
       {/* MENSAJES: error, éxito y aviso con el diseño de la app */}
-      <ModalAlerta
-        visible={vm.alerta.visible}
-        tipo={vm.alerta.tipo}
-        titulo={vm.alerta.titulo}
-        mensaje={vm.alerta.mensaje}
-        textoBoton={vm.alerta.textoBoton}
-        onCerrar={vm.cerrarAlerta}
+      <AlertModal
+        visible={vm.alert.visible}
+        type={vm.alert.type}
+        title={vm.alert.title}
+        message={vm.alert.message}
+        buttonTextValue={vm.alert.buttonTextValue}
+        onClose={vm.closeAlert}
       />
     </ScrollView>
   );

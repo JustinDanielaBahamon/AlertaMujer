@@ -1,10 +1,10 @@
 import api from "../api";
-import { getEvidenciasDeAlerta } from "../evidencias.service";
+import { getAlertEvidence } from "../evidencias.service";
 
 jest.mock("../api", () => ({
   __esModule: true,
   default: { get: jest.fn(), post: jest.fn() },
-  fuenteConToken: (ruta: string) => ({ uri: `https://evidence.example${ruta}`, headers: {} }),
+  sourceWithToken: (route: string) => ({ uri: `https://evidence.example${route}`, headers: {} }),
 }));
 
 const mockedApi = api as jest.Mocked<typeof api>;
@@ -19,11 +19,11 @@ describe("evidencias.service", () => {
       ],
     } as never);
 
-    const lista = await getEvidenciasDeAlerta(9);
+    const list = await getAlertEvidence(9);
 
     expect(mockedApi.get).toHaveBeenCalledWith("/api/evidences/me");
-    expect(lista.map((e) => e.id)).toEqual([1, 3]);
-    expect(lista[0]).toMatchObject({ tipo: "audio", nombre: "evidencia-1", tieneArchivo: false });
-    expect(lista[1].fecha.toISOString()).toBe("2026-10-20T15:01:00.000Z");
+    expect(list.map((e) => e.id)).toEqual([1, 3]);
+    expect(list[0]).toMatchObject({ type: "audio", name: "evidencia-1", hasFile: false });
+    expect(list[1].date.toISOString()).toBe("2026-10-20T15:01:00.000Z");
   });
 });

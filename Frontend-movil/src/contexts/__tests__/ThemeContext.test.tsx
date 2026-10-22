@@ -4,10 +4,10 @@ import { Text } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ThemeProvider, useTheme } from "../ThemeContext";
 
-let cambiar: ReturnType<typeof useTheme>["setMode"] | null = null;
-function Muestra() {
+let change: ReturnType<typeof useTheme>["setMode"] | null = null;
+function Sample() {
   const { theme, setMode } = useTheme();
-  cambiar = setMode;
+  change = setMode;
   return <Text>{theme.mode}</Text>;
 }
 
@@ -15,13 +15,13 @@ describe("ThemeContext", () => {
   beforeEach(() => AsyncStorage.clear());
 
   it("recuerda el tema elegido al volver a abrir la app", async () => {
-    const primera = render(<ThemeProvider><Muestra /></ThemeProvider>);
+    const first = render(<ThemeProvider><Sample /></ThemeProvider>);
     await waitFor(() => screen.getByText("light"));
-    act(() => cambiar!("magenta"));
+    act(() => change!("magenta"));
     await waitFor(() => screen.getByText("magenta"));
-    primera.unmount();
+    first.unmount();
 
-    render(<ThemeProvider><Muestra /></ThemeProvider>);
+    render(<ThemeProvider><Sample /></ThemeProvider>);
     await waitFor(() => screen.getByText("magenta"));
   });
 });

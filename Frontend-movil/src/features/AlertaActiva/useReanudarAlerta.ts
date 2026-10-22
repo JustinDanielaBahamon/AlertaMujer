@@ -2,10 +2,10 @@ import type { NavigationContainerRefWithCurrent } from "@react-navigation/native
 import { useEffect } from "react";
 import { AppState } from "react-native";
 import type { MainStackParamList } from "../../navigation/types";
-import { alertaActivaPropia, getMisAlertas } from "../../services/alerts.service";
+import { ownActiveAlert, getMyAlerts } from "../../services/alerts.service";
 
 // En estas pantallas la alerta ya se está mostrando (o creando): no se navega encima
-const PANTALLAS_DE_ALERTA = new Set(["Activacion", "AlertaActiva"]);
+const ALERT_SCREENS = new Set(["Activacion", "AlertaActiva"]);
 
 /**
  * Si la usuaria tiene una alerta activa (p. ej. cerró la app desde "Recientes" con la alerta en
@@ -13,41 +13,41 @@ const PANTALLAS_DE_ALERTA = new Set(["Activacion", "AlertaActiva"]);
  * retoma esa misma alerta y vuelve a enviar la ubicación. Antes la alerta seguía activa en el
  * servidor pero la app no lo sabía y dejaba de enviar la ubicación.
  */
-export function useReanudarAlerta(
-  navegacion: NavigationContainerRefWithCurrent<MainStackParamList>,
-  conSesion: boolean,
+export function useResumeAlert(
+  navigation: NavigationContainerRefWithCurrent<MainStackParamList>,
+  withSession: boolean,
 ): void {
   useEffect(() => {
-    if (!conSesion) return undefined;
-    let vivo = true;
+    if (!withSession) return undefined;
+    let alive = true;
 
-    const mostrar = (alertaId: number, intentos = 20) => {
-      if (!vivo) return;
-      if (!navegacion.isReady()) {
-        if (intentos > 0) setTimeout(() => mostrar(alertaId, intentos - 1), 300);
+    const show = (alertId: number, attempts = 20) => {
+      if (!alive) return;
+      if (!navigation.isReady()) {
+        if (attempts > 0) setTimeout(() => show(alertId, attempts - 1), 300);
         return;
       }
-      const actual = navegacion.getCurrentRoute()?.name;
-      if (actual && PANTALLAS_DE_ALERTA.has(actual)) return;
-      navegacion.navigate("AlertaActiva", { alertaId });
+      const current = navigation.getCurrentRoute()?.name;
+      if (current && ALERT_SCREENS.has(current)) return;
+      navigation.navigate("AlertaActiva", { alertaId: alertId });
     };
 
-    const revisar = async () => {
+    const check = async () => {
       try {
-        const activa = alertaActivaPropia(await getMisAlertas());
-        if (activa) mostrar(activa.id);
+        const active = ownActiveAlert(await getMyAlerts());
+        if (active) show(active.id);
       } catch {
         // Sin conexión: se vuelve a revisar al volver a la app
       }
     };
 
-    revisar();
-    const sub = AppState.addEventListener("change", (estado) => {
-      if (estado === "active") revisar();
+    check();
+    const sub = AppState.addEventListener("change", (status) => {
+      if (status === "active") check();
     });
     return () => {
-      vivo = false;
+      alive = false;
       sub.remove();
     };
-  }, [conSesion, navegacion]);
+  }, [withSession, navigation]);
 }

@@ -11,18 +11,18 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useInicioViewModel } from "../viewModel/useInicioViewModel";
+import { useHomeViewModel } from "../viewModel/useInicioViewModel";
 import { useTheme } from "../../../../src/contexts/ThemeContext";
 import { useLocale } from "../../../../src/contexts/LocaleContext";
 import { useAuth } from "../../../../src/contexts/AuthContext";
-import type { Alerta } from "../../../features/historial/models/Alerta";
+import type { AlertRecord } from "../../../features/historial/models/Alerta";
 import { getMainStackNavigation } from "../../../navigation/navigationHelpers";
 import { createStyles } from "../styles/inicio.styles";
-import AvisoSinConexion from "../../../components/ui/avisoSinConexion/AvisoSinConexion";
-import { getAlertasByUsuario, transformarAlerta } from "../../../../src/services/alerts.service";
+import OfflineNotice from "../../../components/ui/avisoSinConexion/AvisoSinConexion";
+import { getAlertsByUser, transformAlert } from "../../../../src/services/alerts.service";
 
-export default function Inicio() {
-  const vm = useInicioViewModel();
+export default function Home() {
+  const vm = useHomeViewModel();
   const { theme } = useTheme();
   const { t } = useLocale();
   const { user } = useAuth();
@@ -34,44 +34,44 @@ export default function Inicio() {
   //  Tamaño del botón ligeramente reducido para dar aire al texto
   const BUTTON_SIZE = width * 0.68;
 
-  const [alertas, setAlertas] = useState<Alerta[]>([]);
+  const [alerts, setAlerts] = useState<AlertRecord[]>([]);
 
-  const cargarAlertas = useCallback(async () => {
+  const loadAlerts = useCallback(async () => {
     if (!user?.id) {
-      setAlertas([]);
+      setAlerts([]);
       return;
     }
 
     try {
-      const apiAlertas = await getAlertasByUsuario(user.id);
-      const alertasTransformadas = apiAlertas.map(transformarAlerta);
-      setAlertas(alertasTransformadas);
+      const apiAlerts = await getAlertsByUser(user.id);
+      const transformedAlerts = apiAlerts.map(transformAlert);
+      setAlerts(transformedAlerts);
     } catch (error) {
       console.error("Error al cargar alertas:", error);
-      setAlertas([]);
+      setAlerts([]);
     }
   }, [user?.id]);
 
   useFocusEffect(
     useCallback(() => {
-      cargarAlertas();
-    }, [cargarAlertas]),
+      loadAlerts();
+    }, [loadAlerts]),
   );
 
   // Respaldo: vuelve a cargar cuando el componente está montado y gana foco visible.
   const isFocused = useIsFocused();
   useEffect(() => {
     if (isFocused) {
-      cargarAlertas();
+      loadAlerts();
     }
-  }, [isFocused, cargarAlertas]);
+  }, [isFocused, loadAlerts]);
 
   //  Última alerta derivada del historial
-  const ultimaAlerta = useMemo(() => alertas[0], [alertas]);
+  const lastAlert = useMemo(() => alerts[0], [alerts]);
 
   //  No usar calcularTiempoTranscurrido con formato de API
   //  Usar directamente el valor de tiempo de la API
-  const tiempoTranscurrido = ultimaAlerta?.fecha || t.inicio.sin_alertas;
+  const elapsedTime = lastAlert?.date || t.inicio.sin_alertas;
 
   //  Animaciones glow expansivo
   const glow1Scale   = useRef(new Animated.Value(1)).current;
@@ -124,7 +124,7 @@ export default function Inicio() {
   };
 
   //  Navegación al historial desde tarjeta ultima alerta 
-  const goToHistorial = () => {
+  const goToHistory = () => {
     const main = getMainStackNavigation(navigation);
     main?.navigate("DrawerHome", {
       screen: "Inicio",
@@ -136,7 +136,7 @@ export default function Inicio() {
     <View style={[styles.container, { backgroundColor: theme.background, paddingBottom: insets.bottom }]}>
 
       {/* Sin internet: una alerta no saldría ahora */}
-      <AvisoSinConexion />
+      <OfflineNotice />
 
       {/* Zona segura */}
       <TouchableOpacity
@@ -178,7 +178,7 @@ export default function Inicio() {
             numberOfLines={1}
           >
             {t.inicio.sin_incidentes} •{" "}
-            {vm.ubicacionLista ? t.inicio.gps_activo : "GPS inactivo"}
+            {vm.locationList ? t.inicio.gps_activo : "GPS inactivo"}
           </Text>
 
           <Text
@@ -190,7 +190,7 @@ export default function Inicio() {
             ]}
             numberOfLines={1}
           >
-            {vm.ubicacionNombre || "Ubicación no disponible"}
+            {vm.locationName || "Ubicación no disponible"}
           </Text>
         </View>
 
@@ -212,7 +212,7 @@ export default function Inicio() {
             width: BUTTON_SIZE,
             height: BUTTON_SIZE,
             borderRadius: BUTTON_SIZE / 2,
-            backgroundColor: theme.icono + "18",
+            backgroundColor: theme.icon + "18",
             transform: [{ scale: glow3Scale }],
             opacity: glow3Opacity,
           }}
@@ -226,7 +226,7 @@ export default function Inicio() {
             width: BUTTON_SIZE,
             height: BUTTON_SIZE,
             borderRadius: BUTTON_SIZE / 2,
-            backgroundColor: theme.icono + "28",
+            backgroundColor: theme.icon + "28",
             transform: [{ scale: glow2Scale }],
             opacity: glow2Opacity,
           }}
@@ -240,7 +240,7 @@ export default function Inicio() {
             width: BUTTON_SIZE,
             height: BUTTON_SIZE,
             borderRadius: BUTTON_SIZE / 2,
-            backgroundColor: theme.icono + "45",
+            backgroundColor: theme.icon + "45",
             transform: [{ scale: glow1Scale }],
             opacity: glow1Opacity,
           }}
@@ -249,16 +249,16 @@ export default function Inicio() {
         {/* Botón principal, imagen estática */}
         <TouchableOpacity
           activeOpacity={1}
-          onPressIn={vm.onPressInBoton}
-          onPressOut={vm.onPressOutBoton}
-          onPress={vm.activarAlerta}
+          onPressIn={vm.onButtonPressIn}
+          onPressOut={vm.onButtonPressOut}
+          onPress={vm.activateAlert}
           style={{
             width: BUTTON_SIZE,
             height: BUTTON_SIZE,
             borderRadius: BUTTON_SIZE / 2,
             justifyContent: "center",
             alignItems: "center",
-            shadowColor: theme.icono,
+            shadowColor: theme.icon,
             shadowOffset: { width: 0, height: vm.pressed ? 2 : 10 },
             shadowOpacity: vm.pressed ? 0.2 : 0.6,
             shadowRadius: vm.pressed ? 4 : 20,
@@ -268,7 +268,7 @@ export default function Inicio() {
           }}
         >
           <Image
-            source={theme.imagenBoton}
+            source={theme.buttonImage}
             fadeDuration={0}
             style={{
               width: BUTTON_SIZE * 1.1,
@@ -290,15 +290,15 @@ export default function Inicio() {
           },
         ]}
         activeOpacity={0.8}
-        onPress={goToHistorial}
+        onPress={goToHistory}
       >
         <MaterialIcons name="history" size={24} color="#7B2CBF" />
         <View style={styles.lastAlertInfo}>
           <Text style={[styles.lastAlertTitle, { color: theme.text }]}>
-            <Text style={{ fontWeight: "bold" }}>{t.inicio.ultima_alerta}</Text> {tiempoTranscurrido}
+            <Text style={{ fontWeight: "bold" }}>{t.inicio.ultima_alerta}</Text> {elapsedTime}
           </Text>
           <Text style={[styles.lastAlertSubtitle, { color: theme.text }]}>
-            {t.inicio.ultima_ubicacion_enviada} {ultimaAlerta?.hora || ""} — {ultimaAlerta?.ubicacion || t.inicio.sin_ubicacion}
+            {t.inicio.ultima_ubicacion_enviada} {lastAlert?.time || ""} — {lastAlert?.location || t.inicio.sin_ubicacion}
           </Text>
         </View>
         <MaterialIcons name="chevron-right" size={22} color={theme.text} />

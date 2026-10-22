@@ -1,5 +1,5 @@
-import type { Contacto } from "../features/contactos/models/Contacto";
-import type { Alerta } from "../features/historial/models/Alerta";
+import type { Contact } from "../features/contactos/models/Contacto";
+import type { AlertRecord } from "../features/historial/models/Alerta";
 
 export type AuthStackParamList = {
   Index: undefined;
@@ -16,13 +16,13 @@ export type MainStackParamList = {
 
   Activacion:
     | {
-        contacto?: Contacto; // si viene, la alerta es solo para este contacto
+        contacto?: Contact; // si viene, la alerta es solo para este contacto
         metodo?: "agitar" | "encendido" | "widget"; // agitar, 4 pulsaciones del botón de encendido o widget (por defecto, botón SOS)
       }
     | undefined;
   AlertaActiva:
     | {
-        contacto?: Contacto; // si viene, la alerta es solo para este contacto
+        contacto?: Contact; // si viene, la alerta es solo para este contacto
         metodo?: "agitar" | "encendido" | "widget";
         alertaId?: number; // alerta ya creada en segundo plano: no se crea otra
       }
@@ -58,12 +58,12 @@ export type MainStackParamList = {
 
   AgregarContacto:
     | {
-        contacto?: Contacto;
+        contacto?: Contact;
       }
     | undefined;
 
   DetalleAlerta: {
-    alerta: Alerta;
+    alerta: AlertRecord;
   };
 
   historialMapa: {

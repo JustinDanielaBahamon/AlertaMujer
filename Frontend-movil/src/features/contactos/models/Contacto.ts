@@ -1,8 +1,8 @@
-export type Contacto = {
+export type Contact = {
   id: string;
-  nombre?: string;
-  parentesco?: string;
-  telefono: string;
+  name?: string;
+  relationship?: string;
+  phoneNumber: string;
   email?: string;
-  foto?: string;   // ← URI local (galería o agenda)
+  photo?: string;   // ← URI local (galería o agenda)
 };

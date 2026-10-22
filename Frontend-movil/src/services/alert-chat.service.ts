@@ -1,46 +1,46 @@
 import api from "./api";
 
 /** Mensaje del chat de una alerta. deElla: lo escribió quien activó la alerta. */
-export interface MensajeAlerta {
+export interface AlertMessage {
   id: number;
   deElla: boolean;
-  nombre: string;
-  texto: string;
-  hora: Date;
+  name: string;
+  text: string;
+  time: Date;
 }
 
 // El backend devuelve LocalDateTime en UTC sin 'Z' (igual que en alerts.service.ts)
-const aFecha = (iso?: string | null): Date => {
+const toDate = (iso?: string | null): Date => {
   if (!iso) return new Date();
   const d = new Date(iso + (iso.endsWith("Z") || iso.includes("+") ? "" : "Z"));
   return isNaN(d.getTime()) ? new Date() : d;
 };
 
-export const aMensaje = (m: any): MensajeAlerta => ({
+export const toMessage = (m: any): AlertMessage => ({
   id: m.id,
   deElla: m.senderType === "owner",
-  nombre: m.senderName,
-  texto: m.body,
-  hora: aFecha(m.createdAt),
+  name: m.senderName,
+  text: m.body,
+  time: toDate(m.createdAt),
 });
 
 /** Quién escribe: la dueña de la alerta (con su sesión) o un contacto (con el código del seguimiento). */
-export type ParticipanteChat =
-  | { tipo: "duena"; alertaId: number }
-  | { tipo: "contacto"; codigo: string; nombre: string };
+export type ChatParticipant =
+  | { type: "duena"; alertId: number }
+  | { type: "contacto"; code: string; name: string };
 
-const ruta = (p: ParticipanteChat) =>
-  p.tipo === "duena"
-    ? `/api/alerts/${p.alertaId}/messages`
-    : `/api/public/tracking/${encodeURIComponent(p.codigo)}/messages`;
+const route = (p: ChatParticipant) =>
+  p.type === "duena"
+    ? `/api/alerts/${p.alertId}/messages`
+    : `/api/public/tracking/${encodeURIComponent(p.code)}/messages`;
 
-export async function leerMensajes(p: ParticipanteChat, despuesDe = 0): Promise<MensajeAlerta[]> {
-  const r = await api.get<any[]>(ruta(p), { params: { after: despuesDe } });
-  return (r.data ?? []).map(aMensaje);
+export async function readMessages(p: ChatParticipant, after = 0): Promise<AlertMessage[]> {
+  const r = await api.get<any[]>(route(p), { params: { after: after } });
+  return (r.data ?? []).map(toMessage);
 }
 
-export async function enviarMensaje(p: ParticipanteChat, texto: string): Promise<MensajeAlerta> {
-  const cuerpo = p.tipo === "duena" ? { body: texto } : { name: p.nombre, body: texto };
-  const r = await api.post<any>(ruta(p), cuerpo);
-  return aMensaje(r.data);
+export async function sendMessage(p: ChatParticipant, text: string): Promise<AlertMessage> {
+  const body = p.type === "duena" ? { body: text } : { name: p.name, body: text };
+  const r = await api.post<any>(route(p), body);
+  return toMessage(r.data);
 }

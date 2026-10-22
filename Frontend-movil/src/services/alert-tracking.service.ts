@@ -1,32 +1,32 @@
 import * as Application from "expo-application";
-import api, { fuenteConToken } from "./api";
-import type { AlertaApi } from "./alerts.service";
+import api, { sourceWithToken } from "./api";
+import type { AlertApi } from "./alerts.service";
 
-export interface PuntoUbicacion {
+export interface LocationPoint {
   id: string;
   latitude: number;
   longitude: number;
   recordedAt: Date;
 }
 
-export interface SeguimientoAlerta {
-  estado: string; // "active" | "cancelled" | "resolved" ...
-  puntos: PuntoUbicacion[]; // ordenados del más antiguo al más reciente
-  alerta?: AlertaApi; // datos completos (solo para la dueña de la alerta)
+export interface AlertTracking {
+  status: string; // "active" | "cancelled" | "resolved" ...
+  points: LocationPoint[]; // ordenados del más antiguo al más reciente
+  alert?: AlertApi; // datos completos (solo para la dueña de la alerta)
   /** Grabaciones de la alerta (seguimiento público del contacto), de la más antigua a la más reciente. */
-  evidencias?: EvidenciaSeguimiento[];
+  evidence?: TrackingEvidence[];
 }
 
-export interface EvidenciaSeguimiento {
+export interface TrackingEvidence {
   id: number;
-  tipo: "video" | "audio" | "photo" | "document";
-  creada: Date;
+  type: "video" | "audio" | "photo" | "document";
+  created: Date;
   /** Fuente para el reproductor (el endpoint público no necesita sesión). */
-  fuente: { uri: string; headers: Record<string, string> };
+  source: { uri: string; headers: Record<string, string> };
 }
 
 /** Identificador anónimo de esta app para contar quién vio la alerta (sin datos personales). */
-function idVisitante(): string {
+function visitorId(): string {
   try {
     const id = Application.getAndroidId();
     if (id) return `app-${id}`;
@@ -37,70 +37,70 @@ function idVisitante(): string {
 }
 
 // El backend devuelve LocalDateTime en UTC sin 'Z' (igual que en alerts.service.ts).
-export const aFecha = (iso?: string | null): Date => {
+export const toDate = (iso?: string | null): Date => {
   if (!iso) return new Date();
   const d = new Date(iso + (iso.endsWith("Z") || iso.includes("+") ? "" : "Z"));
   return isNaN(d.getTime()) ? new Date() : d;
 };
 
-export const getSeguimientoAlerta = async (
-  alertaId: number,
-): Promise<SeguimientoAlerta> => {
-  const { data: alerta } = await api.get<AlertaApi>(`/api/alerts/${alertaId}`);
+export const getAlertTracking = async (
+  alertId: number,
+): Promise<AlertTracking> => {
+  const { data: alert } = await api.get<AlertApi>(`/api/alerts/${alertId}`);
 
-  let puntos: PuntoUbicacion[] = [];
+  let points: LocationPoint[] = [];
 
   try {
     // Endpoint de historial de ubicaciones de la alerta (pendiente en el backend).
-    const { data } = await api.get<any[]>(`/api/alerts/${alertaId}/locations`);
-    puntos = (data ?? [])
+    const { data } = await api.get<any[]>(`/api/alerts/${alertId}/locations`);
+    points = (data ?? [])
       .filter((p) => p?.latitude != null && p?.longitude != null)
       .map((p, i) => ({
         id: String(p.id ?? `p-${i}`),
         latitude: Number(p.latitude),
         longitude: Number(p.longitude),
-        recordedAt: aFecha(p.recordedAt ?? p.createdAt ?? p.timestamp),
+        recordedAt: toDate(p.recordedAt ?? p.createdAt ?? p.timestamp),
       }));
   } catch {
     // Si el endpoint aún no existe, se usa solo la ubicación con la que se creó la alerta.
   }
 
-  if (puntos.length === 0 && alerta.latitude != null && alerta.longitude != null) {
-    puntos = [
+  if (points.length === 0 && alert.latitude != null && alert.longitude != null) {
+    points = [
       {
-        id: `inicio-${alerta.id}`,
-        latitude: Number(alerta.latitude),
-        longitude: Number(alerta.longitude),
-        recordedAt: aFecha(alerta.startedAt || alerta.createdAt),
+        id: `inicio-${alert.id}`,
+        latitude: Number(alert.latitude),
+        longitude: Number(alert.longitude),
+        recordedAt: toDate(alert.startedAt || alert.createdAt),
       },
     ];
   }
 
-  puntos.sort((a, b) => a.recordedAt.getTime() - b.recordedAt.getTime());
+  points.sort((a, b) => a.recordedAt.getTime() - b.recordedAt.getTime());
 
-  return { estado: (alerta.status || "").toLowerCase(), puntos, alerta };
+  return { status: (alert.status || "").toLowerCase(), points, alert };
 };
 
 /**
  * Seguimiento para un contacto de emergencia: usa el endpoint público con el código que llega en
  * el push (un contacto no puede leer la alerta de otra persona por /api/alerts/{id}).
  */
-export const getSeguimientoPublico = async (codigo: string): Promise<SeguimientoAlerta> => {
-  const ruta = `/api/public/tracking/${encodeURIComponent(codigo)}`;
-  const { data } = await api.get<any>(ruta, { params: { v: idVisitante() } });
-  const puntos: PuntoUbicacion[] = (data?.route ?? [])
+export const getPublicTracking = async (code: string): Promise<AlertTracking> => {
+  const route = `/api/public/tracking/${encodeURIComponent(code)}`;
+  const { data } = await api.get<any>(route, { params: { v: visitorId() } });
+  const points: LocationPoint[] = (data?.route ?? [])
     .filter((p: any) => p?.latitude != null && p?.longitude != null)
     .map((p: any, i: number) => ({
       id: `t-${i}-${p.recordedAt}`,
       latitude: Number(p.latitude),
       longitude: Number(p.longitude),
-      recordedAt: aFecha(p.recordedAt),
+      recordedAt: toDate(p.recordedAt),
     }));
-  const evidencias: EvidenciaSeguimiento[] = (data?.evidence ?? []).map((e: any) => ({
+  const evidence: TrackingEvidence[] = (data?.evidence ?? []).map((e: any) => ({
     id: Number(e.id),
-    tipo: e.mediaType,
-    creada: aFecha(e.createdAt),
-    fuente: fuenteConToken(`${ruta}/evidence/${e.id}`),
+    type: e.mediaType,
+    created: toDate(e.createdAt),
+    source: sourceWithToken(`${route}/evidence/${e.id}`),
   }));
-  return { estado: String(data?.status ?? "").toLowerCase(), puntos, evidencias };
+  return { status: String(data?.status ?? "").toLowerCase(), points, evidence };
 };

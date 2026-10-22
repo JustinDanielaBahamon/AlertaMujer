@@ -6,108 +6,108 @@ import { getApp } from "@react-native-firebase/app";
 import { getMessaging, onMessage } from "@react-native-firebase/messaging";
 import type { MainStackParamList } from "../navigation/types";
 import {
-  abrirAjustePantallaCompleta,
-  debeOfrecerPantallaCompleta,
-  marcarAvisoPantallaCompleta,
-  pushDisponible,
+  openFullScreenSetting,
+  shouldOfferFullScreen,
+  markFullScreenNoticeShown,
+  pushAvailable,
   registrarPush,
 } from "../services/push.service";
 import {
-  abrirAlertaSos,
-  alAbrirAlertaSos,
-  datosDeNotificacion,
-  esAlertaFinalizada,
-  esAlertaSos,
-  mostrarAlarmaSos,
-  mostrarAlertaFinalizada,
+  openSosAlert,
+  onSosAlertOpen,
+  notificationData,
+  isEndedAlert,
+  isSosAlert,
+  showSosAlarm,
+  showEndedAlert,
 } from "./alarmaSos";
-import { manejarEventoProteccion } from "../features/agitar/servicioProteccion";
-import { esNuevoCelular, mostrarNuevoCelular } from "./nuevoCelular";
-import { esNotificacionDeTrayecto, esTrayectoPorVencer, mostrarTrayectoPorVencer } from "./trayectoPorVencer";
-import { estaEnTutorial } from "../navigation/navigationHelpers";
-import { esPedidoUbicacion, responderPedidoUbicacion } from "../services/pedidoUbicacion";
+import { handleProtectionEvent } from "../features/agitar/servicioProteccion";
+import { isNewPhone, showNewPhone } from "./nuevoCelular";
+import { isTripNotification, isTripDueSoon, showTripDueSoon } from "./trayectoPorVencer";
+import { isInTutorial } from "../navigation/navigationHelpers";
+import { isLocationRequest, answerLocationRequest } from "../services/pedidoUbicacion";
 
 /**
  * Con sesión iniciada: registra el token push, muestra la alarma si llega una alerta con la app
  * abierta y lleva a la pantalla de la alerta al tocar la notificación (o al abrirse sola).
  */
-export function useAlertasSos(
-  navegacion: NavigationContainerRefWithCurrent<MainStackParamList>,
-  conSesion: boolean,
+export function useSosAlerts(
+  navigation: NavigationContainerRefWithCurrent<MainStackParamList>,
+  withSession: boolean,
 ): void {
   useEffect(() => {
-    if (!conSesion) return undefined;
+    if (!withSession) return undefined;
 
     registrarPush().then(async () => {
-      if (!estaEnTutorial(navegacion) && (await debeOfrecerPantallaCompleta())) {
-        await marcarAvisoPantallaCompleta();
+      if (!isInTutorial(navigation) && (await shouldOfferFullScreen())) {
+        await markFullScreenNoticeShown();
         Alert.alert(
           "Alarma de emergencia",
           "Para que veas a pantalla completa cuando un contacto active una alerta, permite las notificaciones de pantalla completa de AlertaMujer.",
           [
             { text: "Ahora no", style: "cancel" },
-            { text: "Permitir", onPress: () => abrirAjustePantallaCompleta() },
+            { text: "Permitir", onPress: () => openFullScreenSetting() },
           ],
         );
       }
     });
 
-    const yaAbiertas = new Set<string>();
-    const dejarDeEscuchar = alAbrirAlertaSos((datos) => {
-      if (yaAbiertas.has(datos.alertaId)) return; // la misma alerta puede llegar por varios caminos
-      yaAbiertas.add(datos.alertaId);
-      const ir = (intentos: number) => {
-        if (navegacion.isReady()) {
-          navegacion.navigate("AlertaContacto", {
-            alertaId: Number(datos.alertaId),
-            nombreUsuaria: datos.nombre,
-            codigo: datos.codigo,
+    const alreadyOpen = new Set<string>();
+    const stopListening = onSosAlertOpen((data) => {
+      if (alreadyOpen.has(data.alertaId)) return; // la misma alerta puede llegar por varios caminos
+      alreadyOpen.add(data.alertaId);
+      const ir = (attempts: number) => {
+        if (navigation.isReady()) {
+          navigation.navigate("AlertaContacto", {
+            alertaId: Number(data.alertaId),
+            nombreUsuaria: data.nombre,
+            codigo: data.codigo,
           });
-        } else if (intentos > 0) {
-          setTimeout(() => ir(intentos - 1), 300);
+        } else if (attempts > 0) {
+          setTimeout(() => ir(attempts - 1), 300);
         }
       };
       ir(20);
     });
 
     // "¿Ya llegaste?" de Avísame si no llego: lleva a la pantalla del trayecto
-    const irATrayecto = (intentos = 20) => {
-      if (navegacion.isReady()) navegacion.navigate("Trayecto");
-      else if (intentos > 0) setTimeout(() => irATrayecto(intentos - 1), 300);
+    const goToTrip = (attempts = 20) => {
+      if (navigation.isReady()) navigation.navigate("Trayecto");
+      else if (attempts > 0) setTimeout(() => goToTrip(attempts - 1), 300);
     };
 
     // App abierta desde la notificación o la pantalla completa
-    notifee.getInitialNotification().then((inicial) => {
+    notifee.getInitialNotification().then((initial) => {
       // Notifee la entrega una sola vez: también puede ser la de "Alerta enviada" al agitar
-      if (inicial && manejarEventoProteccion({ type: EventType.PRESS, detail: inicial })) return;
-      if (esNotificacionDeTrayecto(inicial?.notification?.data)) return irATrayecto();
-      const datos = datosDeNotificacion(inicial?.notification);
-      if (datos) abrirAlertaSos(datos);
+      if (initial && handleProtectionEvent({ type: EventType.PRESS, detail: initial })) return;
+      if (isTripNotification(initial?.notification?.data)) return goToTrip();
+      const data = notificationData(initial?.notification);
+      if (data) openSosAlert(data);
     });
 
-    const dejarDeOirToques = notifee.onForegroundEvent(({ type, detail }) => {
-      if (manejarEventoProteccion({ type, detail })) return;
-      if (type === EventType.PRESS && esNotificacionDeTrayecto(detail.notification?.data)) return irATrayecto();
-      const datos = datosDeNotificacion(detail.notification);
-      if (datos && (type === EventType.PRESS || type === EventType.ACTION_PRESS)) abrirAlertaSos(datos);
+    const stopListeningPresses = notifee.onForegroundEvent(({ type, detail }) => {
+      if (handleProtectionEvent({ type, detail })) return;
+      if (type === EventType.PRESS && isTripNotification(detail.notification?.data)) return goToTrip();
+      const data = notificationData(detail.notification);
+      if (data && (type === EventType.PRESS || type === EventType.ACTION_PRESS)) openSosAlert(data);
     });
 
     // Con la app en primer plano: suena la alarma y se abre la pantalla de la alerta directamente
-    let dejarDeOirPush: (() => void) | undefined;
-    if (pushDisponible()) {
+    let stopListeningPush: (() => void) | undefined;
+    if (pushAvailable()) {
       try {
-        dejarDeOirPush = onMessage(getMessaging(getApp()), async (mensaje) => {
-          if (esAlertaSos(mensaje.data)) {
-            await mostrarAlarmaSos(mensaje.data);
-            abrirAlertaSos(mensaje.data);
-          } else if (esAlertaFinalizada(mensaje.data)) {
-            await mostrarAlertaFinalizada(mensaje.data);
-          } else if (esPedidoUbicacion(mensaje.data)) {
-            await responderPedidoUbicacion();
-          } else if (esNuevoCelular(mensaje.data)) {
-            await mostrarNuevoCelular(mensaje.data);
-          } else if (esTrayectoPorVencer(mensaje.data)) {
-            await mostrarTrayectoPorVencer(mensaje.data);
+        stopListeningPush = onMessage(getMessaging(getApp()), async (message) => {
+          if (isSosAlert(message.data)) {
+            await showSosAlarm(message.data);
+            openSosAlert(message.data);
+          } else if (isEndedAlert(message.data)) {
+            await showEndedAlert(message.data);
+          } else if (isLocationRequest(message.data)) {
+            await answerLocationRequest();
+          } else if (isNewPhone(message.data)) {
+            await showNewPhone(message.data);
+          } else if (isTripDueSoon(message.data)) {
+            await showTripDueSoon(message.data);
           }
         });
       } catch (error) {
@@ -116,9 +116,9 @@ export function useAlertasSos(
     }
 
     return () => {
-      dejarDeEscuchar();
-      dejarDeOirToques();
-      dejarDeOirPush?.();
+      stopListening();
+      stopListeningPresses();
+      stopListeningPush?.();
     };
-  }, [conSesion, navegacion]);
+  }, [withSession, navigation]);
 }

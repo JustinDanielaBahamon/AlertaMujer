@@ -16,30 +16,30 @@ import type { NavigationProp, ParamListBase } from "@react-navigation/native";
 import { Alert, Share } from "react-native";
 import { WEB_URL } from "../../../constants/enlaces";
 import { useLocale } from "../../../contexts/LocaleContext";
-import { contactosService, type EstadoAppContacto } from "../../../services/contactos.service";
-import type { Contacto } from "../models/Contacto";
+import { contactsService, type ContactAppStatus } from "../../../services/contactos.service";
+import type { Contact } from "../models/Contacto";
 import { getMainStackNavigation } from "../../../navigation/navigationHelpers";
-import { useContactosContext } from "../../../contexts/ContactosContext";
+import { useContactsContext } from "../../../contexts/ContactosContext";
 
 /**
  * Formatea un teléfono de 10 dígitos a formato: 317 686 6754
  */
-function formatearTelefonoMostrar(telefono: string): string {
-  const soloDigitos = telefono.replace(/\D/g, "");
-  if (soloDigitos.length === 10) {
-    return `${soloDigitos.slice(0, 3)} ${soloDigitos.slice(3, 6)} ${soloDigitos.slice(6)}`;
+function formatPhoneForDisplay(phoneNumber: string): string {
+  const digitsOnly = phoneNumber.replace(/\D/g, "");
+  if (digitsOnly.length === 10) {
+    return `${digitsOnly.slice(0, 3)} ${digitsOnly.slice(3, 6)} ${digitsOnly.slice(6)}`;
   }
-  return telefono;
+  return phoneNumber;
 }
 
 /** Con menos de estos contactos es fácil que nadie vea la alerta a tiempo. */
-export const CONTACTOS_RECOMENDADOS = 5;
+export const RECOMMENDED_CONTACTS = 5;
 
-export function useContactosTabViewModel() {
+export function useContactsTabViewModel() {
   const { t } = useLocale();
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
-  const { contactos, eliminarContacto, refrescarContactos, loading } = useContactosContext();
-  const [busqueda, setBusqueda] = useState('');
+  const { contacts, removeContact, refreshContacts, loading } = useContactsContext();
+  const [searchText, setSearchText] = useState('');
   const [refreshing, setRefreshing] = useState(false);
 
   /**
@@ -50,25 +50,25 @@ export function useContactosTabViewModel() {
    * la móvil siempre muestra lo último al abrir la pantalla.
    */
   // Estado real de cada contacto (antes decía "Disponible" sin revisar nada)
-  const [estadoApp, setEstadoApp] = useState<Record<string, EstadoAppContacto>>({});
-  const cargarEstadoApp = useCallback(() => {
-    contactosService.getEstadoApp().then(setEstadoApp).catch(() => {});
+  const [appStatus, setAppStatus] = useState<Record<string, ContactAppStatus>>({});
+  const loadAppStatus = useCallback(() => {
+    contactsService.getAppStatus().then(setAppStatus).catch(() => {});
   }, []);
 
   useFocusEffect(
     useCallback(() => {
-      refrescarContactos();
-      cargarEstadoApp();
-    }, [refrescarContactos, cargarEstadoApp]),
+      refreshContacts();
+      loadAppStatus();
+    }, [refreshContacts, loadAppStatus]),
   );
 
   /** Comparte el enlace de la app para que el contacto reciba las alertas también en su celular. */
-  const invitarALaApp = useCallback((contacto: Contacto) => {
-    const mensaje = t.contactos.invitar_mensaje
-      .replace("{nombre}", (contacto.nombre || "").split(" ")[0] || "")
-      .replace("{correo}", contacto.email || "")
+  const inviteToApp = useCallback((contact: Contact) => {
+    const message = t.contactos.invitar_mensaje
+      .replace("{nombre}", (contact.name || "").split(" ")[0] || "")
+      .replace("{correo}", contact.email || "")
       .replace("{url}", WEB_URL);
-    Share.share({ message: mensaje }).catch(() => {});
+    Share.share({ message: message }).catch(() => {});
   }, [t]);
 
   /**
@@ -78,44 +78,44 @@ export function useContactosTabViewModel() {
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      cargarEstadoApp();
-      await refrescarContactos();
+      loadAppStatus();
+      await refreshContacts();
     } finally {
       setRefreshing(false);
     }
-  }, [refrescarContactos, cargarEstadoApp]);
+  }, [refreshContacts, loadAppStatus]);
 
-  const contactosFiltrados = useMemo(() =>
-    contactos.filter(c => {
-      const nombreStr = (c.nombre || '').toLowerCase();
-      const telefonoStr = c.telefono || '';
-      return nombreStr.includes(busqueda.toLowerCase()) || telefonoStr.includes(busqueda);
+  const filteredContacts = useMemo(() =>
+    contacts.filter(c => {
+      const nameStr = (c.name || '').toLowerCase();
+      const phoneStr = c.phoneNumber || '';
+      return nameStr.includes(searchText.toLowerCase()) || phoneStr.includes(searchText);
     }),
-    [contactos, busqueda]  // ← solo recalcula cuando estos dos cambian
+    [contacts, searchText]  // ← solo recalcula cuando estos dos cambian
   );
   // Estado: ¿Está abierto el modal de acciones?
   const [modalVisible, setModalVisible] = useState(false); 
 
   
   // Estado: ¿Qué contacto se seleccionó?
-  const [contactoSeleccionado, setContactoSeleccionado] = useState<Contacto | null>(null);
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
 
   /**
    * ABRIR MODAL DE ACCIONES
    * Se ejecuta cuando el usuario toca un contacto.
    */
-  const abrirModalAcciones = useCallback((contacto: Contacto) => {
-    setContactoSeleccionado(contacto); // Guardar cuál contacto tocó
+  const openActionsModal = useCallback((contact: Contact) => {
+    setSelectedContact(contact); // Guardar cuál contacto tocó
     setModalVisible(true);              // Mostrar el modal
   }, []);
 
   /**
    * CERRAR MODAL DE ACCIONES
    */
-  const cerrarModalAcciones = useCallback(() => {
+  const closeActionsModal = useCallback(() => {
     setModalVisible(false);
     // Esperar a que termine la animación antes de limpiar
-    setTimeout(() => setContactoSeleccionado(null), 300);
+    setTimeout(() => setSelectedContact(null), 300);
   }, []);
 
   /**
@@ -123,15 +123,15 @@ export function useContactosTabViewModel() {
    * Si recibe un contacto, abre en modo "editar" (con datos precargados).
    * Si no recibe contacto, abre en modo "crear nuevo".
    */
-  const navegarAgregarOEditar = useCallback(
-    (contacto?: Contacto) => {
+  const navigateAddOrEdit = useCallback(
+    (contact?: Contact) => {
       const main = getMainStackNavigation(navigation);
       if (!main) {
         return;
       }
-      if (contacto) {
+      if (contact) {
         // Modo editar: pasar el contacto como parámetro
-        main.navigate("AgregarContacto", { contacto });
+        main.navigate("AgregarContacto", { contacto: contact });
       } else {
         // Modo crear nuevo
         main.navigate("AgregarContacto", undefined);
@@ -144,21 +144,21 @@ export function useContactosTabViewModel() {
    * IR A AGREGAR NUEVO CONTACTO
    * Se ejecuta al tocar el botón flotante "+"
    */
-  const irAgregarContacto = useCallback(() => {
-    navegarAgregarOEditar(undefined);
-  }, [navegarAgregarOEditar]);
+  const goToAddContact = useCallback(() => {
+    navigateAddOrEdit(undefined);
+  }, [navigateAddOrEdit]);
 
   /**
    * ALERTA INDIVIDUAL
    * Inicia la alerta normal (pantalla de 5 segundos) pero solo para este contacto.
    */
-  const alertarContacto = useCallback(
-    (contacto: Contacto) => {
+  const alertContact = useCallback(
+    (contact: Contact) => {
       const main = getMainStackNavigation(navigation);
       if (!main) {
         return;
       }
-      main.navigate("Activacion", { contacto });
+      main.navigate("Activacion", { contacto: contact });
     },
     [navigation],
   );
@@ -167,76 +167,76 @@ export function useContactosTabViewModel() {
    * CONFIRMAR BORRADO
    * Muestra un Alert nativo de confirmación antes de borrar.
    */
-  const confirmarBorrar = useCallback((contacto: Contacto) => {
+  const confirmDelete = useCallback((contact: Contact) => {
     Alert.alert(
       "¿Eliminar contacto?",
-      `${contacto.nombre} ya no recibirá tus alertas de emergencia.`,
+      `${contact.name} ya no recibirá tus alertas de emergencia.`,
       [
         { text: "Cancelar", style: "cancel" },
         {
           text: "Eliminar",
           style: "destructive",
           onPress: () => {
-            eliminarContacto(contacto.id);
+            removeContact(contact.id);
           },
         },
       ],
     );
-  }, [eliminarContacto]);
+  }, [removeContact]);
 
   /**
    * ACCIÓN: ACTUALIZAR
    * Se ejecuta cuando el usuario toca "Actualizar" en el modal.
    */
-  const handleActualizar = useCallback(() => {
-    if (contactoSeleccionado) {
-      navegarAgregarOEditar(contactoSeleccionado);
+  const handleUpdate = useCallback(() => {
+    if (selectedContact) {
+      navigateAddOrEdit(selectedContact);
     }
-  }, [contactoSeleccionado, navegarAgregarOEditar]);
+  }, [selectedContact, navigateAddOrEdit]);
 
   /**
    * ACCIÓN: BORRAR
    * Se ejecuta cuando el usuario toca "Borrar" en el modal.
    */
-  const handleBorrar = useCallback(() => {
-    if (contactoSeleccionado) {
-      confirmarBorrar(contactoSeleccionado);
+  const handleDelete = useCallback(() => {
+    if (selectedContact) {
+      confirmDelete(selectedContact);
     }
-  }, [contactoSeleccionado, confirmarBorrar]);
+  }, [selectedContact, confirmDelete]);
 
   /**
    * BORRAR CON SWIPE (deslizar)
    * Se ejecuta cuando el usuario desliza un contacto hacia la izquierda.
    */
-  const borrarConSwipe = useCallback((contacto: Contacto) => {
-    confirmarBorrar(contacto);
-  }, [confirmarBorrar]);
+  const deleteWithSwipe = useCallback((contact: Contact) => {
+    confirmDelete(contact);
+  }, [confirmDelete]);
 
   // Retornar todo lo que la vista necesita
   return {
     // Estado
-    contactos,
+    contacts: contacts,
     modalVisible,
-    contactoSeleccionado,
-    busqueda,
+    selectedContact: selectedContact,
+    searchText: searchText,
     loading,
     refreshing,
     onRefresh,
-    estadoApp,
-    faltanContactos: Math.max(0, CONTACTOS_RECOMENDADOS - contactos.length),
-    invitarALaApp,
+    appStatus: appStatus,
+    missingContacts: Math.max(0, RECOMMENDED_CONTACTS - contacts.length),
+    inviteToApp: inviteToApp,
     
     // Funciones de utilidad
-    formatearTelefonoMostrar,
-    contactosFiltrados,
+    formatPhoneForDisplay: formatPhoneForDisplay,
+    filteredContacts: filteredContacts,
     // Acciones
-    abrirModalAcciones,
-    cerrarModalAcciones,
-    handleActualizar,
-    handleBorrar,
-    irAgregarContacto,
-    alertarContacto,
-    borrarConSwipe,
-    setBusqueda
+    openActionsModal: openActionsModal,
+    closeActionsModal: closeActionsModal,
+    handleUpdate: handleUpdate,
+    handleDelete: handleDelete,
+    goToAddContact: goToAddContact,
+    alertContact: alertContact,
+    deleteWithSwipe: deleteWithSwipe,
+    setSearchText: setSearchText
   };
 }

@@ -1,55 +1,55 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Switch, Text, TouchableOpacity, View } from 'react-native';
-import ModalIdioma from '../../../components/ui/modalIdioma/modalIdioma';
+import LanguageModal from '../../../components/ui/modalIdioma/modalIdioma';
 import { AppMode } from '../../../contexts/ThemeContext';
 import { useLocale } from '../../../contexts/LocaleContext';
-import { obtenerEstilos } from '../styles/ajustes.styles';
-import { OPCIONES_IDIOMA, useAjustesViewModel } from '../viewModel/useAjustesViewModel';
+import { getStyles } from '../styles/ajustes.styles';
+import { LANGUAGE_OPTIONS, useSettingsViewModel } from '../viewModel/useAjustesViewModel';
 
-export default function AjustesComponent({ navigation }: any) {
+export default function SettingsComponent({ navigation }: any) {
   const {
     theme,
     toggleTheme,
     setMode,
     locale,
-    modalIdiomaVisible,
-    abrirModalIdioma,
-    cerrarModalIdioma,
-    seleccionarIdioma,
-    obtenerTextoIdioma,
-    obtenerIconoTema,
-  } = useAjustesViewModel();
+    languageModalVisible: languageModalVisible,
+    openLanguageModal: openLanguageModal,
+    closeLanguageModal: closeLanguageModal,
+    selectLanguage: selectLanguage,
+    getLanguageText: getLanguageText,
+    getThemeIcon: getThemeIcon,
+  } = useSettingsViewModel();
 
   const { t } = useLocale();
 
-  const styles = obtenerEstilos(theme);
+  const styles = getStyles(theme);
 
-  const temasExtra: { id: AppMode; color: string; label: string }[] = [
+  const extraThemes: { id: AppMode; color: string; label: string }[] = [
     { id: 'rosa',    color: '#ee108a', label: 'Rosa' },
     { id: 'vino',    color: '#770736', label: 'Vino' },
     { id: 'Azul',  color: '#0b013b', label: 'Azul' },
     { id: 'magenta', color: '#490449', label: 'Magenta' },
   ];
 
-  const esModoOscuro = theme.mode === 'dark';
+  const isDarkMode = theme.mode === 'dark';
 
   return (
     <View style={styles.container}>
 
       {/* modo claro y oscuro */}
       <View style={styles.item}>
-        <View style={styles.filaSwitch}>
+        <View style={styles.switchRow}>
           <Ionicons
-            name={esModoOscuro ? 'moon-outline' : 'sunny-outline'}
+            name={isDarkMode ? 'moon-outline' : 'sunny-outline'}
             size={18}
             color={theme.text}
             style={{ marginRight: 8 }}
           />
-          <Text style={[styles.textoSwitch, { color: theme.text }]}>
-            {obtenerIconoTema().replace(/^[^\s]+\s/, '')}
+          <Text style={[styles.switchText, { color: theme.text }]}>
+            {getThemeIcon().replace(/^[^\s]+\s/, '')}
           </Text>
           <Switch
-            value={esModoOscuro}
+            value={isDarkMode}
             onValueChange={toggleTheme}
             trackColor={{ false: '#ccc', true: theme.tabActiveColor }}
             thumbColor="#fff"
@@ -60,25 +60,25 @@ export default function AjustesComponent({ navigation }: any) {
 
       {/* temas predeterminados */}
       <View style={styles.item}>
-        <Text style={[styles.tituloSeccion, { color: theme.text }]}>
+        <Text style={[styles.sectionTitle, { color: theme.text }]}>
           {t.ajustes.temas}
         </Text>
-        <View style={styles.filaColores}>
-          {temasExtra.map((tema) => (
+        <View style={styles.colorsRow}>
+          {extraThemes.map((option) => (
             <TouchableOpacity
-              key={tema.id}
-              onPress={() => setMode(tema.id)}
-              accessibilityLabel={`${t.ajustes.tema} ${tema.label}`}
-              style={styles.circuloWrapper}
+              key={option.id}
+              onPress={() => setMode(option.id)}
+              accessibilityLabel={`${t.ajustes.tema} ${option.label}`}
+              style={styles.circleWrapper}
             >
               <View
                 style={[
-                  styles.circulo,
-                  { backgroundColor: tema.color },
-                  theme.mode === tema.id && styles.circuloActivo,
+                  styles.circle,
+                  { backgroundColor: option.color },
+                  theme.mode === option.id && styles.activeCircle,
                 ]}
               >
-                {theme.mode === tema.id && (
+                {theme.mode === option.id && (
                   <Text style={styles.checkmark}>✓</Text>
                 )}
               </View>
@@ -88,8 +88,8 @@ export default function AjustesComponent({ navigation }: any) {
       </View>
 
       {/* idioma */}
-      <TouchableOpacity onPress={abrirModalIdioma} style={styles.item}>
-        <View style={styles.filaConChevron}>
+      <TouchableOpacity onPress={openLanguageModal} style={styles.item}>
+        <View style={styles.chevronRow}>
           <Ionicons name="globe-outline" size={17} color={theme.text} style={{ marginRight: 8 }} />
           <Text style={{ color: theme.text, flex: 1, fontSize: 14 }}>{t.ajustes.idioma}</Text>
           <View
@@ -107,7 +107,7 @@ export default function AjustesComponent({ navigation }: any) {
             <Text style={{ color: theme.tabActiveColor, fontSize: 12, fontWeight: '800' }}>
               {locale.toUpperCase()}
             </Text>
-            <Text style={{ color: theme.text, fontSize: 12 }}>{obtenerTextoIdioma()}</Text>
+            <Text style={{ color: theme.text, fontSize: 12 }}>{getLanguageText()}</Text>
           </View>
           <Ionicons name="chevron-forward" size={15} color={theme.tabActiveColor} />
         </View>
@@ -118,7 +118,7 @@ export default function AjustesComponent({ navigation }: any) {
         onPress={() => navigation.navigate("MetodosActivacion")}
         style={styles.item}
       >
-        <View style={styles.filaConChevron}>
+        <View style={styles.chevronRow}>
           <Ionicons name="flash-outline" size={17} color={theme.text} style={{ marginRight: 8 }} />
           <Text style={{ color: theme.text, flex: 1, fontSize: 14 }}>{t.ajustes.metodos_activacion}</Text>
           <Ionicons name="chevron-forward" size={15} color={theme.tabActiveColor} />
@@ -130,7 +130,7 @@ export default function AjustesComponent({ navigation }: any) {
         onPress={() => navigation.navigate("Notificaciones")}
         style={styles.item}
       >
-        <View style={styles.filaConChevron}>
+        <View style={styles.chevronRow}>
           <Ionicons name="notifications-outline" size={17} color={theme.text} style={{ marginRight: 8 }} />
           <Text style={{ color: theme.text, flex: 1, fontSize: 14 }}>{t.ajustes.notificaciones}</Text>
           <Ionicons name="chevron-forward" size={15} color={theme.tabActiveColor} />
@@ -142,7 +142,7 @@ export default function AjustesComponent({ navigation }: any) {
         onPress={() => navigation.navigate("AcercaDe")}
         style={styles.item}
       >
-        <View style={styles.filaConChevron}>
+        <View style={styles.chevronRow}>
           <Ionicons name="information-circle-outline" size={17} color={theme.text} style={{ marginRight: 8 }} />
           <Text style={{ color: theme.text, flex: 1, fontSize: 14 }}>{t.ajustes.acerca_de}</Text>
           <Ionicons name="chevron-forward" size={15} color={theme.tabActiveColor} />
@@ -154,7 +154,7 @@ export default function AjustesComponent({ navigation }: any) {
         onPress={() => navigation.navigate("TutorialBienvenida")}
         style={[styles.item, { borderBottomWidth: 0 }]}
       >
-        <View style={styles.filaConChevron}>
+        <View style={styles.chevronRow}>
           <Ionicons name="school-outline" size={17} color={theme.text} style={{ marginRight: 8 }} />
           <Text style={{ color: theme.text, flex: 1, fontSize: 14 }}>{t.ajustes.ver_tutoriales}</Text>
           <Ionicons name="chevron-forward" size={15} color={theme.tabActiveColor} />
@@ -162,13 +162,13 @@ export default function AjustesComponent({ navigation }: any) {
       </TouchableOpacity>
 
       {/* modal de seleccion de idioma */}
-      <ModalIdioma
-        visible={modalIdiomaVisible}
+      <LanguageModal
+        visible={languageModalVisible}
         locale={locale}
-        opciones={OPCIONES_IDIOMA}
+        options={LANGUAGE_OPTIONS}
         theme={theme}
-        onSeleccionar={seleccionarIdioma}
-        onCerrar={cerrarModalIdioma}
+        onSelect={selectLanguage}
+        onClose={closeLanguageModal}
       />
 
     </View>

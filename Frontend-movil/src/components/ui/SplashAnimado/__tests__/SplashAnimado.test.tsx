@@ -1,7 +1,7 @@
 import { act, render, screen } from "@testing-library/react-native";
 import { AccessibilityInfo } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
-import SplashAnimado from "../SplashAnimado";
+import AnimatedSplash from "../SplashAnimado";
 
 jest.mock("expo-splash-screen", () => ({ hideAsync: jest.fn(() => Promise.resolve()) }));
 
@@ -16,13 +16,13 @@ describe("SplashAnimado", () => {
   });
 
   it("se anuncia a los lectores de pantalla con el nombre de la app", () => {
-    render(<SplashAnimado onTerminar={jest.fn()} />);
+    render(<AnimatedSplash onFinish={jest.fn()} />);
 
     expect(screen.getByLabelText("Alerta Mujer, seguridad para todas")).toBeTruthy();
   });
 
   it("oculta el splash nativo cuando la animación ya está dibujada", async () => {
-    render(<SplashAnimado onTerminar={jest.fn()} />);
+    render(<AnimatedSplash onFinish={jest.fn()} />);
 
     await act(async () => {
       screen.getByLabelText("Alerta Mujer, seguridad para todas").props.onLayout({ nativeEvent: { layout: {} } });
@@ -32,11 +32,11 @@ describe("SplashAnimado", () => {
   });
 
   it("siempre termina, aunque la animación no arranque (la app nunca queda tapada)", () => {
-    const onTerminar = jest.fn();
-    render(<SplashAnimado onTerminar={onTerminar} />);
+    const onFinish = jest.fn();
+    render(<AnimatedSplash onFinish={onFinish} />);
 
     act(() => jest.advanceTimersByTime(6000));
 
-    expect(onTerminar).toHaveBeenCalled();
+    expect(onFinish).toHaveBeenCalled();
   });
 });

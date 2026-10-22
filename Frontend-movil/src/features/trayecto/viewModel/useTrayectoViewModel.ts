@@ -6,137 +6,137 @@ import { useLocale } from "../../../contexts/LocaleContext";
 import { getOrCreateDevice } from "../../../services/devices.service";
 import { frequentLocationsService, type FrequentLocationApi } from "../../../services/frequent-locations.service";
 import {
-  alargarTrayecto,
-  cancelarTrayecto,
-  confirmarLlegada,
-  iniciarTrayecto,
-  trayectoActivo,
-  type Trayecto,
+  extendTrip,
+  cancelTrip,
+  confirmArrival,
+  startTrip,
+  activeTrip,
+  type Trip,
 } from "../../../services/safe-trips.service";
 
-export const MINUTOS_RAPIDOS = [15, 30, 45, 60, 90];
+export const QUICK_MINUTES = [15, 30, 45, 60, 90];
 
 /**
  * "Avísame si no llego": la usuaria dice a dónde va y en cuánto llega. Si no confirma a tiempo, el
  * servidor avisa a sus contactos con su última ubicación, aunque su celular se quede sin datos.
  */
-export function useTrayectoViewModel() {
+export function useTripViewModel() {
   const navigation = useNavigation();
   const { t } = useLocale();
   const tr = t.trayecto;
   const { user } = useAuth();
-  const [trayecto, setTrayecto] = useState<Trayecto | null>(null);
-  const [cargando, setCargando] = useState(true);
-  const [ocupado, setOcupado] = useState(false);
-  const [destino, setDestino] = useState("");
-  const [lugar, setLugar] = useState<FrequentLocationApi | null>(null);
-  const [minutos, setMinutos] = useState(30);
-  const [lugares, setLugares] = useState<FrequentLocationApi[]>([]);
-  const [ahora, setAhora] = useState(Date.now());
+  const [trip, setTrip] = useState<Trip | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [destination, setDestination] = useState("");
+  const [place, setPlace] = useState<FrequentLocationApi | null>(null);
+  const [minutes, setMinutes] = useState(30);
+  const [places, setPlaces] = useState<FrequentLocationApi[]>([]);
+  const [now, setNow] = useState(Date.now());
 
-  const cargar = useCallback(() => {
-    setCargando(true);
-    trayectoActivo()
-      .then(setTrayecto)
+  const load = useCallback(() => {
+    setLoading(true);
+    activeTrip()
+      .then(setTrip)
       .catch(() => {})
-      .finally(() => setCargando(false));
+      .finally(() => setLoading(false));
   }, []);
 
-  useFocusEffect(cargar);
+  useFocusEffect(load);
 
   useEffect(() => {
     if (!user?.id) return;
-    frequentLocationsService.getByUser(user.id).then(setLugares).catch(() => {});
+    frequentLocationsService.getByUser(user.id).then(setPlaces).catch(() => {});
   }, [user?.id]);
 
   // Cuenta regresiva en pantalla (cada 15 s basta: se muestra en minutos)
   useEffect(() => {
-    if (!trayecto) return;
-    const id = setInterval(() => setAhora(Date.now()), 15000);
+    if (!trip) return;
+    const id = setInterval(() => setNow(Date.now()), 15000);
     return () => clearInterval(id);
-  }, [trayecto]);
+  }, [trip]);
 
-  const elegirLugar = (l: FrequentLocationApi) => {
-    setLugar(l);
-    setDestino(l.name);
+  const choosePlace = (l: FrequentLocationApi) => {
+    setPlace(l);
+    setDestination(l.name);
   };
 
-  const cambiarDestino = (texto: string) => {
-    setDestino(texto);
-    if (lugar && texto !== lugar.name) setLugar(null);
+  const changeDestination = (text: string) => {
+    setDestination(text);
+    if (place && text !== place.name) setPlace(null);
   };
 
   const error = (e: any) =>
     Alert.alert(tr.titulo, e?.response?.data?.message ?? tr.error_conexion);
 
-  const empezar = async () => {
-    if (!destino.trim() || ocupado) return;
-    setOcupado(true);
+  const start = async () => {
+    if (!destination.trim() || busy) return;
+    setBusy(true);
     try {
       const device = await getOrCreateDevice();
-      setTrayecto(
-        await iniciarTrayecto({
-          destino: destino.trim(),
-          minutos,
+      setTrip(
+        await startTrip({
+          destination: destination.trim(),
+          minutes,
           deviceId: device.id,
-          latitude: lugar?.latitude,
-          longitude: lugar?.longitude,
+          latitude: place?.latitude,
+          longitude: place?.longitude,
         }),
       );
     } catch (e) {
       error(e);
     } finally {
-      setOcupado(false);
+      setBusy(false);
     }
   };
 
-  const accion = async (fn: () => Promise<Trayecto>, alTerminar?: (t: Trayecto) => void) => {
-    if (ocupado) return;
-    setOcupado(true);
+  const action = async (fn: () => Promise<Trip>, onDone?: (t: Trip) => void) => {
+    if (busy) return;
+    setBusy(true);
     try {
-      const actualizado = await fn();
-      if (actualizado.estado === "active") setTrayecto(actualizado);
+      const updated = await fn();
+      if (updated.status === "active") setTrip(updated);
       else {
-        setTrayecto(null);
-        alTerminar?.(actualizado);
+        setTrip(null);
+        onDone?.(updated);
       }
     } catch (e) {
       error(e);
     } finally {
-      setOcupado(false);
+      setBusy(false);
     }
   };
 
-  const llegue = () =>
-    trayecto && accion(() => confirmarLlegada(trayecto.id), () => Alert.alert(tr.llegaste_titulo, tr.llegaste_texto));
+  const arrived = () =>
+    trip && action(() => confirmArrival(trip.id), () => Alert.alert(tr.llegaste_titulo, tr.llegaste_texto));
 
-  const alargar = (min: number) => trayecto && accion(() => alargarTrayecto(trayecto.id, min));
+  const extend = (min: number) => trip && action(() => extendTrip(trip.id, min));
 
-  const cancelar = () =>
-    trayecto &&
+  const cancel = () =>
+    trip &&
     Alert.alert(tr.cancelar_titulo, tr.cancelar_texto, [
       { text: t.modal.cancelar, style: "cancel" },
-      { text: tr.cancelar_confirmar, style: "destructive", onPress: () => accion(() => cancelarTrayecto(trayecto.id)) },
+      { text: tr.cancelar_confirmar, style: "destructive", onPress: () => action(() => cancelTrip(trip.id)) },
     ]);
 
-  const minutosRestantes = trayecto ? Math.ceil((trayecto.llegada.getTime() - ahora) / 60000) : 0;
+  const minutesLeft = trip ? Math.ceil((trip.arrival.getTime() - now) / 60000) : 0;
 
   return {
-    trayecto,
-    cargando,
-    ocupado,
-    destino,
-    cambiarDestino,
-    lugares,
-    lugar,
-    elegirLugar,
-    minutos,
-    setMinutos,
-    minutosRestantes,
-    empezar,
-    llegue,
-    alargar,
-    cancelar,
-    volver: navigation.goBack,
+    trip: trip,
+    loading: loading,
+    busy: busy,
+    destination: destination,
+    changeDestination: changeDestination,
+    places: places,
+    place: place,
+    choosePlace: choosePlace,
+    minutes: minutes,
+    setMinutes: setMinutes,
+    minutesLeft: minutesLeft,
+    start: start,
+    arrived: arrived,
+    extend: extend,
+    cancel: cancel,
+    goBack: navigation.goBack,
   };
 }

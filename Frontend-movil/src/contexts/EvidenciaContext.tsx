@@ -12,23 +12,23 @@ import React, {
 const STORAGE_KEY_VIDEO = "alertamujer_grabar_video";
 const STORAGE_KEY_AUDIO = "alertamujer_grabar_audio";
 
-type EvidenciaContextValue = {
+type EvidenceContextValue = {
   // true = al activar una emergencia se graba video con la cámara (por defecto activado)
-  grabarVideo: boolean;
-  setGrabarVideo: (valor: boolean) => void;
+  recordVideo: boolean;
+  setRecordVideo: (value: boolean) => void;
   // true = al activar una emergencia se graba audio con el micrófono (por defecto activado)
-  grabarAudio: boolean;
-  setGrabarAudio: (valor: boolean) => void;
+  recordAudio: boolean;
+  setRecordAudio: (value: boolean) => void;
   // true cuando ya se leyeron los valores guardados en el teléfono
-  cargado: boolean;
+  loaded: boolean;
 };
 
-const EvidenciaContext = createContext<EvidenciaContextValue | null>(null);
+const EvidenceContext = createContext<EvidenceContextValue | null>(null);
 
-export function EvidenciaProvider({ children }: { children: React.ReactNode }) {
-  const [grabarVideo, setGrabarVideoState] = useState<boolean>(true);
-  const [grabarAudio, setGrabarAudioState] = useState<boolean>(true);
-  const [cargado, setCargado] = useState(false);
+export function EvidenceProvider({ children }: { children: React.ReactNode }) {
+  const [recordVideo, setRecordVideoState] = useState<boolean>(true);
+  const [recordAudio, setRecordAudioState] = useState<boolean>(true);
+  const [loaded, setLoaded] = useState(false);
 
   // Al abrir la app, lee lo que la usuaria dejó guardado
   useEffect(() => {
@@ -38,41 +38,41 @@ export function EvidenciaProvider({ children }: { children: React.ReactNode }) {
           AsyncStorage.getItem(STORAGE_KEY_VIDEO),
           AsyncStorage.getItem(STORAGE_KEY_AUDIO),
         ]);
-        if (rawVideo !== null) setGrabarVideoState(rawVideo === "true");
-        if (rawAudio !== null) setGrabarAudioState(rawAudio === "true");
+        if (rawVideo !== null) setRecordVideoState(rawVideo === "true");
+        if (rawAudio !== null) setRecordAudioState(rawAudio === "true");
       } catch (e) {
         console.error("No se pudo leer la preferencia de evidencias:", e);
       } finally {
-        setCargado(true);
+        setLoaded(true);
       }
     })();
   }, []);
 
-  const setGrabarVideo = useCallback((valor: boolean) => {
-    setGrabarVideoState(valor);
-    AsyncStorage.setItem(STORAGE_KEY_VIDEO, String(valor)).catch((e) =>
+  const setRecordVideo = useCallback((value: boolean) => {
+    setRecordVideoState(value);
+    AsyncStorage.setItem(STORAGE_KEY_VIDEO, String(value)).catch((e) =>
       console.error("No se pudo guardar la preferencia de video:", e),
     );
   }, []);
 
-  const setGrabarAudio = useCallback((valor: boolean) => {
-    setGrabarAudioState(valor);
-    AsyncStorage.setItem(STORAGE_KEY_AUDIO, String(valor)).catch((e) =>
+  const setRecordAudio = useCallback((value: boolean) => {
+    setRecordAudioState(value);
+    AsyncStorage.setItem(STORAGE_KEY_AUDIO, String(value)).catch((e) =>
       console.error("No se pudo guardar la preferencia de audio:", e),
     );
   }, []);
 
   const value = useMemo(
-    () => ({ grabarVideo, setGrabarVideo, grabarAudio, setGrabarAudio, cargado }),
-    [grabarVideo, setGrabarVideo, grabarAudio, setGrabarAudio, cargado],
+    () => ({ recordVideo: recordVideo, setRecordVideo: setRecordVideo, recordAudio: recordAudio, setRecordAudio: setRecordAudio, loaded: loaded }),
+    [recordVideo, setRecordVideo, recordAudio, setRecordAudio, loaded],
   );
 
-  return <EvidenciaContext.Provider value={value}>{children}</EvidenciaContext.Provider>;
+  return <EvidenceContext.Provider value={value}>{children}</EvidenceContext.Provider>;
 }
 
 // Uso: const { grabarVideo, grabarAudio } = useEvidencia();
-export function useEvidencia() {
-  const ctx = useContext(EvidenciaContext);
+export function useEvidence() {
+  const ctx = useContext(EvidenceContext);
   if (!ctx) {
     throw new Error("useEvidencia debe usarse dentro de EvidenciaProvider");
   }

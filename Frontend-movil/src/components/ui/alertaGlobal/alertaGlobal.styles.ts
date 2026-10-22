@@ -22,7 +22,7 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
   },
-  circuloIcono: {
+  iconCircle: {
     width: 84,
     height: 84,
     borderRadius: 42,
@@ -31,25 +31,25 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: 18,
   },
-  titulo: {
+  title: {
     fontSize: 21,
     fontWeight: "bold",
     color: "#2E1065",
     textAlign: "center",
     marginBottom: 8,
   },
-  mensaje: {
+  message: {
     fontSize: 15,
     color: "#666",
     textAlign: "center",
     lineHeight: 22,
     marginBottom: 26,
   },
-  botones: {
+  buttons: {
     width: "100%",
     gap: 12,
   },
-  boton: {
+  button: {
     width: "100%",
     height: 52,
     borderRadius: 25,
@@ -62,24 +62,24 @@ export const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 4,
   },
-  botonPeligro: {
+  dangerButton: {
     backgroundColor: "#D32F2F",
     shadowColor: "#D32F2F",
   },
-  botonCancelar: {
+  cancelButton: {
     backgroundColor: "#FFF",
     borderWidth: 1.5,
     borderColor: "#BC27BE",
     shadowOpacity: 0,
     elevation: 0,
   },
-  botonTexto: {
+  buttonText: {
     color: "#FFF",
     fontSize: 17,
     fontWeight: "bold",
     letterSpacing: 0.5,
   },
-  botonTextoCancelar: {
+  cancelButtonText: {
     color: "#6B3FA0",
   },
 });

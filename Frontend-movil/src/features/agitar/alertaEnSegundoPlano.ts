@@ -1,8 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Location from "expo-location";
-import { crearAlertaConReintentos, getAlerta } from "../../services/alerts.service";
+import { createAlertWithRetries, getAlert } from "../../services/alerts.service";
 import { getOrCreateDevice } from "../../services/devices.service";
-import { reportarUbicacion } from "../../services/location-reporter.service";
+import { reportLocation } from "../../services/location-reporter.service";
 import SensorSacudidas from "../../../modules/sensor-sacudidas";
 
 /**
@@ -13,13 +13,13 @@ import SensorSacudidas from "../../../modules/sensor-sacudidas";
  */
 
 // Debe coincidir con la clave de AuthContext (no se importa para no cargar React en el servicio)
-const CLAVE_SESION = "@alerta_mujer:auth";
-const INTERVALO_MS = 30 * 1000;
-const MAXIMO_MS = 3 * 60 * 60 * 1000; // el backend expira la alerta antes; esto solo evita un bucle eterno
+const SESSION_KEY = "@alerta_mujer:auth";
+const INTERVAL_MS = 30 * 1000;
+const MAX_MS = 3 * 60 * 60 * 1000; // el backend expira la alerta antes; esto solo evita un bucle eterno
 
-let alertaEnCurso: number | null = null;
+let alertInProgress: number | null = null;
 
-async function ubicacionActual(): Promise<Location.LocationObject | null> {
+async function currentLocation(): Promise<Location.LocationObject | null> {
   try {
     return await Promise.race([
       Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }),
@@ -30,72 +30,72 @@ async function ubicacionActual(): Promise<Location.LocationObject | null> {
   }
 }
 
-async function ubicacionParaLaAlerta(): Promise<Location.LocationObject | null> {
-  return (await ubicacionActual()) ?? (await Location.getLastKnownPositionAsync().catch(() => null));
+async function locationForAlert(): Promise<Location.LocationObject | null> {
+  return (await currentLocation()) ?? (await Location.getLastKnownPositionAsync().catch(() => null));
 }
 
-const METODOS = {
-  agitar: { activationMethod: "suspicious_movement", mensaje: "Alerta SOS activada al agitar el teléfono" },
-  encendido: { activationMethod: "power_button", mensaje: "Alerta SOS activada con el botón de encendido" },
+const METHODS = {
+  agitar: { activationMethod: "suspicious_movement", message: "Alerta SOS activada al agitar el teléfono" },
+  encendido: { activationMethod: "power_button", message: "Alerta SOS activada con el botón de encendido" },
 } as const;
 
-export async function crearAlertaPorSacudida(metodo: keyof typeof METODOS = "agitar"): Promise<number> {
-  const raw = await AsyncStorage.getItem(CLAVE_SESION);
-  const usuario = raw ? JSON.parse(raw).user : null;
-  if (!usuario) throw new Error("No hay sesión iniciada");
+export async function createShakeAlert(method: keyof typeof METHODS = "agitar"): Promise<number> {
+  const raw = await AsyncStorage.getItem(SESSION_KEY);
+  const user = raw ? JSON.parse(raw).user : null;
+  if (!user) throw new Error("No hay sesión iniciada");
 
-  const [device, ubicacion] = await Promise.all([getOrCreateDevice(), ubicacionParaLaAlerta()]);
+  const [device, location] = await Promise.all([getOrCreateDevice(), locationForAlert()]);
   // Con reintentos: si la red falla o el servidor está despertando, no se pierde la alerta
-  const alerta = await crearAlertaConReintentos({
-    userProfileId: usuario.id,
+  const alert = await createAlertWithRetries({
+    userProfileId: user.id,
     deviceId: device.id,
     alertType: "main",
-    activationMethod: METODOS[metodo].activationMethod,
+    activationMethod: METHODS[method].activationMethod,
     status: "active",
-    message: METODOS[metodo].mensaje,
-    latitude: ubicacion?.coords.latitude,
-    longitude: ubicacion?.coords.longitude,
+    message: METHODS[method].message,
+    latitude: location?.coords.latitude,
+    longitude: location?.coords.longitude,
   });
 
-  alertaEnCurso = alerta.id;
-  seguirUbicacion(alerta.id, Date.now());
-  return alerta.id;
+  alertInProgress = alert.id;
+  followLocation(alert.id, Date.now());
+  return alert.id;
 }
 
-async function seguirUbicacion(alertaId: number, inicio: number) {
-  while (alertaEnCurso === alertaId && Date.now() - inicio <= MAXIMO_MS) {
-    await SensorSacudidas.esperar(INTERVALO_MS);
-    if (alertaEnCurso !== alertaId) return;
+async function followLocation(alertId: number, startTime: number) {
+  while (alertInProgress === alertId && Date.now() - startTime <= MAX_MS) {
+    await SensorSacudidas.esperar(INTERVAL_MS);
+    if (alertInProgress !== alertId) return;
     // Si la alerta ya terminó (la cerró un contacto o la administración, o venció), se suelta: si no,
     // el servicio la seguiría dando por "en curso" e ignoraría las sacudidas siguientes
-    if (!(await sigueActiva(alertaId))) break;
-    const u = await ubicacionActual();
-    if (u && alertaEnCurso === alertaId) {
-      reportarUbicacion({
+    if (!(await stillActive(alertId))) break;
+    const u = await currentLocation();
+    if (u && alertInProgress === alertId) {
+      reportLocation({
         latitude: u.coords.latitude,
         longitude: u.coords.longitude,
         accuracy: u.coords.accuracy,
-        alertId: alertaId,
+        alertaId: alertId,
       }).catch(() => {});
     }
   }
-  if (alertaEnCurso === alertaId) alertaEnCurso = null;
+  if (alertInProgress === alertId) alertInProgress = null;
 }
 
 /** Sin conexión no se sabe: se asume que sigue activa para no dejar de enviar la ubicación. */
-async function sigueActiva(alertaId: number): Promise<boolean> {
+async function stillActive(alertId: number): Promise<boolean> {
   try {
-    return (await getAlerta(alertaId)).status === "active";
+    return (await getAlert(alertId)).status === "active";
   } catch {
     return true;
   }
 }
 
 /** La pantalla de alerta activa se encarga desde ahora (o la alerta terminó): deja de enviar ubicación. */
-export function tomarControlDeLaAlerta(): void {
-  alertaEnCurso = null;
+export function takeOverAlert(): void {
+  alertInProgress = null;
 }
 
-export function alertaEnSegundoPlano(): number | null {
-  return alertaEnCurso;
+export function backgroundAlert(): number | null {
+  return alertInProgress;
 }

@@ -16,7 +16,7 @@ export interface EmergencyResourceApi {
   isActive: boolean;
 }
 
-export const getRecursosEmergencia = async (): Promise<EmergencyResourceApi[]> => {
+export const getEmergencyResources = async (): Promise<EmergencyResourceApi[]> => {
   const response = await api.get<EmergencyResourceApi[]>('/api/resources');
   return response.data;
 };

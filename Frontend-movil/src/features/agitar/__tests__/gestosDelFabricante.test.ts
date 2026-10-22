@@ -1,14 +1,14 @@
-import { conflictoDeGestos } from "../gestosDelFabricante";
+import { gestureConflict } from "../gestosDelFabricante";
 
 describe("gestosDelFabricante", () => {
   it("reconoce Motorola y Lenovo sin importar mayúsculas", () => {
-    expect(conflictoDeGestos("motorola")).toBe("motorola");
-    expect(conflictoDeGestos("Motorola ")).toBe("motorola");
-    expect(conflictoDeGestos("unknown", "lenovo")).toBe("motorola");
+    expect(gestureConflict("motorola")).toBe("motorola");
+    expect(gestureConflict("Motorola ")).toBe("motorola");
+    expect(gestureConflict("unknown", "lenovo")).toBe("motorola");
   });
 
   it("otras marcas no tienen aviso específico", () => {
-    expect(conflictoDeGestos("samsung", "samsung")).toBeNull();
-    expect(conflictoDeGestos(undefined)).toBeNull();
+    expect(gestureConflict("samsung", "samsung")).toBeNull();
+    expect(gestureConflict(undefined)).toBeNull();
   });
 });

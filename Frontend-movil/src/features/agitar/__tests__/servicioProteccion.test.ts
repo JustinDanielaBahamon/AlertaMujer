@@ -18,7 +18,7 @@ jest.mock("@notifee/react-native", () => ({
   EventType: { PRESS: 1, ACTION_PRESS: 2 },
 }));
 
-let mockLector: ((m: { x: number; y: number; z: number }) => void) | null = null;
+let mockReader: ((m: { x: number; y: number; z: number }) => void) | null = null;
 jest.mock("../../../../modules/sensor-sacudidas", () => ({
   __esModule: true,
   default: {
@@ -28,9 +28,9 @@ jest.mock("../../../../modules/sensor-sacudidas", () => ({
     iniciarBotonEncendido: jest.fn(),
     detenerBotonEncendido: jest.fn(),
     esperar: jest.fn((ms: number) => new Promise((r) => setTimeout(r, ms))),
-    addListener: jest.fn((_evento: string, l) => {
-      mockLector = l;
-      return { remove: () => (mockLector = null) };
+    addListener: jest.fn((_event: string, l) => {
+      mockReader = l;
+      return { remove: () => (mockReader = null) };
     }),
   },
 }));
@@ -41,40 +41,40 @@ jest.mock("expo-location", () => ({
 }));
 
 jest.mock("../alertaEnSegundoPlano", () => ({
-  alertaEnSegundoPlano: jest.fn(() => null),
-  crearAlertaPorSacudida: jest.fn(async () => 77),
+  backgroundAlert: jest.fn(() => null),
+  createShakeAlert: jest.fn(async () => 77),
 }));
 
 import notifee from "@notifee/react-native";
 import { AppState } from "react-native";
 import * as Location from "expo-location";
-import { crearAlertaPorSacudida } from "../alertaEnSegundoPlano";
+import { createShakeAlert } from "../alertaEnSegundoPlano";
 import SensorSacudidas from "../../../../modules/sensor-sacudidas";
 import {
-  alAbrirAlertaPorSacudida,
-  alSacudirEnPantalla,
-  detenerProteccion,
-  iniciarProteccion,
-  manejarEventoProteccion,
-  registrarServicioProteccion,
+  onShakeAlertOpen,
+  onShakeOnScreen,
+  stopProtection,
+  startProtection,
+  handleProtectionEvent,
+  registerProtectionService,
 } from "../servicioProteccion";
 
 // Cuatro hachazos fuertes con calma antes y después, leídos cada 40 ms como en el servicio
-const HACHAZO = [1.3, 4.6, 5.8, 3.1, 4.2, 2.2, 1.1, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
-function sacudir() {
-  const quieto = (ms: number) => Array(ms / 40).fill(1);
-  const lecturas = [...quieto(1200), ...Array(4).fill(HACHAZO).flat(), ...quieto(1000)];
-  for (const g of lecturas) {
+const CHOP = [1.3, 4.6, 5.8, 3.1, 4.2, 2.2, 1.1, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+function shakePhone() {
+  const still = (ms: number) => Array(ms / 40).fill(1);
+  const readings = [...still(1200), ...Array(4).fill(CHOP).flat(), ...still(1000)];
+  for (const g of readings) {
     jest.setSystemTime(Date.now() + 40);
-    mockLector?.({ x: g, y: 0, z: 0 });
+    mockReader?.({ x: g, y: 0, z: 0 });
   }
 }
 
-async function encender() {
-  registrarServicioProteccion();
-  const correr = (notifee.registerForegroundService as jest.Mock).mock.calls.at(-1)[0];
-  expect(await iniciarProteccion()).toBe("activa");
-  correr(); // Notifee ejecuta la tarea al mostrar la notificación del servicio
+async function turnOn() {
+  registerProtectionService();
+  const run = (notifee.registerForegroundService as jest.Mock).mock.calls.at(-1)[0];
+  expect(await startProtection()).toBe("activa");
+  run(); // Notifee ejecuta la tarea al mostrar la notificación del servicio
 }
 
 describe("servicioProteccion", () => {
@@ -82,7 +82,7 @@ describe("servicioProteccion", () => {
     jest.useFakeTimers();
     jest.clearAllMocks();
     jest.spyOn(console, "warn").mockImplementation(() => {});
-    await detenerProteccion();
+    await stopProtection();
   });
 
   afterEach(() => jest.useRealTimers());
@@ -90,76 +90,76 @@ describe("servicioProteccion", () => {
   it("sin permiso de ubicación no enciende el servicio", async () => {
     (Location.getForegroundPermissionsAsync as jest.Mock).mockResolvedValueOnce({ granted: false, status: "denied" });
     (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValueOnce({ granted: false, status: "denied" });
-    expect(await iniciarProteccion()).toBe("sin_ubicacion");
+    expect(await startProtection()).toBe("sin_ubicacion");
     expect(notifee.displayNotification).not.toHaveBeenCalled();
   });
 
   it("lee el acelerómetro nativo, que sigue con la app minimizada, y lo suelta al apagar", async () => {
-    await encender();
+    await turnOn();
     expect(SensorSacudidas.iniciar).toHaveBeenCalledWith(40);
 
-    await detenerProteccion();
+    await stopProtection();
     expect(SensorSacudidas.detener).toHaveBeenCalled();
-    expect(mockLector).toBeNull();
+    expect(mockReader).toBeNull();
   });
 
   it("con la app en pantalla abre la cuenta regresiva de la app", async () => {
     Object.defineProperty(AppState, "currentState", { value: "active", configurable: true });
-    const oyente = jest.fn();
-    const quitar = alSacudirEnPantalla(oyente);
-    await encender();
+    const listener = jest.fn();
+    const remove = onShakeOnScreen(listener);
+    await turnOn();
 
-    sacudir();
+    shakePhone();
 
-    expect(oyente).toHaveBeenCalledTimes(1);
-    expect(crearAlertaPorSacudida).not.toHaveBeenCalled();
-    quitar();
+    expect(listener).toHaveBeenCalledTimes(1);
+    expect(createShakeAlert).not.toHaveBeenCalled();
+    remove();
   });
 
   it("en segundo plano envía la alerta tras 5 s y permite abrirla", async () => {
     Object.defineProperty(AppState, "currentState", { value: "background", configurable: true });
-    await encender();
+    await turnOn();
 
-    sacudir();
+    shakePhone();
     await jest.advanceTimersByTimeAsync(6000);
 
-    expect(crearAlertaPorSacudida).toHaveBeenCalledTimes(1);
-    const enviada = (notifee.displayNotification as jest.Mock).mock.calls.at(-1)[0];
-    expect(enviada.title).toContain("Alerta enviada");
+    expect(createShakeAlert).toHaveBeenCalledTimes(1);
+    const sent = (notifee.displayNotification as jest.Mock).mock.calls.at(-1)[0];
+    expect(sent.title).toContain("Alerta enviada");
 
-    const abrir = jest.fn();
-    manejarEventoProteccion({ type: 1, detail: { notification: enviada } } as never);
-    alAbrirAlertaPorSacudida(abrir);
-    expect(abrir).toHaveBeenCalledWith(77);
+    const open = jest.fn();
+    handleProtectionEvent({ type: 1, detail: { notification: sent } } as never);
+    onShakeAlertOpen(open);
+    expect(open).toHaveBeenCalledWith(77);
   });
 
   it("si se toca Cancelar no se envía nada", async () => {
     Object.defineProperty(AppState, "currentState", { value: "background", configurable: true });
-    await encender();
+    await turnOn();
 
-    sacudir();
+    shakePhone();
     await jest.advanceTimersByTimeAsync(2000);
-    manejarEventoProteccion({ type: 2, detail: { pressAction: { id: "cancelar_agitar" } } } as never);
+    handleProtectionEvent({ type: 2, detail: { pressAction: { id: "cancelar_agitar" } } } as never);
     await jest.advanceTimersByTimeAsync(6000);
 
-    expect(crearAlertaPorSacudida).not.toHaveBeenCalled();
+    expect(createShakeAlert).not.toHaveBeenCalled();
   });
 
   it("con el botón de encendido: 4 pulsaciones rápidas envían la alerta con ese método", async () => {
     Object.defineProperty(AppState, "currentState", { value: "background", configurable: true });
-    registrarServicioProteccion();
-    const correr = (notifee.registerForegroundService as jest.Mock).mock.calls.at(-1)[0];
-    expect(await iniciarProteccion(false, { agitar: false, encendido: true })).toBe("activa");
-    correr();
+    registerProtectionService();
+    const run = (notifee.registerForegroundService as jest.Mock).mock.calls.at(-1)[0];
+    expect(await startProtection(false, { shake: false, powerButton: true })).toBe("activa");
+    run();
     expect(SensorSacudidas.iniciarBotonEncendido).toHaveBeenCalled();
     expect(SensorSacudidas.iniciar).not.toHaveBeenCalled(); // sin acelerómetro si no se pidió agitar
 
     for (let i = 0; i < 4; i++) {
       jest.setSystemTime(Date.now() + 400);
-      (mockLector as unknown as (e: { encendida: boolean }) => void)?.({ encendida: i % 2 === 0 });
+      (mockReader as unknown as (e: { turnedOn: boolean }) => void)?.({ turnedOn: i % 2 === 0 });
     }
     await jest.advanceTimersByTimeAsync(6000);
 
-    expect(crearAlertaPorSacudida).toHaveBeenCalledWith("encendido");
+    expect(createShakeAlert).toHaveBeenCalledWith("encendido");
   });
 });

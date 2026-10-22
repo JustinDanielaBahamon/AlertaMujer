@@ -1,64 +1,64 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { enviarMensaje, leerMensajes, type MensajeAlerta, type ParticipanteChat } from "../../services/alert-chat.service";
+import { sendMessage, readMessages, type AlertMessage, type ChatParticipant } from "../../services/alert-chat.service";
 
-const REFRESCO_MS = 5000;
+const REFRESH_MS = 5000;
 
 /** Chat de la alerta: trae los mensajes nuevos cada 5 s mientras está activo y permite enviar. */
-export function useChatAlerta(participante: ParticipanteChat | null, activo: boolean) {
-  const [mensajes, setMensajes] = useState<MensajeAlerta[]>([]);
-  const [enviando, setEnviando] = useState(false);
+export function useAlertChat(participant: ChatParticipant | null, enabled: boolean) {
+  const [messages, setMessages] = useState<AlertMessage[]>([]);
+  const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const ultimoId = useRef(0);
-  const clave = participante ? JSON.stringify(participante) : null;
+  const lastId = useRef(0);
+  const key = participant ? JSON.stringify(participant) : null;
 
-  const agregar = useCallback((nuevos: MensajeAlerta[]) => {
-    if (nuevos.length === 0) return;
-    setMensajes((actuales) => {
-      const ids = new Set(actuales.map((m) => m.id));
-      const juntos = [...actuales, ...nuevos.filter((m) => !ids.has(m.id))];
-      ultimoId.current = juntos.length ? juntos[juntos.length - 1].id : 0;
-      return juntos;
+  const add = useCallback((newOnes: AlertMessage[]) => {
+    if (newOnes.length === 0) return;
+    setMessages((currentOnes) => {
+      const ids = new Set(currentOnes.map((m) => m.id));
+      const together = [...currentOnes, ...newOnes.filter((m) => !ids.has(m.id))];
+      lastId.current = together.length ? together[together.length - 1].id : 0;
+      return together;
     });
   }, []);
 
   useEffect(() => {
-    if (!participante) return undefined;
-    let vivo = true;
+    if (!participant) return undefined;
+    let alive = true;
     const leer = () =>
-      leerMensajes(participante, ultimoId.current)
-        .then((nuevos) => vivo && agregar(nuevos))
+      readMessages(participant, lastId.current)
+        .then((newOnes) => alive && add(newOnes))
         .catch(() => {
           // Sin conexión: se reintenta en la siguiente lectura
         });
     leer();
-    const t = activo ? setInterval(leer, REFRESCO_MS) : null;
+    const t = enabled ? setInterval(leer, REFRESH_MS) : null;
     return () => {
-      vivo = false;
+      alive = false;
       if (t) clearInterval(t);
     };
     // participante se compara por su contenido (clave)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clave, activo, agregar]);
+  }, [key, enabled, add]);
 
-  const enviar = useCallback(
-    async (texto: string) => {
-      const cuerpo = texto.trim();
-      if (!participante || !cuerpo || enviando) return false;
-      setEnviando(true);
+  const send = useCallback(
+    async (text: string) => {
+      const body = text.trim();
+      if (!participant || !body || sending) return false;
+      setSending(true);
       setError(null);
       try {
-        agregar([await enviarMensaje(participante, cuerpo)]);
+        add([await sendMessage(participant, body)]);
         return true;
       } catch (e: any) {
         setError(e?.response?.data?.message ?? "No se pudo enviar el mensaje. Intenta de nuevo.");
         return false;
       } finally {
-        setEnviando(false);
+        setSending(false);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [clave, enviando, agregar],
+    [key, sending, add],
   );
 
-  return { mensajes, enviar, enviando, error };
+  return { messages: messages, send: send, sending: sending, error };
 }

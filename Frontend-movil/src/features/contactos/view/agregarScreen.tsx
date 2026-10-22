@@ -12,30 +12,30 @@ import {
 import Header from "../../../components/ui/Header/header";
 import { Ionicons } from "@expo/vector-icons";
 import { createStyles } from "../style/agregarConstyle";
-import { useAgregarContactoViewModel } from "../viewModel/useAgregarContactoViewModel";
+import { useAddContactViewModel } from "../viewModel/useAgregarContactoViewModel";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { LinearGradient } from "expo-linear-gradient";
-import { esCorreoValido, textosContactoExtra } from "../contactosExtra";
+import { isValidEmail, contactExtraTexts } from "../contactosExtra";
 
 export default function AgregarContacto() {
-  const vm = useAgregarContactoViewModel();
+  const vm = useAddContactViewModel();
   const { t, locale } = useLocale();
   const { theme } = useTheme();
   const styles = createStyles(theme);
-  const extra = textosContactoExtra[locale];
+  const extra = contactExtraTexts[locale];
 
   const headerGradient: [string, string] = [theme.headercolor1, theme.headercolor2];
 
-  const nameInitial = vm.nombre.trim().charAt(0).toUpperCase() || "C";
-  const relationPreview = vm.parentesco.trim() || "Relación";
-  const phonePreview = vm.telefono.trim() || "Sin número";
-  const namePreview = vm.nombre.trim() || t.agregar.titulo_agregar;
+  const nameInitial = vm.name.trim().charAt(0).toUpperCase() || "C";
+  const relationPreview = vm.relationship.trim() || "Relación";
+  const phonePreview = vm.phoneNumber.trim() || "Sin número";
+  const namePreview = vm.name.trim() || t.agregar.titulo_agregar;
 
-  const isNameValid = vm.nombre.trim().length > 0;
-  const isRelationValid = vm.parentesco.trim().length > 0;
-  const isPhoneValid = vm.telefono.replace(/\D/g, "").length >= 10;
-  const isEmailValid = esCorreoValido(vm.correo);
+  const isNameValid = vm.name.trim().length > 0;
+  const isRelationValid = vm.relationship.trim().length > 0;
+  const isPhoneValid = vm.phoneNumber.replace(/\D/g, "").length >= 10;
+  const isEmailValid = isValidEmail(vm.email);
 
   return (
     <KeyboardAvoidingView
@@ -85,7 +85,7 @@ export default function AgregarContacto() {
               </Text>
 
               <TouchableOpacity
-                onPress={vm.seleccionarFoto}
+                onPress={vm.selectPhoto}
                 activeOpacity={0.85}
                 style={{ alignItems: "center" }}
               >
@@ -96,13 +96,13 @@ export default function AgregarContacto() {
                   borderRadius: 54,
                   padding: 3,
                   borderWidth: 2.5,
-                  borderColor: vm.fotoUri ? theme.contactAccent : theme.contactDivider,
-                  borderStyle: vm.fotoUri ? "solid" : "dashed",
+                  borderColor: vm.photoUri ? theme.contactAccent : theme.contactDivider,
+                  borderStyle: vm.photoUri ? "solid" : "dashed",
                   marginBottom: 10,
                 }}>
-                  {vm.fotoUri ? (
+                  {vm.photoUri ? (
                     <Image
-                      source={{ uri: vm.fotoUri }}
+                      source={{ uri: vm.photoUri }}
                       style={{ width: 98, height: 98, borderRadius: 49 }}
                     />
                   ) : (
@@ -151,19 +151,19 @@ export default function AgregarContacto() {
                   fontWeight: "600",
                   marginBottom: 4,
                 }}>
-                  {vm.fotoUri ? t.agregar.foto_cambiar : t.agregar.foto_agregar}
+                  {vm.photoUri ? t.agregar.foto_cambiar : t.agregar.foto_agregar}
                 </Text>
                 <Text style={{ fontSize: 11, color: theme.contactSubtext, textAlign: "center" }}>
-                  {vm.fotoUri
+                  {vm.photoUri
                     ? t.agregar.foto_galeria_cambiar
                     : t.agregar.foto_galeria_inicial}
                 </Text>
               </TouchableOpacity>
 
               {/* Botón quitar foto (solo visible si hay foto) */}
-              {vm.fotoUri && (
+              {vm.photoUri && (
                 <TouchableOpacity
-                  onPress={vm.quitarFoto}
+                  onPress={vm.removePhoto}
                   style={{
                     marginTop: 10,
                     flexDirection: "row",
@@ -201,8 +201,8 @@ export default function AgregarContacto() {
                   style={styles.inputValue}
                   placeholder={t.agregar.placeholder_nombre}
                   placeholderTextColor={theme.contactSubtext}
-                  value={vm.nombre}
-                  onChangeText={vm.setNombre}
+                  value={vm.name}
+                  onChangeText={vm.setName}
                 />
               </View>
               {isNameValid && (
@@ -219,8 +219,8 @@ export default function AgregarContacto() {
                   style={styles.inputValue}
                   placeholder={t.agregar.placeholder_parentesco}
                   placeholderTextColor={theme.contactSubtext}
-                  value={vm.parentesco}
-                  onChangeText={vm.setParentesco}
+                  value={vm.relationship}
+                  onChangeText={vm.setRelationship}
                 />
               </View>
               {isRelationValid && (
@@ -238,14 +238,14 @@ export default function AgregarContacto() {
                   placeholder={t.agregar.placeholder_telefono}
                   placeholderTextColor={theme.contactSubtext}
                   keyboardType="phone-pad"
-                  value={vm.telefono}
-                  onChangeText={vm.setTelefono}
+                  value={vm.phoneNumber}
+                  onChangeText={vm.setPhoneNumber}
                 />
               </View>
               {isPhoneValid && (
                 <Ionicons name="checkmark-circle" size={20} color="#46B987" />
               )}
-              <TouchableOpacity onPress={vm.abrirAgenda} style={styles.contactIconButton}>
+              <TouchableOpacity onPress={vm.openPhoneContacts} style={styles.contactIconButton}>
                 <Ionicons name="add" size={16} color={theme.contactAccent} />
               </TouchableOpacity>
             </View>
@@ -264,8 +264,8 @@ export default function AgregarContacto() {
                   autoCorrect={false}
                   autoComplete="email"
                   maxLength={254}
-                  value={vm.correo}
-                  onChangeText={vm.setCorreo}
+                  value={vm.email}
+                  onChangeText={vm.setEmail}
                 />
               </View>
               {isEmailValid && (
@@ -287,9 +287,9 @@ export default function AgregarContacto() {
 
             <View style={styles.previewCard}>
               <View style={{ position: "relative" }}>
-                {vm.fotoUri ? (
+                {vm.photoUri ? (
                   <Image
-                    source={{ uri: vm.fotoUri }}
+                    source={{ uri: vm.photoUri }}
                     style={[styles.previewAvatar, { borderRadius: 28 }]}
                   />
                 ) : (
@@ -335,13 +335,13 @@ export default function AgregarContacto() {
               style={styles.saveButton}
             >
               {/* ✅ guardar() ya no necesita recibir fotoUri como argumento */}
-              <TouchableOpacity style={styles.buttonInner} onPress={vm.guardar}>
+              <TouchableOpacity style={styles.buttonInner} onPress={vm.save}>
                 <Ionicons name="save-outline" size={18} color="#f7eeee" />
                 <Text style={styles.buttonTextWhite}>{t.agregar.boton_guardar_nuevo}</Text>
               </TouchableOpacity>
             </LinearGradient>
 
-            <TouchableOpacity style={styles.cancelButton} onPress={vm.cancelar}>
+            <TouchableOpacity style={styles.cancelButton} onPress={vm.cancel}>
               <Text style={styles.cancelButtonText}>{t.agregar.cancelar}</Text>
             </TouchableOpacity>
 

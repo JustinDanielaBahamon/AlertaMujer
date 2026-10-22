@@ -4,7 +4,7 @@ import { frequentLocationsService } from "../../../services/frequent-locations.s
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import * as Location from "expo-location";
-import { permisoUbicacion } from "../../../services/permisosSeguros";
+import { locationPermission } from "../../../services/permisosSeguros";
 import { LinearGradient } from "expo-linear-gradient"; // <-- NUEVA IMPORTACIÓN
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -25,50 +25,50 @@ import { useLocale } from "../../../contexts/LocaleContext";
 import { useTheme } from "../../../contexts/ThemeContext";
 import type { MainStackParamList } from "../../../navigation/types";
 import { createStyles } from "../styles/classifyZone.style";
-import BarraBusquedaDireccion from "./BarraBusquedaDireccion";
+import AddressSearchBar from "./BarraBusquedaDireccion";
 
 type NavigationProp = NativeStackNavigationProp<MainStackParamList>;
 
-type ClasificarZonaRouteProp = {
+type ClassifyZoneRouteProp = {
   key: string;
   name: "ClasificarZona";
   params?: {
     latitude?: number;
     longitude?: number;
-    editarUbicacion?: {
+    locationToEdit?: {
       id: string;
-      nombre: string;
-      notas?: string;
-      nivelRiesgo: "muy_segura" | "moderada" | "muy_insegura";
-      descripcion: string;
+      name: string;
+      notes?: string;
+      riskLevel: "muy_segura" | "moderada" | "muy_insegura";
+      description: string;
     };
   };
 };
 
-type DireccionInfo = {
-  direccion: string;
-  barrio: string;
-  municipio: string;
-  ciudad: string;
-  departamento: string;
-  pais: string;
+type AddressInfo = {
+  address: string;
+  neighborhood: string;
+  municipality: string;
+  city: string;
+  department: string;
+  country: string;
 };
 
-const SUGERENCIAS_NOMBRE = [
+const NAME_SUGGESTIONS = [
   { label: "Casa", icon: "home" as const },
   { label: "Trabajo", icon: "work" as const },
   { label: "Otro", icon: "edit" as const },
 ];
 
-export default function ClasificarZonaView() {
+export default function ClassifyZoneView() {
   const { theme } = useTheme();
   const { t } = useLocale();
   const navigation = useNavigation<NavigationProp>();
-  const route = useRoute<ClasificarZonaRouteProp>();
+  const route = useRoute<ClassifyZoneRouteProp>();
   const { user } = useAuth();
 
   // Coordenadas actuales del estado para permitir actualizaciones al presionar "Mi ubicación"
-  const editarUbicacion = route.params?.editarUbicacion;
+  const locationToEdit = route.params?.locationToEdit;
   const initialLat = route.params?.latitude ?? 2.962828;
   const initialLng = route.params?.longitude ?? -75.2855952;
 
@@ -79,29 +79,29 @@ export default function ClasificarZonaView() {
 
   const styles = createStyles(theme);
 
-  const [cargando, setCargando] = useState(true);
-  const [guardando, setGuardando] = useState(false);
-  const [nombre, setNombre] = useState(editarUbicacion?.nombre || "");
-  const [notas, setNotas] = useState(editarUbicacion?.notas || "");
-  const [errorNombre, setErrorNombre] = useState(false);
-  const [maxNotasAlcanzado, setMaxNotasAlcanzado] = useState(false);
-  const [direccionInfo, setDireccionInfo] = useState<DireccionInfo | null>(null);
-  const [direccion, setDireccion] = useState("");
-  const [ciudad, setCiudad] = useState("");
-  const [barrio, setBarrio] = useState("");
-  const [descripcion, setDescripcion] = useState(editarUbicacion?.descripcion || "");
-  const [nivelSeguridad, setNivelSeguridad] = useState<string | null>(
-    editarUbicacion?.nivelRiesgo || null
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [name, setName] = useState(locationToEdit?.name || "");
+  const [notes, setNotes] = useState(locationToEdit?.notes || "");
+  const [nameError, setNameError] = useState(false);
+  const [maxNotesReached, setMaxNotesReached] = useState(false);
+  const [addressInfo, setAddressInfo] = useState<AddressInfo | null>(null);
+  const [address, setAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [neighborhood, setNeighborhood] = useState("");
+  const [description, setDescription] = useState(locationToEdit?.description || "");
+  const [safetyLevel, setSafetyLevel] = useState<string | null>(
+    locationToEdit?.riskLevel || null
   );
 
   const [isLocationHovered, setIsLocationHovered] = useState(false);
-  const [textoBusqueda, setTextoBusqueda] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Función reutilizable de Geocodificación Inversa mejorada
   const fetchAddress = useCallback(
     async (lat: number, lng: number) => {
       try {
-        setCargando(true);
+        setLoading(true);
         const reverse = await Location.reverseGeocodeAsync({
           latitude: lat,
           longitude: lng,
@@ -110,50 +110,50 @@ export default function ClasificarZonaView() {
         const info = reverse[0];
 
         // Extracción mejorada de datos con múltiples fallbacks (solo propiedades válidas)
-        const calle = info?.street || info?.name || t.mapa.sin_calle;
-        const numero = info?.streetNumber || "";
-        const barrioDetectado = info?.district || info?.subregion || t.mapa.sector_desconocido;
-        const ciudadDetectada = info?.city || info?.region || t.mapa.ciudad_desconocida;
-        const municipioDetectado = info?.subregion || info?.city || t.mapa.municipio_desconocido;
-        const departamentoDetectado = info?.region || t.mapa.departamento_desconocido;
-        const paisDetectado = info?.country || t.mapa.pais_desconocido;
-        const codigoPostal = info?.postalCode || "";
+        const street = info?.street || info?.name || t.mapa.sin_calle;
+        const number = info?.streetNumber || "";
+        const detectedNeighborhood = info?.district || info?.subregion || t.mapa.sector_desconocido;
+        const detectedCity = info?.city || info?.region || t.mapa.ciudad_desconocida;
+        const detectedMunicipality = info?.subregion || info?.city || t.mapa.municipio_desconocido;
+        const detectedDepartment = info?.region || t.mapa.departamento_desconocido;
+        const detectedCountry = info?.country || t.mapa.pais_desconocido;
+        const postalCode = info?.postalCode || "";
 
         // Construcción de dirección más completa
-        const direccionCompleta = `${calle} ${numero}`.trim();
-        const ciudadCompleta = ciudadDetectada !== t.mapa.ciudad_desconocida
-          ? `${ciudadDetectada}, ${departamentoDetectado}`
-          : ciudadDetectada;
+        const fullAddress = `${street} ${number}`.trim();
+        const fullCity = detectedCity !== t.mapa.ciudad_desconocida
+          ? `${detectedCity}, ${detectedDepartment}`
+          : detectedCity;
 
-        const direccionData: DireccionInfo = {
-          direccion: direccionCompleta,
-          barrio: barrioDetectado,
-          municipio: municipioDetectado,
-          ciudad: ciudadCompleta,
-          departamento: departamentoDetectado,
-          pais: paisDetectado,
+        const addressData: AddressInfo = {
+          address: fullAddress,
+          neighborhood: detectedNeighborhood,
+          municipality: detectedMunicipality,
+          city: fullCity,
+          department: detectedDepartment,
+          country: detectedCountry,
         };
 
-        setDireccionInfo(direccionData);
-        setDireccion(direccionData.direccion);
-        setCiudad(direccionData.ciudad);
-        setBarrio(direccionData.barrio);
+        setAddressInfo(addressData);
+        setAddress(addressData.address);
+        setCity(addressData.city);
+        setNeighborhood(addressData.neighborhood);
 
       } catch {
-        const fallbackData: DireccionInfo = {
-          direccion: t.mapa.sin_calle,
-          barrio: t.mapa.sector_desconocido,
-          municipio: t.mapa.municipio_desconocido,
-          ciudad: t.mapa.ciudad_desconocida,
-          departamento: t.mapa.departamento_desconocido,
-          pais: t.mapa.pais_desconocido,
+        const fallbackData: AddressInfo = {
+          address: t.mapa.sin_calle,
+          neighborhood: t.mapa.sector_desconocido,
+          municipality: t.mapa.municipio_desconocido,
+          city: t.mapa.ciudad_desconocida,
+          department: t.mapa.departamento_desconocido,
+          country: t.mapa.pais_desconocido,
         };
-        setDireccionInfo(fallbackData);
-        setDireccion(fallbackData.direccion);
-        setCiudad(fallbackData.ciudad);
-        setBarrio(fallbackData.barrio);
+        setAddressInfo(fallbackData);
+        setAddress(fallbackData.address);
+        setCity(fallbackData.city);
+        setNeighborhood(fallbackData.neighborhood);
       } finally {
-        setCargando(false);
+        setLoading(false);
       }
     },
     [t]
@@ -165,12 +165,12 @@ export default function ClasificarZonaView() {
   }, [coords, fetchAddress]);
 
   // Handler para "Usar mi ubicación actual"
-  const handleUsarUbicacionActual = async () => {
+  const handleUseCurrentLocation = async () => {
     try {
-      setCargando(true);
-      if (!(await permisoUbicacion())) {
+      setLoading(true);
+      if (!(await locationPermission())) {
         Alert.alert("Permiso denegado", "Se requiere permiso de ubicación.");
-        setCargando(false);
+        setLoading(false);
         return;
       }
 
@@ -184,26 +184,26 @@ export default function ClasificarZonaView() {
       });
     } catch (err) {
       Alert.alert("Error", "No se pudo obtener la ubicación actual.");
-      setCargando(false);
+      setLoading(false);
     }
   };
 
-  const handleGuardar = async () => {
-    if (guardando) return;
+  const handleSave = async () => {
+    if (saving) return;
 
     // Validación: nombre obligatorio
-    if (!nombre.trim()) {
-      setErrorNombre(true);
+    if (!name.trim()) {
+      setNameError(true);
       return;
     }
 
     // Validación: nivel de seguridad obligatorio
-    if (!nivelSeguridad) {
+    if (!safetyLevel) {
       Alert.alert("Atención", "Por favor selecciona el nivel de seguridad de la zona.");
       return;
     }
 
-    setGuardando(true);
+    setSaving(true);
 
     try {
       if (!user?.id) {
@@ -212,12 +212,12 @@ export default function ClasificarZonaView() {
       }
 
       // Validación: verificar nombre duplicado (solo al crear)
-      if (!editarUbicacion) {
-        const existentes = await frequentLocationsService.getByUser(user.id);
-        const nombreDuplicado = existentes.some(
-          (u) => u.name.toLowerCase() === nombre.trim().toLowerCase()
+      if (!locationToEdit) {
+        const existing = await frequentLocationsService.getByUser(user.id);
+        const duplicateName = existing.some(
+          (u) => u.name.toLowerCase() === name.trim().toLowerCase()
         );
-        if (nombreDuplicado) {
+        if (duplicateName) {
           Alert.alert(
             "Nombre duplicado",
             "Ya existe una ubicación con este nombre. Por favor usa un nombre diferente."
@@ -228,17 +228,17 @@ export default function ClasificarZonaView() {
 
       const payload = {
         user_profile_id: user.id,
-        name: nombre.trim(),
-        address: direccion.trim() || direccionInfo?.direccion || "",
-        city: ciudad.trim() || direccionInfo?.ciudad || "",
+        name: name.trim(),
+        address: address.trim() || addressInfo?.address || "",
+        city: city.trim() || addressInfo?.city || "",
         latitude: coords.latitude,
         longitude: coords.longitude,
-        notes: notas.trim() || descripcion.trim() || undefined,
-        risk_level: nivelSeguridad,
+        notes: notes.trim() || description.trim() || undefined,
+        risk_level: safetyLevel,
       };
 
-      if (editarUbicacion) {
-        await frequentLocationsService.update(editarUbicacion.id, payload);
+      if (locationToEdit) {
+        await frequentLocationsService.update(locationToEdit.id, payload);
       } else {
         await frequentLocationsService.create(payload);
       }
@@ -249,11 +249,11 @@ export default function ClasificarZonaView() {
       console.error("Error al guardar ubicación:", error);
       Alert.alert("Error", "Error al guardar la ubicación");
     } finally {
-      setGuardando(false);
+      setSaving(false);
     }
   };
 
-    if (cargando && !direccionInfo) {
+    if (loading && !addressInfo) {
     return (
       <View style={[styles.loadingContainer, { backgroundColor: theme.background }]}>
         <ActivityIndicator size="large" color="#7B1DB2" />
@@ -319,13 +319,13 @@ export default function ClasificarZonaView() {
         </Text>
 
         {/* BUSCAR DIRECCIÓN */}
-        <BarraBusquedaDireccion
+        <AddressSearchBar
           style={{ marginHorizontal: 18, marginBottom: 12 }}
-          value={textoBusqueda}
-          onChangeText={setTextoBusqueda}
-          onResultado={(coord) => setCoords(coord)}
-          ciudad={
-            ciudad && ciudad !== t.mapa.ciudad_desconocida ? ciudad : undefined
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          onResult={(coord) => setCoords(coord)}
+          city={
+            city && city !== t.mapa.ciudad_desconocida ? city : undefined
           }
           placeholder="Buscar dirección (ej: Carrera 5 #12-30)"
         />
@@ -359,7 +359,7 @@ export default function ClasificarZonaView() {
 
           <TouchableOpacity 
             style={styles.mapLocationButton}
-            onPress={handleUsarUbicacionActual}
+            onPress={handleUseCurrentLocation}
           >
             <MaterialIcons
               name="my-location"
@@ -371,7 +371,7 @@ export default function ClasificarZonaView() {
 
         {/* USAR UBICACIÓN ACTUAL */}
         <Pressable
-          onPress={handleUsarUbicacionActual}
+          onPress={handleUseCurrentLocation}
           onHoverIn={() => setIsLocationHovered(true)}
           onHoverOut={() => setIsLocationHovered(false)}
           style={({ pressed }) => {
@@ -426,18 +426,18 @@ export default function ClasificarZonaView() {
               color: theme.text,
               backgroundColor: theme.card,
             },
-            errorNombre && styles.inputError,
+            nameError && styles.inputError,
           ]}
           placeholder="Ej: Casa, Trabajo, Gimnasio"
           placeholderTextColor={theme.contactSubtext}
-          value={nombre}
+          value={name}
           onChangeText={(val) => {
-            setNombre(val);
-            if (errorNombre) setErrorNombre(false);
+            setName(val);
+            if (nameError) setNameError(false);
           }}
           maxLength={100}
         />
-        {errorNombre && (
+        {nameError && (
           <View style={styles.errorRow}>
             <MaterialIcons name="error-outline" size={13} color="#D81B60" />
             <Text style={styles.errorText}>El nombre es obligatorio</Text>
@@ -445,13 +445,13 @@ export default function ClasificarZonaView() {
         )}
 
         <View style={styles.chipsRow}>
-          {SUGERENCIAS_NOMBRE.map((s) => (
+          {NAME_SUGGESTIONS.map((s) => (
             <TouchableOpacity
               key={s.label}
               style={styles.chip}
               onPress={() => {
-                setNombre(s.label);
-                setErrorNombre(false);
+                setName(s.label);
+                setNameError(false);
               }}
               activeOpacity={0.7}
             >
@@ -490,8 +490,8 @@ export default function ClasificarZonaView() {
           ]}
           placeholder="Ej: Carrera 1e Oeste #48"
           placeholderTextColor={theme.contactSubtext}
-          value={direccion}
-          onChangeText={setDireccion}
+          value={address}
+          onChangeText={setAddress}
         />
 
         {/* CIUDAD */}
@@ -508,8 +508,8 @@ export default function ClasificarZonaView() {
           ]}
           placeholder="Ej: Neiva"
           placeholderTextColor={theme.contactSubtext}
-          value={ciudad}
-          onChangeText={setCiudad}
+          value={city}
+          onChangeText={setCity}
         />
 
         {/* BARRIO */}
@@ -526,8 +526,8 @@ export default function ClasificarZonaView() {
           ]}
           placeholder="Ej: Barrio Santa Inés"
           placeholderTextColor={theme.contactSubtext}
-          value={barrio}
-          onChangeText={setBarrio}
+          value={neighborhood}
+          onChangeText={setNeighborhood}
         />
 
         {/* DESCRIPCIÓN DE LA ZONA */}
@@ -547,8 +547,8 @@ export default function ClasificarZonaView() {
           multiline
           maxLength={250}
           textAlignVertical="top"
-          value={descripcion}
-          onChangeText={setDescripcion}
+          value={description}
+          onChangeText={setDescription}
         />
         <Text
           style={[
@@ -556,7 +556,7 @@ export default function ClasificarZonaView() {
             { color: theme.contactSubtext },
           ]}
         >
-          {descripcion.length}/250
+          {description.length}/250
         </Text>
 
         {/* NOTAS ADICIONALES */}
@@ -576,10 +576,10 @@ export default function ClasificarZonaView() {
           multiline
           maxLength={200}
           textAlignVertical="top"
-          value={notas}
+          value={notes}
           onChangeText={(val) => {
-            setNotas(val);
-            setMaxNotasAlcanzado(val.length >= 200);
+            setNotes(val);
+            setMaxNotesReached(val.length >= 200);
           }}
         />
         <Text
@@ -588,9 +588,9 @@ export default function ClasificarZonaView() {
             { color: theme.contactSubtext },
           ]}
         >
-          {notas.length}/200
+          {notes.length}/200
         </Text>
-        {maxNotasAlcanzado && (
+        {maxNotesReached && (
           <View style={styles.errorRow}>
             <MaterialIcons name="warning" size={13} color="#D81B60" />
             <Text style={styles.errorText}>Máximo de caracteres alcanzado</Text>
@@ -616,9 +616,9 @@ export default function ClasificarZonaView() {
             style={[
               styles.securityOption,
               styles.verySafe,
-              nivelSeguridad === "muy_segura" && styles.selectedSecurity,
+              safetyLevel === "muy_segura" && styles.selectedSecurity,
             ]}
-            onPress={() => setNivelSeguridad("muy_segura")}
+            onPress={() => setSafetyLevel("muy_segura")}
           >
             <MaterialIcons name="verified-user" size={17} color="#7C3AED" />
             <Text style={styles.verySafeText}>Muy segura</Text>
@@ -630,9 +630,9 @@ export default function ClasificarZonaView() {
             style={[
               styles.securityOption,
               styles.moderate,
-              nivelSeguridad === "moderada" && styles.selectedSecurity,
+              safetyLevel === "moderada" && styles.selectedSecurity,
             ]}
-            onPress={() => setNivelSeguridad("moderada")}
+            onPress={() => setSafetyLevel("moderada")}
           >
             <MaterialIcons name="warning" size={17} color="#C084FC" />
             <Text style={styles.moderateText}>Moderada</Text>
@@ -644,9 +644,9 @@ export default function ClasificarZonaView() {
             style={[
               styles.securityOption,
               styles.veryUnsafe,
-              nivelSeguridad === "muy_insegura" && styles.selectedSecurity,
+              safetyLevel === "muy_insegura" && styles.selectedSecurity,
             ]}
-            onPress={() => setNivelSeguridad("muy_insegura")}
+            onPress={() => setSafetyLevel("muy_insegura")}
           >
             <MaterialIcons name="report" size={17} color="#D946EF" />
             <Text style={styles.veryUnsafeText}>Muy insegura</Text>
@@ -656,11 +656,11 @@ export default function ClasificarZonaView() {
 
         {/* GUARDAR UBICACIÓN */}
         <TouchableOpacity
-          style={[styles.submitButton, guardando && { opacity: 0.7 }]}
-          onPress={handleGuardar}
-          disabled={guardando}
+          style={[styles.submitButton, saving && { opacity: 0.7 }]}
+          onPress={handleSave}
+          disabled={saving}
         >
-          {guardando ? (
+          {saving ? (
             <ActivityIndicator color="#fff" />
           ) : (
             <>

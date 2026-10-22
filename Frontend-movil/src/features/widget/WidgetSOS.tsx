@@ -2,9 +2,9 @@ import React from "react";
 import { FlexWidget, TextWidget } from "react-native-android-widget";
 
 /** Nombre del widget en app.config.js (react-native-android-widget). */
-export const NOMBRE_WIDGET = "AlertaSOS";
+export const WIDGET_NAME = "AlertaSOS";
 /** Enlace que abre el widget: la app lo recibe y muestra la cuenta regresiva de 5 s. */
-export const ENLACE_SOS = "alertamujer://sos";
+export const SOS_LINK = "alertamujer://sos";
 
 /**
  * Widget de la pantalla de inicio: un botón SOS violeta. Al tocarlo abre la app en la cuenta
@@ -14,7 +14,7 @@ export function WidgetSOS() {
   return (
     <FlexWidget
       clickAction="OPEN_URI"
-      clickActionData={{ uri: ENLACE_SOS }}
+      clickActionData={{ uri: SOS_LINK }}
       style={{
         height: "match_parent",
         width: "match_parent",

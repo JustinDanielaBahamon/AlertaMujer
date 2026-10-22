@@ -5,8 +5,8 @@ type Insets = { top: number; bottom: number; left: number; right: number };
 
 // Estilos del mini-mapa y del mapa en pantalla completa del módulo Mapa.
 // Mismo diseño que el mapa de "Alerta de emergencia" (píldoras redondeadas, pines numerados).
-export const createMapaModalStyles = (theme: AppTheme, insets: Insets) => {
-  const sombra = {
+export const createMapModalStyles = (theme: AppTheme, insets: Insets) => {
+  const shadow = {
     shadowColor: "#000",
     shadowOpacity: 0.2,
     shadowRadius: 6,
@@ -16,18 +16,18 @@ export const createMapaModalStyles = (theme: AppTheme, insets: Insets) => {
 
   return StyleSheet.create({
     // ─── MINI-MAPA (dentro de la pantalla) ───────────────────────────────
-    mapaCard: {
+    mapCard: {
       height: 250,
       marginHorizontal: 20,
       marginVertical: 20,
       borderRadius: 28,
       overflow: "hidden",
       borderWidth: 2,
-      borderColor: theme.icono,
+      borderColor: theme.icon,
       backgroundColor: theme.card,
-      ...sombra,
+      ...shadow,
     },
-    miniMapa: {
+    miniMap: {
       flex: 1,
     },
     miniBadge: {
@@ -41,20 +41,20 @@ export const createMapaModalStyles = (theme: AppTheme, insets: Insets) => {
       height: 30,
       borderRadius: 15,
       backgroundColor: theme.containerBackground,
-      ...sombra,
+      ...shadow,
     },
-    miniBadgePunto: {
+    miniBadgeDot: {
       width: 8,
       height: 8,
       borderRadius: 4,
       backgroundColor: "#D946EF",
     },
-    miniBadgeTexto: {
+    miniBadgeText: {
       fontSize: 11,
       fontWeight: "700",
       color: theme.text,
     },
-    abrirBtn: {
+    openButton: {
       position: "absolute",
       bottom: 12,
       right: 12,
@@ -65,12 +65,12 @@ export const createMapaModalStyles = (theme: AppTheme, insets: Insets) => {
       paddingHorizontal: 14,
       borderRadius: 19,
       backgroundColor: theme.containerBackground,
-      ...sombra,
+      ...shadow,
     },
-    abrirTexto: {
+    openText: {
       fontSize: 12,
       fontWeight: "700",
-      color: theme.icono,
+      color: theme.icon,
     },
 
     // ─── PINES NUMERADOS ─────────────────────────────────────────────────
@@ -78,7 +78,7 @@ export const createMapaModalStyles = (theme: AppTheme, insets: Insets) => {
       width: 26,
       height: 26,
       borderRadius: 13,
-      backgroundColor: theme.icono,
+      backgroundColor: theme.icon,
       opacity: 0.65,
       borderWidth: 2,
       borderColor: "#FFFFFF",
@@ -90,18 +90,18 @@ export const createMapaModalStyles = (theme: AppTheme, insets: Insets) => {
       fontSize: 11,
       fontWeight: "800",
     },
-    pinActual: {
+    currentPin: {
       width: 38,
       height: 38,
       borderRadius: 19,
-      backgroundColor: theme.icono,
+      backgroundColor: theme.icon,
       borderWidth: 3,
       borderColor: "#FFFFFF",
       justifyContent: "center",
       alignItems: "center",
       elevation: 6,
     },
-    pinRuta: {
+    routePin: {
       width: 30,
       height: 30,
       borderRadius: 15,
@@ -143,12 +143,12 @@ export const createMapaModalStyles = (theme: AppTheme, insets: Insets) => {
       paddingHorizontal: 16,
       borderRadius: 23,
       backgroundColor: theme.containerBackground,
-      ...sombra,
+      ...shadow,
     },
     modalCloseText: {
       fontSize: 13,
       fontWeight: "700",
-      color: theme.icono,
+      color: theme.icon,
     },
     modalTitlePill: {
       flex: 1,
@@ -158,7 +158,7 @@ export const createMapaModalStyles = (theme: AppTheme, insets: Insets) => {
       paddingVertical: 6,
       borderRadius: 23,
       backgroundColor: theme.containerBackground,
-      ...sombra,
+      ...shadow,
     },
     modalTitle: {
       fontSize: 12,
@@ -180,7 +180,7 @@ export const createMapaModalStyles = (theme: AppTheme, insets: Insets) => {
       backgroundColor: theme.containerBackground,
       justifyContent: "center",
       alignItems: "center",
-      ...sombra,
+      ...shadow,
     },
     modalLocBtn: {
       position: "absolute",
@@ -192,7 +192,7 @@ export const createMapaModalStyles = (theme: AppTheme, insets: Insets) => {
       backgroundColor: theme.containerBackground,
       justifyContent: "center",
       alignItems: "center",
-      ...sombra,
+      ...shadow,
     },
     modalInfo: {
       position: "absolute",
@@ -203,17 +203,17 @@ export const createMapaModalStyles = (theme: AppTheme, insets: Insets) => {
       paddingVertical: 10,
       borderRadius: 18,
       backgroundColor: theme.containerBackground,
-      ...sombra,
+      ...shadow,
     },
     modalInfoText: {
       fontSize: 12,
       fontWeight: "700",
       color: theme.text,
     },
-    modalInfoBarrio: {
+    neighborhoodInfoModal: {
       fontSize: 12,
       fontWeight: "600",
-      color: theme.icono,
+      color: theme.icon,
       marginTop: 2,
     },
   });

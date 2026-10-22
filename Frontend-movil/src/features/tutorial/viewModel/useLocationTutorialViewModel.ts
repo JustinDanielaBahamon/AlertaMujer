@@ -16,7 +16,7 @@ export const MUNICIPALITIES_HUILA = [
 export const PLACEHOLDER_MUNICIPALITY = "";
 
 // Clave fija de AsyncStorage para la ubicación
-export const STORAGE_KEY_UBICACION = "@alerta_mujer:ubicacion";
+export const STORAGE_KEY_LOCATION = "@alerta_mujer:ubicacion";
 
 export interface LocationErrors {
   department: string | null;
@@ -72,7 +72,7 @@ export function useLocationTutorialViewModel() {
   const confirmLocation = useCallback(async () => {
     try {
       await AsyncStorage.setItem(
-        STORAGE_KEY_UBICACION,
+        STORAGE_KEY_LOCATION,
         JSON.stringify({ department, municipality })
       );
     } catch {

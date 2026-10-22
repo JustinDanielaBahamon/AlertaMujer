@@ -173,7 +173,7 @@ export const contactStyle = StyleSheet.create({
   },
 
   // ── Card de permisos ───────────────────────────────────────────────────────
-  permisosCard: {
+  permissionsCard: {
     borderRadius: 18,
     padding: 16,
     gap: 10,
@@ -181,20 +181,20 @@ export const contactStyle = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: CONTACT_COLORS.row1Border,
   },
-  permisosRow: {
+  permissionsRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
   },
-  permisosEmoji: {
+  permissionsEmoji: {
     fontSize: 22,
   },
-  permisosTitle: {
+  permissionsTitle: {
     fontSize: 13,
     fontWeight: "700",
     color: "#9c0aa1",
   },
-  permisosDesc: {
+  permissionsDesc: {
     fontSize: 12,
     color: "#6B7280",
     lineHeight: 18,

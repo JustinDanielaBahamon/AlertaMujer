@@ -6,53 +6,53 @@ import { Keyboard, ScrollView, View, useWindowDimensions } from "react-native";
  * Devuelve el espacio a dejar al final del ScrollView (la altura del teclado) y una función para
  * el foco del chat que desplaza la pantalla hasta dejar el campo de texto justo encima del teclado.
  */
-export function useChatSobreTeclado() {
+export function useChatAboveKeyboard() {
   const scrollRef = useRef<ScrollView>(null);
   const chatRef = useRef<View>(null);
-  const [alturaTeclado, setAlturaTeclado] = useState(0);
-  const { height: altoPantalla } = useWindowDimensions();
-  const quiereVerChat = useRef(false);
-  const desplazamiento = useRef(0);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const { height: screenHeight } = useWindowDimensions();
+  const wantsChat = useRef(false);
+  const scrollOffset = useRef(0);
 
-  const llevarAlChat = useCallback(
-    (teclado: number) => {
+  const goToChat = useCallback(
+    (keyboard: number) => {
       const scroll = scrollRef.current;
       const chat = chatRef.current;
       if (!scroll || !chat) return;
-      chat.measureInWindow((_x, y, _ancho, alto) => {
+      chat.measureInWindow((_x, y, _width, height) => {
         // Cuánto tapa el teclado el borde inferior del chat (con un pequeño margen)
-        const tapado = y + alto - (altoPantalla - teclado) + 16;
-        if (tapado > 0) scroll.scrollTo({ y: desplazamiento.current + tapado, animated: true });
+        const covered = y + height - (screenHeight - keyboard) + 16;
+        if (covered > 0) scroll.scrollTo({ y: scrollOffset.current + covered, animated: true });
       });
     },
-    [altoPantalla],
+    [screenHeight],
   );
 
   useEffect(() => {
-    const mostrar = Keyboard.addListener("keyboardDidShow", (e) => {
-      setAlturaTeclado(e.endCoordinates.height);
+    const show = Keyboard.addListener("keyboardDidShow", (e) => {
+      setKeyboardHeight(e.endCoordinates.height);
       // Se espera a que el ScrollView tenga el espacio extra antes de medir
-      if (quiereVerChat.current) setTimeout(() => llevarAlChat(e.endCoordinates.height), 50);
+      if (wantsChat.current) setTimeout(() => goToChat(e.endCoordinates.height), 50);
     });
-    const ocultar = Keyboard.addListener("keyboardDidHide", () => {
-      setAlturaTeclado(0);
-      quiereVerChat.current = false;
+    const hide = Keyboard.addListener("keyboardDidHide", () => {
+      setKeyboardHeight(0);
+      wantsChat.current = false;
     });
     return () => {
-      mostrar.remove();
-      ocultar.remove();
+      show.remove();
+      hide.remove();
     };
-  }, [llevarAlChat]);
+  }, [goToChat]);
 
   /** Para el ScrollView: guarda su desplazamiento actual (lo usa llevarAlChat). */
-  const alDesplazar = useCallback((e: { nativeEvent: { contentOffset: { y: number } } }) => {
-    desplazamiento.current = e.nativeEvent.contentOffset.y; // en un ref: no re-renderiza al desplazar
+  const onScroll = useCallback((e: { nativeEvent: { contentOffset: { y: number } } }) => {
+    scrollOffset.current = e.nativeEvent.contentOffset.y; // en un ref: no re-renderiza al desplazar
   }, []);
 
-  const alEnfocarChat = useCallback(() => {
-    quiereVerChat.current = true;
-    if (alturaTeclado > 0) llevarAlChat(alturaTeclado);
-  }, [alturaTeclado, llevarAlChat]);
+  const onChatFocus = useCallback(() => {
+    wantsChat.current = true;
+    if (keyboardHeight > 0) goToChat(keyboardHeight);
+  }, [keyboardHeight, goToChat]);
 
-  return { scrollRef, chatRef, alturaTeclado, alDesplazar, alEnfocarChat };
+  return { scrollRef, chatRef, keyboardHeight: keyboardHeight, onScroll: onScroll, onChatFocus: onChatFocus };
 }

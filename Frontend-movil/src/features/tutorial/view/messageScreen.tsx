@@ -201,12 +201,12 @@ export default function MessagesScreen({ externalVm }: Props) {
                   <View style={messageStyle.sectionLine} />
                 </View>
 
-                <View style={messageStyle.permisosCard}>
-                  <View style={messageStyle.permisosRow}>
-                    <Text style={messageStyle.permisosEmoji}>✨</Text>
+                <View style={messageStyle.permissionsCard}>
+                  <View style={messageStyle.permissionsRow}>
+                    <Text style={messageStyle.permissionsEmoji}>✨</Text>
                     <View style={{ flex: 1 }}>
-                      <Text style={messageStyle.permisosTitle}>{t.tutorial.mensaje_permisos_activa_titulo}</Text>
-                      <Text style={messageStyle.permisosDesc}>
+                      <Text style={messageStyle.permissionsTitle}>{t.tutorial.mensaje_permisos_activa_titulo}</Text>
+                      <Text style={messageStyle.permissionsDesc}>
                         {t.tutorial.mensaje_permisos_activa_desc}
                       </Text>
                     </View>

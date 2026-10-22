@@ -1,8 +1,8 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import AlertaActivaScreen from "../features/AlertaActiva/view/AlertaActivaScreen";
-import AlertaContactoScreen from "../features/AlertaContacto/view/AlertaContactoScreen";
+import ActiveAlertScreen from "../features/AlertaActiva/view/AlertaActivaScreen";
+import ContactAlertScreen from "../features/AlertaContacto/view/AlertaContactoScreen";
 import ActivacionScreen from "../features/BotonActivacion/activacion";
 import AgregarContactoScreen from "../features/contactos/view/agregarScreen";
 import DetalleAlertaScreen from "../features/historial/view/detallesAlerta"; // ← nuevo
@@ -12,14 +12,14 @@ import UbicacionesGuardadasScreen from "../features/mapa/view/UbicacionesGuardad
 import ZonasAuxiliaresScreen from "../features/mapa/view/ZonasAuxiliares";
 import HistorialRecorridosScreen from "../features/mapa/view/HistorialRecorridos";
 import GuardarRecorridoScreen from "../features/mapa/view/GuardarRecorrido";
-import PerfilScreen from "../features/perfil/view/perfilScreen";
-import AcercaDeScreen from "../features/settings/view/acercaDeScreen";
-import MetodosActivacionScreen from "../features/settings/view/metodosActivacionScreen";
-import AlertasRecibidasScreen from "../features/alertasRecibidas/view/AlertasRecibidasScreen";
-import TrayectoScreen from "../features/trayecto/view/TrayectoScreen";
-import PermisosScreen from "../features/permisos/view/PermisosScreen";
-import NotificacionesScreen from "../features/settings/view/notificacionesScreen";
-import RetencionDatosScreen from "../features/settings/view/retencionDatosScreen";
+import ProfileScreen from "../features/perfil/view/perfilScreen";
+import AboutScreen from "../features/settings/view/acercaDeScreen";
+import ActivationMethodsScreen from "../features/settings/view/metodosActivacionScreen";
+import ReceivedAlertsScreen from "../features/alertasRecibidas/view/AlertasRecibidasScreen";
+import TripScreen from "../features/trayecto/view/TrayectoScreen";
+import PermissionsScreen from "../features/permisos/view/PermisosScreen";
+import NotificationsScreen from "../features/settings/view/notificacionesScreen";
+import DataRetentionScreen from "../features/settings/view/retencionDatosScreen";
 import PrivacidadScreen from "../screens/politica/privacidad";
 import TerminosScreen from "../screens/politica/terminos";
 import BienvenidaTutorialScreen from "../screens/tutorial/bienvenida";
@@ -53,10 +53,10 @@ export default function MainNavigator({ initialRouteName }: Props) {
       <Stack.Screen name="DrawerHome" component={DrawerNavigator} />
       <Stack.Screen name="Activacion" component={ActivacionScreen} />
       {/* Sin gesto de volver: de la alerta activa solo se sale con "Estoy bien" */}
-      <Stack.Screen name="AlertaActiva" component={AlertaActivaScreen} options={{ gestureEnabled: false }} />
-      <Stack.Screen name="AlertaContacto" component={AlertaContactoScreen} />
-      <Stack.Screen name="AlertasRecibidas" component={AlertasRecibidasScreen} />
-      <Stack.Screen name="Trayecto" component={TrayectoScreen} />
+      <Stack.Screen name="AlertaActiva" component={ActiveAlertScreen} options={{ gestureEnabled: false }} />
+      <Stack.Screen name="AlertaContacto" component={ContactAlertScreen} />
+      <Stack.Screen name="AlertasRecibidas" component={ReceivedAlertsScreen} />
+      <Stack.Screen name="Trayecto" component={TripScreen} />
       <Stack.Screen name="TutorialBienvenida" component={BienvenidaTutorialScreen} />
       <Stack.Screen name="TutorialBoton" component={BotonTutorialScreen} />
       <Stack.Screen name="TutorialMensaje" component={MensajeTutorialScreen} />
@@ -66,13 +66,13 @@ export default function MainNavigator({ initialRouteName }: Props) {
       <Stack.Screen name="TutorialNotificacion" component={NotificacionTutorialScreen} />
       <Stack.Screen name="AgregarContacto" component={AgregarContactoScreen} />
       <Stack.Screen name="DetalleAlerta" component={DetalleAlertaScreen} />
-      <Stack.Screen name="Perfil" component={PerfilScreen} /> 
+      <Stack.Screen name="Perfil" component={ProfileScreen} /> 
       <Stack.Screen name="historialMapa" component={HistorialMapa}/>
-      <Stack.Screen name="MetodosActivacion" component={MetodosActivacionScreen} />
-      <Stack.Screen name="Permisos" component={PermisosScreen} />
-      <Stack.Screen name="Notificaciones" component={NotificacionesScreen} />
-      <Stack.Screen name="RetencionDatos" component={RetencionDatosScreen} />
-      <Stack.Screen name="AcercaDe" component={AcercaDeScreen} />
+      <Stack.Screen name="MetodosActivacion" component={ActivationMethodsScreen} />
+      <Stack.Screen name="Permisos" component={PermissionsScreen} />
+      <Stack.Screen name="Notificaciones" component={NotificationsScreen} />
+      <Stack.Screen name="RetencionDatos" component={DataRetentionScreen} />
+      <Stack.Screen name="AcercaDe" component={AboutScreen} />
       <Stack.Screen name="PoliticaTerminos" component={TerminosScreen} />
       <Stack.Screen name="PoliticaPrivacidad" component={PrivacidadScreen} />
       <Stack.Screen name="ClasificarZona" component={ClasificarZonaScreen} />

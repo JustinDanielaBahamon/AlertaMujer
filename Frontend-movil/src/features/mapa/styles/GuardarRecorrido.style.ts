@@ -57,12 +57,12 @@ export const styles = StyleSheet.create({
      MÉTODO DE SELECCIÓN
   ========================= */
 
-  metodoContainer: {
+  methodContainer: {
     flexDirection: "row" as const,
     gap: 12,
   },
 
-  metodoButton: {
+  methodButton: {
     flex: 1,
     flexDirection: "row" as const,
     alignItems: "center" as const,
@@ -74,11 +74,11 @@ export const styles = StyleSheet.create({
     gap: 8,
   },
 
-  metodoButtonActive: {
+  methodButtonActive: {
     backgroundColor: "rgba(123, 27, 178, 0.1)",
   },
 
-  metodoButtonText: {
+  methodButtonText: {
     fontSize: 14,
     fontWeight: "600" as const,
   },
@@ -147,7 +147,7 @@ export const styles = StyleSheet.create({
      PUNTOS DEL RECORRIDO
   ========================= */
 
-  puntoButton: {
+  pointButton: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
     paddingVertical: 14,
@@ -157,11 +157,11 @@ export const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
-  puntoButtonSelected: {
+  pointButtonSelected: {
     backgroundColor: "rgba(123, 29, 178, 0.05)",
   },
 
-  puntoIcon: {
+  pointIcon: {
     width: 44,
     height: 44,
     borderRadius: 22,
@@ -170,21 +170,21 @@ export const styles = StyleSheet.create({
     marginRight: 12,
   },
 
-  puntoInfo: {
+  pointInfo: {
     flex: 1,
   },
 
-  puntoLabel: {
+  pointLabel: {
     fontSize: 15,
     fontWeight: "600" as const,
     marginBottom: 4,
   },
 
-  puntoCoordenadas: {
+  pointCoordinates: {
     fontSize: 13,
   },
 
-  puntoPlaceholder: {
+  pointPlaceholder: {
     fontSize: 13,
     fontStyle: "italic" as const,
   },
@@ -193,7 +193,7 @@ export const styles = StyleSheet.create({
      CAMPOS DE NOMBRE
   ========================= */
 
-  nombreInputContainer: {
+  nameInputContainer: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
     paddingHorizontal: 12,
@@ -205,7 +205,7 @@ export const styles = StyleSheet.create({
     marginBottom: 12,
   },
 
-  nombreInput: {
+  nameInput: {
     flex: 1,
     fontSize: 14,
   },
@@ -296,7 +296,7 @@ export const styles = StyleSheet.create({
     maxHeight: 400,
   },
 
-  ubicacionItem: {
+  locationItem: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
     paddingVertical: 14,
@@ -305,7 +305,7 @@ export const styles = StyleSheet.create({
     marginBottom: 8,
   },
 
-  ubicacionIcon: {
+  locationIcon: {
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -315,17 +315,17 @@ export const styles = StyleSheet.create({
     marginRight: 12,
   },
 
-  ubicacionInfo: {
+  locationInfo: {
     flex: 1,
   },
 
-  ubicacionNombre: {
+  locationName: {
     fontSize: 15,
     fontWeight: "600" as const,
     marginBottom: 2,
   },
 
-  ubicacionDireccion: {
+  locationAddress: {
     fontSize: 13,
   },
 

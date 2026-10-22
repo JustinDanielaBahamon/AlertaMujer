@@ -15,7 +15,7 @@ export const createStyles = (
   const horizontalPadding = Math.max(16, Math.min(width * 0.05, 32));
   const mapHeight = Math.round(Math.min(Math.max(height * 0.36, 220), 380));
 
-  const sombra = {
+  const shadow = {
     shadowColor: "#000",
     shadowOpacity: 0.2,
     shadowRadius: 6,
@@ -59,12 +59,12 @@ export const createStyles = (
       flexShrink: 1,
       fontSize: 12,
       fontWeight: "700" as const,
-      color: theme.icono,
+      color: theme.icon,
     },
     title: {
       fontSize: isCompact ? 22 : isWide ? 30 : 26,
       fontWeight: "800" as const,
-      color: theme.icono,
+      color: theme.icon,
       textAlign: "center" as const,
     },
     subtitle: {
@@ -102,7 +102,7 @@ export const createStyles = (
       fontSize: 13,
       textAlign: "center" as const,
     },
-    pillUbicacion: {
+    locationPill: {
       position: "absolute" as const,
       top: 12,
       left: 12,
@@ -126,19 +126,19 @@ export const createStyles = (
       opacity: 0.65,
       marginTop: 1,
     },
-    pillBarrioRow: {
+    neighborhoodPillRow: {
       flexDirection: "row" as const,
       alignItems: "center" as const,
       gap: 3,
       marginTop: 2,
     },
-    pillBarrio: {
+    neighborhoodPill: {
       flexShrink: 1,
       fontSize: 9.5,
       fontWeight: "700" as const,
-      color: theme.icono,
+      color: theme.icon,
     },
-    btnMaps: {
+    mapsBtn: {
       position: "absolute" as const,
       bottom: 12,
       right: 12,
@@ -152,10 +152,10 @@ export const createStyles = (
       borderWidth: 1,
       borderColor: theme.contactDivider,
     },
-    btnMapsText: {
+    mapsBtnText: {
       fontSize: 12,
       fontWeight: "700" as const,
-      color: theme.icono,
+      color: theme.icon,
     },
 
     // Pines numerados
@@ -163,7 +163,7 @@ export const createStyles = (
       width: 26,
       height: 26,
       borderRadius: 13,
-      backgroundColor: theme.icono,
+      backgroundColor: theme.icon,
       opacity: 0.65,
       borderWidth: 2,
       borderColor: "#FFFFFF",
@@ -175,18 +175,18 @@ export const createStyles = (
       fontSize: 11,
       fontWeight: "800" as const,
     },
-    pinActual: {
+    currentPin: {
       width: 38,
       height: 38,
       borderRadius: 19,
-      backgroundColor: theme.icono,
+      backgroundColor: theme.icon,
       borderWidth: 3,
       borderColor: "#FFFFFF",
       justifyContent: "center" as const,
       alignItems: "center" as const,
       elevation: 6,
     },
-    pinActualText: {
+    currentPinText: {
       color: "#FFFFFF",
       fontSize: 15,
       fontWeight: "900" as const,
@@ -237,7 +237,7 @@ export const createStyles = (
     liveBadgeText: {
       fontSize: 11,
       fontWeight: "700" as const,
-      color: theme.icono,
+      color: theme.icon,
     },
     dataRow: {
       flexDirection: "row" as const,
@@ -275,7 +275,7 @@ export const createStyles = (
     },
 
     // Aviso de estado
-    avisoCard: {
+    noticeCard: {
       flexDirection: "row" as const,
       alignItems: "flex-start" as const,
       gap: 12,
@@ -284,7 +284,7 @@ export const createStyles = (
       padding: 16,
       marginBottom: 14,
     },
-    avisoIcon: {
+    noticeIcon: {
       width: 36,
       height: 36,
       borderRadius: 18,
@@ -292,18 +292,18 @@ export const createStyles = (
       justifyContent: "center" as const,
       alignItems: "center" as const,
     },
-    avisoTitle: {
+    noticeTitle: {
       fontSize: 14,
       fontWeight: "800" as const,
-      color: theme.icono,
+      color: theme.icon,
     },
-    avisoText: {
+    noticeText: {
       fontSize: 12.5,
       lineHeight: 18,
       color: theme.text,
       marginTop: 3,
     },
-    avisoBold: {
+    noticeBold: {
       fontWeight: "700" as const,
     },
     errorText: {
@@ -313,7 +313,7 @@ export const createStyles = (
     },
 
     // Historial (línea de tiempo)
-    historialHeader: {
+    historyHeader: {
       flexDirection: "row" as const,
       flexWrap: "wrap" as const,
       alignItems: "center" as const,
@@ -321,19 +321,19 @@ export const createStyles = (
       gap: 6,
       marginBottom: 16,
     },
-    historialTitleRow: {
+    historyTitleRow: {
       flexShrink: 1,
       flexDirection: "row" as const,
       alignItems: "center" as const,
       gap: 8,
     },
-    historialDot: {
+    historyDot: {
       width: 8,
       height: 8,
       borderRadius: 4,
-      backgroundColor: theme.icono,
+      backgroundColor: theme.icon,
     },
-    historialSub: {
+    historySub: {
       fontSize: 11,
       color: theme.text,
       opacity: 0.55,
@@ -370,7 +370,7 @@ export const createStyles = (
       width: 10,
       height: 10,
       borderRadius: 5,
-      backgroundColor: theme.icono,
+      backgroundColor: theme.icon,
       opacity: 0.55,
       borderWidth: 2,
       borderColor: theme.containerBackground,
@@ -381,21 +381,21 @@ export const createStyles = (
       alignItems: "center" as const,
       gap: 8,
     },
-    timelineTimeActual: {
+    timelineTimeCurrent: {
       fontSize: 12,
       fontWeight: "800" as const,
-      color: theme.icono,
+      color: theme.icon,
     },
     timelineTime: {
       fontSize: 12,
       fontWeight: "600" as const,
       color: theme.text,
     },
-    recienteTag: {
+    recentTag: {
       fontSize: 9.5,
       fontWeight: "800" as const,
       textTransform: "uppercase" as const,
-      color: theme.icono,
+      color: theme.icon,
       backgroundColor: theme.card,
       paddingHorizontal: 6,
       paddingVertical: 2,
@@ -408,17 +408,17 @@ export const createStyles = (
       opacity: 0.65,
       marginTop: 3,
     },
-    timelineBarrioRow: {
+    timelineNeighborhoodRow: {
       flexDirection: "row" as const,
       alignItems: "center" as const,
       gap: 3,
       marginTop: 3,
     },
-    timelineBarrio: {
+    timelineNeighborhood: {
       flexShrink: 1,
       fontSize: 12,
       fontWeight: "600" as const,
-      color: theme.icono,
+      color: theme.icon,
     },
     timelineOffset: {
       fontSize: 11,
@@ -426,12 +426,12 @@ export const createStyles = (
       color: theme.text,
       opacity: 0.5,
     },
-    timelineActual: {
+    timelineCurrent: {
       fontSize: 11,
       fontWeight: "700" as const,
-      color: theme.icono,
+      color: theme.icon,
     },
-    sinRegistros: {
+    noRecords: {
       fontSize: 13,
       color: theme.text,
       opacity: 0.6,
@@ -439,7 +439,7 @@ export const createStyles = (
       paddingVertical: 8,
     },
 
-    consejo: {
+    tip: {
       textAlign: "center" as const,
       fontSize: 12,
       color: theme.text,
@@ -455,7 +455,7 @@ export const createStyles = (
       gap: 10,
       backgroundColor: theme.containerBackground,
       borderWidth: 1.5,
-      borderColor: theme.icono,
+      borderColor: theme.icon,
       borderRadius: 18,
       paddingVertical: 14,
       marginTop: 14,
@@ -463,7 +463,7 @@ export const createStyles = (
     callText: {
       fontSize: 16,
       fontWeight: "800" as const,
-      color: theme.icono,
+      color: theme.icon,
     },
 
     // Ventana emergente del mapa
@@ -491,12 +491,12 @@ export const createStyles = (
       paddingHorizontal: 16,
       borderRadius: 23,
       backgroundColor: theme.containerBackground,
-      ...sombra,
+      ...shadow,
     },
     modalCloseText: {
       fontSize: 13,
       fontWeight: "700" as const,
-      color: theme.icono,
+      color: theme.icon,
     },
     modalTitlePill: {
       flex: 1,
@@ -506,7 +506,7 @@ export const createStyles = (
       paddingVertical: 6,
       borderRadius: 23,
       backgroundColor: theme.containerBackground,
-      ...sombra,
+      ...shadow,
     },
     modalTitle: {
       fontSize: 12,
@@ -528,7 +528,7 @@ export const createStyles = (
       backgroundColor: theme.containerBackground,
       justifyContent: "center" as const,
       alignItems: "center" as const,
-      ...sombra,
+      ...shadow,
     },
     modalInfo: {
       position: "absolute" as const,
@@ -539,17 +539,17 @@ export const createStyles = (
       paddingVertical: 10,
       borderRadius: 18,
       backgroundColor: theme.containerBackground,
-      ...sombra,
+      ...shadow,
     },
     modalInfoText: {
       fontSize: 12,
       fontWeight: "700" as const,
       color: theme.text,
     },
-    modalInfoBarrio: {
+    neighborhoodInfoModal: {
       fontSize: 12,
       fontWeight: "600" as const,
-      color: theme.icono,
+      color: theme.icon,
       marginTop: 2,
     },
   };

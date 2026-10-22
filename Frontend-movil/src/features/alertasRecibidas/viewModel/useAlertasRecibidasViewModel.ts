@@ -4,83 +4,83 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Alert } from "react-native";
 import { useLocale } from "../../../contexts/LocaleContext";
 import type { MainStackParamList } from "../../../navigation/types";
-import { getAlertasRecibidas, getCodigoSeguimiento, type AlertaRecibida } from "../../../services/received-alerts.service";
+import { getReceivedAlerts, getTrackingCode, type ReceivedAlert } from "../../../services/received-alerts.service";
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
 
 // Mientras hay una alerta activa la lista se actualiza sola
-const REFRESCO_MS = 30_000;
+const REFRESH_MS = 30_000;
 
 /**
  * Alertas de las personas que tienen a la usuaria como contacto de emergencia: por si no alcanzó a
  * atender la alarma, aquí puede ver qué pasó y abrir el seguimiento mientras siga disponible.
  */
-export function useAlertasRecibidasViewModel() {
+export function useReceivedAlertsViewModel() {
   const navigation = useNavigation<Nav>();
   const { t } = useLocale();
-  const [alertas, setAlertas] = useState<AlertaRecibida[]>([]);
-  const [cargando, setCargando] = useState(true);
+  const [alerts, setAlerts] = useState<ReceivedAlert[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [abriendo, setAbriendo] = useState<number | null>(null);
-  const enFoco = useRef(false);
+  const [opening, setOpening] = useState<number | null>(null);
+  const focused = useRef(false);
 
-  const cargar = useCallback(async () => {
+  const load = useCallback(async () => {
     try {
-      setAlertas(await getAlertasRecibidas());
+      setAlerts(await getReceivedAlerts());
       setError(false);
     } catch {
       setError(true);
     } finally {
-      setCargando(false);
+      setLoading(false);
     }
   }, []);
 
   useFocusEffect(
     useCallback(() => {
-      enFoco.current = true;
-      cargar();
+      focused.current = true;
+      load();
       return () => {
-        enFoco.current = false;
+        focused.current = false;
       };
-    }, [cargar]),
+    }, [load]),
   );
 
-  const hayActivas = alertas.some((a) => a.activa);
+  const hasActive = alerts.some((a) => a.active);
   useEffect(() => {
-    if (!hayActivas) return;
-    const id = setInterval(() => enFoco.current && cargar(), REFRESCO_MS);
+    if (!hasActive) return;
+    const id = setInterval(() => focused.current && load(), REFRESH_MS);
     return () => clearInterval(id);
-  }, [hayActivas, cargar]);
+  }, [hasActive, load]);
 
-  const abrir = useCallback(
-    async (alerta: AlertaRecibida) => {
-      if (!alerta.seguimientoDisponible || abriendo !== null) return;
-      setAbriendo(alerta.id);
+  const open = useCallback(
+    async (alert: ReceivedAlert) => {
+      if (!alert.trackingAvailable || opening !== null) return;
+      setOpening(alert.id);
       try {
-        const codigo = await getCodigoSeguimiento(alerta.id);
+        const code = await getTrackingCode(alert.id);
         navigation.navigate("AlertaContacto", {
-          alertaId: alerta.id,
-          nombreUsuaria: alerta.nombre || undefined,
-          codigo,
+          alertaId: alert.id,
+          nombreUsuaria: alert.name || undefined,
+          codigo: code,
         });
       } catch {
         Alert.alert(t.alertasRecibidas.titulo_header, t.alertasRecibidas.error_seguimiento);
-        cargar();
+        load();
       } finally {
-        setAbriendo(null);
+        setOpening(null);
       }
     },
-    [abriendo, navigation, t, cargar],
+    [opening, navigation, t, load],
   );
 
   return {
-    activas: alertas.filter((a) => a.activa),
-    anteriores: alertas.filter((a) => !a.activa),
-    cargando,
+    activeOnes: alerts.filter((a) => a.active),
+    previousOnes: alerts.filter((a) => !a.active),
+    loading: loading,
     error,
-    abriendo,
-    recargar: cargar,
-    abrir,
-    volver: navigation.goBack,
+    opening: opening,
+    reload: load,
+    open: open,
+    goBack: navigation.goBack,
   };
 }

@@ -173,7 +173,7 @@ export const securityStyle  = StyleSheet.create({
   },
 
   // ── Card de permisos ───────────────────────────────────────────────────────
-  permisosCard: {
+  permissionsCard: {
     borderRadius: 18,
     padding: 16,
     gap: 12,
@@ -181,27 +181,27 @@ export const securityStyle  = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: SECURITY_COLORS.row1Border,
   },
-  permisosRow: {
+  permissionsRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
   },
-  permisosSeparator: {
+  permissionsSeparator: {
     height: 1,
     backgroundColor: SECURITY_COLORS.sectionLine,
   },
-  permisosEmoji: {
+  permissionsEmoji: {
     fontSize: 22,
   },
-  permisosTitleWrap: {
+  permissionsTitleWrap: {
     flex: 1,
   },
-  permisosTitle: {
+  permissionsTitle: {
     fontSize: 13,
     fontWeight: "700",
     color: "#4A148C",
   },
-  permisosDesc: {
+  permissionsDesc: {
     fontSize: 12,
     color: "#6B7280",
     lineHeight: 18,

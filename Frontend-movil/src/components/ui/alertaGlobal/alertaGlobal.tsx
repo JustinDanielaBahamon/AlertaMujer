@@ -13,42 +13,42 @@ import { styles } from "./alertaGlobal.styles";
  * Uso: se monta <AlertaGlobalHost /> una sola vez en App.tsx.
  */
 
-type AlertaTipo = "exito" | "error" | "aviso" | "peligro";
+type AlertType = "exito" | "error" | "aviso" | "peligro";
 type IconName = React.ComponentProps<typeof MaterialIcons>["name"];
 
-type Boton = {
+type DialogButton = {
   text?: string;
   onPress?: (value?: string) => void;
   style?: "default" | "cancel" | "destructive";
 };
 
-type AlertaItem = {
-  titulo: string;
-  mensaje: string;
-  botones: Boton[];
-  tipo: AlertaTipo;
+type AlertItem = {
+  title: string;
+  message: string;
+  buttons: DialogButton[];
+  type: AlertType;
   cancelable: boolean;
 };
 
 const CONFIG: Record<
-  AlertaTipo,
-  { icono: IconName; color: string; fondo: string }
+  AlertType,
+  { icon: IconName; color: string; background: string }
 > = {
-  exito: { icono: "check", color: "#6B3FA0", fondo: "#F3E8FF" },
-  error: { icono: "close", color: "#D32F2F", fondo: "#FDECEC" },
-  aviso: { icono: "priority-high", color: "#BC27BE", fondo: "#FBE9FB" },
-  peligro: { icono: "delete-outline", color: "#D32F2F", fondo: "#FDECEC" },
+  exito: { icon: "check", color: "#6B3FA0", background: "#F3E8FF" },
+  error: { icon: "close", color: "#D32F2F", background: "#FDECEC" },
+  aviso: { icon: "priority-high", color: "#BC27BE", background: "#FBE9FB" },
+  peligro: { icon: "delete-outline", color: "#D32F2F", background: "#FDECEC" },
 };
 
 // Decide el icono según lo que dice el mensaje
-function inferirTipo(titulo: string, mensaje: string, botones: Boton[]): AlertaTipo {
-  if (botones.some((b) => b.style === "destructive")) return "peligro";
+function inferType(title: string, message: string, buttons: DialogButton[]): AlertType {
+  if (buttons.some((b) => b.style === "destructive")) return "peligro";
 
-  const texto = `${titulo} ${mensaje}`.toLowerCase();
+  const text = `${title} ${message}`.toLowerCase();
 
   if (
     /error|erro|erreur|no se pudo|no fue posible|no est[aá] instalado|denegad|inv[aá]lid|incomplet|duplicad|l[ií]mite|denied|invalid|incomplete|duplicate|failed|impossible|n[ãa]o foi poss/.test(
-      texto
+      text
     )
   ) {
     return "error";
@@ -56,7 +56,7 @@ function inferirTipo(titulo: string, mensaje: string, botones: Boton[]): AlertaT
 
   if (
     /guardad|exitos|[eé]xito|enviad|actualizad|cread|success|saved|sent|updated|enregistr|salv|succ[eè]s|sucesso/.test(
-      texto
+      text
     )
   ) {
     return "exito";
@@ -66,70 +66,70 @@ function inferirTipo(titulo: string, mensaje: string, botones: Boton[]): AlertaT
 }
 
 // ─── Cola + conexión con el componente ───────────────────────────────────────
-type Listener = (a: AlertaItem) => void;
+type Listener = (a: AlertItem) => void;
 let listener: Listener | null = null;
-const pendientes: AlertaItem[] = [];
+const pendingItems: AlertItem[] = [];
 
-function mostrar(
-  titulo?: string,
-  mensaje?: string,
-  botones?: Boton[],
+function show(
+  title?: string,
+  message?: string,
+  buttons?: DialogButton[],
   options?: { cancelable?: boolean }
 ) {
-  const lista = botones ?? [];
-  const item: AlertaItem = {
-    titulo: titulo ?? "",
-    mensaje: mensaje ?? "",
-    botones: lista,
-    tipo: inferirTipo(titulo ?? "", mensaje ?? "", lista),
+  const list = buttons ?? [];
+  const item: AlertItem = {
+    title: title ?? "",
+    message: message ?? "",
+    buttons: list,
+    type: inferType(title ?? "", message ?? "", list),
     cancelable: options?.cancelable ?? false,
   };
   if (listener) listener(item);
-  else pendientes.push(item); // todavía no se monta el componente
+  else pendingItems.push(item); // todavía no se monta el componente
 }
 
 // Cambia Alert.alert y alert() de toda la app por el diseño nuevo
-Alert.alert = (titulo, mensaje, botones, options) =>
-  mostrar(titulo, mensaje, botones as Boton[] | undefined, options);
+Alert.alert = (title, message, buttons, options) =>
+  show(title, message, buttons as DialogButton[] | undefined, options);
 
-(globalThis as any).alert = (mensaje?: unknown) =>
-  mostrar("", mensaje == null ? "" : String(mensaje));
+(globalThis as any).alert = (message?: unknown) =>
+  show("", message == null ? "" : String(message));
 
 // ─── Componente ──────────────────────────────────────────────────────────────
-export default function AlertaGlobalHost() {
+export default function GlobalAlertHost() {
   const { t } = useLocale();
-  const [actual, setActual] = useState<AlertaItem | null>(null);
+  const [current, setCurrent] = useState<AlertItem | null>(null);
 
   useEffect(() => {
-    listener = (item) => setActual(item);
+    listener = (item) => setCurrent(item);
     // Si hubo alertas antes de montarse, mostrar la última
-    const ultima = pendientes.pop();
-    pendientes.length = 0;
-    if (ultima) setActual(ultima);
+    const latest = pendingItems.pop();
+    pendingItems.length = 0;
+    if (latest) setCurrent(latest);
     return () => {
       listener = null;
     };
   }, []);
 
-  const cerrar = (boton?: Boton) => {
-    setActual(null);
-    boton?.onPress?.();
+  const close = (button?: DialogButton) => {
+    setCurrent(null);
+    button?.onPress?.();
   };
 
-  if (!actual) return null;
+  if (!current) return null;
 
-  const cfg = CONFIG[actual.tipo];
+  const cfg = CONFIG[current.type];
 
   // Primero las acciones y al final "Cancelar"
-  const botones: Boton[] =
-    actual.botones.length > 0
+  const buttons: DialogButton[] =
+    current.buttons.length > 0
       ? [
-          ...actual.botones.filter((b) => b.style !== "cancel"),
-          ...actual.botones.filter((b) => b.style === "cancel"),
+          ...current.buttons.filter((b) => b.style !== "cancel"),
+          ...current.buttons.filter((b) => b.style === "cancel"),
         ]
       : [{ text: t.modal.aceptar }];
 
-  const botonCancelar = actual.botones.find((b) => b.style === "cancel");
+  const cancelButton = current.buttons.find((b) => b.style === "cancel");
 
   return (
     <Modal
@@ -139,40 +139,40 @@ export default function AlertaGlobalHost() {
       statusBarTranslucent
       onRequestClose={() => {
         // Botón "atrás" de Android
-        if (botonCancelar) cerrar(botonCancelar);
-        else if (actual.cancelable || actual.botones.length <= 1) cerrar();
+        if (cancelButton) close(cancelButton);
+        else if (current.cancelable || current.buttons.length <= 1) close();
       }}
     >
       <View style={styles.overlay}>
         <View style={styles.card}>
           <View
             style={[
-              styles.circuloIcono,
-              { backgroundColor: cfg.fondo, borderColor: cfg.color },
+              styles.iconCircle,
+              { backgroundColor: cfg.background, borderColor: cfg.color },
             ]}
           >
-            <MaterialIcons name={cfg.icono} size={42} color={cfg.color} />
+            <MaterialIcons name={cfg.icon} size={42} color={cfg.color} />
           </View>
 
-          {actual.titulo ? <Text style={styles.titulo}>{actual.titulo}</Text> : null}
-          {actual.mensaje ? <Text style={styles.mensaje}>{actual.mensaje}</Text> : null}
+          {current.title ? <Text style={styles.title}>{current.title}</Text> : null}
+          {current.message ? <Text style={styles.message}>{current.message}</Text> : null}
 
-          <View style={styles.botones}>
-            {botones.map((b, i) => {
-              const esCancelar = b.style === "cancel";
-              const esPeligro = b.style === "destructive";
+          <View style={styles.buttons}>
+            {buttons.map((b, i) => {
+              const isCancel = b.style === "cancel";
+              const isDanger = b.style === "destructive";
               return (
                 <TouchableOpacity
                   key={`${b.text}-${i}`}
                   style={[
-                    styles.boton,
-                    esPeligro && styles.botonPeligro,
-                    esCancelar && styles.botonCancelar,
+                    styles.button,
+                    isDanger && styles.dangerButton,
+                    isCancel && styles.cancelButton,
                   ]}
-                  onPress={() => cerrar(b)}
+                  onPress={() => close(b)}
                   activeOpacity={0.8}
                 >
-                  <Text style={[styles.botonTexto, esCancelar && styles.botonTextoCancelar]}>
+                  <Text style={[styles.buttonText, isCancel && styles.cancelButtonText]}>
                     {b.text ?? t.modal.aceptar}
                   </Text>
                 </TouchableOpacity>

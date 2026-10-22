@@ -1,18 +1,18 @@
 import * as Location from "expo-location";
 
-export type LugarPunto = {
-  barrio: string | null; // barrio / sector
-  lugar: string | null; // sitio (almacén, colegio...) o, si no hay, la vía (ej. "Carrera 7")
+export type PointPlace = {
+  neighborhood: string | null; // barrio / sector
+  place: string | null; // sitio (almacén, colegio...) o, si no hay, la vía (ej. "Carrera 7")
 };
 
-const limpiar = (v?: string | null) => {
+const clear = (v?: string | null) => {
   const s = v?.trim();
   return s ? s : null;
 };
 
 // OpenStreetMap (Nominatim): gratis y sin clave. Devuelve barrio, vía y nombre del sitio.
 // Su política pide máximo 1 consulta por segundo (el ViewModel respeta ese ritmo).
-async function desdeNominatim(lat: number, lng: number): Promise<LugarPunto | null> {
+async function fromNominatim(lat: number, lng: number): Promise<PointPlace | null> {
   const url =
     `https://nominatim.openstreetmap.org/reverse?format=jsonv2` +
     `&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=es`;
@@ -24,46 +24,46 @@ async function desdeNominatim(lat: number, lng: number): Promise<LugarPunto | nu
   const data = await res.json();
   const a = data?.address ?? {};
 
-  const barrio =
-    limpiar(a.neighbourhood) ??
-    limpiar(a.suburb) ??
-    limpiar(a.quarter) ??
-    limpiar(a.city_district) ??
-    limpiar(a.residential);
+  const neighborhood =
+    clear(a.neighbourhood) ??
+    clear(a.suburb) ??
+    clear(a.quarter) ??
+    clear(a.city_district) ??
+    clear(a.residential);
 
-  const via = limpiar(a.road);
-  const nombre = limpiar(data?.name);
-  const viaConNumero = via ? (a.house_number ? `${via} #${a.house_number}` : via) : null;
+  const via = clear(a.road);
+  const name = clear(data?.name);
+  const streetWithNumber = via ? (a.house_number ? `${via} #${a.house_number}` : via) : null;
   // Si el punto cae sobre un sitio con nombre (almacén, colegio...), se muestra ese nombre.
-  const lugar = nombre && nombre !== via && nombre !== barrio ? nombre : viaConNumero;
+  const place = name && name !== via && name !== neighborhood ? name : streetWithNumber;
 
-  return { barrio, lugar };
+  return { neighborhood, place };
 }
 
 // Respaldo: geocodificador del propio teléfono.
-async function desdeTelefono(lat: number, lng: number): Promise<LugarPunto | null> {
+async function fromPhone(lat: number, lng: number): Promise<PointPlace | null> {
   const [dir] = await Location.reverseGeocodeAsync({ latitude: lat, longitude: lng });
   if (!dir) return null;
   return {
-    barrio: limpiar(dir.district),
-    lugar: limpiar(dir.name) ?? limpiar(dir.street),
+    neighborhood: clear(dir.district),
+    place: clear(dir.name) ?? clear(dir.street),
   };
 }
 
-export async function obtenerLugar(lat: number, lng: number): Promise<LugarPunto | null> {
+export async function getPlace(lat: number, lng: number): Promise<PointPlace | null> {
   try {
-    const r = await desdeNominatim(lat, lng);
-    if (r && (r.barrio || r.lugar)) return r;
+    const r = await fromNominatim(lat, lng);
+    if (r && (r.neighborhood || r.place)) return r;
   } catch {
     // sin internet o servicio caído: se prueba el respaldo
   }
   try {
-    return await desdeTelefono(lat, lng);
+    return await fromPhone(lat, lng);
   } catch {
     return null;
   }
 }
 
 // Texto para mostrar: "Carrera 7 · Barrio Quebraditas" (o solo lo que haya).
-export const descripcionLugar = (l: LugarPunto) =>
-  [l.lugar, l.barrio].filter(Boolean).join(" · ");
+export const placeDescription = (l: PointPlace) =>
+  [l.place, l.neighborhood].filter(Boolean).join(" · ");

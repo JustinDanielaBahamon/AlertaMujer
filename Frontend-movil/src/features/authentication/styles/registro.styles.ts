@@ -2,25 +2,25 @@ import {StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
     // Fondo morado que cubre toda la pantalla (incluye barra de estado y zona inferior)
-    Pantalla: {
+    Screen: {
         flex: 1,
         backgroundColor: 'rgb(202, 171, 222)',
     },
 
-    ContenedorPrincipal : {
+    MainContainer : {
         flex : 1,
         backgroundColor : 'rgb(202 ,171, 222)',
         paddingTop : 13,
         
     },
 
-    ContenedorLogo:{
+    LogoContainer:{
         justifyContent : 'center',
         alignItems:'center',
         marginTop : 10, // 🔽 baja esto un poco
         marginBottom: 10, // 🔥 agrega separación con el form
     },
-     ImagenLogo :{
+     LogoImage :{
         width: 140,
         height: 140,
         maxWidth: '90%',
@@ -29,7 +29,7 @@ export const styles = StyleSheet.create({
 
     //Comienzo contenedor Formulario
 
-   ContenedorFormulario:{
+   FormContainer:{
         backgroundColor: '#FFF',
         marginHorizontal: 20, // separación de los lados
         padding: 20, // espacio interno
@@ -42,9 +42,9 @@ export const styles = StyleSheet.create({
         shadowRadius: 4,
         flex:0,
         elevation: 5, // para Android
-    }, ContenedorTituloFormu:{
+    }, FormTitleContainer:{
     },
-    TituloFormu :{
+    FormTitle :{
         color: 'black',
         fontSize: 22,
         fontWeight: 'bold',
@@ -58,7 +58,7 @@ export const styles = StyleSheet.create({
     
 
     //Comienzo Diseño del contenedor del correo
-    contenedorInput: {
+    inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         borderWidth: 1,
@@ -73,14 +73,14 @@ export const styles = StyleSheet.create({
         backgroundColor:'#F3E8FF',
         
     },
-    IconoCorreo: {
+    EmailIcon: {
         width: 20,
         height: 20,
         marginRight: 10,
         tintColor: '#000000',
         resizeMode: 'contain', 
     },
-    inputCorreo: {
+    emailInput: {
         flex:1,
         height: '100%',
         fontSize: 16,
@@ -91,7 +91,7 @@ export const styles = StyleSheet.create({
 
     //Comienzo diseño del contenedor de la contraseña
 
-    inputContraseña:{
+    passwordInput:{
         flex: 1,
         height: '100%',
         fontSize: 16,
@@ -99,7 +99,7 @@ export const styles = StyleSheet.create({
     },
 
     //Comienzo diseño lista
-        listaDropdown:{
+        dropdownList:{
         backgroundColor: '#FFF',
         marginHorizontal: 10,
         borderRadius: 15,
@@ -112,14 +112,14 @@ export const styles = StyleSheet.create({
         shadowRadius: 4,
         },
 
-        itemLista:{
+        listItem:{
         padding: 10,
         fontSize: 16,
         color: '#000'
         },
     //Fin diseño lista
 
-    botonSession:{
+    sessionButton:{
   backgroundColor: 'rgba(164, 7, 255, 0.67)',
   borderRadius : 25,
   margin : 10,
@@ -128,14 +128,14 @@ export const styles = StyleSheet.create({
   justifyContent: 'center',
 },
 
-textoSession:{
+sessionText:{
   color : 'white',
   fontSize  : 16,
   fontWeight : 'bold',
 },
 
 // Tarjeta de términos y privacidad (mismos colores de los inputs y el botón)
-contenedorChecks:{
+checksContainer:{
   marginTop: 20,
   marginHorizontal: 20,
   padding: 16,
@@ -146,13 +146,13 @@ contenedorChecks:{
   backgroundColor: 'rgba(243, 232, 255, 0.85)',
 },
 
-filaCheck:{
+checkRow:{
   flexDirection: 'row',
   alignItems: 'center',
   marginBottom: 10,
 },
 
-cuadroCheck:{
+checkBox:{
   width: 22,
   height: 22,
   borderWidth: 2,
@@ -164,22 +164,22 @@ cuadroCheck:{
   justifyContent: 'center',
 },
 
-cuadroCheckActivo:{
+activeCheckBox:{
   backgroundColor: '#6A3FC9',
   borderColor: '#6A3FC9',
 },
 
-textoCheck:{
+checkText:{
   flex: 1,
   fontSize: 14,
   color: '#2E1065',
 },
 
-textoBold:{
+boldText:{
   fontWeight: 'bold',
 },
 
-botonContinuar:{
+continueButton:{
   marginTop: 15,
   backgroundColor: '#6A3FC9',
   paddingVertical: 12,
@@ -193,12 +193,12 @@ botonContinuar:{
   shadowRadius: 3,
 },
 
-textoContinuar:{
+continueText:{
   color: '#FFF',
   fontSize: 16,
   fontWeight: 'bold',
 },
-textoLink:{
+linkTextValue:{
   color: '#6A3FC9',
   fontWeight: 'bold',
   textDecorationLine: 'underline'

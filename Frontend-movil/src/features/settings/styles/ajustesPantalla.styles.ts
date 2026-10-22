@@ -1,12 +1,12 @@
 import { StyleSheet } from "react-native";
 import type { AppTheme } from "../../../contexts/ThemeContext";
 
-export function createAjustesPantallaStyles(theme: AppTheme) {
-  const accent = theme.icono;
+export function createSettingsScreenStyles(theme: AppTheme) {
+  const accent = theme.icon;
   const accentSoft = accent + "25";
 
   return StyleSheet.create({
-    contenedor: {
+    container: {
       flex: 1,
       backgroundColor: theme.headercolor1,
     },
@@ -17,7 +17,7 @@ export function createAjustesPantallaStyles(theme: AppTheme) {
       paddingVertical: 14,
       gap: 12,
     },
-    btnVolver: {
+    returnBtn: {
       width: 36,
       height: 36,
       borderRadius: 18,
@@ -25,7 +25,7 @@ export function createAjustesPantallaStyles(theme: AppTheme) {
       alignItems: "center",
       justifyContent: "center",
     },
-    tituloHeader: {
+    headerTitleText: {
       color: theme.headerText,
       fontSize: 20,
       fontWeight: "600",
@@ -44,7 +44,7 @@ export function createAjustesPantallaStyles(theme: AppTheme) {
       lineHeight: 19,
       marginBottom: 4,
     },
-    tarjeta: {
+    card: {
       backgroundColor: theme.containerBackground,
       borderRadius: 18,
       padding: 16,
@@ -56,12 +56,12 @@ export function createAjustesPantallaStyles(theme: AppTheme) {
       shadowRadius: 8,
       elevation: 3,
     },
-    filaTitulo: {
+    titleRow: {
       flexDirection: "row",
       alignItems: "center",
       gap: 12,
     },
-    iconoWrap: {
+    iconWrap: {
       width: 42,
       height: 42,
       borderRadius: 14,
@@ -69,20 +69,20 @@ export function createAjustesPantallaStyles(theme: AppTheme) {
       justifyContent: "center",
       backgroundColor: accentSoft,
     },
-    titulo: {
+    title: {
       color: theme.text,
       fontSize: 15,
       fontWeight: "700",
       flex: 1,
     },
-    descripcion: {
+    description: {
       color: theme.text,
       opacity: 0.75,
       fontSize: 13,
       lineHeight: 19,
       marginTop: 10,
     },
-    deshabilitado: {
+    disabled: {
       opacity: 0.4,
     },
     divisor: {
@@ -90,23 +90,23 @@ export function createAjustesPantallaStyles(theme: AppTheme) {
       backgroundColor: "rgba(0,0,0,0.12)",
       marginVertical: 14,
     },
-    filaHora: {
+    timeRow: {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
       marginTop: 14,
     },
-    etiquetaHora: {
+    timeLabel: {
       color: theme.text,
       fontSize: 14,
       fontWeight: "500",
     },
-    selectorHora: {
+    timePicker: {
       flexDirection: "row",
       alignItems: "center",
       gap: 12,
     },
-    btnHora: {
+    timeBtn: {
       width: 32,
       height: 32,
       borderRadius: 16,
@@ -114,7 +114,7 @@ export function createAjustesPantallaStyles(theme: AppTheme) {
       alignItems: "center",
       justifyContent: "center",
     },
-    textoHora: {
+    timeText: {
       color: theme.text,
       fontSize: 16,
       fontWeight: "700",

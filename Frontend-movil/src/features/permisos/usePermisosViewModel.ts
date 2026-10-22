@@ -1,79 +1,79 @@
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useCallback, useEffect, useState } from "react";
 import { AppState } from "react-native";
-import { useMetodosActivacion } from "../../contexts/MetodosActivacionContext";
-import { activarPermiso, PERMISOS, revisarPermisos, type EstadoPermiso, type IdPermiso } from "./permisos";
-import { EXPLICACION, interrupcionesRecientes, type Interrupcion } from "./saludProteccion";
+import { useActivationMethods } from "../../contexts/MetodosActivacionContext";
+import { grantPermission, PERMISSIONS, checkPermissions, type PermissionStatus, type PermissionId } from "./permisos";
+import { EXPLANATION, recentInterruptions, type Interruption } from "./saludProteccion";
 import SensorSacudidas from "../../../modules/sensor-sacudidas";
-import { useGrabacionAutomatica } from "./useGrabacionAutomatica";
+import { useAutomaticRecording } from "./useGrabacionAutomatica";
 
 // Cámara y micrófono se muestran junto a sus interruptores de grabación automática
-const DE_GRABACION: IdPermiso[] = ["camara", "microfono"];
+const RECORDING_PERMISSIONS: PermissionId[] = ["camara", "microfono"];
 
-export function usePermisosViewModel() {
+export function usePermissionsViewModel() {
   const navigation = useNavigation();
-  const { config, cambiar } = useMetodosActivacion();
-  const [estados, setEstados] = useState<Record<IdPermiso, EstadoPermiso> | null>(null);
-  const [interrupciones, setInterrupciones] = useState<Interrupcion[]>([]);
+  const { config, change } = useActivationMethods();
+  const [statuses, setStatuses] = useState<Record<PermissionId, PermissionStatus> | null>(null);
+  const [interruptions, setInterruptions] = useState<Interruption[]>([]);
 
-  const refrescar = useCallback(() => {
-    const cortes = interrupcionesRecientes();
-    setInterrupciones(cortes);
-    revisarPermisos(config.agitar, cortes.filter((c) => c.causa === "sistema").length)
-      .then(setEstados)
+  const refresh = useCallback(() => {
+    const cortes = recentInterruptions();
+    setInterruptions(cortes);
+    checkPermissions(config.agitar, cortes.filter((c) => c.cause === "sistema").length)
+      .then(setStatuses)
       .catch((e) => console.warn("No se pudieron revisar los permisos:", e));
   }, [config.agitar]);
 
   // Al entrar y al volver de los ajustes de Android (la usuaria pudo cambiar algo allá)
-  useFocusEffect(refrescar);
+  useFocusEffect(refresh);
   useEffect(() => {
-    const sub = AppState.addEventListener("change", (estado) => {
-      if (estado === "active") refrescar();
+    const sub = AppState.addEventListener("change", (status) => {
+      if (status === "active") refresh();
     });
     return () => sub.remove();
-  }, [refrescar]);
+  }, [refresh]);
 
-  const activar = useCallback(
-    async (id: IdPermiso) => {
+  const activate = useCallback(
+    async (id: PermissionId) => {
       if (id === "agitar") {
-        cambiar("agitar", true); // useProteccionAgitar enciende el servicio y pide lo que falte
+        change("agitar", true); // useProteccionAgitar enciende el servicio y pide lo que falte
         return;
       }
-      if (!estados) return;
-      await activarPermiso(id, estados[id]);
-      refrescar();
+      if (!statuses) return;
+      await grantPermission(id, statuses[id]);
+      refresh();
     },
-    [estados, cambiar, refrescar],
+    [statuses, change, refresh],
   );
 
-  const grabacion = useGrabacionAutomatica(refrescar);
+  const recording = useAutomaticRecording(refresh);
 
-  const items = PERMISOS.map((p) => ({ ...p, estado: estados?.[p.id] ?? null })).filter(
-    (i) => !i.estado?.oculto && !DE_GRABACION.includes(i.id),
+  const items = PERMISSIONS.map((p) => ({ ...p, status: statuses?.[p.id] ?? null })).filter(
+    (i) => !i.status?.hidden && !RECORDING_PERMISSIONS.includes(i.id),
   );
-  const listos = items.filter((i) => i.estado?.concedido === true).length;
+  const readyItems = items.filter((i) => i.status?.granted === true).length;
 
   // Salud de la protección: verificada con los cierres que registró Android
-  const ultima = interrupciones[0];
-  const salud = !config.agitar
+  const latest = interruptions[0];
+  const health = !config.agitar
     ? null
     : {
-        veces: interrupciones.length,
-        explicacion: ultima ? EXPLICACION[ultima.causa] : null,
+        times: interruptions.length,
+        explanation: latest ? EXPLANATION[latest.cause] : null,
         // Si la cortó el sistema, el arreglo es el inicio automático de la marca
-        puedeArreglar: ultima?.causa === "sistema",
-        arreglar: () => {
+        canFix: latest?.cause === "sistema",
+        fix: () => {
           SensorSacudidas.abrirInicioAutomatico();
         },
       };
 
   // Si la grabación está encendida pero luego se quitó el permiso desde Android, se avisa en la tarjeta
-  const evidencias = {
-    video: { activo: grabacion.grabarVideo, sinPermiso: grabacion.grabarVideo && estados?.camara.concedido === false },
-    audio: { activo: grabacion.grabarAudio, sinPermiso: grabacion.grabarAudio && estados?.microfono.concedido === false },
-    cambiarVideo: grabacion.cambiarGrabarVideo,
-    cambiarAudio: grabacion.cambiarGrabarAudio,
+  const evidence = {
+    video: { enabled: recording.recordVideo, noPermission: recording.recordVideo && statuses?.camara.granted === false },
+    audio: { enabled: recording.recordAudio, noPermission: recording.recordAudio && statuses?.microfono.granted === false },
+    changeVideo: recording.toggleRecordVideo,
+    changeAudio: recording.toggleRecordAudio,
   };
 
-  return { items, listos, total: items.length, cargando: !estados, activar, salud, evidencias, volver: navigation.goBack };
+  return { items, readyItems: readyItems, total: items.length, loading: !statuses, activate: activate, health: health, evidence: evidence, goBack: navigation.goBack };
 }

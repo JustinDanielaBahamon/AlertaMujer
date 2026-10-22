@@ -9,27 +9,27 @@ jest.mock("@notifee/react-native", () => ({
 
 import notifee from "@notifee/react-native";
 import {
-  abrirAlertaSos,
-  alAbrirAlertaSos,
-  esAlertaFinalizada,
-  esAlertaSos,
-  mostrarAlarmaSos,
-  mostrarAlertaFinalizada,
-  type DatosAlertaSos,
+  openSosAlert,
+  onSosAlertOpen,
+  isEndedAlert,
+  isSosAlert,
+  showSosAlarm,
+  showEndedAlert,
+  type SosAlertData,
 } from "../alarmaSos";
 
-const datos: DatosAlertaSos = { tipo: "ALERTA_SOS", alertaId: "27", nombre: "Ana Gómez", codigo: "abc" };
+const data: SosAlertData = { tipo: "ALERTA_SOS", alertaId: "27", nombre: "Ana Gómez", codigo: "abc" };
 
 describe("alarmaSos", () => {
   it("reconoce solo el push de alerta de emergencia completo", () => {
-    expect(esAlertaSos(datos)).toBe(true);
-    expect(esAlertaSos({ tipo: "OTRO" })).toBe(false);
-    expect(esAlertaSos({ tipo: "ALERTA_SOS", alertaId: "1" })).toBe(false); // sin código
-    expect(esAlertaSos(undefined)).toBe(false);
+    expect(isSosAlert(data)).toBe(true);
+    expect(isSosAlert({ tipo: "OTRO" })).toBe(false);
+    expect(isSosAlert({ tipo: "ALERTA_SOS", alertaId: "1" })).toBe(false); // sin código
+    expect(isSosAlert(undefined)).toBe(false);
   });
 
   it("muestra la alarma a pantalla completa con sonido en bucle", async () => {
-    await mostrarAlarmaSos(datos);
+    await showSosAlarm(data);
 
     const n = (notifee.displayNotification as jest.Mock).mock.calls[0][0];
     expect(n.id).toBe("sos-27");
@@ -40,22 +40,22 @@ describe("alarmaSos", () => {
   });
 
   it("guarda la alerta hasta que la navegación se suscribe", () => {
-    abrirAlertaSos(datos); // aún no hay pantalla escuchando
-    const oyente = jest.fn();
-    const quitar = alAbrirAlertaSos(oyente);
+    openSosAlert(data); // aún no hay pantalla escuchando
+    const listener = jest.fn();
+    const remove = onSosAlertOpen(listener);
 
-    expect(oyente).toHaveBeenCalledWith(datos);
-    abrirAlertaSos({ ...datos, alertaId: "28" });
-    expect(oyente).toHaveBeenCalledTimes(2);
-    quitar();
+    expect(listener).toHaveBeenCalledWith(data);
+    openSosAlert({ ...data, alertaId: "28" });
+    expect(listener).toHaveBeenCalledTimes(2);
+    remove();
   });
 
   it("al terminar la alerta apaga la alarma y deja un aviso", async () => {
-    const fin = { tipo: "ALERTA_FINALIZADA" as const, alertaId: "27", nombre: "Ana Gómez", estado: "resolved" };
-    expect(esAlertaFinalizada(fin)).toBe(true);
-    expect(esAlertaFinalizada(datos)).toBe(false);
+    const end = { tipo: "ALERTA_FINALIZADA" as const, alertaId: "27", nombre: "Ana Gómez", estado: "resolved" };
+    expect(isEndedAlert(end)).toBe(true);
+    expect(isEndedAlert(data)).toBe(false);
 
-    await mostrarAlertaFinalizada(fin);
+    await showEndedAlert(end);
 
     expect(notifee.cancelNotification).toHaveBeenCalledWith("sos-27");
     const n = (notifee.displayNotification as jest.Mock).mock.calls.at(-1)[0];

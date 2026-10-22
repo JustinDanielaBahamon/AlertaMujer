@@ -75,7 +75,7 @@ export const localStyles = StyleSheet.create({
         width: '100%',
         gap: 12, // Espacio entre botones
     },
-    btnConfirmar: {
+    confirmBtn: {
         width: '100%',
         height: 55,
         backgroundColor: '#471e63',
@@ -83,12 +83,12 @@ export const localStyles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    btnTextConfirmar: {
+    confirmBtnText: {
         color: '#FFF',
         fontSize: 16,
         fontWeight: 'bold',
     },
-    btnRegresar: {
+    backBtn: {
         width: '100%',
         height: 55,
         backgroundColor: 'transparent',
@@ -98,7 +98,7 @@ export const localStyles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    btnTextRegresar: {
+    backBtnText: {
         color: '#471e63',
         fontSize: 16,
         fontWeight: 'bold',
