@@ -7,6 +7,7 @@ const RUTAS_EVIDENCE = ["/api/evidences"];
 const RUTAS_ALERT = [
   "/api/alerts", "/api/contacts", "/api/location-logs", "/api/zones", "/api/resources", "/api/saved-routes",
   "/api/frequent-locations", "/api/received-alerts", "/api/zone-reports", "/api/resource-calls", "/api/public/tracking",
+  "/api/safe-trips",
 ];
 
 const empiezaCon = (ruta: string, prefijos: string[]) =>

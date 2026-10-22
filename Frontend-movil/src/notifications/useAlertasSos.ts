@@ -23,6 +23,7 @@ import {
 } from "./alarmaSos";
 import { manejarEventoProteccion } from "../features/agitar/servicioProteccion";
 import { esNuevoCelular, mostrarNuevoCelular } from "./nuevoCelular";
+import { esNotificacionDeTrayecto, esTrayectoPorVencer, mostrarTrayectoPorVencer } from "./trayectoPorVencer";
 import { estaEnTutorial } from "../navigation/navigationHelpers";
 import { esPedidoUbicacion, responderPedidoUbicacion } from "../services/pedidoUbicacion";
 
@@ -69,16 +70,24 @@ export function useAlertasSos(
       ir(20);
     });
 
+    // "¿Ya llegaste?" de Avísame si no llego: lleva a la pantalla del trayecto
+    const irATrayecto = (intentos = 20) => {
+      if (navegacion.isReady()) navegacion.navigate("Trayecto");
+      else if (intentos > 0) setTimeout(() => irATrayecto(intentos - 1), 300);
+    };
+
     // App abierta desde la notificación o la pantalla completa
     notifee.getInitialNotification().then((inicial) => {
       // Notifee la entrega una sola vez: también puede ser la de "Alerta enviada" al agitar
       if (inicial && manejarEventoProteccion({ type: EventType.PRESS, detail: inicial })) return;
+      if (esNotificacionDeTrayecto(inicial?.notification?.data)) return irATrayecto();
       const datos = datosDeNotificacion(inicial?.notification);
       if (datos) abrirAlertaSos(datos);
     });
 
     const dejarDeOirToques = notifee.onForegroundEvent(({ type, detail }) => {
       if (manejarEventoProteccion({ type, detail })) return;
+      if (type === EventType.PRESS && esNotificacionDeTrayecto(detail.notification?.data)) return irATrayecto();
       const datos = datosDeNotificacion(detail.notification);
       if (datos && (type === EventType.PRESS || type === EventType.ACTION_PRESS)) abrirAlertaSos(datos);
     });
@@ -97,6 +106,8 @@ export function useAlertasSos(
             await responderPedidoUbicacion();
           } else if (esNuevoCelular(mensaje.data)) {
             await mostrarNuevoCelular(mensaje.data);
+          } else if (esTrayectoPorVencer(mensaje.data)) {
+            await mostrarTrayectoPorVencer(mensaje.data);
           }
         });
       } catch (error) {
