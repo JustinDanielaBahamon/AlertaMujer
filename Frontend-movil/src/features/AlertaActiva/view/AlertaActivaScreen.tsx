@@ -18,6 +18,7 @@ import { useTheme } from "../../../contexts/ThemeContext";
 import type { PuntoUbicacion } from "../../../services/alert-tracking.service";
 import { createStyles } from "../style/alertaActivaStyle";
 import { useAlertaActivaViewModel } from "../viewModel/useAlertaActivaViewModel";
+import { useChatSobreTeclado } from "../../../hooks/useChatSobreTeclado";
 import GrabacionAlerta from "../../grabacion/GrabacionAlerta";
 import ChatAlerta, { RAPIDOS_DE_ELLA } from "../../chatAlerta/ChatAlerta";
 
@@ -74,6 +75,7 @@ function PinesMapa({
 
 export default function AlertaActivaScreen() {
   const vm = useAlertaActivaViewModel();
+  const teclado = useChatSobreTeclado();
   const { theme } = useTheme();
   const { t } = useLocale();
   const { width, height } = useWindowDimensions();
@@ -96,9 +98,13 @@ export default function AlertaActivaScreen() {
   return (
     <View style={styles.scrollContainer}>
       <ScrollView
+        ref={teclado.scrollRef}
         style={styles.scrollContainer}
-        contentContainerStyle={styles.mainContainer}
+        contentContainerStyle={[styles.mainContainer, { paddingBottom: teclado.alturaTeclado }]}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        onScroll={teclado.alDesplazar}
+        scrollEventThrottle={32}
       >
         <View style={styles.wrap}>
         <View style={styles.header}>
@@ -225,13 +231,16 @@ export default function AlertaActivaScreen() {
         {/* Chat con los contactos: mensajes rápidos sin tener que hablar */}
         {/* Video/audio automático como evidencia (se sube cada 45 s) */}
         <GrabacionAlerta alertaId={vm.alertaId} />
-        <ChatAlerta
-          participante={vm.alertaId ? { tipo: "duena", alertaId: vm.alertaId } : null}
-          activo
-          soyElla
-          titulo="Mensajes a tus contactos"
-          rapidos={RAPIDOS_DE_ELLA}
-        />
+        <View ref={teclado.chatRef} collapsable={false}>
+          <ChatAlerta
+            participante={vm.alertaId ? { tipo: "duena", alertaId: vm.alertaId } : null}
+            activo
+            soyElla
+            titulo="Mensajes a tus contactos"
+            rapidos={RAPIDOS_DE_ELLA}
+            alEnfocar={teclado.alEnfocarChat}
+          />
+        </View>
 
         <TouchableOpacity style={styles.okButton} onPress={vm.abrirConfirmacion}>
           <MaterialIcons name="favorite" size={22} color={theme.headerText} />

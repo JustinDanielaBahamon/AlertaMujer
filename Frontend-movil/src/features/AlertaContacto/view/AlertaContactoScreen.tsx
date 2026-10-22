@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import MapView, { Marker, Polyline } from "../../../components/mapa/MapaLibre";
 import ChatAlerta, { RAPIDOS_DEL_CONTACTO } from "../../chatAlerta/ChatAlerta";
+import { useChatSobreTeclado } from "../../../hooks/useChatSobreTeclado";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useAlertaContactoViewModel } from "../viewModel/useAlertaContactoViewModel";
 import type { PuntoUbicacion } from "../../../services/alert-tracking.service";
@@ -132,6 +133,7 @@ function PinesMapa({
 
 export default function AlertaContactoScreen() {
   const vm = useAlertaContactoViewModel();
+  const teclado = useChatSobreTeclado();
   const { user } = useAuth();
   const miNombre = (user?.nombre ?? "").trim().split(/\s+/)[0] || "Contacto";
   const { theme } = useTheme();
@@ -157,8 +159,12 @@ export default function AlertaContactoScreen() {
   return (
     <View style={styles.container}>
       <ScrollView
-        contentContainerStyle={styles.content}
+        ref={teclado.scrollRef}
+        contentContainerStyle={[styles.content, { paddingBottom: teclado.alturaTeclado }]}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        onScroll={teclado.alDesplazar}
+        scrollEventThrottle={32}
       >
         <View style={styles.wrap}>
           {/* Estado de la alerta */}
@@ -434,14 +440,17 @@ export default function AlertaContactoScreen() {
           </TouchableOpacity>
           {/* Chat con ella: respuestas rápidas o texto (con el código del seguimiento) */}
           {!!vm.codigo && (
-            <ChatAlerta
-              participante={{ tipo: "contacto", codigo: vm.codigo, nombre: miNombre }}
-              activo={vm.activa}
-              soyElla={false}
-              nombreElla={vm.nombreUsuaria}
-              titulo={`Mensajes con ${vm.nombreUsuaria || "ella"}`}
-              rapidos={RAPIDOS_DEL_CONTACTO}
-            />
+            <View ref={teclado.chatRef} collapsable={false}>
+              <ChatAlerta
+                participante={{ tipo: "contacto", codigo: vm.codigo, nombre: miNombre }}
+                activo={vm.activa}
+                soyElla={false}
+                nombreElla={vm.nombreUsuaria}
+                titulo={`Mensajes con ${vm.nombreUsuaria || "ella"}`}
+                rapidos={RAPIDOS_DEL_CONTACTO}
+                alEnfocar={teclado.alEnfocarChat}
+              />
+            </View>
           )}
         </View>
       </ScrollView>
