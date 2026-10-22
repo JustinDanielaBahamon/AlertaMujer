@@ -962,5 +962,9 @@
     "llegaste_titulo": "¡Qué bueno que llegaste!",
     "llegaste_texto": "Tus contactos no recibirán ningún aviso.",
     "error_conexion": "No pudimos conectarnos. Revisa tu conexión e inténtalo de nuevo."
+  },
+  "conexion": {
+    "titulo": "Sin conexión a internet",
+    "texto": "Si activas una alerta ahora, no saldrá. Conéctate a Wi‑Fi o recarga datos, y usa \"Avísame si no llego\" antes de salir."
   }
 }

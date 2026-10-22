@@ -18,6 +18,7 @@ import { useAuth } from "../../../../src/contexts/AuthContext";
 import type { Alerta } from "../../../features/historial/models/Alerta";
 import { getMainStackNavigation } from "../../../navigation/navigationHelpers";
 import { createStyles } from "../styles/inicio.styles";
+import AvisoSinConexion from "../../../components/ui/avisoSinConexion/AvisoSinConexion";
 import { getAlertasByUsuario, transformarAlerta } from "../../../../src/services/alerts.service";
 
 export default function Inicio() {
@@ -133,6 +134,9 @@ export default function Inicio() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background, paddingBottom: insets.bottom }]}>
+
+      {/* Sin internet: una alerta no saldría ahora */}
+      <AvisoSinConexion />
 
       {/* Zona segura */}
       <TouchableOpacity

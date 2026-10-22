@@ -962,5 +962,9 @@
     "llegaste_titulo": "Glad you made it!",
     "llegaste_texto": "Your contacts won't receive any alert.",
     "error_conexion": "We couldn't connect. Check your connection and try again."
+  },
+  "conexion": {
+    "titulo": "No internet connection",
+    "texto": "If you trigger an alert now, it won't go out. Connect to Wi‑Fi or top up your data, and use \"Let them know if I don't arrive\" before you leave."
   }
 }
