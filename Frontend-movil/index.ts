@@ -7,6 +7,8 @@ import notifee, { EventType } from "@notifee/react-native";
 import { getApp } from "@react-native-firebase/app";
 import { getMessaging, setBackgroundMessageHandler } from "@react-native-firebase/messaging";
 import App from "./App";
+import { registerWidgetTaskHandler } from "react-native-android-widget";
+import { tareaWidget } from "./src/features/widget/tareaWidget";
 import { esNuevoCelular, mostrarNuevoCelular } from "./src/notifications/nuevoCelular";
 import { esTrayectoPorVencer, mostrarTrayectoPorVencer } from "./src/notifications/trayectoPorVencer";
 import { esPedidoUbicacion, responderPedidoUbicacion } from "./src/services/pedidoUbicacion";
@@ -42,6 +44,9 @@ if (Constants.expoConfig?.extra?.pushConfigurado === true) {
 
 // Servicio de "agitar el teléfono" (notificación fija "Protección activa")
 registrarServicioProteccion();
+
+// Widget "SOS" de la pantalla de inicio: Android pide dibujarlo aunque la app esté cerrada
+registerWidgetTaskHandler(tareaWidget);
 
 notifee.onBackgroundEvent(async ({ type, detail }) => {
   if (manejarEventoProteccion({ type, detail })) return;

@@ -190,11 +190,13 @@
     "encendido_paso3": "Se você não cancelar, o alerta é enviado aos seus contatos com sua localização.",
     "encendido_rec1": "Olhar a hora (1 ou 2 toques) não ativa o alerta. Não funciona durante uma chamada, para que a tela que apaga perto do rosto não o dispare.",
     "encendido_rec2": "O Android tem seu próprio «SOS de emergência» com 5 toques que liga para a emergência: com 4 toques só o AlertaMujer é ativado.",
+    "widget_agregar": "Adicionar à tela inicial",
+    "widget_manual": "Seu celular não permite adicioná-lo pelo app. Mantenha pressionada a tela inicial, escolha Widgets e procure AlertaMujer SOS.",
     "widget_titulo": "Widget na tela inicial",
     "widget_desc": "Adicione um widget com um botão de alerta à tela inicial do seu celular para ativá-lo com um só toque.",
     "widget_paso1": "Mantenha pressionada a tela inicial do celular e escolha Widgets.",
     "widget_paso2": "Procure AlertaMujer e arraste o widget para onde quiser.",
-    "widget_paso3": "Toque no botão do widget para iniciar o alerta."
+    "widget_paso3": "Ao tocar no widget abre a contagem regressiva de 5 segundos: se foi um toque acidental, você pode cancelá-la."
   },
   "mapa": {
   "titulo": "Sua localização",

@@ -190,11 +190,13 @@
     "encendido_paso3": "If you don't cancel, the alert is sent to your contacts with your location.",
     "encendido_rec1": "Checking the time (1 or 2 presses) does not trigger the alert. It does not work during a call, so the screen turning off near your face cannot trigger it.",
     "encendido_rec2": "Android has its own Emergency SOS with 5 presses that calls emergency services: with 4 presses only AlertaMujer is triggered.",
+    "widget_agregar": "Add to home screen",
+    "widget_manual": "Your phone doesn't allow adding it from the app. Long-press the home screen, choose Widgets and look for AlertaMujer SOS.",
     "widget_titulo": "Home screen widget",
     "widget_desc": "Add a widget with an alert button to your phone's home screen to trigger it with a single tap.",
     "widget_paso1": "Long-press your phone's home screen and choose Widgets.",
     "widget_paso2": "Find AlertaMujer and drag the widget wherever you like.",
-    "widget_paso3": "Tap the widget button to start the alert."
+    "widget_paso3": "Tapping the widget opens the 5-second countdown: if it was an accidental tap, you can cancel it."
   },
   "mapa": {
   "titulo": "Your location",

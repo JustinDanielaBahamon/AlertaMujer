@@ -39,6 +39,26 @@ module.exports = ({ config }) => {
   plugins.push("./plugins/withAlarmSound");
   plugins.push("expo-secure-store");
   plugins.push("./plugins/withServicioProteccion");
+  // Widget "SOS" de la pantalla de inicio (src/features/widget)
+  plugins.push([
+    "react-native-android-widget",
+    {
+      widgets: [
+        {
+          name: "AlertaSOS",
+          label: "AlertaMujer SOS",
+          description: "Botón para enviar una alerta de emergencia",
+          minWidth: "110dp",
+          minHeight: "110dp",
+          targetCellWidth: 2,
+          targetCellHeight: 2,
+          previewImage: "./assets/images/icon.png",
+          resizeMode: "horizontal|vertical",
+          updatePeriodMillis: 0,
+        },
+      ],
+    },
+  ]);
 
   const permisos = new Set([
     ...(config.android?.permissions ?? []),

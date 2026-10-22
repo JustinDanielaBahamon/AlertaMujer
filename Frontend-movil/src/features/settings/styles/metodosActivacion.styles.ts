@@ -230,6 +230,22 @@ export function createMetodosActivacionStyles(theme: AppTheme) {
       opacity: 0.85,
     },
 
+    accionMetodo: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      backgroundColor: theme.icono,
+      borderRadius: 12,
+      paddingVertical: 11,
+      marginTop: 6,
+    },
+    accionMetodoTexto: {
+      color: "#fff",
+      fontSize: 14,
+      fontWeight: "700",
+    },
+
     avisoWrap: {
       flexDirection: "row",
       alignItems: "flex-start",

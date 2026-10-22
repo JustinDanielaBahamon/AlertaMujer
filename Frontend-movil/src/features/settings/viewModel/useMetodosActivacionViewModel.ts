@@ -1,5 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
 import { Alert, Linking } from "react-native";
+import { requestPinWidget } from "react-native-android-widget";
+import { NOMBRE_WIDGET } from "../../widget/WidgetSOS";
 import { conflictoDeEsteTelefono } from "../../agitar/gestosDelFabricante";
 import { useLocale } from "../../../contexts/LocaleContext";
 import {
@@ -24,6 +26,8 @@ export interface MetodoActivacion {
   recomendaciones?: string[];
   /** Consejo destacado para la marca del teléfono (p. ej. gestos de Motorola). */
   recomendacionMarca?: string;
+  /** Botón extra dentro de la tarjeta (p. ej. agregar el widget a la pantalla de inicio). */
+  accion?: { texto: string; icono: string; alPresionar: () => void };
 }
 
 function armarMetodo(
@@ -68,13 +72,26 @@ export function useMetodosActivacionViewModel() {
       recomendaciones: [m.encendido_rec1, m.encendido_rec2],
     },
     armarMetodo(m, "bloqueo", "lock-closed-outline", "popup", 4, config.bloqueo, true),
-    armarMetodo(m, "widget", "apps-outline", "widget", 3, config.widget, true),
+    {
+      ...armarMetodo(m, "widget", "apps-outline", "widget", 3, config.widget, false),
+      accion: { texto: m.widget_agregar, icono: "add-circle-outline", alPresionar: () => agregarWidget() },
+    },
   ];
 
   const activos = metodos.filter((x) => x.activo).length;
 
+  // Diálogo del sistema para poner el widget en la pantalla de inicio (si el launcher lo permite)
+  const agregarWidget = () => {
+    requestPinWidget({ widgetName: NOMBRE_WIDGET })
+      .then((ok) => {
+        if (!ok) Alert.alert(m.widget_titulo, m.widget_manual);
+      })
+      .catch(() => Alert.alert(m.widget_titulo, m.widget_manual));
+  };
+
   const cambiarMetodo = (id: MetodoId, valor: boolean) => {
     cambiar(id, valor);
+    if (id === "widget" && valor) agregarWidget();
     // Al encender "agitar" en un teléfono cuyo sistema también reacciona a la sacudida
     if (id === "agitar" && valor && conflicto === "motorola") {
       Alert.alert(m.gestos_alerta_titulo, m.gestos_alerta_msg, [

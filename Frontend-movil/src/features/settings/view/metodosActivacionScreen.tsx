@@ -147,6 +147,17 @@ export default function MetodosActivacionScreen() {
               </View>
             )}
 
+            {!!metodo.accion && (
+              <TouchableOpacity
+                style={styles.accionMetodo}
+                onPress={metodo.accion.alPresionar}
+                accessibilityRole="button"
+              >
+                <Ionicons name={metodo.accion.icono as never} size={18} color="#fff" />
+                <Text style={styles.accionMetodoTexto}>{metodo.accion.texto}</Text>
+              </TouchableOpacity>
+            )}
+
             {metodo.pendiente && (
               <View style={styles.avisoWrap}>
                 <Ionicons

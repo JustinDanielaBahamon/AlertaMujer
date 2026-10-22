@@ -190,11 +190,13 @@
     "encendido_paso3": "Si tu n'annules pas, l'alerte est envoyée à tes contacts avec ta position.",
     "encendido_rec1": "Regarder l'heure (1 ou 2 appuis) ne déclenche pas l'alerte. Cela ne fonctionne pas pendant un appel, pour que l'écran qui s'éteint près du visage ne la déclenche pas.",
     "encendido_rec2": "Android a son propre « SOS d'urgence » avec 5 appuis qui appelle les secours : avec 4 appuis, seule AlertaMujer se déclenche.",
+    "widget_agregar": "Ajouter à l'écran d'accueil",
+    "widget_manual": "Ton téléphone ne permet pas de l'ajouter depuis l'app. Appuie longuement sur l'écran d'accueil, choisis Widgets et cherche AlertaMujer SOS.",
     "widget_titulo": "Widget sur l'écran d'accueil",
     "widget_desc": "Ajoute à l'écran d'accueil de ton téléphone un widget avec un bouton d'alerte pour la déclencher d'une seule pression.",
     "widget_paso1": "Maintiens appuyé l'écran d'accueil du téléphone et choisis Widgets.",
     "widget_paso2": "Cherche AlertaMujer et fais glisser le widget où tu veux.",
-    "widget_paso3": "Appuie sur le bouton du widget pour lancer l'alerte."
+    "widget_paso3": "En touchant le widget, le compte à rebours de 5 secondes s'ouvre : si c'était un toucher accidentel, tu peux l'annuler."
   },
   "mapa": {
     "titulo": "Ta position",

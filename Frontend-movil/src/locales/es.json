@@ -190,11 +190,13 @@
     "encendido_paso3": "Si no cancelas, la alerta se envía a tus contactos con tu ubicación.",
     "encendido_rec1": "Mirar la hora (1 o 2 pulsaciones) no activa la alerta. Durante una llamada no funciona, para que la pantalla que se apaga al acercar el celular a la cara no la dispare.",
     "encendido_rec2": "Android trae su propio «SOS de emergencia» con 5 pulsaciones que llama al 123: con 4 pulsaciones se activa solo AlertaMujer.",
+    "widget_agregar": "Agregar a la pantalla de inicio",
+    "widget_manual": "Tu celular no permite agregarlo desde la app. Mantén presionada la pantalla de inicio, elige Widgets y busca AlertaMujer SOS.",
     "widget_titulo": "Widget en la pantalla de inicio",
     "widget_desc": "Agrega un widget con un botón de alerta a la pantalla principal de tu celular para activarla con un solo toque.",
     "widget_paso1": "Mantén presionada la pantalla de inicio del celular y elige Widgets.",
     "widget_paso2": "Busca AlertaMujer y arrastra el widget donde quieras.",
-    "widget_paso3": "Toca el botón del widget para iniciar la alerta."
+    "widget_paso3": "Al tocar el widget se abre la cuenta regresiva de 5 segundos: si fue un toque accidental, puedes cancelarla."
   },
   "mapa": {
   "titulo": "Tu ubicacion",

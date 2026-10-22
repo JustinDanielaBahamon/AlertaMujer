@@ -11,6 +11,7 @@ import { useAlertasSos } from "../notifications/useAlertasSos";
 import { useProteccionAgitar } from "../features/agitar/useProteccionAgitar";
 import { useRecordatorioProteccion } from "../features/permisos/useRecordatorioProteccion";
 import { useReanudarAlerta } from "../features/AlertaActiva/useReanudarAlerta";
+import { useEnlaceSOS } from "../features/widget/useEnlaceSOS";
 
 export default function AppNavigator() {
   const { user, pendingMainRoute, restoring } = useAuth();
@@ -24,6 +25,8 @@ export default function AppNavigator() {
   useRecordatorioProteccion(navegacion, !!user && !restoring && user.id !== 0);
   // Si hay una alerta propia activa (la app se cerró con la alerta en curso), se vuelve a ella
   useReanudarAlerta(navegacion, !!user && !restoring && user.id !== 0);
+  // Toque en el widget "SOS" de la pantalla de inicio (abre alertamujer://sos)
+  useEnlaceSOS(navegacion, !!user && !restoring && user.id !== 0);
 
   // Cuentas creadas con Google: faltan teléfono, documento y fecha de nacimiento. Si la consulta
   // falla (sin señal) no se bloquea la app: se vuelve a revisar en la próxima apertura.
