@@ -628,7 +628,7 @@
     "cerrar_sesion": "Se déconnecter",
     "slogan": "Ensemble, nous sommes plus fortes",
     "compartir_mensaje": "Je t'invite sur AlertaMujer, une app pour demander de l'aide en quelques secondes et prévenir tes contacts de confiance. Télécharge-la ici :",
-    "alertas_recibidas": "Alertes reçues",
+    "alertas_recibidas": "Alertes de mes contacts",
     "trayecto": "Préviens si je n'arrive pas"
   },
   "activacion": {
@@ -909,27 +909,25 @@
     "btn_login": "Aller à la connexion"
   },
   "alertasRecibidas": {
-    "titulo_header": "Alertes reçues",
-    "intro": "Les alertes des personnes qui t'ont comme contact d'urgence. Si tu as manqué l'alarme, tu sais ici ce qui s'est passé.",
-    "seccion_activas": "EN COURS",
-    "seccion_anteriores": "PRÉCÉDENTES",
+    "titulo_header": "Alertes de mes contacts",
+    "intro": "Ici tu vois les alertes des personnes qui t'ont ajoutée comme contact d'urgence, pas les tiennes. Si tu as manqué l'alarme, tu sais ici ce qui s'est passé.",
     "un_contacto": "Un contact",
     "pide_ayuda": "Demande de l'aide en ce moment",
-    "cancelo": "A annulé son alerte",
-    "tuvo_alerta": "A déclenché une alerte",
     "estado_activa": "En cours",
     "estado_atendida": "Traitée",
     "estado_cancelada": "Annulée",
     "estado_terminada": "Terminée",
     "duro": "Durée",
     "ver_ubicacion": "Voir la position et aider",
-    "ver_recorrido": "Voir le trajet",
-    "seguimiento_cerrado": "Le suivi de cette alerte est fermé",
-    "vacio_titulo": "Tout est calme",
-    "vacio_desc": "Quand une personne qui t'a comme contact déclenche une alerte, elle apparaîtra ici.",
+    "vacio_titulo": "Aucun de tes contacts n'a demandé d'aide",
+    "vacio_desc": "Quand une personne qui t'a comme contact d'urgence déclenche une alerte, elle apparaîtra ici et une alarme sonnera.",
     "error_carga": "Impossible de charger les alertes. Vérifie ta connexion.",
     "reintentar": "Réessayer",
-    "error_seguimiento": "Le suivi de cette alerte n'est plus disponible."
+    "error_seguimiento": "Le suivi de cette alerte n'est plus disponible.",
+    "hoy": "Aujourd'hui",
+    "ayer": "Hier",
+    "desde": "depuis",
+    "nota_cerradas": "🔒 Les alertes avec un cadenas ne peuvent plus être ouvertes : leur suivi est fermé."
   },
   "version": {
     "titulo": "Une nouvelle version d'AlertaMujer est disponible",

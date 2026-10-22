@@ -629,7 +629,7 @@
   "cerrar_sesion": "Log out",
   "slogan": "Together we are stronger",
   "compartir_mensaje": "Join me on AlertaMujer, an app to ask for help in seconds and alert your trusted contacts. Download it here:",
-  "alertas_recibidas": "Received alerts",
+  "alertas_recibidas": "My contacts' alerts",
   "trayecto": "Let them know if I don't arrive"
 },
 "activacion": {
@@ -910,27 +910,25 @@
   "btn_login": "Go to login"
 },
   "alertasRecibidas": {
-    "titulo_header": "Received alerts",
-    "intro": "Alerts from people who have you as an emergency contact. If you missed the alarm, here you can see what happened.",
-    "seccion_activas": "IN PROGRESS",
-    "seccion_anteriores": "EARLIER",
+    "titulo_header": "My contacts' alerts",
+    "intro": "Here you see alerts from people who added you as their emergency contact, not your own. If you missed the alarm, here you can see what happened.",
     "un_contacto": "A contact",
     "pide_ayuda": "Is asking for help right now",
-    "cancelo": "Cancelled their alert",
-    "tuvo_alerta": "Triggered an alert",
     "estado_activa": "In progress",
     "estado_atendida": "Resolved",
     "estado_cancelada": "Cancelled",
     "estado_terminada": "Ended",
     "duro": "Lasted",
     "ver_ubicacion": "See location and help",
-    "ver_recorrido": "See route",
-    "seguimiento_cerrado": "Tracking for this alert is closed",
-    "vacio_titulo": "All quiet",
-    "vacio_desc": "When someone who has you as a contact triggers an alert, it will show up here.",
+    "vacio_titulo": "None of your contacts has asked for help",
+    "vacio_desc": "When someone who has you as an emergency contact triggers an alert, it will show up here and an alarm will ring.",
     "error_carga": "We couldn't load the alerts. Check your connection.",
     "reintentar": "Try again",
-    "error_seguimiento": "Tracking for this alert is no longer available."
+    "error_seguimiento": "Tracking for this alert is no longer available.",
+    "hoy": "Today",
+    "ayer": "Yesterday",
+    "desde": "since",
+    "nota_cerradas": "🔒 Locked alerts can no longer be opened: their tracking is closed."
   },
   "version": {
     "titulo": "A new version of AlertaMujer is available",
