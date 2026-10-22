@@ -133,8 +133,8 @@ api.interceptors.response.use(
     const isAuthRequest = String(original?.url ?? "").startsWith("/api/auth/");
 
     // Expired token: renewed with the refresh token and the request is repeated once
-    if (error.response?.status === 401 && authToken && original && !original._reintento && !isAuthRequest) {
-      original._reintento = true;
+    if (error.response?.status === 401 && authToken && original && !original._retry && !isAuthRequest) {
+      original._retry = true;
       let newItem: string | null = null;
       try {
         newItem = await renewToken();
