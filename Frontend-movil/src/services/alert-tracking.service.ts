@@ -1,4 +1,5 @@
-import api from "./api";
+import * as Application from "expo-application";
+import api, { fuenteConToken } from "./api";
 import type { AlertaApi } from "./alerts.service";
 
 export interface PuntoUbicacion {
@@ -12,6 +13,27 @@ export interface SeguimientoAlerta {
   estado: string; // "active" | "cancelled" | "resolved" ...
   puntos: PuntoUbicacion[]; // ordenados del más antiguo al más reciente
   alerta?: AlertaApi; // datos completos (solo para la dueña de la alerta)
+  /** Grabaciones de la alerta (seguimiento público del contacto), de la más antigua a la más reciente. */
+  evidencias?: EvidenciaSeguimiento[];
+}
+
+export interface EvidenciaSeguimiento {
+  id: number;
+  tipo: "video" | "audio" | "photo" | "document";
+  creada: Date;
+  /** Fuente para el reproductor (el endpoint público no necesita sesión). */
+  fuente: { uri: string; headers: Record<string, string> };
+}
+
+/** Identificador anónimo de esta app para contar quién vio la alerta (sin datos personales). */
+function idVisitante(): string {
+  try {
+    const id = Application.getAndroidId();
+    if (id) return `app-${id}`;
+  } catch {
+    // sin ANDROID_ID: se usa uno genérico
+  }
+  return "app-sin-identificador";
 }
 
 // El backend devuelve LocalDateTime en UTC sin 'Z' (igual que en alerts.service.ts).
@@ -64,7 +86,8 @@ export const getSeguimientoAlerta = async (
  * el push (un contacto no puede leer la alerta de otra persona por /api/alerts/{id}).
  */
 export const getSeguimientoPublico = async (codigo: string): Promise<SeguimientoAlerta> => {
-  const { data } = await api.get<any>(`/api/public/tracking/${encodeURIComponent(codigo)}`);
+  const ruta = `/api/public/tracking/${encodeURIComponent(codigo)}`;
+  const { data } = await api.get<any>(ruta, { params: { v: idVisitante() } });
   const puntos: PuntoUbicacion[] = (data?.route ?? [])
     .filter((p: any) => p?.latitude != null && p?.longitude != null)
     .map((p: any, i: number) => ({
@@ -73,5 +96,11 @@ export const getSeguimientoPublico = async (codigo: string): Promise<Seguimiento
       longitude: Number(p.longitude),
       recordedAt: aFecha(p.recordedAt),
     }));
-  return { estado: String(data?.status ?? "").toLowerCase(), puntos };
+  const evidencias: EvidenciaSeguimiento[] = (data?.evidence ?? []).map((e: any) => ({
+    id: Number(e.id),
+    tipo: e.mediaType,
+    creada: aFecha(e.createdAt),
+    fuente: fuenteConToken(`${ruta}/evidence/${e.id}`),
+  }));
+  return { estado: String(data?.status ?? "").toLowerCase(), puntos, evidencias };
 };

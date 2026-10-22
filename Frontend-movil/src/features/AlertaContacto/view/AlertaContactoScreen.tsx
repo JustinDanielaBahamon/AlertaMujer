@@ -16,6 +16,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import MapView, { Marker, Polyline } from "../../../components/mapa/MapaLibre";
 import ChatAlerta, { RAPIDOS_DEL_CONTACTO } from "../../chatAlerta/ChatAlerta";
 import { useChatSobreTeclado } from "../../../hooks/useChatSobreTeclado";
+import ReproductorPartes from "../../../components/ui/reproductorPartes/ReproductorPartes";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useAlertaContactoViewModel } from "../viewModel/useAlertaContactoViewModel";
 import type { PuntoUbicacion } from "../../../services/alert-tracking.service";
@@ -428,6 +429,30 @@ export default function AlertaContactoScreen() {
             )}
           </View>
 
+          {/* Grabaciones de la alerta: se reproducen seguidas, parte por parte */}
+          {(vm.videos.length > 0 || vm.audios.length > 0) && (
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>{tx.grabaciones}</Text>
+              <Text style={styles.historialSub}>{tx.grabaciones_desc}</Text>
+              {vm.videos.length > 0 && (
+                <View style={{ marginTop: 12 }}>
+                  <Text style={[styles.historialSub, { fontWeight: "700" }]}>
+                    {tx.grabacion_video} · {vm.videos.length} {vm.videos.length === 1 ? tx.parte : tx.partes}
+                  </Text>
+                  <ReproductorPartes tipo="video" partes={vm.videos} color={theme.icono} />
+                </View>
+              )}
+              {vm.audios.length > 0 && (
+                <View style={{ marginTop: 16 }}>
+                  <Text style={[styles.historialSub, { fontWeight: "700" }]}>
+                    {tx.grabacion_audio} · {vm.audios.length} {vm.audios.length === 1 ? tx.parte : tx.partes}
+                  </Text>
+                  <ReproductorPartes tipo="audio" partes={vm.audios} color={theme.icono} />
+                </View>
+              )}
+            </View>
+          )}
+
           <Text style={styles.consejo}>{tx.consejo}</Text>
 
           <TouchableOpacity
@@ -436,7 +461,7 @@ export default function AlertaContactoScreen() {
             activeOpacity={0.85}
           >
             <MaterialIcons name="call" size={20} color={theme.icono} />
-            <Text style={styles.callText}>{tx.llamar911}</Text>
+            <Text style={styles.callText}>{tx.llamar_numero.replace("{numero}", vm.numeroEmergencia)}</Text>
           </TouchableOpacity>
           {/* Chat con ella: respuestas rápidas o texto (con el código del seguimiento) */}
           {!!vm.codigo && (

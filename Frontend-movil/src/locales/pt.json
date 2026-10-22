@@ -806,7 +806,6 @@
   "confirmarDescripcion": "Seus contatos receberão uma notificação automática informando que você está a salvo e que o alerta foi desativado.",
   "confirmarSi": "Sim, cancelar",
   "confirmarNo": "Não, manter alerta",
-  "llamar911": "Ligar para o 911",
   "salirBloqueadoTitulo": "O alerta continua ativo",
   "salirBloqueadoDescripcion": "Para sair desta tela, toque em \"Estou bem\" e confirme que está em segurança.",
   "envio_enviando": "Avisando seus contatos…",
@@ -821,7 +820,10 @@
   "fin_cancelada": "O alerta foi cancelado. Sua localização não é mais enviada.",
   "fin_pregunta": "Você ainda está em perigo?",
   "fin_otra": "Sim, ativar outro alerta",
-  "fin_bien": "Estou bem, sair"
+  "fin_bien": "Estou bem, sair",
+  "vista": "visualização",
+  "viendo_ahora": "{n} vendo agora",
+  "llamar_numero": "Ligar para {numero}"
 },
     "alertaContacto": {
     "badgeActiva": "Alerta ativo em tempo real",
@@ -853,7 +855,13 @@
     "reciente": "Recente",
     "actual": "Atual",
     "consejo": "Se você acha que a pessoa está em perigo iminente, entre em contato imediatamente com as autoridades.",
-    "llamar911": "Ligar para o 911"
+    "grabaciones": "Gravações do alerta",
+    "grabaciones_desc": "O que o celular dela gravou. Pode ajudar a saber onde ela está ou o que está acontecendo. Não compartilhe.",
+    "grabacion_video": "Vídeo",
+    "grabacion_audio": "Áudio",
+    "parte": "parte",
+    "partes": "partes",
+    "llamar_numero": "Ligar para {numero}"
   },
   "notificaciones": {
     "titulo_header": "Notificações",

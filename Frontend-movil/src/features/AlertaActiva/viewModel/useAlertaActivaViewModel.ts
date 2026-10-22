@@ -9,7 +9,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { MainStackParamList } from "../../../navigation/types";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useLocale } from "../../../contexts/LocaleContext";
-import { crearAlertaConReintentos, finalizarAlerta, getAlerta } from "../../../services/alerts.service";
+import { crearAlertaConReintentos, finalizarAlerta, getAlerta, getVistas } from "../../../services/alerts.service";
 import { getAjustesPublicos } from "../../../services/settings.service";
 import { aFecha } from "../../../services/alert-tracking.service";
 import { getOrCreateDevice } from "../../../services/devices.service";
@@ -372,6 +372,16 @@ export function useAlertaActivaViewModel() {
     return () => clearInterval(t);
   }, [alertaId, revisarEstado]);
 
+  // Quién abrió el seguimiento: le da tranquilidad saber que sus contactos la están viendo
+  const [vistas, setVistas] = useState({ total: 0, viendoAhora: 0 });
+  useEffect(() => {
+    if (!alertaId) return;
+    const leer = () => getVistas(alertaId).then(setVistas).catch(() => {});
+    leer();
+    const t = setInterval(leer, 15000);
+    return () => clearInterval(t);
+  }, [alertaId]);
+
   const llegoACero = alertaId !== null && inicioAlerta !== null && secondsLeft === 0;
   useEffect(() => {
     if (llegoACero) revisarEstado();
@@ -518,6 +528,7 @@ export function useAlertaActivaViewModel() {
     errorAlerta,
     envio,
     fin,
+    vistas,
     activarOtraAlerta,
     salirTrasFin,
     numeroEmergencia,

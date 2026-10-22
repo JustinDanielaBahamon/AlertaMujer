@@ -223,7 +223,11 @@ export default function AlertaActivaScreen() {
             <View style={styles.divider} />
             <View style={styles.locationItem}>
               <MaterialIcons name="visibility" size={18} color={theme.icono} />
-              <Text style={styles.locationText}>0 {t.alertaActiva.vistas}</Text>
+              <Text style={styles.locationText}>
+                {vm.vistas.viendoAhora > 0
+                  ? t.alertaActiva.viendo_ahora.replace("{n}", String(vm.vistas.viendoAhora))
+                  : `${vm.vistas.total} ${vm.vistas.total === 1 ? t.alertaActiva.vista : t.alertaActiva.vistas}`}
+              </Text>
             </View>
           </View>
         </View>
@@ -250,7 +254,7 @@ export default function AlertaActivaScreen() {
 
         <TouchableOpacity style={styles.callRow} onPress={vm.llamarEmergencias}>
           <MaterialIcons name="call" size={18} color={theme.icono} />
-          <Text style={styles.callText}>{t.alertaActiva.llamar911}</Text>
+          <Text style={styles.callText}>{t.alertaActiva.llamar_numero.replace("{numero}", vm.numeroEmergencia)}</Text>
         </TouchableOpacity>
 
         </View>

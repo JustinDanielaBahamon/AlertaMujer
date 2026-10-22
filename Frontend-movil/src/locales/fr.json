@@ -805,7 +805,6 @@
     "confirmarDescripcion": "Tes contacts recevront une notification automatique les informant que tu es en sécurité et que l'alerte a été désactivée.",
     "confirmarSi": "Oui, annuler",
     "confirmarNo": "Non, maintenir l'alerte",
-    "llamar911": "Appeler le 911",
     "salirBloqueadoTitulo": "L'alerte est toujours active",
     "salirBloqueadoDescripcion": "Pour quitter cet écran, touchez « Je vais bien » et confirmez que vous êtes en sécurité.",
     "envio_enviando": "Nous prévenons tes contacts…",
@@ -820,7 +819,10 @@
     "fin_cancelada": "L'alerte a été annulée. Ta position n'est plus envoyée.",
     "fin_pregunta": "Es-tu toujours en danger ?",
     "fin_otra": "Oui, déclencher une autre alerte",
-    "fin_bien": "Je vais bien, quitter"
+    "fin_bien": "Je vais bien, quitter",
+    "vista": "vue",
+    "viendo_ahora": "{n} regardent maintenant",
+    "llamar_numero": "Appeler le {numero}"
   },
   "alertaContacto": {
     "badgeActiva": "Alerte active en temps réel",
@@ -852,7 +854,13 @@
     "reciente": "Récent",
     "actual": "Actuel",
     "consejo": "Si tu penses que la personne est en danger imminent, contacte immédiatement les autorités.",
-    "llamar911": "Appeler le 911"
+    "grabaciones": "Enregistrements de l'alerte",
+    "grabaciones_desc": "Ce que son téléphone a enregistré. Cela peut t'aider à savoir où elle est ou ce qui se passe. Ne les partage pas.",
+    "grabacion_video": "Vidéo",
+    "grabacion_audio": "Audio",
+    "parte": "partie",
+    "partes": "parties",
+    "llamar_numero": "Appeler le {numero}"
   },
   "notificaciones": {
     "titulo_header": "Notifications",
