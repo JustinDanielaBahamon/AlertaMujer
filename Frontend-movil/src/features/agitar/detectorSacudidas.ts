@@ -1,49 +1,52 @@
 /**
- * Detecta la activación por movimiento: 4 hachazos rápidos y fuertes, a partir de las lecturas del
- * acelerómetro (en g, incluida la gravedad; en reposo el teléfono marca ~1 g).
+ * Detecta la activación por movimiento: 4 o más hachazos rápidos y fuertes, a partir de las lecturas
+ * del acelerómetro (en g, incluida la gravedad; en reposo el teléfono marca ~1 g).
  *
- * - Un hachazo cuenta como UN golpe aunque deje varias lecturas fuertes (el impulso, el frenazo y el
- *   rebote): el golpe termina cuando el teléfono queda por debajo de `reposoG` un momento.
- * - Trotar o correr también da golpes rítmicos. Para no confundirlos:
- *   1) antes del primer hachazo tiene que haber calma (corriendo los golpes no paran) y
- *   2) después del cuarto también: quien corre sigue moviéndose; quien pide ayuda se detiene.
- * - Tras una detección hay una pausa para que la misma secuencia no dispare dos alertas.
+ * Medido en un celular real (Infinix X678B): unos hachazos fuertes no se detienen entre golpe y golpe.
+ * La fuerza se queda en 6-8 g con picos de 11-13 g cada 0,3-0,4 s durante 1-5 s. Por eso se cuentan
+ * PICOS (máximos locales por encima de `umbralG`), no golpes separados por reposo.
+ *
+ * Para no confundirlo con trotar o correr (pasos de ~3-4 g, a veces más):
+ *   1) antes del primer pico tiene que haber un rato sin picos (corriendo, los pasos no paran) y
+ *   2) después del último también, con el teléfono ya quieto: quien corre sigue moviéndose; quien
+ *      pide ayuda se detiene.
+ * Dar más de 4 hachazos también cuenta. Tras una detección hay una pausa para no disparar dos veces.
  */
 
 export type OpcionesDetector = {
-  /** Fuerza mínima del pico de un hachazo, en g. */
+  /** Fuerza mínima de un pico (hachazo), en g. */
   umbralG: number;
-  /** Por debajo de esta fuerza el teléfono se considera quieto entre golpes. */
+  /** Por debajo de esta fuerza el teléfono se considera quieto. */
   reposoG: number;
-  /** Tiempo por debajo de `reposoG` para dar por terminado un golpe (ms). */
+  /** Tiempo quieto (bajo `reposoG`) para dar por terminada la secuencia (ms). */
   reposoMinimoMs: number;
-  /** Golpes necesarios. */
+  /** Picos necesarios. */
   golpesNecesarios: number;
-  /** Los golpes deben ocurrir dentro de esta ventana, contada desde el primero (ms). */
+  /** Duración máxima de la secuencia de picos, contada desde el primero (ms). */
   ventanaMs: number;
-  /** Separación mínima entre el inicio de dos golpes: lo que llega antes es parte del mismo (ms). */
+  /** Separación mínima entre dos picos: lo que llega antes es el rebote del mismo hachazo (ms). */
   separacionMinimaMs: number;
-  /** Separación máxima entre dos golpes seguidos (ms). */
+  /** Separación máxima entre dos picos seguidos de la misma secuencia (ms). */
   separacionMaximaMs: number;
-  /** Tiempo sin golpes antes del primero (ms). */
+  /** Tiempo sin picos antes del primero (ms). */
   calmaPreviaMs: number;
-  /** Tiempo sin golpes después del último para confirmar (ms). */
+  /** Tiempo sin picos después del último para confirmar (ms). */
   calmaPosteriorMs: number;
   /** Pausa después de una detección (ms). */
   pausaMs: number;
 };
 
 export const OPCIONES_POR_DEFECTO: OpcionesDetector = {
-  umbralG: 4.2,              // Más fuerte: requiere golpes más intensos (era 3.5)
-  reposoG: 1.8,               // Más exigente para detectar "reposo" (era 1.6)
-  reposoMinimoMs: 150,        // Más tiempo quieto entre golpes (era 120)
-  golpesNecesarios: 4,        // Mantener 4 hachazos
-  ventanaMs: 2500,            // Ventana más corta: golpes más rápidos (era 3000)
-  separacionMinimaMs: 300,    // Más separación para evitar rebotes (era 250)
-  separacionMaximaMs: 900,    // Golpes deben ser más rápidos entre sí (era 1000)
-  calmaPreviaMs: 1200,        // Más calma antes del primer golpe (era 1000)
-  calmaPosteriorMs: 700,      // Más calma después del último (era 600)
-  pausaMs: 10000,             // Pausa más larga entre detecciones (era 8000)
+  umbralG: 4.5,
+  reposoG: 2.0,
+  reposoMinimoMs: 200,
+  golpesNecesarios: 4,
+  ventanaMs: 8000,
+  separacionMinimaMs: 200,
+  separacionMaximaMs: 1000,
+  calmaPreviaMs: 400,
+  calmaPosteriorMs: 600,
+  pausaMs: 8000,
 };
 
 export type DetectorSacudidas = (x: number, y: number, z: number, tiempoMs: number) => boolean;
@@ -51,63 +54,49 @@ export type DetectorSacudidas = (x: number, y: number, z: number, tiempoMs: numb
 export function crearDetectorSacudidas(opciones: Partial<OpcionesDetector> = {}): DetectorSacudidas {
   const o = { ...OPCIONES_POR_DEFECTO, ...opciones };
 
-  let enGolpe = false;
+  // Las dos lecturas anteriores: un pico se confirma cuando la siguiente lectura ya es menor
+  let anterior: { g: number; t: number } | null = null;
+  let antepenultima = 0;
+  let ultimoPico = Number.NEGATIVE_INFINITY;
+  let picos: number[] = [];
   let quietoDesde: number | null = null;
-  let ultimoInicio = Number.NEGATIVE_INFINITY;
-  let ultimoFin = Number.NEGATIVE_INFINITY;
-  let golpes: number[] = [];
   let pausaHasta = 0;
 
-  const reiniciar = () => {
-    golpes = [];
+  const registrarPico = (t: number) => {
+    if (t - ultimoPico < o.separacionMinimaMs) return; // rebote del mismo hachazo
+    const huboCalma = t - ultimoPico >= o.calmaPreviaMs;
+    const sigue = picos.length > 0 && t - ultimoPico <= o.separacionMaximaMs && t - picos[0] <= o.ventanaMs;
+    if (sigue) picos.push(t);
+    else picos = huboCalma ? [t] : []; // sin calma previa es actividad continua (p. ej. correr)
+    ultimoPico = t;
   };
 
   return (x, y, z, t) => {
-    if (t < pausaHasta) return false;
     const fuerza = Math.sqrt(x * x + y * y + z * z);
-
-    // Dentro de un golpe: termina cuando el teléfono se queda quieto un momento
-    if (enGolpe) {
-      if (fuerza < o.reposoG) {
-        quietoDesde ??= t;
-        if (t - quietoDesde >= o.reposoMinimoMs) {
-          enGolpe = false;
-          ultimoFin = t;
-        }
-      } else {
-        quietoDesde = null;
-      }
+    if (t < pausaHasta) {
+      anterior = null;
       return false;
     }
 
-    if (fuerza >= o.umbralG) {
-      // Un pico que llega enseguida es el rebote del mismo hachazo
-      if (t - ultimoInicio < o.separacionMinimaMs) return false;
-      enGolpe = true;
-      quietoDesde = null;
-      const huboCalma = t - ultimoFin >= o.calmaPreviaMs;
-      ultimoInicio = t;
-
-      const ultimo = golpes[golpes.length - 1];
-      const rota = ultimo !== undefined && (t - ultimo > o.separacionMaximaMs || t - golpes[0] > o.ventanaMs);
-      if (rota) reiniciar();
-
-      if (golpes.length >= o.golpesNecesarios) {
-        // Siguió golpeando después del cuarto: es actividad continua (correr), no una petición de ayuda
-        reiniciar();
-      } else if (golpes.length === 0) {
-        if (huboCalma) golpes = [t];
-      } else {
-        golpes = [...golpes, t];
-      }
-      return false;
+    // ¿La lectura anterior fue un máximo local fuerte?
+    if (anterior && anterior.g >= o.umbralG && anterior.g >= antepenultima && anterior.g > fuerza) {
+      registrarPico(anterior.t);
     }
+    antepenultima = anterior?.g ?? fuerza;
+    anterior = { g: fuerza, t };
 
-    // Cuarto golpe ya dado: se confirma cuando pasa la calma posterior sin otro golpe
-    if (golpes.length >= o.golpesNecesarios && !enGolpe && t - ultimoFin >= o.calmaPosteriorMs) {
-      reiniciar();
+    quietoDesde = fuerza < o.reposoG ? (quietoDesde ?? t) : null;
+
+    // Secuencia completa: sin picos nuevos durante la calma posterior y el teléfono ya quieto
+    const quieto = quietoDesde !== null && t - quietoDesde >= o.reposoMinimoMs;
+    if (picos.length >= o.golpesNecesarios && t - ultimoPico >= o.calmaPosteriorMs && quieto) {
+      picos = [];
       pausaHasta = t + o.pausaMs;
       return true;
+    }
+    // Pasó demasiado tiempo sin completar la secuencia: se descarta
+    if (picos.length > 0 && t - ultimoPico > o.separacionMaximaMs && picos.length < o.golpesNecesarios) {
+      picos = [];
     }
     return false;
   };
