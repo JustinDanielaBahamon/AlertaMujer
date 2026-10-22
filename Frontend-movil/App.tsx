@@ -1,6 +1,7 @@
 import "react-native-gesture-handler";
 import { useCallback, useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import GlobalAlertHost from "./src/components/ui/globalAlert/globalAlert";
 import UpdateNotice from "./src/features/version/UpdateNotice";
 import ImagePreload from "./src/components/ui/ImagePreload/ImagePreload";
@@ -23,28 +24,32 @@ export default function App() {
   const [showSplash, setShowSplash] = useState(true);
   const finishSplash = useCallback(() => setShowSplash(false), []);
 
+  // SafeAreaProvider at the root: screens rendered outside a navigator (e.g. CompleteSignUpScreen)
+  // also need the safe area insets, otherwise useSafeAreaInsets throws and the app closes
   return (
-    <ThemeProvider>
-      <LocaleProvider>
-        <AuthProvider>
-          <LocationReport />
-          <ContactsProvider>
-            <RoutesProvider>
-              <EvidenceProvider>
-                <NotificationsProvider>
-                  <ActivationMethodsProvider>
-                    <ImagePreload />
-                    <AppNavigator />
-                    <GlobalAlertHost />
-                    <UpdateNotice />
-                    {showSplash && <AnimatedSplash onFinish={finishSplash} />}
-                  </ActivationMethodsProvider>
-                </NotificationsProvider>
-              </EvidenceProvider>
-            </RoutesProvider>
-          </ContactsProvider>
-        </AuthProvider>
-      </LocaleProvider>
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <LocaleProvider>
+          <AuthProvider>
+            <LocationReport />
+            <ContactsProvider>
+              <RoutesProvider>
+                <EvidenceProvider>
+                  <NotificationsProvider>
+                    <ActivationMethodsProvider>
+                      <ImagePreload />
+                      <AppNavigator />
+                      <GlobalAlertHost />
+                      <UpdateNotice />
+                      {showSplash && <AnimatedSplash onFinish={finishSplash} />}
+                    </ActivationMethodsProvider>
+                  </NotificationsProvider>
+                </EvidenceProvider>
+              </RoutesProvider>
+            </ContactsProvider>
+          </AuthProvider>
+        </LocaleProvider>
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 }
