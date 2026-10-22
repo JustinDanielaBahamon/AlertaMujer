@@ -10,7 +10,7 @@ import React, {
 
 const STORAGE_KEY = "alertamujer_metodos_activacion";
 
-export type MetodoId = "boton" | "contacto" | "agitar" | "bloqueo" | "widget";
+export type MetodoId = "boton" | "contacto" | "agitar" | "encendido" | "bloqueo" | "widget";
 export type ConfigMetodos = Record<MetodoId, boolean>;
 
 // Botón y alerta a un contacto vienen activos; los demás los enciende la usuaria
@@ -18,6 +18,7 @@ const CONFIG_POR_DEFECTO: ConfigMetodos = {
   boton: true,
   contacto: true,
   agitar: false,
+  encendido: false,
   bloqueo: false,
   widget: false,
 };

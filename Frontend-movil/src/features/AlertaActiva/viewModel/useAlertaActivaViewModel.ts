@@ -217,14 +217,18 @@ export function useAlertaActivaViewModel() {
           userProfileId: user.id,
           deviceId: device.id,
           alertType: "main",
-          activationMethod: contactoDestino ? "contact" : metodo === "agitar" ? "suspicious_movement" : "panic_button",
+          activationMethod: contactoDestino
+            ? "contact"
+            : metodo === "agitar" ? "suspicious_movement" : metodo === "encendido" ? "power_button" : "panic_button",
           status: "active",
           // Alerta normal; si es individual, el mensaje indica el contacto destinatario.
           message: contactoDestino
             ? `Alerta SOS activada desde la app solo para: ${contactoDestino.nombre ?? ""} (${contactoDestino.telefono})`
             : metodo === "agitar"
               ? "Alerta SOS activada al agitar el teléfono"
-              : "Alerta SOS activada desde la app",
+              : metodo === "encendido"
+                ? "Alerta SOS activada con el botón de encendido"
+                : "Alerta SOS activada desde la app",
           latitude: location?.latitude,
           longitude: location?.longitude,
           // Alerta individual: el backend solo avisa a este contacto

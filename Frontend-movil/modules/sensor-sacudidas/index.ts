@@ -10,6 +10,8 @@ type Eventos = {
   /** Terminó un trozo de audio de la evidencia (archivo listo para subir). */
   onTrozoAudio: (trozo: { uri: string; duracionMs: number }) => void;
   onErrorGrabacion: (error: { mensaje: string }) => void;
+  /** La pantalla se prendió o se apagó (cada pulsación del botón de encendido). No llega en llamadas. */
+  onPantalla: (cambio: { encendida: boolean }) => void;
 };
 
 declare class SensorSacudidasModule extends NativeModule<Eventos> {
@@ -18,6 +20,9 @@ declare class SensorSacudidasModule extends NativeModule<Eventos> {
   /** Empieza a emitir onLectura (en g) cada intervaloMs, también en segundo plano. */
   iniciar(intervaloMs: number): boolean;
   detener(): void;
+  /** Empieza a emitir onPantalla con cada pulsación del botón de encendido. */
+  iniciarBotonEncendido(): void;
+  detenerBotonEncendido(): void;
   /** Espera con un temporizador nativo (sigue corriendo con la pantalla apagada). */
   esperar(ms: number): Promise<void>;
   ignoraOptimizacionBateria(): boolean;

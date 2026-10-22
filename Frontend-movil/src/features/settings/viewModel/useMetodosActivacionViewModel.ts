@@ -63,6 +63,10 @@ export function useMetodosActivacionViewModel() {
       recomendaciones: [m.agitar_rec1, m.agitar_rec2, m.agitar_rec3, m.agitar_rec4],
       recomendacionMarca: conflicto === "motorola" ? m.agitar_rec_motorola : undefined,
     },
+    {
+      ...armarMetodo(m, "encendido", "power-outline", "encendido", 3, config.encendido, false),
+      recomendaciones: [m.encendido_rec1, m.encendido_rec2],
+    },
     armarMetodo(m, "bloqueo", "lock-closed-outline", "popup", 4, config.bloqueo, true),
     armarMetodo(m, "widget", "apps-outline", "widget", 3, config.widget, true),
   ];

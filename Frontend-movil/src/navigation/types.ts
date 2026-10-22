@@ -17,13 +17,13 @@ export type MainStackParamList = {
   Activacion:
     | {
         contacto?: Contacto; // si viene, la alerta es solo para este contacto
-        metodo?: "agitar"; // activada al agitar el teléfono (por defecto, botón SOS)
+        metodo?: "agitar" | "encendido"; // agitar el teléfono o 4 pulsaciones del botón de encendido (por defecto, botón SOS)
       }
     | undefined;
   AlertaActiva:
     | {
         contacto?: Contacto; // si viene, la alerta es solo para este contacto
-        metodo?: "agitar";
+        metodo?: "agitar" | "encendido";
         alertaId?: number; // alerta ya creada en segundo plano: no se crea otra
       }
     | undefined;

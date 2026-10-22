@@ -23,13 +23,13 @@ const REPREGUNTAR_BATERIA_MS = 3 * 24 * 60 * 60 * 1000;
  * Infinix, Xiaomi, Samsung...) duerme la app con la pantalla apagada. Se pide que la deje correr
  * siempre; si la usuaria dice que no, se vuelve a preguntar a los 3 días.
  */
-async function pedirSinAhorroDeBateria() {
+async function pedirSinAhorroDeBateria(nombre: string) {
   if (Platform.OS !== "android" || SensorSacudidas.ignoraOptimizacionBateria()) return;
   const ultima = Number((await AsyncStorage.getItem(CLAVE_BATERIA)) ?? 0);
   if (Date.now() - ultima < REPREGUNTAR_BATERIA_MS) return;
   await AsyncStorage.setItem(CLAVE_BATERIA, String(Date.now()));
   Alert.alert(
-    "Agitar el teléfono",
+    nombre,
     "Para que la alerta funcione con la app cerrada o la pantalla apagada, permite que AlertaMujer se ejecute siempre en segundo plano.",
     [
       { text: "Ahora no", style: "cancel" },
@@ -39,47 +39,54 @@ async function pedirSinAhorroDeBateria() {
 }
 
 /**
- * Enciende o apaga el servicio de "agitar el teléfono" según el ajuste de la usuaria y conecta
- * sus eventos con la navegación.
+ * Enciende o apaga el servicio "Protección activa" según los métodos que activó la usuaria
+ * (agitar el teléfono y/o botón de encendido) y conecta sus eventos con la navegación.
  */
 export function useProteccionAgitar(
   navegacion: NavigationContainerRefWithCurrent<MainStackParamList>,
   conSesion: boolean,
 ): void {
   const { config, cargado, cambiar } = useMetodosActivacion();
-  const encendida = conSesion && cargado && config.agitar;
-  // Valor del ajuste visto en esta sesión: si pasa de apagado a encendido, lo encendió la usuaria
-  const ajusteAnterior = useRef<boolean | null>(null);
+  const listo = conSesion && cargado;
+  const agitar = listo && config.agitar;
+  const boton = listo && config.encendido;
+  const encendida = agitar || boton;
+  // Valores del ajuste vistos en esta sesión: si uno pasa de apagado a encendido, lo encendió la usuaria
+  const ajusteAnterior = useRef<{ agitar: boolean; encendido: boolean } | null>(null);
 
   useEffect(() => {
     const anterior = ajusteAnterior.current;
-    ajusteAnterior.current = conSesion && cargado ? config.agitar : null;
+    ajusteAnterior.current = listo ? { agitar: config.agitar, encendido: config.encendido } : null;
     if (!encendida) {
       detenerProteccion().catch(() => {});
       return;
     }
-    // Al abrir la app solo arranca si ya tiene los permisos; los pide si la usuaria la acaba de encender
-    const loEncendioAhora = anterior === false;
-    iniciarProteccion(loEncendioAhora)
+    // Al abrir la app solo arranca si ya tiene los permisos; los pide si la usuaria acaba de encender un método
+    const encendioAgitar = anterior !== null && !anterior.agitar && agitar;
+    const encendioBoton = anterior !== null && !anterior.encendido && boton;
+    const loEncendioAhora = encendioAgitar || encendioBoton;
+    const nombre = encendioBoton && !encendioAgitar ? "Botón de encendido" : "Agitar el teléfono";
+    iniciarProteccion(loEncendioAhora, { agitar, encendido: boton })
       .then((estado) => {
         if (estado === "activa") {
-          if (loEncendioAhora) pedirSinAhorroDeBateria().catch(() => {});
+          if (loEncendioAhora) pedirSinAhorroDeBateria(nombre).catch(() => {});
         } else if (estado === "sin_ubicacion") {
           // Al abrir la app no se insiste: el recordatorio de protección avisa lo que falta
           if (!loEncendioAhora) return;
-          cambiar("agitar", false);
+          if (encendioAgitar) cambiar("agitar", false);
+          if (encendioBoton) cambiar("encendido", false);
           Alert.alert(
-            "Agitar el teléfono",
-            "Para enviar tu ubicación cuando agites el teléfono, AlertaMujer necesita el permiso de ubicación. Actívalo e intenta de nuevo.",
+            nombre,
+            "Para enviar tu ubicación con la alerta, AlertaMujer necesita el permiso de ubicación. Actívalo e intenta de nuevo.",
           );
         } else if (estado === "sin_sensor") {
           cambiar("agitar", false);
           Alert.alert("Agitar el teléfono", "Este teléfono no tiene acelerómetro disponible.");
         }
       })
-      .catch((e) => console.warn("No se pudo iniciar la protección por sacudida:", e));
+      .catch((e) => console.warn("No se pudo iniciar la protección:", e));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [encendida, cambiar]);
+  }, [agitar, boton, cambiar]);
 
   useEffect(() => {
     if (!conSesion) return undefined;
@@ -89,10 +96,10 @@ export function useProteccionAgitar(
       else if (intentos > 0) setTimeout(() => ir(accion, intentos - 1), 300);
     };
 
-    const dejarSacudida = alSacudirEnPantalla(() => {
+    const dejarSacudida = alSacudirEnPantalla((metodo) => {
       const actual = navegacion.isReady() ? navegacion.getCurrentRoute()?.name : undefined;
       if (actual && PANTALLAS_DE_ALERTA.has(actual)) return;
-      ir(() => navegacion.navigate("Activacion", { metodo: "agitar" }));
+      ir(() => navegacion.navigate("Activacion", { metodo }));
     });
     const dejarAbrir = alAbrirAlertaPorSacudida((alertaId) =>
       ir(() => navegacion.navigate("AlertaActiva", { alertaId, metodo: "agitar" })),

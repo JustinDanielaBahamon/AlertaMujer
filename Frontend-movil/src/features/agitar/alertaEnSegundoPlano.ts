@@ -34,7 +34,12 @@ async function ubicacionParaLaAlerta(): Promise<Location.LocationObject | null> 
   return (await ubicacionActual()) ?? (await Location.getLastKnownPositionAsync().catch(() => null));
 }
 
-export async function crearAlertaPorSacudida(): Promise<number> {
+const METODOS = {
+  agitar: { activationMethod: "suspicious_movement", mensaje: "Alerta SOS activada al agitar el teléfono" },
+  encendido: { activationMethod: "power_button", mensaje: "Alerta SOS activada con el botón de encendido" },
+} as const;
+
+export async function crearAlertaPorSacudida(metodo: keyof typeof METODOS = "agitar"): Promise<number> {
   const raw = await AsyncStorage.getItem(CLAVE_SESION);
   const usuario = raw ? JSON.parse(raw).user : null;
   if (!usuario) throw new Error("No hay sesión iniciada");
@@ -45,9 +50,9 @@ export async function crearAlertaPorSacudida(): Promise<number> {
     userProfileId: usuario.id,
     deviceId: device.id,
     alertType: "main",
-    activationMethod: "suspicious_movement",
+    activationMethod: METODOS[metodo].activationMethod,
     status: "active",
-    message: "Alerta SOS activada al agitar el teléfono",
+    message: METODOS[metodo].mensaje,
     latitude: ubicacion?.coords.latitude,
     longitude: ubicacion?.coords.longitude,
   });

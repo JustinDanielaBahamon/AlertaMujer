@@ -3,9 +3,12 @@ package expo.modules.sensorsacudidas
 import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.app.NotificationManager
+import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.media.AudioManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -30,6 +33,7 @@ class SensorSacudidasModule : Module() {
   private val principal = Handler(Looper.getMainLooper())
   private var oyente: SensorEventListener? = null
   private var wakeLock: PowerManager.WakeLock? = null
+  private var receptorPantalla: BroadcastReceiver? = null
 
   private val contexto: Context
     get() = requireNotNull(appContext.reactContext) { "Sin contexto de Android" }
@@ -39,7 +43,7 @@ class SensorSacudidasModule : Module() {
 
   override fun definition() = ModuleDefinition {
     Name("SensorSacudidas")
-    Events("onLectura", "onTrozoAudio", "onErrorGrabacion")
+    Events("onLectura", "onTrozoAudio", "onErrorGrabacion", "onPantalla")
 
     OnCreate {
       GrabadoraAudioService.oyenteTrozo = { archivo, duracionMs ->
@@ -59,6 +63,16 @@ class SensorSacudidasModule : Module() {
 
     Function("detener") {
       detener()
+    }
+
+    // Botón de encendido: la app no recibe la tecla, pero sí cada vez que la pantalla se prende o se
+    // apaga (también con el teléfono bloqueado). Cada pulsación es un cambio de pantalla.
+    Function("iniciarBotonEncendido") {
+      iniciarBotonEncendido()
+    }
+
+    Function("detenerBotonEncendido") {
+      detenerBotonEncendido()
     }
 
     // Espera con un temporizador de Android: los de JS pueden no avanzar con la pantalla apagada
@@ -180,9 +194,46 @@ class SensorSacudidasModule : Module() {
 
     OnDestroy {
       detener()
+      detenerBotonEncendido()
       GrabadoraAudioService.oyenteTrozo = null
       GrabadoraAudioService.oyenteError = null
     }
+  }
+
+  private fun iniciarBotonEncendido() {
+    detenerBotonEncendido()
+    val audio = contexto.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+    val receptor = object : BroadcastReceiver() {
+      override fun onReceive(ctx: Context, intent: Intent) {
+        // En una llamada el sensor de proximidad prende y apaga la pantalla al acercar el teléfono
+        // a la cara: eso no son pulsaciones
+        val enLlamada = audio.mode == AudioManager.MODE_IN_CALL || audio.mode == AudioManager.MODE_IN_COMMUNICATION
+        if (enLlamada) return
+        sendEvent("onPantalla", mapOf("encendida" to (intent.action == Intent.ACTION_SCREEN_ON)))
+      }
+    }
+    val filtro = IntentFilter().apply {
+      addAction(Intent.ACTION_SCREEN_ON)
+      addAction(Intent.ACTION_SCREEN_OFF)
+    }
+    // Son difusiones del sistema: llegan aunque el receptor no esté exportado
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+      contexto.registerReceiver(receptor, filtro, Context.RECEIVER_NOT_EXPORTED)
+    } else {
+      contexto.registerReceiver(receptor, filtro)
+    }
+    receptorPantalla = receptor
+  }
+
+  private fun detenerBotonEncendido() {
+    receptorPantalla?.let {
+      try {
+        contexto.unregisterReceiver(it)
+      } catch (e: IllegalArgumentException) {
+        // ya estaba quitado
+      }
+    }
+    receptorPantalla = null
   }
 
   private fun enviarAGrabadora(accion: String) {

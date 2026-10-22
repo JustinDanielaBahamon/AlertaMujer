@@ -25,6 +25,8 @@ jest.mock("../../../../modules/sensor-sacudidas", () => ({
     disponible: jest.fn(() => true),
     iniciar: jest.fn(() => true),
     detener: jest.fn(),
+    iniciarBotonEncendido: jest.fn(),
+    detenerBotonEncendido: jest.fn(),
     esperar: jest.fn((ms: number) => new Promise((r) => setTimeout(r, ms))),
     addListener: jest.fn((_evento: string, l) => {
       mockLector = l;
@@ -141,5 +143,23 @@ describe("servicioProteccion", () => {
     await jest.advanceTimersByTimeAsync(6000);
 
     expect(crearAlertaPorSacudida).not.toHaveBeenCalled();
+  });
+
+  it("con el botón de encendido: 4 pulsaciones rápidas envían la alerta con ese método", async () => {
+    Object.defineProperty(AppState, "currentState", { value: "background", configurable: true });
+    registrarServicioProteccion();
+    const correr = (notifee.registerForegroundService as jest.Mock).mock.calls.at(-1)[0];
+    expect(await iniciarProteccion(false, { agitar: false, encendido: true })).toBe("activa");
+    correr();
+    expect(SensorSacudidas.iniciarBotonEncendido).toHaveBeenCalled();
+    expect(SensorSacudidas.iniciar).not.toHaveBeenCalled(); // sin acelerómetro si no se pidió agitar
+
+    for (let i = 0; i < 4; i++) {
+      jest.setSystemTime(Date.now() + 400);
+      (mockLector as unknown as (e: { encendida: boolean }) => void)?.({ encendida: i % 2 === 0 });
+    }
+    await jest.advanceTimersByTimeAsync(6000);
+
+    expect(crearAlertaPorSacudida).toHaveBeenCalledWith("encendido");
   });
 });

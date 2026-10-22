@@ -10,6 +10,7 @@ import { AppState, Vibration } from "react-native";
 import { estiloGrande } from "../../notifications/estiloNotificacion";
 import SensorSacudidas from "../../../modules/sensor-sacudidas";
 import { crearDetectorSacudidas } from "./detectorSacudidas";
+import { crearDetectorBotonEncendido } from "./detectorBotonEncendido";
 import { alertaEnSegundoPlano, crearAlertaPorSacudida } from "./alertaEnSegundoPlano";
 import { permisoNotificaciones, permisoUbicacion } from "../../services/permisosSeguros";
 
@@ -23,7 +24,14 @@ import { permisoNotificaciones, permisoUbicacion } from "../../services/permisos
  *
  * El acelerómetro es el del módulo nativo sensor-sacudidas: expo-sensors deja de leer en cuanto la
  * app sale de la pantalla. Por lo mismo las esperas son nativas y no setTimeout.
+ *
+ * El mismo servicio atiende el botón de encendido (4 pulsaciones rápidas, también con la pantalla
+ * apagada) si la usuaria activó ese método.
  */
+
+/** Método con el que se pidió la alerta. */
+export type MetodoProteccion = "agitar" | "encendido";
+export type OpcionesProteccion = { agitar: boolean; encendido: boolean };
 
 const CANAL_PROTECCION = "proteccion_activa";
 const CANAL_AVISO = "agitar_aviso";
@@ -40,13 +48,15 @@ export type EstadoProteccion = "activa" | "sin_ubicacion" | "sin_sensor";
 
 let activa = false;
 let detenerSensor: (() => void) | null = null;
+let detenerBoton: (() => void) | null = null;
+let opciones: OpcionesProteccion = { agitar: true, encendido: false };
 let terminarTarea: (() => void) | null = null;
 let cuentaEnCurso: { cancelada: boolean } | null = null;
 
 // --- Sacudida con la app en pantalla: la navegación se suscribe y abre la cuenta regresiva ---
-const oyentesEnPantalla = new Set<() => void>();
+const oyentesEnPantalla = new Set<(metodo: MetodoProteccion) => void>();
 
-export function alSacudirEnPantalla(oyente: () => void): () => void {
+export function alSacudirEnPantalla(oyente: (metodo: MetodoProteccion) => void): () => void {
   oyentesEnPantalla.add(oyente);
   return () => {
     oyentesEnPantalla.delete(oyente);
@@ -83,16 +93,37 @@ export function registrarServicioProteccion(): void {
     () =>
       new Promise<void>((resolver) => {
         terminarTarea = resolver;
-        escucharSensor();
+        configurarDetectores();
       }),
   );
 }
 
-function escucharSensor() {
+/** Enciende solo lo que la usuaria activó: acelerómetro, botón de encendido o ambos. */
+function configurarDetectores() {
   detenerSensor?.();
+  detenerSensor = null;
+  detenerBoton?.();
+  detenerBoton = null;
+  if (opciones.agitar) escucharSensor();
+  if (opciones.encendido) escucharBotonEncendido();
+}
+
+function escucharBotonEncendido() {
+  const detectar = crearDetectorBotonEncendido();
+  const sub = SensorSacudidas.addListener("onPantalla", () => {
+    if (detectar(Date.now())) alActivar("encendido");
+  });
+  SensorSacudidas.iniciarBotonEncendido();
+  detenerBoton = () => {
+    SensorSacudidas.detenerBotonEncendido();
+    sub.remove();
+  };
+}
+
+function escucharSensor() {
   const detectar = crearDetectorSacudidas();
   const sub = SensorSacudidas.addListener("onLectura", ({ x, y, z }) => {
-    if (detectar(x, y, z, Date.now())) alSacudir();
+    if (detectar(x, y, z, Date.now())) alActivar("agitar");
   });
   SensorSacudidas.iniciar(INTERVALO_SENSOR_MS);
   detenerSensor = () => {
@@ -101,14 +132,19 @@ function escucharSensor() {
   };
 }
 
-function alSacudir() {
+function alActivar(metodo: MetodoProteccion) {
   if (cuentaEnCurso || alertaEnSegundoPlano() !== null) return;
   if (AppState.currentState === "active" && oyentesEnPantalla.size > 0) {
-    oyentesEnPantalla.forEach((o) => o());
+    oyentesEnPantalla.forEach((o) => o(metodo));
     return;
   }
-  cuentaRegresiva();
+  cuentaRegresiva(metodo);
 }
+
+const MOTIVO: Record<MetodoProteccion, string> = {
+  agitar: "Agitaste el teléfono",
+  encendido: "Presionaste 4 veces el botón de encendido",
+};
 
 async function crearCanales() {
   await notifee.createChannel({
@@ -119,15 +155,15 @@ async function crearCanales() {
   });
   await notifee.createChannel({
     id: CANAL_AVISO,
-    name: "Alerta por sacudida",
-    description: "Cuenta regresiva y confirmación cuando agitas el teléfono",
+    name: "Alerta rápida",
+    description: "Cuenta regresiva y confirmación al agitar el teléfono o presionar el botón de encendido",
     importance: AndroidImportance.HIGH,
     vibration: true,
     visibility: AndroidVisibility.PUBLIC,
   });
 }
 
-async function cuentaRegresiva() {
+async function cuentaRegresiva(metodo: MetodoProteccion) {
   const cuenta = { cancelada: false };
   cuentaEnCurso = cuenta;
   try {
@@ -137,10 +173,10 @@ async function cuentaRegresiva() {
       await notifee.displayNotification({
         id: ID_CUENTA,
         title: `🚨 Se enviará una alerta en ${s} s`,
-        body: "Agitaste el teléfono. Toca Cancelar si fue un error.",
+        body: `${MOTIVO[metodo]}. Toca Cancelar si fue un error.`,
         android: {
           channelId: CANAL_AVISO,
-          ...estiloGrande("Agitaste el teléfono. Toca Cancelar si fue un error."),
+          ...estiloGrande(`${MOTIVO[metodo]}. Toca Cancelar si fue un error.`),
           category: AndroidCategory.ALARM,
           importance: AndroidImportance.HIGH,
           visibility: AndroidVisibility.PUBLIC,
@@ -156,7 +192,7 @@ async function cuentaRegresiva() {
     await notifee.cancelNotification(ID_CUENTA);
 
     try {
-      const alertaId = await crearAlertaPorSacudida();
+      const alertaId = await crearAlertaPorSacudida(metodo);
       Vibration.vibrate([0, 600, 200, 600]);
       await notifee.displayNotification({
         id: ID_ENVIADA,
@@ -209,23 +245,41 @@ export function manejarEventoProteccion({ type, detail }: Event): boolean {
   return false;
 }
 
-/** pedirPermisos = true solo cuando la usuaria enciende la protección (no al abrir la app). */
-export async function iniciarProteccion(pedirPermisos = false): Promise<EstadoProteccion> {
-  if (!SensorSacudidas.disponible()) return "sin_sensor";
+function textoProteccion(): string {
+  if (opciones.agitar && opciones.encendido) {
+    return "Agita el teléfono con fuerza o presiona 4 veces el botón de encendido para enviar una alerta a tus contactos.";
+  }
+  if (opciones.encendido) return "Presiona 4 veces rápido el botón de encendido para enviar una alerta a tus contactos.";
+  return "Agita el teléfono con fuerza para enviar una alerta a tus contactos.";
+}
+
+/**
+ * pedirPermisos = true solo cuando la usuaria enciende un método (no al abrir la app). Si ya
+ * estaba activa con otros métodos, solo cambia lo que se escucha.
+ */
+export async function iniciarProteccion(
+  pedirPermisos = false,
+  nuevas: OpcionesProteccion = { agitar: true, encendido: false },
+): Promise<EstadoProteccion> {
+  if (nuevas.agitar && !SensorSacudidas.disponible()) return "sin_sensor";
   // El servicio es de tipo ubicación (para poder enviarla con la pantalla bloqueada) y Android
   // exige el permiso antes de iniciarlo
   if (!(await permisoUbicacion(pedirPermisos))) return "sin_ubicacion";
-  if (activa) return "activa";
+  const cambiaron = opciones.agitar !== nuevas.agitar || opciones.encendido !== nuevas.encendido;
+  opciones = nuevas;
+  if (activa && !cambiaron) return "activa";
+  if (activa) configurarDetectores();
 
   await permisoNotificaciones(pedirPermisos);
   await crearCanales();
+  // Mostrar la notificación del servicio otra vez la actualiza (y la primera vez lo arranca)
   await notifee.displayNotification({
     id: ID_SERVICIO,
     title: "Protección activa",
-    body: "Agita el teléfono con fuerza para enviar una alerta a tus contactos.",
+    body: textoProteccion(),
     android: {
       channelId: CANAL_PROTECCION,
-      ...estiloGrande("Agita el teléfono con fuerza para enviar una alerta a tus contactos."),
+      ...estiloGrande(textoProteccion()),
       asForegroundService: true,
       foregroundServiceTypes: [AndroidForegroundServiceType.FOREGROUND_SERVICE_TYPE_LOCATION],
       ongoing: true,
@@ -241,6 +295,8 @@ export async function detenerProteccion(): Promise<void> {
   activa = false;
   detenerSensor?.();
   detenerSensor = null;
+  detenerBoton?.();
+  detenerBoton = null;
   if (cuentaEnCurso) cuentaEnCurso.cancelada = true;
   await notifee.cancelNotification(ID_CUENTA);
   await notifee.stopForegroundService();
