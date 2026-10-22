@@ -112,7 +112,7 @@ function useRouteAddresses(routes: SavedRoute[]): Addresses {
   return addresses;
 }
 
-export default function HistorialRecorridos() {
+export default function RouteHistory() {
   const { theme } = useTheme();
   const { t } = useLocale();
   const navigation = useNavigation<any>();

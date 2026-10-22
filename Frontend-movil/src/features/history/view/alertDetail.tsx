@@ -21,20 +21,20 @@ type AlertDetailRouteProp = RouteProp<MainStackParamList, "AlertDetail">;
 type Coordinate = { latitude: number; longitude: number };
 
 const STEP_ICON: Record<AlertStep["icon"], keyof typeof MaterialIcons.glyphMap> = {
-  alerta: "notifications-active",
-  ubicacion: "my-location",
-  fin: "check",
-  curso: "radio-button-checked",
+  alert: "notifications-active",
+  location: "my-location",
+  end: "check",
+  ongoing: "radio-button-checked",
 };
 
 const STEP_COLOR: Record<AlertStep["icon"], string> = {
-  alerta: POINT_B_COLOR,
-  ubicacion: "#9333EA",
-  fin: POINT_A_COLOR,
-  curso: POINT_B_COLOR,
+  alert: POINT_B_COLOR,
+  location: "#9333EA",
+  end: POINT_A_COLOR,
+  ongoing: POINT_B_COLOR,
 };
 
-export default function DetalleAlerta() {
+export default function AlertDetail() {
   const { theme } = useTheme();
   const { t } = useLocale();
   const styles = useMemo(() => createStyles(theme), [theme]);

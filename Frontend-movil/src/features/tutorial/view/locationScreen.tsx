@@ -139,8 +139,8 @@ export default function LocationScreen({ externalVm }: LocationScreenProps) {
                     value={PLACEHOLDER_MUNICIPALITY}
                     color={LOCATION_COLORS.placeholder}
                   />
-                  {vm.municipalitiesHuila.map((muni) => (
-                    <Picker.Item key={muni} label={muni} value={muni} />
+                  {vm.municipalitiesHuila.map((municipalityName) => (
+                    <Picker.Item key={municipalityName} label={municipalityName} value={municipalityName} />
                   ))}
                 </Picker>
               </View>

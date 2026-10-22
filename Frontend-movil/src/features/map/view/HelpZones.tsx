@@ -94,7 +94,7 @@ const formatDistance = (metros: number) =>
 // About 80 m per minute on foot.
 const walkingMinutes = (metros: number) => Math.max(1, Math.round(metros / 80));
 
-export default function ZonasAuxiliares() {
+export default function HelpZones() {
   const { theme } = useTheme();
   const { t } = useLocale();
   const navigation = useNavigation<any>();

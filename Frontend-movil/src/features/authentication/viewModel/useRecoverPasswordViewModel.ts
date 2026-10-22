@@ -164,7 +164,7 @@ export function useRecoverPasswordViewModel() {
   const verifyCode = () => {
     if (expiredItem) {
       showAlert(
-        'aviso',
+        'warning',
         'Código vencido',
         'Se acabó el tiempo. Solicita un nuevo código para continuar.'
       );
@@ -172,7 +172,7 @@ export function useRecoverPasswordViewModel() {
     }
     if (code.join('').length < CODE_DIGITS) {
       showAlert(
-        'aviso',
+        'warning',
         'Código incompleto',
         'Escribe los 6 dígitos del código que te enviamos.'
       );
@@ -189,7 +189,7 @@ export function useRecoverPasswordViewModel() {
       await authService.requestRecoveryCode(email.trim());
       setCode(emptyCode());
       startTimer();
-      showAlert('exito', 'Código enviado', 'Te enviamos un código nuevo. El anterior ya no sirve.');
+      showAlert('success', 'Código enviado', 'Te enviamos un código nuevo. El anterior ya no sirve.');
     } catch (e) {
       showAlert('error', 'No se pudo reenviar', errorMessage(e, 'Inténtalo de nuevo en un momento.'));
     } finally {
@@ -219,7 +219,7 @@ export function useRecoverPasswordViewModel() {
       .resetPassword(email.trim(), code.join(''), newPassword)
       .then(() =>
         showAlert(
-          'exito',
+          'success',
           '¡Contraseña actualizada!',
           'Ya puedes iniciar sesión con tu nueva contraseña.',
           'Iniciar sesión',

@@ -41,7 +41,7 @@ export function useProtectionReminder(
         // Protection cuts since the last notice (checked with the Android records)
         const cortes = config.agitar ? recentInterruptions().filter((c) => c.when > lastItem) : [];
         const missing = missingCritical(
-          await checkPermissions(config.agitar, cortes.filter((c) => c.cause === "sistema").length),
+          await checkPermissions(config.agitar, cortes.filter((c) => c.cause === "system").length),
         );
         if (missing.length === 0 && cortes.length === 0) return;
         await AsyncStorage.setItem(LAST_NOTICE_KEY, String(Date.now()));

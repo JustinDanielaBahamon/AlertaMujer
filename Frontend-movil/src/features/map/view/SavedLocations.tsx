@@ -65,7 +65,7 @@ const mapFrequentToLocation = (u: FrequentLocationApi): SavedLocation => ({
   description: u.notes ?? "",
 });
 
-export default function UbicacionesGuardadas() {
+export default function SavedLocations() {
   const { theme } = useTheme();
   const { t } = useLocale();
   const navigation = useNavigation<NavigationProp>();

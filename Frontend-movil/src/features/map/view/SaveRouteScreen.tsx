@@ -1,5 +1,5 @@
-import GuardarRecorrido from "./SaveRoute";
+import SaveRoute from "./SaveRoute";
 
 export default function SaveRouteScreen() {
-  return <GuardarRecorrido />;
+  return <SaveRoute />;
 }

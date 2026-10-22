@@ -13,7 +13,7 @@ const AUDIO_TEXT = {
   pt: "Iniciando gravação de áudio",
 };
 
-export default function Activacion() {
+export default function ActivationScreen() {
   const vm = useActivationViewModel();
   const { theme } = useTheme();
   const { t, locale } = useLocale();

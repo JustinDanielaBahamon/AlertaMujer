@@ -56,6 +56,6 @@ describe("recuperar contraseña", () => {
       result.current.saveNewPassword();
     });
     expect(authService.resetPassword).toHaveBeenCalledWith("ana@correo.com", "654321", "NuevaClave123");
-    expect(result.current.alert.type).toBe("exito");
+    expect(result.current.alert.type).toBe("success");
   });
 });

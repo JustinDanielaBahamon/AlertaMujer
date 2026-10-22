@@ -8,7 +8,7 @@ import ShakeSensor, { type AppExit } from "../../../modules/shake-sensor";
  * That way we do not have to trust that the user set up her phone right: it is checked.
  */
 
-export type InterruptionCause = "recientes" | "detenida" | "sistema" | "error";
+export type InterruptionCause = "recents" | "stopped" | "system" | "error";
 export type Interruption = { when: number; cause: InterruptionCause };
 
 // ActivityManager.RunningAppProcessInfo: 125 = foreground service, 100 = on screen
@@ -27,11 +27,11 @@ export function classifyExit(c: AppExit): Interruption | null {
   if (c.reason === USER_REQUESTED) {
     // Swiping the app away in "Recents" (XOS: "remove task ... SwipeUpClean") kills it entirely
     const recent = /remove task|swipe/i.test(c.description);
-    return { when: c.timestamp, cause: recent ? "recientes" : "detenida" };
+    return { when: c.timestamp, cause: recent ? "recents" : "stopped" };
   }
   if (c.reason === CRASH || c.reason === CRASH_NATIVE || c.reason === ANR) return { when: c.timestamp, cause: "error" };
   // Memory, power saving, "too many processes", frozen...: the system or the brand did it
-  return { when: c.timestamp, cause: "sistema" };
+  return { when: c.timestamp, cause: "system" };
 }
 
 /** Protection interruptions in the last days (Android 11+; there is no record before). */
@@ -49,16 +49,16 @@ export function recentInterruptions(days = 7): Interruption[] {
 
 /** Text and fix for the most recent cause. */
 export const EXPLANATION: Record<InterruptionCause, { title: string; fixItem: string }> = {
-  recientes: {
+  recents: {
     title: "Se cerró la app desde «Recientes»",
     fixItem:
       "Al deslizar la app para cerrarla, el teléfono también apaga la protección. En Recientes, mantén presionada la tarjeta de AlertaMujer y toca el candado para bloquearla.",
   },
-  detenida: {
+  stopped: {
     title: "Se forzó la detención de la app",
     fixItem: "Desde los ajustes del teléfono se detuvo AlertaMujer. Ábrela de nuevo para reactivar la protección.",
   },
-  sistema: {
+  system: {
     title: "El teléfono detuvo la protección para ahorrar energía",
     fixItem: "Permite el inicio automático de AlertaMujer y quítale las restricciones de batería.",
   },

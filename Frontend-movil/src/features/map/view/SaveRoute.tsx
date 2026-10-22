@@ -34,7 +34,7 @@ const pointLabel = (name: string, point: SelectedPoint, byDefault: string) =>
 
 type MethodSelection = "mapa" | "ubicaciones";
 
-export default function GuardarRecorrido() {
+export default function SaveRoute() {
   const { theme } = useTheme();
   const { t } = useLocale();
   const navigation = useNavigation<any>();

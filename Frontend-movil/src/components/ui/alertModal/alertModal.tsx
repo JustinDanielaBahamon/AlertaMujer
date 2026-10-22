@@ -3,7 +3,7 @@ import React from "react";
 import { Modal, Text, TouchableOpacity, View } from "react-native";
 import { styles } from "./alertModal.styles";
 
-export type AlertType = "exito" | "error" | "aviso";
+export type AlertType = "success" | "error" | "warning";
 
 interface AlertModalProps {
   visible: boolean;
@@ -21,9 +21,9 @@ const CONFIG: Record<
   AlertType,
   { icon: IconName; color: string; background: string }
 > = {
-  exito: { icon: "check", color: "#6B3FA0", background: "#F3E8FF" },
+  success: { icon: "check", color: "#6B3FA0", background: "#F3E8FF" },
   error: { icon: "close", color: "#D32F2F", background: "#FDECEC" },
-  aviso: { icon: "priority-high", color: "#BC27BE", background: "#FBE9FB" },
+  warning: { icon: "priority-high", color: "#BC27BE", background: "#FBE9FB" },
 };
 
 export default function AlertModal({

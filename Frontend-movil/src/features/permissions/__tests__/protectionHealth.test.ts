@@ -9,7 +9,7 @@ const exit = (reason: number, importance: number, description = "") => ({
 
 describe("clasificarCierre", () => {
   it("deslizar en Recientes con la protección activa la interrumpe", () => {
-    expect(classifyExit(exit(10, 125, "remove task: due to 2098, cleanType:SwipeUpClean"))?.cause).toBe("recientes");
+    expect(classifyExit(exit(10, 125, "remove task: due to 2098, cleanType:SwipeUpClean"))?.cause).toBe("recents");
   });
 
   it("si la protección no corría, el cierre no cuenta", () => {
@@ -18,12 +18,12 @@ describe("clasificarCierre", () => {
   });
 
   it("el sistema matando el servicio cuenta como ahorro de energía", () => {
-    expect(classifyExit(exit(13, 125, "too many empty"))?.cause).toBe("sistema");
-    expect(classifyExit(exit(3, 125))?.cause).toBe("sistema");
+    expect(classifyExit(exit(13, 125, "too many empty"))?.cause).toBe("system");
+    expect(classifyExit(exit(3, 125))?.cause).toBe("system");
   });
 
   it("forzar detención, errores y actualizaciones", () => {
-    expect(classifyExit(exit(10, 125, "force-stop"))?.cause).toBe("detenida");
+    expect(classifyExit(exit(10, 125, "force-stop"))?.cause).toBe("stopped");
     expect(classifyExit(exit(4, 125))?.cause).toBe("error");
     expect(classifyExit(exit(16, 125))).toBeNull();
   });

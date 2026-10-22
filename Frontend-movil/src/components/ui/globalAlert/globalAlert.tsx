@@ -13,7 +13,7 @@ import { styles } from "./globalAlert.styles";
  * Usage: <GlobalAlertHost /> is mounted once in App.tsx.
  */
 
-type AlertType = "exito" | "error" | "aviso" | "peligro";
+type AlertType = "success" | "error" | "warning" | "danger";
 type IconName = React.ComponentProps<typeof MaterialIcons>["name"];
 
 type DialogButton = {
@@ -34,15 +34,15 @@ const CONFIG: Record<
   AlertType,
   { icon: IconName; color: string; background: string }
 > = {
-  exito: { icon: "check", color: "#6B3FA0", background: "#F3E8FF" },
+  success: { icon: "check", color: "#6B3FA0", background: "#F3E8FF" },
   error: { icon: "close", color: "#D32F2F", background: "#FDECEC" },
-  aviso: { icon: "priority-high", color: "#BC27BE", background: "#FBE9FB" },
-  peligro: { icon: "delete-outline", color: "#D32F2F", background: "#FDECEC" },
+  warning: { icon: "priority-high", color: "#BC27BE", background: "#FBE9FB" },
+  danger: { icon: "delete-outline", color: "#D32F2F", background: "#FDECEC" },
 };
 
 // Picks the icon from what the message says
 function inferType(title: string, message: string, buttons: DialogButton[]): AlertType {
-  if (buttons.some((b) => b.style === "destructive")) return "peligro";
+  if (buttons.some((b) => b.style === "destructive")) return "danger";
 
   const text = `${title} ${message}`.toLowerCase();
 
@@ -59,10 +59,10 @@ function inferType(title: string, message: string, buttons: DialogButton[]): Ale
       text
     )
   ) {
-    return "exito";
+    return "success";
   }
 
-  return "aviso";
+  return "warning";
 }
 
 // ─── Queue + connection with the component ───────────────────────────────────

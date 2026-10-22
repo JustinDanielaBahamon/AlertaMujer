@@ -27,7 +27,7 @@ const duration = (ms: number) => {
 };
 
 /** A step of the detail timeline. */
-export type AlertStep = { icon: "alerta" | "ubicacion" | "fin" | "curso"; title: string; detail: string };
+export type AlertStep = { icon: "alert" | "location" | "end" | "ongoing"; title: string; detail: string };
 
 interface UseAlertDetailViewModelResult {
   isEmergency: boolean;
@@ -106,11 +106,11 @@ export function useAlertDetailViewModel(alert: AlertRecord): UseAlertDetailViewM
     if (!data) return [];
     const startTime = toDate(data.startedAt || data.createdAt);
     const list: AlertStep[] = [
-      { icon: "alerta", title: "Alerta activada", detail: [time(startTime), method].filter(Boolean).join(" · ") },
+      { icon: "alert", title: "Alerta activada", detail: [time(startTime), method].filter(Boolean).join(" · ") },
     ];
     if (points.length > 0) {
       list.push({
-        icon: "ubicacion",
+        icon: "location",
         title: points.length === 1 ? "Ubicación compartida" : `Ubicación compartida ${points.length} veces`,
         detail:
           points.length > 1
@@ -121,12 +121,12 @@ export function useAlertDetailViewModel(alert: AlertRecord): UseAlertDetailViewM
     const status = (data.status || "").toLowerCase();
     const endIso = data.cancelledAt || data.endedAt;
     if (status === "active" || !endIso) {
-      list.push({ icon: "curso", title: "Alerta en curso", detail: `Activa desde hace ${duration(Date.now() - startTime.getTime())}` });
+      list.push({ icon: "ongoing", title: "Alerta en curso", detail: `Activa desde hace ${duration(Date.now() - startTime.getTime())}` });
     } else {
       const end = toDate(endIso);
       const title =
         status === "cancelled" ? "Cancelaste la alerta" : status === "expired" ? "La alerta expiró" : "Alerta terminada";
-      list.push({ icon: "fin", title, detail: `${time(end)} · duró ${duration(end.getTime() - startTime.getTime())}` });
+      list.push({ icon: "end", title, detail: `${time(end)} · duró ${duration(end.getTime() - startTime.getTime())}` });
     }
     return list;
   }, [data, points, method]);

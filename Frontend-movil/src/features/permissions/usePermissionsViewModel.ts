@@ -19,7 +19,7 @@ export function usePermissionsViewModel() {
   const refresh = useCallback(() => {
     const cortes = recentInterruptions();
     setInterruptions(cortes);
-    checkPermissions(config.agitar, cortes.filter((c) => c.cause === "sistema").length)
+    checkPermissions(config.agitar, cortes.filter((c) => c.cause === "system").length)
       .then(setStatuses)
       .catch((e) => console.warn("No se pudieron revisar los permisos:", e));
   }, [config.agitar]);
@@ -61,7 +61,7 @@ export function usePermissionsViewModel() {
         times: interruptions.length,
         explanation: latest ? EXPLANATION[latest.cause] : null,
         // If the system cut it, the fix is the brand's auto start
-        canFix: latest?.cause === "sistema",
+        canFix: latest?.cause === "system",
         fix: () => {
           ShakeSensor.openAutoStart();
         },

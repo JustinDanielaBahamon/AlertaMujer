@@ -18,7 +18,7 @@ import { useTheme } from "../../../contexts/ThemeContext";
 import { LinearGradient } from "expo-linear-gradient";
 import { isValidEmail, contactExtraTexts } from "../contactsExtra";
 
-export default function AgregarContacto() {
+export default function AddContactScreen() {
   const vm = useAddContactViewModel();
   const { t, locale } = useLocale();
   const { theme } = useTheme();
