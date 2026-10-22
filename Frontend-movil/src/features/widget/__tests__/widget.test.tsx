@@ -32,7 +32,7 @@ describe("widget SOS", () => {
 
     renderHook(() => useSosLink(nav as never, true));
 
-    await waitFor(() => expect(nav.navigate).toHaveBeenCalledWith("Activacion", { metodo: "widget" }));
+    await waitFor(() => expect(nav.navigate).toHaveBeenCalledWith("Activation", { method: "widget" }));
   });
 
   it("si el widget está desactivado en Ajustes, solo avisa", async () => {

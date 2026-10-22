@@ -77,7 +77,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
     props.navigation.closeDrawer();
     setTimeout(() => {
       props.navigation.dispatch(
-        CommonActions.navigate({ name: "Inicio", params: { screen: tabName } })
+        CommonActions.navigate({ name: "Home", params: { screen: tabName } })
       );
     }, 250);
   };
@@ -102,7 +102,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
           {/* ✅ Perfil tappable con datos dinámicos del usuario */}
           <TouchableOpacity
             style={styles.zoneHeader}
-            onPress={() => navigateTo("Perfil")}
+            onPress={() => navigateTo("Profile")}
             activeOpacity={0.75}
           >
             <View style={styles.avatarRow}>
@@ -138,7 +138,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
               <Ionicons name="chevron-forward" size={16} color={cardIconColor} style={styles.chevron} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.cardItem} onPress={() => navigateToTab("Contactos")} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.cardItem} onPress={() => navigateToTab("Contacts")} activeOpacity={0.7}>
               <View style={[styles.circleIcon, { backgroundColor: cardIconBg }]}>
                 <Ionicons name="people-outline" size={20} color={cardIconColor} />
               </View>
@@ -146,7 +146,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
               <Ionicons name="chevron-forward" size={16} color={cardIconColor} style={styles.chevron} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.cardItem} onPress={() => navigateToTab("Historial")} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.cardItem} onPress={() => navigateToTab("History")} activeOpacity={0.7}>
               <View style={[styles.circleIcon, { backgroundColor: cardIconBg }]}>
                 <Ionicons name="time-outline" size={20} color={cardIconColor} />
               </View>
@@ -154,7 +154,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
               <Ionicons name="chevron-forward" size={16} color={cardIconColor} style={styles.chevron} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.cardItem} onPress={() => navigateTo("Trayecto")} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.cardItem} onPress={() => navigateTo("Trip")} activeOpacity={0.7}>
               <View style={[styles.circleIcon, { backgroundColor: cardIconBg }]}>
                 <Ionicons name="navigate-circle-outline" size={20} color={cardIconColor} />
               </View>
@@ -162,7 +162,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
               <Ionicons name="chevron-forward" size={16} color={cardIconColor} style={styles.chevron} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.cardItem} onPress={() => navigateTo("AlertasRecibidas")} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.cardItem} onPress={() => navigateTo("ReceivedAlerts")} activeOpacity={0.7}>
               <View style={[styles.circleIcon, { backgroundColor: cardIconBg }]}>
                 <Ionicons name="notifications-circle-outline" size={20} color={cardIconColor} />
               </View>
@@ -170,7 +170,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
               <Ionicons name="chevron-forward" size={16} color={cardIconColor} style={styles.chevron} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.cardItem} onPress={() => navigateTo("Permisos")} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.cardItem} onPress={() => navigateTo("Permissions")} activeOpacity={0.7}>
               <View style={[styles.circleIcon, { backgroundColor: cardIconBg }]}>
                 <Ionicons name="shield-checkmark-outline" size={20} color={cardIconColor} />
               </View>
@@ -264,7 +264,7 @@ export default function DrawerNavigator() {
       drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions={{ headerShown: false }}
     >
-      <Drawer.Screen name="Inicio" component={HeaderWithTabs} />
+      <Drawer.Screen name="Home" component={HeaderWithTabs} />
     </Drawer.Navigator>
   );
 }

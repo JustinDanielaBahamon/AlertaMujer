@@ -9,7 +9,7 @@ import { STORAGE_KEY_LOCATION } from "../../tutorial/viewModel/useLocationTutori
 import { deleteMyAccount, getMe, updateMe } from "../../../services/users.service";
 import { toStorablePhoto } from "../../../services/fotos.service";
 
-type ProfileNavigation = NativeStackNavigationProp<MainStackParamList, "Perfil">;
+type ProfileNavigation = NativeStackNavigationProp<MainStackParamList, "Profile">;
 
 export function useProfileViewModel() {
   const navigation = useNavigation<ProfileNavigation>();

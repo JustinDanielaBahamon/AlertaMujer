@@ -17,12 +17,12 @@ import { isValidEmail, contactExtraTexts } from "../contactosExtra";
 
 type AddNav = NativeStackNavigationProp<
   MainStackParamList,
-  "AgregarContacto"
+  "AddContact"
 >;
 
 type AddRoute = RouteProp<
   MainStackParamList,
-  "AgregarContacto"
+  "AddContact"
 >;
 
 export function useAddContactViewModel() {
@@ -37,7 +37,7 @@ export function useAddContactViewModel() {
 
   const { t, locale } = useLocale();
 
-  const contactParam = route.params?.contacto;
+  const contactParam = route.params?.contact;
   const isEditing = Boolean(contactParam);
 
   const [name, setName] = useState("");

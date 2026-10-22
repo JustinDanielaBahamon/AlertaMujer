@@ -8,14 +8,14 @@ import { useNotifications } from "../../../contexts/NotificacionesContext";
 import type { MainStackParamList } from "../../../navigation/types";
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
-type ActivationRoute = RouteProp<MainStackParamList, "Activacion">;
+type ActivationRoute = RouteProp<MainStackParamList, "Activation">;
 
 export function useActivationViewModel() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<ActivationRoute>();
   // Si viene un contacto, la alerta es solo para esa persona (no para todos)
-  const contact = route.params?.contacto;
-  const method = route.params?.metodo;
+  const contact = route.params?.contact;
+  const method = route.params?.method;
   const { config } = useNotifications();
   const { recordVideo, recordAudio } = useEvidence();
   const [counter, setCounter] = useState(5);
@@ -26,7 +26,7 @@ export function useActivationViewModel() {
   const goToActiveAlert = useCallback(() => {
     if (alreadyNavigatedRef.current) return;
     alreadyNavigatedRef.current = true;
-    navigation.replace("AlertaActiva", contact || method ? { contacto: contact, metodo: method } : undefined);
+    navigation.replace("ActiveAlert", contact || method ? { contact: contact, method: method } : undefined);
   }, [navigation, contact, method]);
 
   useEffect(() => {

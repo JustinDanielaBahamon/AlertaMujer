@@ -131,10 +131,10 @@ export function useContactsTabViewModel() {
       }
       if (contact) {
         // Modo editar: pasar el contacto como parámetro
-        main.navigate("AgregarContacto", { contacto: contact });
+        main.navigate("AddContact", { contact: contact });
       } else {
         // Modo crear nuevo
-        main.navigate("AgregarContacto", undefined);
+        main.navigate("AddContact", undefined);
       }
     },
     [navigation],
@@ -158,7 +158,7 @@ export function useContactsTabViewModel() {
       if (!main) {
         return;
       }
-      main.navigate("Activacion", { contacto: contact });
+      main.navigate("Activation", { contact: contact });
     },
     [navigation],
   );

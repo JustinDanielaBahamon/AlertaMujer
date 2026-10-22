@@ -41,11 +41,11 @@ export function useLoginViewModel() {
   }, []);
 
   const goToRecoverPassword = useCallback(() => {
-    navigation.navigate("RecuperarContrasena");
+    navigation.navigate("RecoverPassword");
   }, [navigation]);
 
   const goToSignUp = useCallback(() => {
-    navigation.navigate("Registro");
+    navigation.navigate("SignUp");
   }, [navigation]);
 
   const clearErrors = () => {
@@ -91,7 +91,7 @@ export function useLoginViewModel() {
       ) {
         setEmailError("Este correo no está registrado.");
         setGeneralError("¿Eres nueva? Regístrate para continuar.");
-        setTimeout(() => navigation.navigate("Registro"), 2000);
+        setTimeout(() => navigation.navigate("SignUp"), 2000);
       } else {
         setGeneralError("Correo o contraseña incorrectos");
       }

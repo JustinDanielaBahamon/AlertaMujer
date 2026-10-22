@@ -118,8 +118,8 @@ export default function Home() {
   const goToMap = () => {
     const main = getMainStackNavigation(navigation);
     main?.navigate("DrawerHome", {
-      screen: "Inicio",
-      params: { screen: "Mapa" },
+      screen: "Home",
+      params: { screen: "Map" },
     } as never);
   };
 
@@ -127,8 +127,8 @@ export default function Home() {
   const goToHistory = () => {
     const main = getMainStackNavigation(navigation);
     main?.navigate("DrawerHome", {
-      screen: "Inicio",
-      params: { screen: "Historial" },
+      screen: "Home",
+      params: { screen: "History" },
     } as never);
   };
 

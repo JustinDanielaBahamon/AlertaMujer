@@ -17,10 +17,10 @@ export default function AuthNavigator() {
     >
       <Stack.Screen name="Index" component={IndexScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
-      <Stack.Screen name="Registro" component={RegistroScreen} />
-      <Stack.Screen name="RecuperarContrasena" component={RecoverPasswordScreen} />
-      <Stack.Screen name="PoliticaTerminos" component={TerminosScreen} />
-      <Stack.Screen name="PoliticaPrivacidad" component={PrivacidadScreen} />
+      <Stack.Screen name="SignUp" component={RegistroScreen} />
+      <Stack.Screen name="RecoverPassword" component={RecoverPasswordScreen} />
+      <Stack.Screen name="TermsPolicy" component={TerminosScreen} />
+      <Stack.Screen name="PrivacyPolicy" component={PrivacidadScreen} />
     </Stack.Navigator>
   );
 }

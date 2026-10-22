@@ -115,7 +115,7 @@ export default function SettingsComponent({ navigation }: any) {
 
       {/* metodos de activacion */}
       <TouchableOpacity
-        onPress={() => navigation.navigate("MetodosActivacion")}
+        onPress={() => navigation.navigate("ActivationMethods")}
         style={styles.item}
       >
         <View style={styles.chevronRow}>
@@ -127,7 +127,7 @@ export default function SettingsComponent({ navigation }: any) {
 
       {/* notificaciones */}
       <TouchableOpacity
-        onPress={() => navigation.navigate("Notificaciones")}
+        onPress={() => navigation.navigate("Notifications")}
         style={styles.item}
       >
         <View style={styles.chevronRow}>
@@ -139,7 +139,7 @@ export default function SettingsComponent({ navigation }: any) {
 
       {/* acerca de */}
       <TouchableOpacity
-        onPress={() => navigation.navigate("AcercaDe")}
+        onPress={() => navigation.navigate("About")}
         style={styles.item}
       >
         <View style={styles.chevronRow}>
@@ -151,7 +151,7 @@ export default function SettingsComponent({ navigation }: any) {
 
       {/* tutoriales */}
       <TouchableOpacity
-        onPress={() => navigation.navigate("TutorialBienvenida")}
+        onPress={() => navigation.navigate("WelcomeTutorial")}
         style={[styles.item, { borderBottomWidth: 0 }]}
       >
         <View style={styles.chevronRow}>

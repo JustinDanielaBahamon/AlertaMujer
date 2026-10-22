@@ -12,7 +12,7 @@ export function getMainStackNavigation(
   for (let depth = 0; depth < 10 && current; depth++) {
     const state = current.getState();
     const names = state?.routeNames;
-    if (names?.includes("DrawerHome") && names?.includes("AgregarContacto")) {
+    if (names?.includes("DrawerHome") && names?.includes("AddContact")) {
       return current as unknown as NavigationProp<MainStackParamList>;
     }
     current = current.getParent();

@@ -58,10 +58,10 @@ export function useSosAlerts(
       alreadyOpen.add(data.alertaId);
       const ir = (attempts: number) => {
         if (navigation.isReady()) {
-          navigation.navigate("AlertaContacto", {
-            alertaId: Number(data.alertaId),
-            nombreUsuaria: data.nombre,
-            codigo: data.codigo,
+          navigation.navigate("ContactAlert", {
+            alertId: Number(data.alertaId),
+            userName: data.nombre,
+            code: data.codigo,
           });
         } else if (attempts > 0) {
           setTimeout(() => ir(attempts - 1), 300);
@@ -72,7 +72,7 @@ export function useSosAlerts(
 
     // "¿Ya llegaste?" de Avísame si no llego: lleva a la pantalla del trayecto
     const goToTrip = (attempts = 20) => {
-      if (navigation.isReady()) navigation.navigate("Trayecto");
+      if (navigation.isReady()) navigation.navigate("Trip");
       else if (attempts > 0) setTimeout(() => goToTrip(attempts - 1), 300);
     };
 

@@ -25,20 +25,20 @@ describe("reanudar alerta activa", () => {
 
   it("al abrir la app con una alerta activa, vuelve a la pantalla de alerta", async () => {
     (getMyAlerts as jest.Mock).mockResolvedValue([alert(9, "active")]);
-    const nav = navigation("Inicio");
+    const nav = navigation("Home");
 
     renderHook(() => useResumeAlert(nav as never, true));
 
-    await waitFor(() => expect(nav.navigate).toHaveBeenCalledWith("AlertaActiva", { alertaId: 9 }));
+    await waitFor(() => expect(nav.navigate).toHaveBeenCalledWith("ActiveAlert", { alertId: 9 }));
   });
 
   it("no navega si ya está en la alerta, ni si no hay alerta activa", async () => {
     (getMyAlerts as jest.Mock).mockResolvedValue([alert(9, "active")]);
-    const inAlert = navigation("AlertaActiva");
+    const inAlert = navigation("ActiveAlert");
     renderHook(() => useResumeAlert(inAlert as never, true));
 
     (getMyAlerts as jest.Mock).mockResolvedValue([alert(8, "cancelled")]);
-    const noAlert = navigation("Inicio");
+    const noAlert = navigation("Home");
     renderHook(() => useResumeAlert(noAlert as never, true));
 
     await waitFor(() => expect(getMyAlerts).toHaveBeenCalledTimes(2));

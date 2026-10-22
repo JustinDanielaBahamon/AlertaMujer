@@ -100,10 +100,10 @@ export function useHomeViewModel() {
     if (stackNav && "navigate" in stackNav) {
       (
         stackNav as { navigate: (name: keyof MainStackParamList) => void }
-      ).navigate("Activacion");
+      ).navigate("Activation");
       return;
     }
-    navigation.navigate("Activacion");
+    navigation.navigate("Activation");
   }, [navigation, config.vibracion]);
 
   // Vibra mientras el botón está presionado y se detiene al soltarlo

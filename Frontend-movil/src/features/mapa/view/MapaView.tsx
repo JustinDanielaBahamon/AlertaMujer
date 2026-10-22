@@ -262,7 +262,7 @@ export default function MapScreen() {
   );
 
   const goToSaveRoute = () => {
-    navigation.navigate("GuardarRecorrido");
+    navigation.navigate("SaveRoute");
   };
 
   // Zonas clasificadas (seguras / moderadas / inseguras): se recargan cada vez que se vuelve al mapa
@@ -557,7 +557,7 @@ export default function MapScreen() {
       label: t.mapa.guardar,
       action: () => {
         if (!location) return;
-        navigation.navigate("ClasificarZona", {
+        navigation.navigate("ClassifyZone", {
           latitude: location.latitude,
           longitude: location.longitude,
         });

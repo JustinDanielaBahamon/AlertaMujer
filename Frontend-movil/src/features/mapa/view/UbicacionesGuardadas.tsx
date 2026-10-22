@@ -80,7 +80,7 @@ export default function UbicacionesGuardadas() {
   // Volver siempre lleva al módulo de Mapa (también justo después de guardar una ubicación,
   // cuando por detrás todavía está la pantalla de "Clasificar zona").
   const goToMap = useCallback(() => {
-    const destination = { screen: "Inicio", params: { screen: "Mapa" } } as never;
+    const destination = { screen: "Home", params: { screen: "Map" } } as never;
     try {
       (navigation as any).popTo("DrawerHome", destination);
     } catch {
@@ -155,15 +155,15 @@ export default function UbicacionesGuardadas() {
   };
 
   const handleCardPress = (location: SavedLocation) => {
-    navigation.navigate("ClasificarZona", {
+    navigation.navigate("ClassifyZone", {
       latitude: location.latitude,
       longitude: location.longitude,
-      editarUbicacion: {
+      locationToEdit: {
         id: location.id,
-        nombre: location.name,
-        notas: location.notes,
-        nivelRiesgo: location.riskLevel,
-        descripcion: location.description,
+        name: location.name,
+        notes: location.notes,
+        riskLevel: location.riskLevel,
+        description: location.description,
       },
     });
   };

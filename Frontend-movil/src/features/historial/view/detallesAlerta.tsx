@@ -17,7 +17,7 @@ import type { MainStackParamList } from "../../../navigation/types";
 import { createStyles } from "../style/detalle.Style";
 import { getAssistanceColors, getEmergencyColors } from "../style/historial.style";
 
-type AlertDetailRouteProp = RouteProp<MainStackParamList, "DetalleAlerta">;
+type AlertDetailRouteProp = RouteProp<MainStackParamList, "AlertDetail">;
 type Coordinate = { latitude: number; longitude: number };
 
 const STEP_ICON: Record<AlertStep["icon"], keyof typeof MaterialIcons.glyphMap> = {
@@ -41,7 +41,7 @@ export default function DetalleAlerta() {
 
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const route = useRoute<AlertDetailRouteProp>();
-  const { alerta: alert } = route.params;
+  const { alert: alert } = route.params;
   const {
     isEmergency, sharing, shareReport, notifiedContacts, loadingContacts, contactsError,
     points, loadingDetail, address, method, message, steps,
@@ -81,9 +81,9 @@ export default function DetalleAlerta() {
   const goToInternalMap = () => {
     const main = getMainStackNavigation(navigation);
     main?.navigate("DrawerHome", {
-      screen: "Inicio",
+      screen: "Home",
       params: {
-        screen: "Mapa",
+        screen: "Map",
         params: { targetAddress: alert.location },
       },
     } as never);

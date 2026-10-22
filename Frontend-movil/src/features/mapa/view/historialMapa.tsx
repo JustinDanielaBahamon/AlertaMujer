@@ -12,7 +12,7 @@ import { styles } from "../styles/historialMapa.style";
 
 type HistoryRouteProp = RouteProp<
   MainStackParamList,
-  "historialMapa"
+  "HistoryMap"
 >;
 
 export default function HistoryMap() {
@@ -25,12 +25,12 @@ export default function HistoryMap() {
   const navigation =
     useNavigation<NativeStackNavigationProp<MainStackParamList>>();
 
-  const { ubicacion: location } = route.params;
+  const { location: location } = route.params;
 
   const [fullscreen, setFullscreen] =
     useState(false);
 
-  const date = new Date(location.fecha);
+  const date = new Date(location.date);
 
   const formattedTime =
     date.toLocaleTimeString("es-CO", {
@@ -123,8 +123,8 @@ export default function HistoryMap() {
                   },
                 ]}
               >
-                {location.municipio},{" "}
-                {location.departamento}
+                {location.municipality},{" "}
+                {location.department}
               </Text>
 
               <Text
@@ -186,7 +186,7 @@ export default function HistoryMap() {
                 title={t.historialMapa.ubicacion_guardada_marcador}
 
                 description={
-                  location.direccion
+                  location.address
                 }
 
                 pinColor="#6C2BD9"
@@ -243,28 +243,28 @@ export default function HistoryMap() {
             <InfoRow
               icon="place"
               label={t.historialMapa.direccion}
-              value={location.direccion}
+              value={location.address}
               theme={theme}
             />
 
             <InfoRow
               icon="home"
               label={t.historialMapa.barrio}
-              value={location.barrio}
+              value={location.neighborhood}
               theme={theme}
             />
 
             <InfoRow
               icon="location-city"
               label={t.historialMapa.municipio}
-              value={location.municipio}
+              value={location.municipality}
               theme={theme}
             />
 
             <InfoRow
               icon="public"
               label={t.historialMapa.pais}
-              value={location.pais}
+              value={location.country}
               theme={theme}
             />
 
@@ -292,7 +292,7 @@ export default function HistoryMap() {
             <InfoRow
               icon="check-circle"
               label={t.historialMapa.estado}
-              value={location.estado}
+              value={location.status}
               theme={theme}
               active
             />
@@ -342,7 +342,7 @@ export default function HistoryMap() {
               title={t.historialMapa.ubicacion_guardada_marcador}
 
               description={
-                location.direccion
+                location.address
               }
 
               pinColor="#6C2BD9"

@@ -4,113 +4,113 @@ import type { AlertRecord } from "../features/historial/models/Alerta";
 export type AuthStackParamList = {
   Index: undefined;
   Login: undefined;
-  Registro: undefined;
-  RecuperarContrasena: undefined;
-  PoliticaTerminos: undefined;
-  PoliticaPrivacidad: undefined;
+  SignUp: undefined;
+  RecoverPassword: undefined;
+  TermsPolicy: undefined;
+  PrivacyPolicy: undefined;
 };
 
 export type MainStackParamList = {
   DrawerHome: undefined;
-  Perfil: undefined;
+  Profile: undefined;
 
-  Activacion:
+  Activation:
     | {
-        contacto?: Contact; // si viene, la alerta es solo para este contacto
-        metodo?: "agitar" | "encendido" | "widget"; // agitar, 4 pulsaciones del botón de encendido o widget (por defecto, botón SOS)
+        contact?: Contact; // si viene, la alerta es solo para este contacto
+        method?: "agitar" | "encendido" | "widget"; // agitar, 4 pulsaciones del botón de encendido o widget (por defecto, botón SOS)
       }
     | undefined;
-  AlertaActiva:
+  ActiveAlert:
     | {
-        contacto?: Contact; // si viene, la alerta es solo para este contacto
-        metodo?: "agitar" | "encendido" | "widget";
-        alertaId?: number; // alerta ya creada en segundo plano: no se crea otra
+        contact?: Contact; // si viene, la alerta es solo para este contacto
+        method?: "agitar" | "encendido" | "widget";
+        alertId?: number; // alerta ya creada en segundo plano: no se crea otra
       }
     | undefined;
-  AlertasRecibidas: undefined;
-  Trayecto: undefined;
-  AlertaContacto: {
-    alertaId: number;
-    nombreUsuaria?: string;
+  ReceivedAlerts: undefined;
+  Trip: undefined;
+  ContactAlert: {
+    alertId: number;
+    userName?: string;
     latitude?: number;
     longitude?: number;
     demo?: boolean; // TEMPORAL: modo de prueba con puntos simulados
-    codigo?: string; // código de seguimiento público (llega en el push a los contactos)
+    code?: string; // código de seguimiento público (llega en el push a los contactos)
   };
 
-  TutorialBienvenida: undefined;
-  TutorialBoton: undefined;
-  TutorialMensaje: undefined;
-  TutorialUbicacion: undefined;
-  TutorialContacto: undefined;
-  TutorialSeguridad: undefined;
-  TutorialNotificacion: undefined;
+  WelcomeTutorial: undefined;
+  ButtonTutorial: undefined;
+  MessageTutorial: undefined;
+  LocationTutorial: undefined;
+  ContactTutorial: undefined;
+  SecurityTutorial: undefined;
+  NotificationTutorial: undefined;
 
-  MetodosActivacion: undefined;
-  Permisos: undefined;
+  ActivationMethods: undefined;
+  Permissions: undefined;
 
-  Notificaciones: undefined;
-  RetencionDatos: undefined;
+  Notifications: undefined;
+  DataRetention: undefined;
 
-  AcercaDe: undefined;
-  PoliticaTerminos: undefined;
-  PoliticaPrivacidad: undefined;
+  About: undefined;
+  TermsPolicy: undefined;
+  PrivacyPolicy: undefined;
 
-  AgregarContacto:
+  AddContact:
     | {
-        contacto?: Contact;
+        contact?: Contact;
       }
     | undefined;
 
-  DetalleAlerta: {
-    alerta: AlertRecord;
+  AlertDetail: {
+    alert: AlertRecord;
   };
 
-  historialMapa: {
-    ubicacion: {
+  HistoryMap: {
+    location: {
       id: string;
-      nombre?: string; // Modificado a opcional
+      name?: string; // Modificado a opcional
       latitude: number;
       longitude: number;
-      direccion: string;
-      barrio: string;
-      municipio: string;
-      ciudad: string;
-      departamento: string;
-      pais: string;
-      fecha: string;
-      estado: "Activo" | "Inactivo";
+      address: string;
+      neighborhood: string;
+      municipality: string;
+      city: string;
+      department: string;
+      country: string;
+      date: string;
+      status: "Activo" | "Inactivo";
       precision: string;
-      notas?: string;
+      notes?: string;
     };
   };
 
-  guardarUbi: {
+  SaveLocation: {
     latitude: number;
     longitude: number;
   };
 
-  ClasificarZona:
+  ClassifyZone:
     | {
         latitude?: number;
         longitude?: number;
-        editarUbicacion?: {
+        locationToEdit?: {
           id: string;
-          nombre: string;
-          notas?: string;
-          nivelRiesgo: "muy_segura" | "moderada" | "muy_insegura";
-          descripcion: string;
+          name: string;
+          notes?: string;
+          riskLevel: "muy_segura" | "moderada" | "muy_insegura";
+          description: string;
         };
       }
     | undefined; // Permite ir a ClasificarZona sin pasar parámetros
 
-  UbicacionesGuardadas: undefined;
+  SavedLocations: undefined;
 
-  ZonasAuxiliares: undefined;
+  HelpZones: undefined;
 
-  HistorialRecorridos: undefined;
+  RouteHistory: undefined;
 
-  GuardarRecorrido: undefined;
+  SaveRoute: undefined;
 };
 
 /** @deprecated */

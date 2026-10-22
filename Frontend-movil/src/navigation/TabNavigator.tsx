@@ -16,11 +16,11 @@ import Mapa from "../features/mapa/view/MapaView";
 const Tab = createBottomTabNavigator();
 
 const TABS = [
-  { name: "Inicio",    icon: "home",    offIcon: "home-outline"    },
-  { name: "Mapa",      icon: "map",     offIcon: "map-outline"     },
-  { name: "Asistencia",    icon: "medical", offIcon: "medical-outline" },
-  { name: "Contactos", icon: "people",  offIcon: "people-outline"  },
-  { name: "Historial", icon: "time",    offIcon: "time-outline"    },
+  { name: "Home",    icon: "home",    offIcon: "home-outline"    },
+  { name: "Map",      icon: "map",     offIcon: "map-outline"     },
+  { name: "Assistance",    icon: "medical", offIcon: "medical-outline" },
+  { name: "Contacts", icon: "people",  offIcon: "people-outline"  },
+  { name: "History", icon: "time",    offIcon: "time-outline"    },
 ];
 
 function TabButton({ routeName, label, isFocused, onPress, color }: {
@@ -83,11 +83,11 @@ export default function TabNavigator() {
 
   // Traduce cada nombre de ruta a su texto visible en el idioma activo
   const tabLabels: Record<string, string> = {
-    Inicio: t.menu.inicio,
-    Mapa: t.menu.mapa,
-    Asistencia: t.menu.asistencia,
-    Contactos: t.menu.contactos,
-    Historial: t.menu.historial,
+    Home: t.menu.inicio,
+    Map: t.menu.mapa,
+    Assistance: t.menu.asistencia,
+    Contacts: t.menu.contactos,
+    History: t.menu.historial,
   };
 
   return (
@@ -122,11 +122,11 @@ export default function TabNavigator() {
       )}
       screenOptions={getTabScreenOptions(theme)}
     >
-      <Tab.Screen name="Inicio"    component={Home} />
-      <Tab.Screen name="Mapa"      component={Mapa} />
-      <Tab.Screen name="Asistencia"    component={Assistance} />
-      <Tab.Screen name="Contactos" component={ContactsTab} />
-      <Tab.Screen name="Historial" component={HistoryTab} />
+      <Tab.Screen name="Home"    component={Home} />
+      <Tab.Screen name="Map"      component={Mapa} />
+      <Tab.Screen name="Assistance"    component={Assistance} />
+      <Tab.Screen name="Contacts" component={ContactsTab} />
+      <Tab.Screen name="History" component={HistoryTab} />
     </Tab.Navigator>
   );
 }

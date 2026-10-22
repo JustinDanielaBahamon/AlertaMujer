@@ -51,35 +51,35 @@ export default function MainNavigator({ initialRouteName }: Props) {
       screenOptions={{ headerShown: false }}
     >
       <Stack.Screen name="DrawerHome" component={DrawerNavigator} />
-      <Stack.Screen name="Activacion" component={ActivacionScreen} />
+      <Stack.Screen name="Activation" component={ActivacionScreen} />
       {/* Sin gesto de volver: de la alerta activa solo se sale con "Estoy bien" */}
-      <Stack.Screen name="AlertaActiva" component={ActiveAlertScreen} options={{ gestureEnabled: false }} />
-      <Stack.Screen name="AlertaContacto" component={ContactAlertScreen} />
-      <Stack.Screen name="AlertasRecibidas" component={ReceivedAlertsScreen} />
-      <Stack.Screen name="Trayecto" component={TripScreen} />
-      <Stack.Screen name="TutorialBienvenida" component={BienvenidaTutorialScreen} />
-      <Stack.Screen name="TutorialBoton" component={BotonTutorialScreen} />
-      <Stack.Screen name="TutorialMensaje" component={MensajeTutorialScreen} />
-      <Stack.Screen name="TutorialUbicacion" component={UbicacionTutorialScreen} />
-      <Stack.Screen name="TutorialContacto" component={ContactoTutorialScreen} />
-      <Stack.Screen name="TutorialSeguridad" component={SeguridadTutorialScreen} />
-      <Stack.Screen name="TutorialNotificacion" component={NotificacionTutorialScreen} />
-      <Stack.Screen name="AgregarContacto" component={AgregarContactoScreen} />
-      <Stack.Screen name="DetalleAlerta" component={DetalleAlertaScreen} />
-      <Stack.Screen name="Perfil" component={ProfileScreen} /> 
-      <Stack.Screen name="historialMapa" component={HistorialMapa}/>
-      <Stack.Screen name="MetodosActivacion" component={ActivationMethodsScreen} />
-      <Stack.Screen name="Permisos" component={PermissionsScreen} />
-      <Stack.Screen name="Notificaciones" component={NotificationsScreen} />
-      <Stack.Screen name="RetencionDatos" component={DataRetentionScreen} />
-      <Stack.Screen name="AcercaDe" component={AboutScreen} />
-      <Stack.Screen name="PoliticaTerminos" component={TerminosScreen} />
-      <Stack.Screen name="PoliticaPrivacidad" component={PrivacidadScreen} />
-      <Stack.Screen name="ClasificarZona" component={ClasificarZonaScreen} />
-      <Stack.Screen name="UbicacionesGuardadas" component={UbicacionesGuardadasScreen} />
-      <Stack.Screen name="ZonasAuxiliares" component={ZonasAuxiliaresScreen} />
-      <Stack.Screen name="HistorialRecorridos" component={HistorialRecorridosScreen} />
-      <Stack.Screen name="GuardarRecorrido" component={GuardarRecorridoScreen} />
+      <Stack.Screen name="ActiveAlert" component={ActiveAlertScreen} options={{ gestureEnabled: false }} />
+      <Stack.Screen name="ContactAlert" component={ContactAlertScreen} />
+      <Stack.Screen name="ReceivedAlerts" component={ReceivedAlertsScreen} />
+      <Stack.Screen name="Trip" component={TripScreen} />
+      <Stack.Screen name="WelcomeTutorial" component={BienvenidaTutorialScreen} />
+      <Stack.Screen name="ButtonTutorial" component={BotonTutorialScreen} />
+      <Stack.Screen name="MessageTutorial" component={MensajeTutorialScreen} />
+      <Stack.Screen name="LocationTutorial" component={UbicacionTutorialScreen} />
+      <Stack.Screen name="ContactTutorial" component={ContactoTutorialScreen} />
+      <Stack.Screen name="SecurityTutorial" component={SeguridadTutorialScreen} />
+      <Stack.Screen name="NotificationTutorial" component={NotificacionTutorialScreen} />
+      <Stack.Screen name="AddContact" component={AgregarContactoScreen} />
+      <Stack.Screen name="AlertDetail" component={DetalleAlertaScreen} />
+      <Stack.Screen name="Profile" component={ProfileScreen} /> 
+      <Stack.Screen name="HistoryMap" component={HistorialMapa}/>
+      <Stack.Screen name="ActivationMethods" component={ActivationMethodsScreen} />
+      <Stack.Screen name="Permissions" component={PermissionsScreen} />
+      <Stack.Screen name="Notifications" component={NotificationsScreen} />
+      <Stack.Screen name="DataRetention" component={DataRetentionScreen} />
+      <Stack.Screen name="About" component={AboutScreen} />
+      <Stack.Screen name="TermsPolicy" component={TerminosScreen} />
+      <Stack.Screen name="PrivacyPolicy" component={PrivacidadScreen} />
+      <Stack.Screen name="ClassifyZone" component={ClasificarZonaScreen} />
+      <Stack.Screen name="SavedLocations" component={UbicacionesGuardadasScreen} />
+      <Stack.Screen name="HelpZones" component={ZonasAuxiliaresScreen} />
+      <Stack.Screen name="RouteHistory" component={HistorialRecorridosScreen} />
+      <Stack.Screen name="SaveRoute" component={GuardarRecorridoScreen} />
     </Stack.Navigator>
   );
 }

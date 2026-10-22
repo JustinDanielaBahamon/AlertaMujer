@@ -56,7 +56,7 @@ export function useProtectionReminder(
           parts.join("\n\n"),
           [
             { text: "Ahora no", style: "cancel" },
-            { text: "Revisar", onPress: () => navigation.isReady() && navigation.navigate("Permisos") },
+            { text: "Revisar", onPress: () => navigation.isReady() && navigation.navigate("Permissions") },
           ],
         );
       } catch (e) {

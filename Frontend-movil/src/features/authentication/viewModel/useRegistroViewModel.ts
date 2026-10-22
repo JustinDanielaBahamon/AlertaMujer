@@ -18,7 +18,7 @@ type ErrorsType = {
   confirmPassword?: string;
 };
 
-type SignUpNavigation = NativeStackNavigationProp<AuthStackParamList, "Registro">;
+type SignUpNavigation = NativeStackNavigationProp<AuthStackParamList, "SignUp">;
 
 export function useSignUpViewModel() {
   const navigation = useNavigation<SignUpNavigation>();
@@ -109,13 +109,13 @@ export function useSignUpViewModel() {
   const goToTerms = useCallback(() => {
     setTermsError("");
     setReadTerms(true);
-    navigation.navigate("PoliticaTerminos");
+    navigation.navigate("TermsPolicy");
   }, [navigation]);
 
   const goToPrivacy = useCallback(() => {
     setTermsError("");
     setReadPrivacy(true);
-    navigation.navigate("PoliticaPrivacidad");
+    navigation.navigate("PrivacyPolicy");
   }, [navigation]);
 
   const toggleAcceptsTerms = useCallback(() => {
@@ -203,7 +203,7 @@ export function useSignUpViewModel() {
         last_name: backendUser.lastName,
       };
 
-      signIn(user, response.token, { initialMainRoute: "TutorialBienvenida", refreshToken: response.refreshToken });
+      signIn(user, response.token, { initialMainRoute: "WelcomeTutorial", refreshToken: response.refreshToken });
     } catch (error) {
       setTermsError("Error al registrar. Intenta nuevamente.");
     }

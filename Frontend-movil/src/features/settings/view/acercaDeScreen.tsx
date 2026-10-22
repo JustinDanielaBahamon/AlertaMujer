@@ -81,11 +81,11 @@ export default function AboutScreen() {
             </View>
           ))}
           <View style={styles.divisor} />
-          {linkRow("server-outline", a.retencion_titulo, a.retencion_desc, () => navigation.navigate("RetencionDatos"))}
+          {linkRow("server-outline", a.retencion_titulo, a.retencion_desc, () => navigation.navigate("DataRetention"))}
           <View style={styles.divisor} />
-          {linkRow("shield-checkmark-outline", a.politica_privacidad, null, () => navigation.navigate("PoliticaPrivacidad"))}
+          {linkRow("shield-checkmark-outline", a.politica_privacidad, null, () => navigation.navigate("PrivacyPolicy"))}
           <View style={styles.divisor} />
-          {linkRow("document-text-outline", a.terminos, null, () => navigation.navigate("PoliticaTerminos"))}
+          {linkRow("document-text-outline", a.terminos, null, () => navigation.navigate("TermsPolicy"))}
         </View>
 
         {/* La app en la web */}

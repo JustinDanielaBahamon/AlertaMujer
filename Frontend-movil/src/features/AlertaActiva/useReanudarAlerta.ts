@@ -5,7 +5,7 @@ import type { MainStackParamList } from "../../navigation/types";
 import { ownActiveAlert, getMyAlerts } from "../../services/alerts.service";
 
 // En estas pantallas la alerta ya se está mostrando (o creando): no se navega encima
-const ALERT_SCREENS = new Set(["Activacion", "AlertaActiva"]);
+const ALERT_SCREENS = new Set(["Activation", "ActiveAlert"]);
 
 /**
  * Si la usuaria tiene una alerta activa (p. ej. cerró la app desde "Recientes" con la alerta en
@@ -29,7 +29,7 @@ export function useResumeAlert(
       }
       const current = navigation.getCurrentRoute()?.name;
       if (current && ALERT_SCREENS.has(current)) return;
-      navigation.navigate("AlertaActiva", { alertaId: alertId });
+      navigation.navigate("ActiveAlert", { alertId: alertId });
     };
 
     const check = async () => {

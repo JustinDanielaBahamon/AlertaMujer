@@ -31,7 +31,7 @@ type NavigationProp = NativeStackNavigationProp<MainStackParamList>;
 
 type ClassifyZoneRouteProp = {
   key: string;
-  name: "ClasificarZona";
+  name: "ClassifyZone";
   params?: {
     latitude?: number;
     longitude?: number;
@@ -244,7 +244,7 @@ export default function ClassifyZoneView() {
       }
 
       // Navegar a la pantalla de ubicaciones guardadas
-      navigation.navigate("UbicacionesGuardadas");
+      navigation.navigate("SavedLocations");
     } catch (error) {
       console.error("Error al guardar ubicación:", error);
       Alert.alert("Error", "Error al guardar la ubicación");

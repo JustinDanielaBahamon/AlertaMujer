@@ -95,7 +95,7 @@ export default function HistoryTab() {
 
   const goToDetail = (alert: AlertRecord) => {
     const main = getMainStackNavigation(navigation);
-    main?.navigate("DetalleAlerta", { alerta: alert });
+    main?.navigate("AlertDetail", { alert: alert });
   };
 
   const stats = useMemo(

@@ -5,7 +5,7 @@ import type { AuthStackParamList } from "../../../navigation/types";
 import type { AlertType } from "../../../components/ui/modalAlerta/modalAlerta";
 import { authService } from "../../../services/auth.service";
 
-type Nav = NativeStackNavigationProp<AuthStackParamList, "RecuperarContrasena">;
+type Nav = NativeStackNavigationProp<AuthStackParamList, "RecoverPassword">;
 
 // El código que envía el backend tiene 6 dígitos y vence a los 15 minutos;
 // se puede pedir otro pasado 1 minuto (el backend no acepta más seguido).

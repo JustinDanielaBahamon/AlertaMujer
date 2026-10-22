@@ -74,7 +74,7 @@ export type HistoryItem = {
 };
 
 export function useContactAlertViewModel() {
-  const { params } = useRoute<RouteProp<MainStackParamList, "AlertaContacto">>();
+  const { params } = useRoute<RouteProp<MainStackParamList, "ContactAlert">>();
 
   // TEMPORAL: en modo demo no se consulta el backend, se simulan los puntos.
   const DEMO = params.demo === true;
@@ -161,9 +161,9 @@ export function useContactAlertViewModel() {
       done += 1;
       try {
         // Contacto de emergencia (llega por push): endpoint público con el código de seguimiento
-        const tracking = params.codigo
-          ? await getPublicTracking(params.codigo)
-          : await getAlertTracking(params.alertaId);
+        const tracking = params.code
+          ? await getPublicTracking(params.code)
+          : await getAlertTracking(params.alertId);
         if (!mounted) return;
 
         setConnectionError(false);
@@ -189,12 +189,12 @@ export function useContactAlertViewModel() {
       mounted = false;
       if (timer) clearTimeout(timer);
     };
-  }, [params.alertaId, params.codigo, DEMO]);
+  }, [params.alertId, params.code, DEMO]);
 
   // Al abrir la pantalla de la alerta se apaga la alarma
   useEffect(() => {
-    if (!DEMO) stopSosAlarm(params.alertaId).catch(() => undefined);
-  }, [params.alertaId, DEMO]);
+    if (!DEMO) stopSosAlarm(params.alertId).catch(() => undefined);
+  }, [params.alertId, DEMO]);
 
   // ===== TEMPORAL (modo demo): agrega un punto nuevo con la ubicación real del teléfono =====
   useEffect(() => {
@@ -345,10 +345,10 @@ export function useContactAlertViewModel() {
   const audios = evidence.filter((e) => e.type === "audio");
 
   return {
-    code: params.codigo,
+    code: params.code,
     videos,
     audios,
-    userName: params.nombreUsuaria,
+    userName: params.userName,
     mapRef,
     fullMapRef: fullMapRef,
     points: points,

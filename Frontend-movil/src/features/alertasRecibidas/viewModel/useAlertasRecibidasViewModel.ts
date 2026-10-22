@@ -58,10 +58,10 @@ export function useReceivedAlertsViewModel() {
       setOpening(alert.id);
       try {
         const code = await getTrackingCode(alert.id);
-        navigation.navigate("AlertaContacto", {
-          alertaId: alert.id,
-          nombreUsuaria: alert.name || undefined,
-          codigo: code,
+        navigation.navigate("ContactAlert", {
+          alertId: alert.id,
+          userName: alert.name || undefined,
+          code: code,
         });
       } catch {
         Alert.alert(t.alertasRecibidas.titulo_header, t.alertasRecibidas.error_seguimiento);

@@ -20,7 +20,7 @@ import { locationPermission } from "../../../services/permisosSeguros";
 import { takeOverAlert } from "../../agitar/alertaEnSegundoPlano";
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
-type ActiveAlertRoute = RouteProp<MainStackParamList, "AlertaActiva">;
+type ActiveAlertRoute = RouteProp<MainStackParamList, "ActiveAlert">;
 
 export type Coordinate = {
   latitude: number;
@@ -86,10 +86,10 @@ export function useActiveAlertViewModel() {
   const route = useRoute<ActiveAlertRoute>();
 
   // Si viene un contacto, la alerta es solo para esa persona (no para todos).
-  const targetContact = route.params?.contacto;
-  const method = route.params?.metodo;
+  const targetContact = route.params?.contact;
+  const method = route.params?.method;
   // Alerta que ya se creó en segundo plano al agitar el teléfono
-  const existingAlert = route.params?.alertaId;
+  const existingAlert = route.params?.alertId;
 
   // Referencia al id de la alerta creada en el backend (para poder cerrarla).
   const createdAlertIdRef = useRef<number | null>(null);
@@ -167,7 +167,7 @@ export function useActiveAlertViewModel() {
   useEffect(() => {
     if (!canLeave) return;
     // "Sigo en peligro": se abre una alerta nueva (la anterior ya la cerró el servidor)
-    if (newAlertRef.current) navigation.replace("AlertaActiva", targetContact ? { contacto: targetContact } : undefined);
+    if (newAlertRef.current) navigation.replace("ActiveAlert", targetContact ? { contact: targetContact } : undefined);
     else navigation.replace("DrawerHome");
   }, [canLeave, navigation, targetContact]);
 

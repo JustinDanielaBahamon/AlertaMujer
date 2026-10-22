@@ -13,7 +13,7 @@ import {
 } from "./servicioProteccion";
 
 // Durante una alerta (o su cuenta regresiva) otra sacudida no hace nada
-const ALERT_SCREENS = new Set(["Activacion", "AlertaActiva"]);
+const ALERT_SCREENS = new Set(["Activation", "ActiveAlert"]);
 
 const BATTERY_KEY = "@alerta_mujer:bateria_preguntada";
 const BATTERY_REASK_MS = 3 * 24 * 60 * 60 * 1000;
@@ -99,10 +99,10 @@ export function useShakeProtection(
     const dropShake = onShakeOnScreen((method) => {
       const current = navigation.isReady() ? navigation.getCurrentRoute()?.name : undefined;
       if (current && ALERT_SCREENS.has(current)) return;
-      ir(() => navigation.navigate("Activacion", { metodo: method }));
+      ir(() => navigation.navigate("Activation", { method: method }));
     });
     const allowOpen = onShakeAlertOpen((alertId) =>
-      ir(() => navigation.navigate("AlertaActiva", { alertaId: alertId, metodo: "agitar" })),
+      ir(() => navigation.navigate("ActiveAlert", { alertId: alertId, method: "agitar" })),
     );
     return () => {
       dropShake();

@@ -49,7 +49,7 @@ export function useAccountRequirements(profile: ProfileData) {
       !profile.document.trim() && r.req_dato_documento,
     ].filter(Boolean) as string[];
     const noEmail = contacts.filter((c) => !c.email?.trim()).length;
-    const goToContacts = () => navigation.navigate("DrawerHome", { screen: "Inicio", params: { screen: "Contactos" } } as never);
+    const goToContacts = () => navigation.navigate("DrawerHome", { screen: "Home", params: { screen: "Contacts" } } as never);
 
     return [
       {
@@ -86,7 +86,7 @@ export function useAccountRequirements(profile: ProfileData) {
           missingPermissions === 0 ? r.req_permisos_ok : r.req_permisos_falta.replace("{n}", String(missingPermissions ?? "?")),
         meets: missingPermissions === 0,
         required: true,
-        action: missingPermissions === 0 ? undefined : { text: r.req_permisos_accion, ir: () => navigation.navigate("Permisos") },
+        action: missingPermissions === 0 ? undefined : { text: r.req_permisos_accion, ir: () => navigation.navigate("Permissions") },
       },
       {
         id: "foto",

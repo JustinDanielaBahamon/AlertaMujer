@@ -384,7 +384,7 @@ export const useMapViewModel = () => {
       label: t.mapa.guardar,
       action: async () => {
         if (!location) return;
-        navigation.navigate("ClasificarZona", {
+        navigation.navigate("ClassifyZone", {
           latitude: location.latitude,
           longitude: location.longitude,
         });
@@ -395,22 +395,22 @@ export const useMapViewModel = () => {
   // ─── NAVEGACIÓN A ACCIONES ADICIONALES ────────────────────────────────────
   const goToClassifyZone = () => {
     if (!location) return;
-    navigation.navigate("ClasificarZona", {
+    navigation.navigate("ClassifyZone", {
       latitude: location.latitude,
       longitude: location.longitude,
     });
   };
 
   const goToSavedLocations = () => {
-    navigation.navigate("UbicacionesGuardadas");
+    navigation.navigate("SavedLocations");
   };
 
   const goToHelpZones = () => {
-    navigation.navigate("ZonasAuxiliares");
+    navigation.navigate("HelpZones");
   };
 
   const goToRouteHistory = () => {
-    navigation.navigate("HistorialRecorridos");
+    navigation.navigate("RouteHistory");
   };
 
   // ─── PROCESAMIENTO FINAL Y RETORNO ────────────────────────────────────────
@@ -421,7 +421,7 @@ export const useMapViewModel = () => {
   };
 
   const openClassifyZone =() =>{
-     navigation.navigate("ClasificarZona")
+     navigation.navigate("ClassifyZone")
   };
 
   

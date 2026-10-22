@@ -5,7 +5,7 @@ import { useActivationMethods } from "../../contexts/MetodosActivacionContext";
 import type { MainStackParamList } from "../../navigation/types";
 import { SOS_LINK } from "./WidgetSOS";
 
-const ALERT_SCREENS = new Set(["Activacion", "AlertaActiva"]);
+const ALERT_SCREENS = new Set(["Activation", "ActiveAlert"]);
 const isSosLink = (url: string | null) => !!url && url.toLowerCase().startsWith(SOS_LINK);
 
 /**
@@ -50,7 +50,7 @@ export function useSosLink(
       }
       const current = navigation.getCurrentRoute()?.name;
       if (current && ALERT_SCREENS.has(current)) return;
-      navigation.navigate("Activacion", { metodo: "widget" });
+      navigation.navigate("Activation", { method: "widget" });
     };
     ir();
   }, [toques, withSession, loaded, config.widget, navigation]);

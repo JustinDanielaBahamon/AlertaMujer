@@ -30,7 +30,7 @@ export default function DataRetentionScreen() {
 
   const actions: { icon: IonIcon; title: string; desc: string; onPress: () => void; external?: boolean }[] = [
     { icon: "bookmark-outline", title: r.accion_conservar, desc: r.accion_conservar_desc, onPress: () => Linking.openURL(WEB_URL), external: true },
-    { icon: "mic-off-outline", title: r.accion_grabacion, desc: r.accion_grabacion_desc, onPress: () => navigation.navigate("Permisos") },
+    { icon: "mic-off-outline", title: r.accion_grabacion, desc: r.accion_grabacion_desc, onPress: () => navigation.navigate("Permissions") },
   ];
 
   return (
