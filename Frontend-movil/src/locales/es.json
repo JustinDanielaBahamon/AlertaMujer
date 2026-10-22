@@ -629,7 +629,7 @@
   "cerrar_sesion": "Cerrar sesión",
   "slogan": "Juntas somos más fuertes",
   "compartir_mensaje": "Te invito a AlertaMujer, una app para pedir ayuda en segundos y avisar a tus contactos de confianza. Descárgala aquí:",
-  "alertas_recibidas": "Alertas recibidas",
+  "alertas_recibidas": "Alertas de mis contactos",
   "trayecto": "Avísame si no llego"
 },
 "activacion": {
@@ -910,27 +910,25 @@
   "btn_login": "Ir a login"
 },
   "alertasRecibidas": {
-    "titulo_header": "Alertas recibidas",
-    "intro": "Alertas de las personas que te tienen como contacto de emergencia. Si no alcanzaste a ver la alarma, aquí sabes qué pasó.",
-    "seccion_activas": "EN CURSO",
-    "seccion_anteriores": "ANTERIORES",
+    "titulo_header": "Alertas de mis contactos",
+    "intro": "Aquí ves las alertas de las personas que te agregaron como su contacto de emergencia, no las tuyas. Si no alcanzaste a ver la alarma, aquí sabes qué pasó.",
     "un_contacto": "Un contacto",
     "pide_ayuda": "Está pidiendo ayuda ahora",
-    "cancelo": "Canceló su alerta",
-    "tuvo_alerta": "Activó una alerta",
     "estado_activa": "En curso",
     "estado_atendida": "Atendida",
     "estado_cancelada": "Cancelada",
     "estado_terminada": "Terminada",
     "duro": "Duró",
     "ver_ubicacion": "Ver ubicación y ayudar",
-    "ver_recorrido": "Ver recorrido",
-    "seguimiento_cerrado": "El seguimiento de esta alerta ya se cerró",
-    "vacio_titulo": "Todo tranquilo",
-    "vacio_desc": "Cuando alguien que te tiene como contacto active una alerta, aparecerá aquí.",
+    "vacio_titulo": "Ninguno de tus contactos ha pedido ayuda",
+    "vacio_desc": "Cuando alguien que te tiene como contacto de emergencia active una alerta, aparecerá aquí y te sonará una alarma.",
     "error_carga": "No pudimos cargar las alertas. Revisa tu conexión.",
     "reintentar": "Reintentar",
-    "error_seguimiento": "El seguimiento de esta alerta ya no está disponible."
+    "error_seguimiento": "El seguimiento de esta alerta ya no está disponible.",
+    "hoy": "Hoy",
+    "ayer": "Ayer",
+    "desde": "desde las",
+    "nota_cerradas": "🔒 Las alertas con candado ya no se pueden abrir: su seguimiento se cerró."
   },
   "version": {
     "titulo": "Hay una versión nueva de AlertaMujer",
