@@ -1,29 +1,29 @@
-// Configuración dinámica sobre app.json: agrega lo que necesita la alarma de emergencia (push FCM +
-// Notifee) sin romper el build cuando falta google-services.json.
+// Dynamic config on top of app.json: adds what the emergency alarm needs (FCM push + Notifee)
+// without breaking the build when google-services.json is missing.
 const fs = require("fs");
 const path = require("path");
 
 module.exports = ({ config }) => {
-  // google-services.json: archivo local (no se sube a git) o variable de archivo de EAS
+  // google-services.json: local file (not committed) or an EAS file variable
   const googleServices = process.env.GOOGLE_SERVICES_JSON ?? "./google-services.json";
-  const conFirebase = fs.existsSync(path.resolve(__dirname, googleServices));
-  // HTTP sin cifrar solo para desarrollo local (backend en la IP del PC); los APK de EAS hablan
-  // con Render por HTTPS y no deben permitir tráfico en claro
-  const perfilEas = process.env.EAS_BUILD_PROFILE;
-  const permitirHttp = !perfilEas || perfilEas === "development";
+  const withFirebase = fs.existsSync(path.resolve(__dirname, googleServices));
+  // Plain HTTP only for local development (backend on the PC IP); EAS APKs talk to Render over
+  // HTTPS and must not allow cleartext traffic
+  const easProfile = process.env.EAS_BUILD_PROFILE;
+  const allowHttp = !easProfile || easProfile === "development";
 
   const plugins = (config.plugins ?? []).map((p) => {
-    // Notifee publica su librería Android en un repositorio Maven local dentro de node_modules
+    // Notifee publishes its Android library in a local Maven repository inside node_modules
     if (Array.isArray(p) && p[0] === "expo-build-properties") {
-      const opciones = p[1] ?? {};
-      const android = opciones.android ?? {};
+      const options = p[1] ?? {};
+      const android = options.android ?? {};
       return [
         "expo-build-properties",
         {
-          ...opciones,
+          ...options,
           android: {
             ...android,
-            usesCleartextTraffic: permitirHttp,
+            usesCleartextTraffic: allowHttp,
             extraMavenRepos: [
               ...(android.extraMavenRepos ?? []),
               "../../node_modules/@notifee/react-native/android/libs",
@@ -35,11 +35,11 @@ module.exports = ({ config }) => {
     return p;
   });
 
-  if (conFirebase) plugins.push("@react-native-firebase/app");
+  if (withFirebase) plugins.push("@react-native-firebase/app");
   plugins.push("./plugins/withAlarmSound");
   plugins.push("expo-secure-store");
-  plugins.push("./plugins/withServicioProteccion");
-  // Widget "SOS" de la pantalla de inicio (src/features/widget)
+  plugins.push("./plugins/withProtectionService");
+  // Home screen "SOS" widget (src/features/widget)
   plugins.push([
     "react-native-android-widget",
     {
@@ -60,7 +60,7 @@ module.exports = ({ config }) => {
     },
   ]);
 
-  const permisos = new Set([
+  const permissions = new Set([
     ...(config.android?.permissions ?? []),
     "android.permission.POST_NOTIFICATIONS",
     "android.permission.USE_FULL_SCREEN_INTENT",
@@ -73,9 +73,9 @@ module.exports = ({ config }) => {
     plugins,
     android: {
       ...config.android,
-      permissions: [...permisos],
-      ...(conFirebase ? { googleServicesFile: googleServices } : {}),
+      permissions: [...permissions],
+      ...(withFirebase ? { googleServicesFile: googleServices } : {}),
     },
-    extra: { ...config.extra, pushConfigurado: conFirebase },
+    extra: { ...config.extra, pushConfigurado: withFirebase },
   };
 };
