@@ -71,13 +71,17 @@ class SensorSacudidasModule : Module() {
       energia.isIgnoringBatteryOptimizations(contexto.packageName)
     }
 
-    // Abre el diálogo del sistema "¿Permitir que la app se ejecute siempre en segundo plano?"
+    // Abre el diálogo del sistema "¿Permitir que la app se ejecute siempre en segundo plano?". Si ya
+    // tiene el permiso, el diálogo no sale (parecía que el botón no hacía nada): se abre la página de
+    // la app en Ajustes, donde Samsung y otras marcas tienen "Batería → Sin restricciones".
     Function("pedirIgnorarOptimizacionBateria") {
+      val energia = contexto.getSystemService(Context.POWER_SERVICE) as PowerManager
       @SuppressLint("BatteryLife")
-      val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+      val dialogo = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
         .setData(Uri.parse("package:" + contexto.packageName))
-        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-      contexto.startActivity(intent)
+      val abierto = !energia.isIgnoringBatteryOptimizations(contexto.packageName) && abrir(dialogo)
+      if (!abierto) abrirDetallesApp()
+      abierto
     }
 
     // ── Salud de la protección (pantalla "Permisos y protección") ──────────────────────────
@@ -121,15 +125,15 @@ class SensorSacudidasModule : Module() {
       pantallaInicioAutomatico() != null
     }
 
+    // true si abrió la pantalla de inicio automático de la marca; false si quedó en la página de la
+    // app en Ajustes. Se prueba cada pantalla: algunas existen pero no dejan abrirse desde otra app
+    // (en Samsung el botón no hacía nada por eso).
     Function("abrirInicioAutomatico") {
-      val pantalla = pantallaInicioAutomatico()
-      if (pantalla != null) {
-        abrir(Intent().setComponent(pantalla))
-        true
-      } else {
-        abrir(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + contexto.packageName)))
-        false
-      }
+      val abierta = PANTALLAS_INICIO_AUTOMATICO
+        .map { Intent().setComponent(ComponentName(it.first, it.second)) }
+        .any { intent -> sePuedeAbrir(intent) && abrir(intent) }
+      if (!abierta) abrirDetallesApp()
+      abierta
     }
 
     // ── Grabación de evidencia durante una alerta ───────────────────────────────────────────
@@ -186,16 +190,27 @@ class SensorSacudidasModule : Module() {
     contexto.startService(Intent(contexto, GrabadoraAudioService::class.java).setAction(accion))
   }
 
-  private fun abrir(intent: Intent) {
-    contexto.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-  }
+  // false si Android no dejó abrirla (no existe, no está exportada o la marca la bloquea)
+  private fun abrir(intent: Intent): Boolean =
+    try {
+      contexto.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+      true
+    } catch (e: Exception) {
+      false
+    }
+
+  private fun abrirDetallesApp(): Boolean =
+    abrir(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + contexto.packageName)))
 
   private fun pantallaInicioAutomatico(): ComponentName? =
     PANTALLAS_INICIO_AUTOMATICO
       .map { ComponentName(it.first, it.second) }
-      .firstOrNull { componente ->
-        Intent().setComponent(componente).resolveActivity(contexto.packageManager) != null
-      }
+      .firstOrNull { sePuedeAbrir(Intent().setComponent(it)) }
+
+  private fun sePuedeAbrir(intent: Intent): Boolean {
+    val actividad = contexto.packageManager.resolveActivity(intent, 0)?.activityInfo ?: return false
+    return actividad.exported
+  }
 
   private fun iniciar(intervaloMs: Int): Boolean {
     detener()
@@ -250,8 +265,8 @@ class SensorSacudidasModule : Module() {
       // Huawei, Honor
       "com.huawei.systemmanager" to "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity",
       "com.huawei.systemmanager" to "com.huawei.systemmanager.optimize.process.ProtectActivity",
-      // Samsung (apps que nunca se suspenden)
-      "com.samsung.android.lool" to "com.samsung.android.sm.battery.ui.BatteryActivity",
+      // Samsung no tiene pantalla de inicio automático que se pueda abrir: se usa la página de la app
+      // (Batería → Sin restricciones)
       // Asus
       "com.asus.mobilemanager" to "com.asus.mobilemanager.MainActivity",
     )

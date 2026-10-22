@@ -2,7 +2,7 @@ import notifee, { AuthorizationStatus } from "@notifee/react-native";
 import { Camera } from "expo-camera";
 import * as Contacts from "expo-contacts";
 import * as Location from "expo-location";
-import { Linking, Platform } from "react-native";
+import { Linking, Platform, Alert } from "react-native";
 import SensorSacudidas from "../../../modules/sensor-sacudidas";
 import { reportarPermisos } from "../../services/devices.service";
 import { enColaDePermisos, permisoNotificaciones, permisoUbicacion } from "../../services/permisosSeguros";
@@ -185,13 +185,24 @@ export async function activarPermiso(id: Exclude<IdPermiso, "agitar">, estado: E
       else await registrarPush();
       return;
     case "bateria":
-      SensorSacudidas.pedirIgnorarOptimizacionBateria();
+      // Si no salió el diálogo del sistema se abrió la página de la app: se explica qué tocar
+      if (!SensorSacudidas.pedirIgnorarOptimizacionBateria()) {
+        Alert.alert(
+          "Batería sin restricciones",
+          "En la página de AlertaMujer que se abrió entra a \"Batería\" y elige \"Sin restricciones\" (en Samsung: Batería → Sin restricciones).",
+        );
+      }
       return;
     case "pantallaCompleta":
       SensorSacudidas.pedirPantallaCompleta();
       return;
     case "inicioAutomatico":
-      SensorSacudidas.abrirInicioAutomatico();
+      if (!SensorSacudidas.abrirInicioAutomatico()) {
+        Alert.alert(
+          "Inicio automático",
+          "En la página de AlertaMujer que se abrió busca \"Inicio automático\" o \"Batería\" y permite que la app se ejecute en segundo plano.",
+        );
+      }
       return;
     case "microfono":
       await enColaDePermisos(() => Camera.requestMicrophonePermissionsAsync());

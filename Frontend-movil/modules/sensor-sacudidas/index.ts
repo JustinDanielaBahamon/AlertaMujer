@@ -21,7 +21,8 @@ declare class SensorSacudidasModule extends NativeModule<Eventos> {
   /** Espera con un temporizador nativo (sigue corriendo con la pantalla apagada). */
   esperar(ms: number): Promise<void>;
   ignoraOptimizacionBateria(): boolean;
-  pedirIgnorarOptimizacionBateria(): void;
+  /** false si ya tenía el permiso o no se pudo: se abrió la página de la app en Ajustes. */
+  pedirIgnorarOptimizacionBateria(): boolean;
   fabricante(): string;
   /** Cierres de la app registrados por Android (11+) desde desdeMs. */
   motivosDeCierre(desdeMs: number): CierreApp[];
