@@ -1,3 +1,4 @@
+import * as Brightness from "expo-brightness";
 import { Camera, type CameraView } from "expo-camera";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AppState, Linking } from "react-native";
@@ -140,6 +141,16 @@ export function useGrabacionAlerta(alertaId: number | null) {
   }, [grabandoVideo, alertaId, frontal]);
 
   const mostrarCamara = activa && servicioListo && puedeVideo && enPantalla;
+
+  // La cámara frontal casi no tiene luz y el video salía muy oscuro: mientras graba con ella, la
+  // pantalla se pone al máximo para iluminar la cara. Al cambiar de cámara o terminar, se restaura.
+  useEffect(() => {
+    if (!grabandoVideo || !frontal) return;
+    Brightness.setBrightnessAsync(1).catch(() => {});
+    return () => {
+      Brightness.restoreSystemBrightnessAsync().catch(() => {});
+    };
+  }, [grabandoVideo, frontal]);
 
   // La vista de la cámara se desmonta al minimizar: al volver hay que esperar que esté lista otra vez
   useEffect(() => {
