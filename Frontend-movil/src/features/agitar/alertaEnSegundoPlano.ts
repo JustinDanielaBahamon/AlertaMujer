@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Location from "expo-location";
-import { crearAlertaConReintentos } from "../../services/alerts.service";
+import { crearAlertaConReintentos, getAlerta } from "../../services/alerts.service";
 import { getOrCreateDevice } from "../../services/devices.service";
 import { reportarUbicacion } from "../../services/location-reporter.service";
 import SensorSacudidas from "../../../modules/sensor-sacudidas";
@@ -61,6 +61,9 @@ async function seguirUbicacion(alertaId: number, inicio: number) {
   while (alertaEnCurso === alertaId && Date.now() - inicio <= MAXIMO_MS) {
     await SensorSacudidas.esperar(INTERVALO_MS);
     if (alertaEnCurso !== alertaId) return;
+    // Si la alerta ya terminó (la cerró un contacto o la administración, o venció), se suelta: si no,
+    // el servicio la seguiría dando por "en curso" e ignoraría las sacudidas siguientes
+    if (!(await sigueActiva(alertaId))) break;
     const u = await ubicacionActual();
     if (u && alertaEnCurso === alertaId) {
       reportarUbicacion({
@@ -70,6 +73,16 @@ async function seguirUbicacion(alertaId: number, inicio: number) {
         alertId: alertaId,
       }).catch(() => {});
     }
+  }
+  if (alertaEnCurso === alertaId) alertaEnCurso = null;
+}
+
+/** Sin conexión no se sabe: se asume que sigue activa para no dejar de enviar la ubicación. */
+async function sigueActiva(alertaId: number): Promise<boolean> {
+  try {
+    return (await getAlerta(alertaId)).status === "active";
+  } catch {
+    return true;
   }
 }
 
