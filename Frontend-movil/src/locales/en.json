@@ -696,7 +696,12 @@
   "evidencia_foto": "Photo",
   "evidencia_documento": "Document",
   "evidencia_sin_archivo": "no file",
-  "evidencia_error_reproducir": "It couldn't be played. Check your connection and try again."
+  "evidencia_error_reproducir": "It couldn't be played. Check your connection and try again.",
+  "canal_corto_email": "Email",
+  "canal_corto_push": "App",
+  "escribir_whatsapp": "WhatsApp",
+  "llamar_contacto": "Call",
+  "whatsapp_mensaje": "Hi {nombre}, I'm writing about the alert you got from me ({fecha})."
 },
 "confirmacion": {
   "titulo": "Almost there!",

@@ -696,7 +696,12 @@
   "evidencia_foto": "Foto",
   "evidencia_documento": "Documento",
   "evidencia_sin_archivo": "sin archivo",
-  "evidencia_error_reproducir": "No se pudo reproducir. Revisa tu conexión e inténtalo de nuevo."
+  "evidencia_error_reproducir": "No se pudo reproducir. Revisa tu conexión e inténtalo de nuevo.",
+  "canal_corto_email": "Correo",
+  "canal_corto_push": "App",
+  "escribir_whatsapp": "WhatsApp",
+  "llamar_contacto": "Llamar",
+  "whatsapp_mensaje": "Hola {nombre}, te escribo por la alerta que te llegó de mí ({fecha})."
 },
 "confirmacion": {
   "titulo": "¡Casi listos!",

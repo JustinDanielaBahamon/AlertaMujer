@@ -696,7 +696,12 @@
   "evidencia_foto": "Foto",
   "evidencia_documento": "Documento",
   "evidencia_sin_archivo": "sem arquivo",
-  "evidencia_error_reproducir": "Não foi possível reproduzir. Verifique sua conexão e tente de novo."
+  "evidencia_error_reproducir": "Não foi possível reproduzir. Verifique sua conexão e tente de novo.",
+  "canal_corto_email": "E-mail",
+  "canal_corto_push": "App",
+  "escribir_whatsapp": "WhatsApp",
+  "llamar_contacto": "Ligar",
+  "whatsapp_mensaje": "Oi {nombre}, estou escrevendo sobre o alerta que você recebeu de mim ({fecha})."
 },
 "confirmacion": {
   "titulo": "Quase lá!",
