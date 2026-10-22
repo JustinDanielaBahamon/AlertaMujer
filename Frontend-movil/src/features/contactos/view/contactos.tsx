@@ -24,6 +24,15 @@ export default function Contactos() {
 
   const headerGradient: [string, string] = [theme.headercolor1, theme.headercolor2];
 
+  // Estado real: con la app (violeta lleno), con cuenta sin celular (violeta claro) o solo correo (gris)
+  const estadoDe = (c: Contacto) => {
+    const e = vm.estadoApp[String(c.id)];
+    if (e === "app") return { color: theme.contactAccent, texto: t.contactos.estado_app, invitar: false };
+    if (e === "account") return { color: theme.contactAccent + "99", texto: t.contactos.estado_cuenta, invitar: true };
+    if (e === "none") return { color: "#9E9E9E", texto: t.contactos.estado_correo, invitar: true };
+    return { color: "#BDBDBD", texto: t.contactos.estado_revisando, invitar: false };
+  };
+
   const makeCall = (phoneNumber: string) => {
     const url =
       Platform.OS === "android"
@@ -116,7 +125,42 @@ export default function Contactos() {
           />
         }
 
-        renderItem={({ item: c }) => (
+        ListHeaderComponent={
+          vm.faltanContactos > 0 && !vm.loading ? (
+            <View style={[styles.suggestionCard, {
+              backgroundColor: theme.contactSugerenciaBg,
+              borderColor: theme.contactAccent,
+              borderStyle: "solid",
+              marginTop: 0,
+              marginBottom: 10,
+            }]}>
+              <View style={{ flex: 1, marginRight: 10 }}>
+                <Text style={{ fontWeight: "bold", fontSize: 14, color: theme.text }}>
+                  {t.contactos.minimo_titulo.replace("{total}", "5")}
+                </Text>
+                <Text style={{ fontSize: 12, color: theme.contactSubtext, marginTop: 2 }}>
+                  {t.contactos.minimo_desc.replace("{n}", String(5 - vm.faltanContactos)).replace("{total}", "5")}
+                </Text>
+                <View style={{ flexDirection: "row", gap: 4, marginTop: 8 }}>
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <View key={i} style={{
+                      flex: 1, height: 5, borderRadius: 3,
+                      backgroundColor: i < 5 - vm.faltanContactos ? theme.contactAccent : theme.contactAccent + "30",
+                    }} />
+                  ))}
+                </View>
+              </View>
+              <TouchableOpacity
+                style={[styles.addSmallButton, { backgroundColor: theme.contactBotonAgregarBg }]}
+                onPress={vm.irAgregarContacto}
+              >
+                <Text style={{ color: "white", fontWeight: "bold", fontSize: 12 }}>{t.contactos.minimo_boton}</Text>
+              </TouchableOpacity>
+            </View>
+          ) : null
+        }
+
+        renderItem={({ item: c }) => { const estado = estadoDe(c); return (
           <View style={styles.cardWrapper}>
             <View style={styles.contactCard}>
               {/* Sección superior: foto, info, botones */}
@@ -157,7 +201,7 @@ export default function Contactos() {
                       style={[styles.profilePhoto, { borderColor: theme.contactAvatarBorder }]}
                     />
                   )}
-                  <View style={styles.statusDot} />
+                  <View style={[styles.statusDot, { backgroundColor: estado.color }]} />
                 </View>
                 {/* ────────────────────────────────────────────────────────── */}
 
@@ -181,9 +225,19 @@ export default function Contactos() {
                     </Text>
                   </View>
                   <View style={{ flexDirection: "row", alignItems: "center", marginTop: 4 }}>
-                    <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: "#28a745", marginRight: 5 }} />
-                    <Text style={{ fontSize: 12, color: "#28a745", fontWeight: "500" }}>{t.contactos.disponible}</Text>
+                    <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: estado.color, marginRight: 5 }} />
+                    <Text style={{ flexShrink: 1, fontSize: 12, color: estado.color === "#9E9E9E" ? theme.contactSubtext : theme.contactAccent, fontWeight: "600" }}>
+                      {estado.texto}
+                    </Text>
                   </View>
+                  {estado.invitar && (
+                    <TouchableOpacity onPress={() => vm.invitarALaApp(c)} style={{ flexDirection: "row", alignItems: "center", marginTop: 6 }}>
+                      <Feather name="share-2" size={13} color={theme.contactAccent} />
+                      <Text style={{ fontSize: 12, color: theme.contactAccent, fontWeight: "700", marginLeft: 5, textDecorationLine: "underline" }}>
+                        {t.contactos.invitar}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
 
                 <View style={styles.topIcons}>
@@ -236,7 +290,7 @@ export default function Contactos() {
               </View>
             </View>
           </View>
-        )}
+        ); }}
 
         renderHiddenItem={({ item: c }) => (
           <View style={styles.swipeBack}>
@@ -264,6 +318,9 @@ export default function Contactos() {
               </Text>
               <Text style={{ fontSize: 12, color: theme.contactSubtext }}>
                 {t.contactos.agregar_desc}
+              </Text>
+              <Text style={{ fontSize: 11, color: theme.contactSubtext, marginTop: 6, lineHeight: 16 }}>
+                {t.contactos.recomendacion}
               </Text>
             </View>
             <TouchableOpacity

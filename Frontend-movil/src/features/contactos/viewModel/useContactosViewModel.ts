@@ -13,7 +13,10 @@
 import { useCallback, useState ,useMemo} from "react";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import type { NavigationProp, ParamListBase } from "@react-navigation/native";
-import { Alert } from "react-native";
+import { Alert, Share } from "react-native";
+import { WEB_URL } from "../../../constants/enlaces";
+import { useLocale } from "../../../contexts/LocaleContext";
+import { contactosService, type EstadoAppContacto } from "../../../services/contactos.service";
 import type { Contacto } from "../models/Contacto";
 import { getMainStackNavigation } from "../../../navigation/navigationHelpers";
 import { useContactosContext } from "../../../contexts/ContactosContext";
@@ -29,7 +32,11 @@ function formatearTelefonoMostrar(telefono: string): string {
   return telefono;
 }
 
+/** Con menos de estos contactos es fácil que nadie vea la alerta a tiempo. */
+export const CONTACTOS_RECOMENDADOS = 5;
+
 export function useContactosTabViewModel() {
+  const { t } = useLocale();
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const { contactos, eliminarContacto, refrescarContactos, loading } = useContactosContext();
   const [busqueda, setBusqueda] = useState('');
@@ -42,11 +49,27 @@ export function useContactosTabViewModel() {
    * contacto se creó/editó/borró en otro lado (web, u otra sesión),
    * la móvil siempre muestra lo último al abrir la pantalla.
    */
+  // Estado real de cada contacto (antes decía "Disponible" sin revisar nada)
+  const [estadoApp, setEstadoApp] = useState<Record<string, EstadoAppContacto>>({});
+  const cargarEstadoApp = useCallback(() => {
+    contactosService.getEstadoApp().then(setEstadoApp).catch(() => {});
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
       refrescarContactos();
-    }, [refrescarContactos]),
+      cargarEstadoApp();
+    }, [refrescarContactos, cargarEstadoApp]),
   );
+
+  /** Comparte el enlace de la app para que el contacto reciba las alertas también en su celular. */
+  const invitarALaApp = useCallback((contacto: Contacto) => {
+    const mensaje = t.contactos.invitar_mensaje
+      .replace("{nombre}", (contacto.nombre || "").split(" ")[0] || "")
+      .replace("{correo}", contacto.email || "")
+      .replace("{url}", WEB_URL);
+    Share.share({ message: mensaje }).catch(() => {});
+  }, [t]);
 
   /**
    * PULL TO REFRESH (deslizar hacia abajo para recargar)
@@ -55,11 +78,12 @@ export function useContactosTabViewModel() {
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
+      cargarEstadoApp();
       await refrescarContactos();
     } finally {
       setRefreshing(false);
     }
-  }, [refrescarContactos]);
+  }, [refrescarContactos, cargarEstadoApp]);
 
   const contactosFiltrados = useMemo(() =>
     contactos.filter(c => {
@@ -198,6 +222,9 @@ export function useContactosTabViewModel() {
     loading,
     refreshing,
     onRefresh,
+    estadoApp,
+    faltanContactos: Math.max(0, CONTACTOS_RECOMENDADOS - contactos.length),
+    invitarALaApp,
     
     // Funciones de utilidad
     formatearTelefonoMostrar,

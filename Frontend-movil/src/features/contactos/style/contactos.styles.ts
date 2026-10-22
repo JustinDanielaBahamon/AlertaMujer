@@ -140,7 +140,7 @@ export const createStyles = (theme: AppTheme) =>
       width: 18,
       height: 18,
       borderRadius: 9,
-      backgroundColor: "#28a745", // Verde disponible
+      backgroundColor: "#BDBDBD", // Se reemplaza por el estado real del contacto
       borderWidth: 3,
       borderColor: theme.contactCardBg,
     },

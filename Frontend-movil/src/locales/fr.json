@@ -26,7 +26,8 @@
     "acepto_la": "J'accepte la",
     "privacidad": "Politique de confidentialité",
     "continuar": "Continuer",
-    "ya_cuenta": "Tu as déjà un compte ? Connecte-toi"
+    "ya_cuenta": "Tu as déjà un compte ? Connecte-toi",
+    "documento_para_que": "Il sert à ce que chaque personne n'ait qu'un seul compte, pour éviter les comptes faux ou en double. Vos contacts ne le voient pas."
   },
   "inicio": {
     "sin_alertas": "Aucune alerte",
@@ -61,7 +62,6 @@
     "que_deseas": "Que souhaites-tu faire ?",
     "editar": "Modifier",
     "tus_contactos": "Tes contacts",
-    "disponible": "Disponible",
     "llamar": "Appeler",
     "whatsapp": "WhatsApp",
     "ubicacion_boton": "Position",
@@ -69,7 +69,17 @@
     "agregar_desc": "Ajoute des personnes de confiance.",
     "buscar_placeholder": "Rechercher par nom ou téléphone...",
     "parentesco_default": "Ami",
-    "agregar_corto": "+ Ajouter"
+    "agregar_corto": "+ Ajouter",
+    "estado_app": "Reçoit vos alertes dans l'app",
+    "estado_cuenta": "A un compte, mais aucun téléphone enregistré",
+    "estado_correo": "Les reçoit seulement par e-mail",
+    "estado_revisando": "Vérification…",
+    "invitar": "Inviter à l'app",
+    "invitar_mensaje": "Bonjour {nombre}, je t'ai ajouté(e) comme contact d'urgence dans AlertaMujer. Installe l'app et connecte-toi avec cet e-mail ({correo}) pour recevoir mes alertes instantanément sur ton téléphone : {url}",
+    "minimo_titulo": "Ajoutez au moins {total} contacts",
+    "minimo_desc": "Vous en avez {n} sur {total}. Plus il y a de personnes qui reçoivent votre alerte, plus l'aide arrive vite si quelqu'un ne la voit pas.",
+    "minimo_boton": "Ajouter",
+    "recomendacion": "Ils peuvent recevoir vos alertes par e-mail sans l'app, mais il est recommandé de l'installer : l'alerte arrive instantanément sur leur téléphone."
   },
   "perfil": {
     "titulo_header": "Mon profil",
@@ -600,12 +610,12 @@
     "label_celular": "Portable",
     "info_ubicacion": "Ce contact recevra ta position si tu déclenches une alerte.",
     "vista_previa": "Aperçu",
-    "disponible": "Disponible",
     "permiso_galeria_titulo": "Autorisation requise",
     "permiso_galeria_desc": "Nous avons besoin d'accéder à ta galerie pour sélectionner une photo.",
     "duplicado_titulo": "Contact en double",
     "duplicado_desc": "Le numéro {telefono} est déjà enregistré comme contact d'urgence de {nombre}.",
-    "duplicado_boton": "Compris"
+    "duplicado_boton": "Compris",
+    "recibira": "Recevra vos alertes par e-mail et, avec l'app, sur son téléphone"
   },
   "general": {
     "cargando": "Chargement...",
@@ -980,5 +990,19 @@
   "conexion": {
     "titulo": "Pas de connexion internet",
     "texto": "Si tu déclenches une alerte maintenant, elle ne partira pas. Connecte-toi au Wi‑Fi ou recharge tes données, et utilise « Préviens si je n'arrive pas » avant de partir."
+  },
+  "completarRegistro": {
+    "titulo": "Complétez votre inscription",
+    "intro": "Bonjour {nombre}, vous vous êtes connectée avec Google. Pour protéger votre compte, il nous faut quelques informations de plus, comme pour l'inscription normale. Nous ne les demandons qu'une fois.",
+    "telefono": "Téléphone portable",
+    "tipo_documento": "Type de document",
+    "fecha": "Date de naissance",
+    "guardar": "Enregistrer et continuer",
+    "otra_cuenta": "Utiliser un autre compte",
+    "error_telefono": "Saisissez un numéro à 10 chiffres",
+    "error_tipo": "Choisissez le type de document",
+    "error_documento": "Saisissez votre numéro de document",
+    "error_fecha": "Saisissez une date valide JJ/MM/AAAA",
+    "error_guardar": "Impossible d'enregistrer. Vérifiez votre connexion et réessayez."
   }
 }

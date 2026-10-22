@@ -21,7 +21,15 @@ export interface CreateContactData {
   photo?: string; // "" la quita al actualizar
 }
 
+/** Si al contacto le llega el aviso en el celular: app con avisos, cuenta sin celular o solo correo. */
+export type EstadoAppContacto = 'app' | 'account' | 'none';
+
 export const contactosService = {
+  async getEstadoApp(): Promise<Record<string, EstadoAppContacto>> {
+    const response = await api.get<Record<string, EstadoAppContacto>>('/api/contacts/app-status');
+    return response.data;
+  },
+
   async getContactos(userProfileId: number | string): Promise<EmergencyContact[]> {
 
     // Conectar al backend Spring Boot usando el nuevo endpoint
