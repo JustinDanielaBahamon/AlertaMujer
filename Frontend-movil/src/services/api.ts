@@ -98,6 +98,15 @@ api.interceptors.request.use((config) => {
  * URL and session header so a player (video, audio, image) loads a protected file
  * directly, without downloading it first.
  */
+/**
+ * URL for a player when the route is public (contact tracking). No session header: with cloud storage
+ * the backend redirects to a signed link, and Android's player sends the same headers to it, so the
+ * storage rejected the request (two ways of authenticating) and the contact could not play anything.
+ */
+export const publicSource = (route: string): { uri: string } => ({
+  uri: `${serviceFor(route) ?? API_BASE_URL}${route}`,
+});
+
 export const sourceWithToken = (route: string): { uri: string; headers: Record<string, string> } => ({
   uri: `${serviceFor(route) ?? API_BASE_URL}${route}`,
   headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},

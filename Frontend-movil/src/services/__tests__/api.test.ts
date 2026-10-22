@@ -1,5 +1,5 @@
 import axios, { type AxiosAdapter, type InternalAxiosRequestConfig } from "axios";
-import api, { listenSession, setAuthToken, setRefreshToken } from "../api";
+import api, { listenSession, publicSource, setAuthToken, setRefreshToken, sourceWithToken } from "../api";
 
 jest.mock("expo-constants", () => ({ __esModule: true, default: { expoConfig: {} } }));
 
@@ -65,5 +65,15 @@ describe("api · sesión", () => {
     await expect(api.post("/api/auth/login", {})).rejects.toThrow();
     expect(post).not.toHaveBeenCalled();
     expect(expired).not.toHaveBeenCalled();
+  });
+});
+
+describe("api · fuentes para el reproductor", () => {
+  it("la evidencia pública del contacto va sin cabecera de sesión (el enlace firmado la rechaza)", () => {
+    setAuthToken("con-sesion");
+    const route = "/api/public/tracking/abc/evidence/5";
+    expect(publicSource(route)).toEqual({ uri: expect.stringMatching(/\/api\/public\/tracking\/abc\/evidence\/5$/) });
+    expect(publicSource(route)).not.toHaveProperty("headers");
+    expect(sourceWithToken("/api/evidences/5/file").headers).toEqual({ Authorization: "Bearer con-sesion" });
   });
 });

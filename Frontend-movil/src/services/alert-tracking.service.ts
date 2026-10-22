@@ -1,5 +1,5 @@
 import * as Application from "expo-application";
-import api, { sourceWithToken } from "./api";
+import api, { publicSource } from "./api";
 import type { AlertApi } from "./alerts.service";
 
 export interface LocationPoint {
@@ -100,7 +100,7 @@ export const getPublicTracking = async (code: string): Promise<AlertTracking> =>
     id: Number(e.id),
     type: e.mediaType,
     created: toDate(e.createdAt),
-    source: sourceWithToken(`${route}/evidence/${e.id}`),
+    source: publicSource(`${route}/evidence/${e.id}`),
   }));
   return { status: String(data?.status ?? "").toLowerCase(), points, evidence };
 };
