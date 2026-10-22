@@ -110,12 +110,12 @@ export default function SaveRoute() {
     }
   };
 
-  const selectFromLocations = (location: any, point: "A" | "B") => {
+  const selectFromLocations = (location: (typeof savedLocations)[number], point: "A" | "B") => {
     const selectedPointItem = {
       latitude: location.latitude,
       longitude: location.longitude,
-      name: location.nombre,
-      address: location.direccion,
+      name: location.name,
+      address: location.address,
     };
 
     if (point === "A") {

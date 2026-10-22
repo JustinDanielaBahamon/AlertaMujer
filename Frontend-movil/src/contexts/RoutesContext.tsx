@@ -13,7 +13,7 @@ type GpsPoint = {
   timestamp: string;
 };
 
-type SavedRoute = {
+export type SavedRoute = {
   id: string;
   date: string;
   estimatedTime: string; // Estimated travel time

@@ -27,6 +27,7 @@ import {
   MAX_IMPORTANTES,
   MAX_ROUTES,
   useRoutes,
+  type SavedRoute,
 } from "../../../contexts/RoutesContext";
 import { POINT_B_COLOR } from "../routeColors";
 import { useAuth } from "../../../contexts/AuthContext";
@@ -207,7 +208,7 @@ export default function MapScreen() {
   const [onlyImportant, setOnlyImportant] = useState(false); // Show all by default
   const [addressInfoText, setAddressInfoText] = useState<AddressInfoBlock | null>(null);
   const [routeInfoVisible, setRouteInfoVisible] = useState(false);
-  const [routeInfo, setRouteInfo] = useState<any>(null);
+  const [routeInfo, setRouteInfo] = useState<SavedRoute | null>(null);
   const [mapReady, setMapReady] = useState(false); // the big map is drawn when the modal animation ends
   const [trackChanges, setTrackChanges] = useState(true); // custom pins are redrawn only for a few moments
   const [classifiedZones, setClassifiedZones] = useState<ClassifiedZone[]>([]);
@@ -226,21 +227,21 @@ export default function MapScreen() {
     location,
     fullscreen,
     setFullscreen,
-    historial: history,
-    destinoAlerta: alertDestination,
-    coordenadaCentro: centerCoordinate,
-    ultimaActualizacion: lastUpdate,
+    history,
+    alertDestination,
+    centerCoordinate,
+    lastUpdate,
     precisionMetros,
-    formatearHora: formatHour,
-    refrescarUbicacion: refreshLocation,
-    reintentarPermisos: retryPermissions,
-    irAUbicacionesGuardadas: goToSavedLocations,
-    irAZonasAuxiliares: goToHelpZones,
-    irAHistorialRecorridos: goToRouteHistory,
-    permisoDenegado: permissionDenied,
-    serviciosDesactivados: disabledServices,
-    cargando: loading,
-  } = useMapViewModel() as any;
+    formatHour,
+    refreshLocation,
+    retryPermissions,
+    goToSavedLocations,
+    goToHelpZones,
+    goToRouteHistory,
+    permissionDenied,
+    disabledServices,
+    loading,
+  } = useMapViewModel();
 
   const ms = useMemo(() => createMapModalStyles(theme, insets), [theme, insets]);
 
@@ -256,7 +257,7 @@ export default function MapScreen() {
       !showRoutesOnMap
         ? []
         : (routes as any[]).filter(
-            (r) => r?.puntos?.length > 0 && (!onlyImportant || r.importante)
+            (r) => r?.points?.length > 0 && (!onlyImportant || r.important)
           ),
     [routes, showRoutesOnMap, onlyImportant]
   );
@@ -488,7 +489,7 @@ export default function MapScreen() {
   }
 
   // ─── CENTER COORDINATE AND LOCAL ACTIONS ─────────────────────────────────
-  const computedCenter = centerCoordinate ?? alertDestination?.coordenada ?? location;
+  const computedCenter = centerCoordinate ?? alertDestination?.coordinate ?? location;
   const mapCenter: Coord = searchResult?.coord ?? computedCenter;
 
   // Circle with the safety level color of each classified zone (if the user shows them)
@@ -569,11 +570,11 @@ export default function MapScreen() {
   // Every visible point: location, alert address, history and routes.
   const visiblePoints = (): Coord[] => {
     const pts: Coord[] = [location];
-    if (alertDestination) pts.push(alertDestination.coordenada);
+    if (alertDestination) pts.push(alertDestination.coordinate);
     if (searchResult) pts.push(searchResult.coord);
     (history ?? []).forEach((p: Coord) => pts.push(p));
-    visibleRoutes.forEach((r: any) =>
-      r.puntos.forEach((p: any) => pts.push({ latitude: p.latitude, longitude: p.longitude }))
+    visibleRoutes.forEach((r) =>
+      r.points.forEach((p: any) => pts.push({ latitude: p.latitude, longitude: p.longitude }))
     );
     return pts;
   };
@@ -602,7 +603,7 @@ export default function MapScreen() {
     );
   };
 
-  const openRouteInfo = (route: any) => {
+  const openRouteInfo = (route: SavedRoute) => {
     setRouteInfo(route);
     setRouteInfoVisible(true);
   };
@@ -670,7 +671,7 @@ export default function MapScreen() {
           >
             {renderOfficialZones()}
             {renderClassifiedZones()}
-            <Marker coordinate={location} title={t.mapa.tu_ubicacion_marcador} pinColor={theme.icono} />
+            <Marker coordinate={location} title={t.mapa.tu_ubicacion_marcador} pinColor={theme.icon} />
             {searchResult && (
               <Marker
                 coordinate={searchResult.coord}
@@ -680,9 +681,9 @@ export default function MapScreen() {
             )}
             {alertDestination && (
               <Marker
-                coordinate={alertDestination.coordenada}
+                coordinate={alertDestination.coordinate}
                 title={t.mapa.direccion_alerta_marcador}
-                description={alertDestination.direccion}
+                description={alertDestination.address}
                 pinColor="#7B1DB2"
               />
             )}
@@ -699,7 +700,7 @@ export default function MapScreen() {
               <Text style={ms.miniBadgeText}>{t.mapa.activo}</Text>
             </View>
             <View style={ms.openButton}>
-              <MaterialIcons name="open-in-full" size={16} color={theme.icono} />
+              <MaterialIcons name="open-in-full" size={16} color={theme.icon} />
               <Text style={ms.openText}>{t.mapa.abrir_mapa_completo}</Text>
             </View>
           </TouchableOpacity>
@@ -714,8 +715,8 @@ export default function MapScreen() {
             accessibilityRole="button"
             accessibilityState={{ expanded: optionsOpen }}
           >
-            <View style={[op.headerIconItem, { backgroundColor: theme.icono + "22" }]}>
-              <MaterialIcons name="tune" size={20} color={theme.icono} />
+            <View style={[op.headerIconItem, { backgroundColor: theme.icon + "22" }]}>
+              <MaterialIcons name="tune" size={20} color={theme.icon} />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={[styles.routesSwitchTitle, { color: theme.text }]}>{t.mapa.opciones_titulo}</Text>
@@ -726,7 +727,7 @@ export default function MapScreen() {
                 )}
               </Text>
             </View>
-            <MaterialIcons name={optionsOpen ? "expand-less" : "expand-more"} size={24} color={theme.icono} />
+            <MaterialIcons name={optionsOpen ? "expand-less" : "expand-more"} size={24} color={theme.icon} />
           </TouchableOpacity>
 
           {optionsOpen &&
@@ -748,7 +749,7 @@ export default function MapScreen() {
                 title: t.mapa.opcion_importantes,
                 detail: showRoutesOnMap
                   ? t.mapa.opcion_importantes_desc
-                      .replace("{n}", String(routes.filter((r: any) => r.importante).length))
+                      .replace("{n}", String(routes.filter((r) => r.important).length))
                       .replace("{max}", String(MAX_IMPORTANTES))
                   : t.mapa.opcion_importantes_bloqueada,
                 value: showRoutesOnMap && onlyImportant,
@@ -765,8 +766,8 @@ export default function MapScreen() {
                 disabled: false,
               },
             ].map((o) => (
-              <View key={o.id} style={[op.row, { borderTopColor: theme.icono + "22" }, o.disabled && { opacity: 0.45 }]}>
-                <MaterialIcons name={o.icon as any} size={20} color={theme.icono} />
+              <View key={o.id} style={[op.row, { borderTopColor: theme.icon + "22" }, o.disabled && { opacity: 0.45 }]}>
+                <MaterialIcons name={o.icon as any} size={20} color={theme.icon} />
                 <View style={{ flex: 1 }}>
                   <Text style={[op.rowTitle, { color: theme.text }]}>{o.title}</Text>
                   <Text style={[op.detailRow, { color: theme.contactSubtext }]}>{o.detail}</Text>
@@ -797,7 +798,7 @@ export default function MapScreen() {
         {/* LOCATION CARD: neighborhood and address; radius and coordinates in small print */}
         <View style={[styles.coordinatesCard, { backgroundColor: theme.card }]}>
           <View style={op.placeRow}>
-            <View style={[op.placeIcon, { backgroundColor: theme.icono }]}>
+            <View style={[op.placeIcon, { backgroundColor: theme.icon }]}>
               <MaterialIcons name="place" size={22} color="#fff" />
             </View>
             <View style={{ flex: 1 }}>
@@ -812,15 +813,15 @@ export default function MapScreen() {
             </View>
           </View>
 
-          <View style={[op.technicalRow, { backgroundColor: theme.icono + "12" }]}>
+          <View style={[op.technicalRow, { backgroundColor: theme.icon + "12" }]}>
             <View style={op.technicalDetail}>
-              <MaterialIcons name="radar" size={14} color={theme.icono} />
+              <MaterialIcons name="radar" size={14} color={theme.icon} />
               <Text style={[op.technicalText, { color: theme.text }]}>
                 {t.mapa.radio} {precisionMetros != null ? `± ${Math.round(precisionMetros)} m` : "--"}
               </Text>
             </View>
             <View style={op.technicalDetail}>
-              <MaterialIcons name="my-location" size={14} color={theme.icono} />
+              <MaterialIcons name="my-location" size={14} color={theme.icon} />
               <Text style={[op.technicalText, { color: theme.text }]} numberOfLines={1}>
                 {location.latitude.toFixed(5)}, {location.longitude.toFixed(5)}
               </Text>
@@ -946,7 +947,7 @@ export default function MapScreen() {
               <HistoryPins
                 points={history ?? []}
                 current={location}
-                lineColor={theme.icono}
+                lineColor={theme.icon}
                 styles={ms}
                 trackChanges={trackChanges}
                 label={t.mapa.historial}
@@ -963,12 +964,12 @@ export default function MapScreen() {
 
               {alertDestination && (
                 <Marker
-                  coordinate={alertDestination.coordenada}
+                  coordinate={alertDestination.coordinate}
                   anchor={{ x: 0.5, y: 0.5 }}
                   tracksViewChanges={trackChanges}
                   zIndex={998}
                   title={t.mapa.direccion_alerta_marcador}
-                  description={alertDestination.direccion}
+                  description={alertDestination.address}
                 >
                   <View style={ms.currentPin}>
                     <MaterialIcons name="place" size={20} color="#FFFFFF" />
@@ -979,7 +980,7 @@ export default function MapScreen() {
               {/* Saved routes (same logic: screen switches and tap to see information) */}
               {visibleRoutes.map((route: any, index: number) => {
                 const routeColor = ROUTE_COLORS[index % ROUTE_COLORS.length];
-                const points = route.puntos.map((point: any) => ({
+                const points = route.points.map((point: any) => ({
                   latitude: point.latitude,
                   longitude: point.longitude,
                 }));
@@ -1005,8 +1006,8 @@ export default function MapScreen() {
                       anchor={{ x: 0.5, y: 0.5 }}
                       tracksViewChanges={trackChanges}
                       title={
-                        route.nombrePersonalizado ||
-                        `${route.barrioInicio} → ${route.barrioFin}`
+                        route.customName ||
+                        `${route.startNeighborhood} → ${route.endNeighborhood}`
                       }
                       description="Inicio del recorrido"
                       onPress={() => openRouteInfo(route)}
@@ -1033,7 +1034,7 @@ export default function MapScreen() {
             </MapView>
           ) : (
             <View style={ms.modalLoading}>
-              <ActivityIndicator size="large" color={theme.icono} />
+              <ActivityIndicator size="large" color={theme.icon} />
             </View>
           )}
 
@@ -1046,7 +1047,7 @@ export default function MapScreen() {
               accessibilityRole="button"
               accessibilityLabel={t.mapa.cerrar_mapa}
             >
-              <MaterialIcons name="close" size={20} color={theme.icono} />
+              <MaterialIcons name="close" size={20} color={theme.icon} />
               <Text style={ms.modalCloseText}>{t.mapa.cerrar_mapa}</Text>
             </TouchableOpacity>
 
@@ -1136,7 +1137,7 @@ export default function MapScreen() {
             activeOpacity={0.85}
             accessibilityRole="button"
           >
-            <MaterialIcons name="my-location" size={22} color={theme.icono} />
+            <MaterialIcons name="my-location" size={22} color={theme.icon} />
           </TouchableOpacity>
           <TouchableOpacity
             style={ms.modalFitBtn}
@@ -1144,7 +1145,7 @@ export default function MapScreen() {
             activeOpacity={0.85}
             accessibilityRole="button"
           >
-            <MaterialIcons name="zoom-out-map" size={22} color={theme.icono} />
+            <MaterialIcons name="zoom-out-map" size={22} color={theme.icon} />
           </TouchableOpacity>
         </View>
       </Modal>
@@ -1170,42 +1171,42 @@ export default function MapScreen() {
                       <MaterialIcons name="route" size={20} color="#7B1DB2" />
                       <Text style={[styles.infoLabel, { color: theme.contactSubtext }]}>Nombre:</Text>
                       <Text style={[styles.infoValue, { color: theme.text }]}>
-                        {routeInfo.nombrePersonalizado || `${routeInfo.barrioInicio} → ${routeInfo.barrioFin}`}
+                        {routeInfo.customName || `${routeInfo.startNeighborhood} → ${routeInfo.endNeighborhood}`}
                       </Text>
                     </View>
                     <View style={styles.infoRow}>
                       <MaterialIcons name="place" size={20} color="#7B1DB2" />
                       <Text style={[styles.infoLabel, { color: theme.contactSubtext }]}>Inicio:</Text>
                       <Text style={[styles.infoValue, { color: theme.text }]}>
-                        {routeInfo.barrioInicio}
+                        {routeInfo.startNeighborhood}
                       </Text>
                     </View>
                     <View style={styles.infoRow}>
                       <MaterialIcons name="flag" size={20} color="#7B1DB2" />
                       <Text style={[styles.infoLabel, { color: theme.contactSubtext }]}>Fin:</Text>
                       <Text style={[styles.infoValue, { color: theme.text }]}>
-                        {routeInfo.barrioFin}
+                        {routeInfo.endNeighborhood}
                       </Text>
                     </View>
                     <View style={styles.infoRow}>
                       <MaterialIcons name="calendar-today" size={20} color="#7B1DB2" />
                       <Text style={[styles.infoLabel, { color: theme.contactSubtext }]}>Fecha:</Text>
                       <Text style={[styles.infoValue, { color: theme.text }]}>
-                        {formatRouteDate(routeInfo.fecha, true)}
+                        {formatRouteDate(routeInfo.date, true)}
                       </Text>
                     </View>
                     <View style={styles.infoRow}>
                       <MaterialIcons name="schedule" size={20} color="#7B1DB2" />
                       <Text style={[styles.infoLabel, { color: theme.contactSubtext }]}>Tiempo estimado:</Text>
                       <Text style={[styles.infoValue, { color: theme.text }]}>
-                        {routeInfo.tiempoEstimado}
+                        {routeInfo.estimatedTime}
                       </Text>
                     </View>
                     <View style={styles.infoRow}>
                       <MaterialIcons name="straighten" size={20} color="#7B1DB2" />
                       <Text style={[styles.infoLabel, { color: theme.contactSubtext }]}>Distancia:</Text>
                       <Text style={[styles.infoValue, { color: theme.text }]}>
-                        {routeInfo.distanciaEstimada}
+                        {routeInfo.estimatedDistance}
                       </Text>
                     </View>
                   </View>
