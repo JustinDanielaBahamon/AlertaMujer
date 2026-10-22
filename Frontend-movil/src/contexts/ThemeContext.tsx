@@ -1,4 +1,5 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ImageSourcePropType } from "react-native";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -444,20 +445,40 @@ type ThemeContextValue = {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
+// El tema es del celular, no de la cuenta: se conserva al cerrar sesión y al reiniciar la app
+const CLAVE_TEMA = "@alerta_mujer:tema";
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [mode, setMode] = useState<AppMode>("light");
+  const [mode, setModeState] = useState<AppMode>("light");
+  // Hasta leer el tema guardado no se pinta nada, para no mostrar un instante el tema claro
+  const [cargado, setCargado] = useState(false);
+
+  useEffect(() => {
+    AsyncStorage.getItem(CLAVE_TEMA)
+      .then((guardado) => {
+        if (guardado && guardado in THEMES) setModeState(guardado as AppMode);
+      })
+      .catch(() => {})
+      .finally(() => setCargado(true));
+  }, []);
+
+  const setMode = useCallback((m: AppMode) => {
+    setModeState(m);
+    AsyncStorage.setItem(CLAVE_TEMA, m).catch(() => {});
+  }, []);
 
   const theme = useMemo(() => THEMES[mode], [mode]);
 
   const toggleTheme = useCallback(() => {
-    setMode((m) => (m === "dark" ? "light" : "dark"));
-  }, []);
+    setMode(mode === "dark" ? "light" : "dark");
+  }, [mode, setMode]);
 
   const value = useMemo(
     () => ({ theme, toggleTheme, setMode }),
     [theme, toggleTheme, setMode]
   );
 
+  if (!cargado) return null;
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
