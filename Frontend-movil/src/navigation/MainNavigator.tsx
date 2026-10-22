@@ -16,6 +16,7 @@ import PerfilScreen from "../features/perfil/view/perfilScreen";
 import AcercaDeScreen from "../features/settings/view/acercaDeScreen";
 import MetodosActivacionScreen from "../features/settings/view/metodosActivacionScreen";
 import AlertasRecibidasScreen from "../features/alertasRecibidas/view/AlertasRecibidasScreen";
+import TrayectoScreen from "../features/trayecto/view/TrayectoScreen";
 import PermisosScreen from "../features/permisos/view/PermisosScreen";
 import NotificacionesScreen from "../features/settings/view/notificacionesScreen";
 import RetencionDatosScreen from "../features/settings/view/retencionDatosScreen";
@@ -55,6 +56,7 @@ export default function MainNavigator({ initialRouteName }: Props) {
       <Stack.Screen name="AlertaActiva" component={AlertaActivaScreen} options={{ gestureEnabled: false }} />
       <Stack.Screen name="AlertaContacto" component={AlertaContactoScreen} />
       <Stack.Screen name="AlertasRecibidas" component={AlertasRecibidasScreen} />
+      <Stack.Screen name="Trayecto" component={TrayectoScreen} />
       <Stack.Screen name="TutorialBienvenida" component={BienvenidaTutorialScreen} />
       <Stack.Screen name="TutorialBoton" component={BotonTutorialScreen} />
       <Stack.Screen name="TutorialMensaje" component={MensajeTutorialScreen} />

@@ -629,7 +629,8 @@
   "cerrar_sesion": "Log out",
   "slogan": "Together we are stronger",
   "compartir_mensaje": "Join me on AlertaMujer, an app to ask for help in seconds and alert your trusted contacts. Download it here:",
-  "alertas_recibidas": "Received alerts"
+  "alertas_recibidas": "Received alerts",
+  "trayecto": "Let them know if I don't arrive"
 },
 "activacion": {
   "activar_ahora": "Activate now",
@@ -939,5 +940,29 @@
     "nota": "Meanwhile the app keeps working: you can send alerts as usual.",
     "descargar": "Download the new version",
     "mas_tarde": "Remind me tomorrow"
+  },
+  "trayecto": {
+    "titulo": "Let them know if I don't arrive",
+    "intro": "If you're going somewhere alone, tell us where and when you'll arrive. If you don't confirm in time, we alert your contacts with your last location, even if your phone runs out of data or balance.",
+    "a_donde": "Where are you going?",
+    "destino_placeholder": "E.g. Home, University, Mom's place",
+    "en_cuanto": "When will you arrive?",
+    "paso_1": "Start the trip now, while you have a connection.",
+    "paso_2": "5 minutes before the time we'll ask if you've arrived.",
+    "paso_3": "If you don't confirm, the server triggers an alert for you: it doesn't depend on your phone having signal.",
+    "empezar": "Start trip",
+    "vas_a": "Going to",
+    "minutos_para_llegar": "minutes to arrive",
+    "hora_cumplida": "arrival time has passed",
+    "llegada_esperada": "Arrival time: {hora}",
+    "si_no_confirmas": "If you don't confirm 2 minutes after that time, we'll alert your contacts.",
+    "ya_llegue": "I've arrived",
+    "cancelar": "Cancel trip",
+    "cancelar_titulo": "Cancel the trip?",
+    "cancelar_texto": "We won't alert your contacts if you don't confirm your arrival.",
+    "cancelar_confirmar": "Cancel trip",
+    "llegaste_titulo": "Glad you made it!",
+    "llegaste_texto": "Your contacts won't receive any alert.",
+    "error_conexion": "We couldn't connect. Check your connection and try again."
   }
 }

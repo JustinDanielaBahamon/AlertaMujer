@@ -28,6 +28,7 @@ export type MainStackParamList = {
       }
     | undefined;
   AlertasRecibidas: undefined;
+  Trayecto: undefined;
   AlertaContacto: {
     alertaId: number;
     nombreUsuaria?: string;

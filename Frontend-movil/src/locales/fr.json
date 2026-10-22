@@ -628,7 +628,8 @@
     "cerrar_sesion": "Se déconnecter",
     "slogan": "Ensemble, nous sommes plus fortes",
     "compartir_mensaje": "Je t'invite sur AlertaMujer, une app pour demander de l'aide en quelques secondes et prévenir tes contacts de confiance. Télécharge-la ici :",
-    "alertas_recibidas": "Alertes reçues"
+    "alertas_recibidas": "Alertes reçues",
+    "trayecto": "Préviens si je n'arrive pas"
   },
   "activacion": {
     "activar_ahora": "Activer maintenant",
@@ -938,5 +939,29 @@
     "nota": "En attendant, l'app continue de fonctionner : tu peux envoyer des alertes normalement.",
     "descargar": "Télécharger la nouvelle version",
     "mas_tarde": "Me le rappeler demain"
+  },
+  "trayecto": {
+    "titulo": "Préviens si je n'arrive pas",
+    "intro": "Si tu vas quelque part seule, dis-nous où et quand tu arrives. Si tu ne confirmes pas à temps, nous prévenons tes contacts avec ta dernière position, même si ton téléphone n'a plus de données ni de crédit.",
+    "a_donde": "Où vas-tu ?",
+    "destino_placeholder": "Ex : Maison, Université, Chez ma mère",
+    "en_cuanto": "Dans combien de temps arrives-tu ?",
+    "paso_1": "Démarre le trajet maintenant, pendant que tu as une connexion.",
+    "paso_2": "5 minutes avant l'heure, nous te demanderons si tu es arrivée.",
+    "paso_3": "Si tu ne confirmes pas, le serveur déclenche une alerte pour toi : cela ne dépend pas du réseau de ton téléphone.",
+    "empezar": "Démarrer le trajet",
+    "vas_a": "Tu vas à",
+    "minutos_para_llegar": "minutes avant d'arriver",
+    "hora_cumplida": "l'heure d'arrivée est passée",
+    "llegada_esperada": "Heure d'arrivée : {hora}",
+    "si_no_confirmas": "Si tu ne confirmes pas 2 minutes après cette heure, nous préviendrons tes contacts.",
+    "ya_llegue": "Je suis arrivée",
+    "cancelar": "Annuler le trajet",
+    "cancelar_titulo": "Annuler le trajet ?",
+    "cancelar_texto": "Nous ne préviendrons plus tes contacts si tu ne confirmes pas ton arrivée.",
+    "cancelar_confirmar": "Annuler le trajet",
+    "llegaste_titulo": "Contente que tu sois arrivée !",
+    "llegaste_texto": "Tes contacts ne recevront aucune alerte.",
+    "error_conexion": "Connexion impossible. Vérifie ta connexion et réessaie."
   }
 }

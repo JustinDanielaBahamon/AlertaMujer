@@ -629,7 +629,8 @@
   "cerrar_sesion": "Sair",
   "slogan": "Juntas somos mais fortes",
   "compartir_mensaje": "Convido você para o AlertaMujer, um app para pedir ajuda em segundos e avisar seus contatos de confiança. Baixe aqui:",
-  "alertas_recibidas": "Alertas recebidos"
+  "alertas_recibidas": "Alertas recebidos",
+  "trayecto": "Avise se eu não chegar"
 },
 "activacion": {
   "activar_ahora": "Ativar agora",
@@ -939,5 +940,29 @@
     "nota": "Enquanto isso o app continua funcionando: você pode enviar alertas normalmente.",
     "descargar": "Baixar a nova versão",
     "mas_tarde": "Lembrar amanhã"
+  },
+  "trayecto": {
+    "titulo": "Avise se eu não chegar",
+    "intro": "Se você vai a algum lugar sozinha, diga para onde e em quanto tempo chega. Se não confirmar a tempo, avisamos seus contatos com sua última localização, mesmo que o celular fique sem dados ou saldo.",
+    "a_donde": "Para onde você vai?",
+    "destino_placeholder": "Ex: Casa, Universidade, Casa da minha mãe",
+    "en_cuanto": "Em quanto tempo você chega?",
+    "paso_1": "Inicie o trajeto agora, enquanto tem conexão.",
+    "paso_2": "5 minutos antes do horário perguntaremos se você já chegou.",
+    "paso_3": "Se não confirmar, o servidor ativa um alerta por você: não depende do sinal do seu celular.",
+    "empezar": "Iniciar trajeto",
+    "vas_a": "Indo para",
+    "minutos_para_llegar": "minutos para chegar",
+    "hora_cumplida": "o horário de chegada já passou",
+    "llegada_esperada": "Horário de chegada: {hora}",
+    "si_no_confirmas": "Se não confirmar 2 minutos depois desse horário, avisaremos seus contatos.",
+    "ya_llegue": "Já cheguei",
+    "cancelar": "Cancelar trajeto",
+    "cancelar_titulo": "Cancelar o trajeto?",
+    "cancelar_texto": "Não avisaremos seus contatos se você não confirmar a chegada.",
+    "cancelar_confirmar": "Cancelar trajeto",
+    "llegaste_titulo": "Que bom que você chegou!",
+    "llegaste_texto": "Seus contatos não receberão nenhum aviso.",
+    "error_conexion": "Não conseguimos conectar. Verifique sua conexão e tente de novo."
   }
 }

@@ -8,6 +8,7 @@ import { getApp } from "@react-native-firebase/app";
 import { getMessaging, setBackgroundMessageHandler } from "@react-native-firebase/messaging";
 import App from "./App";
 import { esNuevoCelular, mostrarNuevoCelular } from "./src/notifications/nuevoCelular";
+import { esTrayectoPorVencer, mostrarTrayectoPorVencer } from "./src/notifications/trayectoPorVencer";
 import { esPedidoUbicacion, responderPedidoUbicacion } from "./src/services/pedidoUbicacion";
 import { manejarEventoProteccion, registrarServicioProteccion } from "./src/features/agitar/servicioProteccion";
 import {
@@ -30,6 +31,8 @@ if (Constants.expoConfig?.extra?.pushConfigurado === true) {
         await responderPedidoUbicacion();
       } else if (esNuevoCelular(mensaje.data)) {
         await mostrarNuevoCelular(mensaje.data);
+      } else if (esTrayectoPorVencer(mensaje.data)) {
+        await mostrarTrayectoPorVencer(mensaje.data);
       }
     });
   } catch (error) {

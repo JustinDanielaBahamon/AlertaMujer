@@ -629,7 +629,8 @@
   "cerrar_sesion": "Cerrar sesión",
   "slogan": "Juntas somos más fuertes",
   "compartir_mensaje": "Te invito a AlertaMujer, una app para pedir ayuda en segundos y avisar a tus contactos de confianza. Descárgala aquí:",
-  "alertas_recibidas": "Alertas recibidas"
+  "alertas_recibidas": "Alertas recibidas",
+  "trayecto": "Avísame si no llego"
 },
 "activacion": {
   "activar_ahora": "Activar ahora",
@@ -939,5 +940,29 @@
     "nota": "Mientras tanto la app sigue funcionando: puedes enviar alertas con normalidad.",
     "descargar": "Descargar la nueva versión",
     "mas_tarde": "Recordármelo mañana"
+  },
+  "trayecto": {
+    "titulo": "Avísame si no llego",
+    "intro": "Si vas a algún lugar sola, dinos a dónde y en cuánto llegas. Si no confirmas tu llegada a tiempo, avisamos a tus contactos con tu última ubicación, aunque tu celular se quede sin datos ni saldo.",
+    "a_donde": "¿A dónde vas?",
+    "destino_placeholder": "Ej: Casa, Universidad, Donde mi mamá",
+    "en_cuanto": "¿En cuánto llegas?",
+    "paso_1": "Inicia el trayecto ahora, mientras tienes conexión.",
+    "paso_2": "5 minutos antes de la hora te preguntaremos si ya llegaste.",
+    "paso_3": "Si no confirmas, el servidor activa una alerta por ti: no depende de que tu celular tenga señal.",
+    "empezar": "Empezar trayecto",
+    "vas_a": "Vas a",
+    "minutos_para_llegar": "minutos para llegar",
+    "hora_cumplida": "ya pasó la hora de llegada",
+    "llegada_esperada": "Hora de llegada: {hora}",
+    "si_no_confirmas": "Si no confirmas 2 minutos después de esa hora, avisaremos a tus contactos.",
+    "ya_llegue": "Ya llegué",
+    "cancelar": "Cancelar trayecto",
+    "cancelar_titulo": "¿Cancelar el trayecto?",
+    "cancelar_texto": "Ya no avisaremos a tus contactos si no confirmas tu llegada.",
+    "cancelar_confirmar": "Cancelar trayecto",
+    "llegaste_titulo": "¡Qué bueno que llegaste!",
+    "llegaste_texto": "Tus contactos no recibirán ningún aviso.",
+    "error_conexion": "No pudimos conectarnos. Revisa tu conexión e inténtalo de nuevo."
   }
 }
