@@ -57,12 +57,19 @@
         "expo-build-properties",
         {
           "android": {
-            "usesCleartextTraffic": true
+            "usesCleartextTraffic": true,
+            "buildArchs": [
+              "arm64-v8a",
+              "armeabi-v7a"
+            ],
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true
           }
         }
       ],
       "@maplibre/maplibre-react-native",
-      "./plugins/withPointerTaggingDisabled"
+      "./plugins/withPointerTaggingDisabled",
+      "./plugins/withoutBarcodeScanner"
     ],
     "experiments": {
       "reactCompiler": true
