@@ -961,5 +961,9 @@
     "llegaste_titulo": "Contente que tu sois arrivée !",
     "llegaste_texto": "Tes contacts ne recevront aucune alerte.",
     "error_conexion": "Connexion impossible. Vérifie ta connexion et réessaie."
+  },
+  "conexion": {
+    "titulo": "Pas de connexion internet",
+    "texto": "Si tu déclenches une alerte maintenant, elle ne partira pas. Connecte-toi au Wi‑Fi ou recharge tes données, et utilise « Préviens si je n'arrive pas » avant de partir."
   }
 }
