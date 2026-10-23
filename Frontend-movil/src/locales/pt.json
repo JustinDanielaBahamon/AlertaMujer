@@ -1000,7 +1000,14 @@
     "cancelar_confirmar": "Cancelar trajeto",
     "llegaste_titulo": "Que bom que você chegou!",
     "llegaste_texto": "Seus contatos não receberão nenhum aviso.",
-    "error_conexion": "Não conseguimos conectar. Verifique sua conexão e tente de novo."
+    "error_conexion": "Não conseguimos conectar. Verifique sua conexão e tente de novo.",
+    "como_funciona": "Como funciona?",
+    "llegada_prevista": "Você chegaria às {hora}",
+    "avisaremos_a": "Se você não confirmar sua chegada, avisaremos: {nombres}",
+    "sin_contactos": "Você ainda não tem contatos de emergência: se não confirmar sua chegada, ninguém receberá o aviso.",
+    "agregar_contacto": "Adicionar contato",
+    "quedan_pocos": "Faltam poucos minutos. Confirme quando chegar ou peça mais tempo.",
+    "atrasada": "Seu horário de chegada já passou. Confirme agora se está bem."
   },
   "conexion": {
     "titulo": "Sem conexão com a internet",
