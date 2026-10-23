@@ -60,7 +60,7 @@ export default function AboutScreen() {
         {/* App presentation */}
         <View style={[styles.card, { padding: 0, overflow: "hidden" }]}>
           <LinearGradient colors={[accent + "30", accent + "08"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={local.hero}>
-            <Image source={require("../../../../assets/images/icon.png")} style={local.logo} />
+            <Image source={require("../../../../assets/icon.png")} style={local.logo} />
             <Text style={[local.name, { color: theme.text }]}>AlertaMujer</Text>
             <Text style={[local.motto, { color: theme.text }]}>{a.descripcion}</Text>
             <View style={[local.chipVersion, { backgroundColor: accent }]}>
