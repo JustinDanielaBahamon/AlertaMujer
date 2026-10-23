@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Alert, Linking } from "react-native";
+import { Linking } from "react-native";
 import type { NavigationContainerRefWithCurrent } from "@react-navigation/native";
 import { useActivationMethods } from "../../contexts/ActivationMethodsContext";
 import type { MainStackParamList } from "../../navigation/types";
@@ -16,7 +16,7 @@ export function useSosLink(
   navigation: NavigationContainerRefWithCurrent<MainStackParamList>,
   withSession: boolean,
 ): void {
-  const { config, loaded } = useActivationMethods();
+  const { config, loaded, change } = useActivationMethods();
   const pending = useRef(false);
   // Changes with each widget tap to run the effect that handles it again
   const [toques, setToques] = useState(0);
@@ -36,13 +36,10 @@ export function useSosLink(
   useEffect(() => {
     if (!pending.current || !withSession || !loaded) return;
     pending.current = false;
-    if (!config.widget) {
-      Alert.alert(
-        "Widget de alerta",
-        "El widget está desactivado. Actívalo en Ajustes → Métodos de activación para enviar alertas desde la pantalla de inicio.",
-      );
-      return;
-    }
+    // She put the widget on her home screen and tapped it: that is the intention, even if the method
+    // was off in Settings (it happens when the widget is added from the launcher). Before, the app
+    // only showed a notice and the countdown never opened.
+    if (!config.widget) change("widget", true);
     const ir = (attempts = 20) => {
       if (!navigation.isReady()) {
         if (attempts > 0) setTimeout(() => ir(attempts - 1), 300);
@@ -53,5 +50,5 @@ export function useSosLink(
       navigation.navigate("Activation", { method: "widget" });
     };
     ir();
-  }, [toques, withSession, loaded, config.widget, navigation]);
+  }, [toques, withSession, loaded, config.widget, change, navigation]);
 }

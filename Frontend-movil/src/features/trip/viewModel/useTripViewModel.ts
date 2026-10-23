@@ -2,6 +2,7 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useCallback, useEffect, useState } from "react";
 import { Alert } from "react-native";
 import { useAuth } from "../../../contexts/AuthContext";
+import { useContactsContext } from "../../../contexts/ContactsContext";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { getOrCreateDevice } from "../../../services/devices.service";
 import { frequentLocationsService, type FrequentLocationApi } from "../../../services/frequent-locations.service";
@@ -22,10 +23,11 @@ export const QUICK_MINUTES = [15, 30, 45, 60, 90];
  * server notifies her contacts with her last location, even if her phone runs out of data.
  */
 export function useTripViewModel() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const { t } = useLocale();
   const tr = t.trayecto;
   const { user } = useAuth();
+  const { contacts } = useContactsContext();
   const [trip, setTrip] = useState<Trip | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -50,12 +52,11 @@ export function useTripViewModel() {
     frequentLocationsService.getByUser(user.id).then(setPlaces).catch(() => {});
   }, [user?.id]);
 
-  // On-screen countdown (every 15 s is enough: it is shown in minutes)
+  // On-screen countdown and arrival preview (every 15 s is enough: they are shown in minutes)
   useEffect(() => {
-    if (!trip) return;
     const id = setInterval(() => setNow(Date.now()), 15000);
     return () => clearInterval(id);
-  }, [trip]);
+  }, []);
 
   const choosePlace = (l: FrequentLocationApi) => {
     setPlace(l);
@@ -121,8 +122,18 @@ export function useTripViewModel() {
     ]);
 
   const minutesLeft = trip ? Math.ceil((trip.arrival.getTime() - now) / 60000) : 0;
+  // Share of the trip time already used (0 to 1), for the progress bar
+  const totalMs = trip ? trip.arrival.getTime() - trip.startTime.getTime() : 0;
+  const progress = trip && totalMs > 0 ? Math.min(1, Math.max(0, (now - trip.startTime.getTime()) / totalMs)) : 0;
+  // Who gets the notice if she does not confirm
+  const contactNames = contacts.map((c) => (c.name ?? "").trim().split(" ")[0]).filter(Boolean);
+  const goToAddContact = () => navigation.navigate("AddContact");
 
   return {
+    arrivalPreview: new Date(now + minutes * 60000),
+    progress: progress,
+    contactNames: contactNames,
+    goToAddContact: goToAddContact,
     trip: trip,
     loading: loading,
     busy: busy,

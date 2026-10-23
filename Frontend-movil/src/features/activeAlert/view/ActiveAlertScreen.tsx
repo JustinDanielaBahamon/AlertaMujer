@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import {
     ActivityIndicator,
-    Linking,
     Modal,
     ScrollView,
     StyleSheet,
@@ -181,7 +180,7 @@ export default function ActiveAlertScreen() {
                   <Text style={deliveryStyles.buttonText}>{t.alertaActiva.envio_reintentar}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  onPress={() => Linking.openURL("tel:123").catch(() => {})}
+                  onPress={vm.callEmergency}
                   style={[deliveryStyles.button, { borderColor: theme.icon, borderWidth: 1.5 }]}
                 >
                   <MaterialIcons name="call" size={16} color={theme.icon} />
@@ -191,6 +190,12 @@ export default function ActiveAlertScreen() {
             )}
           </View>
         </View>
+
+        {/* Emergency call near the top: at the end of the screen it was below the recording and the chat */}
+        <TouchableOpacity style={styles.callRow} onPress={vm.callEmergency}>
+          <MaterialIcons name="call" size={20} color={theme.icon} />
+          <Text style={styles.callText}>{t.alertaActiva.llamar_numero.replace("{numero}", vm.emergencyNumber)}</Text>
+        </TouchableOpacity>
 
         <View style={styles.circleWrapper}>
           <View style={styles.circle}>
@@ -253,11 +258,6 @@ export default function ActiveAlertScreen() {
           <MaterialIcons name="favorite" size={22} color={theme.headerText} />
           <Text style={styles.okButtonText}>{t.alertaActiva.estoyBien}</Text>
           <Text style={styles.okButtonSubtext}>{t.alertaActiva.estoyBienDescripcion}</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.callRow} onPress={vm.callEmergency}>
-          <MaterialIcons name="call" size={18} color={theme.icon} />
-          <Text style={styles.callText}>{t.alertaActiva.llamar_numero.replace("{numero}", vm.emergencyNumber)}</Text>
         </TouchableOpacity>
 
         </View>

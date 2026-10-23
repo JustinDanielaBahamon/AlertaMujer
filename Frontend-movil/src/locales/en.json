@@ -1000,7 +1000,14 @@
     "cancelar_confirmar": "Cancel trip",
     "llegaste_titulo": "Glad you made it!",
     "llegaste_texto": "Your contacts won't receive any alert.",
-    "error_conexion": "We couldn't connect. Check your connection and try again."
+    "error_conexion": "We couldn't connect. Check your connection and try again.",
+    "como_funciona": "How does it work?",
+    "llegada_prevista": "You would arrive at {hora}",
+    "avisaremos_a": "If you don't confirm your arrival, we'll notify: {nombres}",
+    "sin_contactos": "You don't have emergency contacts yet: if you don't confirm your arrival, nobody will be notified.",
+    "agregar_contacto": "Add contact",
+    "quedan_pocos": "Only a few minutes left. Confirm when you arrive or ask for more time.",
+    "atrasada": "Your arrival time has passed. Confirm now if you are OK."
   },
   "conexion": {
     "titulo": "No internet connection",
