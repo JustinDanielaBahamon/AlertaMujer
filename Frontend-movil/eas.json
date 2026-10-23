@@ -15,18 +15,18 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://alerta-mujer-auth.onrender.com",
-        "EXPO_PUBLIC_ALERT_API_URL": "https://alerta-mujer-alert.onrender.com",
-        "EXPO_PUBLIC_EVIDENCE_API_URL": "https://alerta-mujer-evidence.onrender.com"
+        "EXPO_PUBLIC_API_URL": "https://alerta-mujer-auth.wittybush-c3d970eb.brazilsouth.azurecontainerapps.io",
+        "EXPO_PUBLIC_ALERT_API_URL": "https://alerta-mujer-alert.wittybush-c3d970eb.brazilsouth.azurecontainerapps.io",
+        "EXPO_PUBLIC_EVIDENCE_API_URL": "https://alerta-mujer-evidence.wittybush-c3d970eb.brazilsouth.azurecontainerapps.io"
       }
     },
     "production": {
       "autoIncrement": true,
       "environment": "production",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://alerta-mujer-auth.onrender.com",
-        "EXPO_PUBLIC_ALERT_API_URL": "https://alerta-mujer-alert.onrender.com",
-        "EXPO_PUBLIC_EVIDENCE_API_URL": "https://alerta-mujer-evidence.onrender.com"
+        "EXPO_PUBLIC_API_URL": "https://alerta-mujer-auth.wittybush-c3d970eb.brazilsouth.azurecontainerapps.io",
+        "EXPO_PUBLIC_ALERT_API_URL": "https://alerta-mujer-alert.wittybush-c3d970eb.brazilsouth.azurecontainerapps.io",
+        "EXPO_PUBLIC_EVIDENCE_API_URL": "https://alerta-mujer-evidence.wittybush-c3d970eb.brazilsouth.azurecontainerapps.io"
       }
     }
   },
