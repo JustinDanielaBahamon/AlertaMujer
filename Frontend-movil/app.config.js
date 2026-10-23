@@ -52,7 +52,7 @@ module.exports = ({ config }) => {
           minHeight: "110dp",
           targetCellWidth: 2,
           targetCellHeight: 2,
-          previewImage: "./assets/images/icon.png",
+          previewImage: "./assets/images/widget-sos-preview.png",
           resizeMode: "horizontal|vertical",
           updatePeriodMillis: 0,
         },
