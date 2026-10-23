@@ -88,12 +88,17 @@ type OfficialZone = {
 };
 
 const OFFICIAL_ZONE_COLOR = "#4C1D95";
+// Risk zones in red with a warning: in purple with the generic "place" icon they looked
+// like a second pin of the user's own location
+const ZONE_COLOR_BY_TYPE: Record<string, string> = { risk: "#C62828" };
+const zoneColor = (type: string) => ZONE_COLOR_BY_TYPE[type] ?? OFFICIAL_ZONE_COLOR;
 
 const OFFICIAL_ZONE_ICON: Record<string, keyof typeof MaterialIcons.glyphMap> = {
   policia: "local-police",
   asistencia: "health-and-safety",
   help: "support",
   safe: "verified-user",
+  risk: "warning",
 };
 
 const distanceMeters = (a: Coord, b: Coord) => {
@@ -517,16 +522,16 @@ export default function MapScreen() {
         <Circle
           center={{ latitude: zone.latitude, longitude: zone.longitude }}
           radius={zone.radio}
-          strokeColor={OFFICIAL_ZONE_COLOR}
+          strokeColor={zoneColor(zone.type)}
           strokeWidth={2.5}
-          fillColor={`${OFFICIAL_ZONE_COLOR}26`}
+          fillColor={`${zoneColor(zone.type)}26`}
         />
         <Marker
           coordinate={{ latitude: zone.latitude, longitude: zone.longitude }}
           anchor={{ x: 0.5, y: 0.5 }}
           title={zone.name}
         >
-          <View style={[ms.routePin, { backgroundColor: OFFICIAL_ZONE_COLOR }]}>
+          <View style={[ms.routePin, { backgroundColor: zoneColor(zone.type) }]}>
             <MaterialIcons name={OFFICIAL_ZONE_ICON[zone.type] ?? "place"} size={14} color="#FFFFFF" />
           </View>
         </Marker>
@@ -671,7 +676,7 @@ export default function MapScreen() {
           >
             {renderOfficialZones()}
             {renderClassifiedZones()}
-            <Marker coordinate={location} title={t.mapa.tu_ubicacion_marcador} pinColor={theme.icon} />
+            <Marker coordinate={location} title={t.mapa.tu_ubicacion_marcador} pinColor={theme.icon} zIndex={1000} />
             {searchResult && (
               <Marker
                 coordinate={searchResult.coord}
