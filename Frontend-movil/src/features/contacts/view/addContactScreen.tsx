@@ -8,6 +8,7 @@ import {
   ScrollView,
   Platform,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import Header from "../../../components/ui/Header/header";
 import { Ionicons } from "@expo/vector-icons";
@@ -335,8 +336,16 @@ export default function AddContactScreen() {
               style={styles.saveButton}
             >
               {/* ✅ save() no longer needs photoUri as an argument */}
-              <TouchableOpacity style={styles.buttonInner} onPress={vm.save}>
-                <Ionicons name="save-outline" size={18} color="#f7eeee" />
+              <TouchableOpacity
+                style={[styles.buttonInner, vm.saving && { opacity: 0.7 }]}
+                onPress={vm.save}
+                disabled={vm.saving}
+              >
+                {vm.saving ? (
+                  <ActivityIndicator size="small" color="#f7eeee" />
+                ) : (
+                  <Ionicons name="save-outline" size={18} color="#f7eeee" />
+                )}
                 <Text style={styles.buttonTextWhite}>{t.agregar.boton_guardar_nuevo}</Text>
               </TouchableOpacity>
             </LinearGradient>
