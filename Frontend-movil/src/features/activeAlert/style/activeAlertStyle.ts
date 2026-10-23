@@ -240,12 +240,20 @@ export const createStyles = (
       flexDirection: "row" as const,
       justifyContent: "center" as const,
       alignItems: "center" as const,
+      alignSelf: "stretch" as const,
+      minHeight: 48,
+      marginTop: 12,
+      paddingHorizontal: 16,
+      borderRadius: 24,
+      borderWidth: 1.5,
+      borderColor: theme.icon,
+      backgroundColor: theme.icon + "14",
     },
     callText: {
       marginLeft: 8,
       color: theme.icon,
-      fontSize: 15,
-      fontWeight: "600" as const,
+      fontSize: 16,
+      fontWeight: "700" as const,
     },
 
     // Confirmation dialog to cancel the alert
