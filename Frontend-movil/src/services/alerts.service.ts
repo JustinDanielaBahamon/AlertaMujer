@@ -16,6 +16,8 @@ export interface AlertApi {
   endedAt?: string | null;
   cancelledAt?: string | null;
   createdAt: string;
+  /** Evidence kept as proof: the server does not delete it after the retention days. */
+  keepEvidence?: boolean;
 }
 
 export const getAlertsByUser = async (userId: number): Promise<AlertApi[]> => {
@@ -190,3 +192,9 @@ export const getNotifiedContacts = async (alertId: number | string): Promise<Not
   const response = await api.get<NotifiedContact[]>(`/api/alerts/${alertId}/contacts`);
   return response.data;
 };
+
+/** Keeps (or releases) an alert's evidence so it is not deleted after the retention days. */
+export async function keepAlertEvidence(alertId: number, keep: boolean): Promise<AlertApi> {
+  const response = await api.patch<AlertApi>(`/api/alerts/${alertId}/keep-evidence`, { keep });
+  return response.data;
+}

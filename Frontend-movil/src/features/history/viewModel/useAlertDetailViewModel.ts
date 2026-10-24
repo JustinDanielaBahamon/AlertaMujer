@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, Share } from "react-native";
 import type { AlertRecord } from "../models/AlertRecord";
-import { getNotifiedContacts, type AlertApi, type NotifiedContact } from "../../../services/alerts.service";
+import { getNotifiedContacts, keepAlertEvidence, type AlertApi, type NotifiedContact } from "../../../services/alerts.service";
 import { toDate, getAlertTracking, type LocationPoint } from "../../../services/alert-tracking.service";
 import { placeDescription, getPlace } from "../../../services/geocoding.service";
 
@@ -33,6 +33,10 @@ interface UseAlertDetailViewModelResult {
   isEmergency: boolean;
   sharing: boolean;
   shareReport: () => Promise<void>;
+  /** The alert's evidence is kept as proof (not deleted after the retention days). */
+  kept: boolean;
+  savingKeep: boolean;
+  toggleKeep: () => Promise<void>;
   notifiedContacts: NotifiedContact[];
   loadingContacts: boolean;
   contactsError: boolean;
@@ -167,8 +171,30 @@ export function useAlertDetailViewModel(alert: AlertRecord): UseAlertDetailViewM
     }
   }, [sharing, shareMessage]);
 
+  // Keep the evidence as proof (the server allows a few alerts and explains when the limit is reached)
+  const [savingKeep, setSavingKeep] = useState(false);
+  const kept = !!data?.keepEvidence;
+  const toggleKeep = useCallback(async () => {
+    if (savingKeep || !data) return;
+    setSavingKeep(true);
+    try {
+      const updated = await keepAlertEvidence(data.id, !kept);
+      setData((current) => (current ? { ...current, keepEvidence: !!updated?.keepEvidence } : current));
+    } catch (error: any) {
+      Alert.alert(
+        "Conservar evidencias",
+        error?.response?.data?.message ?? "No se pudo guardar el cambio. Revisa tu conexión e intenta de nuevo.",
+      );
+    } finally {
+      setSavingKeep(false);
+    }
+  }, [savingKeep, data, kept]);
+
   return {
     isEmergency,
+    kept,
+    savingKeep,
+    toggleKeep,
     sharing,
     shareReport,
     notifiedContacts,

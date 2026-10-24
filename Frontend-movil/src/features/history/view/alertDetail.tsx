@@ -43,7 +43,7 @@ export default function AlertDetail() {
   const route = useRoute<AlertDetailRouteProp>();
   const { alert: alert } = route.params;
   const {
-    isEmergency, sharing, shareReport, notifiedContacts, loadingContacts, contactsError,
+    isEmergency, sharing, shareReport, kept, savingKeep, toggleKeep, notifiedContacts, loadingContacts, contactsError,
     points, loadingDetail, address, method, message, steps,
   } = useAlertDetailViewModel(alert);
   const path = useMemo(() => points.map((p) => ({ latitude: p.latitude, longitude: p.longitude })), [points]);
@@ -77,6 +77,12 @@ export default function AlertDetail() {
   const emergencyColors = useMemo(() => getEmergencyColors(theme), [theme]);
   const assistanceColors = useMemo(() => getAssistanceColors(theme), [theme]);
   const alertColors = isEmergency ? emergencyColors : assistanceColors;
+
+  // Help lines (123, Línea Púrpura...) in case she needs guidance or wants to report what happened
+  const goToAssistance = () => {
+    const main = getMainStackNavigation(navigation);
+    main?.navigate("DrawerHome", { screen: "Home", params: { screen: "Assistance" } } as never);
+  };
 
   const goToInternalMap = () => {
     const main = getMainStackNavigation(navigation);
@@ -393,6 +399,28 @@ export default function AlertDetail() {
                   <Feather name="navigation" size={18} color={theme.contactAccent} />
                 </View>
                 <Text style={styles.ActionText}>{t.detalle.navegar}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.ActionItem}
+                onPress={toggleKeep}
+                disabled={savingKeep}
+                accessibilityRole="switch"
+                accessibilityState={{ checked: kept }}
+              >
+                <View style={[styles.ActionCircle, kept && { backgroundColor: theme.contactAccent }]}>
+                  {savingKeep ? (
+                    <ActivityIndicator size="small" color={theme.contactAccent} />
+                  ) : (
+                    <MaterialIcons name={kept ? "lock" : "lock-open"} size={18} color={kept ? "#fff" : theme.contactAccent} />
+                  )}
+                </View>
+                <Text style={styles.ActionText}>{kept ? "Evidencias conservadas" : "Conservar evidencias"}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.ActionItem} onPress={goToAssistance}>
+                <View style={styles.ActionCircle}>
+                  <Feather name="phone-call" size={18} color={theme.contactAccent} />
+                </View>
+                <Text style={styles.ActionText}>Pedir ayuda</Text>
               </TouchableOpacity>
             </View>
             <View style={styles.EndSeparator} />
