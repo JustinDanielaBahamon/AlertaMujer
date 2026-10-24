@@ -67,17 +67,17 @@ export function getAssistanceColors(theme: AppTheme) {
       time:      "#9C27B0",
     };
   }
-  // dark → a nicer blue (vibrant light blue)
+  // dark → soft rose, inside the violet palette (the light blue stood out from the rest of the app)
   if (theme.mode === "dark") {
     return {
-      border:    "#29B6F6",
-      iconBg:    "#0D2137",
-      iconTint:  "#29B6F6",
-      text:      "#29B6F6",
-      badgeBg:   "#0D2137",
-      badgeText: "#4FC3F7",
-      line:      "#29B6F6",
-      time:      "#29B6F6",
+      border:    "#F472B6",
+      iconBg:    "#3B0F2E",
+      iconTint:  "#F472B6",
+      text:      "#F9A8D4",
+      badgeBg:   "#3B0F2E",
+      badgeText: "#F9A8D4",
+      line:      "#F472B6",
+      time:      "#F9A8D4",
     };
   }
   // magenta → pink/light purple
