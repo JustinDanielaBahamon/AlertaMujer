@@ -43,13 +43,15 @@ class ShakeSensorModule : Module() {
 
   override fun definition() = ModuleDefinition {
     Name("ShakeSensor")
-    Events("onReading", "onAudioChunk", "onRecordingError", "onScreenChange")
+    Events("onReading", "onAudioChunk", "onRecordingError", "onScreenChange", "onTripAuthExpired", "onTripEnded")
 
     OnCreate {
       AudioRecorderService.chunkListener = { file, durationMs ->
         sendEvent("onAudioChunk", mapOf("uri" to Uri.fromFile(file).toString(), "durationMs" to durationMs.toDouble()))
       }
       AudioRecorderService.errorListener = { message -> sendEvent("onRecordingError", mapOf("message" to message)) }
+      TripService.authExpiredListener = { sendEvent("onTripAuthExpired", emptyMap<String, Any>()) }
+      TripService.tripEndedListener = { status -> sendEvent("onTripEnded", mapOf("status" to status)) }
     }
 
     Function("available") {
@@ -192,11 +194,65 @@ class ShakeSensorModule : Module() {
       file.delete()
     }
 
+    // ── "Avísame si no llego" ───────────────────────────────────────────────────────────────
+
+    // Starts (or updates) the trip service; it must be called with the app open. false if the
+    // location permission is missing.
+    Function("startTrip") { options: Map<String, Any?> ->
+      val context = androidContext
+      val fine = context.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION)
+      val coarse = context.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION)
+      if (fine != android.content.pm.PackageManager.PERMISSION_GRANTED &&
+        coarse != android.content.pm.PackageManager.PERMISSION_GRANTED
+      ) return@Function false
+      val intent = Intent(context, TripService::class.java)
+        .setAction(TripService.ACTION_START)
+        .putExtra(TripService.EXTRA_TRIP_ID, (options["tripId"] as? Number)?.toLong() ?: 0L)
+        .putExtra(TripService.EXTRA_BASE_URL, options["baseUrl"] as? String ?: "")
+        .putExtra(TripService.EXTRA_TOKEN, options["token"] as? String ?: "")
+        .putExtra(TripService.EXTRA_DESTINATION, options["destination"] as? String ?: "")
+        .putExtra(TripService.EXTRA_DEST_LATITUDE, (options["destLatitude"] as? Number)?.toDouble() ?: Double.NaN)
+        .putExtra(TripService.EXTRA_DEST_LONGITUDE, (options["destLongitude"] as? Number)?.toDouble() ?: Double.NaN)
+        .putExtra(TripService.EXTRA_ARRIVAL_MS, (options["arrivalMs"] as? Number)?.toLong() ?: 0L)
+      try {
+        context.startForegroundService(intent)
+        true
+      } catch (e: Exception) {
+        false
+      }
+    }
+
+    Function("updateTripToken") { token: String ->
+      if (!TripService.status.running) return@Function
+      androidContext.startService(
+        Intent(androidContext, TripService::class.java).setAction(TripService.ACTION_TOKEN).putExtra(TripService.EXTRA_TOKEN, token),
+      )
+    }
+
+    Function("stopTrip") {
+      if (!TripService.status.running) return@Function
+      androidContext.startService(Intent(androidContext, TripService::class.java).setAction(TripService.ACTION_STOP))
+    }
+
+    Function("tripStatus") {
+      val s = TripService.status
+      mapOf(
+        "running" to s.running,
+        "tripId" to s.tripId.toDouble(),
+        "lastSentAt" to s.lastSentAt.toDouble(),
+        "lastFixAt" to s.lastFixAt.toDouble(),
+        "queued" to s.queued,
+        "error" to s.error,
+      )
+    }
+
     OnDestroy {
       stopSensor()
       stopPowerButton()
       AudioRecorderService.chunkListener = null
       AudioRecorderService.errorListener = null
+      TripService.authExpiredListener = null
+      TripService.tripEndedListener = null
     }
   }
 

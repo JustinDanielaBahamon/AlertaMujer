@@ -25,5 +25,10 @@
       android:name="expo.modules.shakesensor.AudioRecorderService"
       android:exported="false"
       android:foregroundServiceType="microphone|location" />
+    <!-- "Avísame si no llego": signal of life with the location during the trip -->
+    <service
+      android:name="expo.modules.shakesensor.TripService"
+      android:exported="false"
+      android:foregroundServiceType="location" />
   </application>
 </manifest>

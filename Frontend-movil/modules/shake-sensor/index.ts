@@ -3,6 +3,28 @@ import { NativeModule, requireNativeModule } from "expo";
 export type Reading = { x: number; y: number; z: number };
 
 /** ApplicationExitInfo: reason (REASON_*), process importance when it died and description. */
+/** State of the "Avísame si no llego" service (times in ms since epoch, 0 = never). */
+export type TripServiceStatus = {
+  running: boolean;
+  tripId: number;
+  lastSentAt: number;
+  lastFixAt: number;
+  /** Signals kept on the phone while offline. */
+  queued: number;
+  error: string | null;
+};
+
+export type TripServiceOptions = {
+  tripId: number;
+  /** Base URL of the service that handles /api/safe-trips. */
+  baseUrl: string;
+  token: string;
+  destination: string;
+  destLatitude?: number | null;
+  destLongitude?: number | null;
+  arrivalMs: number;
+};
+
 export type AppExit = { timestamp: number; reason: number; importance: number; description: string };
 
 type Events = {
@@ -12,6 +34,10 @@ type Events = {
   onRecordingError: (error: { message: string }) => void;
   /** The screen turned on or off (each power button press). Not sent during calls. */
   onScreenChange: (change: { screenOn: boolean }) => void;
+  /** The trip service got a 401: it needs a renewed session token (updateTripToken). */
+  onTripAuthExpired: () => void;
+  /** The trip ended from the service (arrival confirmed in the notification, or ended on the server). */
+  onTripEnded: (event: { status: string }) => void;
 };
 
 declare class ShakeSensorModule extends NativeModule<Events> {
@@ -50,6 +76,15 @@ declare class ShakeSensorModule extends NativeModule<Events> {
   pendingAudios(): string[];
   /** Deletes an evidence file from the app cache (already uploaded). */
   deleteFile(uri: string): boolean;
+  /**
+   * "Avísame si no llego": a location service that sends a signal of life every 2 min (queued while
+   * offline) and asks "¿Ya llegaste?" near the destination. Must be called with the app open; false if
+   * the location permission is missing. Calling it again with the same trip updates it.
+   */
+  startTrip(options: TripServiceOptions): boolean;
+  updateTripToken(token: string): void;
+  stopTrip(): void;
+  tripStatus(): TripServiceStatus;
 }
 
 /** Accelerometer for "shake the phone" that does not stop when the app is minimized (Android only). */
