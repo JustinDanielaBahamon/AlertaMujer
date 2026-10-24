@@ -17,7 +17,9 @@ import { useLocale } from "../../../contexts/LocaleContext";
 import { useRoutes } from "../../../contexts/RoutesContext";
 import { useAuth } from "../../../contexts/AuthContext";
 import { frequentLocationsService } from "../../../services/frequent-locations.service";
-import { placeDescription, getPlace } from "../../../services/geocoding.service";
+import { placeDescription, getPlace, type FoundPlace } from "../../../services/geocoding.service";
+import { LocationService } from "../../../services/location.service";
+import PlaceSearchField from "../../../components/ui/placeSearch/PlaceSearchField";
 import { POINT_A_COLOR, POINT_B_COLOR } from "../routeColors";
 import { styles } from "../styles/SaveRoute.style";
 
@@ -78,6 +80,43 @@ export default function SaveRoute() {
       mounted = false;
     };
   }, [user?.id]);
+
+  // Her location: the address search shows nearby places first and the map starts there
+  const [here, setHere] = useState<{ latitude: number; longitude: number } | null>(null);
+  React.useEffect(() => {
+    LocationService.getCurrentPosition(false)
+      .then((p) => p && setHere({ latitude: p.coords.latitude, longitude: p.coords.longitude }))
+      .catch(() => {});
+  }, []);
+
+  // A searched address becomes point A or B
+  const chooseFound = (point: "A" | "B", place: FoundPlace) => {
+    const selected = {
+      latitude: place.latitude,
+      longitude: place.longitude,
+      name: place.name,
+      address: place.detail,
+    };
+    if (point === "A") setPointA(selected);
+    else setPointB(selected);
+    setSelectingPoint(null);
+  };
+
+  // The small map follows the chosen points (both in view when there are two)
+  const mapRegion = React.useMemo(() => {
+    const points = [pointA, pointB].filter(Boolean) as SelectedPoint[];
+    if (points.length === 0) return here ? { ...here, latitudeDelta: 0.02, longitudeDelta: 0.02 } : undefined;
+    const lats = points.map((p) => p.latitude);
+    const lngs = points.map((p) => p.longitude);
+    const latitudeDelta = Math.max(0.01, (Math.max(...lats) - Math.min(...lats)) * 1.6);
+    const longitudeDelta = Math.max(0.01, (Math.max(...lngs) - Math.min(...lngs)) * 1.6);
+    return {
+      latitude: (Math.max(...lats) + Math.min(...lats)) / 2,
+      longitude: (Math.max(...lngs) + Math.min(...lngs)) / 2,
+      latitudeDelta,
+      longitudeDelta,
+    };
+  }, [pointA, pointB, here]);
 
   // Looks up the address and neighborhood of the point tapped on the map
   const completeAddress = async (
@@ -302,6 +341,7 @@ export default function SaveRoute() {
               latitudeDelta: 0.02,
               longitudeDelta: 0.02,
             }}
+            region={mapRegion}
             scrollEnabled={false}
             zoomEnabled={false}
             rotateEnabled={false}
@@ -349,6 +389,28 @@ export default function SaveRoute() {
           <Text style={[styles.sectionTitle, { color: theme.text }]}>
             Puntos del recorrido
           </Text>
+
+          {/* Quick way: write the address of each point */}
+          <PlaceSearchField
+            letter="A"
+            accent={POINT_A_COLOR}
+            placeholder="Busca la dirección del punto A"
+            near={here}
+            textColor={theme.text}
+            background={theme.background}
+            noResultsText="No encontramos esa dirección. Márcala en el mapa."
+            onPick={(place) => chooseFound("A", place)}
+          />
+          <PlaceSearchField
+            letter="B"
+            accent={POINT_B_COLOR}
+            placeholder="Busca la dirección del punto B"
+            near={here}
+            textColor={theme.text}
+            background={theme.background}
+            noResultsText="No encontramos esa dirección. Márcala en el mapa."
+            onPick={(place) => chooseFound("B", place)}
+          />
 
           {/* POINT A */}
           <TouchableOpacity
