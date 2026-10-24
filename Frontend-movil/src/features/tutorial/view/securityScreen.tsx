@@ -195,6 +195,32 @@ export default function CameraAndMicrophoneTutorial({ externalVm }: Props) {
 
               <View style={securityStyle.divider} />
 
+              {/* Alert protection: cancel PIN, duress PIN, volume, discreet mode, check-in */}
+              <View style={securityStyle.sectionRow}>
+                <Text style={securityStyle.sectionLabel}>{t.tutorial.seguridad_proteger_titulo}</Text>
+                <View style={securityStyle.sectionLine} />
+              </View>
+
+              <View style={{ gap: 4 }}>
+                {[
+                  { emoji: "🔉", text: t.tutorial.seguridad_proteger_volumen },
+                  { emoji: "🔑", text: t.tutorial.seguridad_proteger_pin },
+                  { emoji: "🆘", text: t.tutorial.seguridad_proteger_coaccion },
+                  { emoji: "🔕", text: t.tutorial.seguridad_proteger_discreto },
+                  { emoji: "⏱️", text: t.tutorial.seguridad_proteger_pregunta },
+                ].map((row) => (
+                  <View key={row.emoji} style={securityStyle.descRow}>
+                    <Text style={{ fontSize: 15 }}>{row.emoji}</Text>
+                    <View style={securityStyle.descTextWrap}>
+                      <Text style={securityStyle.descNormal}>{row.text}</Text>
+                    </View>
+                  </View>
+                ))}
+                <Text style={securityStyle.descBold}>{t.tutorial.seguridad_proteger_ajustes}</Text>
+              </View>
+
+              <View style={securityStyle.divider} />
+
               {/* Permissions section — shows both (camera and audio) */}
               <View style={securityStyle.sectionRow}>
                 <Text style={securityStyle.sectionLabel}>{t.tutorial.seguridad_permisos_titulo}</Text>
