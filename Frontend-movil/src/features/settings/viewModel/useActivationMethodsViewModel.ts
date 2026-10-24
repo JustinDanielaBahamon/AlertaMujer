@@ -68,11 +68,6 @@ export function useActivationMethodsViewModel() {
       brandRecommendation: conflict === "motorola" ? m.agitar_rec_motorola : undefined,
     },
     {
-      ...buildMethod(m, "encendido", "power-outline", "encendido", 3, config.encendido, false),
-      recommendations: [m.encendido_rec1, m.encendido_rec2],
-    },
-    buildMethod(m, "bloqueo", "lock-closed-outline", "popup", 4, config.bloqueo, true),
-    {
       ...buildMethod(m, "widget", "apps-outline", "widget", 3, config.widget, false),
       action: { text: m.widget_agregar, icon: "add-circle-outline", onPressed: () => addWidget() },
     },
