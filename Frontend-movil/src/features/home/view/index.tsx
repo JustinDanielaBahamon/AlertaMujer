@@ -171,9 +171,7 @@ export default function Home() {
           <Text
             style={[
               styles.safeZoneSubtitle,
-              {
-
-              },
+              { color: theme.text },
             ]}
             numberOfLines={1}
           >

@@ -1,4 +1,5 @@
 import * as Location from "expo-location";
+import { getPlace } from "./geocoding.service";
 import { locationPermission } from "./safePermissions";
 
 // Interface for improved location data
@@ -117,10 +118,12 @@ export class LocationService {
     longitude: number
   ): Promise<DetailedLocation | null> {
     try {
-      const reverse = await Location.reverseGeocodeAsync({
-        latitude,
-        longitude,
-      });
+      // The phone geocoder gives city and region, but on some phones its neighborhood is wrong
+      // (e.g. a Vietnamese district for a point in Neiva): OpenStreetMap gives the neighborhood
+      const [reverse, osm] = await Promise.all([
+        Location.reverseGeocodeAsync({ latitude, longitude }),
+        getPlace(latitude, longitude).catch(() => null),
+      ]);
 
       if (reverse.length > 0) {
         const info = reverse[0];
@@ -128,7 +131,7 @@ export class LocationService {
         // Improved data extraction with several fallbacks (valid properties only)
         const street = info.street || info.name || "Calle desconocida";
         const number = info.streetNumber || "";
-        const neighborhood = info.district || info.subregion || "Sector desconocido";
+        const neighborhood = osm?.neighborhood || info.district || info.subregion || "Sector desconocido";
         const city = info.city || "Ciudad desconocida";
         const municipality = info.subregion || info.city || "Municipio desconocido";
         const department = info.region || "Departamento desconocido";
