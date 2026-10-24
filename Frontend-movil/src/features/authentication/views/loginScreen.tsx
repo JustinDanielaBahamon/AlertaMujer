@@ -56,6 +56,7 @@ export default function Login() {
             <TextInput
               style={styles.emailInput}
               placeholder={t.login.correo}
+                maxLength={254}
               placeholderTextColor={'#666'}
               value={vm.email}
               onChangeText={(v) => { vm.setEmail(v); }}
@@ -80,6 +81,7 @@ export default function Login() {
               style={styles.passwordInput}
               secureTextEntry={!vm.showPassword}
               placeholder={t.login.contrasena}
+                maxLength={100}
               placeholderTextColor={'#666'}
               value={vm.password}
               onChangeText={(v) => { vm.setPassword(v); }}

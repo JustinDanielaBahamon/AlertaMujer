@@ -281,7 +281,8 @@ export default function SavedLocations() {
               placeholder="Buscar por nombre, dirección o ciudad"
               placeholderTextColor={theme.contactSubtext}
               value={searchText}
-              onChangeText={setSearchText}
+              maxLength={120}
+            onChangeText={setSearchText}
             />
             {searchText.length > 0 && (
               <TouchableOpacity onPress={() => setSearchText("")}>

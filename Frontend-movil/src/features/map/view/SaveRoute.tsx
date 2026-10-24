@@ -271,6 +271,7 @@ export default function SaveRoute() {
               style={[styles.nameInput, { color: theme.text }]}
               placeholder="Ej: Camino seguro Sanjuan - Plaza, Recorrido de la tarde..."
               placeholderTextColor={theme.contactSubtext}
+              maxLength={60}
               value={routeName}
               onChangeText={setRouteName}
             />
@@ -449,7 +450,8 @@ export default function SaveRoute() {
                 style={[styles.nameInput, { color: theme.text }]}
                 placeholder="Nombre del punto A (ej: Casa, Trabajo)"
                 placeholderTextColor={theme.contactSubtext}
-                value={pointAName}
+                maxLength={120}
+              value={pointAName}
                 onChangeText={setPointAName}
               />
             </View>
@@ -492,7 +494,8 @@ export default function SaveRoute() {
                 style={[styles.nameInput, { color: theme.text }]}
                 placeholder="Nombre del punto B (ej: Gimnasio, Supermercado)"
                 placeholderTextColor={theme.contactSubtext}
-                value={pointBName}
+                maxLength={120}
+              value={pointBName}
                 onChangeText={setPointBName}
               />
             </View>

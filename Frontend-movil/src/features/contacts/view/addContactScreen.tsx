@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -18,9 +18,15 @@ import { useLocale } from "../../../contexts/LocaleContext";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { LinearGradient } from "expo-linear-gradient";
 import { isValidEmail, contactExtraTexts } from "../contactsExtra";
+import { lettersOnly } from "../../../utils/validators";
+import { RELATIONSHIPS } from "../relationships";
 
 export default function AddContactScreen() {
   const vm = useAddContactViewModel();
+  const [showRelations, setShowRelations] = useState(false);
+  // A contact saved before the list existed keeps its old value as an option
+  const relationOptions =
+    vm.relationship && !RELATIONSHIPS.includes(vm.relationship) ? [...RELATIONSHIPS, vm.relationship] : RELATIONSHIPS;
   const { t, locale } = useLocale();
   const { theme } = useTheme();
   const styles = createStyles(theme);
@@ -213,7 +219,8 @@ export default function AddContactScreen() {
                   placeholder={t.agregar.placeholder_nombre}
                   placeholderTextColor={theme.contactSubtext}
                   value={vm.name}
-                  onChangeText={vm.setName}
+                  maxLength={60}
+                  onChangeText={(v) => vm.setName(lettersOnly(v, 60))}
                 />
               </View>
               {isNameValid && (
@@ -221,23 +228,42 @@ export default function AddContactScreen() {
               )}
             </View>
 
-            {/* RELATIONSHIP INPUT */}
-            <View style={styles.inputCard}>
+            {/* RELATIONSHIP: same list as the web, so it is always written the same way */}
+            <TouchableOpacity
+              style={styles.inputCard}
+              onPress={() => setShowRelations((v) => !v)}
+              accessibilityRole="button"
+              accessibilityState={{ expanded: showRelations }}
+            >
               <Ionicons name="people-outline" size={20} color={theme.contactAccent} />
               <View style={styles.inputTextWrap}>
                 <Text style={styles.inputLabel}>{t.agregar.label_parentesco}</Text>
-                <TextInput
-                  style={styles.inputValue}
-                  placeholder={t.agregar.placeholder_parentesco}
-                  placeholderTextColor={theme.contactSubtext}
-                  value={vm.relationship}
-                  onChangeText={vm.setRelationship}
-                />
+                <Text style={[styles.inputValue, !vm.relationship && { color: theme.contactSubtext }]}>
+                  {vm.relationship || t.agregar.placeholder_parentesco}
+                </Text>
               </View>
-              {isRelationValid && (
-                <Ionicons name="checkmark-circle" size={20} color="#46B987" />
-              )}
-            </View>
+              {isRelationValid && <Ionicons name="checkmark-circle" size={20} color="#46B987" />}
+              <Ionicons name={showRelations ? "chevron-up" : "chevron-down"} size={20} color={theme.contactAccent} />
+            </TouchableOpacity>
+            {showRelations && (
+              <View style={styles.relationList}>
+                {relationOptions.map((option) => (
+                  <TouchableOpacity
+                    key={option}
+                    style={[styles.relationOption, vm.relationship === option && styles.relationOptionActive]}
+                    onPress={() => {
+                      vm.setRelationship(option);
+                      setShowRelations(false);
+                    }}
+                  >
+                    <Text style={[styles.relationText, vm.relationship === option && styles.relationTextActive]}>
+                      {option}
+                    </Text>
+                    {vm.relationship === option && <Ionicons name="checkmark" size={18} color={theme.contactAccent} />}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
 
             {/* PHONE INPUT */}
             <View style={styles.inputCard}>

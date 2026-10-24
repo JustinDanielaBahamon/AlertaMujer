@@ -119,6 +119,26 @@ export const createStyles = (theme: AppTheme) =>
       color: theme.contactName,
     },
 
+    relationList: {
+      backgroundColor: theme.contactSearchBg,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: theme.contactCardBorder,
+      marginTop: -6,
+      marginBottom: 12,
+      paddingVertical: 4,
+    },
+    relationOption: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: 16,
+      paddingVertical: 11,
+    },
+    relationOptionActive: { backgroundColor: theme.contactAccent + "1A" },
+    relationText: { fontSize: 16, color: theme.contactName },
+    relationTextActive: { fontWeight: "700", color: theme.contactAccent },
+
     importButton: {
       flexDirection: "row",
       alignItems: "center",

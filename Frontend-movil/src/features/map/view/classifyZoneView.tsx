@@ -26,6 +26,7 @@ import { useTheme } from "../../../contexts/ThemeContext";
 import type { MainStackParamList } from "../../../navigation/types";
 import { createStyles } from "../styles/classifyZone.style";
 import AddressSearchBar from "./AddressSearchBar";
+import { lettersOnly } from "../../../utils/validators";
 
 type NavigationProp = NativeStackNavigationProp<MainStackParamList>;
 
@@ -487,6 +488,7 @@ export default function ClassifyZoneView() {
           ]}
           placeholder="Ej: Carrera 1e Oeste #48"
           placeholderTextColor={theme.contactSubtext}
+          maxLength={120}
           value={address}
           onChangeText={setAddress}
         />
@@ -505,8 +507,9 @@ export default function ClassifyZoneView() {
           ]}
           placeholder="Ej: Neiva"
           placeholderTextColor={theme.contactSubtext}
+          maxLength={60}
           value={city}
-          onChangeText={setCity}
+          onChangeText={(v) => setCity(lettersOnly(v, 60))}
         />
 
         {/* BARRIO */}
@@ -523,6 +526,7 @@ export default function ClassifyZoneView() {
           ]}
           placeholder="Ej: Barrio Santa Inés"
           placeholderTextColor={theme.contactSubtext}
+          maxLength={60}
           value={neighborhood}
           onChangeText={setNeighborhood}
         />

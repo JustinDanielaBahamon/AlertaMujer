@@ -78,6 +78,7 @@ export default function RecoverPasswordScreen() {
             <TextInput
               style={styles.inputText}
               placeholder={t.recuperar.placeholder_correo}
+                  maxLength={254}
               placeholderTextColor="#999"
               value={vm.email}
               onChangeText={vm.setEmail}
@@ -135,6 +136,7 @@ export default function RecoverPasswordScreen() {
               <TextInput
                 style={styles.inputText}
                 placeholder={t.recuperar.placeholder_nueva}
+                  maxLength={100}
                 placeholderTextColor="#999"
                 secureTextEntry={!vm.showNew}
                 autoCapitalize="none"
@@ -155,6 +157,7 @@ export default function RecoverPasswordScreen() {
               <TextInput
                 style={styles.inputText}
                 placeholder={t.recuperar.placeholder_confirmar}
+                  maxLength={100}
                 placeholderTextColor="#999"
                 secureTextEntry={!vm.showConfirm}
                 autoCapitalize="none"
