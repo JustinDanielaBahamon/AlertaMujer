@@ -23,6 +23,8 @@ export type TripServiceOptions = {
   destLatitude?: number | null;
   destLongitude?: number | null;
   arrivalMs: number;
+  /** JSON list of { name, latitude, longitude, radius } to warn her when she enters or approaches one. */
+  riskZones?: string;
 };
 
 export type AppExit = { timestamp: number; reason: number; importance: number; description: string };

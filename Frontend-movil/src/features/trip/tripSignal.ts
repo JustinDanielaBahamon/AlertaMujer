@@ -1,6 +1,7 @@
 import { Platform } from "react-native";
 import ShakeSensor, { type TripServiceStatus } from "../../../modules/shake-sensor";
 import { baseUrlFor, freshToken } from "../../services/api";
+import { getRiskZones, riskZonesJson } from "../../services/riskZones";
 import { activeTrip, type Trip } from "../../services/safe-trips.service";
 
 /**
@@ -47,6 +48,8 @@ export async function syncTripSignal(trip: Trip | null): Promise<boolean> {
   listenAuthExpired();
   const token = await freshToken(TOKEN_MIN_MS);
   if (!token) return false;
+  // The phone warns her when she enters or approaches one during the trip
+  const zones = await getRiskZones();
   return ShakeSensor.startTrip({
     tripId: trip.id,
     baseUrl: baseUrlFor(TRIP_ROUTE),
@@ -55,6 +58,7 @@ export async function syncTripSignal(trip: Trip | null): Promise<boolean> {
     destLatitude: trip.destinationLatitude,
     destLongitude: trip.destinationLongitude,
     arrivalMs: trip.arrival.getTime(),
+    riskZones: riskZonesJson(zones),
   });
 }
 

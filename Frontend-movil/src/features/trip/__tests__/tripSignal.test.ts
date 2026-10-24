@@ -22,6 +22,11 @@ jest.mock("../../../services/api", () => ({
 
 jest.mock("../../../services/safe-trips.service", () => ({ activeTrip: jest.fn(async () => null) }));
 
+jest.mock("../../../services/riskZones", () => ({
+  getRiskZones: jest.fn(async () => []),
+  riskZonesJson: jest.fn(() => "[]"),
+}));
+
 import ShakeSensor from "../../../../modules/shake-sensor";
 import { freshToken } from "../../../services/api";
 import type { Trip } from "../../../services/safe-trips.service";
@@ -54,6 +59,7 @@ describe("tripSignal", () => {
       destLatitude: 2.93,
       destLongitude: -75.28,
       arrivalMs: Date.parse("2026-10-23T20:30:00Z"),
+      riskZones: "[]",
     });
   });
 

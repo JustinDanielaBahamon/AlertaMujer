@@ -214,6 +214,7 @@ class ShakeSensorModule : Module() {
         .putExtra(TripService.EXTRA_DEST_LATITUDE, (options["destLatitude"] as? Number)?.toDouble() ?: Double.NaN)
         .putExtra(TripService.EXTRA_DEST_LONGITUDE, (options["destLongitude"] as? Number)?.toDouble() ?: Double.NaN)
         .putExtra(TripService.EXTRA_ARRIVAL_MS, (options["arrivalMs"] as? Number)?.toLong() ?: 0L)
+        .putExtra(TripService.EXTRA_RISK_ZONES, options["riskZones"] as? String ?: "[]")
       try {
         context.startForegroundService(intent)
         true

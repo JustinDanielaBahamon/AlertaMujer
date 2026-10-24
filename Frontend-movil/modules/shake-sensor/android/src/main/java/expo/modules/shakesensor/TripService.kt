@@ -64,6 +64,9 @@ class TripService : Service() {
   private var bestDistanceAt = 0L
   private var arrivalAskedAt = 0L
   private var checkAskedAt = 0L
+  private var riskZones: List<RiskZone> = emptyList()
+  // When each zone was last announced (not repeated every fix)
+  private val zoneNoticeAt = mutableMapOf<String, Long>()
 
   override fun onBind(intent: Intent?): IBinder? = null
 
@@ -92,6 +95,7 @@ class TripService : Service() {
     destLatitude = intent.getDoubleExtra(EXTRA_DEST_LATITUDE, Double.NaN)
     destLongitude = intent.getDoubleExtra(EXTRA_DEST_LONGITUDE, Double.NaN)
     arrivalMs = intent.getLongExtra(EXTRA_ARRIVAL_MS, 0L)
+    riskZones = parseZones(intent.getStringExtra(EXTRA_RISK_ZONES))
     if (!goForeground()) return
     if (sameTrip && worker != null) {
       // Only the arrival time or the session changed (extension, renewed token)
@@ -123,6 +127,7 @@ class TripService : Service() {
     bestDistanceAt = 0L
     arrivalAskedAt = 0L
     checkAskedAt = 0L
+    zoneNoticeAt.clear()
   }
 
   // ── Location ───────────────────────────────────────────────────────────────────────
@@ -164,7 +169,50 @@ class TripService : Service() {
     if (!isBetter(location)) return
     lastFix = location
     status = status.copy(lastFixAt = location.time)
+    checkRiskZones(location)
     checkProgress(location)
+  }
+
+  // ── Risk zones ─────────────────────────────────────────────────────────────────────
+
+  private fun parseZones(json: String?): List<RiskZone> =
+    runCatching {
+      val list = JSONArray(json ?: "[]")
+      (0 until list.length()).map { i ->
+        val z = list.getJSONObject(i)
+        RiskZone(z.optString("name"), z.getDouble("latitude"), z.getDouble("longitude"), z.getDouble("radius"))
+      }
+    }.getOrDefault(emptyList())
+
+  /** Inside or close to a risk zone she is told (once per zone every 30 min). */
+  private fun checkRiskZones(location: Location) {
+    if (riskZones.isEmpty() || location.accuracy > MAX_ACCURACY_M) return
+    val now = System.currentTimeMillis()
+    val result = FloatArray(1)
+    for (zone in riskZones) {
+      Location.distanceBetween(location.latitude, location.longitude, zone.latitude, zone.longitude, result)
+      val distance = result[0].toDouble()
+      val inside = distance <= zone.radius
+      if (!inside && distance > zone.radius + NEAR_ZONE_M) continue
+      // Entering after having been warned that she was close does deserve a new notice
+      val key = (if (inside) "in:" else "near:") + zone.name
+      if (now - (zoneNoticeAt[key] ?: 0L) < ZONE_NOTICE_MS) return
+      zoneNoticeAt[key] = now
+      val title = if (inside) "Estás en una zona de riesgo" else "Te acercas a una zona de riesgo"
+      val text = zone.name + ". Mantén el celular contigo: si tu señal se corta aquí, avisamos a tus contactos a los 5 minutos."
+      notifications().notify(
+        ZONE_ID,
+        Notification.Builder(this, ALERTS_CHANNEL)
+          .setContentTitle(title)
+          .setContentText(text)
+          .setStyle(Notification.BigTextStyle().bigText(text))
+          .setSmallIcon(applicationInfo.icon)
+          .setAutoCancel(true)
+          .setContentIntent(openApp())
+          .build(),
+      )
+      return
+    }
   }
 
   // ── Arrival and "¿Todo bien?" ─────────────────────────────────────────────────────
@@ -466,6 +514,8 @@ class TripService : Service() {
     checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
       checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
 
+  data class RiskZone(val name: String, val latitude: Double, val longitude: Double, val radius: Double)
+
   /** What the app shows on the trip screen. */
   data class Status(
     val running: Boolean = false,
@@ -485,6 +535,9 @@ class TripService : Service() {
     private const val ARRIVAL_ID = 7402
     private const val CHECK_ID = 7403
     private const val RESULT_ID = 7404
+    private const val ZONE_ID = 7405
+    private const val NEAR_ZONE_M = 300.0
+    private const val ZONE_NOTICE_MS = 30 * 60_000L
     private const val HEARTBEAT_MS = 2 * 60_000L
     private const val LOCATION_INTERVAL_MS = 30_000L
     // A position older than this is not sent as the current one
@@ -513,6 +566,7 @@ class TripService : Service() {
     const val EXTRA_DEST_LATITUDE = "destLatitude"
     const val EXTRA_DEST_LONGITUDE = "destLongitude"
     const val EXTRA_ARRIVAL_MS = "arrivalMs"
+    const val EXTRA_RISK_ZONES = "riskZones"
 
     /** Notify the JS module (when the app is alive). */
     var authExpiredListener: (() -> Unit)? = null
