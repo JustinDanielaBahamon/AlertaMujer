@@ -29,6 +29,20 @@ const duration = (ms: number) => {
 /** A step of the detail timeline. */
 export type AlertStep = { icon: "alert" | "location" | "end" | "ongoing"; title: string; detail: string };
 
+export interface RouteStop {
+  id: string;
+  number: number;
+  latitude: number;
+  longitude: number;
+  time: string;
+  place: string | null;
+}
+
+/** Places are looked up for at most this many points (OpenStreetMap allows 1 query per second). */
+const MAX_PLACES = 20;
+/** Map markers beyond this are thinned out evenly (first and last always stay). */
+export const MAX_ROUTE_MARKERS = 40;
+
 interface UseAlertDetailViewModelResult {
   isEmergency: boolean;
   sharing: boolean;
@@ -37,6 +51,8 @@ interface UseAlertDetailViewModelResult {
   kept: boolean;
   savingKeep: boolean;
   toggleKeep: () => Promise<void>;
+  /** Route points in order, numbered from 1, with their time and (when found) the place. */
+  route: RouteStop[];
   notifiedContacts: NotifiedContact[];
   loadingContacts: boolean;
   contactsError: boolean;
@@ -190,8 +206,40 @@ export function useAlertDetailViewModel(alert: AlertRecord): UseAlertDetailViewM
     }
   }, [savingKeep, data, kept]);
 
+  // Place of each route point, one query per second, in order
+  const [places, setPlaces] = useState<Record<string, string>>({});
+  useEffect(() => {
+    let enabled = true;
+    (async () => {
+      for (const p of points.slice(0, MAX_PLACES)) {
+        if (!enabled) return;
+        const place = await getPlace(p.latitude, p.longitude).catch(() => null);
+        const text = place ? placeDescription(place) : "";
+        if (enabled && text) setPlaces((current) => ({ ...current, [p.id]: text }));
+        await new Promise((r) => setTimeout(r, 1100));
+      }
+    })();
+    return () => {
+      enabled = false;
+    };
+  }, [points]);
+
+  const route = useMemo<RouteStop[]>(
+    () =>
+      points.map((p, i) => ({
+        id: p.id,
+        number: i + 1,
+        latitude: p.latitude,
+        longitude: p.longitude,
+        time: time(p.recordedAt),
+        place: places[p.id] ?? null,
+      })),
+    [points, places],
+  );
+
   return {
     isEmergency,
+    route,
     kept,
     savingKeep,
     toggleKeep,

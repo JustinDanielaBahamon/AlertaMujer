@@ -7,7 +7,7 @@ import { ActivityIndicator, Image, Linking, Modal, Pressable, ScrollView, StyleS
 import { useContactsContext } from "../../../contexts/ContactsContext";
 import MapView, { Marker, Polyline } from "../../../components/map/MapLibreMap";
 import { POINT_A_COLOR, POINT_B_COLOR } from "../../map/routeColors";
-import { useAlertDetailViewModel, type AlertStep } from "../viewModel/useAlertDetailViewModel";
+import { MAX_ROUTE_MARKERS, useAlertDetailViewModel, type AlertStep, type RouteStop } from "../viewModel/useAlertDetailViewModel";
 import NotifiedContactsModal, { STATUSES, CHANNEL_ICON } from "./NotifiedContactsModal";
 import AlertEvidence from "./AlertEvidence";
 import { useTheme } from "../../../contexts/ThemeContext";
@@ -19,6 +19,17 @@ import { getAssistanceColors, getEmergencyColors } from "../style/history.style"
 
 type AlertDetailRouteProp = RouteProp<MainStackParamList, "AlertDetail">;
 type Coordinate = { latitude: number; longitude: number };
+
+/** Start and last location keep the colors of the rest of the app; the points in between are violet. */
+const routeColor = (stop: RouteStop, total: number) =>
+  stop.number === 1 ? POINT_A_COLOR : stop.number === total ? POINT_B_COLOR : "#7C3AED";
+
+/** Many points would cover the map: keeps an even sample, always with the first and the last. */
+function markersOf(route: RouteStop[]): RouteStop[] {
+  if (route.length <= MAX_ROUTE_MARKERS) return route;
+  const step = (route.length - 1) / (MAX_ROUTE_MARKERS - 1);
+  return Array.from({ length: MAX_ROUTE_MARKERS }, (_, i) => route[Math.round(i * step)]);
+}
 
 const STEP_ICON: Record<AlertStep["icon"], keyof typeof MaterialIcons.glyphMap> = {
   alert: "notifications-active",
@@ -43,7 +54,7 @@ export default function AlertDetail() {
   const route = useRoute<AlertDetailRouteProp>();
   const { alert: alert } = route.params;
   const {
-    isEmergency, sharing, shareReport, kept, savingKeep, toggleKeep, notifiedContacts, loadingContacts, contactsError,
+    isEmergency, route: stops, sharing, shareReport, kept, savingKeep, toggleKeep, notifiedContacts, loadingContacts, contactsError,
     points, loadingDetail, address, method, message, steps,
   } = useAlertDetailViewModel(alert);
   const path = useMemo(() => points.map((p) => ({ latitude: p.latitude, longitude: p.longitude })), [points]);
@@ -291,6 +302,34 @@ export default function AlertDetail() {
             </>
           )}
 
+          {/* ROUTE: every point in order, with its time and place */}
+          {stops.length > 1 && (
+            <>
+              <Text style={styles.SectionTitle}>Recorrido</Text>
+              <View style={[extra.card, { backgroundColor: theme.containerBackground }]}>
+                {stops.map((stop, i) => (
+                  <View key={stop.id} style={extra.step}>
+                    <View style={extra.stepGuide}>
+                      <View style={[extra.routeDot, { backgroundColor: routeColor(stop, stops.length) }]}>
+                        <Text style={extra.routeNumber}>{stop.number}</Text>
+                      </View>
+                      {i < stops.length - 1 && <View style={[extra.stepLine, { backgroundColor: `${theme.contactAccent}40` }]} />}
+                    </View>
+                    <View style={extra.stepText}>
+                      <Text style={[extra.stepTitle, { color: theme.text }]}>
+                        {stop.time}
+                        {i === 0 ? " · Inicio" : i === stops.length - 1 ? " · Última ubicación" : ""}
+                      </Text>
+                      <Text style={[extra.stepDetail, { color: theme.contactSubtext }]}>
+                        {stop.place ?? `${stop.latitude.toFixed(5)}, ${stop.longitude.toFixed(5)}`}
+                      </Text>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            </>
+          )}
+
           {/* RECORDED EVIDENCE */}
           <Text style={styles.SectionTitle}>{t.detalle.evidencias_titulo}</Text>
           <AlertEvidence alertId={Number(alert.id)} />
@@ -442,9 +481,23 @@ export default function AlertDetail() {
               {path.length > 1 && (
                 <Polyline coordinates={path} strokeWidth={4} strokeColor={POINT_A_COLOR} />
               )}
-              <Marker coordinate={path[0] ?? alertCoordinate} title="Inicio" pinColor={POINT_A_COLOR} />
-              {path.length > 1 && (
-                <Marker coordinate={path[path.length - 1]} title="Última ubicación" pinColor={POINT_B_COLOR} />
+              {stops.length > 1 ? (
+                markersOf(stops).map((stop) => (
+                  <Marker
+                    key={stop.id}
+                    coordinate={stop}
+                    anchor={{ x: 0.5, y: 0.5 }}
+                    title={`${stop.number} · ${stop.time}`}
+                    description={stop.place ?? undefined}
+                    zIndex={stop.number === 1 || stop.number === stops.length ? 2 : 1}
+                  >
+                    <View style={[extra.routeMarker, { backgroundColor: routeColor(stop, stops.length) }]}>
+                      <Text style={extra.routeNumber}>{stop.number}</Text>
+                    </View>
+                  </Marker>
+                ))
+              ) : (
+                <Marker coordinate={path[0] ?? alertCoordinate} title="Inicio" pinColor={POINT_A_COLOR} />
               )}
             </MapView>
           ) : (
@@ -506,6 +559,17 @@ const extra = StyleSheet.create({
   step: { flexDirection: "row", minHeight: 52 },
   stepGuide: { width: 28, alignItems: "center" },
   stepDot: { width: 26, height: 26, borderRadius: 13, alignItems: "center", justifyContent: "center" },
+  routeDot: { width: 26, height: 26, borderRadius: 13, alignItems: "center", justifyContent: "center" },
+  routeMarker: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    borderWidth: 2,
+    borderColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  routeNumber: { color: "#fff", fontSize: 12, fontWeight: "800" },
   stepLine: { flex: 1, width: 2, marginVertical: 2 },
   stepText: { flex: 1, paddingLeft: 10, paddingBottom: 10 },
   stepTitle: { fontSize: 14, fontWeight: "700" },
