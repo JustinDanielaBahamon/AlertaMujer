@@ -30,7 +30,8 @@ export type TripServiceOptions = {
 export type AppExit = { timestamp: number; reason: number; importance: number; description: string };
 
 type Events = {
-  onReading: (reading: Reading) => void;
+  /** The phone was shaken with the activation pattern (detected on the native side). */
+  onShake: () => void;
   /** An evidence audio chunk finished (file ready to upload). */
   onAudioChunk: (chunk: { uri: string; durationMs: number }) => void;
   onRecordingError: (error: { message: string }) => void;
@@ -45,7 +46,7 @@ type Events = {
 declare class ShakeSensorModule extends NativeModule<Events> {
   /** The phone has an accelerometer. */
   available(): boolean;
-  /** Starts emitting onReading (in g) every intervalMs, also in the background. */
+  /** Starts the accelerometer every intervalMs (also in the background) and emits onShake on a detection. */
   start(intervalMs: number): boolean;
   stop(): void;
   /** Starts emitting onScreenChange with each power button press. */

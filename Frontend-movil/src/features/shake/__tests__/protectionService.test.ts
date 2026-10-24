@@ -18,7 +18,8 @@ jest.mock("@notifee/react-native", () => ({
   EventType: { PRESS: 1, ACTION_PRESS: 2 },
 }));
 
-let mockReader: ((m: { x: number; y: number; z: number }) => void) | null = null;
+let mockShake: (() => void) | null = null;
+let mockScreen: ((e: { screenOn: boolean }) => void) | null = null;
 jest.mock("../../../../modules/shake-sensor", () => ({
   __esModule: true,
   default: {
@@ -28,9 +29,13 @@ jest.mock("../../../../modules/shake-sensor", () => ({
     startPowerButton: jest.fn(),
     stopPowerButton: jest.fn(),
     wait: jest.fn((ms: number) => new Promise((r) => setTimeout(r, ms))),
-    addListener: jest.fn((_event: string, l) => {
-      mockReader = l;
-      return { remove: () => (mockReader = null) };
+    addListener: jest.fn((event: string, l) => {
+      if (event === "onScreenChange") {
+        mockScreen = l;
+        return { remove: () => (mockScreen = null) };
+      }
+      mockShake = l;
+      return { remove: () => (mockShake = null) };
     }),
   },
 }));
@@ -60,15 +65,9 @@ import {
   registerProtectionService,
 } from "../protectionService";
 
-// Four strong chops with calm before and after, read every 40 ms as in the service
-const CHOP = [1.3, 4.6, 5.8, 3.1, 4.2, 2.2, 1.1, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+// The detection runs natively (ShakeDetector.kt): the service only receives "onShake"
 function shakePhone() {
-  const still = (ms: number) => Array(ms / 40).fill(1);
-  const readings = [...still(1200), ...Array(4).fill(CHOP).flat(), ...still(1000)];
-  for (const g of readings) {
-    jest.setSystemTime(Date.now() + 40);
-    mockReader?.({ x: g, y: 0, z: 0 });
-  }
+  mockShake?.();
 }
 
 async function turnOn() {
@@ -101,7 +100,7 @@ describe("servicioProteccion", () => {
 
     await stopProtection();
     expect(ShakeSensor.stop).toHaveBeenCalled();
-    expect(mockReader).toBeNull();
+    expect(mockShake).toBeNull();
   });
 
   it("con la app en pantalla abre la cuenta regresiva de la app", async () => {
@@ -157,7 +156,7 @@ describe("servicioProteccion", () => {
 
     for (let i = 0; i < 4; i++) {
       jest.setSystemTime(Date.now() + 400);
-      (mockReader as unknown as (e: { turnedOn: boolean }) => void)?.({ turnedOn: i % 2 === 0 });
+      mockScreen?.({ screenOn: i % 2 === 0 });
     }
     await jest.advanceTimersByTimeAsync(6000);
 

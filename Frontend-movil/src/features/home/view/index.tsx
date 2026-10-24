@@ -3,6 +3,7 @@ import { useNavigation, useFocusEffect, useIsFocused, type NavigationProp, type 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
+  AppState,
   Easing,
   Image,
   Text,
@@ -114,38 +115,44 @@ export default function Home() {
   const glow3Scale   = useRef(new Animated.Value(1)).current;
   const glow3Opacity = useRef(new Animated.Value(0.15)).current;
 
+  // The glow only runs while the home screen is visible and the app is in the foreground. Before, the
+  // three loops never stopped (other tabs, background) and every remount added three more, so the
+  // phone got slower the longer the app was used.
+  const [appActive, setAppActive] = useState(AppState.currentState === "active");
   useEffect(() => {
-    const loopGlow1 = () => {
-      glow1Scale.setValue(1);
-      glow1Opacity.setValue(0.65);
-      Animated.parallel([
-        Animated.timing(glow1Scale,   { toValue: 1.28, duration: 1600, easing: Easing.out(Easing.quad), useNativeDriver: true }),
-        Animated.timing(glow1Opacity, { toValue: 0,    duration: 1600, easing: Easing.out(Easing.quad), useNativeDriver: true }),
-      ]).start(() => loopGlow1());
-    };
-
-    const loopGlow2 = () => {
-      glow2Scale.setValue(1);
-      glow2Opacity.setValue(0.45);
-      Animated.parallel([
-        Animated.timing(glow2Scale,   { toValue: 1.55, duration: 2000, easing: Easing.out(Easing.quad), useNativeDriver: true }),
-        Animated.timing(glow2Opacity, { toValue: 0,    duration: 2000, easing: Easing.out(Easing.quad), useNativeDriver: true }),
-      ]).start(() => loopGlow2());
-    };
-
-    const loopGlow3 = () => {
-      glow3Scale.setValue(1);
-      glow3Opacity.setValue(0.25);
-      Animated.parallel([
-        Animated.timing(glow3Scale,   { toValue: 1.85, duration: 2500, easing: Easing.out(Easing.quad), useNativeDriver: true }),
-        Animated.timing(glow3Opacity, { toValue: 0,    duration: 2500, easing: Easing.out(Easing.quad), useNativeDriver: true }),
-      ]).start(() => loopGlow3());
-    };
-
-    loopGlow1();
-    setTimeout(() => loopGlow2(), 600);
-    setTimeout(() => loopGlow3(), 1200);
+    const sub = AppState.addEventListener("change", (state) => setAppActive(state === "active"));
+    return () => sub.remove();
   }, []);
+  const glowOn = isFocused && appActive;
+
+  useEffect(() => {
+    if (!glowOn) return undefined;
+    const ring = (scale: Animated.Value, opacity: Animated.Value, from: number, to: number, duration: number, delay: number) =>
+      Animated.loop(
+        Animated.sequence([
+          Animated.delay(delay),
+          Animated.parallel([
+            Animated.timing(scale, { toValue: to, duration, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+            Animated.timing(opacity, { toValue: 0, duration, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+          ]),
+          // Back to the start instantly, still on the native side (no JS round trip per lap)
+          Animated.parallel([
+            Animated.timing(scale, { toValue: 1, duration: 0, useNativeDriver: true }),
+            Animated.timing(opacity, { toValue: from, duration: 0, useNativeDriver: true }),
+          ]),
+        ]),
+      );
+    glow1Opacity.setValue(0.65);
+    glow2Opacity.setValue(0.45);
+    glow3Opacity.setValue(0.25);
+    const loops = [
+      ring(glow1Scale, glow1Opacity, 0.65, 1.28, 1600, 0),
+      ring(glow2Scale, glow2Opacity, 0.45, 1.55, 2000, 600),
+      ring(glow3Scale, glow3Opacity, 0.25, 1.85, 2500, 1200),
+    ];
+    loops.forEach((l) => l.start());
+    return () => loops.forEach((l) => l.stop());
+  }, [glowOn, glow1Scale, glow1Opacity, glow2Scale, glow2Opacity, glow3Scale, glow3Opacity]);
 
   // Navigation to the map
   const goToMap = () => {

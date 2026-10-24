@@ -9,7 +9,6 @@ import notifee, {
 import { AppState, Vibration } from "react-native";
 import { bigStyle } from "../../notifications/notificationStyle";
 import ShakeSensor from "../../../modules/shake-sensor";
-import { createShakeDetector } from "./shakeDetector";
 import { createPowerButtonDetector } from "./powerButtonDetector";
 import { backgroundAlert, createShakeAlert, prepareAlertLocation } from "./backgroundAlert";
 import { notificationsPermission, locationPermission } from "../../services/safePermissions";
@@ -121,10 +120,8 @@ function listenPowerButton() {
 }
 
 function listenSensor() {
-  const detect = createShakeDetector();
-  const sub = ShakeSensor.addListener("onReading", ({ x, y, z }) => {
-    if (detect(x, y, z, Date.now())) onActivate("agitar");
-  });
+  // The detection runs on the native side (ShakeDetector.kt, same algorithm as shakeDetector.ts)
+  const sub = ShakeSensor.addListener("onShake", () => onActivate("agitar"));
   ShakeSensor.start(SENSOR_INTERVAL_MS);
   stopSensor = () => {
     ShakeSensor.stop();

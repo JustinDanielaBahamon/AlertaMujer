@@ -43,7 +43,7 @@ class ShakeSensorModule : Module() {
 
   override fun definition() = ModuleDefinition {
     Name("ShakeSensor")
-    Events("onReading", "onAudioChunk", "onRecordingError", "onScreenChange", "onTripAuthExpired", "onTripEnded")
+    Events("onShake", "onAudioChunk", "onRecordingError", "onScreenChange", "onTripAuthExpired", "onTripEnded")
 
     OnCreate {
       AudioRecorderService.chunkListener = { file, durationMs ->
@@ -327,17 +327,18 @@ class ShakeSensorModule : Module() {
   private fun startSensor(intervalMs: Int): Boolean {
     stopSensor()
     val accelerometer = sensors.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) ?: return false
+    val detector = ShakeDetector()
     val newListener = object : SensorEventListener {
       override fun onSensorChanged(event: SensorEvent) {
         val g = SensorManager.GRAVITY_EARTH
-        sendEvent(
-          "onReading",
-          mapOf(
-            "x" to event.values[0] / g,
-            "y" to event.values[1] / g,
-            "z" to event.values[2] / g,
-          ),
+        val detected = detector.add(
+          (event.values[0] / g).toDouble(),
+          (event.values[1] / g).toDouble(),
+          (event.values[2] / g).toDouble(),
+          event.timestamp / 1_000_000,
         )
+        // Only a detection crosses to JavaScript, never the readings
+        if (detected) sendEvent("onShake", emptyMap<String, Any>())
       }
 
       override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) = Unit
