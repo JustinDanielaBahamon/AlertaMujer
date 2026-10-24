@@ -119,7 +119,8 @@ export default function HistoryTab() {
   // ─── Render of each card ──────────────────────────────────────────────────
 
   const renderItem = ({ item }: { item: AlertRecord }) => {
-    const isEmergency = item.type === "Emergencia";
+    // Trip alerts ("Avísame si no llego") are emergencies too: same violet card, only "Asistencia" changes
+    const isEmergency = item.type !== "Asistencia";
     const colors = isEmergency ? emergencyColors : assistanceColors;
 
     // Status: "Sent" shares colors with emergency / "Cancelled" with assistance

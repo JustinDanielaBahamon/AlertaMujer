@@ -342,7 +342,7 @@ export default function Home() {
           <Text style={[styles.lastAlertTitle, { color: theme.text }]}>
             <Text style={{ fontWeight: "bold" }}>{t.inicio.ultima_alerta}</Text> {elapsedTime}
           </Text>
-          <Text style={[styles.lastAlertSubtitle, { color: theme.text }]}>
+          <Text style={[styles.lastAlertSubtitle, { color: theme.text }]} numberOfLines={2}>
             {t.inicio.ultima_ubicacion_enviada} {lastAlert?.time || ""} — {lastAlert?.location || t.inicio.sin_ubicacion}
           </Text>
         </View>

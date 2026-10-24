@@ -197,7 +197,11 @@ export default function AlertDetail() {
           {/* SUMMARY */}
           <View style={styles.SummaryCard}>
             <View style={[styles.SummaryIcon, { backgroundColor: alertColors.iconBg }]}>
-              <MaterialIcons name={isEmergency ? "warning" : "medical-services"} size={22} color={alertColors.iconTint} />
+              <MaterialIcons
+                name={alert.type === "Avísame si no llego" ? "directions-walk" : isEmergency ? "warning" : "medical-services"}
+                size={22}
+                color={alertColors.iconTint}
+              />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.SummaryType}>{alert.type}</Text>
@@ -338,10 +342,13 @@ export default function AlertDetail() {
 
           {/* NOTIFIED CONTACTS */}
           <View style={extra.sectionRow}>
-            <Text style={styles.SectionTitle}>{t.detalle.notificados_titulo}</Text>
+            <Text style={[styles.SectionTitle, extra.sectionRowTitle]} numberOfLines={2}>
+              {t.detalle.notificados_titulo}
+            </Text>
             {notifiedContacts.length > 0 && (
-              <TouchableOpacity onPress={() => setShowNotified(true)}>
-                <Text style={[extra.seeAll, { color: theme.contactAccent }]}>Ver detalle</Text>
+              <TouchableOpacity onPress={() => setShowNotified(true)} style={extra.seeAllButton} hitSlop={8}>
+                <Text style={[extra.seeAll, { color: theme.contactAccent }]}>{t.detalle.ver_detalle}</Text>
+                <MaterialIcons name="chevron-right" size={18} color={theme.contactAccent} />
               </TouchableOpacity>
             )}
           </View>
@@ -585,8 +592,11 @@ const extra = StyleSheet.create({
   stepText: { flex: 1, paddingLeft: 10, paddingBottom: 10 },
   stepTitle: { fontSize: 14, fontWeight: "700" },
   stepDetail: { fontSize: 12, marginTop: 2 },
-  sectionRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  seeAll: { fontSize: 13, fontWeight: "700", marginBottom: 10 },
+  sectionRow: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: 10 },
+  // The title wraps instead of pushing "Ver detalle" out of place on narrow screens
+  sectionRowTitle: { flex: 1 },
+  seeAllButton: { flexDirection: "row", alignItems: "center", paddingTop: 8 },
+  seeAll: { fontSize: 13, fontWeight: "700" },
   contactCard: { paddingVertical: 10, gap: 8 },
   contact: { flexDirection: "row", alignItems: "center", gap: 10 },
   avatar: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },

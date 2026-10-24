@@ -13,8 +13,8 @@ const ICON: Record<SavedEvidence["type"], keyof typeof MaterialIcons.glyphMap> =
   document: "description",
 };
 
-const dos = (n: number) => String(n).padStart(2, "0");
-const time = (d: Date) => `${dos(d.getHours())}:${dos(d.getMinutes())}:${dos(d.getSeconds())}`;
+// Same format as the rest of the detail ("10:17 p. m.")
+const time = (d: Date) => d.toLocaleTimeString("es-CO", { timeZone: "America/Bogota", hour: "numeric", minute: "2-digit" });
 const size = (bytes: number | null) =>
   bytes == null ? "" : bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 

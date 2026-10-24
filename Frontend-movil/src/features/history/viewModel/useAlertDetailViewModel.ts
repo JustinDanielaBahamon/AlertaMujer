@@ -14,7 +14,11 @@ const METHODS: Record<string, string> = {
   gesture: "Agitando el teléfono",
   contact: "Alerta a un contacto",
   voice: "Comando de voz",
-  timer: "Temporizador",
+  widget: "Widget de inicio",
+  power_button: "Botón de encendido",
+  // For trip alerts the title already says "Avísame si no llego": the chip tells why it went out
+  timer: "No confirmó la llegada",
+  signal_lost: "Señal perdida en el trayecto",
 };
 
 const time = (d: Date) => d.toLocaleTimeString("es-CO", { timeZone: TIME_ZONE, hour: "numeric", minute: "2-digit" });
@@ -69,7 +73,8 @@ interface UseAlertDetailViewModelResult {
 export function useAlertDetailViewModel(alert: AlertRecord): UseAlertDetailViewModelResult {
   const [sharing, setSharing] = useState(false);
 
-  const isEmergency = useMemo(() => alert.type === "Emergencia", [alert.type]);
+  // Trip alerts ("Avísame si no llego") are emergencies too; only "Asistencia" is different
+  const isEmergency = useMemo(() => alert.type !== "Asistencia", [alert.type]);
 
   // Contacts notified in this alert and the status of each channel.
   const [notifiedContacts, setNotifiedContacts] = useState<NotifiedContact[]>([]);

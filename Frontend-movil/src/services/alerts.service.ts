@@ -129,7 +129,9 @@ export const endAlert = async (alertId: number, status: 'resolved' | 'cancelled'
   return response.data;
 };
 
-const transformType = (apiType: string, message?: string): string => {
+const transformType = (apiType: string, message?: string, method?: string): string => {
+  // Alerts the server activated in a trip ("Avísame si no llego")
+  if (method === 'timer' || method === 'signal_lost') return 'Avísame si no llego';
   const t = (apiType || '').toLowerCase();
   if (t.includes('medical') || t.includes('asistencia') || t.includes('salud')) return 'Asistencia';
   const m = (message || '').toLowerCase();
@@ -156,7 +158,7 @@ export const transformAlert = (apiAlert: AlertApi): AlertRecord => {
   const zoneOptions: Intl.DateTimeFormatOptions = { timeZone: 'America/Bogota' };
   return {
     id: String(apiAlert.id),
-    type: transformType(apiAlert.alertType, apiAlert.message),
+    type: transformType(apiAlert.alertType, apiAlert.message, apiAlert.activationMethod),
     date: dateObj && !isNaN(dateObj.getTime())
       ? dateObj.toLocaleDateString('es-CO', zoneOptions)
       : '',
