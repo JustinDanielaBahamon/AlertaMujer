@@ -163,15 +163,13 @@
       // =====================================================
 
       useLocationButton: {
-        height: 40,
+        height: 44,
         marginHorizontal: 18,
         marginTop: 8,
-        borderWidth: 1,
-        borderColor: "#7B1DB2",
-        borderRadius: 6,
+        borderRadius: 12,
+        backgroundColor: "#7B1DB2",
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "transparent",
       },
 
       // State while the user presses the button
@@ -181,9 +179,9 @@
       },
 
       useLocationText: {
-        fontSize: 13,
+        fontSize: 14,
         fontWeight: "700",
-        color: "#7B1DB2",
+        color: "#FFFFFF",
       },
 
       // Text while the button is pressed
@@ -266,23 +264,25 @@
 
       securityOption: {
         width: "31.8%",
-        minHeight: 55,
-        borderRadius: 8,
-        paddingVertical: 7,
+        minHeight: 64,
+        borderRadius: 14,
+        paddingVertical: 9,
         paddingHorizontal: 5,
         alignItems: "center",
         justifyContent: "center",
-        borderWidth: 1,
+        borderWidth: 2,
+        borderColor: "transparent",
       },
 
       selectedSecurity: {
-        borderWidth: 2,
-        borderColor: "#7B1DB2",
+        borderWidth: 3,
+        borderColor: theme.mode === "dark" ? "#FFFFFF" : "#3B0764",
+        transform: [{ scale: 1.04 }],
+        elevation: 6,
       },
 
       verySafe: {
-        backgroundColor: "#E9F8EF",
-        borderColor: "#D0EEDB",
+        backgroundColor: "#16A34A",
       },
 
       safe: {
@@ -291,8 +291,7 @@
       },
 
       moderate: {
-        backgroundColor: "#FFF8DF",
-        borderColor: "#F4E6A7",
+        backgroundColor: "#F59E0B",
       },
 
       unsafe: {
@@ -301,8 +300,7 @@
       },
 
       veryUnsafe: {
-        backgroundColor: "#FFEAEA",
-        borderColor: "#F4C4C4",
+        backgroundColor: "#E11D48",
       },
 
       notApplicable: {
@@ -311,9 +309,9 @@
       },
 
       verySafeText: {
-        fontSize: 12.8,
-        fontWeight: "700",
-        color: "#7C3AED",
+        fontSize: 13.5,
+        fontWeight: "800",
+        color: "#FFFFFF",
         marginTop: 2,
       },
 
@@ -325,9 +323,9 @@
       },
 
       moderateText: {
-        fontSize: 12.8,
-        fontWeight: "700",
-        color: "#C084FC",
+        fontSize: 13.5,
+        fontWeight: "800",
+        color: "#FFFFFF",
         marginTop: 2,
       },
 
@@ -339,9 +337,9 @@
       },
 
       veryUnsafeText: {
-        fontSize: 12.8,
-        fontWeight: "700",
-        color: "#D946EF",
+        fontSize: 13.5,
+        fontWeight: "800",
+        color: "#FFFFFF",
         marginTop: 2,
       },
 
@@ -353,8 +351,8 @@
       },
 
       securitySmallText: {
-        fontSize: 8.6,
-        color: "#777",
+        fontSize: 10,
+        color: "rgba(255,255,255,0.9)",
         marginTop: 2,
       },
 

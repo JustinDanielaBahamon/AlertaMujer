@@ -378,10 +378,7 @@ export default function ClassifyZoneView() {
             const isActive = pressed || isLocationHovered;
             return [
               styles.useLocationButton,
-              isActive && {
-                backgroundColor: "#7B1DB2",
-                borderColor: "#5A1387",
-              },
+              isActive && { backgroundColor: "#5A1387" },
             ];
           }}
         >
@@ -620,7 +617,7 @@ export default function ClassifyZoneView() {
             ]}
             onPress={() => setSafetyLevel("muy_segura")}
           >
-            <MaterialIcons name="verified-user" size={17} color="#7C3AED" />
+            <MaterialIcons name="verified-user" size={20} color="#FFFFFF" />
             <Text style={styles.verySafeText}>Muy segura</Text>
             <Text style={styles.securitySmallText}>Zona muy segura</Text>
           </TouchableOpacity>
@@ -634,7 +631,7 @@ export default function ClassifyZoneView() {
             ]}
             onPress={() => setSafetyLevel("moderada")}
           >
-            <MaterialIcons name="warning" size={17} color="#C084FC" />
+            <MaterialIcons name="warning" size={20} color="#FFFFFF" />
             <Text style={styles.moderateText}>Moderada</Text>
             <Text style={styles.securitySmallText}>Riesgo medio</Text>
           </TouchableOpacity>
@@ -648,7 +645,7 @@ export default function ClassifyZoneView() {
             ]}
             onPress={() => setSafetyLevel("muy_insegura")}
           >
-            <MaterialIcons name="report" size={17} color="#D946EF" />
+            <MaterialIcons name="report" size={20} color="#FFFFFF" />
             <Text style={styles.veryUnsafeText}>Muy insegura</Text>
             <Text style={styles.securitySmallText}>Riesgo muy alto</Text>
           </TouchableOpacity>

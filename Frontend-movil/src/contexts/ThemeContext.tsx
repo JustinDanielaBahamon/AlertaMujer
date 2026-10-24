@@ -215,11 +215,11 @@ const THEMES: Record<AppMode, AppTheme> = {
     contactSearchText: "#e8d5ff",
     assistanceEmergencyGradient: ["#3a035c", "#0b022c"],
     assistanceViolenceGradient: ["#350249", "#33012b"],
-    assistanceMentalGradient:    ["#042f63", "#090111"],
-    assistanceUserIconBg:        "#010e33",
+    assistanceMentalGradient:    ["#4c1d95", "#1e0b3a"],
+    assistanceUserIconBg:        "#3b0764",
     assistanceBulbIconBg:    "#3a2d55",
     assistanceBulbIconColor: "#c084fc",
-    assistanceStarIconBg:    "#010e33",
+    assistanceStarIconBg:    "#3b0764",
   },
 
   // ── ROSA ──────────────────────────────────────────────────────────────────

@@ -149,7 +149,7 @@ export default function Assistance() {
                 <Feather name="user" size={24} color="white" />
               </View>
               <Text style={{ color: 'white', fontSize: 14, fontWeight: 'bold' }}>{violenceResource.name || t.asistencia.violencia}</Text>
-              <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold' }}>{violenceResource.telephone}</Text>
+              <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold' }} numberOfLines={1} adjustsFontSizeToFit>{violenceResource.telephone}</Text>
               <Text style={{ color: 'white', fontSize: 12, marginBottom: 15, height: 40 }}>
                 {violenceResource.description || t.asistencia.violencia_desc}
               </Text>
@@ -169,7 +169,7 @@ export default function Assistance() {
                 <MaterialIcons name="lightbulb-outline" size={26} color={bulbIconColor} />
               </View>
               <Text style={{ color: 'white', fontSize: 14, fontWeight: 'bold' }}>{mentalHealthResource.name || t.asistencia.salud_mental}</Text>
-              <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold' }}>{mentalHealthResource.telephone}</Text>
+              <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold' }} numberOfLines={1} adjustsFontSizeToFit>{mentalHealthResource.telephone}</Text>
               <Text style={{ textAlign: 'right', color: 'white', fontSize: 12, marginBottom: 15, height: 40 }}>
                 {mentalHealthResource.description || t.asistencia.salud_desc}
               </Text>
