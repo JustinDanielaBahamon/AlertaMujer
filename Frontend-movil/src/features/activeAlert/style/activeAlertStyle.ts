@@ -223,7 +223,8 @@ export const createStyles = (
       paddingVertical: 18,
       borderRadius: 20,
       alignItems: "center" as const,
-      marginBottom: 15,
+      marginTop: 18,
+      marginBottom: 14,
     },
     okButtonText: {
       color: theme.headerText,
@@ -240,6 +241,11 @@ export const createStyles = (
       flexDirection: "row" as const,
       justifyContent: "center" as const,
       alignItems: "center" as const,
+      paddingVertical: 12,
+      borderRadius: 16,
+      borderWidth: 1.5,
+      borderColor: theme.icon,
+      marginBottom: 8,
     },
     callText: {
       marginLeft: 8,

@@ -1,16 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Keyboard, ScrollView, View, useWindowDimensions } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 /**
  * With edge-to-edge Android does not shrink the screen when the keyboard opens: the chat ended up below it.
  * Returns the space to leave at the end of the ScrollView (the keyboard height) and a function for
  * the chat focus that scrolls the screen until the text field sits right above the keyboard.
+ * On phones with the 3-button navigation bar the keyboard sits above that bar, so its height is added.
  */
 export function useChatAboveKeyboard() {
   const scrollRef = useRef<ScrollView>(null);
   const chatRef = useRef<View>(null);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const { height: screenHeight } = useWindowDimensions();
+  const { bottom: navigationBar } = useSafeAreaInsets();
   const wantsChat = useRef(false);
   const scrollOffset = useRef(0);
 
@@ -30,9 +33,10 @@ export function useChatAboveKeyboard() {
 
   useEffect(() => {
     const show = Keyboard.addListener("keyboardDidShow", (e) => {
-      setKeyboardHeight(e.endCoordinates.height);
+      const covered = e.endCoordinates.height + navigationBar;
+      setKeyboardHeight(covered);
       // Wait until the ScrollView has the extra space before measuring
-      if (wantsChat.current) setTimeout(() => goToChat(e.endCoordinates.height), 50);
+      if (wantsChat.current) setTimeout(() => goToChat(covered), 50);
     });
     const hide = Keyboard.addListener("keyboardDidHide", () => {
       setKeyboardHeight(0);
@@ -42,7 +46,7 @@ export function useChatAboveKeyboard() {
       show.remove();
       hide.remove();
     };
-  }, [goToChat]);
+  }, [goToChat, navigationBar]);
 
   /** For the ScrollView: stores its current offset (used by goToChat). */
   const onScroll = useCallback((e: { nativeEvent: { contentOffset: { y: number } } }) => {

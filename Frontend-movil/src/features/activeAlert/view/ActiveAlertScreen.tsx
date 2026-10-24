@@ -101,7 +101,7 @@ export default function ActiveAlertScreen() {
       <ScrollView
         ref={keyboard.scrollRef}
         style={styles.scrollContainer}
-        contentContainerStyle={[styles.mainContainer, { paddingBottom: keyboard.keyboardHeight }]}
+        contentContainerStyle={[styles.mainContainer, { paddingBottom: insets.bottom + 30 + keyboard.keyboardHeight }]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         onScroll={keyboard.onScroll}
