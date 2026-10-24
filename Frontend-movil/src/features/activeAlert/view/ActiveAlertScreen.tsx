@@ -21,6 +21,7 @@ import { useChatAboveKeyboard } from "../../../hooks/useChatAboveKeyboard";
 import AlertRecording from "../../recording/AlertRecording";
 import AlertChat, { HER_QUICK_REPLIES } from "../../alertChat/AlertChat";
 import Countdown from "./Countdown";
+import CancelPinModal from "./CancelPinModal";
 
 type Styles = ReturnType<typeof createStyles>;
 
@@ -208,7 +209,9 @@ export default function ActiveAlertScreen() {
         {/* Information about what happens when the time runs out and how to cancel. */}
         <View style={styles.messageCard}>
           <MaterialIcons name="info-outline" size={20} color={theme.icon} />
-          <Text style={styles.messageText}>{t.alertaActiva.mensajeReenvio}</Text>
+          <Text style={styles.messageText}>
+            {vm.unanswered ? t.alertaActiva.sin_respuesta : t.alertaActiva.mensajeReenvio}
+          </Text>
         </View>
 
         <View style={styles.infoCard}>
@@ -242,7 +245,7 @@ export default function ActiveAlertScreen() {
 
         {/* Chat with the contacts: quick messages without having to speak */}
         {/* Automatic video/audio as evidence (uploaded every 45 s) */}
-        <AlertRecording alertId={vm.alertId} />
+        <AlertRecording alertId={vm.alertId} alertStart={vm.alertStart} />
         <View ref={keyboard.chatRef} collapsable={false}>
           <AlertChat
             participant={vm.alertId ? { type: "duena", alertId: vm.alertId } : null}
@@ -278,7 +281,7 @@ export default function ActiveAlertScreen() {
             <Text style={styles.confirmTitle}>{t.alertaActiva.confirmarTitulo}</Text>
             <Text style={styles.confirmDescription}>{t.alertaActiva.confirmarDescripcion}</Text>
 
-            <TouchableOpacity style={styles.confirmButtonYes} onPress={vm.markImOk}>
+            <TouchableOpacity style={styles.confirmButtonYes} onPress={vm.confirmCancel}>
               <Text style={styles.confirmButtonYesText}>{t.alertaActiva.confirmarSi}</Text>
             </TouchableOpacity>
 
@@ -288,6 +291,34 @@ export default function ActiveAlertScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* "¿Sigues en peligro?": 5 minutes before the check-in time, until she answers */}
+      <Modal visible={vm.checkInVisible} transparent animationType="fade" onRequestClose={() => {}}>
+        <View style={styles.confirmOverlay}>
+          <View style={styles.confirmCard}>
+            <View style={styles.confirmIconCircle}>
+              <MaterialIcons name="help-outline" size={28} color={theme.icon} />
+            </View>
+            <Text style={styles.confirmTitle}>{t.alertaActiva.pregunta_titulo}</Text>
+            <Text style={styles.confirmDescription}>
+              {vm.unanswered ? t.alertaActiva.sin_respuesta : t.alertaActiva.pregunta_texto}
+            </Text>
+            <TouchableOpacity style={styles.confirmButtonYes} onPress={vm.stillInDanger}>
+              <Text style={styles.confirmButtonYesText}>{t.alertaActiva.pregunta_sigo}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.confirmButtonNo} onPress={vm.openConfirmation}>
+              <Text style={styles.confirmButtonNoText}>{t.alertaActiva.pregunta_bien}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <CancelPinModal
+        visible={vm.pinVisible}
+        error={vm.pinError}
+        onSubmit={vm.submitPin}
+        onClose={vm.closePin}
+      />
 
       {/* Full-screen map (same design as the "Emergency alert" popup). On close, stays on ActiveAlert. */}
       <Modal

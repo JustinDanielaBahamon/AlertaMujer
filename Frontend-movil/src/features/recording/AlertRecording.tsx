@@ -1,9 +1,9 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { CameraView } from "expo-camera";
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Animated, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useTheme, type AppTheme } from "../../contexts/ThemeContext";
-import { SECONDS_PER_CHUNK, useAlertRecording } from "./useAlertRecording";
+import { useAlertRecording } from "./useAlertRecording";
 
 const NEON = "#C026D3";
 
@@ -14,11 +14,16 @@ const MODE_TEXT = {
   sin_permiso: "Falta el permiso de micrófono",
 } as const;
 
-/** "Evidence" card of the active alert: camera view, status and what was already uploaded. */
-export default function AlertRecording({ alertId }: { alertId: number | null }) {
+/**
+ * "Evidence" card of the active alert. Closed by default: whoever sees her screen (the aggressor, a
+ * thief) must not notice she is being recorded, so neither the camera image nor a recording light is
+ * shown. It keeps recording while closed; she opens it like a dropdown to see the video or audio.
+ */
+export default function AlertRecording({ alertId, alertStart }: { alertId: number | null; alertStart: Date | null }) {
   const { theme } = useTheme();
   const s = useMemo(() => createStyles(theme), [theme]);
-  const g = useAlertRecording(alertId);
+  const [open, setOpen] = useState(false);
+  const g = useAlertRecording(alertId, alertStart, open);
   const recordingNow = g.mode === "video" || g.mode === "audio";
   const pulse = useRef(new Animated.Value(1)).current;
 
@@ -37,23 +42,35 @@ export default function AlertRecording({ alertId }: { alertId: number | null }) 
   const { uploaded, pendingItems } = g.uploads;
   const uploadsText =
     uploaded === 0 && pendingItems === 0
-      ? `Cada ${SECONDS_PER_CHUNK} s se envía lo grabado a la nube para tus contactos.`
+      ? "Lo grabado se envía por partes a la nube para tus contactos."
       : `${uploaded} ${uploaded === 1 ? "parte enviada" : "partes enviadas"} a tus contactos` +
         (pendingItems > 0 ? ` · ${pendingItems} por enviar` : "");
 
   return (
     <View style={s.card}>
-      <View style={s.heading}>
-        <MaterialIcons name="videocam" size={20} color={theme.contactAccent} />
+      <TouchableOpacity
+        style={s.heading}
+        onPress={() => setOpen((o) => !o)}
+        activeOpacity={0.8}
+        accessibilityRole="button"
+        accessibilityState={{ expanded: open }}
+      >
+        <MaterialIcons name="folder-special" size={20} color={theme.contactAccent} />
         <Text style={s.title}>Evidencia</Text>
-        <View style={s.status}>
-          <Animated.View style={[s.point, !recordingNow && s.offDot, { opacity: recordingNow ? pulse : 1 }]} />
-          <Text style={s.statusText}>{MODE_TEXT[g.mode]}</Text>
-        </View>
-      </View>
+        {open ? (
+          <View style={s.status}>
+            <Animated.View style={[s.point, !recordingNow && s.offDot, { opacity: recordingNow ? pulse : 1 }]} />
+            <Text style={s.statusText}>{MODE_TEXT[g.mode]}</Text>
+          </View>
+        ) : (
+          <Text style={s.closedHint}>Toca para ver</Text>
+        )}
+        <MaterialIcons name={open ? "expand-less" : "expand-more"} size={22} color={theme.contactSubtext} />
+      </TouchableOpacity>
 
+      {/* The camera stays mounted while closed (it keeps recording), but its image is not shown */}
       {g.showCamera && (
-        <View style={s.cameraFrame}>
+        <View style={open ? s.cameraFrame : s.hiddenCamera} pointerEvents={open ? "auto" : "none"}>
           <CameraView
             ref={g.cameraRef}
             style={s.camera}
@@ -67,6 +84,10 @@ export default function AlertRecording({ alertId }: { alertId: number | null }) 
         </View>
       )}
 
+      {/* A missing permission is shown even closed: without it nothing is recorded */}
+      {!open && g.mode === "sin_permiso" && <Text style={s.error}>{MODE_TEXT.sin_permiso}</Text>}
+      {open && (
+        <>
       <Text style={s.detail}>{uploadsText}</Text>
       {recordingNow && <Text style={s.note}>Si apagas la pantalla o sales de la app, se sigue grabando el audio.</Text>}
       {!!g.error && <Text style={s.error}>{g.error}</Text>}
@@ -100,6 +121,14 @@ export default function AlertRecording({ alertId }: { alertId: number | null }) 
           </TouchableOpacity>
         )}
       </View>
+        </>
+      )}
+      {!open && g.mode === "sin_permiso" && (
+        <TouchableOpacity style={[s.button, s.primaryButton, s.closedPermission]} onPress={g.givePermission} activeOpacity={0.85}>
+          <MaterialIcons name="mic" size={18} color="#FFFFFF" />
+          <Text style={s.primaryButtonText}>Dar permiso</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -114,6 +143,10 @@ const createStyles = (theme: AppTheme) =>
     offDot: { backgroundColor: theme.contactSubtext },
     statusText: { fontSize: 12, fontWeight: "700", color: theme.contactAccent, flexShrink: 1 },
     cameraFrame: { marginTop: 12, height: 200, borderRadius: 14, overflow: "hidden", backgroundColor: "#000000" },
+    // Closed: the camera keeps working (the recording does not depend on the preview size) but is invisible
+    hiddenCamera: { position: "absolute", width: 2, height: 2, opacity: 0, overflow: "hidden" },
+    closedHint: { marginLeft: "auto", fontSize: 12, fontWeight: "600", color: theme.contactSubtext },
+    closedPermission: { flex: 0, marginTop: 10, paddingHorizontal: 16 },
     camera: { flex: 1 },
     detail: { marginTop: 10, fontSize: 13, color: theme.text },
     note: { marginTop: 4, fontSize: 12, color: theme.contactSubtext },

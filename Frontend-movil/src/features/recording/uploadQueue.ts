@@ -94,7 +94,12 @@ export async function processQueue(): Promise<void> {
     }
     notify();
     while (current.length > 0) {
-      const chunk = current[0];
+      // With a bad signal the audios go first: they weigh much less than video and are the proof that
+      // survives a dark video or a phone in a pocket
+      const audioIndex = current.findIndex((t) => t.tipo === "audio");
+      const index = audioIndex >= 0 ? audioIndex : 0;
+      const chunk = current[index];
+      let accepted = true;
       try {
         await uploadEvidence(chunk.alertaId, chunk.uri, chunk.tipo);
         uploaded++;
@@ -104,20 +109,33 @@ export async function processQueue(): Promise<void> {
           retry = setTimeout(() => void processQueue(), RETRY_MS);
           return;
         }
+        accepted = false;
         console.warn("Evidencia rechazada por el servidor, se descarta:", (e as any)?.response?.status);
       }
-      current.shift();
+      current.splice(index, 1);
       await save();
-      try {
-        ShakeSensor.deleteFile(chunk.uri);
-      } catch {
-        // If it cannot be deleted, Android cleans the cache by itself
-      }
+      keepOrDelete(chunk, accepted);
       notify();
     }
   } finally {
     uploading = false;
     notify();
+  }
+}
+
+/**
+ * An uploaded chunk stays as a private copy inside the app (she downloads or shares it from the
+ * history when she decides); a rejected one is deleted.
+ */
+function keepOrDelete(chunk: PendingChunk, accepted: boolean) {
+  try {
+    const kept =
+      accepted && typeof ShakeSensor.keepEvidence === "function"
+        ? ShakeSensor.keepEvidence(chunk.uri, chunk.alertaId)
+        : null;
+    if (!kept) ShakeSensor.deleteFile(chunk.uri);
+  } catch {
+    // If it cannot be moved or deleted, Android cleans the cache by itself
   }
 }
 

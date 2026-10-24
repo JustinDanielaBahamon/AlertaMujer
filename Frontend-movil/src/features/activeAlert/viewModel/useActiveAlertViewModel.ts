@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import type { RefObject } from "react";
-import { Alert, Animated, Linking, Platform } from "react-native";
+import { Alert, Animated, AppState, Linking, Platform, Vibration } from "react-native";
 import type MapView from "../../../components/map/MapLibreMap";
 import * as Location from "expo-location";
 import { useNavigation, usePreventRemove, useRoute } from "@react-navigation/native";
@@ -9,7 +9,15 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { MainStackParamList } from "../../../navigation/types";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useLocale } from "../../../contexts/LocaleContext";
-import { createAlertWithRetries, endAlert, getAlert, getViews } from "../../../services/alerts.service";
+import {
+  createAlertWithRetries,
+  duressAlert,
+  endAlert,
+  extendAlert,
+  getAlert,
+  getViews,
+  type AlertApi,
+} from "../../../services/alerts.service";
 import { getPublicSettings } from "../../../services/settings.service";
 import { toDate } from "../../../services/alert-tracking.service";
 import { getOrCreateDevice } from "../../../services/devices.service";
@@ -17,7 +25,10 @@ import type { LocationPoint } from "../../../services/alert-tracking.service";
 import { placeDescription, getPlace } from "../../../services/geocoding.service";
 import { reportLocation } from "../../../services/location-reporter.service";
 import { locationPermission } from "../../../services/safePermissions";
-import { takeOverAlert } from "../../shake/backgroundAlert";
+import { continueSilently, takeOverAlert } from "../../shake/backgroundAlert";
+import { checkCancelPin, hasCancelPin } from "../../security/cancelPin";
+import { checkInDeadline, locationIntervalMs, shouldAsk } from "../checkIn";
+import { clearCheckInReminder, showCheckInReminder } from "../../../notifications/checkInReminder";
 import { clearShakeAlertNotice } from "../../shake/protectionService";
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
@@ -28,15 +39,7 @@ export type Coordinate = {
   longitude: number;
 };
 
-// Location update cycle: every 30 s (10 times) and then 1 min of rest.
-const UPDATE_INTERVAL_MS = 30 * 1000;
-const UPDATES_PER_CYCLE = 10;
-const REST_MS = 60 * 1000;
 const MAX_HISTORY = 15; // points whose neighborhood is looked up (the map shows all of them)
-
-// How long to wait before the next update, depending on how many were done in the current cycle.
-const delayAfterUpdate = (done: number) =>
-  done % UPDATES_PER_CYCLE === 0 ? REST_MS : UPDATE_INTERVAL_MS;
 
 // The alert waits for the location at most this long; if the GPS does not respond (indoors, no signal) it
 // is created anyway and the location is added when it arrives. Before, the alert was not sent without GPS.
@@ -114,8 +117,23 @@ export function useActiveAlertViewModel() {
     };
   }, []);
 
-  // Until when the alert stays active on the server (start + panel maximum duration)
+  // Start of the alert, and the check-in: "¿Sigues en peligro?" at the configured minutes (or at the
+  // time she extended it to). Without an answer it goes on in saving mode and her contacts are told.
   const [alertStart, setAlertStart] = useState<Date | null>(null);
+  const [extendedUntil, setExtendedUntil] = useState<Date | null>(null);
+  const [unanswered, setUnanswered] = useState(false);
+  const [checkInVisible, setCheckInVisible] = useState(false);
+  const alertStartRef = useRef<number | null>(null);
+  const savingRef = useRef(false);
+  useEffect(() => {
+    alertStartRef.current = alertStart ? alertStart.getTime() : null;
+  }, [alertStart]);
+  useEffect(() => {
+    savingRef.current = unanswered;
+  }, [unanswered]);
+  // Cancel with PIN (optional) and duress PIN
+  const [pinVisible, setPinVisible] = useState(false);
+  const [pinError, setPinError] = useState<string | null>(null);
   const [maxDurationMin, setMaxDurationMin] = useState(DEFAULT_MAX_DURATION_MIN);
   const [emergencyNumber, setEmergencyNumber] = useState(DEFAULT_EMERGENCY_NUMBER);
   // The alert ended on the server: stop sending the location and ask what to do
@@ -277,7 +295,6 @@ export function useActiveAlertViewModel() {
   useEffect(() => {
     let mounted = true;
     let timer: ReturnType<typeof setTimeout> | undefined;
-    let done = 0;
 
     (async () => {
       if (!(await locationPermission()) || !mounted) return;
@@ -292,7 +309,6 @@ export function useActiveAlertViewModel() {
 
       const update = async () => {
         if (endedRef.current) return; // the alert ended on the server: nothing more is sent
-        done += 1;
         try {
           const current = await readLocation();
           if (!current) throw new Error("Sin ubicación");
@@ -313,7 +329,8 @@ export function useActiveAlertViewModel() {
         } catch {
           // Silent: if it fails, the header shows the fallback icon or the last location.
         }
-        if (mounted) timer = setTimeout(update, delayAfterUpdate(done));
+        // Every 15 s the first 5 minutes, then 30 s, and 60 s in saving mode
+        if (mounted) timer = setTimeout(update, locationIntervalMs(alertStartRef.current, Date.now(), savingRef.current));
       };
 
       update();
@@ -356,9 +373,18 @@ export function useActiveAlertViewModel() {
     return () => clearInterval(id);
   }, []);
 
-  // Moment the alert expires on the server
-  const alertEndMs = alertStart ? alertStart.getTime() + maxDurationMin * 60000 : null;
+  // Next check-in ("¿Sigues en peligro?"): what the counter shows
+  const alertEndMs = alertStart
+    ? checkInDeadline(alertStart.getTime(), maxDurationMin, extendedUntil ? extendedUntil.getTime() : null)
+    : null;
   const alertEnd = useMemo(() => (alertEndMs === null ? null : new Date(alertEndMs)), [alertEndMs]);
+
+  // What the server knows of the check-in (she may have answered from another screen or the server
+  // marked that she did not answer)
+  const applyCheckIn = useCallback((a: AlertApi) => {
+    setExtendedUntil(a.extendedUntil ? toDate(a.extendedUntil) : null);
+    setUnanswered(!!a.unansweredAt);
+  }, []);
 
   // Still active? Checked every 30 s and when the counter reaches 0. If the server closed it
   // (expired, marked attended or cancelled elsewhere) the location stops being sent
@@ -370,12 +396,16 @@ export function useActiveAlertViewModel() {
       const status = (a.status || "").toLowerCase();
       if (status && status !== "active") {
         endedRef.current = true;
-        setEnd({ status, minutes: maxDurationMin });
+        const started = alertStartRef.current ?? Date.now();
+        setEnd({ status, minutes: Math.max(1, Math.round((Date.now() - started) / 60000)) });
+        void clearCheckInReminder();
+        return;
       }
+      applyCheckIn(a);
     } catch {
       // Offline: checked on the next round
     }
-  }, [maxDurationMin]);
+  }, [applyCheckIn]);
 
   useEffect(() => {
     if (!alertId) return;
@@ -393,12 +423,43 @@ export function useActiveAlertViewModel() {
     return () => clearInterval(t);
   }, [alertId]);
 
-  // When it reaches zero the server is asked whether the alert already ended
+  // A little after the check-in time the server has marked whether she answered
   useEffect(() => {
     if (alertId === null || alertEndMs === null) return;
-    const t = setTimeout(checkStatus, Math.max(0, alertEndMs - Date.now()) + 1000);
+    const t = setTimeout(checkStatus, Math.max(0, alertEndMs - Date.now()) + 75000);
     return () => clearTimeout(t);
   }, [alertId, alertEndMs, checkStatus]);
+
+  // "¿Sigues en peligro?" 5 minutes before the check-in time (and while she has not answered): it
+  // vibrates and, if the app is not on screen, a notification brings her back
+  useEffect(() => {
+    if (alertId === null || alertEndMs === null || end) return;
+    const ask = () => {
+      setCheckInVisible(true);
+      Vibration.vibrate([0, 500, 300, 500, 300, 500]);
+      if (AppState.currentState !== "active") void showCheckInReminder();
+    };
+    if (shouldAsk(alertEndMs, Date.now()) || unanswered) {
+      ask();
+      return;
+    }
+    const t = setTimeout(ask, alertEndMs - 5 * 60000 - Date.now());
+    return () => clearTimeout(t);
+  }, [alertId, alertEndMs, unanswered, end]);
+
+  // "Sigo en peligro": the alert is extended until the next check-in
+  const stillInDanger = useCallback(async () => {
+    const id = createdAlertIdRef.current;
+    if (!id) return;
+    setCheckInVisible(false);
+    void clearCheckInReminder();
+    try {
+      applyCheckIn(await extendAlert(id));
+    } catch {
+      // Offline: it is asked again at the next round; the alert is not closed meanwhile
+      setCheckInVisible(true);
+    }
+  }, [applyCheckIn]);
 
   // Data derived from the last point (the same "Emergency alert" shows).
   const lastItem = points.length > 0 ? points[points.length - 1] : null;
@@ -459,9 +520,45 @@ export function useActiveAlertViewModel() {
     setConfirmVisible(false);
   }, []);
 
-  // Runs when the user confirms "Yes, cancel".
+  // "Yes, cancel": with a PIN configured it is asked first (a wrong PIN never cancels)
+  const confirmCancel = useCallback(async () => {
+    setConfirmVisible(false);
+    setCheckInVisible(false);
+    if (await hasCancelPin()) {
+      setPinError(null);
+      setPinVisible(true);
+      return;
+    }
+    markImOk();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const submitPin = useCallback(async (pin: string) => {
+    const result = await checkCancelPin(pin);
+    if (result === "wrong") {
+      setPinError(t.alertaActiva.pin_incorrecto);
+      return;
+    }
+    setPinVisible(false);
+    if (result === "ok") {
+      markImOk();
+      return;
+    }
+    // Duress PIN: everything looks cancelled, but the alert goes on and her contacts are warned
+    const id = createdAlertIdRef.current;
+    if (id) {
+      duressAlert(id).catch(() => {});
+      void continueSilently(id, alertStartRef.current ?? Date.now());
+    }
+    void clearCheckInReminder();
+    setCanLeave(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [t]);
+
+  // Runs when the user confirms "Yes, cancel" (and the PIN, if she has one).
   const markImOk = useCallback(() => {
     setConfirmVisible(false);
+    void clearCheckInReminder();
     // Close the active alert in the backend (cancelled status)
     if (createdAlertIdRef.current) {
       endAlert(createdAlertIdRef.current, "cancelled").catch((err) =>
@@ -528,6 +625,17 @@ export function useActiveAlertViewModel() {
     alertEnd: alertEnd,
     maxDurationMin: maxDurationMin,
     markImOk: markImOk,
+    alertStart: alertStart,
+    // Check-in ("¿Sigues en peligro?") and saving mode
+    checkInVisible: checkInVisible,
+    unanswered: unanswered,
+    stillInDanger: stillInDanger,
+    // Cancel: "Sí, cancelar" goes through confirmCancel (PIN if she configured one)
+    confirmCancel: confirmCancel,
+    pinVisible: pinVisible,
+    pinError: pinError,
+    submitPin: submitPin,
+    closePin: () => setPinVisible(false),
     openConfirmation: openConfirmation,
     closeConfirmation: closeConfirmation,
     confirmVisible: confirmVisible,

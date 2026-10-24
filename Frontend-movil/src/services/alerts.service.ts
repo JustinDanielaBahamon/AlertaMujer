@@ -18,6 +18,12 @@ export interface AlertApi {
   createdAt: string;
   /** Evidence kept as proof: the server does not delete it after the retention days. */
   keepEvidence?: boolean;
+  /** "Sigo en peligro": until when she confirmed it (the next "¿Sigues en peligro?" is then). */
+  extendedUntil?: string | null;
+  /** She did not answer at the check-in: her contacts were told and it goes on in saving mode. */
+  unansweredAt?: string | null;
+  /** She "cancelled" with her duress PIN: on her phone it looks cancelled but it goes on. */
+  duressAt?: string | null;
 }
 
 export const getAlertsByUser = async (userId: number): Promise<AlertApi[]> => {
@@ -124,6 +130,18 @@ export const getViews = async (alertId: number): Promise<{ total: number; watchi
   return { total: response.data.total, watchingNow: response.data.viendoAhora };
 };
 
+/** "Sigo en peligro": the alert is extended until the next check-in. */
+export const extendAlert = async (alertId: number): Promise<AlertApi> => {
+  const response = await api.post<AlertApi>(`/api/alerts/${alertId}/extend`);
+  return response.data;
+};
+
+/** Duress PIN: the alert goes on and her contacts are warned that she may be under pressure. */
+export const duressAlert = async (alertId: number): Promise<AlertApi> => {
+  const response = await api.post<AlertApi>(`/api/alerts/${alertId}/duress`);
+  return response.data;
+};
+
 export const endAlert = async (alertId: number, status: 'resolved' | 'cancelled'): Promise<AlertApi> => {
   const response = await api.put<AlertApi>(`/api/alerts/${alertId}`, { status: status });
   return response.data;
@@ -166,7 +184,8 @@ export const transformAlert = (apiAlert: AlertApi): AlertRecord => {
       ? dateObj.toLocaleTimeString('es-CO', { ...zoneOptions, hour: '2-digit', minute: '2-digit' })
       : '',
     location: apiAlert.message || 'Sin ubicación registrada',
-    status: transformStatus(apiAlert.status),
+    // An alert cancelled with the duress PIN looks cancelled on her phone (whoever checks it sees that)
+    status: apiAlert.duressAt ? 'Cancelada' : transformStatus(apiAlert.status),
     coords:
       apiAlert.latitude != null && apiAlert.longitude != null
         ? { latitude: Number(apiAlert.latitude), longitude: Number(apiAlert.longitude) }

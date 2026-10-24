@@ -8,8 +8,13 @@ import { useEvidence } from "../../contexts/EvidenceContext";
 import { inPermissionQueue } from "../../services/safePermissions";
 import { setAudioAlert, enqueueChunk, listenUploads, processQueue, type UploadStatus } from "./uploadQueue";
 
-/** Length of each chunk: what is recorded is uploaded every 45 s, so little is lost if the phone is taken away. */
-export const SECONDS_PER_CHUNK = 45;
+import {
+  AUDIO_SECONDS,
+  FIRST_AUDIO_SECONDS,
+  FIRST_VIDEO_SECONDS,
+  VIDEO_PHASE_MS,
+  VIDEO_SECONDS,
+} from "./recordingPlan";
 /** Shorter chunks (when switching camera, when returning to the app...) add nothing: they are discarded. */
 export const MIN_CHUNK_MS = 3000;
 /** If the camera does not report it is ready within this time, it continues with audio only. */
@@ -24,7 +29,7 @@ type Permissions = { camera: boolean; microphone: boolean; canAsk: boolean };
  * Android does not allow the camera and only audio continues with the native microphone service.
  * What is chosen in Settings (video, audio or both) decides the mode; the button pauses or resumes it.
  */
-export function useAlertRecording(alertId: number | null) {
+export function useAlertRecording(alertId: number | null, alertStart: Date | null = null, visible = true) {
   const { recordVideo, recordAudio, loaded } = useEvidence();
   // null = the user did not touch the button: what was chosen in Settings applies
   const [chosen, setChosen] = useState<boolean | null>(null);
@@ -37,13 +42,30 @@ export function useAlertRecording(alertId: number | null) {
   const [error, setError] = useState<string | null>(null);
   const [uploads, setUploads] = useState<UploadStatus>({ uploaded: 0, pendingItems: 0, uploading: false });
   const cameraRef = useRef<CameraView>(null);
+  // The first video chunk of the alert is the short one
+  const firstVideoRef = useRef(true);
+  const [videoPhase, setVideoPhase] = useState(true);
+
+  // After the first 5 minutes only audio is recorded
+  useEffect(() => {
+    if (!alertStart) return;
+    const left = alertStart.getTime() + VIDEO_PHASE_MS - Date.now();
+    if (left <= 0) {
+      setVideoPhase(false);
+      return;
+    }
+    setVideoPhase(true);
+    const t = setTimeout(() => setVideoPhase(false), left);
+    return () => clearTimeout(t);
+  }, [alertStart?.getTime()]);
 
   // If she turned both off in Settings but taps "Record", video with sound is recorded
   const conVideo = recordVideo || !recordAudio;
-  const conAudio = recordAudio || !recordVideo;
+  // After the video phase there is always audio, even if she chose video only in Settings
+  const conAudio = recordAudio || !recordVideo || !videoPhase;
   const turnedOn = chosen ?? (recordVideo || recordAudio);
   const active = !!alertId && loaded && turnedOn;
-  const canVideo = conVideo && !!permissions?.camera && !!permissions?.microphone && !videoFailed;
+  const canVideo = conVideo && videoPhase && !!permissions?.camera && !!permissions?.microphone && !videoFailed;
   const recordingVideo = active && serviceReady && canVideo && onScreen && cameraReady;
 
   useEffect(() => listenUploads(setUploads), []);
@@ -93,7 +115,7 @@ export function useAlertRecording(alertId: number | null) {
     if (!active || !permissions?.microphone || !alertId) return;
     setAudioAlert(alertId);
     const recordNow = conAudio && !(canVideo && AppState.currentState === "active");
-    if (!ShakeSensor.startAudioRecording(SECONDS_PER_CHUNK, recordNow)) {
+    if (!ShakeSensor.startAudioRecording(AUDIO_SECONDS, recordNow, FIRST_AUDIO_SECONDS, false)) {
       setError("No se pudo encender el micrófono");
       return;
     }
@@ -117,7 +139,9 @@ export function useAlertRecording(alertId: number | null) {
       while (alive) {
         try {
           const startTime = Date.now();
-          const video = await cameraRef.current?.recordAsync({ maxDuration: SECONDS_PER_CHUNK });
+          const seconds = firstVideoRef.current ? FIRST_VIDEO_SECONDS : VIDEO_SECONDS;
+          firstVideoRef.current = false;
+          const video = await cameraRef.current?.recordAsync({ maxDuration: seconds });
           if (!video) break;
           if (video.uri && Date.now() - startTime >= MIN_CHUNK_MS) {
             void enqueueChunk({ uri: video.uri, alertaId: alertId, tipo: "video" });
@@ -144,13 +168,14 @@ export function useAlertRecording(alertId: number | null) {
 
   // The front camera has almost no light and the video came out very dark: while recording with it, the
   // screen goes to maximum brightness to light the face. It is restored when switching camera or finishing.
+  // Only with the evidence open: a bright screen would give her away while it is closed
   useEffect(() => {
-    if (!recordingVideo || !frontal) return;
+    if (!recordingVideo || !frontal || !visible) return;
     Brightness.setBrightnessAsync(1).catch(() => {});
     return () => {
       Brightness.restoreSystemBrightnessAsync().catch(() => {});
     };
-  }, [recordingVideo, frontal]);
+  }, [recordingVideo, frontal, visible]);
 
   // The camera view is unmounted when minimizing: when coming back we have to wait until it is ready again
   useEffect(() => {

@@ -35,7 +35,8 @@ export function useResumeAlert(
     const check = async () => {
       try {
         const active = ownActiveAlert(await getMyAlerts());
-        if (active) show(active.id);
+        // An alert "cancelled" with the duress PIN goes on silently: opening it would give her away
+        if (active && !active.duressAt) show(active.id);
       } catch {
         // Offline: checked again when returning to the app
       }

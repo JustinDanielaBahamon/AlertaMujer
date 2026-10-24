@@ -1,8 +1,12 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AppState } from "react-native";
 import * as Location from "expo-location";
 import { createAlertWithRetries, getAlert } from "../../services/alerts.service";
 import { getOrCreateDevice } from "../../services/devices.service";
 import { reportLocation } from "../../services/location-reporter.service";
+import { locationIntervalMs } from "../activeAlert/checkIn";
+import { AUDIO_SECONDS, FIRST_AUDIO_SECONDS } from "../recording/recordingPlan";
+import { setAudioAlert } from "../recording/uploadQueue";
 import ShakeSensor from "../../../modules/shake-sensor";
 
 /**
@@ -14,8 +18,10 @@ import ShakeSensor from "../../../modules/shake-sensor";
 
 // Must match the AuthContext key (not imported so React is not loaded in the service)
 const SESSION_KEY = "@alerta_mujer:auth";
-const INTERVAL_MS = 30 * 1000;
-const MAX_MS = 3 * 60 * 60 * 1000; // the backend expires the alert earlier; this only avoids an endless loop
+const MAX_MS = 3 * 60 * 60 * 1000; // the backend closes the alert at 2 h; this only avoids an endless loop
+// The server status (ended, unanswered) is checked once a minute, not on every location
+const STATUS_CHECK_MS = 60 * 1000;
+const MAX_LAST_KNOWN_AGE_MS = 15 * 60 * 1000;
 
 let alertInProgress: number | null = null;
 
@@ -81,6 +87,8 @@ export async function createShakeAlert(method: keyof typeof METHODS = "agitar"):
   });
 
   alertInProgress = alert.id;
+  // Audio from the first seconds, also with the screen off (under the protection service)
+  startAlertAudio(alert.id);
   // The precise GPS position goes to the alert as soon as it arrives (it was created with a quicker one)
   fix.then((precise) => {
     if (!precise || precise === location) return;
@@ -95,14 +103,44 @@ export async function createShakeAlert(method: keyof typeof METHODS = "agitar"):
   return alert.id;
 }
 
-async function followLocation(alertId: number, startTime: number) {
-  while (alertInProgress === alertId && Date.now() - startTime <= MAX_MS) {
-    await ShakeSensor.wait(INTERVAL_MS);
+/** Starts the alert's audio; from the background it runs under the protection service. */
+function startAlertAudio(alertId: number) {
+  try {
+    setAudioAlert(alertId);
+    ShakeSensor.startAudioRecording(AUDIO_SECONDS, true, FIRST_AUDIO_SECONDS, AppState.currentState !== "active");
+  } catch {
+    // Old build or no microphone permission: the location goes on anyway
+  }
+}
+
+/**
+ * Location every 15 s the first 5 minutes, then every 30 s and every 60 s in saving mode. Without a
+ * GPS fix the last known position is sent: otherwise the server would tell her contacts that her
+ * phone stopped sending its location.
+ */
+async function followLocation(alertId: number, startMs: number) {
+  let saving = false;
+  // Time waited since the last status check (the waits are native, so they are counted, not read
+  // from the clock); the first round checks it right away
+  let sinceCheck = STATUS_CHECK_MS;
+  let waited = 0;
+  while (alertInProgress === alertId && waited <= MAX_MS) {
+    const interval = locationIntervalMs(startMs, Date.now(), saving);
+    await ShakeSensor.wait(interval);
+    waited += interval;
+    sinceCheck += interval;
     if (alertInProgress !== alertId) return;
-    // If the alert already ended (a contact or the administration closed it, or it expired), it is released: otherwise
-    // the service would keep treating it as "in progress" and ignore the next shakes
-    if (!(await stillActive(alertId))) break;
-    const u = await currentLocation();
+    if (sinceCheck >= STATUS_CHECK_MS) {
+      sinceCheck = 0;
+      // If it already ended (a contact or the administration closed it, or the 2 h passed), it is
+      // released: otherwise the service would keep ignoring the next shakes
+      const status = await alertStatus(alertId);
+      if (status === "ended") break;
+      saving = status === "saving";
+    }
+    const u =
+      (await currentLocation()) ??
+      (await Location.getLastKnownPositionAsync({ maxAge: MAX_LAST_KNOWN_AGE_MS }).catch(() => null));
     if (u && alertInProgress === alertId) {
       reportLocation({
         latitude: u.coords.latitude,
@@ -112,16 +150,38 @@ async function followLocation(alertId: number, startTime: number) {
       }).catch(() => {});
     }
   }
-  if (alertInProgress === alertId) alertInProgress = null;
+  if (alertInProgress === alertId) {
+    alertInProgress = null;
+    try {
+      ShakeSensor.stopAudioRecording();
+    } catch {
+      // nothing was recording
+    }
+  }
 }
 
 /** Offline we cannot know: assume it is still active so the location keeps being sent. */
-async function stillActive(alertId: number): Promise<boolean> {
+async function alertStatus(alertId: number): Promise<"active" | "saving" | "ended"> {
   try {
-    return (await getAlert(alertId)).status === "active";
+    const a = await getAlert(alertId);
+    if (a.status !== "active") return "ended";
+    return a.unansweredAt ? "saving" : "active";
   } catch {
-    return true;
+    return "active";
   }
+}
+
+/**
+ * Duress PIN: the alert screen closes as if it were cancelled, but the location and the audio go on
+ * from here until the alert really ends (her contacts were warned, or the 2 h limit).
+ */
+export async function continueSilently(alertId: number, startMs: number): Promise<void> {
+  alertInProgress = alertId;
+  // The alert screen stops its recording when it closes: the audio starts again right after
+  await ShakeSensor.wait(1500);
+  if (alertInProgress !== alertId) return;
+  startAlertAudio(alertId);
+  void followLocation(alertId, startMs);
 }
 
 /** The active alert screen takes over from now on (or the alert ended): stop sending the location. */
