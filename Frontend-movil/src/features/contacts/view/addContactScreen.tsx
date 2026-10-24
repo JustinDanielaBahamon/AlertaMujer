@@ -43,7 +43,7 @@ export default function AddContactScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={styles.container}
     >
-      <Header />
+      <Header back />
 
       <LinearGradient
         colors={headerGradient}
