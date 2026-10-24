@@ -1,8 +1,7 @@
+import ScreenHeader from "../../../components/ui/ScreenHeader/ScreenHeader";
 import { Ionicons } from "@expo/vector-icons";
-import { StatusBar } from "expo-status-bar";
 import React, { useMemo } from "react";
 import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { useTheme } from "../../../contexts/ThemeContext";
 import type { ReceivedAlert } from "../../../services/received-alerts.service";
@@ -30,7 +29,6 @@ export default function ReceivedAlertsScreen() {
   const { t } = useLocale();
   const r = t.alertasRecibidas;
   const styles = useMemo(() => createSettingsScreenStyles(theme), [theme]);
-  const insets = useSafeAreaInsets();
   const vm = useReceivedAlertsViewModel();
   const accent = theme.icon;
 
@@ -55,14 +53,8 @@ export default function ReceivedAlertsScreen() {
     a.status === "resolved" ? r.estado_atendida : a.status === "cancelled" ? r.estado_cancelada : r.estado_terminada;
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <StatusBar style="light" backgroundColor={theme.headercolor1} />
-      <View style={styles.header}>
-        <TouchableOpacity onPress={vm.goBack} style={styles.returnBtn}>
-          <Ionicons name="arrow-back" size={22} color={theme.headerText} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitleText}>{r.titulo_header}</Text>
-      </View>
+    <View style={styles.container}>
+      <ScreenHeader title={r.titulo_header} subtitle="Las personas que confían en ti" icon="people" />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}

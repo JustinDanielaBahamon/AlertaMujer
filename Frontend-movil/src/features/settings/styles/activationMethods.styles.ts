@@ -64,20 +64,20 @@ export function createActivationMethodsStyles(theme: AppTheme) {
     },
     summaryRow: { gap: 8 },
     summaryText: {
-      color: text,
+      color: "#FFFFFF",
       fontSize: 12.5,
       fontWeight: "600",
     },
     barBackground: {
       height: 6,
       borderRadius: 3,
-      backgroundColor: text + "33",
+      backgroundColor: "rgba(255,255,255,0.3)",
       overflow: "hidden",
     },
     barFill: {
       height: 6,
       borderRadius: 3,
-      backgroundColor: text,
+      backgroundColor: "#FFFFFF",
     },
 
     // Content

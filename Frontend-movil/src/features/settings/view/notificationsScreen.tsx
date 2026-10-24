@@ -1,8 +1,7 @@
+import ScreenHeader from "../../../components/ui/ScreenHeader/ScreenHeader";
 import { Ionicons } from "@expo/vector-icons";
-import { StatusBar } from "expo-status-bar";
 import React, { useMemo } from "react";
 import { ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { createSettingsScreenStyles } from "../styles/settingsScreen.styles";
@@ -14,7 +13,6 @@ export default function NotificationsScreen() {
   const { theme } = useTheme();
   const { t } = useLocale();
   const styles = useMemo(() => createSettingsScreenStyles(theme), [theme]);
-  const insets = useSafeAreaInsets();
   const vm = useNotificationsViewModel();
   const n = t.notificaciones;
   const accent = theme.icon;
@@ -60,15 +58,8 @@ export default function NotificationsScreen() {
   ];
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <StatusBar style="light" backgroundColor={theme.headercolor1} />
-
-      <View style={styles.header}>
-        <TouchableOpacity onPress={vm.goBack} style={styles.returnBtn}>
-          <Ionicons name="arrow-back" size={22} color={theme.headerText} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitleText}>{n.titulo_header}</Text>
-      </View>
+    <View style={styles.container}>
+      <ScreenHeader title={n.titulo_header} subtitle="Qué avisos recibes y cómo suenan" icon="notifications" />
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.intro}>{n.intro}</Text>

@@ -1,13 +1,11 @@
+import ScreenHeader from "../../../components/ui/ScreenHeader/ScreenHeader";
 import { Ionicons } from "@expo/vector-icons";
-import { StatusBar } from "expo-status-bar";
 import React, { useMemo } from "react";
 import { ScrollView, Switch, Text, TouchableOpacity, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { useTheme } from "../../../contexts/ThemeContext";
 import {
   createActivationMethodsStyles,
-  getHeaderColors,
 } from "../styles/activationMethods.styles";
 import { useActivationMethodsViewModel } from "../viewModel/useActivationMethodsViewModel";
 
@@ -15,56 +13,29 @@ export default function ActivationMethodsScreen() {
   const { theme } = useTheme();
   const { t } = useLocale();
   const styles = useMemo(() => createActivationMethodsStyles(theme), [theme]);
-  const { text } = getHeaderColors(theme);
-  const insets = useSafeAreaInsets();
-  const { methods: methods, activeItems: activeItems, total, setMethod: setMethod, goBack: goBack } =
+  const { methods: methods, activeItems: activeItems, total, setMethod: setMethod } =
     useActivationMethodsViewModel();
   const m = t.metodosActivacion;
 
   const percentage = total > 0 ? Math.round((activeItems / total) * 100) : 0;
 
-  // Light or dark status bar icons depending on the header color
-  const statusBarStyle = text === "#1a1a1a" ? "dark" : "light";
-
   return (
     <View style={styles.container}>
-      <StatusBar style={statusBarStyle} />
-
-      {/* Header (same color as the sidebar) */}
-      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <View style={styles.headerRow}>
-          <TouchableOpacity
-            onPress={goBack}
-            style={styles.returnBtn}
-            accessibilityRole="button"
-          >
-            <Ionicons name="arrow-back" size={22} color={text} />
-          </TouchableOpacity>
-
-          <View style={styles.headerTexts}>
-            <Text style={styles.headerTitleText}>{m.titulo_header}</Text>
-            <Text style={styles.headerSubtitleText}>{m.subtitulo_header}</Text>
+      <ScreenHeader title={m.titulo_header} subtitle={m.subtitulo_header} icon="flash">
+          <View style={[styles.summaryRow, { marginTop: 16 }]}>
+            <Text style={styles.summaryText}>
+              {activeItems}/{total} {m.resumen_activos}
+            </Text>
+            <View style={styles.barBackground}>
+              <View
+                style={[
+                  styles.barFill,
+                  { width: `${percentage}%` as `${number}%` },
+                ]}
+              />
+            </View>
           </View>
-
-          <View style={styles.headerIcon}>
-            <Ionicons name="flash" size={22} color={text} />
-          </View>
-        </View>
-
-        <View style={styles.summaryRow}>
-          <Text style={styles.summaryText}>
-            {activeItems}/{total} {m.resumen_activos}
-          </Text>
-          <View style={styles.barBackground}>
-            <View
-              style={[
-                styles.barFill,
-                { width: `${percentage}%` as `${number}%` },
-              ]}
-            />
-          </View>
-        </View>
-      </View>
+      </ScreenHeader>
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -100,14 +71,17 @@ export default function ActivationMethodsScreen() {
                       method.enabled && styles.activeChipText,
                     ]}
                   >
-                    {method.enabled ? m.estado_activo : m.estado_inactivo}
+                    {method.locked ? m.estado_siempre : method.enabled ? m.estado_activo : m.estado_inactivo}
                   </Text>
                 </View>
               </View>
 
               <Switch
                 value={method.enabled}
-                onValueChange={(value) => setMethod(method.id, value)}
+                disabled={method.locked}
+                onValueChange={(value) => {
+                  if (method.id !== "viaje") setMethod(method.id, value);
+                }}
                 trackColor={{ false: "#ccc", true: theme.icon }}
                 thumbColor="#fff"
               />

@@ -141,6 +141,12 @@
   "eliminar_confirmar": "Excluir definitivamente"
   },
   "metodosActivacion": {
+    "viaje_titulo": "Me avise se eu não chegar",
+    "viaje_desc": "Sempre ativo, não pode ser desativado. Se você iniciar um trajeto e não confirmar a chegada a tempo, ou seu celular parar de dar sinal no caminho, o servidor avisa seus contatos com sua última localização.",
+    "viaje_paso1": "Abra o menu e toque em \"Me avise se eu não chegar\", ou no cartão \"Vai a algum lugar?\" do início.",
+    "viaje_paso2": "Escolha para onde vai e em quanto tempo chega, e toque em Iniciar.",
+    "viaje_paso3": "Ao chegar, confirme. Se não confirmar ou o sinal cair, seus contatos recebem o alerta.",
+    "estado_siempre": "Sempre ativo",
     "titulo_header": "Métodos de ativação",
     "subtitulo_header": "Escolha como quer ativar seu alerta",
     "resumen_activos": "ativos",

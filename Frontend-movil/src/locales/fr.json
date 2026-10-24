@@ -141,6 +141,12 @@
     "eliminar_confirmar": "Supprimer définitivement"
   },
    "metodosActivacion": {
+    "viaje_titulo": "Préviens-moi si je n'arrive pas",
+    "viaje_desc": "Toujours actif, impossible à désactiver. Si vous démarrez un trajet et ne confirmez pas votre arrivée à temps, ou si votre téléphone ne donne plus de signal en route, le serveur alerte vos contacts avec votre dernière position.",
+    "viaje_paso1": "Ouvrez le menu et touchez « Préviens-moi si je n'arrive pas », ou la carte « Tu vas quelque part ? » de l'accueil.",
+    "viaje_paso2": "Choisissez où vous allez et en combien de temps, puis touchez Démarrer.",
+    "viaje_paso3": "À l'arrivée, confirmez. Sinon, ou si le signal est perdu, vos contacts reçoivent l'alerte.",
+    "estado_siempre": "Toujours actif",
     "titulo_header": "Méthodes d'activation",
     "subtitulo_header": "Choisis comment déclencher ton alerte",
     "resumen_activos": "actifs",

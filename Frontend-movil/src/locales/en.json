@@ -141,6 +141,12 @@
   "eliminar_confirmar": "Delete permanently"
   },
   "metodosActivacion": {
+    "viaje_titulo": "Let me know if I don't arrive",
+    "viaje_desc": "Always on, it cannot be turned off. If you start a trip and do not confirm your arrival in time, or your phone stops sending a signal on the way, the server alerts your contacts with your last location.",
+    "viaje_paso1": "Open the menu and tap \"Let me know if I don't arrive\", or the \"Going somewhere?\" card on the home screen.",
+    "viaje_paso2": "Choose where you are going and how long it takes, and tap Start.",
+    "viaje_paso3": "When you arrive, confirm it. If you do not, or your signal is lost, your contacts get the alert.",
+    "estado_siempre": "Always on",
     "titulo_header": "Activation methods",
     "subtitulo_header": "Choose how you want to trigger your alert",
     "resumen_activos": "active",

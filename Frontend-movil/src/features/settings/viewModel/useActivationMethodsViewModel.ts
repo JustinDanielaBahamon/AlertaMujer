@@ -14,7 +14,7 @@ export interface MethodStep {
 }
 
 export interface ActivationMethod {
-  id: MethodId;
+  id: MethodId | "viaje";
   icon: string;
   title: string;
   description: string;
@@ -22,6 +22,8 @@ export interface ActivationMethod {
   enabled: boolean;
   // true = for now only the preference is saved (the feature comes in a future version)
   pending: boolean;
+  /** Always on: it cannot be turned off (the switch is shown on and disabled). */
+  locked?: boolean;
   /** Tips so the method works well on the user's phone. */
   recommendations?: string[];
   /** Highlighted tip for the phone brand (e.g. Motorola gestures). */
@@ -32,7 +34,7 @@ export interface ActivationMethod {
 
 function buildMethod(
   m: Record<string, string>,
-  id: MethodId,
+  id: MethodId | "viaje",
   icon: string,
   prefix: string,
   totalSteps: number,
@@ -67,6 +69,8 @@ export function useActivationMethodsViewModel() {
       recommendations: [m.agitar_rec1, m.agitar_rec2, m.agitar_rec3, m.agitar_rec4],
       brandRecommendation: conflict === "motorola" ? m.agitar_rec_motorola : undefined,
     },
+    // "Avísame si no llego" is not negotiable: the server protects every trip she starts
+    { ...buildMethod(m, "viaje", "navigate-circle-outline", "viaje", 3, true, false), locked: true },
     {
       ...buildMethod(m, "widget", "apps-outline", "widget", 3, config.widget, false),
       action: { text: m.widget_agregar, icon: "add-circle-outline", onPressed: () => addWidget() },
