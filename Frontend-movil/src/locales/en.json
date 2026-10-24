@@ -593,6 +593,7 @@
   "defensoria": "Ombudsman's Office"
 },
 "agregar": {
+  "importar_contacto": "Import from my contacts",
   "titulo_agregar": "Add contact",
   "titulo_editar": "Update contact",
   "placeholder_nombre": "Trusted person's name",

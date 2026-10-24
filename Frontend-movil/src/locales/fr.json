@@ -592,6 +592,7 @@
     "defensoria": "Médiateur du Peuple"
   },
   "agregar": {
+    "importar_contacto": "Importer depuis mes contacts",
     "titulo_agregar": "Ajouter un contact",
     "titulo_editar": "Mettre à jour le contact",
     "placeholder_nombre": "Nom de la personne de confiance",

@@ -593,6 +593,7 @@
   "defensoria": "Defensoria do Povo"
 },
 "agregar": {
+  "importar_contacto": "Importar dos meus contatos",
   "titulo_agregar": "Adicionar contato",
   "titulo_editar": "Atualizar contato",
   "placeholder_nombre": "Nome da pessoa de confiança",

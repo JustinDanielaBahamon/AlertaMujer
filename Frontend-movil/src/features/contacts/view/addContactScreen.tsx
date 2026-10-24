@@ -193,6 +193,16 @@ export default function AddContactScreen() {
               <Text style={styles.sectionTitle}>{t.agregar.info_contacto_titulo}</Text>
             </View>
 
+            {/* Fills name, phone and photo from the phone book */}
+            <TouchableOpacity
+              onPress={vm.openPhoneContacts}
+              style={styles.importButton}
+              accessibilityRole="button"
+            >
+              <Ionicons name="book-outline" size={20} color="#fff" />
+              <Text style={styles.importButtonText}>{t.agregar.importar_contacto}</Text>
+            </TouchableOpacity>
+
             {/* NAME INPUT */}
             <View style={styles.inputCard}>
               <Ionicons name="person-outline" size={20} color={theme.contactAccent} />
@@ -247,9 +257,6 @@ export default function AddContactScreen() {
               {isPhoneValid && (
                 <Ionicons name="checkmark-circle" size={20} color="#46B987" />
               )}
-              <TouchableOpacity onPress={vm.openPhoneContacts} style={styles.contactIconButton}>
-                <Ionicons name="add" size={16} color={theme.contactAccent} />
-              </TouchableOpacity>
             </View>
 
             {/* EMAIL INPUT */}

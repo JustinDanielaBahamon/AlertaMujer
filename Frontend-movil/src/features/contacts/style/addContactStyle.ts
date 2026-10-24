@@ -119,16 +119,17 @@ export const createStyles = (theme: AppTheme) =>
       color: theme.contactName,
     },
 
-    contactIconButton: {
-      marginLeft: 6,
-      width: 30,
-      height: 30,
-      borderRadius: 15,
-      borderWidth: 1,
-      borderColor: theme.contactAccent,
+    importButton: {
+      flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
+      gap: 8,
+      height: 48,
+      borderRadius: 14,
+      marginBottom: 14,
+      backgroundColor: theme.contactAccent,
     },
+    importButtonText: { color: "#fff", fontSize: 15, fontWeight: "700" },
 
     // --- INFO BOX ---
 
