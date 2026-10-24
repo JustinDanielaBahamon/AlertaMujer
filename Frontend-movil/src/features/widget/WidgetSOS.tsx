@@ -1,3 +1,7 @@
+"use no memo";
+// react-native-android-widget calls the component as a plain function: if the React Compiler
+// rewrites it (it adds hooks), the render fails with "Invalid Hook Call" and the widget stays invisible.
+
 import React from "react";
 import { FlexWidget, TextWidget } from "react-native-android-widget";
 

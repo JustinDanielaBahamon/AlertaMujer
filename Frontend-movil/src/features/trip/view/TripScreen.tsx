@@ -22,6 +22,31 @@ export default function TripScreen() {
   const insets = useSafeAreaInsets();
   const vm = useTripViewModel();
   const accent = theme.icon;
+  // Trip state color: normal, last 5 minutes, or arrival time already passed
+  const overdue = !!vm.trip && vm.minutesLeft <= 0;
+  const soon = !!vm.trip && !overdue && vm.minutesLeft <= 5;
+  const stateColor = overdue ? DANGER : soon ? WARNING : accent;
+
+  // Who gets the notice if she does not confirm (or a warning if nobody would)
+  const contactsNotice = vm.contactNames.length > 0 ? (
+    <View style={[styles.card, local.contactsRow]}>
+      <Ionicons name="people" size={18} color={accent} />
+      <Text style={[local.contactsText, { color: theme.text }]}>
+        {tr.avisaremos_a.replace("{nombres}", vm.contactNames.join(", "))}
+      </Text>
+    </View>
+  ) : (
+    <View style={[styles.card, local.warningCard]}>
+      <View style={local.contactsRow}>
+        <Ionicons name="warning" size={18} color={DANGER} />
+        <Text style={[local.contactsText, { color: theme.text }]}>{tr.sin_contactos}</Text>
+      </View>
+      <TouchableOpacity onPress={vm.goToAddContact} style={[local.addContact, { borderColor: accent }]}>
+        <Ionicons name="person-add" size={16} color={accent} />
+        <Text style={[local.secondaryButtonText, { color: accent }]}>{tr.agregar_contacto}</Text>
+      </TouchableOpacity>
+    </View>
+  );
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -39,22 +64,31 @@ export default function TripScreen() {
         ) : vm.trip ? (
           /* ── Trip in progress ── */
           <>
-            <View style={[styles.card, local.inProgress, { borderColor: accent }]}>
+            <View style={[styles.card, local.inProgress, { borderColor: stateColor }]}>
               <Text style={[local.label, { color: theme.text }]}>{tr.vas_a}</Text>
               <Text style={[local.destination, { color: theme.text }]} numberOfLines={2}>{vm.trip.destination}</Text>
-              <View style={[local.clock, { backgroundColor: accent + "18" }]}>
-                <Text style={[local.minutes, { color: accent }]}>
+              <View style={[local.clock, { backgroundColor: stateColor + "18" }]}>
+                <Text style={[local.minutes, { color: stateColor }]}>
                   {vm.minutesLeft > 0 ? vm.minutesLeft : 0}
                 </Text>
                 <Text style={[local.minutesText, { color: theme.text }]}>
                   {vm.minutesLeft > 0 ? tr.minutos_para_llegar : tr.hora_cumplida}
                 </Text>
               </View>
+              {/* How much of the trip time has passed */}
+              <View style={[local.progressTrack, { backgroundColor: stateColor + "26" }]}>
+                <View style={[local.progressFill, { backgroundColor: stateColor, width: `${Math.round(vm.progress * 100)}%` }]} />
+              </View>
               <Text style={[local.detail, { color: theme.text }]}>
                 {tr.llegada_esperada.replace("{hora}", time(vm.trip.arrival))}
               </Text>
+              {(overdue || soon) && (
+                <Text style={[local.alertText, { color: stateColor }]}>{overdue ? tr.atrasada : tr.quedan_pocos}</Text>
+              )}
               <Text style={[local.notice, { color: theme.text }]}>{tr.si_no_confirmas}</Text>
             </View>
+
+            {contactsNotice}
 
             <TouchableOpacity
               onPress={vm.arrived}
@@ -129,9 +163,18 @@ export default function TripScreen() {
                   </TouchableOpacity>
                 ))}
               </View>
+              <View style={local.previewRow}>
+                <Ionicons name="flag" size={14} color={accent} />
+                <Text style={[local.previewText, { color: theme.text }]}>
+                  {tr.llegada_prevista.replace("{hora}", time(vm.arrivalPreview))}
+                </Text>
+              </View>
             </View>
 
+            {contactsNotice}
+
             <View style={[styles.card, local.como]}>
+              <Text style={[local.label, { color: theme.text }]}>{tr.como_funciona}</Text>
               {[tr.paso_1, tr.paso_2, tr.paso_3].map((p, i) => (
                 <View key={p} style={local.step}>
                   <View style={[local.number, { backgroundColor: accent }]}>
@@ -158,8 +201,20 @@ export default function TripScreen() {
   );
 }
 
+const DANGER = "#C62828";
+const WARNING = "#E65100";
+
 const local = StyleSheet.create({
   inProgress: { borderWidth: 2, alignItems: "center" },
+  progressTrack: { alignSelf: "stretch", height: 8, borderRadius: 4, marginTop: 14, overflow: "hidden" },
+  progressFill: { height: 8, borderRadius: 4 },
+  alertText: { fontSize: 13, fontWeight: "800", textAlign: "center", marginTop: 8 },
+  contactsRow: { flexDirection: "row", alignItems: "flex-start", gap: 10 },
+  contactsText: { flex: 1, fontSize: 13, lineHeight: 19 },
+  warningCard: { gap: 10, borderWidth: 1.5, borderColor: DANGER },
+  addContact: { flexDirection: "row", alignSelf: "flex-start", alignItems: "center", gap: 6, borderWidth: 1.5, borderRadius: 14, paddingHorizontal: 12, paddingVertical: 8 },
+  previewRow: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 12 },
+  previewText: { fontSize: 13, fontWeight: "600", opacity: 0.85 },
   label: { fontSize: 12, fontWeight: "700", opacity: 0.7, letterSpacing: 0.4, textTransform: "uppercase", alignSelf: "stretch" },
   destination: { fontSize: 20, fontWeight: "800", textAlign: "center", marginTop: 4 },
   clock: { alignItems: "center", borderRadius: 20, paddingVertical: 14, paddingHorizontal: 28, marginTop: 14 },

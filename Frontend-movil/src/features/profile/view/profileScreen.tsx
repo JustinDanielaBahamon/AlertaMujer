@@ -12,19 +12,7 @@ import { useAccountRequirements } from "../viewModel/useAccountRequirements";
 import DeleteAccountModal from "./DeleteAccountModal";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { useLocale } from "../../../contexts/LocaleContext";
-
-// Builds initials from the full name (max 2 letters)
-function getInitials(name: string): string {
-  if (!name.trim()) return "?";
-  return name
-    .trim()
-    .split(" ")
-    .filter(Boolean)
-    .map((n) => n[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
+import { getInitials } from "../../../utils/initials";
 
 export default function ProfileScreen() {
   const vm = useProfileViewModel();

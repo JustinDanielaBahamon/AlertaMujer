@@ -7,8 +7,9 @@ jest.mock("react-native-android-widget", () => ({
 }));
 
 let mockWidgetEnabled = true;
+const mockChange = jest.fn();
 jest.mock("../../../contexts/ActivationMethodsContext", () => ({
-  useActivationMethods: () => ({ config: { widget: mockWidgetEnabled }, loaded: true }),
+  useActivationMethods: () => ({ config: { widget: mockWidgetEnabled }, loaded: true, change: mockChange }),
 }));
 
 import { widgetTask } from "../widgetTask";
@@ -35,7 +36,7 @@ describe("widget SOS", () => {
     await waitFor(() => expect(nav.navigate).toHaveBeenCalledWith("Activation", { method: "widget" }));
   });
 
-  it("si el widget está desactivado en Ajustes, solo avisa", async () => {
+  it("si el widget estaba desactivado en Ajustes, lo activa y abre la cuenta regresiva", async () => {
     mockWidgetEnabled = false;
     jest.spyOn(Linking, "getInitialURL").mockResolvedValue("alertamujer://sos");
     const notice = jest.spyOn(Alert, "alert").mockImplementation(() => {});
@@ -43,7 +44,8 @@ describe("widget SOS", () => {
 
     renderHook(() => useSosLink(nav as never, true));
 
-    await waitFor(() => expect(notice).toHaveBeenCalled());
-    expect(nav.navigate).not.toHaveBeenCalled();
+    await waitFor(() => expect(nav.navigate).toHaveBeenCalledWith("Activation", { method: "widget" }));
+    expect(mockChange).toHaveBeenCalledWith("widget", true);
+    expect(notice).not.toHaveBeenCalled();
   });
 });

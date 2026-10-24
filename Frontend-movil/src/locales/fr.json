@@ -999,7 +999,14 @@
     "cancelar_confirmar": "Annuler le trajet",
     "llegaste_titulo": "Contente que tu sois arrivée !",
     "llegaste_texto": "Tes contacts ne recevront aucune alerte.",
-    "error_conexion": "Connexion impossible. Vérifie ta connexion et réessaie."
+    "error_conexion": "Connexion impossible. Vérifie ta connexion et réessaie.",
+    "como_funciona": "Comment ça marche ?",
+    "llegada_prevista": "Tu arriverais à {hora}",
+    "avisaremos_a": "Si tu ne confirmes pas ton arrivée, nous préviendrons : {nombres}",
+    "sin_contactos": "Tu n'as pas encore de contacts d'urgence : si tu ne confirmes pas ton arrivée, personne ne sera prévenu.",
+    "agregar_contacto": "Ajouter un contact",
+    "quedan_pocos": "Il reste peu de minutes. Confirme ton arrivée ou demande plus de temps.",
+    "atrasada": "Ton heure d'arrivée est passée. Confirme maintenant si tout va bien."
   },
   "conexion": {
     "titulo": "Pas de connexion internet",

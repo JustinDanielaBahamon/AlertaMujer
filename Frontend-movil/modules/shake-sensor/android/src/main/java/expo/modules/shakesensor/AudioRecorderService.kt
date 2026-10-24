@@ -12,7 +12,9 @@ import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.media.MediaRecorder
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.os.PowerManager
 import android.util.Log
 import java.io.File
@@ -34,6 +36,12 @@ class AudioRecorderService : Service() {
   private var currentStart = 0L
   private var secondsPerChunk = 30
   private var wakeLock: PowerManager.WakeLock? = null
+  // The app wants audio now (not paused for the camera, not stopped)
+  private var wantRecording = false
+  // When the camera stops, it may still hold the microphone for a moment: starting fails and,
+  // without retrying, no audio was recorded for the rest of the alert
+  private var retries = 0
+  private val handler = Handler(Looper.getMainLooper())
 
   override fun onBind(intent: Intent?): IBinder? = null
 
@@ -42,11 +50,21 @@ class AudioRecorderService : Service() {
       ACTION_START -> {
         secondsPerChunk = intent.getIntExtra(EXTRA_SECONDS, 30).coerceIn(5, 300)
         if (!goForeground()) return START_NOT_STICKY
-        if (intent.getBooleanExtra(EXTRA_RECORD, true)) startChunk()
+        wantRecording = intent.getBooleanExtra(EXTRA_RECORD, true)
+        if (wantRecording) startFresh()
       }
-      ACTION_RESUME -> if (recorder == null) startChunk()
-      ACTION_PAUSE -> endChunk()
+      ACTION_RESUME -> {
+        wantRecording = true
+        if (recorder == null) startFresh()
+      }
+      ACTION_PAUSE -> {
+        wantRecording = false
+        handler.removeCallbacksAndMessages(null)
+        endChunk()
+      }
       ACTION_STOP -> {
+        wantRecording = false
+        handler.removeCallbacksAndMessages(null)
         endChunk()
         shutDown()
       }
@@ -54,7 +72,15 @@ class AudioRecorderService : Service() {
     return START_NOT_STICKY
   }
 
+  private fun startFresh() {
+    handler.removeCallbacksAndMessages(null)
+    retries = 0
+    startChunk()
+  }
+
   override fun onDestroy() {
+    wantRecording = false
+    handler.removeCallbacksAndMessages(null)
     endChunk()
     releaseWakeLock()
     active = false
@@ -139,11 +165,17 @@ class AudioRecorderService : Service() {
       currentFile = file
       currentPath = file.absolutePath
       currentStart = System.currentTimeMillis()
+      retries = 0
     } catch (e: Exception) {
-      Log.w(TAG, "Could not use the microphone", e)
+      Log.w(TAG, "Could not use the microphone (attempt ${retries + 1})", e)
       newRecorder.release()
       file.delete()
-      errorListener?.invoke("El micrófono está ocupado o sin permiso")
+      if (wantRecording && retries < MAX_RETRIES) {
+        retries++
+        handler.postDelayed({ if (wantRecording && recorder == null) startChunk() }, RETRY_DELAY_MS)
+      } else {
+        errorListener?.invoke("El micrófono está ocupado o sin permiso")
+      }
     }
   }
 
@@ -209,6 +241,9 @@ class AudioRecorderService : Service() {
     private const val CHANNEL = "grabacion_evidencia"
     private const val NOTICE_ID = 7301
     private const val MIN_CHUNK_MS = 3000L
+    // Up to ~8 s waiting for the camera to release the microphone
+    private const val MAX_RETRIES = 10
+    private const val RETRY_DELAY_MS = 800L
     const val ACTION_START = "alertamujer.recording.START"
     const val ACTION_PAUSE = "alertamujer.recording.PAUSE"
     const val ACTION_RESUME = "alertamujer.recording.RESUME"

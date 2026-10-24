@@ -17,6 +17,7 @@ import { useTheme } from "../../contexts/ThemeContext";
 import { useLocale } from "../../contexts/LocaleContext";
 import { getDrawerStyles } from "./drawer.style";
 import TabNavigator from "../TabNavigator";
+import { getInitials } from "../../utils/initials";
 import AjustesSubmenu from "../../features/settings/components/settingsComponent";
 
 const Drawer = createDrawerNavigator();
@@ -106,24 +107,28 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
             activeOpacity={0.75}
           >
             <View style={styles.avatarRow}>
-              {/* ✅ Dynamic photo: uses the user's or the default image */}
-              <Image
-                source={
-                  user?.fotoPerfil
-                    ? { uri: user.fotoPerfil }
-                    : { uri: "https://i.redd.it/f85dk8outnof1.png" }
-                }
-                style={[styles.avatar, { borderColor: accentLineColor }]}
-              />
+              {/* User's photo; without one, her initials (same as the profile screen) */}
+              {user?.fotoPerfil ? (
+                <Image
+                  source={{ uri: user.fotoPerfil }}
+                  style={[styles.avatar, { borderColor: accentLineColor }]}
+                />
+              ) : (
+                <View
+                  style={[
+                    styles.avatar,
+                    styles.avatarInitials,
+                    { borderColor: accentLineColor, backgroundColor: theme.icon + "55" },
+                  ]}
+                >
+                  <Text style={styles.avatarInitialsText}>{getInitials(user?.nombre ?? "")}</Text>
+                </View>
+              )}
             </View>
-            {/* ✅ Dynamic name */}
             <Text style={styles.name}>
-              {user?.nombre || "Isabella Quintero"}
+              {user?.nombre || t.perfil.nombre_default}
             </Text>
-            {/* ✅ Dynamic email */}
-            <Text style={styles.email}>
-              {user?.correo || "isabella@gmail.com"}
-            </Text>
+            {!!user?.correo && <Text style={styles.email}>{user.correo}</Text>}
             <View style={[styles.accentLine, { backgroundColor: accentLineColor }]} />
           </TouchableOpacity>
 

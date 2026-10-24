@@ -45,6 +45,7 @@ export function useAddContactViewModel() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmailState] = useState("");
   const [photoUri, setPhotoUri] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   /**
    * Emails do not allow spaces: they are removed while typing.
@@ -176,7 +177,8 @@ export function useAddContactViewModel() {
   /**
    * Save or update the contact
    */
-  const save = useCallback(() => {
+  const save = useCallback(async () => {
+    if (saving) return;
     const extra = contactExtraTexts[locale];
 
     const normalizedName = name.trim();
@@ -272,17 +274,28 @@ export function useAddContactViewModel() {
       photo: photoUri ?? undefined,
     };
 
-    if (isEditing && contactParam) {
-      updateContactItem(
-        contactParam.id,
-        payload
+    // It waits for the server: before, it went back right away and, if the save failed
+    // (e.g. maximum number of contacts reached), the contact just never appeared
+    setSaving(true);
+    try {
+      if (isEditing && contactParam) {
+        await updateContactItem(contactParam.id, payload);
+      } else {
+        await addContactItem(payload);
+      }
+      navigation.goBack();
+    } catch (error: any) {
+      const reason: string | undefined = error?.response?.data?.message;
+      const noResponse = !error?.response;
+      Alert.alert(
+        extra.guardar_error_titulo,
+        reason || (noResponse ? extra.guardar_sin_respuesta : extra.guardar_error_desc)
       );
-    } else {
-      addContactItem(payload);
+    } finally {
+      setSaving(false);
     }
-
-    navigation.goBack();
   }, [
+    saving,
     contacts,
     updateContactItem,
     addContactItem,
@@ -306,6 +319,8 @@ export function useAddContactViewModel() {
   }, [navigation]);
 
   return {
+    saving: saving,
+
     name: name,
     setName: setName,
 

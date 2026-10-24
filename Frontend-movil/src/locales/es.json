@@ -1000,7 +1000,14 @@
     "cancelar_confirmar": "Cancelar trayecto",
     "llegaste_titulo": "¡Qué bueno que llegaste!",
     "llegaste_texto": "Tus contactos no recibirán ningún aviso.",
-    "error_conexion": "No pudimos conectarnos. Revisa tu conexión e inténtalo de nuevo."
+    "error_conexion": "No pudimos conectarnos. Revisa tu conexión e inténtalo de nuevo.",
+    "como_funciona": "¿Cómo funciona?",
+    "llegada_prevista": "Llegarías a las {hora}",
+    "avisaremos_a": "Si no confirmas tu llegada, avisaremos a: {nombres}",
+    "sin_contactos": "Aún no tienes contactos de emergencia: si no confirmas tu llegada, nadie recibirá el aviso.",
+    "agregar_contacto": "Agregar contacto",
+    "quedan_pocos": "Quedan pocos minutos. Confirma cuando llegues o pide más tiempo.",
+    "atrasada": "Ya pasó tu hora de llegada. Confirma ahora si estás bien."
   },
   "conexion": {
     "titulo": "Sin conexión a internet",

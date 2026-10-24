@@ -51,6 +51,17 @@ export const getDrawerStyles = (theme: AppTheme) => {
       // inline borderColor: theme.icono
     },
 
+    avatarInitials: {
+      alignItems: "center",
+      justifyContent: "center",
+    },
+
+    avatarInitialsText: {
+      color: "#ffffff",
+      fontSize: 26,
+      fontWeight: "700",
+    },
+
     name: {
       color: theme.headerText,
       fontSize: 20,
