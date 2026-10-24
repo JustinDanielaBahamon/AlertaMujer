@@ -12,7 +12,7 @@ import {
 import Header from "../../../components/ui/Header/header";
 import { Ionicons } from "@expo/vector-icons";
 import { createStyles } from "../style/addContactStyle";
-import { useAddContactViewModel } from "../viewModel/useAddContactViewModel";
+import { toLocalPhone, useAddContactViewModel } from "../viewModel/useAddContactViewModel";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { LinearGradient } from "expo-linear-gradient";
@@ -237,9 +237,10 @@ export default function AddContactScreen() {
                   style={styles.inputValue}
                   placeholder={t.agregar.placeholder_telefono}
                   placeholderTextColor={theme.contactSubtext}
-                  keyboardType="phone-pad"
+                  keyboardType="number-pad"
+                  maxLength={10}
                   value={vm.phoneNumber}
-                  onChangeText={vm.setPhoneNumber}
+                  onChangeText={(v) => vm.setPhoneNumber(toLocalPhone(v))}
                 />
               </View>
               {isPhoneValid && (

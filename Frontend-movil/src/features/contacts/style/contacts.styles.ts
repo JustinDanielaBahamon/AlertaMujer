@@ -261,9 +261,11 @@ export const createStyles = (theme: AppTheme) =>
       position: "absolute",
       bottom: 30,
       right: 13,
-      width: 65,
-      height: 65,
-      borderRadius: 32.5,
+      height: 52,
+      paddingHorizontal: 18,
+      borderRadius: 26,
+      flexDirection: "row",
+      gap: 8,
       justifyContent: "center",
       alignItems: "center",
       elevation: 8,
@@ -272,6 +274,8 @@ export const createStyles = (theme: AppTheme) =>
       shadowOpacity: 0.4,
       shadowRadius: 8,
     },
+
+    floatingButtonText: { color: "white", fontSize: 15, fontWeight: "700" },
 
     swipeBack: {
       alignItems: "center",

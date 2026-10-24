@@ -340,7 +340,8 @@ export default function ContactsTab() {
         style={[styles.floatingButton, { backgroundColor: theme.contactFloatingBg }]}
         onPress={vm.goToAddContact}
       >
-        <MaterialIcons name="person-add" size={28} color="white" />
+        <MaterialIcons name="person-add" size={22} color="white" />
+        <Text style={styles.floatingButtonText}>{t.agregar.titulo_agregar}</Text>
       </TouchableOpacity>
 
       <ContactActionsModal

@@ -149,13 +149,7 @@ export function useAddContactViewModel() {
             selectedContact.phoneNumbers &&
             selectedContact.phoneNumbers.length > 0
           ) {
-            const cleanNumber =
-              selectedContact.phoneNumbers[0].number?.replace(
-                /[^\d+]/g,
-                ""
-              );
-
-            setPhoneNumber(cleanNumber || "");
+            setPhoneNumber(toLocalPhone(selectedContact.phoneNumbers[0].number ?? ""));
           }
 
           if (
@@ -343,4 +337,13 @@ export function useAddContactViewModel() {
       ? t.agregar.boton_guardar_edicion
       : t.agregar.boton_guardar_nuevo,
   };
+}
+/**
+ * Colombian mobile numbers have 10 digits. Keeps only digits and drops the country code (+57) that the
+ * phone book often adds, so the contact is saved as "3001234567".
+ */
+export function toLocalPhone(value: string): string {
+  const digits = value.replace(/\D/g, "");
+  const local = digits.length > 10 && digits.startsWith("57") ? digits.slice(2) : digits;
+  return local.slice(0, 10);
 }
