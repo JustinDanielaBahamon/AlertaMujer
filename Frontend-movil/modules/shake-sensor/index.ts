@@ -27,6 +27,9 @@ export type TripServiceOptions = {
   riskZones?: string;
 };
 
+/** A file of the evidence copy kept inside the app. */
+export type LocalEvidenceFile = { uri: string; name: string; sizeBytes: number; modifiedMs: number };
+
 export type AppExit = { timestamp: number; reason: number; importance: number; description: string };
 
 type Events = {
@@ -37,6 +40,8 @@ type Events = {
   onRecordingError: (error: { message: string }) => void;
   /** The screen turned on or off (each power button press). Not sent during calls. */
   onScreenChange: (change: { screenOn: boolean }) => void;
+  /** 4 presses of "volume down" within 2 s while the countdown runs (startVolumeCancel). */
+  onVolumeCancel: () => void;
   /** The trip service got a 401: it needs a renewed session token (updateTripToken). */
   onTripAuthExpired: () => void;
   /** The trip ended from the service (arrival confirmed in the notification, or ended on the server). */
@@ -67,10 +72,11 @@ declare class ShakeSensorModule extends NativeModule<Events> {
   openAutoStart(): boolean;
   /**
    * Microphone service for an alert's evidence: records in chunks and keeps going with the screen
-   * off. It can only be started with the app open; false if the microphone permission is missing.
-   * record=false keeps it running without using the microphone (while the camera records video).
+   * off; false if the microphone permission is missing. record=false keeps it running without using
+   * the microphone (while the camera records video). The first chunk lasts firstSeconds. background:
+   * started without the app on screen (alert by shaking), it runs under the protection service.
    */
-  startAudioRecording(secondsPerChunk: number, record: boolean): boolean;
+  startAudioRecording(secondsPerChunk: number, record: boolean, firstSeconds?: number, background?: boolean): boolean;
   pauseAudioRecording(): void;
   resumeAudioRecording(): void;
   stopAudioRecording(): void;
@@ -79,6 +85,21 @@ declare class ShakeSensorModule extends NativeModule<Events> {
   pendingAudios(): string[];
   /** Deletes an evidence file from the app cache (already uploaded). */
   deleteFile(uri: string): boolean;
+  /** Moves an uploaded chunk into the app's private evidence folder; its new uri or null. */
+  keepEvidence(uri: string, alertId: number): string | null;
+  /** The evidence copy of an alert kept on the phone. */
+  localEvidence(alertId: number): LocalEvidenceFile[];
+  deleteLocalEvidence(alertId: number): boolean;
+  deleteAllLocalEvidence(): boolean;
+  /** Copies it to Descargas/AlertaMujer; the visible path, or null (Android 9 or older). */
+  exportEvidence(uri: string): string | null;
+  /** Opens the share sheet with the file. */
+  shareEvidence(uri: string): boolean;
+  /** Listens to "volume down" (onVolumeCancel) while the countdown runs. */
+  startVolumeCancel(): void;
+  stopVolumeCancel(): void;
+  /** Neutral texts in the persistent notifications (protection, recording, trip). */
+  setDiscreet(on: boolean): void;
   /**
    * "Avísame si no llego": a location service that sends a signal of life every 2 min (queued while
    * offline) and asks "¿Ya llegaste?" near the destination. Must be called with the app open; false if

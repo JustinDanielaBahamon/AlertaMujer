@@ -6,6 +6,11 @@ plugins {
 group = 'com.alertamujer'
 version = '1.0.0'
 
+dependencies {
+  // FileProvider: share the evidence copy without exposing the app's files
+  implementation "androidx.core:core-ktx:1.13.1"
+}
+
 android {
   namespace "expo.modules.shakesensor"
   defaultConfig {

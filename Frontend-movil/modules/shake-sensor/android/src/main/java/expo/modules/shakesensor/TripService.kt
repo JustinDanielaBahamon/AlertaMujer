@@ -409,9 +409,11 @@ class TripService : Service() {
         SimpleDateFormat("h:mm a", Locale("es", "CO")).format(Date(status.lastSentAt))
       else -> "Enviando tu ubicación cada 2 minutos."
     }
-    val text = "Si no confirmas que llegaste antes de las $arrival, tus contactos reciben aviso. $signal"
+    val discreet = DiscreetMode.isOn(this)
+    val text = if (discreet) DiscreetMode.TEXT
+      else "Si no confirmas que llegaste antes de las $arrival, tus contactos reciben aviso. $signal"
     return Notification.Builder(this, SERVICE_CHANNEL)
-      .setContentTitle("Rumbo a $destination")
+      .setContentTitle(if (discreet) DiscreetMode.TITLE else "Rumbo a $destination")
       .setContentText(text)
       .setStyle(Notification.BigTextStyle().bigText(text))
       .setSmallIcon(applicationInfo.icon)

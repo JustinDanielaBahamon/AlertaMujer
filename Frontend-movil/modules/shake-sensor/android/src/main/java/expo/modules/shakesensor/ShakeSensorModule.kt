@@ -34,6 +34,7 @@ class ShakeSensorModule : Module() {
   private var listener: SensorEventListener? = null
   private var wakeLock: PowerManager.WakeLock? = null
   private var screenReceiver: BroadcastReceiver? = null
+  private var volumeWatcher: VolumeCancelWatcher? = null
 
   private val androidContext: Context
     get() = requireNotNull(appContext.reactContext) { "No Android context" }
@@ -43,7 +44,10 @@ class ShakeSensorModule : Module() {
 
   override fun definition() = ModuleDefinition {
     Name("ShakeSensor")
-    Events("onShake", "onAudioChunk", "onRecordingError", "onScreenChange", "onTripAuthExpired", "onTripEnded")
+    Events(
+      "onShake", "onAudioChunk", "onRecordingError", "onScreenChange", "onTripAuthExpired", "onTripEnded",
+      "onVolumeCancel",
+    )
 
     OnCreate {
       AudioRecorderService.chunkListener = { file, durationMs ->
@@ -154,22 +158,76 @@ class ShakeSensorModule : Module() {
 
     // ── Evidence recording during an alert ──────────────────────────────────────────────────
 
-    // Starts the microphone service (it must be called with the app open). record=false leaves it
-    // ready without using the microphone, while the camera records video with audio.
-    Function("startAudioRecording") { secondsPerChunk: Int, record: Boolean ->
+    // Starts the microphone service. record=false leaves it ready without using the microphone, while
+    // the camera records video with audio. The first chunk lasts firstSeconds (shorter, so something
+    // reaches the contacts within seconds). background=true: alert by shaking without the app on
+    // screen; it runs under the protection service, which holds the microphone permission.
+    // firstSeconds and background are optional: without them every chunk lasts secondsPerChunk, in the foreground
+    Function("startAudioRecording") { secondsPerChunk: Int, record: Boolean, firstSeconds: Int?, background: Boolean? ->
+      val first = firstSeconds ?: secondsPerChunk
+      val inBackground = background ?: false
       val permission = androidContext.checkSelfPermission(android.Manifest.permission.RECORD_AUDIO)
       if (permission != android.content.pm.PackageManager.PERMISSION_GRANTED) return@Function false
       val intent = Intent(androidContext, AudioRecorderService::class.java)
         .setAction(AudioRecorderService.ACTION_START)
         .putExtra(AudioRecorderService.EXTRA_SECONDS, secondsPerChunk)
+        .putExtra(AudioRecorderService.EXTRA_FIRST_SECONDS, first)
         .putExtra(AudioRecorderService.EXTRA_RECORD, record)
+        .putExtra(AudioRecorderService.EXTRA_BACKGROUND, inBackground)
       try {
-        androidContext.startForegroundService(intent)
+        if (inBackground) androidContext.startService(intent) else androidContext.startForegroundService(intent)
         true
       } catch (e: Exception) {
         false
       }
     }
+
+    // ── Evidence copy inside the app ───────────────────────────────────────────────────────
+
+    // Moves an uploaded chunk into files/evidencias/<alert>; the new uri, or null
+    Function("keepEvidence") { uri: String, alertId: Int ->
+      EvidenceFiles.keep(androidContext, uri, alertId)?.let { Uri.fromFile(it).toString() }
+    }
+
+    Function("localEvidence") { alertId: Int ->
+      EvidenceFiles.list(androidContext, alertId).map {
+        mapOf(
+          "uri" to Uri.fromFile(it).toString(),
+          "name" to it.name,
+          "sizeBytes" to it.length().toDouble(),
+          "modifiedMs" to it.lastModified().toDouble(),
+        )
+      }
+    }
+
+    Function("deleteLocalEvidence") { alertId: Int -> EvidenceFiles.deleteAlert(androidContext, alertId) }
+
+    Function("deleteAllLocalEvidence") { EvidenceFiles.deleteAll(androidContext) }
+
+    // Copies it to Descargas/AlertaMujer; the visible path, or null
+    Function("exportEvidence") { uri: String -> EvidenceFiles.export(androidContext, uri) }
+
+    Function("shareEvidence") { uri: String -> EvidenceFiles.share(androidContext, uri) }
+
+    // ── Quick cancel and discreet mode ─────────────────────────────────────────────────────
+
+    // While the countdown runs: 4 x "volume down" within 2 s emits onVolumeCancel
+    Function("startVolumeCancel") {
+      mainHandler.post {
+        volumeWatcher = volumeWatcher ?: VolumeCancelWatcher(androidContext) {
+          sendEvent("onVolumeCancel", emptyMap<String, Any>())
+        }
+        volumeWatcher?.start()
+      }
+      Unit
+    }
+
+    Function("stopVolumeCancel") {
+      mainHandler.post { volumeWatcher?.stop() }
+      Unit
+    }
+
+    Function("setDiscreet") { on: Boolean -> DiscreetMode.set(androidContext, on) }
 
     Function("pauseAudioRecording") { sendToRecorder(AudioRecorderService.ACTION_PAUSE) }
     Function("resumeAudioRecording") { sendToRecorder(AudioRecorderService.ACTION_RESUME) }
@@ -252,6 +310,7 @@ class ShakeSensorModule : Module() {
     }
 
     OnDestroy {
+      volumeWatcher?.stop()
       stopSensor()
       stopPowerButton()
       AudioRecorderService.chunkListener = null

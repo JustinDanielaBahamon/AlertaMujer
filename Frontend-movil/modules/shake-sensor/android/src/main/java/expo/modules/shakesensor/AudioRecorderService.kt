@@ -35,6 +35,9 @@ class AudioRecorderService : Service() {
   private var currentFile: File? = null
   private var currentStart = 0L
   private var secondsPerChunk = 30
+  // The first chunk is shorter, so the contacts get something within seconds
+  private var firstChunkSeconds = 10
+  private var firstChunkPending = true
   private var wakeLock: PowerManager.WakeLock? = null
   // The app wants audio now (not paused for the camera, not stopped)
   private var wantRecording = false
@@ -49,9 +52,27 @@ class AudioRecorderService : Service() {
     when (intent?.action) {
       ACTION_START -> {
         secondsPerChunk = intent.getIntExtra(EXTRA_SECONDS, 30).coerceIn(5, 300)
-        if (!goForeground()) return START_NOT_STICKY
+        firstChunkSeconds = intent.getIntExtra(EXTRA_FIRST_SECONDS, secondsPerChunk).coerceIn(5, secondsPerChunk)
+        if (!active) firstChunkPending = true
+        // From the background (alert by shaking) the protection service keeps the app alive and holds
+        // the microphone permission: this one runs without its own notification (Android does not let
+        // a microphone service start from the background)
+        val background = intent.getBooleanExtra(EXTRA_BACKGROUND, false)
+        if (background) {
+          active = true
+          acquireWakeLock()
+        } else if (!goForeground()) {
+          return START_NOT_STICKY
+        }
         wantRecording = intent.getBooleanExtra(EXTRA_RECORD, true)
-        if (wantRecording) startFresh()
+        // Started again when she opens the app (it was recording from the background): the chunk in
+        // progress goes on, or ends if the camera takes over
+        if (wantRecording && recorder == null) {
+          startFresh()
+        } else if (!wantRecording) {
+          handler.removeCallbacksAndMessages(null)
+          endChunk()
+        }
       }
       ACTION_RESUME -> {
         wantRecording = true
@@ -92,9 +113,10 @@ class AudioRecorderService : Service() {
     val openApp = packageManager.getLaunchIntentForPackage(packageName)?.let {
       PendingIntent.getActivity(this, 0, it, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
     }
+    val discreet = DiscreetMode.isOn(this)
     val notice: Notification = Notification.Builder(this, CHANNEL)
-      .setContentTitle("Alerta activa")
-      .setContentText("Grabando evidencia para tus contactos")
+      .setContentTitle(if (discreet) DiscreetMode.TITLE else "Alerta activa")
+      .setContentText(if (discreet) DiscreetMode.TEXT else "Grabando evidencia para tus contactos")
       .setSmallIcon(applicationInfo.icon)
       .setOngoing(true)
       .setContentIntent(openApp)
@@ -150,7 +172,7 @@ class AudioRecorderService : Service() {
       newRecorder.setAudioChannels(1)
       newRecorder.setAudioSamplingRate(44100)
       newRecorder.setAudioEncodingBitRate(64000)
-      newRecorder.setMaxDuration(secondsPerChunk * 1000)
+      newRecorder.setMaxDuration((if (firstChunkPending) firstChunkSeconds else secondsPerChunk) * 1000)
       newRecorder.setOutputFile(file.absolutePath)
       newRecorder.setOnInfoListener { _, what, _ ->
         // When the chunk length is reached the file is closed and another one starts
@@ -162,6 +184,7 @@ class AudioRecorderService : Service() {
       newRecorder.prepare()
       newRecorder.start()
       recorder = newRecorder
+      firstChunkPending = false
       currentFile = file
       currentPath = file.absolutePath
       currentStart = System.currentTimeMillis()
@@ -250,6 +273,8 @@ class AudioRecorderService : Service() {
     const val ACTION_STOP = "alertamujer.recording.STOP"
     const val EXTRA_SECONDS = "seconds"
     const val EXTRA_RECORD = "record"
+    const val EXTRA_FIRST_SECONDS = "firstSeconds"
+    const val EXTRA_BACKGROUND = "background"
 
     /** Notify the JS module of each finished chunk and of errors. */
     var chunkListener: ((File, Long) -> Unit)? = null
