@@ -161,7 +161,7 @@ export default function ContactAlertScreen() {
     <View style={styles.container}>
       <ScrollView
         ref={keyboard.scrollRef}
-        contentContainerStyle={[styles.content, { paddingBottom: keyboard.keyboardHeight }]}
+        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 24 + keyboard.keyboardHeight }]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         onScroll={keyboard.onScroll}
