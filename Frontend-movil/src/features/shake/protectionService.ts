@@ -294,6 +294,10 @@ export async function startProtection(
     },
   });
   active = true;
+  // After a JS reload the service may still be running with the previous JS, whose detectors no
+  // longer exist, and Notifee does not run the new task for it: this JS turns its own detectors on
+  // (setting them up again is harmless: the previous ones are stopped first)
+  if (!finishTask) setUpDetectors();
   return "activa";
 }
 
