@@ -20,6 +20,13 @@ import { getMainStackNavigation } from "../../../navigation/navigationHelpers";
 import { createStyles } from "../styles/home.styles";
 import OfflineNotice from "../../../components/ui/offlineNotice/OfflineNotice";
 import { getAlertsByUser, transformAlert } from "../../../services/alerts.service";
+import { useZoneStatus } from "../viewModel/useZoneStatus";
+import { useTripSuggestion } from "../viewModel/useTripSuggestion";
+import TripSuggestionPopup from "./TripSuggestionPopup";
+
+// Zone card colors: safe, near a risk zone, inside one, or no location
+const ZONE_COLORS = { safe: "#27ae60", near: "#E67E22", inside: "#C62828" } as const;
+const ZONE_ICONS = { safe: "verified-user", near: "warning", inside: "report" } as const;
 
 export default function Home() {
   const vm = useHomeViewModel();
@@ -68,6 +75,32 @@ export default function Home() {
 
   // Last alert derived from the history
   const lastAlert = useMemo(() => alerts[0], [alerts]);
+  const hasActiveAlert = alerts.some((a) => a.status === "En curso");
+
+  // Real zone status from her position and the risk zones
+  const here = useMemo(
+    () =>
+      vm.detailedLocation
+        ? { latitude: vm.detailedLocation.latitudeValue, longitude: vm.detailedLocation.longitudeValue }
+        : null,
+    [vm.detailedLocation],
+  );
+  const zone = useZoneStatus(here);
+  const tripSuggestion = useTripSuggestion(hasActiveAlert);
+  const zoneColor = zone ? ZONE_COLORS[zone.kind] : theme.icon;
+  const zoneTitle = !zone
+    ? t.inicio.ubicacion_desconocida
+    : zone.kind === "inside"
+      ? t.inicio.zona_dentro
+      : zone.kind === "near"
+        ? t.inicio.zona_cerca
+        : t.inicio.zona_segura;
+  const gpsText = vm.locationList ? t.inicio.gps_activo : t.inicio.gps_inactivo;
+  const zoneSubtitle = !zone || zone.kind === "safe"
+    ? `${zone ? t.inicio.zona_sin_riesgo : t.inicio.sin_incidentes} • ${gpsText}`
+    : zone.kind === "near"
+      ? t.inicio.zona_cerca_detalle.replace("{zona}", zone.zone?.name ?? "").replace("{metros}", String(zone.distanceM ?? 0))
+      : t.inicio.zona_dentro_detalle.replace("{zona}", zone.zone?.name ?? "");
 
   // Do not use the elapsed-time calculation with the API format
   // Use the API time value directly
@@ -123,6 +156,8 @@ export default function Home() {
     } as never);
   };
 
+  const goToTrip = () => getMainStackNavigation(navigation)?.navigate("Trip" as never);
+
   // Navigation to the history from the last alert card
   const goToHistory = () => {
     const main = getMainStackNavigation(navigation);
@@ -138,22 +173,33 @@ export default function Home() {
       {/* No internet: an alert would not go out now */}
       <OfflineNotice />
 
-      {/* Safe zone */}
+      {/* "¿Vas a algún lado?": a small notification over the screen, not a fixed card */}
+      <TripSuggestionPopup
+        visible={tripSuggestion.visible}
+        onStart={() => {
+          tripSuggestion.markSeen();
+          goToTrip();
+        }}
+        onLater={tripSuggestion.dismiss}
+        onTimeout={tripSuggestion.markSeen}
+      />
+
+      {/* Zone: safe, near a risk zone or inside one */}
       <TouchableOpacity
         style={[
           styles.safeZoneCard,
           {
             backgroundColor: theme.containerBackground,
-            borderColor: "#27ae60",
+            borderColor: zoneColor,
           },
         ]}
         activeOpacity={0.8}
-        onPress={goToMap}
+        onPress={zone && zone.kind !== "safe" ? goToTrip : goToMap}
       >
         <MaterialIcons
-          name="verified-user"
+          name={zone ? ZONE_ICONS[zone.kind] : "location-searching"}
           size={26}
-          color="#27ae60"
+          color={zoneColor}
         />
 
         <View style={styles.safeZoneInfo}>
@@ -161,11 +207,11 @@ export default function Home() {
             style={[
               styles.safeZoneTitle,
               {
-                color: "#27ae60",
+                color: zoneColor,
               },
             ]}
           >
-            {t.inicio.zona_segura}
+            {zoneTitle}
           </Text>
 
           <Text
@@ -173,10 +219,9 @@ export default function Home() {
               styles.safeZoneSubtitle,
               { color: theme.text },
             ]}
-            numberOfLines={1}
+            numberOfLines={2}
           >
-            {t.inicio.sin_incidentes} •{" "}
-            {vm.locationList ? t.inicio.gps_activo : "GPS inactivo"}
+            {zoneSubtitle}
           </Text>
 
           <Text
