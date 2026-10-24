@@ -161,8 +161,9 @@ export function useContactAlertViewModel() {
       done += 1;
       try {
         // Emergency contact (arrives by push): public endpoint with the tracking code
+        // The first query tells the user that this contact saw the alert
         const tracking = params.code
-          ? await getPublicTracking(params.code)
+          ? await getPublicTracking(params.code, done === 1 ? params.delivery : null)
           : await getAlertTracking(params.alertId);
         if (!mounted) return;
 

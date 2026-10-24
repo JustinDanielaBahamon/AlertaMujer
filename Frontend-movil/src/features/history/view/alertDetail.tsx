@@ -73,11 +73,13 @@ export default function AlertDetail() {
       .replace("{fecha}", `${alert.date} · ${alert.time}`);
     Linking.openURL(`https://wa.me/${number}?text=${encodeURIComponent(text)}`).catch(() => {});
   };
-  const statusLabel = (status: string) =>
+  const statusLabel = (status: string, channel?: string) =>
     ({
       pending: t.detalle.estado_pending,
       sent: t.detalle.estado_sent,
-      delivered: t.detalle.estado_delivered,
+      // For the email "delivered" means she opened it; for the app, that it reached her phone
+      delivered: channel === "email" ? t.detalle.estado_delivered_email : t.detalle.estado_delivered,
+      seen: t.detalle.estado_seen,
       failed: t.detalle.estado_failed,
       expired: t.detalle.estado_expired,
     })[status] ?? status;
@@ -375,17 +377,26 @@ export default function AlertDetail() {
                     <View style={extra.channels}>
                       {c.channels.map((channel) => {
                         const status = STATUSES[channel.status] ?? STATUSES.pending;
+                        // Already seen: filled strong violet so it stands out
+                        const seen = channel.status === "seen";
+                        const color = seen ? "#FFFFFF" : status.color;
                         return (
                           <View
                             key={channel.channel}
-                            style={[extra.channel, { backgroundColor: `${status.color}14`, borderColor: `${status.color}66` }]}
+                            style={[
+                              extra.channel,
+                              seen
+                                ? { backgroundColor: status.color, borderColor: status.color }
+                                : { backgroundColor: `${status.color}14`, borderColor: `${status.color}66` },
+                            ]}
                           >
-                            <MaterialIcons name={CHANNEL_ICON[channel.channel] ?? "chat"} size={14} color={status.color} />
-                            <Text style={[extra.channelText, { color: status.color }]}>
+                            <MaterialIcons name={CHANNEL_ICON[channel.channel] ?? "chat"} size={14} color={color} />
+                            <Text style={[extra.channelText, { color }]}>
                               {channel.channel === "email" ? t.detalle.canal_corto_email : channel.channel === "push" ? t.detalle.canal_corto_push : channel.channel}
                               {" · "}
-                              {statusLabel(channel.status)}
+                              {statusLabel(channel.status, channel.channel)}
                             </Text>
+                            {seen && <MaterialIcons name="visibility" size={14} color={color} />}
                           </View>
                         );
                       })}

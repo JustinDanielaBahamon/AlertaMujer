@@ -176,9 +176,11 @@ export const transformAlert = (apiAlert: AlertApi): AlertRecord => {
 export interface NotificationChannel {
   channel: "email" | "push" | string;
   destination?: string | null;
-  status: "pending" | "sent" | "delivered" | "failed" | "expired" | string;
+  /** delivered: it reached her (push received, email opened); seen: she opened the tracking from it. */
+  status: "pending" | "sent" | "delivered" | "seen" | "failed" | "expired" | string;
   sentAt?: string | null;
   deliveredAt?: string | null;
+  seenAt?: string | null;
 }
 
 export interface NotifiedContact {

@@ -16,7 +16,9 @@ type Props = {
 // Color and icon of each delivery status.
 // Only the app palette (violets and neon); the icon tells each status apart
 export const STATUSES: Record<string, { color: string; icon: keyof typeof MaterialIcons.glyphMap }> = {
-  delivered: { color: "#7B1DB2", icon: "check-circle" },
+  // Strong violet and filled: the contact already opened it
+  seen: { color: "#4A0080", icon: "visibility" },
+  delivered: { color: "#7B1DB2", icon: "done-all" },
   sent: { color: "#9333EA", icon: "send" },
   pending: { color: "#A855F7", icon: "schedule" },
   failed: { color: "#C026D3", icon: "error" },
@@ -38,17 +40,26 @@ export default function NotifiedContactsModal({ visible, onClose, contacts, load
   const channelLabel = (channel: string) =>
     channel === "email" ? t.detalle.canal_email : channel === "push" ? t.detalle.canal_push : channel;
 
-  const statusLabel = (status: string) =>
+  const statusLabel = (status: string, channel: string) =>
     ({
       pending: t.detalle.estado_pending,
       sent: t.detalle.estado_sent,
-      delivered: t.detalle.estado_delivered,
+      // For the email "delivered" means she opened it; for the app, that it reached her phone
+      delivered: channel === "email" ? t.detalle.estado_delivered_email : t.detalle.estado_delivered,
+      seen: t.detalle.estado_seen,
       failed: t.detalle.estado_failed,
       expired: t.detalle.estado_expired,
     })[status] ?? status;
 
+  const hour = (iso?: string | null) => {
+    if (!iso) return "";
+    const d = new Date(iso + (iso.endsWith("Z") || iso.includes("+") ? "" : "Z"));
+    return isNaN(d.getTime()) ? "" : d.toLocaleTimeString("es-CO", { hour: "numeric", minute: "2-digit" });
+  };
+
   const channelRow = (channel: NotificationChannel, i: number) => {
     const status = STATUSES[channel.status] ?? STATUSES.pending;
+    const seen = channel.status === "seen";
     return (
       <View key={`${channel.channel}-${i}`} style={styles.channel}>
         <MaterialIcons name={CHANNEL_ICON[channel.channel] ?? "chat"} size={20} color={theme.contactAccent} />
@@ -59,10 +70,24 @@ export default function NotifiedContactsModal({ visible, onClose, contacts, load
               {channel.destination}
             </Text>
           ) : null}
+          {seen && channel.seenAt ? (
+            <Text style={[styles.channelDestination, { color: status.color }]}>
+              {t.detalle.vista_a_las.replace("{hora}", hour(channel.seenAt))}
+            </Text>
+          ) : null}
         </View>
-        <View style={[styles.status, { backgroundColor: `${status.color}1A`, borderColor: status.color }]}>
-          <MaterialIcons name={status.icon} size={14} color={status.color} />
-          <Text style={[styles.statusText, { color: status.color }]}>{statusLabel(channel.status)}</Text>
+        <View
+          style={[
+            styles.status,
+            seen
+              ? { backgroundColor: status.color, borderColor: status.color }
+              : { backgroundColor: `${status.color}1A`, borderColor: status.color },
+          ]}
+        >
+          <MaterialIcons name={status.icon} size={14} color={seen ? "#FFFFFF" : status.color} />
+          <Text style={[styles.statusText, { color: seen ? "#FFFFFF" : status.color }]}>
+            {statusLabel(channel.status, channel.channel)}
+          </Text>
         </View>
       </View>
     );

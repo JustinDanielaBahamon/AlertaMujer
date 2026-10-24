@@ -62,6 +62,7 @@ export function useSosAlerts(
             alertId: Number(data.alertaId),
             userName: data.nombre,
             code: data.codigo,
+            delivery: data.envioId,
           });
         } else if (attempts > 0) {
           setTimeout(() => ir(attempts - 1), 300);

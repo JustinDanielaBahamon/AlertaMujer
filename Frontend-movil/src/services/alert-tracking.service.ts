@@ -85,9 +85,15 @@ export const getAlertTracking = async (
  * Tracking for an emergency contact: uses the public endpoint with the code that arrives in
  * the push (a contact cannot read another person's alert through /api/alerts/{id}).
  */
-export const getPublicTracking = async (code: string): Promise<AlertTracking> => {
+/**
+ * delivery: the push delivery that brought her here (envioId); sent only on the first query so the
+ * user's history shows that this contact saw the alert.
+ */
+export const getPublicTracking = async (code: string, delivery?: string | null): Promise<AlertTracking> => {
   const route = `/api/public/tracking/${encodeURIComponent(code)}`;
-  const { data } = await api.get<any>(route, { params: { v: visitorId() } });
+  const params: Record<string, string> = { v: visitorId() };
+  if (delivery && /^\d+$/.test(delivery)) params.c = delivery;
+  const { data } = await api.get<any>(route, { params });
   const points: LocationPoint[] = (data?.route ?? [])
     .filter((p: any) => p?.latitude != null && p?.longitude != null)
     .map((p: any, i: number) => ({
@@ -104,3 +110,13 @@ export const getPublicTracking = async (code: string): Promise<AlertTracking> =>
   }));
   return { status: String(data?.status ?? "").toLowerCase(), points, evidence };
 };
+
+/** The alert push reached this phone: the user's history shows that delivery as received. */
+export async function confirmAlertReceived(code: string, delivery: string | undefined): Promise<void> {
+  if (!delivery || !/^\d+$/.test(delivery)) return;
+  try {
+    await api.post(`/api/public/tracking/${encodeURIComponent(code)}/received`, null, { params: { c: delivery } });
+  } catch {
+    // Offline or server asleep: it is only a receipt, the alarm already sounded
+  }
+}

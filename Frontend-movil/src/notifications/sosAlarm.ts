@@ -5,6 +5,7 @@ import notifee, {
   type Notification,
 } from "@notifee/react-native";
 import { bigStyle } from "./notificationStyle";
+import { confirmAlertReceived } from "../services/alert-tracking.service";
 
 /**
  * Alarm an emergency contact receives when a user activates an alert. It arrives as a
@@ -21,6 +22,7 @@ export type SosAlertData = {
   alertaId: string;
   nombre: string;
   codigo: string; // public tracking code
+  envioId?: string; // this delivery (to mark it received and seen in the user's history)
 };
 
 export function isSosAlert(data: Record<string, unknown> | undefined): data is SosAlertData {
@@ -83,6 +85,8 @@ export async function createSosChannel(): Promise<void> {
 }
 
 export async function showSosAlarm(data: SosAlertData): Promise<void> {
+  // The user sees in her history that the notice reached this phone
+  void confirmAlertReceived(data.codigo, data.envioId);
   await createSosChannel();
   const name = data.nombre?.trim() || "Una persona";
   const text = `${name} activó una alerta y puede estar en peligro. Toca para ver su ubicación en tiempo real y escribirle.`;

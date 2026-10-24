@@ -36,6 +36,7 @@ export type MainStackParamList = {
     longitude?: number;
     demo?: boolean; // TEMPORARY: test mode with simulated points
     code?: string; // public tracking code (arrives in the push to the contacts)
+    delivery?: string; // push delivery id: opening the screen marks it seen in the user's history
   };
 
   WelcomeTutorial: undefined;
