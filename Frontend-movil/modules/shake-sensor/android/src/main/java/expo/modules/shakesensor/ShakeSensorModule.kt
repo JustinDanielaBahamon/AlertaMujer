@@ -224,15 +224,19 @@ class ShakeSensorModule : Module() {
     }
 
     Function("updateTripToken") { token: String ->
-      if (!TripService.status.running) return@Function
-      androidContext.startService(
-        Intent(androidContext, TripService::class.java).setAction(TripService.ACTION_TOKEN).putExtra(TripService.EXTRA_TOKEN, token),
-      )
+      if (TripService.status.running) {
+        androidContext.startService(
+          Intent(androidContext, TripService::class.java).setAction(TripService.ACTION_TOKEN).putExtra(TripService.EXTRA_TOKEN, token),
+        )
+      }
+      Unit
     }
 
     Function("stopTrip") {
-      if (!TripService.status.running) return@Function
-      androidContext.startService(Intent(androidContext, TripService::class.java).setAction(TripService.ACTION_STOP))
+      if (TripService.status.running) {
+        androidContext.startService(Intent(androidContext, TripService::class.java).setAction(TripService.ACTION_STOP))
+      }
+      Unit
     }
 
     Function("tripStatus") {
