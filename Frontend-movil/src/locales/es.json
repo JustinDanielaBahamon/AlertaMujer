@@ -140,7 +140,7 @@
   "eliminar_escribe": "Escribe {palabra} para confirmar",
   "eliminar_confirmar": "Eliminar definitivamente"
   },
-    "metodosActivación": {
+    "metodosActivacion": {
     "viaje_titulo": "Avísame si no llego",
     "viaje_desc": "Siempre activo, no se puede desactivar. Si inicias un trayecto y no confirmas tu llegada a tiempo, o tu celular deja de dar señal en el camino, el servidor avisa solo a tus contactos con tu última ubicación.",
     "viaje_paso1": "Abre el menú y toca \"Avísame si no llego\", o la tarjeta \"¿Vas a algún lado?\" del inicio.",
