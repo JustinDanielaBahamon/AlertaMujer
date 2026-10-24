@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useIsFocused, useNavigation, useRoute } from "@react-navigation/native";
 import type { RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Vibration } from "react-native";
@@ -29,7 +29,12 @@ export function useActivationViewModel() {
     navigation.replace("ActiveAlert", contact || method ? { contact: contact, method: method } : undefined);
   }, [navigation, contact, method]);
 
+  // A countdown left under another screen must not keep running and fire an alert by itself:
+  // it only advances while it is the screen on display
+  const isFocused = useIsFocused();
+
   useEffect(() => {
+    if (!isFocused) return undefined;
     if (counter > 0) {
       // A short vibration for each second of the countdown (5, 4, 3, 2, 1)
       if (config.vibracion) Vibration.vibrate(200);
@@ -38,7 +43,7 @@ export function useActivationViewModel() {
     }
     goToActiveAlert();
     return undefined;
-  }, [counter, goToActiveAlert, config.vibracion]);
+  }, [counter, goToActiveAlert, config.vibracion, isFocused]);
 
   // Skips the countdown and goes straight to the active alert screen
   const activateNow = useCallback(() => {
