@@ -23,6 +23,7 @@ export type SosAlertData = {
   nombre: string;
   codigo: string; // public tracking code
   envioId?: string; // this delivery (to mark it received and seen in the user's history)
+  aviso?: string; // what changed while it goes on (she does not answer, lost signal, duress)
 };
 
 export function isSosAlert(data: Record<string, unknown> | undefined): data is SosAlertData {
@@ -89,7 +90,9 @@ export async function showSosAlarm(data: SosAlertData): Promise<void> {
   void confirmAlertReceived(data.codigo, data.envioId);
   await createSosChannel();
   const name = data.nombre?.trim() || "Una persona";
-  const text = `${name} activó una alerta y puede estar en peligro. Toca para ver su ubicación en tiempo real y escribirle.`;
+  const text = data.aviso?.trim()
+    ? data.aviso.trim()
+    : `${name} activó una alerta y puede estar en peligro. Toca para ver su ubicación en tiempo real y escribirle.`;
   await notifee.displayNotification({
     id: notificationId(data.alertaId),
     title: `🚨 ${name} necesita ayuda`,

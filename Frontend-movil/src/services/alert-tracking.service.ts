@@ -15,6 +15,8 @@ export interface AlertTracking {
   alert?: AlertApi; // full data (only for the alert owner)
   /** Alert recordings (the contact's public tracking), from oldest to newest. */
   evidence?: TrackingEvidence[];
+  /** What the contact must know while it goes on: unanswered, signal_lost or duress (null = none). */
+  warning?: string | null;
 }
 
 export interface TrackingEvidence {
@@ -108,7 +110,7 @@ export const getPublicTracking = async (code: string, delivery?: string | null):
     created: toDate(e.createdAt),
     source: publicSource(`${route}/evidence/${e.id}`),
   }));
-  return { status: String(data?.status ?? "").toLowerCase(), points, evidence };
+  return { status: String(data?.status ?? "").toLowerCase(), points, evidence, warning: data?.warning ?? null };
 };
 
 /** The alert push reached this phone: the user's history shows that delivery as received. */

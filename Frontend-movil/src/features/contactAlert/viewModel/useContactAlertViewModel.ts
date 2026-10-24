@@ -109,6 +109,7 @@ export function useContactAlertViewModel() {
   }, []);
   // Alert recordings (video and audio in parts): the contact sees them to help locate her
   const [evidence, setEvidence] = useState<TrackingEvidence[]>([]);
+  const [warning, setWarning] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [connectionError, setConnectionError] = useState(false);
   const [now, setNow] = useState(Date.now());
@@ -170,6 +171,7 @@ export function useContactAlertViewModel() {
         setConnectionError(false);
         if (tracking.points.length > 0) setPoints(tracking.points);
         if (tracking.evidence) setEvidence(tracking.evidence);
+        setWarning(tracking.warning ?? null);
         setLoading(false);
 
         const stillActive = !FINAL_STATUSES.includes(tracking.status);
@@ -347,6 +349,8 @@ export function useContactAlertViewModel() {
 
   return {
     code: params.code,
+    // She does not answer, her phone stopped sending its location, or she cancelled under duress
+    warning: active ? warning : null,
     videos,
     audios,
     userName: params.userName,

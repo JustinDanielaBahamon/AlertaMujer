@@ -197,6 +197,24 @@ export default function ContactAlertScreen() {
             </Text>
           </Text>
 
+          {/* What changed while it goes on: shown first, it is what the contact must act on */}
+          {!!vm.warning && (
+            <View style={[warningStyles.box, { borderColor: theme.icon, backgroundColor: theme.icon + "18" }]}>
+              <MaterialIcons
+                name={vm.warning === "duress" ? "report" : vm.warning === "signal_lost" ? "signal-cellular-off" : "help-outline"}
+                size={22}
+                color={theme.icon}
+              />
+              <Text style={[warningStyles.text, { color: theme.text }]}>
+                {vm.warning === "duress"
+                  ? tx.aviso_coaccion
+                  : vm.warning === "signal_lost"
+                    ? tx.aviso_senal
+                    : tx.aviso_sin_respuesta}
+              </Text>
+            </View>
+          )}
+
           {/* Small map (preview): tapping it opens the popup */}
           <View style={styles.mapCard}>
             {vm.lastItem ? (
@@ -563,3 +581,8 @@ export default function ContactAlertScreen() {
     </View>
   );
 }
+
+const warningStyles = StyleSheet.create({
+  box: { flexDirection: "row", gap: 10, alignItems: "flex-start", borderWidth: 1.5, borderRadius: 14, padding: 12, marginTop: 12 },
+  text: { flex: 1, fontSize: 14, fontWeight: "700", lineHeight: 20 },
+});
