@@ -3,9 +3,7 @@ import {
   View, Text, TouchableOpacity, Image,
   TextInput, ScrollView, ActivityIndicator, StyleSheet,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { StatusBar } from "expo-status-bar";
 import { createProfileStyles } from "../styles/profileStyle";
 import { useProfileViewModel } from "../viewModel/useProfileViewModel";
 import { useAccountRequirements } from "../viewModel/useAccountRequirements";
@@ -13,10 +11,10 @@ import DeleteAccountModal from "./DeleteAccountModal";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { getInitials } from "../../../utils/initials";
+import ScreenHeader from "../../../components/ui/ScreenHeader/ScreenHeader";
 
 export default function ProfileScreen() {
   const vm = useProfileViewModel();
-  const insets = useSafeAreaInsets();
   const { theme } = useTheme();
   const { t } = useLocale();
   const styles = useMemo(() => createProfileStyles(theme), [theme]);
@@ -30,16 +28,8 @@ export default function ProfileScreen() {
     vm.message.toLowerCase().includes("formato");
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <StatusBar style="light" backgroundColor={theme.headercolor1} />
-
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={vm.goBack} style={styles.returnBtn}>
-          <Ionicons name="arrow-back" size={22} color={theme.headerText} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitleText}>{t.perfil.titulo_header}</Text>
-      </View>
+    <View style={styles.container}>
+      <ScreenHeader title={t.perfil.titulo_header} subtitle="Tus datos y tu cuenta" icon="person-circle" />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}

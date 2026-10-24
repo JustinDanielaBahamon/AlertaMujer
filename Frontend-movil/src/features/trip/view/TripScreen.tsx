@@ -1,13 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
-import { StatusBar } from "expo-status-bar";
 import React, { useMemo } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { createSettingsScreenStyles } from "../../settings/styles/settingsScreen.styles";
 import { QUICK_MINUTES, useTripViewModel } from "../viewModel/useTripViewModel";
 import TripDestinationPicker from "./TripDestinationPicker";
+import ScreenHeader from "../../../components/ui/ScreenHeader/ScreenHeader";
 
 const dos = (n: number) => String(n).padStart(2, "0");
 const time = (d: Date) => {
@@ -20,7 +19,6 @@ export default function TripScreen() {
   const { t } = useLocale();
   const tr = t.trayecto;
   const styles = useMemo(() => createSettingsScreenStyles(theme), [theme]);
-  const insets = useSafeAreaInsets();
   const vm = useTripViewModel();
   const accent = theme.icon;
   // Trip state color: normal, last 5 minutes, or arrival time already passed
@@ -54,14 +52,8 @@ export default function TripScreen() {
   );
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <StatusBar style="light" backgroundColor={theme.headercolor1} />
-      <View style={styles.header}>
-        <TouchableOpacity onPress={vm.goBack} style={styles.returnBtn}>
-          <Ionicons name="arrow-back" size={22} color={theme.headerText} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitleText}>{tr.titulo}</Text>
-      </View>
+    <View style={styles.container}>
+      <ScreenHeader title={tr.titulo} subtitle="El servidor te cuida en el camino" icon="navigate" />
 
       <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
         {vm.loading ? (

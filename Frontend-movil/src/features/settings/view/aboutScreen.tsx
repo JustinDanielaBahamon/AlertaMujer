@@ -2,14 +2,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import Constants from "expo-constants";
 import { LinearGradient } from "expo-linear-gradient";
-import { StatusBar } from "expo-status-bar";
 import React, { useMemo } from "react";
 import { Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WEB_URL } from "../../../constants/links";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { createSettingsScreenStyles } from "../styles/settingsScreen.styles";
+import ScreenHeader from "../../../components/ui/ScreenHeader/ScreenHeader";
 
 type IonIcon = React.ComponentProps<typeof Ionicons>["name"];
 
@@ -20,7 +19,6 @@ export default function AboutScreen() {
   const { t } = useLocale();
   const a = t.acercaDe;
   const styles = useMemo(() => createSettingsScreenStyles(theme), [theme]);
-  const insets = useSafeAreaInsets();
   const accent = theme.icon;
 
   // Read from "version" in app.json
@@ -46,15 +44,8 @@ export default function AboutScreen() {
   ];
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <StatusBar style="light" backgroundColor={theme.headercolor1} />
-
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.returnBtn}>
-          <Ionicons name="arrow-back" size={22} color={theme.headerText} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitleText}>{a.titulo_header}</Text>
-      </View>
+    <View style={styles.container}>
+      <ScreenHeader title={a.titulo_header} subtitle="Qué es AlertaMujer y cómo cuida tus datos" icon="information-circle" />
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* App presentation */}

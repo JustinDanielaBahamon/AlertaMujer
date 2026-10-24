@@ -1,13 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { StatusBar } from "expo-status-bar";
 import React, { useMemo } from "react";
 import { Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WEB_URL } from "../../../constants/links";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { createSettingsScreenStyles } from "../styles/settingsScreen.styles";
+import ScreenHeader from "../../../components/ui/ScreenHeader/ScreenHeader";
 
 type IonIcon = React.ComponentProps<typeof Ionicons>["name"];
 
@@ -18,7 +17,6 @@ export default function DataRetentionScreen() {
   const { t } = useLocale();
   const r = t.retencion;
   const styles = useMemo(() => createSettingsScreenStyles(theme), [theme]);
-  const insets = useSafeAreaInsets();
   const accent = theme.icon;
 
   const periods: { icon: IonIcon; title: string; period: string; desc: string }[] = [
@@ -34,15 +32,8 @@ export default function DataRetentionScreen() {
   ];
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <StatusBar style="light" backgroundColor={theme.headercolor1} />
-
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.returnBtn}>
-          <Ionicons name="arrow-back" size={22} color={theme.headerText} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitleText}>{r.titulo_header}</Text>
-      </View>
+    <View style={styles.container}>
+      <ScreenHeader title={r.titulo_header} subtitle="Cuánto tiempo guardamos cada dato" icon="server" />
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.intro}>{r.intro}</Text>

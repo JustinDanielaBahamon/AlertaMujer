@@ -1,49 +1,32 @@
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { StatusBar } from "expo-status-bar";
+import { MaterialIcons } from "@expo/vector-icons";
 import React, { useMemo } from "react";
 import { ActivityIndicator, ScrollView, Switch, Text, TouchableOpacity, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { useTheme } from "../../../contexts/ThemeContext";
-import { createActivationMethodsStyles, getHeaderColors } from "../../settings/styles/activationMethods.styles";
+import { createActivationMethodsStyles } from "../../settings/styles/activationMethods.styles";
 import { usePermissionsViewModel } from "../usePermissionsViewModel";
+import ScreenHeader from "../../../components/ui/ScreenHeader/ScreenHeader";
 
 /** "Permissions and protection": what is missing for an alert to work and a button to enable it. */
 export default function PermissionsScreen() {
   const { theme } = useTheme();
   const styles = useMemo(() => createActivationMethodsStyles(theme), [theme]);
-  const { text } = getHeaderColors(theme);
-  const insets = useSafeAreaInsets();
   const { t } = useLocale();
-  const { items, readyItems: readyItems, total, loading, activate: activate, health: health, evidence: evidence, goBack } = usePermissionsViewModel();
+  const { items, readyItems: readyItems, total, loading, activate: activate, health: health, evidence: evidence } = usePermissionsViewModel();
   const percentage = total > 0 ? Math.round((readyItems / total) * 100) : 0;
 
   return (
     <View style={styles.container}>
-      <StatusBar style={text === "#1a1a1a" ? "dark" : "light"} />
-
-      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <View style={styles.headerRow}>
-          <TouchableOpacity onPress={goBack} style={styles.returnBtn} accessibilityRole="button">
-            <Ionicons name="arrow-back" size={22} color={text} />
-          </TouchableOpacity>
-          <View style={styles.headerTexts}>
-            <Text style={styles.headerTitleText}>Permisos y protección</Text>
-            <Text style={styles.headerSubtitleText}>Lo que necesita la app para protegerte</Text>
-          </View>
-          <View style={styles.headerIcon}>
-            <Ionicons name="shield-checkmark" size={22} color={text} />
-          </View>
-        </View>
-        <View style={styles.summaryRow}>
-          <Text style={styles.summaryText}>
+      <ScreenHeader title="Permisos y protección" subtitle="Lo que necesita la app para protegerte" icon="shield-checkmark">
+        <View style={[styles.summaryRow, { marginTop: 16 }]}>
+          <Text style={[styles.summaryText, { color: "#fff" }]}>
             {readyItems}/{total} listos
           </Text>
-          <View style={styles.barBackground}>
-            <View style={[styles.barFill, { width: `${percentage}%` as `${number}%` }]} />
+          <View style={[styles.barBackground, { backgroundColor: "rgba(255,255,255,0.3)" }]}>
+            <View style={[styles.barFill, { width: `${percentage}%` as `${number}%`, backgroundColor: "#fff" }]} />
           </View>
         </View>
-      </View>
+      </ScreenHeader>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.intro}>
