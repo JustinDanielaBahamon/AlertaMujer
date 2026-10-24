@@ -8,10 +8,17 @@ import { useTheme } from "../../../contexts/ThemeContext";
 const SHOW_AFTER_MS = 1200;
 const HIDE_AFTER_MS = 10000;
 
-type Props = { visible: boolean; onStart: () => void; onLater: () => void; onTimeout: () => void };
+type Props = {
+  visible: boolean;
+  /** First time: it announces what is new instead of suggesting a trip. */
+  isNews?: boolean;
+  onStart: () => void;
+  onLater: () => void;
+  onTimeout: () => void;
+};
 
 /** "¿Vas a algún lado?" as a small notification that slides down over the home screen. */
-export default function TripSuggestionPopup({ visible, onStart, onLater, onTimeout }: Props) {
+export default function TripSuggestionPopup({ visible, isNews = false, onStart, onLater, onTimeout }: Props) {
   const { theme } = useTheme();
   const { t } = useLocale();
   const offset = useRef(new Animated.Value(-160)).current;
@@ -43,11 +50,15 @@ export default function TripSuggestionPopup({ visible, onStart, onLater, onTimeo
     >
       <View style={local.row}>
         <View style={[local.icon, { backgroundColor: theme.icon + "20" }]}>
-          <MaterialIcons name="directions-walk" size={22} color={theme.icon} />
+          <MaterialIcons name={isNews ? "new-releases" : "directions-walk"} size={22} color={theme.icon} />
         </View>
         <View style={local.body}>
-          <Text style={[local.title, { color: theme.text }]}>{t.inicio.vas_a_algun_lado}</Text>
-          <Text style={[local.text, { color: theme.text }]}>{t.inicio.vas_a_algun_lado_texto}</Text>
+          <Text style={[local.title, { color: theme.text }]}>
+            {isNews ? t.inicio.novedad_titulo : t.inicio.vas_a_algun_lado}
+          </Text>
+          <Text style={[local.text, { color: theme.text }]}>
+            {isNews ? t.inicio.novedad_texto : t.inicio.vas_a_algun_lado_texto}
+          </Text>
         </View>
       </View>
       <View style={local.actions}>
@@ -59,7 +70,7 @@ export default function TripSuggestionPopup({ visible, onStart, onLater, onTimeo
           style={[local.start, { backgroundColor: theme.icon }]}
           accessibilityRole="button"
         >
-          <Text style={local.startText}>{t.inicio.iniciar_trayecto}</Text>
+          <Text style={local.startText}>{isNews ? t.inicio.novedad_ver : t.inicio.iniciar_trayecto}</Text>
         </TouchableOpacity>
       </View>
     </Animated.View>

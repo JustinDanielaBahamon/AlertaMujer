@@ -176,12 +176,14 @@ export default function Home() {
       {/* "¿Vas a algún lado?": a small notification over the screen, not a fixed card */}
       <TripSuggestionPopup
         visible={tripSuggestion.visible}
+        isNews={tripSuggestion.isNews}
         onStart={() => {
           tripSuggestion.markSeen();
           goToTrip();
         }}
         onLater={tripSuggestion.dismiss}
-        onTimeout={tripSuggestion.markSeen}
+        // Hidden by itself: the news is shown again next time (she may not have read it)
+        onTimeout={() => tripSuggestion.markSeen(false)}
       />
 
       {/* Zone: safe, near a risk zone or inside one */}

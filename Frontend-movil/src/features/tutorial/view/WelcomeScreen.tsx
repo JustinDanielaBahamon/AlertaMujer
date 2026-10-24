@@ -11,6 +11,7 @@ import LocationScreen from "./locationScreen";
 import MessagesScreen from "./messageScreen";
 import NotificationScreen from "./notificationScreen";
 import ProtectionScreen from "./protectionScreen";
+import TripPrivacyScreen from "./tripPrivacyScreen";
 import { useNotificationTutorialViewModel } from "../viewModel/useNotificationTutorialViewModel";
 import SecurityScreen from "./securityScreen";
 import { useSecurityTutorialViewModel } from "../viewModel/useSecurityTutorialViewModel";
@@ -138,6 +139,7 @@ export default function Welcome() {
             <ContactsScreen externalVm={contactsVM} />
             <SecurityScreen externalVm={securityVM} />
             <NotificationScreen externalVm={notificationVM} />
+            <TripPrivacyScreen />
             <ProtectionScreen />
 
           </TutorialPager>
