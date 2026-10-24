@@ -1,5 +1,4 @@
 import "react-native-gesture-handler";
-import { useCallback, useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import GlobalAlertHost from "./src/components/ui/globalAlert/globalAlert";
@@ -15,15 +14,12 @@ import { RoutesProvider } from "./src/contexts/RoutesContext";
 import { ThemeProvider } from "./src/contexts/ThemeContext";
 import AppNavigator from "./src/navigation/AppNavigator";
 import LocationReport from "./src/components/LocationReporting";
-import AnimatedSplash from "./src/components/ui/AnimatedSplash/AnimatedSplash";
 
-// The native splash stays until the opening animation is drawn on top
+// The native splash stays until the session is restored (AppNavigator hides it): no opening animation,
+// the app must be usable at once, above all when it opens from an alert notification
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
 export default function App() {
-  const [showSplash, setShowSplash] = useState(true);
-  const finishSplash = useCallback(() => setShowSplash(false), []);
-
   // SafeAreaProvider at the root: screens rendered outside a navigator (e.g. CompleteSignUpScreen)
   // also need the safe area insets, otherwise useSafeAreaInsets throws and the app closes
   return (
@@ -41,7 +37,6 @@ export default function App() {
                       <AppNavigator />
                       <GlobalAlertHost />
                       <UpdateNotice />
-                      {showSplash && <AnimatedSplash onFinish={finishSplash} />}
                     </ActivationMethodsProvider>
                   </NotificationsProvider>
                 </EvidenceProvider>

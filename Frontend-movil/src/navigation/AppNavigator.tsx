@@ -1,4 +1,5 @@
 import { NavigationContainer, useNavigationContainerRef } from "@react-navigation/native";
+import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useRef, useState } from "react";
 import CompleteSignUpScreen from "../features/completeSignUp/CompleteSignUpScreen";
 import { profileIncomplete } from "../features/completeSignUp/profileIncomplete";
@@ -51,6 +52,11 @@ export default function AppNavigator() {
   // sign-up is complete: it never covers the "Complete your sign-up" screen.
   const signUpDone = !!user && user.role_id === 2 ? true : profileChecked && !missingData;
   useProtectionReminder(navigation, !!user && !restoring && user.id !== 0 && signUpDone);
+
+  // The native splash covers only the restoring of the session
+  useEffect(() => {
+    if (!restoring) SplashScreen.hideAsync().catch(() => {});
+  }, [restoring]);
 
   if (user && mainEntryRef.current === null) {
     mainEntryRef.current = pendingMainRoute ?? "DrawerHome";
