@@ -20,6 +20,7 @@ import TripScreen from "../features/trip/view/TripScreen";
 import PermissionsScreen from "../features/permissions/view/PermissionsScreen";
 import NotificationsScreen from "../features/settings/view/notificationsScreen";
 import DataRetentionScreen from "../features/settings/view/dataRetentionScreen";
+import AlertSecurityScreen from "../features/settings/view/alertSecurityScreen";
 import PrivacidadScreen from "../screens/policy/privacy";
 import TerminosScreen from "../screens/policy/terms";
 import BienvenidaTutorialScreen from "../screens/tutorial/welcome";
@@ -72,6 +73,7 @@ export default function MainNavigator({ initialRouteName }: Props) {
       <Stack.Screen name="Permissions" component={PermissionsScreen} />
       <Stack.Screen name="Notifications" component={NotificationsScreen} />
       <Stack.Screen name="DataRetention" component={DataRetentionScreen} />
+      <Stack.Screen name="AlertSecurity" component={AlertSecurityScreen} />
       <Stack.Screen name="About" component={AboutScreen} />
       <Stack.Screen name="TermsPolicy" component={TerminosScreen} />
       <Stack.Screen name="PrivacyPolicy" component={PrivacidadScreen} />

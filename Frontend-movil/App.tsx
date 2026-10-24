@@ -14,10 +14,14 @@ import { RoutesProvider } from "./src/contexts/RoutesContext";
 import { ThemeProvider } from "./src/contexts/ThemeContext";
 import AppNavigator from "./src/navigation/AppNavigator";
 import LocationReport from "./src/components/LocationReporting";
+import { syncDiscreet } from "./src/features/settings/discreetMode";
 
 // The native splash stays until the session is restored (AppNavigator hides it): no opening animation,
 // the app must be usable at once, above all when it opens from an alert notification
 SplashScreen.preventAutoHideAsync().catch(() => {});
+
+// The native services (recorder, trip) read the saved "Modo discreto" choice
+syncDiscreet().catch(() => {});
 
 export default function App() {
   // SafeAreaProvider at the root: screens rendered outside a navigator (e.g. CompleteSignUpScreen)

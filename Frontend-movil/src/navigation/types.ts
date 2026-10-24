@@ -11,7 +11,8 @@ export type AuthStackParamList = {
 };
 
 export type MainStackParamList = {
-  DrawerHome: undefined;
+  // Optionally opens a tab: { screen: "Home", params: { screen: "History" } }
+  DrawerHome: { screen: "Home"; params?: { screen: string } } | undefined;
   Profile: undefined;
 
   Activation:
@@ -52,6 +53,7 @@ export type MainStackParamList = {
 
   Notifications: undefined;
   DataRetention: undefined;
+  AlertSecurity: undefined;
 
   About: undefined;
   TermsPolicy: undefined;

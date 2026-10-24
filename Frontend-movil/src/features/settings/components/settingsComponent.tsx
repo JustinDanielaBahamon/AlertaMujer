@@ -125,6 +125,18 @@ export default function SettingsComponent({ navigation }: any) {
         </View>
       </TouchableOpacity>
 
+      {/* alert security: discreet notifications and cancel PIN */}
+      <TouchableOpacity
+        onPress={() => navigation.navigate("AlertSecurity")}
+        style={styles.item}
+      >
+        <View style={styles.chevronRow}>
+          <Ionicons name="lock-closed-outline" size={17} color={theme.text} style={{ marginRight: 8 }} />
+          <Text style={{ color: theme.text, flex: 1, fontSize: 14 }}>{t.ajustes.seguridad_alerta}</Text>
+          <Ionicons name="chevron-forward" size={15} color={theme.tabActiveColor} />
+        </View>
+      </TouchableOpacity>
+
       {/* notifications */}
       <TouchableOpacity
         onPress={() => navigation.navigate("Notifications")}
