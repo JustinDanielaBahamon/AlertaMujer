@@ -1015,7 +1015,22 @@
     "sin_contactos": "You don't have emergency contacts yet: if you don't confirm your arrival, nobody will be notified.",
     "agregar_contacto": "Add contact",
     "quedan_pocos": "Only a few minutes left. Confirm when you arrive or ask for more time.",
-    "atrasada": "Your arrival time has passed. Confirm now if you are OK."
+    "atrasada": "Your arrival time has passed. Confirm now if you are OK.",
+    "paso_senal": "During the trip your phone sends its location every 2 minutes, even when locked. If the signals stop (phone off or out of battery), we alert sooner: after 15 minutes, or 5 if you are in a risk zone.",
+    "mapa_marcar": "Mark the destination on the map",
+    "mapa_cambiar": "Change the point",
+    "mapa_quitar": "Remove the point",
+    "mapa_instruccion": "Tap the map where you are going",
+    "mapa_tu_ubicacion": "You are here",
+    "mapa_destino": "Destination",
+    "mapa_punto_marcado": "Point marked on the map",
+    "mapa_sin_punto": "You haven't marked the destination yet",
+    "mapa_usar_punto": "Use this destination",
+    "senal_activa": "Your phone is sending its location every 2 minutes.",
+    "senal_ultima": "Signal of life sent at {hora}. Your phone sends it every 2 minutes, even when locked.",
+    "senal_sin_internet": "No internet: your location is saved on the phone and will be sent when the connection returns.",
+    "senal_no_activa": "The signal of life could not start: check that the app has location permission. The arrival time alert is still on.",
+    "senal_destino": "We'll ask if you arrived when you are near the destination."
   },
   "conexion": {
     "titulo": "No internet connection",

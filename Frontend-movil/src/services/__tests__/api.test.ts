@@ -1,5 +1,5 @@
 import axios, { type AxiosAdapter, type InternalAxiosRequestConfig } from "axios";
-import api, { listenSession, publicSource, setAuthToken, setRefreshToken, sourceWithToken } from "../api";
+import api, { listenSession, publicSource, setAuthToken, setRefreshToken, sourceWithToken, tokenTimeLeftMs } from "../api";
 
 jest.mock("expo-constants", () => ({ __esModule: true, default: { expoConfig: {} } }));
 
@@ -75,5 +75,19 @@ describe("api · fuentes para el reproductor", () => {
     expect(publicSource(route)).toEqual({ uri: expect.stringMatching(/\/api\/public\/tracking\/abc\/evidence\/5$/) });
     expect(publicSource(route)).not.toHaveProperty("headers");
     expect(sourceWithToken("/api/evidences/5/file").headers).toEqual({ Authorization: "Bearer con-sesion" });
+  });
+});
+
+describe("api · tokenTimeLeftMs", () => {
+  const jwt = (payload: object) => `x.${btoa(JSON.stringify(payload)).replace(/=+$/, "")}.y`;
+
+  it("reads the expiry of the session token", () => {
+    expect(tokenTimeLeftMs(jwt({ exp: 1_000 }), 400_000)).toBe(600_000);
+  });
+
+  it("is 0 when expired or unreadable", () => {
+    expect(tokenTimeLeftMs(jwt({ exp: 1 }), 400_000)).toBe(0);
+    expect(tokenTimeLeftMs("no-es-jwt")).toBe(0);
+    expect(tokenTimeLeftMs(null)).toBe(0);
   });
 });

@@ -25,5 +25,21 @@ describe("safe-trips.service", () => {
     });
     expect(t).toMatchObject({ id: 3, destination: "Casa", status: "active" });
     expect(t.arrival.toISOString()).toBe("2026-10-21T20:30:00.000Z");
+    expect(t).toMatchObject({ destinationLatitude: null, lastSeenAt: null, alertReason: null });
+  });
+
+  it("lee el destino marcado y la última señal de vida", async () => {
+    mockedApi.get.mockResolvedValueOnce({
+      status: 200,
+      data: {
+        id: 5, destination: "U", startedAt: "2026-10-21T20:00:00", expectedArrival: "2026-10-21T20:30:00",
+        status: "active", destinationLatitude: "2.93", destinationLongitude: -75.28, lastSeenAt: "2026-10-21T20:10:00",
+      },
+    } as never);
+
+    const t = await activeTrip();
+
+    expect(t).toMatchObject({ destinationLatitude: 2.93, destinationLongitude: -75.28 });
+    expect(t?.lastSeenAt?.toISOString()).toBe("2026-10-21T20:10:00.000Z");
   });
 });

@@ -112,6 +112,9 @@ export const sourceWithToken = (route: string): { uri: string; headers: Record<s
   headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
 });
 
+/** Base URL of the microservice that handles the route (for native code that calls it directly). */
+export const baseUrlFor = (route: string): string => serviceFor(route) ?? API_BASE_URL;
+
 // A single renewal at a time even if several requests fail together
 let renewing: Promise<string | null> | null = null;
 
@@ -129,6 +132,37 @@ async function renewToken(): Promise<string | null> {
       renewing = null;
     });
   return renewing;
+}
+
+/** Milliseconds left before the session token expires (0 if unknown or already expired). */
+export function tokenTimeLeftMs(token: string | null = authToken, now = Date.now()): number {
+  try {
+    const payload = token?.split(".")[1];
+    if (!payload) return 0;
+    const json = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/")));
+    return typeof json.exp === "number" ? Math.max(0, json.exp * 1000 - now) : 0;
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * The current session token, renewed first if it expires within minMs. For native services that
+ * keep using it for hours without the app (they cannot renew it themselves). null without session.
+ */
+export async function freshToken(minMs: number): Promise<string | null> {
+  if (!authToken) return null;
+  if (tokenTimeLeftMs() >= minMs) return authToken;
+  try {
+    const renewed = await renewToken();
+    if (renewed) {
+      setAuthToken(renewed);
+      onTokenRenewed?.(renewed);
+    }
+  } catch {
+    // Offline: the current one is used and the service asks again when it expires
+  }
+  return authToken;
 }
 
 api.interceptors.response.use(

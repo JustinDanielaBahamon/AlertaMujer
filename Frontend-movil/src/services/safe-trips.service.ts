@@ -8,7 +8,16 @@ export interface Trip {
   startTime: Date;
   arrival: Date;
   status: "active" | "arrived" | "cancelled" | "alerted";
+  /** Destination point, if she marked it (saved place or map). */
+  destinationLatitude: number | null;
+  destinationLongitude: number | null;
+  /** Last signal of life the server received from her phone. */
+  lastSeenAt: Date | null;
+  /** Why the server alerted: "not_confirmed" or "signal_lost". */
+  alertReason: string | null;
 }
+
+const toNumber = (v: unknown): number | null => (v == null || v === "" ? null : Number(v));
 
 const toTrip = (t: any): Trip => ({
   id: Number(t.id),
@@ -16,6 +25,10 @@ const toTrip = (t: any): Trip => ({
   startTime: toDate(t.startedAt),
   arrival: toDate(t.expectedArrival),
   status: t.status,
+  destinationLatitude: toNumber(t.destinationLatitude),
+  destinationLongitude: toNumber(t.destinationLongitude),
+  lastSeenAt: t.lastSeenAt ? toDate(t.lastSeenAt) : null,
+  alertReason: t.alertReason ?? null,
 });
 
 export async function startTrip(trip: {

@@ -7,6 +7,7 @@ import { useLocale } from "../../../contexts/LocaleContext";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { createSettingsScreenStyles } from "../../settings/styles/settingsScreen.styles";
 import { QUICK_MINUTES, useTripViewModel } from "../viewModel/useTripViewModel";
+import TripDestinationPicker from "./TripDestinationPicker";
 
 const dos = (n: number) => String(n).padStart(2, "0");
 const time = (d: Date) => {
@@ -88,6 +89,25 @@ export default function TripScreen() {
               <Text style={[local.notice, { color: theme.text }]}>{tr.si_no_confirmas}</Text>
             </View>
 
+            {/* Signal of life: what her phone is sending to the server */}
+            <View style={[styles.card, local.contactsRow, !vm.signalReady && local.warningCard]}>
+              <Ionicons
+                name={!vm.signalReady ? "warning" : vm.queuedSignals > 0 ? "cloud-offline" : "radio"}
+                size={18}
+                color={!vm.signalReady ? DANGER : accent}
+              />
+              <Text style={[local.contactsText, { color: theme.text }]}>
+                {!vm.signalReady
+                  ? tr.senal_no_activa
+                  : vm.queuedSignals > 0
+                    ? tr.senal_sin_internet
+                    : vm.lastSignal
+                      ? tr.senal_ultima.replace("{hora}", time(vm.lastSignal))
+                      : tr.senal_activa}
+                {vm.hasDestinationPoint ? ` ${tr.senal_destino}` : ""}
+              </Text>
+            </View>
+
             {contactsNotice}
 
             <TouchableOpacity
@@ -149,6 +169,29 @@ export default function TripScreen() {
                 </View>
               )}
 
+              {/* Destination point: lets the phone notice when she arrives or moves away */}
+              {vm.mapPoint ? (
+                <View style={[local.pointRow, { borderColor: accent + "50" }]}>
+                  <Ionicons name="flag" size={16} color={accent} />
+                  <Text style={[local.pointText, { color: theme.text }]} numberOfLines={2}>
+                    {vm.mapPointLabel || tr.mapa_punto_marcado}
+                  </Text>
+                  <TouchableOpacity onPress={vm.openPicker} accessibilityLabel={tr.mapa_cambiar}>
+                    <Ionicons name="create-outline" size={18} color={accent} />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={vm.clearMapPoint} accessibilityLabel={tr.mapa_quitar}>
+                    <Ionicons name="close-circle" size={18} color={accent} />
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                !vm.place && (
+                  <TouchableOpacity onPress={vm.openPicker} style={[local.addContact, { borderColor: accent, marginTop: 10 }]}>
+                    <Ionicons name="map" size={16} color={accent} />
+                    <Text style={[local.secondaryButtonText, { color: accent }]}>{tr.mapa_marcar}</Text>
+                  </TouchableOpacity>
+                )
+              )}
+
               <Text style={[local.label, { color: theme.text, marginTop: 16 }]}>{tr.en_cuanto}</Text>
               <View style={local.chips}>
                 {QUICK_MINUTES.map((m) => (
@@ -175,7 +218,7 @@ export default function TripScreen() {
 
             <View style={[styles.card, local.como]}>
               <Text style={[local.label, { color: theme.text }]}>{tr.como_funciona}</Text>
-              {[tr.paso_1, tr.paso_2, tr.paso_3].map((p, i) => (
+              {[tr.paso_1, tr.paso_senal, tr.paso_2, tr.paso_3].map((p, i) => (
                 <View key={p} style={local.step}>
                   <View style={[local.number, { backgroundColor: accent }]}>
                     <Text style={local.numberText}>{i + 1}</Text>
@@ -197,6 +240,15 @@ export default function TripScreen() {
           </>
         )}
       </ScrollView>
+
+      <TripDestinationPicker
+        visible={vm.pickerOpen}
+        origin={vm.origin}
+        point={vm.mapPoint}
+        label={vm.mapPointLabel}
+        onPick={vm.chooseMapPoint}
+        onClose={vm.closePicker}
+      />
     </View>
   );
 }
@@ -213,6 +265,8 @@ const local = StyleSheet.create({
   contactsText: { flex: 1, fontSize: 13, lineHeight: 19 },
   warningCard: { gap: 10, borderWidth: 1.5, borderColor: DANGER },
   addContact: { flexDirection: "row", alignSelf: "flex-start", alignItems: "center", gap: 6, borderWidth: 1.5, borderRadius: 14, paddingHorizontal: 12, paddingVertical: 8 },
+  pointRow: { flexDirection: "row", alignItems: "center", gap: 8, borderWidth: 1.5, borderRadius: 12, paddingHorizontal: 10, paddingVertical: 8, marginTop: 10 },
+  pointText: { flex: 1, fontSize: 13, fontWeight: "600" },
   previewRow: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 12 },
   previewText: { fontSize: 13, fontWeight: "600", opacity: 0.85 },
   label: { fontSize: 12, fontWeight: "700", opacity: 0.7, letterSpacing: 0.4, textTransform: "uppercase", alignSelf: "stretch" },

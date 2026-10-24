@@ -6,6 +6,8 @@ import { useContactsContext } from "../../../contexts/ContactsContext";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { getOrCreateDevice } from "../../../services/devices.service";
 import { frequentLocationsService, type FrequentLocationApi } from "../../../services/frequent-locations.service";
+import { getPlace, placeDescription } from "../../../services/geocoding.service";
+import { LocationService } from "../../../services/location.service";
 import {
   extendTrip,
   cancelTrip,
@@ -14,6 +16,8 @@ import {
   activeTrip,
   type Trip,
 } from "../../../services/safe-trips.service";
+import type { LatLng } from "../../../components/map/MapLibreMap";
+import { onTripSignalEnded, stopTripSignal, syncTripSignal, tripSignalStatus } from "../tripSignal";
 
 export const QUICK_MINUTES = [15, 30, 45, 60, 90];
 
@@ -36,16 +40,33 @@ export function useTripViewModel() {
   const [minutes, setMinutes] = useState(30);
   const [places, setPlaces] = useState<FrequentLocationApi[]>([]);
   const [now, setNow] = useState(Date.now());
+  // Destination marked on the map (when it is not a saved place) and its address
+  const [mapPoint, setMapPoint] = useState<LatLng | null>(null);
+  const [mapPointLabel, setMapPointLabel] = useState("");
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [origin, setOrigin] = useState<LatLng | null>(null);
+  const [signalReady, setSignalReady] = useState(true);
+
+  // Every time the screen shows the trip, the signal-of-life service is (re)started for it
+  const show = useCallback((found: Trip | null) => {
+    setTrip(found);
+    syncTripSignal(found)
+      .then(setSignalReady)
+      .catch(() => setSignalReady(false));
+  }, []);
 
   const load = useCallback(() => {
     setLoading(true);
     activeTrip()
-      .then(setTrip)
+      .then(show)
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  }, [show]);
 
   useFocusEffect(load);
+
+  // Arrival confirmed from the notification, or the trip ended on the server
+  useEffect(() => onTripSignalEnded(() => load()), [load]);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -60,7 +81,36 @@ export function useTripViewModel() {
 
   const choosePlace = (l: FrequentLocationApi) => {
     setPlace(l);
+    setMapPoint(null);
     setDestination(l.name);
+  };
+
+  // The map opens on her current location (the origin of the trip)
+  const openPicker = async () => {
+    setPickerOpen(true);
+    if (origin) return;
+    try {
+      const here = await LocationService.getCurrentPosition(true);
+      if (here) setOrigin({ latitude: here.coords.latitude, longitude: here.coords.longitude });
+    } catch {
+      // Without location the map opens on the default region
+    }
+  };
+
+  const chooseMapPoint = async (point: LatLng) => {
+    setMapPoint(point);
+    setPlace(null);
+    setMapPointLabel("");
+    const found = await getPlace(point.latitude, point.longitude).catch(() => null);
+    const label = found ? placeDescription(found) : "";
+    setMapPointLabel(label);
+    // A name is suggested only if she has not written one
+    setDestination((current) => (current.trim() ? current : label));
+  };
+
+  const clearMapPoint = () => {
+    setMapPoint(null);
+    setMapPointLabel("");
   };
 
   const changeDestination = (text: string) => {
@@ -75,16 +125,20 @@ export function useTripViewModel() {
     if (!destination.trim() || busy) return;
     setBusy(true);
     try {
+      // The service needs the location permission to send her position during the trip
+      await LocationService.requestPermissions(true);
       const device = await getOrCreateDevice();
-      setTrip(
+      const target = place ?? mapPoint;
+      show(
         await startTrip({
           destination: destination.trim(),
           minutes,
           deviceId: device.id,
-          latitude: place?.latitude,
-          longitude: place?.longitude,
+          latitude: target?.latitude,
+          longitude: target?.longitude,
         }),
       );
+      clearMapPoint();
     } catch (e) {
       error(e);
     } finally {
@@ -97,9 +151,10 @@ export function useTripViewModel() {
     setBusy(true);
     try {
       const updated = await fn();
-      if (updated.status === "active") setTrip(updated);
+      if (updated.status === "active") show(updated);
       else {
         setTrip(null);
+        stopTripSignal();
         onDone?.(updated);
       }
     } catch (e) {
@@ -128,6 +183,9 @@ export function useTripViewModel() {
   // Who gets the notice if she does not confirm
   const contactNames = contacts.map((c) => (c.name ?? "").trim().split(" ")[0]).filter(Boolean);
   const goToAddContact = () => navigation.navigate("AddContact");
+  // Read on each refresh of "now" (every 15 s)
+  const signal = trip ? tripSignalStatus() : null;
+  const lastSignal = signal?.lastSentAt ? new Date(signal.lastSentAt) : trip?.lastSeenAt ?? null;
 
   return {
     arrivalPreview: new Date(now + minutes * 60000),
@@ -150,5 +208,18 @@ export function useTripViewModel() {
     extend: extend,
     cancel: cancel,
     goBack: navigation.goBack,
+    mapPoint: mapPoint,
+    mapPointLabel: mapPointLabel,
+    pickerOpen: pickerOpen,
+    openPicker: openPicker,
+    closePicker: () => setPickerOpen(false),
+    chooseMapPoint: chooseMapPoint,
+    clearMapPoint: clearMapPoint,
+    origin: origin,
+    // false: the phone could not start sending its signal of life (permission or old version)
+    signalReady: signalReady,
+    lastSignal: lastSignal,
+    queuedSignals: signal?.queued ?? 0,
+    hasDestinationPoint: !!trip && trip.destinationLatitude != null,
   };
 }

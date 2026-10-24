@@ -1015,7 +1015,22 @@
     "sin_contactos": "Aún no tienes contactos de emergencia: si no confirmas tu llegada, nadie recibirá el aviso.",
     "agregar_contacto": "Agregar contacto",
     "quedan_pocos": "Quedan pocos minutos. Confirma cuando llegues o pide más tiempo.",
-    "atrasada": "Ya pasó tu hora de llegada. Confirma ahora si estás bien."
+    "atrasada": "Ya pasó tu hora de llegada. Confirma ahora si estás bien.",
+    "paso_senal": "Durante el trayecto tu celular envía su ubicación cada 2 minutos, aunque esté bloqueado. Si las señales se cortan (celular apagado o sin batería), avisamos antes: a los 15 minutos, o a los 5 si estás en una zona de riesgo.",
+    "mapa_marcar": "Marcar el destino en el mapa",
+    "mapa_cambiar": "Cambiar el punto",
+    "mapa_quitar": "Quitar el punto",
+    "mapa_instruccion": "Toca el mapa en el lugar a donde vas",
+    "mapa_tu_ubicacion": "Estás aquí",
+    "mapa_destino": "Destino",
+    "mapa_punto_marcado": "Punto marcado en el mapa",
+    "mapa_sin_punto": "Aún no marcas el destino",
+    "mapa_usar_punto": "Usar este destino",
+    "senal_activa": "Tu celular está enviando su ubicación cada 2 minutos.",
+    "senal_ultima": "Señal de vida enviada a las {hora}. Tu celular la envía cada 2 minutos, aunque esté bloqueado.",
+    "senal_sin_internet": "Sin internet: tu ubicación se guarda en el celular y se enviará cuando vuelva la conexión.",
+    "senal_no_activa": "No se pudo activar la señal de vida: revisa que la app tenga permiso de ubicación. El aviso por la hora de llegada sigue activo.",
+    "senal_destino": "Te preguntaremos si llegaste cuando estés cerca del destino."
   },
   "conexion": {
     "titulo": "Sin conexión a internet",

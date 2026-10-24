@@ -1014,7 +1014,22 @@
     "sin_contactos": "Tu n'as pas encore de contacts d'urgence : si tu ne confirmes pas ton arrivée, personne ne sera prévenu.",
     "agregar_contacto": "Ajouter un contact",
     "quedan_pocos": "Il reste peu de minutes. Confirme ton arrivée ou demande plus de temps.",
-    "atrasada": "Ton heure d'arrivée est passée. Confirme maintenant si tout va bien."
+    "atrasada": "Ton heure d'arrivée est passée. Confirme maintenant si tout va bien.",
+    "paso_senal": "Pendant le trajet, ton téléphone envoie sa position toutes les 2 minutes, même verrouillé. Si les signaux s'arrêtent (téléphone éteint ou sans batterie), nous prévenons plus tôt : après 15 minutes, ou 5 si tu es dans une zone à risque.",
+    "mapa_marcar": "Marquer la destination sur la carte",
+    "mapa_cambiar": "Changer le point",
+    "mapa_quitar": "Retirer le point",
+    "mapa_instruccion": "Touche la carte à l'endroit où tu vas",
+    "mapa_tu_ubicacion": "Tu es ici",
+    "mapa_destino": "Destination",
+    "mapa_punto_marcado": "Point marqué sur la carte",
+    "mapa_sin_punto": "Tu n'as pas encore marqué la destination",
+    "mapa_usar_punto": "Utiliser cette destination",
+    "senal_activa": "Ton téléphone envoie sa position toutes les 2 minutes.",
+    "senal_ultima": "Signal de vie envoyé à {hora}. Ton téléphone l'envoie toutes les 2 minutes, même verrouillé.",
+    "senal_sin_internet": "Pas d'internet : ta position est enregistrée sur le téléphone et sera envoyée au retour de la connexion.",
+    "senal_no_activa": "Le signal de vie n'a pas pu démarrer : vérifie que l'app a l'autorisation de localisation. L'alerte à l'heure d'arrivée reste active.",
+    "senal_destino": "Nous te demanderons si tu es arrivée quand tu seras près de la destination."
   },
   "conexion": {
     "titulo": "Pas de connexion internet",
