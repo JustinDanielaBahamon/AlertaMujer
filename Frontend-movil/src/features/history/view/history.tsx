@@ -12,6 +12,13 @@ import type { AlertRecord } from "../models/AlertRecord";
 import { createStyles, getAssistanceColors, getEmergencyColors } from "../style/history.style";
 import { getAlertsByUser, transformAlert } from "../../../services/alerts.service";
 
+
+// Days the server keeps the videos and audios of an alert (evidence.retention.days in evidence-service)
+export const EVIDENCE_RETENTION_DAYS = 60;
+
+const normalize = (text: string) =>
+  text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
 export default function HistoryTab() {
   const { theme } = useTheme();
   const { t } = useLocale();
@@ -25,14 +32,15 @@ export default function HistoryTab() {
 
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const [searchQuery, setSearchQuery]           = useState("");
-  const [filteredAlerts, setFilteredAlerts]     = useState<AlertRecord[]>([]);
+  const [allAlerts, setAllAlerts]               = useState<AlertRecord[]>([]);
+  const [statusFilter, setStatusFilter]         = useState<AlertRecord["status"] | null>(null);
   const [refreshing, setRefreshing]             = useState(false);
   const [loading, setLoading]                   = useState(false);
   const [error, setError]                       = useState<string | null>(null);
 
   const loadAlerts = useCallback(async () => {
     if (!user?.id) {
-      setFilteredAlerts([]);
+      setAllAlerts([]);
       setError("No hay usuario autenticated");
       return;
     }
@@ -42,11 +50,11 @@ export default function HistoryTab() {
     try {
       const apiAlerts = await getAlertsByUser(user.id);
       const transformedAlerts = apiAlerts.map(transformAlert);
-      setFilteredAlerts(transformedAlerts);
+      setAllAlerts(transformedAlerts);
     } catch (error) {
       console.error("Error al cargar alertas:", error);
       setError("Error al cargar alertas. Verifica tu conexión.");
-      setFilteredAlerts([]);
+      setAllAlerts([]);
     } finally {
       setLoading(false);
     }
@@ -79,19 +87,19 @@ export default function HistoryTab() {
     }
   }, [loadAlerts]);
 
-  const handleSearch = (text: string) => {
-    setSearchQuery(text);
-    if (!text.trim()) {
-      loadAlerts();
-      return;
-    }
-    const filtered = filteredAlerts.filter((item) => {
-      const itemData =
-        `${item.date} ${item.time} ${item.location} ${item.status} ${item.type}`.toLowerCase();
-      return itemData.includes(text.toLowerCase());
+  // The search and the status filter always start from the full list: erasing letters shows the
+  // alerts again (before, each letter filtered the previous result). Accents do not matter.
+  const handleSearch = (text: string) => setSearchQuery(text);
+  const filteredAlerts = useMemo(() => {
+    const words = normalize(searchQuery).split(/\s+/).filter(Boolean);
+    return allAlerts.filter((item) => {
+      if (statusFilter && item.status !== statusFilter) return false;
+      const itemData = normalize(`${item.date} ${item.time} ${item.location} ${item.status} ${item.type}`);
+      return words.every((w) => itemData.includes(w));
     });
-    setFilteredAlerts(filtered);
-  };
+  }, [allAlerts, searchQuery, statusFilter]);
+  const toggleStatus = (status: AlertRecord["status"] | null) =>
+    setStatusFilter((current) => (current === status ? null : status));
 
   const goToDetail = (alert: AlertRecord) => {
     const main = getMainStackNavigation(navigation);
@@ -100,12 +108,12 @@ export default function HistoryTab() {
 
   const stats = useMemo(
     () => ({
-      total:     filteredAlerts.length,
-      sent:      filteredAlerts.filter((a) => a.status === "Enviada").length,
-      cancelled: filteredAlerts.filter((a) => a.status === "Cancelada").length,
-      ongoing:   filteredAlerts.filter((a) => a.status === "En curso").length,
+      total:     allAlerts.length,
+      sent:      allAlerts.filter((a) => a.status === "Enviada").length,
+      cancelled: allAlerts.filter((a) => a.status === "Cancelada").length,
+      ongoing:   allAlerts.filter((a) => a.status === "En curso").length,
     }),
-    [filteredAlerts]
+    [allAlerts]
   );
 
   // ─── Render of each card ──────────────────────────────────────────────────
@@ -233,33 +241,54 @@ export default function HistoryTab() {
 
         {/* STATISTICS */}
         <View style={styles.statsCard}>
-          <View style={styles.statItem}>
+          <TouchableOpacity
+            style={[styles.statItem, statusFilter === null && styles.statItemActive]}
+            onPress={() => toggleStatus(null)}
+            accessibilityRole="button"
+            accessibilityState={{ selected: statusFilter === null }}
+          >
             <Text style={styles.statLabel}>{t.historial.stats_total}</Text>
             <Text style={[styles.statNumber, { color: theme.text }]}>{stats.total}</Text>
             <Text style={styles.statSublabel}>{t.historial.stats_alertas}</Text>
-          </View>
+          </TouchableOpacity>
           <View style={styles.statDivider} />
-          <View style={styles.statItem}>
+          <TouchableOpacity
+            style={[styles.statItem, statusFilter === "Enviada" && styles.statItemActive]}
+            onPress={() => toggleStatus("Enviada")}
+            accessibilityRole="button"
+            accessibilityState={{ selected: statusFilter === "Enviada" }}
+          >
             <Text style={[styles.statLabel, { color: emergencyColors.text }]}>{t.historial.stats_enviadas}</Text>
             <Text style={[styles.statNumber, { color: emergencyColors.text }]}>{stats.sent}</Text>
             <Text style={styles.statSublabel}>{t.historial.stats_alertas}</Text>
-          </View>
+          </TouchableOpacity>
           <View style={styles.statDivider} />
-          <View style={styles.statItem}>
+          <TouchableOpacity
+            style={[styles.statItem, statusFilter === "Cancelada" && styles.statItemActive]}
+            onPress={() => toggleStatus("Cancelada")}
+            accessibilityRole="button"
+            accessibilityState={{ selected: statusFilter === "Cancelada" }}
+          >
             <Text style={[styles.statLabel, { color: assistanceColors.text }]}>{t.historial.stats_canceladas}</Text>
             <Text style={[styles.statNumber, { color: assistanceColors.text }]}>{stats.cancelled}</Text>
             <Text style={styles.statSublabel}>{t.historial.stats_alertas}</Text>
-          </View>
+          </TouchableOpacity>
           <View style={styles.statDivider} />
-          <View style={styles.statItem}>
+          <TouchableOpacity
+            style={[styles.statItem, statusFilter === "En curso" && styles.statItemActive]}
+            onPress={() => toggleStatus("En curso")}
+            accessibilityRole="button"
+            accessibilityState={{ selected: statusFilter === "En curso" }}
+          >
             <Text style={[styles.statLabel, { color: theme.contactSubtext }]}>{t.historial.stats_en_curso}</Text>
             <Text style={[styles.statNumber, { color: theme.contactSubtext }]}>{stats.ongoing}</Text>
             <Text style={styles.statSublabel}>{t.historial.stats_alertas}</Text>
-          </View>
+          </TouchableOpacity>
         </View>
       </View>
     ),
-    [searchQuery, stats, theme, emergencyColors, assistanceColors, styles, t, insets.top]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [searchQuery, stats, statusFilter, theme, emergencyColors, assistanceColors, styles, t, insets.top]
   );
 
   return (
@@ -269,6 +298,16 @@ export default function HistoryTab() {
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         ListHeaderComponent={ListHeader}
+        ListFooterComponent={
+          allAlerts.length > 0 ? (
+            <View style={styles.retentionNotice}>
+              <MaterialIcons name="auto-delete" size={18} color={theme.contactAccent} />
+              <Text style={styles.retentionText}>
+                {t.historial.retencion_aviso.replace("{dias}", String(EVIDENCE_RETENTION_DAYS))}
+              </Text>
+            </View>
+          ) : null
+        }
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
         bounces={false}

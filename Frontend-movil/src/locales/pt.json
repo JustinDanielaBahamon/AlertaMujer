@@ -287,6 +287,7 @@
   "radio": "Raio"
   },
   "historial": {
+  "retencion_aviso": "As evidências (vídeos e áudios) são apagadas automaticamente após {dias} dias. Os alertas que você marcar para manter não são apagados.",
   "titulo": "Histórico de Alertas",
   "buscar": "Buscar por data, local ou status...",
   "sin_alertas": "Nenhum alerta encontrado.",

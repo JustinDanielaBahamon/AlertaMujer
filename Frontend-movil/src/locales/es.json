@@ -287,6 +287,7 @@
   "radio": "Radio"
   },
   "historial": {
+  "retencion_aviso": "Las evidencias (videos y audios) se borran automáticamente a los {dias} días. Las alertas que marques para conservar no se borran.",
   "titulo": "Historial de Alertas",
   "buscar": "Buscar por fecha, lugar o estado...",
   "sin_alertas": "No se encontraron alertas.",

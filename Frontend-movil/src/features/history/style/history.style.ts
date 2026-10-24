@@ -234,6 +234,30 @@ export const createStyles = (theme: AppTheme) =>
     statItem: {
       flex: 1,
       alignItems: "center",
+      borderRadius: 12,
+      paddingVertical: 4,
+    },
+
+    statItemActive: {
+      backgroundColor: theme.contactAccent + "22",
+    },
+
+    retentionNotice: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      gap: 8,
+      marginHorizontal: 20,
+      marginTop: 6,
+      padding: 12,
+      borderRadius: 14,
+      backgroundColor: theme.containerBackground,
+    },
+
+    retentionText: {
+      flex: 1,
+      fontSize: 12.5,
+      lineHeight: 18,
+      color: theme.contactSubtext,
     },
 
     statLabel: {

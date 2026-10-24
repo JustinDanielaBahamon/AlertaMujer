@@ -287,6 +287,7 @@
     "radio": "Rayon"
   },
   "historial": {
+    "retencion_aviso": "Les preuves (vidéos et audios) sont supprimées automatiquement après {dias} jours. Les alertes que vous choisissez de garder ne sont pas supprimées.",
     "titulo": "Historique des Alertes",
     "buscar": "Rechercher par date, lieu ou statut...",
     "sin_alertas": "Aucune alerte trouvée.",
