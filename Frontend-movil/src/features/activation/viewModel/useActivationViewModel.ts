@@ -5,6 +5,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Vibration } from "react-native";
 import { useEvidence } from "../../../contexts/EvidenceContext";
 import { useNotifications } from "../../../contexts/NotificationsContext";
+import ShakeSensor from "../../../../modules/shake-sensor";
 import type { MainStackParamList } from "../../../navigation/types";
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
@@ -44,6 +45,22 @@ export function useActivationViewModel() {
     goToActiveAlert();
     return undefined;
   }, [counter, goToActiveAlert, config.vibracion, isFocused]);
+
+  // 4 x "volume down" within 2 s cancels it without looking at the screen (only during the countdown)
+  useEffect(() => {
+    if (!isFocused || typeof ShakeSensor?.startVolumeCancel !== "function") return undefined;
+    const sub = ShakeSensor.addListener("onVolumeCancel", () => {
+      if (alreadyNavigatedRef.current) return;
+      alreadyNavigatedRef.current = true;
+      Vibration.vibrate([0, 120, 120, 120]);
+      navigation.goBack();
+    });
+    ShakeSensor.startVolumeCancel();
+    return () => {
+      sub.remove();
+      ShakeSensor.stopVolumeCancel();
+    };
+  }, [isFocused, navigation]);
 
   // Skips the countdown and goes straight to the active alert screen
   const activateNow = useCallback(() => {

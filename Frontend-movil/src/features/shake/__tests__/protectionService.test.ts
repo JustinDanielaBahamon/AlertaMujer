@@ -45,6 +45,13 @@ jest.mock("expo-location", () => ({
   requestForegroundPermissionsAsync: jest.fn(async () => ({ granted: true, status: "granted" })),
 }));
 
+let mockDiscreet = false;
+jest.mock("../../settings/discreetMode", () => ({
+  DISCREET_TITLE: "Servicio activo",
+  DISCREET_TEXT: "Toca para abrir",
+  isDiscreet: jest.fn(async () => mockDiscreet),
+}));
+
 jest.mock("../backgroundAlert", () => ({
   backgroundAlert: jest.fn(() => null),
   createShakeAlert: jest.fn(async () => 77),
@@ -131,6 +138,19 @@ describe("servicioProteccion", () => {
     handleProtectionEvent({ type: 1, detail: { notification: sent } } as never);
     onShakeAlertOpen(open);
     expect(open).toHaveBeenCalledWith(77);
+  });
+
+  it("en modo discreto las notificaciones no dicen que es una alerta", async () => {
+    mockDiscreet = true;
+    Object.defineProperty(AppState, "currentState", { value: "background", configurable: true });
+    await turnOn();
+
+    shakePhone();
+    await jest.advanceTimersByTimeAsync(6000);
+
+    const texts = (notifee.displayNotification as jest.Mock).mock.calls.map((c) => `${c[0].title} ${c[0].body}`);
+    expect(texts.some((x) => /alerta/i.test(x))).toBe(false);
+    mockDiscreet = false;
   });
 
   it("si se toca Cancelar no se envía nada", async () => {

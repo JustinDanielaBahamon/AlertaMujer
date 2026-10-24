@@ -6,12 +6,17 @@ import notifee, {
   EventType,
   type Event,
 } from "@notifee/react-native";
-import { AppState, Vibration } from "react-native";
+import { AppState, PermissionsAndroid, Vibration } from "react-native";
 import { bigStyle } from "../../notifications/notificationStyle";
 import ShakeSensor from "../../../modules/shake-sensor";
 import { createPowerButtonDetector } from "./powerButtonDetector";
 import { backgroundAlert, createShakeAlert, prepareAlertLocation } from "./backgroundAlert";
 import { notificationsPermission, locationPermission } from "../../services/safePermissions";
+import { DISCREET_TEXT, DISCREET_TITLE, isDiscreet } from "../settings/discreetMode";
+
+// Builds made before these native functions existed (dev build): their manifest does not declare the
+// microphone service type nor listen to the volume keys
+const newNative = () => typeof ShakeSensor.startVolumeCancel === "function";
 
 /**
  * "Shake the phone": an Android foreground service (persistent "Active protection"
@@ -160,22 +165,41 @@ async function createChannels() {
   });
 }
 
+/** Cancels the countdown in progress (notification button or 4 x volume down). */
+function cancelCountdown() {
+  if (!countdownRunning) return;
+  countdownRunning.cancelled = true;
+  void notifee.cancelNotification(ACCOUNT_ID);
+}
+
 async function startCountdown(method: ProtectionMethod) {
   const countdown = { cancelled: false };
   countdownRunning = countdown;
   // The GPS works during the 5 seconds: the alert goes out without waiting for it afterwards
   prepareAlertLocation();
+  const discreet = await isDiscreet();
+  // 4 x "volume down" within 2 s cancels it without taking the phone out (only during the countdown)
+  let volumeSub: { remove: () => void } | null = null;
+  if (newNative()) {
+    volumeSub = ShakeSensor.addListener("onVolumeCancel", () => {
+      if (countdownRunning !== countdown) return;
+      cancelCountdown();
+      Vibration.vibrate([0, 120, 120, 120]);
+    });
+    ShakeSensor.startVolumeCancel();
+  }
   try {
     for (let s = COUNTDOWN_SECONDS; s > 0; s--) {
       if (countdown.cancelled) return;
       Vibration.vibrate(300);
+      const text = discreet ? "Toca Cancelar si fue un error." : `${REASON[method]}. Toca Cancelar si fue un error.`;
       await notifee.displayNotification({
         id: ACCOUNT_ID,
-        title: `🚨 Se enviará una alerta en ${s} s`,
-        body: `${REASON[method]}. Toca Cancelar si fue un error.`,
+        title: discreet ? `Confirmación en ${s} s` : `🚨 Se enviará una alerta en ${s} s`,
+        body: text,
         android: {
           channelId: NOTICE_CHANNEL,
-          ...bigStyle(`${REASON[method]}. Toca Cancelar si fue un error.`),
+          ...bigStyle(text),
           category: AndroidCategory.ALARM,
           importance: AndroidImportance.HIGH,
           visibility: AndroidVisibility.PUBLIC,
@@ -189,18 +213,23 @@ async function startCountdown(method: ProtectionMethod) {
     }
     if (countdown.cancelled) return;
     await notifee.cancelNotification(ACCOUNT_ID);
+    stopVolume(volumeSub);
+    volumeSub = null;
 
     try {
       const alertId = await createShakeAlert(method);
       Vibration.vibrate([0, 600, 200, 600]);
+      const sentText = discreet
+        ? DISCREET_TEXT
+        : "Tus contactos recibieron tu ubicación. Toca para ver la alerta, escribirles y ver lo que se graba.";
       await notifee.displayNotification({
         id: SENT_ID,
-        title: "🚨 Alerta enviada",
-        body: "Tus contactos recibieron tu ubicación. Toca para ver la alerta.",
+        title: discreet ? "Listo" : "🚨 Alerta enviada",
+        body: sentText,
         data: { alertaId: String(alertId) },
         android: {
           channelId: NOTICE_CHANNEL,
-          ...bigStyle("Tus contactos recibieron tu ubicación. Toca para ver la alerta, escribirles y ver lo que se graba."),
+          ...bigStyle(sentText),
           visibility: AndroidVisibility.PUBLIC,
           pressAction: { id: ACTION_OPEN, launchActivity: "default" },
         },
@@ -218,7 +247,18 @@ async function startCountdown(method: ProtectionMethod) {
       });
     }
   } finally {
+    stopVolume(volumeSub);
     if (countdownRunning === countdown) countdownRunning = null;
+  }
+}
+
+function stopVolume(sub: { remove: () => void } | null) {
+  if (!sub) return;
+  sub.remove();
+  try {
+    ShakeSensor.stopVolumeCancel();
+  } catch {
+    // already stopped
   }
 }
 
@@ -231,7 +271,7 @@ export function handleProtectionEvent({ type, detail }: Event): boolean {
   if (type !== EventType.ACTION_PRESS && type !== EventType.PRESS) return false;
   const action = detail.pressAction?.id;
   if (action === ACTION_CANCEL) {
-    if (countdownRunning) countdownRunning.cancelled = true;
+    cancelCountdown();
     notifee.cancelNotification(ACCOUNT_ID);
     return true;
   }
@@ -276,16 +316,23 @@ export async function startProtection(
 
   await notificationsPermission(requestPermissions);
   await createChannels();
+  // Also a microphone service (started now, with the app open): an alert by shaking without the app on
+  // screen records audio under it. Only with the permission granted, or Android refuses to start it.
+  const types = [AndroidForegroundServiceType.FOREGROUND_SERVICE_TYPE_LOCATION];
+  const microphone = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO).catch(() => false);
+  if (microphone && newNative()) types.push(AndroidForegroundServiceType.FOREGROUND_SERVICE_TYPE_MICROPHONE);
+  const discreet = await isDiscreet();
+  const text = discreet ? DISCREET_TEXT : protectionText();
   // Showing the service notification again updates it (and the first time starts it)
   await notifee.displayNotification({
     id: SERVICE_ID,
-    title: "Protección activa",
-    body: protectionText(),
+    title: discreet ? DISCREET_TITLE : "Protección activa",
+    body: text,
     android: {
       channelId: PROTECTION_CHANNEL,
-      ...bigStyle(protectionText()),
+      ...bigStyle(text),
       asForegroundService: true,
-      foregroundServiceTypes: [AndroidForegroundServiceType.FOREGROUND_SERVICE_TYPE_LOCATION],
+      foregroundServiceTypes: types,
       ongoing: true,
       pressAction: { id: "default", launchActivity: "default" },
     },
