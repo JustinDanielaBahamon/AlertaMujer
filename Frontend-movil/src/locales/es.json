@@ -156,7 +156,7 @@
     "boton_off_titulo": "Botón desactivado",
     "boton_off_msg": "Activa el botón de alerta en Configuración > Métodos de activación.",
     "intro": "Además del botón principal de alerta, puedes activar una alerta usando estos métodos alternativos. Conócelos para reaccionar más rápido en caso de necesitarlo.",
-    "nota": "Muy pronto se añadirán más formas de activacion rápida. Esta sección se actualizará de forma automática cuando estén disponibles.",
+    "nota": "Muy pronto se añadirán más formas de activación rápida. Esta sección se actualizará de forma automática cuando estén disponibles.",
     "boton_titulo": "Botón principal de alerta",
     "boton_desc": "El botón grande de la pantalla de inicio. Si lo desactivas, tocarlo no enviará ninguna alerta.",
     "boton_paso1": "Ve a la pantalla de inicio de la app.",
