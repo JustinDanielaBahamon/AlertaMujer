@@ -27,10 +27,10 @@ export type Coordinate = {
   longitude: number;
 };
 
-// Location update cycle: every 30 s (10 times) and then 5 min of rest.
+// Location update cycle: every 30 s (10 times) and then 1 min of rest.
 const UPDATE_INTERVAL_MS = 30 * 1000;
 const UPDATES_PER_CYCLE = 10;
-const REST_MS = 5 * 60 * 1000;
+const REST_MS = 60 * 1000;
 const MAX_HISTORY = 15; // points whose neighborhood is looked up (the map shows all of them)
 
 // How long to wait before the next update, depending on how many were done in the current cycle.
@@ -48,7 +48,8 @@ const MAX_LAST_KNOWN_AGE_MS = 15 * 60 * 1000;
 async function readLocation(): Promise<Location.LocationObject | null> {
   try {
     const current = await Promise.race([
-      Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }),
+      // High accuracy uses the GPS, which works without internet (balanced relies on Wi-Fi and cell towers)
+      Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High }),
       new Promise<null>((resolver) => setTimeout(() => resolver(null), MAX_READ_TIME_MS)),
     ]);
     if (current) return current;
@@ -269,7 +270,7 @@ export function useActiveAlertViewModel() {
   }, []);
 
   // Updates the location in cycles to save battery: every 30 s (10 times) and then
-  // 5 min of rest, when the GPS is not queried. Then the cycle repeats.
+  // 1 min of rest, when the GPS is not queried. Then the cycle repeats.
   useEffect(() => {
     let mounted = true;
     let timer: ReturnType<typeof setTimeout> | undefined;

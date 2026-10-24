@@ -7,6 +7,8 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.Manifest
+import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.media.MediaRecorder
 import android.os.Build
@@ -18,8 +20,10 @@ import java.io.File
 /**
  * Records the microphone during an alert, also with the app minimized or the screen off.
  *
- * It is a foreground service of type "microphone": Android only lets it start with the app open,
- * but once running it can keep recording in the background. It records in chunks of a few seconds
+ * It is a foreground service of type "microphone" and "location": Android only lets it start with the
+ * app open, but once running it can keep recording and the app can keep reading the location in the
+ * background (with only the "while using the app" location permission). Without that type the route of
+ * an alert stopped as soon as the phone was locked. It records in chunks of a few seconds
  * so each one is uploaded as soon as it ends: if the phone is taken away or turned off, what was
  * already recorded is in the cloud. While the camera records video (which already has audio), the
  * service stays "paused" without using the microphone.
@@ -71,7 +75,16 @@ class AudioRecorderService : Service() {
       .build()
     return try {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-        startForeground(NOTICE_ID, notice, ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE)
+        val types = serviceTypes()
+        try {
+          startForeground(NOTICE_ID, notice, types)
+        } catch (e: SecurityException) {
+          // Started from the background (widget, shake) Android may refuse the location type:
+          // recording matters more, so it starts as a microphone service only
+          if (types == ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE) throw e
+          Log.w(TAG, "Location type refused, recording without it", e)
+          startForeground(NOTICE_ID, notice, ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE)
+        }
       } else {
         startForeground(NOTICE_ID, notice)
       }
@@ -86,6 +99,19 @@ class AudioRecorderService : Service() {
       false
     }
   }
+
+  /** Each type needs its permission granted, or Android 14 refuses to start the service. */
+  private fun serviceTypes(): Int {
+    var types = 0
+    if (granted(Manifest.permission.RECORD_AUDIO)) types = types or ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
+    if (granted(Manifest.permission.ACCESS_FINE_LOCATION) || granted(Manifest.permission.ACCESS_COARSE_LOCATION)) {
+      types = types or ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
+    }
+    return if (types == 0) ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE else types
+  }
+
+  private fun granted(permission: String) =
+    checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
 
   private fun startChunk() {
     val folder = audioFolder(this)

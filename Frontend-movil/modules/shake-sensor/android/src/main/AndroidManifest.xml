@@ -3,10 +3,11 @@
   <uses-permission android:name="android.permission.WAKE_LOCK" />
   <!-- Ask the system not to put the app to sleep (Android and brand battery savers) -->
   <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-  <!-- Record the microphone during an alert, also with the screen off -->
+  <!-- Record the microphone and keep reading the location during an alert, also with the screen off -->
   <uses-permission android:name="android.permission.RECORD_AUDIO" />
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
   <!-- Android 11+: to open each brand's "auto start" screen its apps must be declared -->
   <queries>
     <package android:name="com.transsion.phonemaster" />
@@ -23,6 +24,6 @@
     <service
       android:name="expo.modules.shakesensor.AudioRecorderService"
       android:exported="false"
-      android:foregroundServiceType="microphone" />
+      android:foregroundServiceType="microphone|location" />
   </application>
 </manifest>
