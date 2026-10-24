@@ -8,6 +8,8 @@ import * as ImagePicker from "expo-image-picker";
 import { STORAGE_KEY_LOCATION } from "../../tutorial/viewModel/useLocationTutorialViewModel";
 import { deleteMyAccount, getMe, updateMe } from "../../../services/users.service";
 import { toStorablePhoto } from "../../../services/photos.service";
+import ShakeSensor from "../../../../modules/shake-sensor";
+import { removeCancelPins } from "../../security/cancelPin";
 import { dateToIso, formatDateText } from "../../completeSignUp/profileIncomplete";
 import { digitsOnly, isValidCellphone, isValidName, lettersOnly } from "../../../utils/validators";
 
@@ -175,6 +177,13 @@ export function useProfileViewModel() {
     try {
       await deleteMyAccount(confirmation.trim().toUpperCase());
       setDeleteVisible(false);
+      // Nothing of hers stays on the phone: the private evidence copies and the cancel PINs
+      try {
+        if (typeof ShakeSensor?.deleteAllLocalEvidence === "function") ShakeSensor.deleteAllLocalEvidence();
+      } catch {
+        // Old build without the local copy
+      }
+      await removeCancelPins().catch(() => {});
       // Without a session, the app goes back to the sign-in screen on its own
       signOut();
     } catch {

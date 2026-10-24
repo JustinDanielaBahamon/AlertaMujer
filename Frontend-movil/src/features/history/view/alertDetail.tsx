@@ -10,6 +10,7 @@ import { POINT_A_COLOR, POINT_B_COLOR } from "../../map/routeColors";
 import { MAX_ROUTE_MARKERS, useAlertDetailViewModel, type AlertStep, type RouteStop } from "../viewModel/useAlertDetailViewModel";
 import NotifiedContactsModal, { STATUSES, CHANNEL_ICON } from "./NotifiedContactsModal";
 import AlertEvidence from "./AlertEvidence";
+import LocalEvidence from "./LocalEvidence";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { getMainStackNavigation } from "../../../navigation/navigationHelpers";
@@ -339,6 +340,7 @@ export default function AlertDetail() {
           {/* RECORDED EVIDENCE */}
           <Text style={styles.SectionTitle}>{t.detalle.evidencias_titulo}</Text>
           <AlertEvidence alertId={Number(alert.id)} />
+          <LocalEvidence alertId={Number(alert.id)} />
 
           {/* NOTIFIED CONTACTS */}
           <View style={extra.sectionRow}>

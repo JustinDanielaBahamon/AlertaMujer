@@ -24,6 +24,7 @@ import {
 import { handleProtectionEvent } from "../features/shake/protectionService";
 import { isNewPhone, showNewPhone } from "./newPhone";
 import { isTripNotification, isTripDueSoon, showTripDueSoon } from "./tripDueSoon";
+import { isEvidenceExpiry, isHistoryNotification, showEvidenceExpiry } from "./evidenceExpiry";
 import { isInTutorial } from "../navigation/navigationHelpers";
 import { isLocationRequest, answerLocationRequest } from "../services/locationRequest";
 
@@ -77,11 +78,18 @@ export function useSosAlerts(
       else if (attempts > 0) setTimeout(() => goToTrip(attempts - 1), 300);
     };
 
+    // "Your evidence will be deleted": leads to her alert history
+    const goToHistory = (attempts = 20) => {
+      if (navigation.isReady()) navigation.navigate("DrawerHome", { screen: "Home", params: { screen: "History" } });
+      else if (attempts > 0) setTimeout(() => goToHistory(attempts - 1), 300);
+    };
+
     // App opened from the notification or the full screen
     notifee.getInitialNotification().then((initial) => {
       // Notifee delivers it only once: it can also be the "Alert sent" one from shaking
       if (initial && handleProtectionEvent({ type: EventType.PRESS, detail: initial })) return;
       if (isTripNotification(initial?.notification?.data)) return goToTrip();
+      if (isHistoryNotification(initial?.notification?.data)) return goToHistory();
       const data = notificationData(initial?.notification);
       if (data) openSosAlert(data);
     });
@@ -89,6 +97,7 @@ export function useSosAlerts(
     const stopListeningPresses = notifee.onForegroundEvent(({ type, detail }) => {
       if (handleProtectionEvent({ type, detail })) return;
       if (type === EventType.PRESS && isTripNotification(detail.notification?.data)) return goToTrip();
+      if (type === EventType.PRESS && isHistoryNotification(detail.notification?.data)) return goToHistory();
       const data = notificationData(detail.notification);
       if (data && (type === EventType.PRESS || type === EventType.ACTION_PRESS)) openSosAlert(data);
     });
@@ -109,6 +118,8 @@ export function useSosAlerts(
             await showNewPhone(message.data);
           } else if (isTripDueSoon(message.data)) {
             await showTripDueSoon(message.data);
+          } else if (isEvidenceExpiry(message.data)) {
+            await showEvidenceExpiry(message.data);
           }
         });
       } catch (error) {

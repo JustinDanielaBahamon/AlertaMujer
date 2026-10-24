@@ -11,6 +11,7 @@ import { registerWidgetTaskHandler } from "react-native-android-widget";
 import { widgetTask } from "./src/features/widget/widgetTask";
 import { isNewPhone, showNewPhone } from "./src/notifications/newPhone";
 import { isTripDueSoon, showTripDueSoon } from "./src/notifications/tripDueSoon";
+import { isEvidenceExpiry, showEvidenceExpiry } from "./src/notifications/evidenceExpiry";
 import { isLocationRequest, answerLocationRequest } from "./src/services/locationRequest";
 import { handleProtectionEvent, registerProtectionService } from "./src/features/shake/protectionService";
 import {
@@ -35,6 +36,8 @@ if (Constants.expoConfig?.extra?.pushConfigurado === true) {
         await showNewPhone(message.data);
       } else if (isTripDueSoon(message.data)) {
         await showTripDueSoon(message.data);
+      } else if (isEvidenceExpiry(message.data)) {
+        await showEvidenceExpiry(message.data);
       }
     });
   } catch (error) {
