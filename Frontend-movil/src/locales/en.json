@@ -1059,7 +1059,7 @@
     "mapa_sin_punto": "You haven't marked the destination yet",
     "mapa_usar_punto": "Use this destination",
     "senal_activa": "Your phone is sending its location every 2 minutes.",
-    "senal_ultima": "Signal of life sent at {hora}. Your phone sends it every 2 minutes, even when locked.",
+    "senal_ultima": "Signal of life sent at {hora}; your phone sends it every 2 minutes, even when locked.",
     "senal_sin_internet": "No internet: your location is saved on the phone and will be sent when the connection returns.",
     "senal_no_activa": "The signal of life could not start: check that the app has location permission. The arrival time alert is still on.",
     "senal_no_soportada": "This version of the app does not send the signal of life during the trip: update it. The arrival time alert is still on.",

@@ -1058,7 +1058,7 @@
     "mapa_sin_punto": "Tu n'as pas encore marqué la destination",
     "mapa_usar_punto": "Utiliser cette destination",
     "senal_activa": "Ton téléphone envoie sa position toutes les 2 minutes.",
-    "senal_ultima": "Signal de vie envoyé à {hora}. Ton téléphone l'envoie toutes les 2 minutes, même verrouillé.",
+    "senal_ultima": "Signal de vie envoyé à {hora} ; ton téléphone l'envoie toutes les 2 minutes, même verrouillé.",
     "senal_sin_internet": "Pas d'internet : ta position est enregistrée sur le téléphone et sera envoyée au retour de la connexion.",
     "senal_no_activa": "Le signal de vie n'a pas pu démarrer : vérifie que l'app a l'autorisation de localisation. L'alerte à l'heure d'arrivée reste active.",
     "senal_no_soportada": "Cette version de l'app n'envoie pas le signal de vie pendant le trajet : mets-la à jour. L'alerte à l'heure d'arrivée reste active.",

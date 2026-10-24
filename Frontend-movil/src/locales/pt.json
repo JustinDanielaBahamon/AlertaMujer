@@ -1059,7 +1059,7 @@
     "mapa_sin_punto": "Você ainda não marcou o destino",
     "mapa_usar_punto": "Usar este destino",
     "senal_activa": "Seu celular está enviando a localização a cada 2 minutos.",
-    "senal_ultima": "Sinal de vida enviado às {hora}. Seu celular o envia a cada 2 minutos, mesmo bloqueado.",
+    "senal_ultima": "Sinal de vida enviado às {hora}; seu celular o envia a cada 2 minutos, mesmo bloqueado.",
     "senal_sin_internet": "Sem internet: sua localização fica salva no celular e será enviada quando a conexão voltar.",
     "senal_no_activa": "Não foi possível ativar o sinal de vida: verifique se o app tem permissão de localização. O aviso pelo horário de chegada continua ativo.",
     "senal_no_soportada": "Esta versão do app não envia o sinal de vida durante o trajeto: atualize-a. O aviso pelo horário de chegada continua ativo.",

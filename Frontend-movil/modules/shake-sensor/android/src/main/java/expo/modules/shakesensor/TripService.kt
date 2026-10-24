@@ -404,8 +404,9 @@ class TripService : Service() {
     val arrival = if (arrivalMs > 0) SimpleDateFormat("h:mm a", Locale("es", "CO")).format(Date(arrivalMs)) else ""
     val signal = when {
       status.queued > 0 -> "Sin internet: tu ubicación se guarda y se enviará al volver la conexión."
+      // The time already ends in "p. m.": no extra period
       status.lastSentAt > 0 -> "Última señal enviada a las " +
-        SimpleDateFormat("h:mm a", Locale("es", "CO")).format(Date(status.lastSentAt)) + "."
+        SimpleDateFormat("h:mm a", Locale("es", "CO")).format(Date(status.lastSentAt))
       else -> "Enviando tu ubicación cada 2 minutos."
     }
     val text = "Si no confirmas que llegaste antes de las $arrival, tus contactos reciben aviso. $signal"
