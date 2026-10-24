@@ -246,8 +246,8 @@ export const createStyles = (theme: AppTheme) =>
     EndSeparator: {
       height: 2,
     },
-    Footer:{
-      backgroundColor:'white',
-      padding:17
-    }
+    Footer: {
+      backgroundColor: theme.containerBackground,
+      padding: 17,
+    },
   });
