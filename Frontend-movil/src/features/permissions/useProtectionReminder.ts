@@ -14,8 +14,9 @@ const OPEN_DELAY_MS = 3000;
 
 /**
  * When the app opens with a session, if something critical is missing (shake off, location, notifications,
- * battery) a notice with access to "Permissions and protection" is shown. At most every 12 h, so it does not
- * nag. After reinstalling the app, "shake" is off again: this notice reminds her.
+ * battery) a notice with access to "Permissions and protection" is shown. "Not now" only postpones it until
+ * the app opens again; after "Review" it waits 12 h, so it does not nag. After reinstalling the app, "shake"
+ * is off again: this notice reminds her.
  */
 export function useProtectionReminder(
   navigation: NavigationContainerRefWithCurrent<MainStackParamList>,
@@ -44,7 +45,6 @@ export function useProtectionReminder(
           await checkPermissions(config.agitar, cortes.filter((c) => c.cause === "system").length),
         );
         if (missing.length === 0 && cortes.length === 0) return;
-        await AsyncStorage.setItem(LAST_NOTICE_KEY, String(Date.now()));
         const parts = [
           cortes.length > 0
             ? `Tu protección se detuvo ${cortes.length === 1 ? "1 vez" : `${cortes.length} veces`}: ${EXPLANATION[cortes[0].cause].title.toLowerCase()}.`
@@ -56,7 +56,13 @@ export function useProtectionReminder(
           parts.join("\n\n"),
           [
             { text: "Ahora no", style: "cancel" },
-            { text: "Revisar", onPress: () => navigation.isReady() && navigation.navigate("Permissions") },
+            {
+              text: "Revisar",
+              onPress: () => {
+                void AsyncStorage.setItem(LAST_NOTICE_KEY, String(Date.now()));
+                if (navigation.isReady()) navigation.navigate("Permissions");
+              },
+            },
           ],
         );
       } catch (e) {

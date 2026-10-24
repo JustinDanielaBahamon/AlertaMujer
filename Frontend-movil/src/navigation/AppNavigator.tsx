@@ -21,8 +21,6 @@ export default function AppNavigator() {
   useSosAlerts(navigation, !!user && !restoring);
   // Alert activation by shaking the phone (if the user turned it on in Settings)
   useShakeProtection(navigation, !!user && !restoring && user.id !== 0);
-  // Notice if something is missing for alerts to work (shake off, permissions...)
-  useProtectionReminder(navigation, !!user && !restoring && user.id !== 0);
   // If there is an active alert of her own (the app closed with the alert in progress), go back to it
   useResumeAlert(navigation, !!user && !restoring && user.id !== 0);
   // Tap on the home screen "SOS" widget (opens alertamujer://sos)
@@ -31,8 +29,10 @@ export default function AppNavigator() {
   // Accounts created with Google: phone, document and birth date are missing. If the query
   // fails (no signal) the app is not blocked: it is checked again the next time it opens.
   const [missingData, setMissingData] = useState(false);
+  const [profileChecked, setProfileChecked] = useState(false);
   const realSession = !!user && !restoring && user.id !== 0 && user.role_id !== 2;
   useEffect(() => {
+    setProfileChecked(false);
     if (!realSession) {
       setMissingData(false);
       return;
@@ -40,11 +40,17 @@ export default function AppNavigator() {
     let valid = true;
     getMe()
       .then((u) => valid && setMissingData(profileIncomplete(u)))
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => valid && setProfileChecked(true));
     return () => {
       valid = false;
     };
   }, [realSession, user?.correo]);
+
+  // Notice if something is missing for alerts to work (shake off, permissions...). It waits until the
+  // sign-up is complete: it never covers the "Complete your sign-up" screen.
+  const signUpDone = !!user && user.role_id === 2 ? true : profileChecked && !missingData;
+  useProtectionReminder(navigation, !!user && !restoring && user.id !== 0 && signUpDone);
 
   if (user && mainEntryRef.current === null) {
     mainEntryRef.current = pendingMainRoute ?? "DrawerHome";
