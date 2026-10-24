@@ -1077,9 +1077,9 @@
     "fecha": "Data de nascimento",
     "guardar": "Salvar e continuar",
     "otra_cuenta": "Usar outra conta",
-    "error_telefono": "Digite um celular de 10 dígitos",
+    "error_telefono": "Digite um celular de 10 dígitos que comece com 3",
     "error_tipo": "Escolha o tipo de documento",
-    "error_documento": "Digite o número do documento",
+    "error_documento": "Digite um documento válido: 6 a 10 números (C.C ou T.I) ou 5 a 15 letras e números (estrangeiro)",
     "error_fecha": "Digite uma data válida DD/MM/AAAA",
     "error_guardar": "Não foi possível salvar. Verifique sua conexão e tente de novo."
   }

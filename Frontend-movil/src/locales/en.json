@@ -1077,9 +1077,9 @@
     "fecha": "Date of birth",
     "guardar": "Save and continue",
     "otra_cuenta": "Use another account",
-    "error_telefono": "Enter a 10-digit mobile number",
+    "error_telefono": "Enter a 10-digit cell phone starting with 3",
     "error_tipo": "Choose the document type",
-    "error_documento": "Enter your document number",
+    "error_documento": "Enter a valid document: 6 to 10 digits (C.C or T.I) or 5 to 15 letters and digits (foreign)",
     "error_fecha": "Enter a valid date DD/MM/YYYY",
     "error_guardar": "Couldn't save your details. Check your connection and try again."
   }

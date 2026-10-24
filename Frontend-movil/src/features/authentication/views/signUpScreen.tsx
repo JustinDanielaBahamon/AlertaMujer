@@ -68,7 +68,8 @@ export default function SignUp() {
                   style={styles.emailInput}
                   placeholder={t.registro.telefono}
                   placeholderTextColor={"#000"}
-                  keyboardType="phone-pad"
+                  keyboardType="number-pad"
+                  maxLength={10}
                   value={vm.phoneNumber}
                   onChangeText={vm.setPhoneNumber}
                   onFocus={closeList}
@@ -111,6 +112,8 @@ export default function SignUp() {
                   placeholderTextColor="#000"
                   value={vm.document}
                   onChangeText={vm.setDocument}
+                  keyboardType={vm.documentType === "Documento extranjero" ? "default" : "number-pad"}
+                  autoCapitalize="characters"
                   onFocus={closeList}
                 />
               </View>

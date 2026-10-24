@@ -1077,9 +1077,9 @@
     "fecha": "Fecha de nacimiento",
     "guardar": "Guardar y continuar",
     "otra_cuenta": "Usar otra cuenta",
-    "error_telefono": "Escribe un celular de 10 dígitos",
+    "error_telefono": "Escribe un celular de 10 dígitos que empiece por 3",
     "error_tipo": "Elige el tipo de documento",
-    "error_documento": "Escribe tu número de documento",
+    "error_documento": "Escribe un documento válido: 6 a 10 números (C.C o T.I) o 5 a 15 letras y números (extranjero)",
     "error_fecha": "Escribe una fecha válida DD/MM/AAAA",
     "error_guardar": "No se pudieron guardar los datos. Revisa tu conexión e intenta de nuevo."
   }

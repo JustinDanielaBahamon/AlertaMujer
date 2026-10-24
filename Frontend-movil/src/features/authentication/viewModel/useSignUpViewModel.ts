@@ -6,6 +6,17 @@ import type { AuthStackParamList } from "../../../navigation/types";
 import { useAuth } from "../../../contexts/AuthContext";
 import { authService } from "../../../services/auth.service";
 import type { User } from "../models/User";
+import { dateToIso, formatDateText } from "../../completeSignUp/profileIncomplete";
+import {
+  digitsOnly,
+  documentFilter,
+  isValidCellphone,
+  isValidDocument,
+  isValidEmail,
+  isValidName,
+  isValidPassword,
+  lettersOnly,
+} from "../../../utils/validators";
 
 type ErrorsType = {
   name?: string;
@@ -28,10 +39,14 @@ export function useSignUpViewModel() {
   const [showList, setShowList] = useState(false);
   const [documentType, setDocumentType] = useState("");
 
-  const [name, setName] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [document, setDocument] = useState("");
-  const [email, setEmail] = useState("");
+  const [name, setNameRaw] = useState("");
+  const [phoneNumber, setPhoneRaw] = useState("");
+  const [document, setDocumentRaw] = useState("");
+  const [email, setEmailRaw] = useState("");
+  // Each field filters what is typed: letters in the name, 10 digits in the phone, no spaces in the email
+  const setName = useCallback((v: string) => setNameRaw(lettersOnly(v)), []);
+  const setPhoneNumber = useCallback((v: string) => setPhoneRaw(digitsOnly(v, 10)), []);
+  const setEmail = useCallback((v: string) => setEmailRaw(v.replace(/\s/g, "")), []);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -47,54 +62,53 @@ export function useSignUpViewModel() {
   const [errors, setErrors] = useState<ErrorsType>({});
 
   // ── Automatic DD/MM/YYYY format ──────────────────────────────────────────
-  const setBirthDate = useCallback((text: string) => {
-    // Digits only
-    const digits = text.replace(/\D/g, "");
-    let formatted = "";
-    if (digits.length <= 2) {
-      formatted = digits;
-    } else if (digits.length <= 4) {
-      formatted = digits.slice(0, 2) + "/" + digits.slice(2);
-    } else {
-      formatted = digits.slice(0, 2) + "/" + digits.slice(2, 4) + "/" + digits.slice(4, 8);
-    }
-    setBirthDateRaw(formatted);
-  }, []);
+  const setBirthDate = useCallback((text: string) => setBirthDateRaw(formatDateText(text)), []);
+  // The document number accepts digits for C.C and T.I, letters and digits for a foreign document
+  const setDocument = useCallback((v: string) => setDocumentRaw(documentFilter(documentType, v)), [documentType]);
 
   const validateForm = useCallback(() => {
     const newErrors: ErrorsType = {};
 
     if (!name.trim()) {
       newErrors.name = "El nombre es obligatorio";
+    } else if (!isValidName(name)) {
+      newErrors.name = "Escribe tu nombre completo";
     }
 
     if (!phoneNumber.trim()) {
       newErrors.phoneNumber = "El teléfono es obligatorio";
-    }
-
-    if (!document.trim()) {
-      newErrors.document = "El número de documento es obligatorio";
+    } else if (!isValidCellphone(phoneNumber)) {
+      newErrors.phoneNumber = "Escribe un celular de 10 dígitos que empiece por 3";
     }
 
     if (!documentType) {
       newErrors.documentType = "El tipo de documento es obligatorio";
     }
 
+    if (!document.trim()) {
+      newErrors.document = "El número de documento es obligatorio";
+    } else if (documentType && !isValidDocument(documentType, document)) {
+      newErrors.document =
+        documentType === "Documento extranjero"
+          ? "Escribe entre 5 y 15 letras o números"
+          : "Escribe entre 6 y 10 números, sin puntos";
+    }
+
     if (!birthDate.trim()) {
       newErrors.birthDate = "La fecha de nacimiento es obligatoria";
-    } else if (birthDate.length < 10) {
-      newErrors.birthDate = "Ingresa una fecha completa DD/MM/AAAA";
+    } else if (!dateToIso(birthDate)) {
+      newErrors.birthDate = "Escribe una fecha válida DD/MM/AAAA";
     }
 
     if (!email) {
       newErrors.email = "El correo es obligatorio";
-    } else if (!email.includes("@")) {
-      newErrors.email = "Correo inválido";
+    } else if (!isValidEmail(email)) {
+      newErrors.email = "Escribe un correo válido, por ejemplo nombre@correo.com";
     }
 
     if (!password) {
       newErrors.password = "La contraseña es obligatoria";
-    } else if (password.length < 8) {
+    } else if (!isValidPassword(password)) {
       newErrors.password = "Mínimo 8 caracteres";
     }
 
@@ -150,6 +164,8 @@ export function useSignUpViewModel() {
 
   const selectDocumentType = useCallback((type: string) => {
     setDocumentType(type);
+    // What was typed is adapted to the new type (digits only for C.C and T.I)
+    setDocumentRaw((current) => documentFilter(type, current));
     setShowList(false);
   }, []);
 

@@ -1076,9 +1076,9 @@
     "fecha": "Date de naissance",
     "guardar": "Enregistrer et continuer",
     "otra_cuenta": "Utiliser un autre compte",
-    "error_telefono": "Saisissez un numéro à 10 chiffres",
+    "error_telefono": "Saisis un portable de 10 chiffres commençant par 3",
     "error_tipo": "Choisissez le type de document",
-    "error_documento": "Saisissez votre numéro de document",
+    "error_documento": "Saisis un document valide : 6 à 10 chiffres (C.C ou T.I) ou 5 à 15 lettres et chiffres (étranger)",
     "error_fecha": "Saisissez une date valide JJ/MM/AAAA",
     "error_guardar": "Impossible d'enregistrer. Vérifiez votre connexion et réessayez."
   }

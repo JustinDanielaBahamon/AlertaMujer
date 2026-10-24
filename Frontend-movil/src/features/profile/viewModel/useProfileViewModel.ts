@@ -8,6 +8,8 @@ import * as ImagePicker from "expo-image-picker";
 import { STORAGE_KEY_LOCATION } from "../../tutorial/viewModel/useLocationTutorialViewModel";
 import { deleteMyAccount, getMe, updateMe } from "../../../services/users.service";
 import { toStorablePhoto } from "../../../services/photos.service";
+import { dateToIso, formatDateText } from "../../completeSignUp/profileIncomplete";
+import { digitsOnly, isValidCellphone, isValidName, lettersOnly } from "../../../utils/validators";
 
 type ProfileNavigation = NativeStackNavigationProp<MainStackParamList, "Profile">;
 
@@ -97,52 +99,28 @@ export function useProfileViewModel() {
     }
   }, [profilePhoto, updateUser]);
 
-  // ── DD/MM/YYYY date validation ─────────────────────────────────────────────
-  const validateDate = (date: string): boolean => {
-    if (!date.trim()) return true; // optional field
-    const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
-    const match = date.match(regex);
-    if (!match) return false;
-    const day = parseInt(match[1], 10);
-    const month = parseInt(match[2], 10);
-    const year = parseInt(match[3], 10);
-    if (month < 1 || month > 12) return false;
-    if (day < 1 || day > 31) return false;
-    if (year < 1900 || year > new Date().getFullYear()) return false;
-    return true;
-  };
+  // ── DD/MM/YYYY date validation: a real date and a reasonable age ───────────
+  const validateDate = (date: string): boolean => !date.trim() || dateToIso(date) !== null;
 
   // ── Automatic date formatting while typing ─────────────────────────────────
-  const handleDateChange = useCallback((text: string) => {
-    // Only digits and "/"
-    const clean = text.replace(/[^\d/]/g, "");
-    // Adds "/" automatically at positions 2 and 5
-    let formatted = clean;
-    if (clean.length === 2 && !clean.includes("/")) {
-      formatted = clean + "/";
-    } else if (clean.length === 5 && clean.split("/").length === 2) {
-      formatted = clean + "/";
-    }
-    setBirthDate(formatted.slice(0, 10));
-  }, []);
+  const handleDateChange = useCallback((text: string) => setBirthDate(formatDateText(text)), []);
+
+  // Letters only in the name and 10 digits in the phone, as in the sign-up
+  const changeName = useCallback((text: string) => setName(lettersOnly(text)), []);
+  const changePhone = useCallback((text: string) => setPhoneNumber(digitsOnly(text, 10)), []);
 
   // ── Save changes ──────────────────────────────────────────────────────────
   const saveChanges = useCallback(async () => {
-    if (!name.trim()) {
-      setMessage("El nombre no puede estar vacío.");
+    if (!isValidName(name)) {
+      setMessage("Escribe tu nombre completo.");
       return;
     }
-    const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-    if (!validEmail) {
-      setMessage("El correo no tiene un formato válido.");
-      return;
-    }
-    if (phoneNumber.trim() && phoneNumber.trim().length < 7) {
-      setMessage("El teléfono no es válido.");
+    if (phoneNumber.trim() && !isValidCellphone(phoneNumber)) {
+      setMessage("Escribe un celular de 10 dígitos que empiece por 3.");
       return;
     }
     if (!validateDate(birthDate)) {
-      setMessage("La fecha debe tener formato DD/MM/YYYY.");
+      setMessage("Escribe una fecha válida DD/MM/AAAA.");
       return;
     }
 
@@ -211,9 +189,9 @@ export function useProfileViewModel() {
   }, [navigation]);
 
   return {
-    name: name,          setName: setName,
+    name: name,          setName: changeName,
     email: email,          setEmail: setEmail,
-    phoneNumber: phoneNumber,        setPhoneNumber: setPhoneNumber,
+    phoneNumber: phoneNumber,        setPhoneNumber: changePhone,
     birthDate: birthDate, handleDateChange: handleDateChange,
     profilePhoto: profilePhoto,      selectPhoto: selectPhoto,
     document: document,

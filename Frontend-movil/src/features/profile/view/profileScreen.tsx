@@ -153,7 +153,8 @@ export default function ProfileScreen() {
                   placeholder={t.perfil.placeholder_correo}
                   placeholderTextColor={theme.icon + "70"}
                   value={vm.email}
-                  onChangeText={vm.setEmail}
+                  // The email is the account sign-in: it is not changed from the profile
+                  editable={false}
                   keyboardType="email-address"
                   autoCapitalize="none"
                   selectionColor={theme.icon}
@@ -172,7 +173,8 @@ export default function ProfileScreen() {
                   placeholderTextColor={theme.icon + "70"}
                   value={vm.phoneNumber}
                   onChangeText={vm.setPhoneNumber}
-                  keyboardType="phone-pad"
+                  keyboardType="number-pad"
+                  maxLength={10}
                   selectionColor={theme.icon}
                 />
               </View>

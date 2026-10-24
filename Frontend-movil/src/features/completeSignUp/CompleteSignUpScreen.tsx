@@ -19,6 +19,7 @@ import { useLocale } from "../../contexts/LocaleContext";
 import { updateMe } from "../../services/users.service";
 import { styles } from "../authentication/styles/signUp.styles";
 import { dateToIso, formatDateText } from "./profileIncomplete";
+import { documentFilter, isValidCellphone, isValidDocument } from "../../utils/validators";
 
 const TYPES = ["C.C", "T.I", "Documento extranjero"] as const;
 const PURPLE = "#6A3FC9";
@@ -46,9 +47,9 @@ export default function CompleteSignUpScreen({ onDone }: { onDone: () => void })
   const save = async () => {
     const e: Errors = {};
     const tel = phoneNumber.replace(/\D/g, "");
-    if (tel.length !== 10) e.telefono = c.error_telefono;
+    if (!isValidCellphone(tel)) e.telefono = c.error_telefono;
     if (!type) e.tipo = c.error_tipo;
-    if (!document.trim() || document.trim().length < 5) e.documento = c.error_documento;
+    if (!isValidDocument(type, document.trim())) e.documento = c.error_documento;
     const iso = dateToIso(date);
     if (!iso) e.fecha = c.error_fecha;
     setErrors(e);
@@ -119,7 +120,10 @@ export default function CompleteSignUpScreen({ onDone }: { onDone: () => void })
               {TYPES.map((op) => (
                 <TouchableOpacity
                   key={op}
-                  onPress={() => setType(op)}
+                  onPress={() => {
+                    setType(op);
+                    setDocument((current) => documentFilter(op, current));
+                  }}
                   style={[local.chip, type === op && local.chipActive]}
                   accessibilityRole="radio"
                   accessibilityState={{ selected: type === op }}
@@ -139,10 +143,11 @@ export default function CompleteSignUpScreen({ onDone }: { onDone: () => void })
                 style={styles.emailInput}
                 placeholder={t.registro.num_documento}
                 placeholderTextColor="#000"
-                maxLength={20}
+                maxLength={15}
                 autoCapitalize="characters"
+                keyboardType={type === "Documento extranjero" ? "default" : "number-pad"}
                 value={document}
-                onChangeText={setDocument}
+                onChangeText={(v) => setDocument(documentFilter(type, v))}
               />
             </View>
             {errors.documento ? (
