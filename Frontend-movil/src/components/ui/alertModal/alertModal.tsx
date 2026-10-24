@@ -2,6 +2,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 import { Modal, Text, TouchableOpacity, View } from "react-native";
 import { styles } from "./alertModal.styles";
+import { useDialogColors } from "../dialogColors";
 
 export type AlertType = "success" | "error" | "warning";
 
@@ -34,6 +35,7 @@ export default function AlertModal({
   buttonTextValue,
   onClose,
 }: AlertModalProps) {
+  const dialog = useDialogColors();
   const cfg = CONFIG[type];
 
   return (
@@ -44,7 +46,7 @@ export default function AlertModal({
       onRequestClose={onClose}
     >
       <View style={styles.overlay}>
-        <View style={styles.card}>
+        <View style={[styles.card, dialog.card]}>
           {/* Icon inside a circle */}
           <View
             style={[
@@ -55,8 +57,8 @@ export default function AlertModal({
             <MaterialIcons name={cfg.icon} size={42} color={cfg.color} />
           </View>
 
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.message}>{message}</Text>
+          <Text style={[styles.title, dialog.title]}>{title}</Text>
+          <Text style={[styles.message, dialog.text]}>{message}</Text>
 
           <TouchableOpacity
             style={styles.button}

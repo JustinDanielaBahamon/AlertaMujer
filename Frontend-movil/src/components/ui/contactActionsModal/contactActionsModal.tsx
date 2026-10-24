@@ -19,6 +19,7 @@ import { View, Text, Modal, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { styles } from './contactActionsModal.styles';
 import { useLocale } from '../../../contexts/LocaleContext';
+import { useDialogColors } from "../dialogColors";
 
 interface ContactActionsModalProps {
   visible: boolean;
@@ -35,6 +36,7 @@ export default function ContactActionsModal({
   onDelete,
   onClose 
 }: ContactActionsModalProps) {
+  const dialog = useDialogColors();
   const { t } = useLocale();
 
   return (
@@ -55,7 +57,7 @@ export default function ContactActionsModal({
           activeOpacity={1}
           onPress={(e) => e.stopPropagation()} 
         >
-          <View style={styles.modalCard}>
+          <View style={[styles.modalCard, dialog.card]}>
             
             {/* ICON WITH A PURPLE CIRCLE */}
             <View style={styles.iconCircle}>
@@ -67,7 +69,7 @@ export default function ContactActionsModal({
               {contactNameValue}
             </Text>
             
-            <Text style={styles.modalSubtitle}>
+            <Text style={[styles.modalSubtitle, dialog.text]}>
               {t.contactos.que_deseas}
             </Text>
 

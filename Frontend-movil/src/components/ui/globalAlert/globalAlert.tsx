@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Alert, Modal, Text, TouchableOpacity, View } from "react-native";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { styles } from "./globalAlert.styles";
+import { useDialogColors } from "../dialogColors";
 
 /**
  * GLOBAL ALERT
@@ -97,6 +98,7 @@ Alert.alert = (title, message, buttons, options) =>
 
 // ─── Component ───────────────────────────────────────────────────────────────
 export default function GlobalAlertHost() {
+  const dialog = useDialogColors();
   const { t } = useLocale();
   const [current, setCurrent] = useState<AlertItem | null>(null);
 
@@ -144,7 +146,7 @@ export default function GlobalAlertHost() {
       }}
     >
       <View style={styles.overlay}>
-        <View style={styles.card}>
+        <View style={[styles.card, dialog.card]}>
           <View
             style={[
               styles.iconCircle,
@@ -154,8 +156,8 @@ export default function GlobalAlertHost() {
             <MaterialIcons name={cfg.icon} size={42} color={cfg.color} />
           </View>
 
-          {current.title ? <Text style={styles.title}>{current.title}</Text> : null}
-          {current.message ? <Text style={styles.message}>{current.message}</Text> : null}
+          {current.title ? <Text style={[styles.title, dialog.title]}>{current.title}</Text> : null}
+          {current.message ? <Text style={[styles.message, dialog.text]}>{current.message}</Text> : null}
 
           <View style={styles.buttons}>
             {buttons.map((b, i) => {
@@ -172,7 +174,7 @@ export default function GlobalAlertHost() {
                   onPress={() => close(b)}
                   activeOpacity={0.8}
                 >
-                  <Text style={[styles.buttonText, isCancel && styles.cancelButtonText]}>
+                  <Text style={[styles.buttonText, isCancel && styles.cancelButtonText, isCancel && dialog.secondaryText]}>
                     {b.text ?? t.modal.aceptar}
                   </Text>
                 </TouchableOpacity>

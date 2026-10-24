@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, Modal, TouchableOpacity } from 'react-native';
 import { localStyles } from './confirmationStyle';
 import { useLocale } from '../../../contexts/LocaleContext';
+import { useDialogColors } from "../dialogColors";
 
 interface ConfirmationModalProps {
   visible: boolean;
@@ -20,20 +21,21 @@ export default function ConfirmationModal({
   onBack,
   confirmOnly, // ← add this
 }: ConfirmationModalProps) {
+  const dialog = useDialogColors();
   const { t } = useLocale();
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onBack}>
       <View style={localStyles.overlay}>
-        <View style={localStyles.modalCard}>
+        <View style={[localStyles.modalCard, dialog.card]}>
           
           <View style={localStyles.iconCircle}>
             <Text style={localStyles.iconText}>⚠️</Text>
           </View>
 
-          <Text style={localStyles.modalTitle}>{t.confirmacion.titulo}</Text>
+          <Text style={[localStyles.modalTitle, dialog.title]}>{t.confirmacion.titulo}</Text>
           
-          <Text style={localStyles.modalSubtitle}>
+          <Text style={[localStyles.modalSubtitle, dialog.text]}>
             {t.confirmacion.subtitulo}
           </Text>
 
