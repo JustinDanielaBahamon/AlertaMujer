@@ -36,21 +36,27 @@ function listenAuthExpired() {
 }
 
 /**
- * Starts (or updates) the service for the active trip, or stops it if there is none. Must be called
- * with the app open. false if it could not start (location permission missing).
+ * running: the phone is sending its signal of life; stopped: there is no active trip; unsupported:
+ * this version of the app has no trip service; failed: it could not start (location permission).
  */
-export async function syncTripSignal(trip: Trip | null): Promise<boolean> {
-  if (!supported()) return false;
+export type TripSignalState = "running" | "stopped" | "unsupported" | "failed";
+
+/**
+ * Starts (or updates) the service for the active trip, or stops it if there is none. Must be called
+ * with the app open.
+ */
+export async function syncTripSignal(trip: Trip | null): Promise<TripSignalState> {
+  if (!supported()) return "unsupported";
   if (!trip || trip.status !== "active") {
     stopTripSignal();
-    return true;
+    return "stopped";
   }
   listenAuthExpired();
   const token = await freshToken(TOKEN_MIN_MS);
-  if (!token) return false;
+  if (!token) return "failed";
   // The phone warns her when she enters or approaches one during the trip
   const zones = await getRiskZones();
-  return ShakeSensor.startTrip({
+  const started = ShakeSensor.startTrip({
     tripId: trip.id,
     baseUrl: baseUrlFor(TRIP_ROUTE),
     token,
@@ -60,6 +66,7 @@ export async function syncTripSignal(trip: Trip | null): Promise<boolean> {
     arrivalMs: trip.arrival.getTime(),
     riskZones: riskZonesJson(zones),
   });
+  return started ? "running" : "failed";
 }
 
 export function stopTripSignal(): void {

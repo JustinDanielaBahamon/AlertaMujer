@@ -49,7 +49,7 @@ describe("tripSignal", () => {
   beforeEach(() => jest.clearAllMocks());
 
   it("starts the native service with the trip, the service URL and a fresh token", async () => {
-    await expect(syncTripSignal(trip())).resolves.toBe(true);
+    await expect(syncTripSignal(trip())).resolves.toBe("running");
 
     expect(ShakeSensor.startTrip).toHaveBeenCalledWith({
       tripId: 4,
@@ -74,7 +74,7 @@ describe("tripSignal", () => {
   it("does not start without a session", async () => {
     (freshToken as jest.Mock).mockResolvedValueOnce(null);
 
-    await expect(syncTripSignal(trip())).resolves.toBe(false);
+    await expect(syncTripSignal(trip())).resolves.toBe("failed");
     expect(ShakeSensor.startTrip).not.toHaveBeenCalled();
   });
 

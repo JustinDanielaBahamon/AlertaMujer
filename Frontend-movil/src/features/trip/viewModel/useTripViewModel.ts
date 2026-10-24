@@ -6,7 +6,7 @@ import { useContactsContext } from "../../../contexts/ContactsContext";
 import { useLocale } from "../../../contexts/LocaleContext";
 import { getOrCreateDevice } from "../../../services/devices.service";
 import { frequentLocationsService, type FrequentLocationApi } from "../../../services/frequent-locations.service";
-import { getPlace, placeDescription } from "../../../services/geocoding.service";
+import { getPlace, placeDescription, searchPlaces, type FoundPlace } from "../../../services/geocoding.service";
 import { LocationService } from "../../../services/location.service";
 import {
   extendTrip,
@@ -17,7 +17,13 @@ import {
   type Trip,
 } from "../../../services/safe-trips.service";
 import type { LatLng } from "../../../components/map/MapLibreMap";
-import { onTripSignalEnded, stopTripSignal, syncTripSignal, tripSignalStatus } from "../tripSignal";
+import {
+  onTripSignalEnded,
+  stopTripSignal,
+  syncTripSignal,
+  tripSignalStatus,
+  type TripSignalState,
+} from "../tripSignal";
 
 export const QUICK_MINUTES = [15, 30, 45, 60, 90];
 
@@ -40,19 +46,22 @@ export function useTripViewModel() {
   const [minutes, setMinutes] = useState(30);
   const [places, setPlaces] = useState<FrequentLocationApi[]>([]);
   const [now, setNow] = useState(Date.now());
-  // Destination marked on the map (when it is not a saved place) and its address
+  // Point B: the destination point (saved place, address found or tapped on the map)
   const [mapPoint, setMapPoint] = useState<LatLng | null>(null);
-  const [mapPointLabel, setMapPointLabel] = useState("");
   const [pickerOpen, setPickerOpen] = useState(false);
+  // Point A: always where she is now
   const [origin, setOrigin] = useState<LatLng | null>(null);
-  const [signalReady, setSignalReady] = useState(true);
+  const [originLabel, setOriginLabel] = useState("");
+  const [found, setFound] = useState<FoundPlace[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [signalState, setSignalState] = useState<TripSignalState>("running");
 
   // Every time the screen shows the trip, the signal-of-life service is (re)started for it
   const show = useCallback((found: Trip | null) => {
     setTrip(found);
     syncTripSignal(found)
-      .then(setSignalReady)
-      .catch(() => setSignalReady(false));
+      .then(setSignalState)
+      .catch(() => setSignalState("failed"));
   }, []);
 
   const load = useCallback(() => {
@@ -73,6 +82,47 @@ export function useTripViewModel() {
     frequentLocationsService.getByUser(user.id).then(setPlaces).catch(() => {});
   }, [user?.id]);
 
+  // Point A: her current location and its neighborhood, as soon as the screen opens
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const here = await LocationService.getCurrentPosition(false);
+        if (!here || !active) return;
+        const point = { latitude: here.coords.latitude, longitude: here.coords.longitude };
+        setOrigin(point);
+        const where = await getPlace(point.latitude, point.longitude).catch(() => null);
+        if (active && where) setOriginLabel(where.neighborhood ?? placeDescription(where));
+      } catch {
+        // Without location point A is shown as "your current location"
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // While she types the destination (and has not chosen a point) addresses are searched near her
+  useEffect(() => {
+    if (mapPoint || destination.trim().length < 3) {
+      setFound([]);
+      setSearching(false);
+      return;
+    }
+    setSearching(true);
+    let active = true;
+    // One query per pause in typing (OpenStreetMap asks for at most 1 per second)
+    const id = setTimeout(() => {
+      searchPlaces(destination, origin)
+        .then((r) => active && setFound(r))
+        .finally(() => active && setSearching(false));
+    }, 700);
+    return () => {
+      active = false;
+      clearTimeout(id);
+    };
+  }, [destination, mapPoint, origin]);
+
   // On-screen countdown and arrival preview (every 15 s is enough: they are shown in minutes)
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 15000);
@@ -81,41 +131,41 @@ export function useTripViewModel() {
 
   const choosePlace = (l: FrequentLocationApi) => {
     setPlace(l);
-    setMapPoint(null);
+    setMapPoint(l.latitude != null && l.longitude != null ? { latitude: Number(l.latitude), longitude: Number(l.longitude) } : null);
     setDestination(l.name);
   };
 
-  // The map opens on her current location (the origin of the trip)
-  const openPicker = async () => {
-    setPickerOpen(true);
-    if (origin) return;
-    try {
-      const here = await LocationService.getCurrentPosition(true);
-      if (here) setOrigin({ latitude: here.coords.latitude, longitude: here.coords.longitude });
-    } catch {
-      // Without location the map opens on the default region
-    }
+  // An address from the search: it becomes point B
+  const chooseFound = (f: FoundPlace) => {
+    setPlace(null);
+    setMapPoint({ latitude: f.latitude, longitude: f.longitude });
+    setDestination(f.name);
+    setFound([]);
   };
 
-  const chooseMapPoint = async (point: LatLng) => {
+  const openPicker = () => setPickerOpen(true);
+
+  // Point B tapped on the map: its address becomes the destination name
+  const chooseMapPoint = async (point: LatLng, name?: string) => {
     setMapPoint(point);
     setPlace(null);
-    setMapPointLabel("");
-    const found = await getPlace(point.latitude, point.longitude).catch(() => null);
-    const label = found ? placeDescription(found) : "";
-    setMapPointLabel(label);
-    // A name is suggested only if she has not written one
-    setDestination((current) => (current.trim() ? current : label));
+    if (name) {
+      setDestination(name);
+      return;
+    }
+    const where = await getPlace(point.latitude, point.longitude).catch(() => null);
+    if (where) setDestination(placeDescription(where));
   };
 
   const clearMapPoint = () => {
     setMapPoint(null);
-    setMapPointLabel("");
+    setPlace(null);
   };
 
+  // Writing again after choosing a point means a different destination
   const changeDestination = (text: string) => {
     setDestination(text);
-    if (place && text !== place.name) setPlace(null);
+    if (mapPoint) clearMapPoint();
   };
 
   const error = (e: any) =>
@@ -128,7 +178,7 @@ export function useTripViewModel() {
       // The service needs the location permission to send her position during the trip
       await LocationService.requestPermissions(true);
       const device = await getOrCreateDevice();
-      const target = place ?? mapPoint;
+      const target = mapPoint;
       show(
         await startTrip({
           destination: destination.trim(),
@@ -209,15 +259,18 @@ export function useTripViewModel() {
     cancel: cancel,
     goBack: navigation.goBack,
     mapPoint: mapPoint,
-    mapPointLabel: mapPointLabel,
+    originLabel: originLabel,
+    found: found,
+    searching: searching,
+    chooseFound: chooseFound,
     pickerOpen: pickerOpen,
     openPicker: openPicker,
     closePicker: () => setPickerOpen(false),
     chooseMapPoint: chooseMapPoint,
     clearMapPoint: clearMapPoint,
     origin: origin,
-    // false: the phone could not start sending its signal of life (permission or old version)
-    signalReady: signalReady,
+    // Whether the phone is sending its signal of life (or why not)
+    signalState: signalState,
     lastSignal: lastSignal,
     queuedSignals: signal?.queued ?? 0,
     hasDestinationPoint: !!trip && trip.destinationLatitude != null,

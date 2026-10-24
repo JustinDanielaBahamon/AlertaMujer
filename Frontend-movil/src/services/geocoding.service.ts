@@ -67,3 +67,47 @@ export async function getPlace(lat: number, lng: number): Promise<PointPlace | n
 // Text to show: "Carrera 7 · Barrio Quebraditas" (or only what is available).
 export const placeDescription = (l: PointPlace) =>
   [l.place, l.neighborhood].filter(Boolean).join(" · ");
+/** A place found by its address or name. */
+export type FoundPlace = { name: string; detail: string; latitude: number; longitude: number };
+
+/**
+ * Searches an address or place by text (OpenStreetMap, free, no key), preferring results near her.
+ * Empty list without internet or for very short texts.
+ */
+export async function searchPlaces(
+  text: string,
+  near?: { latitude: number; longitude: number } | null,
+): Promise<FoundPlace[]> {
+  const q = text.trim();
+  if (q.length < 3) return [];
+  // ~25 km around her: results in her city first, but others are not excluded
+  const box = near
+    ? `&viewbox=${near.longitude - 0.25},${near.latitude + 0.25},${near.longitude + 0.25},${near.latitude - 0.25}`
+    : "";
+  const url =
+    `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=6&countrycodes=co` +
+    `&accept-language=es&q=${encodeURIComponent(q)}${box}`;
+  try {
+    const res = await fetch(url, {
+      headers: { "User-Agent": "AlertaMujer/1.0 (app movil)", Accept: "application/json" },
+    });
+    if (!res.ok) return [];
+    const data: any[] = await res.json();
+    const places: FoundPlace[] = data.map((r) => {
+      const a = r.address ?? {};
+      const road = clear(a.road);
+      const street = road ? (a.house_number ? `${road} #${a.house_number}` : road) : null;
+      const name = clear(r.name) ?? street ?? clear(a.neighbourhood) ?? String(r.display_name ?? "").split(",")[0];
+      const detail = [street !== name ? street : null, clear(a.neighbourhood) ?? clear(a.suburb), clear(a.city) ?? clear(a.town)]
+        .filter(Boolean)
+        .join(" · ");
+      return { name, detail, latitude: Number(r.lat), longitude: Number(r.lon) };
+    });
+    // Closest first: the same name may exist in several towns
+    if (!near) return places;
+    const away = (p: FoundPlace) => (p.latitude - near.latitude) ** 2 + (p.longitude - near.longitude) ** 2;
+    return places.sort((a, b) => away(a) - away(b));
+  } catch {
+    return [];
+  }
+}

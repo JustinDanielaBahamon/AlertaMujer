@@ -27,6 +27,10 @@ export default function TripScreen() {
   const overdue = !!vm.trip && vm.minutesLeft <= 0;
   const soon = !!vm.trip && !overdue && vm.minutesLeft <= 5;
   const stateColor = overdue ? DANGER : soon ? WARNING : accent;
+  const signalOn = vm.signalState === "running";
+  // Saved places filtered by what she writes (all of them while the field is empty)
+  const query = vm.mapPoint ? "" : vm.destination.trim().toLowerCase();
+  const savedMatches = vm.places.filter((l) => !query || l.name.toLowerCase().includes(query)).slice(0, 6);
 
   // Who gets the notice if she does not confirm (or a warning if nobody would)
   const contactsNotice = vm.contactNames.length > 0 ? (
@@ -90,21 +94,23 @@ export default function TripScreen() {
             </View>
 
             {/* Signal of life: what her phone is sending to the server */}
-            <View style={[styles.card, local.contactsRow, !vm.signalReady && local.warningCard]}>
+            <View style={[styles.card, local.contactsRow, !signalOn && local.warningCard]}>
               <Ionicons
-                name={!vm.signalReady ? "warning" : vm.queuedSignals > 0 ? "cloud-offline" : "radio"}
+                name={!signalOn ? "warning" : vm.queuedSignals > 0 ? "cloud-offline" : "radio"}
                 size={18}
-                color={!vm.signalReady ? DANGER : accent}
+                color={!signalOn ? DANGER : accent}
               />
               <Text style={[local.contactsText, { color: theme.text }]}>
-                {!vm.signalReady
-                  ? tr.senal_no_activa
-                  : vm.queuedSignals > 0
-                    ? tr.senal_sin_internet
-                    : vm.lastSignal
-                      ? tr.senal_ultima.replace("{hora}", time(vm.lastSignal))
-                      : tr.senal_activa}
-                {vm.hasDestinationPoint ? ` ${tr.senal_destino}` : ""}
+                {vm.signalState === "unsupported"
+                  ? tr.senal_no_soportada
+                  : !signalOn
+                    ? tr.senal_no_activa
+                    : vm.queuedSignals > 0
+                      ? tr.senal_sin_internet
+                      : vm.lastSignal
+                        ? tr.senal_ultima.replace("{hora}", time(vm.lastSignal))
+                        : tr.senal_activa}
+                {signalOn && vm.hasDestinationPoint ? ` ${tr.senal_destino}` : ""}
               </Text>
             </View>
 
@@ -143,18 +149,84 @@ export default function TripScreen() {
             <Text style={styles.intro}>{tr.intro}</Text>
 
             <View style={styles.card}>
-              <Text style={[local.label, { color: theme.text }]}>{tr.a_donde}</Text>
-              <TextInput
-                value={vm.destination}
-                onChangeText={vm.changeDestination}
-                placeholder={tr.destino_placeholder}
-                placeholderTextColor={accent + "70"}
-                maxLength={120}
-                style={[local.input, { borderColor: accent + "50", color: theme.text }]}
-              />
-              {vm.places.length > 0 && (
+              {/* Point A: always where she is now */}
+              <View style={local.routeRow}>
+                <View style={[local.routeDot, { backgroundColor: ORIGIN_COLOR }]}>
+                  <Text style={local.routeDotText}>A</Text>
+                </View>
+                <View style={local.routeBody}>
+                  <Text style={[local.label, { color: theme.text }]}>{tr.desde}</Text>
+                  <Text style={[local.routeValue, { color: theme.text }]} numberOfLines={1}>
+                    {vm.originLabel || tr.tu_ubicacion_actual}
+                  </Text>
+                </View>
+              </View>
+              <View style={[local.routeLine, { backgroundColor: accent + "40" }]} />
+
+              {/* Point B: she writes the address (or a saved place) or marks it on the map */}
+              <View style={local.routeRow}>
+                <View style={[local.routeDot, { backgroundColor: accent }]}>
+                  <Text style={local.routeDotText}>B</Text>
+                </View>
+                <View style={local.routeBody}>
+                  <Text style={[local.label, { color: theme.text }]}>{tr.a_donde}</Text>
+                  <View style={[local.searchBox, { borderColor: vm.mapPoint ? accent : accent + "50" }]}>
+                    <Ionicons name={vm.mapPoint ? "flag" : "search"} size={16} color={accent} />
+                    <TextInput
+                      value={vm.destination}
+                      onChangeText={vm.changeDestination}
+                      placeholder={tr.buscar_destino}
+                      placeholderTextColor={accent + "70"}
+                      maxLength={120}
+                      style={[local.searchInput, { color: theme.text }]}
+                    />
+                    {vm.searching && <ActivityIndicator size="small" color={accent} />}
+                    {!!vm.destination && (
+                      <TouchableOpacity
+                        onPress={() => vm.changeDestination("")}
+                        hitSlop={8}
+                        accessibilityLabel={tr.mapa_quitar}
+                      >
+                        <Ionicons name="close-circle" size={18} color={accent + "90"} />
+                      </TouchableOpacity>
+                    )}
+                    <TouchableOpacity onPress={vm.openPicker} hitSlop={8} accessibilityLabel={tr.mapa_marcar}>
+                      <Ionicons name="map" size={20} color={accent} />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+
+              {/* Addresses found while she types */}
+              {vm.found.length > 0 && (
+                <View style={[local.results, { borderColor: accent + "30" }]}>
+                  {vm.found.map((f, i) => (
+                    <TouchableOpacity
+                      key={`${f.latitude},${f.longitude},${i}`}
+                      onPress={() => vm.chooseFound(f)}
+                      style={[local.result, i > 0 && { borderTopWidth: 1, borderTopColor: accent + "20" }]}
+                    >
+                      <Ionicons name="location" size={16} color={accent} />
+                      <View style={local.routeBody}>
+                        <Text style={[local.resultName, { color: theme.text }]} numberOfLines={1}>{f.name}</Text>
+                        {!!f.detail && (
+                          <Text style={[local.resultDetail, { color: theme.text }]} numberOfLines={1}>{f.detail}</Text>
+                        )}
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+              {!vm.mapPoint && !vm.searching && vm.found.length === 0 && vm.destination.trim().length >= 3 && (
+                <TouchableOpacity onPress={vm.openPicker} style={local.noResults}>
+                  <Text style={[local.resultDetail, { color: theme.text }]}>{tr.sin_resultados}</Text>
+                </TouchableOpacity>
+              )}
+
+              {/* Saved places that match what she writes */}
+              {savedMatches.length > 0 && (
                 <View style={local.chips}>
-                  {vm.places.slice(0, 6).map((l) => (
+                  {savedMatches.map((l) => (
                     <TouchableOpacity
                       key={l.id}
                       onPress={() => vm.choosePlace(l)}
@@ -167,29 +239,6 @@ export default function TripScreen() {
                     </TouchableOpacity>
                   ))}
                 </View>
-              )}
-
-              {/* Destination point: lets the phone notice when she arrives or moves away */}
-              {vm.mapPoint ? (
-                <View style={[local.pointRow, { borderColor: accent + "50" }]}>
-                  <Ionicons name="flag" size={16} color={accent} />
-                  <Text style={[local.pointText, { color: theme.text }]} numberOfLines={2}>
-                    {vm.mapPointLabel || tr.mapa_punto_marcado}
-                  </Text>
-                  <TouchableOpacity onPress={vm.openPicker} accessibilityLabel={tr.mapa_cambiar}>
-                    <Ionicons name="create-outline" size={18} color={accent} />
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={vm.clearMapPoint} accessibilityLabel={tr.mapa_quitar}>
-                    <Ionicons name="close-circle" size={18} color={accent} />
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                !vm.place && (
-                  <TouchableOpacity onPress={vm.openPicker} style={[local.addContact, { borderColor: accent, marginTop: 10 }]}>
-                    <Ionicons name="map" size={16} color={accent} />
-                    <Text style={[local.secondaryButtonText, { color: accent }]}>{tr.mapa_marcar}</Text>
-                  </TouchableOpacity>
-                )
               )}
 
               <Text style={[local.label, { color: theme.text, marginTop: 16 }]}>{tr.en_cuanto}</Text>
@@ -245,7 +294,7 @@ export default function TripScreen() {
         visible={vm.pickerOpen}
         origin={vm.origin}
         point={vm.mapPoint}
-        label={vm.mapPointLabel}
+        destination={vm.destination}
         onPick={vm.chooseMapPoint}
         onClose={vm.closePicker}
       />
@@ -254,6 +303,8 @@ export default function TripScreen() {
 }
 
 const DANGER = "#C62828";
+// Point A in light violet, point B in the theme color (same as the map)
+const ORIGIN_COLOR = "#B388FF";
 const WARNING = "#E65100";
 
 const local = StyleSheet.create({
@@ -265,8 +316,19 @@ const local = StyleSheet.create({
   contactsText: { flex: 1, fontSize: 13, lineHeight: 19 },
   warningCard: { gap: 10, borderWidth: 1.5, borderColor: DANGER },
   addContact: { flexDirection: "row", alignSelf: "flex-start", alignItems: "center", gap: 6, borderWidth: 1.5, borderRadius: 14, paddingHorizontal: 12, paddingVertical: 8 },
-  pointRow: { flexDirection: "row", alignItems: "center", gap: 8, borderWidth: 1.5, borderRadius: 12, paddingHorizontal: 10, paddingVertical: 8, marginTop: 10 },
-  pointText: { flex: 1, fontSize: 13, fontWeight: "600" },
+  routeRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  routeBody: { flex: 1 },
+  routeDot: { width: 26, height: 26, borderRadius: 13, alignItems: "center", justifyContent: "center" },
+  routeDotText: { color: "#fff", fontSize: 12, fontWeight: "900" },
+  routeValue: { fontSize: 15, fontWeight: "700", marginTop: 2 },
+  routeLine: { width: 2, height: 18, marginLeft: 12, marginVertical: 4 },
+  searchBox: { flexDirection: "row", alignItems: "center", gap: 8, borderWidth: 1.5, borderRadius: 12, paddingHorizontal: 10, marginTop: 6 },
+  searchInput: { flex: 1, fontSize: 15, paddingVertical: 9 },
+  results: { borderWidth: 1, borderRadius: 12, marginTop: 8, marginLeft: 38 },
+  result: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 12, paddingVertical: 10 },
+  resultName: { fontSize: 14, fontWeight: "700" },
+  resultDetail: { fontSize: 12, opacity: 0.7 },
+  noResults: { marginTop: 8, marginLeft: 38 },
   previewRow: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 12 },
   previewText: { fontSize: 13, fontWeight: "600", opacity: 0.85 },
   label: { fontSize: 12, fontWeight: "700", opacity: 0.7, letterSpacing: 0.4, textTransform: "uppercase", alignSelf: "stretch" },
