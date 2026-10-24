@@ -247,6 +247,11 @@ export function handleProtectionEvent({ type, detail }: Event): boolean {
   return false;
 }
 
+/** The alert ended (or its screen took over): the "Alert sent" notice must not reopen it. */
+export async function clearShakeAlertNotice(): Promise<void> {
+  await notifee.cancelNotification(SENT_ID).catch(() => {});
+}
+
 function protectionText(): string {
   if (options.shake && options.powerButton) {
     return "Agita el teléfono con fuerza o presiona 4 veces el botón de encendido para enviar una alerta a tus contactos.";

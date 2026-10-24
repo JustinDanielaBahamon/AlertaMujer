@@ -5,6 +5,7 @@ import type { NavigationContainerRefWithCurrent } from "@react-navigation/native
 import { useActivationMethods } from "../../contexts/ActivationMethodsContext";
 import ShakeSensor from "../../../modules/shake-sensor";
 import type { MainStackParamList } from "../../navigation/types";
+import { getAlert } from "../../services/alerts.service";
 import {
   onShakeAlertOpen,
   onShakeOnScreen,
@@ -42,6 +43,15 @@ async function askNoBatterySaver(name: string) {
  * Turns the "Active protection" service on or off depending on the methods the user enabled
  * (shaking the phone and/or the power button) and connects its events with navigation.
  */
+/** Offline we cannot know: the alert is opened (better than hiding an alert that is still on). */
+async function alertStillActive(alertId: number): Promise<boolean> {
+  try {
+    return (await getAlert(alertId)).status === "active";
+  } catch {
+    return true;
+  }
+}
+
 export function useShakeProtection(
   navigation: NavigationContainerRefWithCurrent<MainStackParamList>,
   withSession: boolean,
@@ -101,9 +111,11 @@ export function useShakeProtection(
       if (current && ALERT_SCREENS.has(current)) return;
       ir(() => navigation.navigate("Activation", { method: method }));
     });
-    const allowOpen = onShakeAlertOpen((alertId) =>
-      ir(() => navigation.navigate("ActiveAlert", { alertId: alertId, method: "agitar" })),
-    );
+    // A notice left in the tray after the alert ended must not reopen it
+    const allowOpen = onShakeAlertOpen(async (alertId) => {
+      if (!(await alertStillActive(alertId))) return;
+      ir(() => navigation.navigate("ActiveAlert", { alertId: alertId, method: "agitar" }));
+    });
     return () => {
       dropShake();
       allowOpen();

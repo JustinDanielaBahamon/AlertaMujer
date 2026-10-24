@@ -18,6 +18,7 @@ import { placeDescription, getPlace } from "../../../services/geocoding.service"
 import { reportLocation } from "../../../services/location-reporter.service";
 import { locationPermission } from "../../../services/safePermissions";
 import { takeOverAlert } from "../../shake/backgroundAlert";
+import { clearShakeAlertNotice } from "../../shake/protectionService";
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
 type ActiveAlertRoute = RouteProp<MainStackParamList, "ActiveAlert">;
@@ -167,6 +168,8 @@ export function useActiveAlertViewModel() {
   });
   useEffect(() => {
     if (!canLeave) return;
+    // The alert is over for this screen: the "Alerta enviada" notice must not open it again
+    void clearShakeAlertNotice();
     // "I'm still in danger": a new alert opens (the server already closed the previous one)
     if (newAlertRef.current) navigation.replace("ActiveAlert", targetContact ? { contact: targetContact } : undefined);
     else navigation.replace("DrawerHome");
