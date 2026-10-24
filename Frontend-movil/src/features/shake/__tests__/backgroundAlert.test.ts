@@ -16,8 +16,11 @@ jest.mock("../../../services/alerts.service", () => ({
   getAlert: jest.fn(),
 }));
 
-import { getAlert } from "../../../services/alerts.service";
-import { backgroundAlert, createShakeAlert } from "../backgroundAlert";
+import * as Location from "expo-location";
+import ShakeSensor from "../../../../modules/shake-sensor";
+import { createAlertWithRetries, getAlert } from "../../../services/alerts.service";
+import { reportLocation } from "../../../services/location-reporter.service";
+import { backgroundAlert, createShakeAlert, takeOverAlert } from "../backgroundAlert";
 
 const waitCycles = () => new Promise((r) => setTimeout(r, 0));
 
@@ -34,5 +37,24 @@ describe("alertaEnSegundoPlano", () => {
 
     for (let i = 0; i < 10; i++) await waitCycles();
     expect(backgroundAlert()).toBeNull();
+  });
+
+  it("does not wait for the GPS: it uses the last position and sends the precise one when it arrives", async () => {
+    takeOverAlert();
+    // The GPS timeout does not run out during this test
+    (ShakeSensor.wait as jest.Mock).mockReturnValueOnce(new Promise(() => {}));
+    let deliverFix: (fix: unknown) => void = () => {};
+    (Location.getCurrentPositionAsync as jest.Mock).mockReturnValueOnce(new Promise((r) => (deliverFix = r)));
+    (Location.getLastKnownPositionAsync as jest.Mock).mockResolvedValueOnce({ coords: { latitude: 1, longitude: 2 } });
+    (getAlert as jest.Mock).mockResolvedValue({ status: "resolved" });
+
+    await createShakeAlert();
+
+    expect(createAlertWithRetries).toHaveBeenLastCalledWith(expect.objectContaining({ latitude: 1, longitude: 2 }));
+    deliverFix({ coords: { latitude: 2.95, longitude: -75.29, accuracy: 8 } });
+    await waitCycles();
+    expect(reportLocation).toHaveBeenCalledWith(
+      expect.objectContaining({ latitude: 2.95, longitude: -75.29, alertaId: 41 }),
+    );
   });
 });

@@ -11,7 +11,7 @@ import { bigStyle } from "../../notifications/notificationStyle";
 import ShakeSensor from "../../../modules/shake-sensor";
 import { createShakeDetector } from "./shakeDetector";
 import { createPowerButtonDetector } from "./powerButtonDetector";
-import { backgroundAlert, createShakeAlert } from "./backgroundAlert";
+import { backgroundAlert, createShakeAlert, prepareAlertLocation } from "./backgroundAlert";
 import { notificationsPermission, locationPermission } from "../../services/safePermissions";
 
 /**
@@ -166,6 +166,8 @@ async function createChannels() {
 async function startCountdown(method: ProtectionMethod) {
   const countdown = { cancelled: false };
   countdownRunning = countdown;
+  // The GPS works during the 5 seconds: the alert goes out without waiting for it afterwards
+  prepareAlertLocation();
   try {
     for (let s = COUNTDOWN_SECONDS; s > 0; s--) {
       if (countdown.cancelled) return;

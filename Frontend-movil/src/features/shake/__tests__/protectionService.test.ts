@@ -43,6 +43,7 @@ jest.mock("expo-location", () => ({
 jest.mock("../backgroundAlert", () => ({
   backgroundAlert: jest.fn(() => null),
   createShakeAlert: jest.fn(async () => 77),
+  prepareAlertLocation: jest.fn(),
 }));
 
 import notifee from "@notifee/react-native";

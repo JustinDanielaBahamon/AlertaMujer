@@ -30,8 +30,29 @@ async function currentLocation(): Promise<Location.LocationObject | null> {
   }
 }
 
-async function locationForAlert(): Promise<Location.LocationObject | null> {
-  return (await currentLocation()) ?? (await Location.getLastKnownPositionAsync().catch(() => null));
+// Precise fix requested when the countdown starts, so the GPS works during those 5 seconds
+let pendingFix: Promise<Location.LocationObject | null> | null = null;
+
+/** Starts looking for the GPS position while the countdown runs (called when it starts). */
+export function prepareAlertLocation(): void {
+  pendingFix ??= currentLocation();
+}
+
+// A known position this recent is good enough to send the alert right away
+const RECENT_FIX_MS = 2 * 60 * 1000;
+// Without any known position the alert waits this long for the GPS, at most
+const MAX_FIX_WAIT_MS = 2000;
+
+/**
+ * The location the alert is created with, without making her wait: the GPS fix if it already arrived,
+ * otherwise the last known position; only with no position at all it waits a moment for the GPS.
+ */
+async function locationForAlert(fix: Promise<Location.LocationObject | null>): Promise<Location.LocationObject | null> {
+  const ready = await Promise.race([fix, Promise.resolve(undefined)]);
+  if (ready) return ready;
+  const last = await Location.getLastKnownPositionAsync({ maxAge: RECENT_FIX_MS }).catch(() => null);
+  if (last) return last;
+  return Promise.race([fix, ShakeSensor.wait(MAX_FIX_WAIT_MS).then(() => null)]);
 }
 
 const METHODS = {
@@ -44,7 +65,9 @@ export async function createShakeAlert(method: keyof typeof METHODS = "agitar"):
   const user = raw ? JSON.parse(raw).user : null;
   if (!user) throw new Error("No hay sesión iniciada");
 
-  const [device, location] = await Promise.all([getOrCreateDevice(), locationForAlert()]);
+  const fix = pendingFix ?? currentLocation();
+  pendingFix = null;
+  const [device, location] = await Promise.all([getOrCreateDevice(), locationForAlert(fix)]);
   // With retries: if the network fails or the server is waking up, the alert is not lost
   const alert = await createAlertWithRetries({
     userProfileId: user.id,
@@ -58,6 +81,16 @@ export async function createShakeAlert(method: keyof typeof METHODS = "agitar"):
   });
 
   alertInProgress = alert.id;
+  // The precise GPS position goes to the alert as soon as it arrives (it was created with a quicker one)
+  fix.then((precise) => {
+    if (!precise || precise === location) return;
+    reportLocation({
+      latitude: precise.coords.latitude,
+      longitude: precise.coords.longitude,
+      accuracy: precise.coords.accuracy,
+      alertaId: alert.id,
+    }).catch(() => {});
+  });
   followLocation(alert.id, Date.now());
   return alert.id;
 }
