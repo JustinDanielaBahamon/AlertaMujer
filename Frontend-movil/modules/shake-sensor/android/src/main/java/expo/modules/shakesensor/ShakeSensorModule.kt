@@ -217,7 +217,7 @@ class ShakeSensorModule : Module() {
         volumeWatcher = volumeWatcher ?: VolumeCancelWatcher(androidContext) {
           sendEvent("onVolumeCancel", emptyMap<String, Any>())
         }
-        volumeWatcher?.start()
+        volumeWatcher?.start(appContext.currentActivity)
       }
       Unit
     }
