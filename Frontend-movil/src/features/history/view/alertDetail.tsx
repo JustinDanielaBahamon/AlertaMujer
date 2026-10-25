@@ -160,6 +160,28 @@ export default function AlertDetail() {
 
   const openFullMap = () => alertCoordinate && setFullScreenMap(true);
 
+  // The big map is mounted when the modal finishes sliding (mounted during the animation it stayed
+  // blank or showed only the pin) and, once drawn, it fits the whole route
+  const fullMapRef = useRef<MapView>(null);
+  const [fullMapMounted, setFullMapMounted] = useState(false);
+  useEffect(() => {
+    if (!fullScreenMap) {
+      setFullMapMounted(false);
+      return undefined;
+    }
+    const id = setTimeout(() => setFullMapMounted(true), 300);
+    return () => clearTimeout(id);
+  }, [fullScreenMap]);
+
+  const fitFullMap = () => {
+    const points = alertCoordinate ? [...path, alertCoordinate] : path;
+    if (points.length < 2) return;
+    fullMapRef.current?.fitToCoordinates(points, {
+      edgePadding: { top: 110, right: 60, bottom: 80, left: 60 },
+      animated: true,
+    });
+  };
+
   return (
     <>
       <ScrollView
@@ -488,15 +510,21 @@ export default function AlertDetail() {
 
       <Modal visible={fullScreenMap} animationType="slide" onRequestClose={() => setFullScreenMap(false)}>
         <View style={{ flex: 1, backgroundColor: theme.background }}>
-          {alertCoordinate ? (
+          {alertCoordinate && !fullMapMounted ? (
+            <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+              <ActivityIndicator color={theme.contactAccent} />
+            </View>
+          ) : alertCoordinate ? (
             <MapView
+              ref={fullMapRef}
               style={{ flex: 1 }}
               initialRegion={{
-                latitude: alertCoordinate.latitude,
-                longitude: alertCoordinate.longitude,
+                latitude: (path[path.length - 1] ?? alertCoordinate).latitude,
+                longitude: (path[path.length - 1] ?? alertCoordinate).longitude,
                 latitudeDelta: 0.01,
                 longitudeDelta: 0.01,
               }}
+              onMapReady={fitFullMap}
             >
               {path.length > 1 && (
                 <Polyline coordinates={path} strokeWidth={4} strokeColor={POINT_A_COLOR} />
@@ -517,7 +545,12 @@ export default function AlertDetail() {
                   </Marker>
                 ))
               ) : (
-                <Marker coordinate={path[0] ?? alertCoordinate} title="Inicio" pinColor={POINT_A_COLOR} />
+                <>
+                  <Marker coordinate={path[0] ?? alertCoordinate} title="Inicio" pinColor={POINT_A_COLOR} />
+                  {path.length > 1 && (
+                    <Marker coordinate={path[path.length - 1]} title="Última ubicación" pinColor={POINT_B_COLOR} />
+                  )}
+                </>
               )}
             </MapView>
           ) : (
