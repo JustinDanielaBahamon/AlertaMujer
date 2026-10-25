@@ -1,15 +1,11 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
-import * as Location from "expo-location";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Image,
   Modal,
   ScrollView,
-  Share,
   StyleSheet,
   Switch,
   Text,
@@ -21,29 +17,15 @@ import MapView, { Circle, Marker, Polyline } from "../../../components/map/MapLi
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "../styles/MapStyles";
 import { createMapModalStyles } from "../styles/MapModal.style";
-import { useMapViewModel } from "../viewModel/useMapViewModel";
 import {
-  formatRouteDate,
-  MAX_IMPORTANTES,
-  MAX_ROUTES,
-  useRoutes,
-  type SavedRoute,
-} from "../../../contexts/RoutesContext";
+  useMapViewModel,
+  ZONE_RADIUS_METERS,
+  type ClassifiedZone,
+  type Coordinate as Coord,
+} from "../viewModel/useMapViewModel";
+import { formatRouteDate, MAX_IMPORTANTES, MAX_ROUTES } from "../../../contexts/RoutesContext";
 import { POINT_B_COLOR } from "../routeColors";
-import { useAuth } from "../../../contexts/AuthContext";
-import { frequentLocationsService } from "../../../services/frequent-locations.service";
 import AddressSearchBar from "./AddressSearchBar";
-import { getZones } from "../../../services/zones.service";
-import { getPlace } from "../../../services/geocoding.service";
-
-type Coord = { latitude: number; longitude: number };
-
-type AddressInfoBlock = {
-  zone: string; // neighborhood, or the city if there is no neighborhood (used in the header)
-  neighborhood: string;
-  city: string;
-  address: string;
-};
 
 // Different colors for each saved route, so they do not pile up
 // Only the app palette: violets, purples and neon
@@ -58,17 +40,6 @@ const ROUTE_COLORS = [
   "#E879F9", // Light neon
 ];
 
-// Zones classified by the user ("Classify zone" screen), drawn as circles on the map
-type ClassifiedZone = {
-  id: string;
-  name: string;
-  latitude: number;
-  longitude: number;
-  riskLevel: "muy_segura" | "moderada" | "muy_insegura";
-};
-
-const ZONE_RADIUS_METERS = 150;
-
 // Zones the user classified: app palette shades by level
 const LEVEL_COLOR: Record<ClassifiedZone["riskLevel"], string> = {
   muy_segura: "#7C3AED",
@@ -78,15 +49,6 @@ const LEVEL_COLOR: Record<ClassifiedZone["riskLevel"], string> = {
 
 // System emergency zones (police, assistance, safe zones): always visible, in dark
 // purple and with an icon, so they are not confused with the user's
-type OfficialZone = {
-  id: string;
-  name: string;
-  type: string;
-  latitude: number;
-  longitude: number;
-  radio: number;
-};
-
 const OFFICIAL_ZONE_COLOR = "#4C1D95";
 // Risk zones in red with a warning: in purple with the generic "place" icon they looked
 // like a second pin of the user's own location
@@ -99,38 +61,6 @@ const OFFICIAL_ZONE_ICON: Record<string, keyof typeof MaterialIcons.glyphMap> = 
   help: "support",
   safe: "verified-user",
   risk: "warning",
-};
-
-const distanceMeters = (a: Coord, b: Coord) => {
-  const R = 6371000;
-  const dLat = ((b.latitude - a.latitude) * Math.PI) / 180;
-  const dLon = ((b.longitude - a.longitude) * Math.PI) / 180;
-  const x =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos((a.latitude * Math.PI) / 180) *
-      Math.cos((b.latitude * Math.PI) / 180) *
-      Math.sin(dLon / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
-};
-
-// Looks up the address of some coordinates (neighborhood, city and street)
-const getAddressInfo = async (coord: Coord): Promise<AddressInfoBlock> => {
-  const reverse = await Location.reverseGeocodeAsync(coord);
-  const info = reverse?.[0];
-
-  const street = info?.street || info?.name || "";
-  const number = info?.streetNumber || "";
-  // In Colombia the phone geocoder almost never returns the neighborhood: OpenStreetMap fills it in
-  const neighborhood =
-    info?.district || (await getPlace(coord.latitude, coord.longitude).catch(() => null))?.neighborhood || "";
-  const municipality = info?.city || info?.subregion || "";
-
-  return {
-    zone: neighborhood || municipality,
-    neighborhood,
-    city: [municipality, info?.region].filter(Boolean).join(", "),
-    address: `${street} ${number}`.trim(),
-  };
 };
 
 type MapStyles = ReturnType<typeof createMapModalStyles>;
@@ -201,31 +131,7 @@ function HistoryPins({
 }
 
 export default function MapScreen() {
-  const navigation = useNavigation<any>();
-  const { routes } = useRoutes();
-  const { user } = useAuth();
   const insets = useSafeAreaInsets();
-  const mapRef = useRef<MapView>(null);
-  const mounted = useRef(true);
-  const lastGeocoded = useRef<Coord | null>(null);
-
-  const [showRoutesOnMap, setShowRoutesOnMap] = useState(true); // On by default
-  const [onlyImportant, setOnlyImportant] = useState(false); // Show all by default
-  const [addressInfoText, setAddressInfoText] = useState<AddressInfoBlock | null>(null);
-  const [routeInfoVisible, setRouteInfoVisible] = useState(false);
-  const [routeInfo, setRouteInfo] = useState<SavedRoute | null>(null);
-  const [mapReady, setMapReady] = useState(false); // the big map is drawn when the modal animation ends
-  const [trackChanges, setTrackChanges] = useState(true); // custom pins are redrawn only for a few moments
-  const [classifiedZones, setClassifiedZones] = useState<ClassifiedZone[]>([]);
-  const [officialZones, setOfficialZones] = useState<OfficialZone[]>([]);
-  const [showMyZones, setShowMyZones] = useState(true);
-  const [optionsOpen, setOptionsOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResult, setSearchResult] = useState<{
-    coord: Coord;
-    text: string;
-  } | null>(null);
-
   const {
     theme,
     t,
@@ -234,230 +140,52 @@ export default function MapScreen() {
     setFullscreen,
     history,
     alertDestination,
-    centerCoordinate,
+    mapCenter,
     lastUpdate,
     precisionMetros,
     formatHour,
-    refreshLocation,
     retryPermissions,
-    goToSavedLocations,
-    goToHelpZones,
-    goToRouteHistory,
     permissionDenied,
     disabledServices,
     loading,
+    mapRef,
+    mapReady,
+    trackChanges,
+    actions,
+    currentAddress,
+    addressInfo,
+    routes,
+    importantRoutes,
+    visibleRoutes,
+    showRoutesOnMap,
+    setShowRoutesOnMap,
+    onlyImportant,
+    setOnlyImportant,
+    showMyZones,
+    setShowMyZones,
+    classifiedZones,
+    officialZones,
+    optionsOpen,
+    toggleOptions,
+    searchQuery,
+    setSearchQuery,
+    searchResult,
+    setSearchResult,
+    showSearchResult,
+    clearSearch,
+    routeInfo,
+    routeInfoVisible,
+    openRouteInfo,
+    closeRouteInfo,
+    seeAll,
+    centerOnMe,
+    goToSavedLocations,
+    goToHelpZones,
+    goToRouteHistory,
+    goToSaveRoute,
   } = useMapViewModel();
 
   const ms = useMemo(() => createMapModalStyles(theme, insets), [theme, insets]);
-
-  const currentAddress = addressInfoText
-    ? addressInfoText.zone
-      ? `${addressInfoText.zone}, ${addressInfoText.address}`.replace(/, $/, "")
-      : addressInfoText.address
-    : "";
-
-  // Saved routes drawn on the big map (same logic as always)
-  const visibleRoutes = useMemo(
-    () =>
-      !showRoutesOnMap
-        ? []
-        : (routes as any[]).filter(
-            (r) => r?.points?.length > 0 && (!onlyImportant || r.important)
-          ),
-    [routes, showRoutesOnMap, onlyImportant]
-  );
-
-  const goToSaveRoute = () => {
-    navigation.navigate("SaveRoute");
-  };
-
-  // Classified zones (safe / moderate / unsafe): reloaded every time the map is opened again
-  useFocusEffect(
-    useCallback(() => {
-      let enabled = true;
-      (async () => {
-        try {
-          if (!user?.id) {
-            if (enabled) setClassifiedZones([]);
-            return;
-          }
-          const savedOnes = await frequentLocationsService.getByUser(user.id);
-          if (!enabled) return;
-          setClassifiedZones(
-            savedOnes
-              .filter(
-                (u) => u.isActive !== false && u.latitude != null && u.longitude != null
-              )
-              .map((u) => ({
-                id: String(u.id),
-                name: u.name,
-                latitude: Number(u.latitude),
-                longitude: Number(u.longitude),
-                riskLevel:
-                  u.riskLevel === "muy_segura" || u.riskLevel === "muy_insegura"
-                    ? u.riskLevel
-                    : "moderada",
-              }))
-          );
-        } catch (error) {
-          console.error("Error al cargar zonas clasificadas:", error);
-        }
-      })();
-      return () => {
-        enabled = false;
-      };
-    }, [user?.id])
-  );
-
-  // When an address is searched with the big map open, the camera moves there
-  useEffect(() => {
-    if (!fullscreen || !mapReady || !searchResult) return;
-    mapRef.current?.animateToRegion(
-      {
-        latitude: searchResult.coord.latitude,
-        longitude: searchResult.coord.longitude,
-        latitudeDelta: 0.006,
-        longitudeDelta: 0.006,
-      },
-      500
-    );
-  }, [searchResult, fullscreen, mapReady]);
-
-  const handleSearchResult = (coord: Coord, text: string) => {
-    setSearchResult({ coord, text });
-    setFullscreen(true);
-  };
-
-  const clearSearch = () => {
-    setSearchQuery("");
-    setSearchResult(null);
-  };
-
-  useEffect(() => {
-    mounted.current = true;
-    return () => {
-      mounted.current = false;
-    };
-  }, []);
-
-  // The big map is mounted when the modal finishes sliding so the animation does not stutter
-  useEffect(() => {
-    if (!fullscreen) {
-      setMapReady(false);
-      return;
-    }
-    const id = setTimeout(() => setMapReady(true), 300);
-    return () => clearTimeout(id);
-  }, [fullscreen]);
-
-  // Custom pins are redrawn for a few moments when they change or the map opens
-  useEffect(() => {
-    setTrackChanges(true);
-    const id = setTimeout(() => setTrackChanges(false), 600);
-    return () => clearTimeout(id);
-  }, [history?.length, fullscreen, mapReady, visibleRoutes.length]);
-
-  // Current address (reverse geocoding). Only queried at the start or after moving more than 40 m,
-  // so there is no network request on every GPS update.
-  useEffect(() => {
-    if (!location) return;
-
-    const previous = lastGeocoded.current;
-    if (previous && distanceMeters(previous, location) < 40) return;
-    lastGeocoded.current = location;
-
-    (async () => {
-      try {
-        const info = await getAddressInfo(location);
-        if (mounted.current) setAddressInfoText(info);
-      } catch (error) {
-        console.error("Error al obtener dirección:", error);
-      }
-    })();
-  }, [location]);
-
-  const handleShare = async () => {
-    if (!location) return;
-
-    try {
-      let info = addressInfoText;
-      if (!info) {
-        try {
-          info = await getAddressInfo(location);
-        } catch {
-          info = null;
-        }
-      }
-
-      const now = new Date();
-      const date = now.toLocaleDateString("es-CO", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      });
-      const time = now.toLocaleTimeString("es-CO", {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-
-      const lat = location.latitude.toFixed(6);
-      const lng = location.longitude.toFixed(6);
-
-      // Only the lines that actually have data are included
-      const lines = [
-        t.mapa.mensaje_ubicacion,
-        "",
-        info?.neighborhood ? `🏘️ Barrio: ${info.neighborhood}` : null,
-        info?.city ? `🏙️ Ciudad: ${info.city}` : null,
-        info?.address ? `🛣️ Dirección: ${info.address}` : null,
-        `🧭 Coordenadas: ${lat}, ${lng}`,
-        "",
-        "🗺️ Ábrela en el mapa:",
-        `https://www.google.com/maps?q=${lat},${lng}`,
-        "",
-        `🕐 Enviado el ${date} a las ${time}`,
-        "💜 Compartido desde AlertaMujer",
-      ].filter((line): line is string => line !== null);
-
-      await Share.share({
-        title: t.mapa.compartir_ubicacion,
-        message: lines.join("\n"),
-      });
-    } catch (error) {
-      console.error("Error al compartir ubicación:", error);
-      Alert.alert("Error", `${t.mapa.compartir_error}. Inténtalo nuevamente.`);
-    }
-  };
-
-  // ─── LOADING SCREEN ──────────────────────────────────────────────────────
-  // System emergency zones: loaded when entering the map (they do not depend on the user).
-  // It must go before the "no location" return: a hook after a return changes the
-  // number of hooks between renders and React closes the app.
-  useFocusEffect(
-    useCallback(() => {
-      let enabled = true;
-      getZones()
-        .then((zones) => {
-          if (!enabled) return;
-          setOfficialZones(
-            zones
-              .filter((z) => z.isActive !== false && z.latitude != null && z.longitude != null)
-              .map((z) => ({
-                id: String(z.id),
-                name: z.name,
-                type: (z.zoneType || "").toLowerCase(),
-                latitude: Number(z.latitude),
-                longitude: Number(z.longitude),
-                radio: Number(z.radiusMeters) > 0 ? Number(z.radiusMeters) : ZONE_RADIUS_METERS,
-              }))
-          );
-        })
-        .catch((error) => console.warn("No se pudieron cargar las zonas de emergencia:", error));
-      return () => {
-        enabled = false;
-      };
-    }, [])
-  );
 
   if (!location) {
     const esError = permissionDenied || disabledServices;
@@ -492,10 +220,6 @@ export default function MapScreen() {
       </View>
     );
   }
-
-  // ─── CENTER COORDINATE AND LOCAL ACTIONS ─────────────────────────────────
-  const computedCenter = centerCoordinate ?? alertDestination?.coordinate ?? location;
-  const mapCenter: Coord = searchResult?.coord ?? computedCenter;
 
   // Circle with the safety level color of each classified zone (if the user shows them)
   const renderClassifiedZones = () =>
@@ -538,81 +262,6 @@ export default function MapScreen() {
       </React.Fragment>
     ));
 
-  const actions = [
-    {
-      icon: "share",
-      label: t.mapa.compartir,
-      action: handleShare,
-    },
-    {
-      icon: "refresh",
-      label: t.mapa.actualizar,
-      action: refreshLocation,
-    },
-    {
-      icon: "navigation",
-      label: t.mapa.navegar,
-      action: () => {
-        if (location) {
-          setFullscreen(true);
-        }
-      },
-    },
-    {
-      icon: "bookmark",
-      label: t.mapa.guardar,
-      action: () => {
-        if (!location) return;
-        navigation.navigate("ClassifyZone", {
-          latitude: location.latitude,
-          longitude: location.longitude,
-        });
-      },
-    },
-  ] as const;
-
-  // ─── BIG MAP FITTING ─────────────────────────────────────────────────────
-  // Every visible point: location, alert address, history and routes.
-  const visiblePoints = (): Coord[] => {
-    const pts: Coord[] = [location];
-    if (alertDestination) pts.push(alertDestination.coordinate);
-    if (searchResult) pts.push(searchResult.coord);
-    (history ?? []).forEach((p: Coord) => pts.push(p));
-    visibleRoutes.forEach((r) =>
-      r.points.forEach((p: any) => pts.push({ latitude: p.latitude, longitude: p.longitude }))
-    );
-    return pts;
-  };
-
-  const seeAll = () => {
-    const pts = visiblePoints();
-    if (pts.length < 2) {
-      centerOnMe();
-      return;
-    }
-    mapRef.current?.fitToCoordinates(pts, {
-      edgePadding: { top: insets.top + 90, right: 60, bottom: insets.bottom + 130, left: 60 },
-      animated: true,
-    });
-  };
-
-  const centerOnMe = () => {
-    mapRef.current?.animateToRegion(
-      {
-        latitude: location.latitude,
-        longitude: location.longitude,
-        latitudeDelta: 0.005,
-        longitudeDelta: 0.005,
-      },
-      400
-    );
-  };
-
-  const openRouteInfo = (route: SavedRoute) => {
-    setRouteInfo(route);
-    setRouteInfoVisible(true);
-  };
-
   return (
     <View style={[styles.mainContainer, { backgroundColor: theme.background }]}>
       <ScrollView
@@ -651,9 +300,9 @@ export default function MapScreen() {
           style={{ marginHorizontal: 20, marginTop: 20 }}
           value={searchQuery}
           onChangeText={setSearchQuery}
-          onResult={handleSearchResult}
+          onResult={showSearchResult}
           onClear={clearSearch}
-          city={addressInfoText?.city}
+          city={addressInfo?.city}
         />
 
         {/* MAP */}
@@ -715,7 +364,7 @@ export default function MapScreen() {
         <View style={[styles.routesSwitchContainer, op.panel, { backgroundColor: theme.card }]}>
           <TouchableOpacity
             style={op.header}
-            onPress={() => setOptionsOpen((v) => !v)}
+            onPress={() => toggleOptions()}
             activeOpacity={0.7}
             accessibilityRole="button"
             accessibilityState={{ expanded: optionsOpen }}
@@ -754,7 +403,7 @@ export default function MapScreen() {
                 title: t.mapa.opcion_importantes,
                 detail: showRoutesOnMap
                   ? t.mapa.opcion_importantes_desc
-                      .replace("{n}", String(routes.filter((r) => r.important).length))
+                      .replace("{n}", String(importantRoutes))
                       .replace("{max}", String(MAX_IMPORTANTES))
                   : t.mapa.opcion_importantes_bloqueada,
                 value: showRoutesOnMap && onlyImportant,
@@ -809,11 +458,11 @@ export default function MapScreen() {
             <View style={{ flex: 1 }}>
               <Text style={[op.label, { color: theme.contactSubtext }]}>{t.mapa.barrio}</Text>
               <Text style={[op.neighborhood, { color: theme.text }]} numberOfLines={1}>
-                {addressInfoText ? addressInfoText.neighborhood || addressInfoText.city || t.mapa.barrio_desconocido : t.mapa.obteniendo}
+                {addressInfo ? addressInfo.neighborhood || addressInfo.city || t.mapa.barrio_desconocido : t.mapa.obteniendo}
               </Text>
               <Text style={[op.label, { color: theme.contactSubtext, marginTop: 8 }]}>{t.mapa.direccion}</Text>
               <Text style={[op.address, { color: theme.text }]} numberOfLines={2}>
-                {addressInfoText ? addressInfoText.address || t.mapa.direccion_desconocida : t.mapa.obteniendo}
+                {addressInfo ? addressInfo.address || t.mapa.direccion_desconocida : t.mapa.obteniendo}
               </Text>
             </View>
           </View>
@@ -1079,7 +728,7 @@ export default function MapScreen() {
             onChangeText={setSearchQuery}
             onResult={(coord, text) => setSearchResult({ coord, text })}
             onClear={clearSearch}
-            city={addressInfoText?.city}
+            city={addressInfo?.city}
           />
 
           {/* Safety level legend */}
@@ -1146,7 +795,9 @@ export default function MapScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             style={ms.modalFitBtn}
-            onPress={seeAll}
+            onPress={() =>
+              seeAll({ top: insets.top + 90, right: 60, bottom: insets.bottom + 130, left: 60 })
+            }
             activeOpacity={0.85}
             accessibilityRole="button"
           >
@@ -1157,7 +808,7 @@ export default function MapScreen() {
 
       {/* ROUTE INFORMATION MODAL */}
       <Modal visible={routeInfoVisible} animationType="slide" transparent>
-        <TouchableWithoutFeedback onPress={() => setRouteInfoVisible(false)}>
+        <TouchableWithoutFeedback onPress={closeRouteInfo}>
           <View style={styles.modalOverlay}>
             <TouchableWithoutFeedback>
               <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
@@ -1165,7 +816,7 @@ export default function MapScreen() {
                   <Text style={[styles.modalTitle, { color: theme.text }]}>
                     Información del Recorrido
                   </Text>
-                  <TouchableOpacity onPress={() => setRouteInfoVisible(false)}>
+                  <TouchableOpacity onPress={closeRouteInfo}>
                     <MaterialIcons name="close" size={24} color={theme.text} />
                   </TouchableOpacity>
                 </View>
@@ -1219,7 +870,7 @@ export default function MapScreen() {
 
                 <TouchableOpacity
                   style={styles.modalCloseButton}
-                  onPress={() => setRouteInfoVisible(false)}
+                  onPress={closeRouteInfo}
                 >
                   <Text style={styles.modalCloseText}>Cerrar</Text>
                 </TouchableOpacity>
