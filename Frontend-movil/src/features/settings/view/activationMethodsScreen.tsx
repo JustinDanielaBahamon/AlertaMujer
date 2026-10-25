@@ -82,7 +82,7 @@ export default function ActivationMethodsScreen() {
                 onValueChange={(value) => {
                   if (method.id !== "viaje") setMethod(method.id, value);
                 }}
-                trackColor={{ false: "#ccc", true: theme.icon }}
+                trackColor={{ false: "#ccc", true: theme.tabActiveColor }}
                 thumbColor="#fff"
               />
             </View>

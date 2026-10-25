@@ -110,7 +110,12 @@ export default function AlertSecurityScreen() {
               <Text style={[local.title, { color: theme.text }]}>{s.discreto_titulo}</Text>
               <Text style={[local.desc, { color: theme.text }]}>{s.discreto_desc}</Text>
             </View>
-            <Switch value={discreet} onValueChange={toggleDiscreet} trackColor={{ true: accent }} />
+            <Switch
+              value={discreet}
+              onValueChange={toggleDiscreet}
+              trackColor={{ false: "#ccc", true: theme.tabActiveColor }}
+              thumbColor="#fff"
+            />
           </View>
         </View>
 
