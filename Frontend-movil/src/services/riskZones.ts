@@ -1,4 +1,5 @@
 import { getZones, type ZoneApi } from "./zones.service";
+import type { FrequentLocationApi } from "./frequent-locations.service";
 
 /**
  * Risk zones published by the administration, and where she stands with respect to them. The same
@@ -19,6 +20,30 @@ export const isRiskZone = (z: ZoneApi): boolean =>
   z.longitude != null &&
   Number(z.radiusMeters) > 0 &&
   (z.riskLevel === "high" || (z.zoneType === "risk" && z.riskLevel === "medium"));
+
+/** Radius of a place she classified herself (the same circle the map draws). */
+const OWN_ZONE_RADIUS_M = 150;
+
+/**
+ * The places she classified as "Muy insegura" count as risk zones too: the home card and the alerts
+ * react to them like to the ones the administration publishes.
+ */
+export function ownRiskZones(places: FrequentLocationApi[]): ZoneApi[] {
+  return places
+    .filter((p) => p.isActive !== false && p.riskLevel === "muy_insegura" && p.latitude != null && p.longitude != null)
+    .map((p) => ({
+      id: -p.id, // negative: never the same id as an official zone
+      name: p.name,
+      zoneType: "risk",
+      riskLevel: "high",
+      city: p.city ?? "",
+      latitude: Number(p.latitude),
+      longitude: Number(p.longitude),
+      radiusMeters: OWN_ZONE_RADIUS_M,
+      isActive: true,
+      createdAt: p.createdAt,
+    }));
+}
 
 export function distanceM(a: Point, b: Point): number {
   const R = 6371e3;

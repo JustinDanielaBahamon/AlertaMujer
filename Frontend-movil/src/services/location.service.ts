@@ -175,6 +175,24 @@ export class LocationService {
    * so the caller shows the right message.
    */
   /** askPermission = false when a screen opens: it only checks and shows no system prompts. */
+  /**
+   * The position the phone already knows (no GPS wait), or null. For a first answer in milliseconds
+   * that is refined later with getFullLocation.
+   */
+  static async getQuickLocation(): Promise<DetailedLocation | null> {
+    try {
+      const { granted } = await Location.getForegroundPermissionsAsync();
+      if (!granted) return null;
+      const last = await Location.getLastKnownPositionAsync({ maxAge: MAX_AGE_MS });
+      if (!last) return null;
+      const geocoding = await this.reverseGeocode(last.coords.latitude, last.coords.longitude);
+      if (geocoding) geocoding.precision = last.coords.accuracy || 0;
+      return geocoding;
+    } catch {
+      return null;
+    }
+  }
+
   static async getFullLocation(requestPermission = true): Promise<DetailedLocation | null> {
     // We do not catch typed errors — we let them bubble up to the ViewModel
     const location = await this.getCurrentPosition(requestPermission);

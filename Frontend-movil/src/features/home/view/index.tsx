@@ -198,8 +198,10 @@ export default function Home() {
         style={[
           styles.safeZoneCard,
           {
-            backgroundColor: theme.containerBackground,
+            // Near or inside a risk zone the whole card takes its color, not only the border
+            backgroundColor: zone && zone.kind !== "safe" ? `${zoneColor}1F` : theme.containerBackground,
             borderColor: zoneColor,
+            borderWidth: zone && zone.kind !== "safe" ? 2 : undefined,
           },
         ]}
         activeOpacity={0.8}

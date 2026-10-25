@@ -36,9 +36,16 @@ export function useHomeViewModel() {
   const loadLocation = useCallback(async (requestPermission: boolean) => {
     try {
       setLoading(true);
-      setLocationStatus("cargando");
+      setLocationStatus((current) => (current === "lista" ? current : "cargando"));
 
-      // Use the central high-accuracy location service
+      // At once: the position the phone already knows; then the precise GPS reading replaces it
+      const quick = await LocationService.getQuickLocation();
+      if (quick) {
+        setDetailedLocation(quick);
+        setResolvedLocation(LocationService.formatAddress(quick));
+        setLocationStatus("lista");
+      }
+
       const location = await LocationService.getFullLocation(requestPermission);
 
       if (location) {
@@ -48,7 +55,7 @@ export function useHomeViewModel() {
         setResolvedLocation(fullName);
         setLocationStatus("lista");
 
-      } else {
+      } else if (!quick) {
         setLocationStatus("error");
       }
     } catch (error) {

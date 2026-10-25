@@ -1,5 +1,5 @@
 import { getZones, type ZoneApi } from "../zones.service";
-import { getRiskZones, isRiskZone, riskZonesJson, zoneStatus } from "../riskZones";
+import { getRiskZones, isRiskZone, ownRiskZones, riskZonesJson, zoneStatus } from "../riskZones";
 
 jest.mock("../zones.service", () => ({ getZones: jest.fn() }));
 
@@ -59,5 +59,23 @@ describe("riskZones", () => {
     expect(JSON.parse(riskZonesJson([zone({})]))).toEqual([
       { name: "Parque", latitude: 2.93, longitude: -75.28, radius: 200 },
     ]);
+  });
+});
+
+describe("ownRiskZones", () => {
+  const place = (riskLevel: string, id = 1) => ({
+    id, userProfileId: 1, name: `Lugar ${id}`, latitude: 2.93, longitude: -75.28, riskLevel, isActive: true, createdAt: "",
+  });
+
+  it("solo los lugares que ella marcó como muy inseguros cuentan como zona de riesgo", () => {
+    const zones = ownRiskZones([place("muy_insegura", 1), place("moderada", 2), place("muy_segura", 3)]);
+    expect(zones).toHaveLength(1);
+    expect(isRiskZone(zones[0])).toBe(true);
+    expect(zones[0].id).toBe(-1);
+  });
+
+  it("estar en su lugar inseguro se ve como dentro de una zona de riesgo", () => {
+    const [own] = ownRiskZones([place("muy_insegura")]);
+    expect(zoneStatus({ latitude: 2.93, longitude: -75.28 }, [own]).kind).toBe("inside");
   });
 });
