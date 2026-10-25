@@ -5,6 +5,8 @@ import android.media.AudioManager
 import android.media.VolumeProvider
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
+import android.os.Handler
+import android.os.Looper
 import android.os.SystemClock
 import android.util.Log
 
@@ -33,6 +35,8 @@ class VolumeCancelWatcher(private val context: Context, private val onCancel: ()
         }
       }
       session = MediaSession(context, "AlertaMujerCancel").apply {
+        // Without a callback the session drops the volume adjustments: the provider never hears them
+        setCallback(object : MediaSession.Callback() {}, Handler(Looper.getMainLooper()))
         setPlaybackToRemote(provider)
         setPlaybackState(PlaybackState.Builder().setState(PlaybackState.STATE_PLAYING, 0, 1f).build())
         isActive = true
@@ -53,6 +57,7 @@ class VolumeCancelWatcher(private val context: Context, private val onCancel: ()
   }
 
   private fun onPress(now: Long) {
+    Log.d(TAG, "volume down")
     val audio = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
     if (audio.mode == AudioManager.MODE_IN_CALL || audio.mode == AudioManager.MODE_IN_COMMUNICATION) return
     val previous = presses.lastOrNull()
@@ -65,6 +70,7 @@ class VolumeCancelWatcher(private val context: Context, private val onCancel: ()
     while (presses.isNotEmpty() && now - presses.first() > WINDOW_MS) presses.removeFirst()
     if (presses.size >= PRESSES) {
       presses.clear()
+      Log.i(TAG, "cancel")
       onCancel()
     }
   }
