@@ -6,6 +6,7 @@ import notifee, {
 } from "@notifee/react-native";
 import { bigStyle } from "./notificationStyle";
 import { confirmAlertReceived } from "../services/alert-tracking.service";
+import { addToInbox } from "./inbox";
 
 /**
  * Alarm an emergency contact receives when a user activates an alert. It arrives as a
@@ -59,6 +60,7 @@ export async function showEndedAlert(data: EndedAlertData): Promise<void> {
     : data.estado === "cancelled" ? "fue cancelada"
     : "terminó";
   const text = `La alerta de ${name} ${what}. Si aún no sabes de ella, comunícate para confirmar que está bien.`;
+  await addToInbox({ id: `alert-${data.alertaId}`, kind: "alert_ended", title: "Alerta terminada", body: text });
   await notifee.displayNotification({
     id: `fin-${data.alertaId}`,
     title: "Alerta terminada",
@@ -93,6 +95,13 @@ export async function showSosAlarm(data: SosAlertData): Promise<void> {
   const text = data.aviso?.trim()
     ? data.aviso.trim()
     : `${name} activó una alerta y puede estar en peligro. Toca para ver su ubicación en tiempo real y escribirle.`;
+  await addToInbox({
+    id: `alert-${data.alertaId}`,
+    kind: data.aviso?.trim() ? "warning" : "alert",
+    title: `${name} necesita ayuda`,
+    body: text,
+    target: { screen: "ContactAlert", alertId: Number(data.alertaId), userName: data.nombre, code: data.codigo, delivery: data.envioId },
+  });
   await notifee.displayNotification({
     id: notificationId(data.alertaId),
     title: `🚨 ${name} necesita ayuda`,

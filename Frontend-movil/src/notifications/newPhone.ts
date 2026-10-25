@@ -1,5 +1,6 @@
 import notifee, { AndroidImportance } from "@notifee/react-native";
 import { bigStyle } from "./notificationStyle";
+import { addToInbox } from "./inbox";
 
 /**
  * Notice when the account is opened from another phone (NUEVO_CELULAR push from the backend). The account
@@ -22,6 +23,7 @@ export async function showNewPhone(data: Record<string, unknown> | undefined): P
   const text =
     `Se abrió tu cuenta de AlertaMujer en ${phone}. Desde ahora tu ubicación diaria se toma de ese celular. ` +
     "Si no fuiste tú, cambia tu contraseña.";
+  await addToInbox({ id: `phone-${Date.now()}`, kind: "phone", title: "Tu cuenta se abrió en otro celular", body: text });
   await notifee.displayNotification({
     title: "Tu cuenta se abrió en otro celular",
     body: text,

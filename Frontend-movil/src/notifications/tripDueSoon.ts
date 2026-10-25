@@ -1,5 +1,6 @@
 import notifee, { AndroidImportance, AndroidVisibility } from "@notifee/react-native";
 import { bigStyle } from "./notificationStyle";
+import { addToInbox } from "./inbox";
 
 /**
  * "Did you arrive?": push the server sends 5 minutes before the arrival time of a
@@ -25,6 +26,13 @@ export async function showTripDueSoon(data: Record<string, unknown> | undefined)
   const text =
     `Si no confirmas que llegaste, en unos ${minutes + 2} minutos avisaremos a tus contactos con tu última ubicación. ` +
     "Toca para confirmar o pedir más tiempo.";
+  await addToInbox({
+    id: `trip-${data?.trayectoId ?? ""}`,
+    kind: "trip",
+    title: `¿Ya llegaste a ${destination}?`,
+    body: text,
+    target: { screen: "Trip" },
+  });
   await notifee.displayNotification({
     id: `trayecto-${data?.trayectoId ?? ""}`,
     title: `¿Ya llegaste a ${destination}?`,

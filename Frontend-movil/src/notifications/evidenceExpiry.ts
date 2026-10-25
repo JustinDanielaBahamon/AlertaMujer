@@ -1,5 +1,6 @@
 import notifee, { AndroidImportance, AndroidVisibility } from "@notifee/react-native";
 import { bigStyle } from "./notificationStyle";
+import { addToInbox } from "./inbox";
 
 /**
  * One general notice (not one per alert) the server sends 5 days before the evidence of her
@@ -24,6 +25,13 @@ export async function showEvidenceExpiry(data: Record<string, unknown> | undefin
   const text =
     `Tus evidencias de tus alertas se borrarán en ${days} días. ` +
     "Toca para revisarlas y guardar las que necesites.";
+  await addToInbox({
+    id: `evidence-${new Date().toISOString().slice(0, 10)}`,
+    kind: "evidence",
+    title: "Tus evidencias se borrarán pronto",
+    body: text,
+    target: { screen: "History" },
+  });
   await notifee.displayNotification({
     id: "evidencias-por-borrar",
     title: "Tus evidencias se borrarán pronto",

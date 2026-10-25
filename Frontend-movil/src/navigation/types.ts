@@ -50,6 +50,7 @@ export type MainStackParamList = {
 
   ActivationMethods: undefined;
   Permissions: undefined;
+  Inbox: undefined;
 
   Notifications: undefined;
   DataRetention: undefined;

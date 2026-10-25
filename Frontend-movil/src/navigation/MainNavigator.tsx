@@ -31,6 +31,7 @@ import NotificacionTutorialScreen from "../screens/tutorial/notification";
 import SeguridadTutorialScreen from "../screens/tutorial/security";
 import UbicacionTutorialScreen from "../screens/tutorial/location";
 import DrawerNavigator from "./drawer/DrawerNavigator";
+import InboxScreen from "../features/inbox/view/InboxScreen";
 import type { MainStackParamList } from "./types";
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
@@ -71,6 +72,7 @@ export default function MainNavigator({ initialRouteName }: Props) {
       <Stack.Screen name="HistoryMap" component={HistorialMapa}/>
       <Stack.Screen name="ActivationMethods" component={ActivationMethodsScreen} />
       <Stack.Screen name="Permissions" component={PermissionsScreen} />
+      <Stack.Screen name="Inbox" component={InboxScreen} />
       <Stack.Screen name="Notifications" component={NotificationsScreen} />
       <Stack.Screen name="DataRetention" component={DataRetentionScreen} />
       <Stack.Screen name="AlertSecurity" component={AlertSecurityScreen} />
