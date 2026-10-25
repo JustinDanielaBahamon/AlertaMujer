@@ -56,6 +56,7 @@ class TripService : Service() {
   private var destLatitude = Double.NaN
   private var destLongitude = Double.NaN
   private var arrivalMs = 0L
+  private var startedAt = 0L
 
   private var lastFix: Location? = null
   private var startDistance = Double.NaN
@@ -103,6 +104,7 @@ class TripService : Service() {
       return
     }
     resetProgress()
+    startedAt = System.currentTimeMillis()
     status = Status(running = true, tripId = tripId)
     val t = HandlerThread("AlertaMujerTrip").apply { start() }
     thread = t
@@ -116,8 +118,27 @@ class TripService : Service() {
   private val tick = object : Runnable {
     override fun run() {
       sendHeartbeat()
-      if (tripId != 0L) worker?.postDelayed(this, HEARTBEAT_MS)
+      if (tripId != 0L) worker?.postDelayed(this, heartbeatDelay())
     }
+  }
+
+  /**
+   * Adaptive signal: every 2 minutes when it matters (the first half hour, near the arrival time or the
+   * destination, near a risk zone); every 5 minutes on the long stretch of a long trip. The server waits
+   * 15 minutes (5 in a risk zone) before alerting, so both are safe and a long trip costs half the requests.
+   */
+  private fun heartbeatDelay(): Long {
+    val now = System.currentTimeMillis()
+    val fix = lastFix
+    val early = now - startedAt < CLOSE_WATCH_MS
+    val arrivingSoon = arrivalMs > 0 && arrivalMs - now < CLOSE_WATCH_MS
+    val nearDestination = !bestDistance.isNaN() && bestDistance < NEAR_DESTINATION_M
+    val nearZone = fix != null && riskZones.any {
+      val d = FloatArray(1)
+      Location.distanceBetween(fix.latitude, fix.longitude, it.latitude, it.longitude, d)
+      d[0] <= it.radius + NEAR_ZONE_M
+    }
+    return if (early || arrivingSoon || nearDestination || nearZone) HEARTBEAT_MS else HEARTBEAT_LONG_MS
   }
 
   private fun resetProgress() {
@@ -407,7 +428,7 @@ class TripService : Service() {
       // The time already ends in "p. m.": no extra period
       status.lastSentAt > 0 -> "Última señal enviada a las " +
         SimpleDateFormat("h:mm a", Locale("es", "CO")).format(Date(status.lastSentAt))
-      else -> "Enviando tu ubicación cada 2 minutos."
+      else -> "Enviando tu ubicación cada pocos minutos."
     }
     val discreet = DiscreetMode.isOn(this)
     val text = if (discreet) DiscreetMode.TEXT
@@ -542,6 +563,9 @@ class TripService : Service() {
     private const val NEAR_ZONE_M = 300.0
     private const val ZONE_NOTICE_MS = 30 * 60_000L
     private const val HEARTBEAT_MS = 2 * 60_000L
+    private const val HEARTBEAT_LONG_MS = 5 * 60_000L
+    private const val CLOSE_WATCH_MS = 30 * 60_000L
+    private const val NEAR_DESTINATION_M = 2_000.0
     private const val LOCATION_INTERVAL_MS = 30_000L
     // A position older than this is not sent as the current one
     private const val FRESH_FIX_MS = 5 * 60_000L
