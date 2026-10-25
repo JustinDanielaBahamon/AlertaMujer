@@ -6,6 +6,7 @@ import notifee, {
 } from "@notifee/react-native";
 import { bigStyle } from "./notificationStyle";
 import { confirmAlertReceived } from "../services/alert-tracking.service";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { addToInbox } from "./inbox";
 
 /**
@@ -162,4 +163,27 @@ export function onSosAlertOpen(listener: (d: SosAlertData) => void): () => void 
   return () => {
     listeners.delete(listener);
   };
+}
+
+// ── Open it by itself ──────────────────────────────────────────────────────────────────
+// With the app closed the push is handled in the background: the alert to open is kept here and the app,
+// brought to the front, opens it as soon as it is visible.
+const TO_OPEN_KEY = "@alerta-mujer:sos-to-open";
+const TO_OPEN_MAX_MS = 5 * 60 * 1000;
+
+export async function rememberSosToOpen(data: SosAlertData): Promise<void> {
+  await AsyncStorage.setItem(TO_OPEN_KEY, JSON.stringify({ data, at: Date.now() })).catch(() => {});
+}
+
+/** The alert waiting to be opened (only once and only if it is recent). */
+export async function takeSosToOpen(): Promise<SosAlertData | null> {
+  try {
+    const raw = await AsyncStorage.getItem(TO_OPEN_KEY);
+    if (!raw) return null;
+    await AsyncStorage.removeItem(TO_OPEN_KEY);
+    const { data, at } = JSON.parse(raw) as { data: SosAlertData; at: number };
+    return Date.now() - at < TO_OPEN_MAX_MS && isSosAlert(data) ? data : null;
+  } catch {
+    return null;
+  }
 }

@@ -11,6 +11,8 @@
   <!-- Automatic protection: geofences of her frequent places, also after a reboot -->
   <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
   <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+  <!-- A contact's emergency opens the app by itself even while the phone is in use -->
+  <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
   <!-- Android 11+: to open each brand's "auto start" screen its apps must be declared -->
   <queries>
     <package android:name="com.transsion.phonemaster" />

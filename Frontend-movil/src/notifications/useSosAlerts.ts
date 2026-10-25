@@ -1,5 +1,9 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect } from "react";
-import { Alert } from "react-native";
+import { Alert, AppState } from "react-native";
+import ShakeSensor from "../../modules/shake-sensor";
+import { requestAlertCheck } from "../features/activeAlert/useResumeAlert";
+import { isOwnAlert } from "./ownAlert";
 import type { NavigationContainerRefWithCurrent } from "@react-navigation/native";
 import notifee, { EventType } from "@notifee/react-native";
 import { getApp } from "@react-native-firebase/app";
@@ -20,6 +24,7 @@ import {
   isSosAlert,
   showSosAlarm,
   showEndedAlert,
+  takeSosToOpen,
 } from "./sosAlarm";
 import { handleProtectionEvent } from "../features/shake/protectionService";
 import { isNewPhone, showNewPhone } from "./newPhone";
@@ -27,6 +32,14 @@ import { isTripNotification, isTripDueSoon, showTripDueSoon } from "./tripDueSoo
 import { isEvidenceExpiry, isHistoryNotification, showEvidenceExpiry } from "./evidenceExpiry";
 import { isInTutorial } from "../navigation/navigationHelpers";
 import { isLocationRequest, answerLocationRequest } from "../services/locationRequest";
+
+const OVER_APPS_ASKED_KEY = "@alerta-mujer:over-apps-asked";
+
+/** "Mostrar sobre otras apps" is offered once, only to phones that do not have it yet. */
+async function shouldOfferShowOverApps(): Promise<boolean> {
+  if (typeof ShakeSensor?.canShowOverApps !== "function" || ShakeSensor.canShowOverApps()) return false;
+  return !(await AsyncStorage.getItem(OVER_APPS_ASKED_KEY).catch(() => "1"));
+}
 
 /**
  * When signed in: registers the push token, shows the alarm if an alert arrives with the app
@@ -40,7 +53,8 @@ export function useSosAlerts(
     if (!withSession) return undefined;
 
     registrarPush().then(async () => {
-      if (!isInTutorial(navigation) && (await shouldOfferFullScreen())) {
+      if (isInTutorial(navigation)) return;
+      if (await shouldOfferFullScreen()) {
         await markFullScreenNoticeShown();
         Alert.alert(
           "Alarma de emergencia",
@@ -50,8 +64,26 @@ export function useSosAlerts(
             { text: "Permitir", onPress: () => openFullScreenSetting() },
           ],
         );
+      } else if (await shouldOfferShowOverApps()) {
+        // Never two notices at once: this one waits for another time the app opens
+        await AsyncStorage.setItem(OVER_APPS_ASKED_KEY, "1").catch(() => {});
+        Alert.alert(
+          "Abrir alertas al instante",
+          "Para que la alerta de un contacto se abra sola aunque estés usando el celular, permite que AlertaMujer se muestre sobre otras apps.",
+          [
+            { text: "Ahora no", style: "cancel" },
+            { text: "Permitir", onPress: () => ShakeSensor.requestShowOverApps() },
+          ],
+        );
       }
     });
+
+    // The alert that arrived with the app closed opens as soon as the app is visible
+    const openPending = () => {
+      void takeSosToOpen().then((data) => data && openSosAlert(data));
+    };
+    openPending();
+    const appState = AppState.addEventListener("change", (status) => status === "active" && openPending());
 
     const alreadyOpen = new Set<string>();
     const stopListening = onSosAlertOpen((data) => {
@@ -120,6 +152,9 @@ export function useSosAlerts(
             await showTripDueSoon(message.data);
           } else if (isEvidenceExpiry(message.data)) {
             await showEvidenceExpiry(message.data);
+          } else if (isOwnAlert(message.data)) {
+            // The server activated an alert for her: its screen opens right away
+            requestAlertCheck();
           }
         });
       } catch (error) {
@@ -131,6 +166,7 @@ export function useSosAlerts(
       stopListening();
       stopListeningPresses();
       stopListeningPush?.();
+      appState.remove();
     };
   }, [withSession, navigation]);
 }

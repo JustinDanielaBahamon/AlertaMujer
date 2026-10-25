@@ -140,6 +140,22 @@ class ShakeSensorModule : Module() {
       }
     }
 
+    // "Mostrar sobre otras apps": the only way Android lets an app come to the front by itself while
+    // the phone is in use (alarm and emergency apps use it). Without it the alert arrives as a notification.
+    Function("canShowOverApps") { Settings.canDrawOverlays(androidContext) }
+
+    Function("requestShowOverApps") {
+      openIntent(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + androidContext.packageName)))
+    }
+
+    // A contact's alert arrived: the app comes to the front (if allowed) and opens its screen
+    Function("bringToFront") {
+      if (!Settings.canDrawOverlays(androidContext)) return@Function false
+      val launch = androidContext.packageManager.getLaunchIntentForPackage(androidContext.packageName)
+        ?: return@Function false
+      openIntent(launch.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP))
+    }
+
     // "Auto start" is not an Android setting but each brand's: its screen opens if it exists
     Function("hasAutoStartSetting") {
       autoStartScreen() != null

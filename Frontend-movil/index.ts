@@ -14,7 +14,10 @@ import { isTripDueSoon, showTripDueSoon } from "./src/notifications/tripDueSoon"
 import { isEvidenceExpiry, showEvidenceExpiry } from "./src/notifications/evidenceExpiry";
 import { isLocationRequest, answerLocationRequest } from "./src/services/locationRequest";
 import { handleProtectionEvent, registerProtectionService } from "./src/features/shake/protectionService";
+import ShakeSensor from "./modules/shake-sensor";
+import { isOwnAlert, showOwnAlert } from "./src/notifications/ownAlert";
 import {
+  rememberSosToOpen,
   openSosAlert,
   notificationData,
   isEndedAlert,
@@ -28,6 +31,18 @@ if (Constants.expoConfig?.extra?.pushConfigurado === true) {
     setBackgroundMessageHandler(getMessaging(getApp()), async (message) => {
       if (isSosAlert(message.data)) {
         await showSosAlarm(message.data);
+        // With "Mostrar sobre otras apps" the app comes to the front and opens the alert by itself
+        if (!message.data.aviso) {
+          await rememberSosToOpen(message.data);
+          openSosAlert(message.data);
+          try {
+            ShakeSensor.bringToFront?.();
+          } catch {
+            // Old build without the function: the alarm notification stays
+          }
+        }
+      } else if (isOwnAlert(message.data)) {
+        await showOwnAlert(message.data);
       } else if (isEndedAlert(message.data)) {
         await showEndedAlert(message.data);
       } else if (isLocationRequest(message.data)) {

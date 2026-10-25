@@ -18,6 +18,7 @@ export type PermissionId =
   | "notificaciones"
   | "bateria"
   | "pantallaCompleta"
+  | "sobreApps"
   | "inicioAutomatico"
   | "microfono"
   | "camara"
@@ -66,6 +67,13 @@ export const PERMISSIONS: PermissionInfo[] = [
     description: "Para que la alarma de emergencia de tus contactos aparezca aunque el teléfono esté bloqueado.",
     icon: "fullscreen",
     critical: true,
+  },
+  {
+    id: "sobreApps",
+    title: "Abrir alertas al instante",
+    description: "Para que la alerta de un contacto se abra sola aunque estés usando el celular (Mostrar sobre otras apps).",
+    icon: "open-in-new",
+    critical: false,
   },
   {
     id: "inicioAutomatico",
@@ -131,6 +139,8 @@ export async function checkPermissions(
   const android = Platform.OS === "android";
   const battery = !android || ShakeSensor.ignoresBatteryOptimization();
   const fullScreen = !android || ShakeSensor.canUseFullScreen();
+  // Builds before this function: shown as granted (nothing to ask)
+  const overApps = !android || typeof ShakeSensor.canShowOverApps !== "function" || ShakeSensor.canShowOverApps();
   const withAutoStart = android && ShakeSensor.hasAutoStartSetting();
   // The website shows whether the phone is ready for an emergency
   void reportPermissions({
@@ -148,6 +158,7 @@ export async function checkPermissions(
     notificaciones: notifications,
     bateria: { granted: battery, canAsk: true },
     pantallaCompleta: { granted: fullScreen, canAsk: true },
+    sobreApps: { granted: overApps, canAsk: true, hidden: !android },
     // The brand does not let us read it: if the phone already cut protection, it is missing; otherwise it must be checked
     inicioAutomatico: {
       granted: systemKills > 0 ? false : null,
@@ -192,6 +203,9 @@ export async function grantPermission(id: Exclude<PermissionId, "agitar">, statu
           "En la página de AlertaMujer que se abrió entra a \"Batería\" y elige \"Sin restricciones\" (en Samsung: Batería → Sin restricciones).",
         );
       }
+      return;
+    case "sobreApps":
+      ShakeSensor.requestShowOverApps();
       return;
     case "pantallaCompleta":
       ShakeSensor.requestFullScreen();

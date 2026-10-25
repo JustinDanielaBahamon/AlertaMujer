@@ -116,6 +116,11 @@ declare class ShakeSensorModule extends NativeModule<Events> {
    */
   configureAutoProtection(options: AutoProtectionOptions): boolean;
   disableAutoProtection(): void;
+  /** "Mostrar sobre otras apps": lets a contact's alert bring the app to the front while the phone is in use. */
+  canShowOverApps(): boolean;
+  requestShowOverApps(): boolean;
+  /** Brings the app to the front (only with "Mostrar sobre otras apps"); false if not allowed. */
+  bringToFront(): boolean;
   autoProtectionStatus(): AutoProtectionStatus;
 }
 
