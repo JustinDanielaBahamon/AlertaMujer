@@ -109,7 +109,18 @@ declare class ShakeSensorModule extends NativeModule<Events> {
   updateTripToken(token: string): void;
   stopTrip(): void;
   tripStatus(): TripServiceStatus;
+  /**
+   * Automatic protection: geofences around her frequent places. places / riskZones are JSON arrays
+   * ({id, latitude, longitude, radius} / {name, latitude, longitude, radius}); key = undefined keeps the
+   * stored one. false if "Permitir ubicación todo el tiempo" is missing.
+   */
+  configureAutoProtection(options: AutoProtectionOptions): boolean;
+  disableAutoProtection(): void;
+  autoProtectionStatus(): AutoProtectionStatus;
 }
+
+export type AutoProtectionOptions = { baseUrl: string; key?: string; places: string; riskZones: string };
+export type AutoProtectionStatus = { enabled: boolean; permissions: boolean; running: boolean };
 
 /** Accelerometer for "shake the phone" that does not stop when the app is minimized (Android only). */
 export default requireNativeModule<ShakeSensorModule>("ShakeSensor");

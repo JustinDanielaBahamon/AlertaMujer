@@ -309,6 +309,30 @@ class ShakeSensorModule : Module() {
       )
     }
 
+    // ── Automatic protection ────────────────────────────────────────────────────────────
+
+    // places / riskZones: JSON arrays. key = null keeps the one already stored (refreshing the places).
+    // false if the background location ("Permitir todo el tiempo") is missing.
+    Function("configureAutoProtection") { options: Map<String, Any?> ->
+      AutoProtection.configure(
+        androidContext,
+        options["baseUrl"] as? String ?: "",
+        options["key"] as? String,
+        options["places"] as? String ?: "[]",
+        options["riskZones"] as? String ?: "[]",
+      )
+    }
+
+    Function("disableAutoProtection") { AutoProtection.disable(androidContext) }
+
+    Function("autoProtectionStatus") {
+      mapOf(
+        "enabled" to AutoProtection.isEnabled(androidContext),
+        "permissions" to AutoProtection.hasPermissions(androidContext),
+        "running" to AutoProtectionService.status.running,
+      )
+    }
+
     OnDestroy {
       volumeWatcher?.stop()
       stopSensor()
