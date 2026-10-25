@@ -11,6 +11,7 @@ import MainNavigator from "./MainNavigator";
 import { useSosAlerts } from "../notifications/useSosAlerts";
 import { useShakeProtection } from "../features/shake/useShakeProtection";
 import { useProtectionReminder } from "../features/permissions/useProtectionReminder";
+import { syncAutoProtection } from "../features/security/autoProtection";
 import { useResumeAlert } from "../features/activeAlert/useResumeAlert";
 import { useSosLink } from "../features/widget/useSosLink";
 
@@ -52,6 +53,12 @@ export default function AppNavigator() {
   // sign-up is complete: it never covers the "Complete your sign-up" screen.
   const signUpDone = !!user && user.role_id === 2 ? true : profileChecked && !missingData;
   useProtectionReminder(navigation, !!user && !restoring && user.id !== 0 && signUpDone);
+
+  // Automatic protection: her frequent places or the risk zones may have changed since last time
+  const sessionUserId = !restoring && user && user.id !== 0 ? user.id : null;
+  useEffect(() => {
+    if (sessionUserId != null) void syncAutoProtection(sessionUserId);
+  }, [sessionUserId]);
 
   // The native splash covers only the restoring of the session
   useEffect(() => {

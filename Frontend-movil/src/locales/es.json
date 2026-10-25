@@ -1115,6 +1115,18 @@
     "error_guardar": "No se pudieron guardar los datos. Revisa tu conexión e intenta de nuevo."
   },
   "seguridadAlerta": {
+    "auto_titulo": "Protección automática",
+    "auto_texto": "Cuando salgas de uno de tus lugares frecuentes (casa, trabajo, universidad) te acompañamos sin que tengas que iniciar nada. Si tu celular deja de enviar señal o te detienes en una zona de riesgo sin responder, avisamos a tus contactos.",
+    "auto_permiso_titulo": "Ubicación todo el tiempo",
+    "auto_permiso_texto": "Para notar cuándo sales de tus lugares frecuentes con la app cerrada, elige «Permitir todo el tiempo» en la pantalla que se abrirá. Solo usamos tu ubicación mientras vas de camino.",
+    "auto_continuar": "Continuar",
+    "auto_sin_lugares": "Primero guarda al menos un lugar frecuente (por ejemplo tu casa) en el mapa con «Guardar mis zonas».",
+    "auto_ir_mapa": "Ir al mapa",
+    "auto_sin_permiso": "Sin «Permitir todo el tiempo» la protección automática no puede funcionar con la app cerrada.",
+    "auto_error": "No se pudo activar. Revisa tu conexión e inténtalo de nuevo.",
+    "auto_activada": "Listo: te acompañaremos cuando salgas de tus lugares frecuentes.",
+    "auto_falta_permiso": "Falta el permiso de ubicación todo el tiempo. Toca para activarlo.",
+    "auto_lugares": "Lugares vigilados: {n}",
     "titulo": "Seguridad de la alerta",
     "subtitulo": "Que nadie más pueda cancelarla",
     "discreto_titulo": "Notificaciones discretas",

@@ -1115,6 +1115,18 @@
     "error_guardar": "Couldn't save your details. Check your connection and try again."
   },
   "seguridadAlerta": {
+    "auto_titulo": "Automatic protection",
+    "auto_texto": "When you leave one of your frequent places (home, work, university) we watch over you without you starting anything. If your phone stops sending signal or you stop in a risk zone without answering, we warn your contacts.",
+    "auto_permiso_titulo": "Location all the time",
+    "auto_permiso_texto": "To notice when you leave your frequent places with the app closed, choose “Allow all the time” on the next screen. We only use your location while you are on the way.",
+    "auto_continuar": "Continue",
+    "auto_sin_lugares": "First save at least one frequent place (for example your home) on the map with “Save my places”.",
+    "auto_ir_mapa": "Go to the map",
+    "auto_sin_permiso": "Without “Allow all the time” the automatic protection cannot work with the app closed.",
+    "auto_error": "It could not be turned on. Check your connection and try again.",
+    "auto_activada": "Done: we will watch over you when you leave your frequent places.",
+    "auto_falta_permiso": "The location all the time permission is missing. Tap to turn it on.",
+    "auto_lugares": "Places watched: {n}",
     "titulo": "Alert security",
     "subtitulo": "So nobody else can cancel it",
     "discreto_titulo": "Discreet notifications",

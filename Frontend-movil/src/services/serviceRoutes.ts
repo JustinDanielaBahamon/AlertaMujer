@@ -7,7 +7,7 @@ const EVIDENCE_ROUTES = ["/api/evidences"];
 const ALERT_ROUTES = [
   "/api/alerts", "/api/contacts", "/api/location-logs", "/api/zones", "/api/resources", "/api/saved-routes",
   "/api/frequent-locations", "/api/received-alerts", "/api/zone-reports", "/api/resource-calls", "/api/public/tracking",
-  "/api/safe-trips",
+  "/api/safe-trips", "/api/auto-protection", "/api/public/auto-protection",
 ];
 
 const startsWith = (route: string, prefixes: string[]) =>

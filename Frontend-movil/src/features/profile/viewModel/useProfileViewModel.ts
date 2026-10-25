@@ -10,6 +10,7 @@ import { deleteMyAccount, getMe, updateMe } from "../../../services/users.servic
 import { toStorablePhoto } from "../../../services/photos.service";
 import ShakeSensor from "../../../../modules/shake-sensor";
 import { removeCancelPins } from "../../security/cancelPin";
+import { disableAutoProtection } from "../../security/autoProtection";
 import { dateToIso, formatDateText } from "../../completeSignUp/profileIncomplete";
 import { digitsOnly, isValidCellphone, isValidName, lettersOnly } from "../../../utils/validators";
 
@@ -175,6 +176,8 @@ export function useProfileViewModel() {
     setDeleting(true);
     setDeleteError(null);
     try {
+      // Before deleting: afterwards there is no session to turn her phone's key off
+      await disableAutoProtection();
       await deleteMyAccount(confirmation.trim().toUpperCase());
       setDeleteVisible(false);
       // Nothing of hers stays on the phone: the private evidence copies and the cancel PINs

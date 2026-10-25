@@ -1114,6 +1114,18 @@
     "error_guardar": "Impossible d'enregistrer. Vérifiez votre connexion et réessayez."
   },
   "seguridadAlerta": {
+    "auto_titulo": "Protection automatique",
+    "auto_texto": "Quand tu quittes un de tes lieux fréquents (maison, travail, université), nous t'accompagnons sans que tu aies à lancer quoi que ce soit. Si ton téléphone n'envoie plus de signal ou si tu t'arrêtes dans une zone à risque sans répondre, nous prévenons tes contacts.",
+    "auto_permiso_titulo": "Position en permanence",
+    "auto_permiso_texto": "Pour savoir quand tu quittes tes lieux fréquents avec l'app fermée, choisis « Toujours autoriser » sur l'écran suivant. Nous n'utilisons ta position que pendant ton trajet.",
+    "auto_continuar": "Continuer",
+    "auto_sin_lugares": "Enregistre d'abord au moins un lieu fréquent (par exemple ta maison) sur la carte avec « Enregistrer mes lieux ».",
+    "auto_ir_mapa": "Aller à la carte",
+    "auto_sin_permiso": "Sans « Toujours autoriser » la protection automatique ne peut pas fonctionner avec l'app fermée.",
+    "auto_error": "Impossible de l'activer. Vérifie ta connexion et réessaie.",
+    "auto_activada": "C'est prêt : nous t'accompagnerons quand tu quitteras tes lieux fréquents.",
+    "auto_falta_permiso": "L'autorisation de position en permanence manque. Touche pour l'activer.",
+    "auto_lugares": "Lieux surveillés : {n}",
     "titulo": "Sécurité de l'alerte",
     "subtitulo": "Pour que personne d'autre ne puisse l'annuler",
     "discreto_titulo": "Notifications discrètes",

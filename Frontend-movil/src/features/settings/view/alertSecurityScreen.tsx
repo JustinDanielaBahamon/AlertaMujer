@@ -14,6 +14,7 @@ import {
   validPin,
 } from "../../security/cancelPin";
 import { isDiscreet, setDiscreet } from "../discreetMode";
+import { useAutoProtection } from "../viewModel/useAutoProtection";
 import { createSettingsScreenStyles } from "../styles/settingsScreen.styles";
 
 const digits = (v: string) => v.replace(/\D/g, "").slice(0, PIN_LENGTH_MAX);
@@ -28,6 +29,7 @@ export default function AlertSecurityScreen() {
   const s = t.seguridadAlerta;
   const styles = useMemo(() => createSettingsScreenStyles(theme), [theme]);
   const accent = theme.icon;
+  const auto = useAutoProtection();
 
   const [discreet, setDiscreetState] = useState(true);
   const [hasPin, setHasPin] = useState(false);
@@ -102,6 +104,32 @@ export default function AlertSecurityScreen() {
     <View style={styles.container}>
       <ScreenHeader title={s.titulo} subtitle={s.subtitulo} icon="lock-closed" />
       <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+        {/* Automatic protection: watches over her when she leaves a frequent place */}
+        {auto.supported && (
+          <View style={styles.card}>
+            <View style={local.row}>
+              <Ionicons name="shield-checkmark-outline" size={20} color={accent} />
+              <View style={{ flex: 1 }}>
+                <Text style={[local.title, { color: theme.text }]}>{s.auto_titulo}</Text>
+                <Text style={[local.desc, { color: theme.text }]}>{s.auto_texto}</Text>
+              </View>
+              <Switch
+                value={auto.enabled}
+                onValueChange={auto.toggle}
+                disabled={auto.busy}
+                trackColor={{ false: "#ccc", true: theme.tabActiveColor }}
+                thumbColor="#fff"
+              />
+            </View>
+            {auto.missingPermission && (
+              <TouchableOpacity onPress={auto.openSettings} style={local.warning} accessibilityRole="button">
+                <Ionicons name="warning-outline" size={18} color="#C62828" />
+                <Text style={local.warningText}>{s.auto_falta_permiso}</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
+
         {/* Discreet notifications */}
         <View style={styles.card}>
           <View style={local.row}>
@@ -169,6 +197,8 @@ export default function AlertSecurityScreen() {
 }
 
 const local = StyleSheet.create({
+  warning: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 12, padding: 10, borderRadius: 12, backgroundColor: "#C628281A" },
+  warningText: { flex: 1, color: "#C62828", fontSize: 13, fontWeight: "600" },
   row: { flexDirection: "row", gap: 12, alignItems: "flex-start" },
   title: { fontSize: 15, fontWeight: "800" },
   desc: { fontSize: 12.5, lineHeight: 18, opacity: 0.8, marginTop: 4 },

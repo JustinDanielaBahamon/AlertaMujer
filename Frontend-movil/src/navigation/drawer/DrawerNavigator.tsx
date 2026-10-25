@@ -19,6 +19,7 @@ import { getDrawerStyles } from "./drawer.style";
 import TabNavigator from "../TabNavigator";
 import { getInitials } from "../../utils/initials";
 import AjustesSubmenu from "../../features/settings/components/settingsComponent";
+import { disableAutoProtection } from "../../features/security/autoProtection";
 
 const Drawer = createDrawerNavigator();
 
@@ -234,7 +235,10 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
 
             <TouchableOpacity
               style={[styles.closeBtn, { backgroundColor: logoutButtonBg }]}
-              onPress={signOut}
+              onPress={() => {
+                // Whoever signs in next on this phone must not carry her automatic protection
+                void disableAutoProtection().finally(signOut);
+              }}
               activeOpacity={0.8}
             >
               <View style={styles.btnInner}>
