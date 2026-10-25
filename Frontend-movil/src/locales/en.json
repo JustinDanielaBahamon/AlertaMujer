@@ -242,6 +242,7 @@
   "actualizar": "Refresh",
   "navegar": "Navigate",
   "guardar": "Save",
+  "guardar_zonas": "Save my places",
   "ultima_actualizacion": "Last update:",
   "activo": "Active",
   "historial_reciente": "Recent history",
@@ -1139,5 +1140,16 @@
     "error_repetir": "The new PINs don't match.",
     "error_igual": "The emergency PIN must be different from the normal PIN.",
     "nota": "The PINs are stored encrypted only on this phone. If you forget your PIN, remove it here with the current PIN or reinstall the app."
-  }
+  },
+"bandeja": {
+  "titulo": "Notifications",
+  "subtitulo": "Everything AlertaMujer told you",
+  "vacio": "You have no notifications yet. Here you will see your contacts' alerts, your trips and important notices.",
+  "ahora": "Now",
+  "hace_min": "{n} min ago",
+  "hace_horas": "{n} h ago",
+  "borrar_todo": "Clear all",
+  "borrar_pregunta": "Clear all the notifications in this list? Your alerts and history are not affected.",
+  "abrir": "Notifications"
+}
 }

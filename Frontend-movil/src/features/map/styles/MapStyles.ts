@@ -213,6 +213,8 @@ export const styles = StyleSheet.create({
   buttonLabel: {
     fontSize: 12,
     fontWeight: "500",
+    textAlign: "center",
+    maxWidth: 82,
   },
 
   /* COORDINATES CARD */

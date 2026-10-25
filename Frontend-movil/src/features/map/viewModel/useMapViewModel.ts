@@ -640,8 +640,8 @@ export const useMapViewModel = () => {
       },
     },
     {
-      icon: "bookmark",
-      label: t.mapa.guardar,
+      icon: "bookmark-add",
+      label: t.mapa.guardar_zonas,
       action: () => {
         if (!location) return;
         navigation.navigate("ClassifyZone", { latitude: location.latitude, longitude: location.longitude });

@@ -242,6 +242,7 @@
     "actualizar": "Actualiser",
     "navegar": "Naviguer",
     "guardar": "Enregistrer",
+    "guardar_zonas": "Enregistrer mes lieux",
     "ultima_actualizacion": "Dernière mise à jour :",
     "activo": "Actif",
     "historial_reciente": "Historique récent",
@@ -1138,5 +1139,16 @@
     "error_repetir": "Les nouveaux PIN ne correspondent pas.",
     "error_igual": "Le PIN d'urgence doit être différent du PIN normal.",
     "nota": "Les PIN sont enregistrés chiffrés uniquement sur ce téléphone. Si tu oublies ton PIN, retire-le ici avec le PIN actuel ou réinstalle l'app."
-  }
+  },
+"bandeja": {
+  "titulo": "Notifications",
+  "subtitulo": "Tout ce qu'AlertaMujer t'a signalé",
+  "vacio": "Tu n'as pas encore de notifications. Ici tu verras les alertes de tes contacts, tes trajets et les avis importants.",
+  "ahora": "Maintenant",
+  "hace_min": "Il y a {n} min",
+  "hace_horas": "Il y a {n} h",
+  "borrar_todo": "Tout effacer",
+  "borrar_pregunta": "Effacer toutes les notifications de cette liste ? Tes alertes et ton historique ne changent pas.",
+  "abrir": "Notifications"
+}
 }

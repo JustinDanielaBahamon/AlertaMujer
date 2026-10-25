@@ -242,6 +242,7 @@
   "actualizar": "Atualizar",
   "navegar": "Navegar",
   "guardar": "Salvar",
+  "guardar_zonas": "Salvar meus lugares",
   "ultima_actualizacion": "Última atualização:",
   "activo": "Ativo",
   "historial_reciente": "Histórico recente",
@@ -1139,5 +1140,16 @@
     "error_repetir": "Os novos PIN não coincidem.",
     "error_igual": "O PIN de emergência deve ser diferente do PIN normal.",
     "nota": "Os PIN ficam criptografados apenas neste celular. Se esquecer seu PIN, remova-o aqui com o PIN atual ou reinstale o app."
-  }
+  },
+"bandeja": {
+  "titulo": "Notificações",
+  "subtitulo": "Tudo o que o AlertaMujer te avisou",
+  "vacio": "Você ainda não tem notificações. Aqui verá os alertas dos seus contatos, seus trajetos e avisos importantes.",
+  "ahora": "Agora",
+  "hace_min": "Há {n} min",
+  "hace_horas": "Há {n} h",
+  "borrar_todo": "Apagar tudo",
+  "borrar_pregunta": "Apagar todas as notificações desta lista? Seus alertas e histórico não são afetados.",
+  "abrir": "Notificações"
+}
 }
