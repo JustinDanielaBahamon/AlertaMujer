@@ -156,6 +156,14 @@ class ShakeSensorModule : Module() {
       openIntent(launch.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP))
     }
 
+    // Screen on and unlocked: she is using the phone. Only then the alert screen may come to the front
+    // (to record video); with the phone locked or in a pocket it stays discreet and records audio.
+    Function("isPhoneInUse") {
+      val power = androidContext.getSystemService(Context.POWER_SERVICE) as PowerManager
+      val keyguard = androidContext.getSystemService(Context.KEYGUARD_SERVICE) as android.app.KeyguardManager
+      power.isInteractive && !keyguard.isKeyguardLocked
+    }
+
     // "Auto start" is not an Android setting but each brand's: its screen opens if it exists
     Function("hasAutoStartSetting") {
       autoStartScreen() != null

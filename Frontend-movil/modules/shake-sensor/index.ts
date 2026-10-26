@@ -121,6 +121,8 @@ declare class ShakeSensorModule extends NativeModule<Events> {
   requestShowOverApps(): boolean;
   /** Brings the app to the front (only with "Mostrar sobre otras apps"); false if not allowed. */
   bringToFront(): boolean;
+  /** Screen on and unlocked: she is using the phone right now. */
+  isPhoneInUse(): boolean;
   autoProtectionStatus(): AutoProtectionStatus;
 }
 

@@ -12,6 +12,7 @@ import ShakeSensor from "../../../modules/shake-sensor";
 import { createPowerButtonDetector } from "./powerButtonDetector";
 import { backgroundAlert, createShakeAlert, prepareAlertLocation } from "./backgroundAlert";
 import { notificationsPermission, locationPermission } from "../../services/safePermissions";
+import { requestAlertCheck } from "../activeAlert/useResumeAlert";
 import { DISCREET_TEXT, DISCREET_TITLE, isDiscreet } from "../settings/discreetMode";
 
 // Builds made before these native functions existed (dev build): their manifest does not declare the
@@ -219,6 +220,7 @@ async function startCountdown(method: ProtectionMethod) {
     try {
       const alertId = await createShakeAlert(method);
       Vibration.vibrate([0, 600, 200, 600]);
+      openAlertScreenIfInUse();
       const sentText = discreet
         ? DISCREET_TEXT
         : "Tus contactos recibieron tu ubicación. Toca para ver la alerta, escribirles y ver lo que se graba.";
@@ -249,6 +251,24 @@ async function startCountdown(method: ProtectionMethod) {
   } finally {
     stopVolume(volumeSub);
     if (countdownRunning === countdown) countdownRunning = null;
+  }
+}
+
+/**
+ * Android does not let an app use the camera from the background, so an alert activated with the app
+ * closed records only audio. If she is using the phone (screen on and unlocked) the app comes to the
+ * front: the active alert screen opens by itself (useResumeAlert) and records video. With the phone
+ * locked or in a pocket nothing is shown, so whoever is near does not notice.
+ */
+function openAlertScreenIfInUse() {
+  try {
+    if (typeof ShakeSensor.isPhoneInUse === "function" && ShakeSensor.isPhoneInUse()) {
+      ShakeSensor.bringToFront();
+      // If the app was already on screen, its alert screen opens now instead of within a minute
+      requestAlertCheck();
+    }
+  } catch {
+    // Old build or without "Mostrar sobre otras apps": the alert keeps going with audio
   }
 }
 
