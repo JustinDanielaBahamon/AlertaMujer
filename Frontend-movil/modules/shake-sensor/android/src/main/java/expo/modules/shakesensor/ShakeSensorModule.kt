@@ -434,7 +434,7 @@ class ShakeSensorModule : Module() {
   private fun startSensor(intervalMs: Int): Boolean {
     stopSensor()
     val accelerometer = sensors.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) ?: return false
-    val detector = ShakeDetector()
+    val detector = ShakeDetector.forRange(accelerometer.maximumRange / SensorManager.GRAVITY_EARTH)
     val newListener = object : SensorEventListener {
       override fun onSensorChanged(event: SensorEvent) {
         val g = SensorManager.GRAVITY_EARTH

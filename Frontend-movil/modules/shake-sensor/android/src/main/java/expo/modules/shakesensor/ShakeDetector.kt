@@ -44,6 +44,26 @@ class ShakeDetector(
     lastPeak = t
   }
 
+  companion object {
+    /** The chop strength that counts on phones whose sensor measures 8 g or more. */
+    private const val FULL_THRESHOLD_G = 4.5
+    private const val FULL_REST_G = 2.0
+
+    /**
+     * Budget phones have accelerometers limited to ±2 g or ±4 g per axis (e.g. TCL T610E, SC7A20 chip):
+     * a strong chop gets stuck at that limit and never reaches 4.5 g, so shaking could not activate the
+     * alert there. The threshold follows the real range of the sensor (a bit above one saturated axis,
+     * because the chop also moves the other axes). The other rules against false alarms stay: 4 chops,
+     * calm before, stillness after.
+     */
+    fun forRange(rangeG: Float): ShakeDetector {
+      if (!rangeG.isFinite() || rangeG <= 0f || rangeG >= 5f) return ShakeDetector()
+      val threshold = minOf(FULL_THRESHOLD_G, maxOf(1.8, rangeG * 1.1))
+      val rest = minOf(FULL_REST_G, threshold * 0.65)
+      return ShakeDetector(thresholdG = threshold, restG = rest)
+    }
+  }
+
   /** Returns true when a full sequence of chops just ended. */
   fun add(x: Double, y: Double, z: Double, t: Long): Boolean {
     val strength = sqrt(x * x + y * y + z * z)
