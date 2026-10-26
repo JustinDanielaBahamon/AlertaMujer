@@ -1,6 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { ResizeMode, Video, type AVPlaybackStatus } from "expo-av";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export type RecordingPart = {
@@ -30,6 +30,14 @@ export default function PartsPlayer({
   const [error, setError] = useState(false);
   const playOnLoad = useRef(false);
   const current = parts[Math.min(index, parts.length - 1)];
+  // The tracking refreshes every few seconds with new objects: the player only gets a new source when the
+  // address really changes, otherwise it would reload the part she is watching
+  const uri = current?.source?.uri;
+  const headers = JSON.stringify(current?.source?.headers ?? {});
+  const source = useMemo(
+    () => (uri ? { uri, headers: JSON.parse(headers) as Record<string, string> } : undefined),
+    [uri, headers],
+  );
 
   useEffect(() => {
     setLoading(true);
@@ -56,7 +64,7 @@ export default function PartsPlayer({
         {type === "audio" && <MaterialIcons name="graphic-eq" size={48} color={color} style={styles.audioIcon} />}
         <Video
           key={current.id}
-          source={current.source}
+          source={source}
           style={type === "audio" ? styles.videoAudio : StyleSheet.absoluteFill}
           resizeMode={ResizeMode.CONTAIN}
           useNativeControls
