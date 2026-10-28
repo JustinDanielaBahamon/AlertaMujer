@@ -13,7 +13,7 @@ import {
   type LocationPoint,
 } from "../../../services/alert-tracking.service";
 import { getPublicSettings } from "../../../services/settings.service";
-import { stopSosAlarm } from "../../../notifications/sosAlarm";
+import { useAlarmSilencer } from "../../../notifications/useAlarmSilencer";
 import { placeDescription, getPlace } from "../../../services/geocoding.service";
 
 // Update cycle: the location is updated every 30 s; after 10 updates
@@ -194,10 +194,8 @@ export function useContactAlertViewModel() {
     };
   }, [params.alertId, params.code, DEMO]);
 
-  // Opening the alert screen turns the alarm off
-  useEffect(() => {
-    if (!DEMO) stopSosAlarm(params.alertId).catch(() => undefined);
-  }, [params.alertId, DEMO]);
+  // The alarm keeps ringing with the screen open (the phone may be far away): a volume key silences it
+  const alarm = useAlarmSilencer(params.alertId, !DEMO);
 
   // ===== TEMPORARY (demo mode): adds a new point with the phone's real location =====
   useEffect(() => {
@@ -351,6 +349,8 @@ export function useContactAlertViewModel() {
     code: params.code,
     // She does not answer, her phone stopped sending its location, or she cancelled under duress
     warning: active ? warning : null,
+    alarmRinging: alarm.ringing,
+    silenceAlarm: alarm.silence,
     videos,
     audios,
     userName: params.userName,

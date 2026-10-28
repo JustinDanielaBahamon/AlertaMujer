@@ -197,6 +197,22 @@ export default function ContactAlertScreen() {
             </Text>
           </Text>
 
+          {/* The alarm keeps ringing until she silences it (volume key, notification or this button) */}
+          {vm.alarmRinging && (
+            <View style={warningStyles.alarm}>
+              <TouchableOpacity
+                style={[warningStyles.alarmButton, { backgroundColor: theme.icon }]}
+                onPress={vm.silenceAlarm}
+                accessibilityRole="button"
+                accessibilityLabel={tx.silenciar_alarma}
+              >
+                <MaterialIcons name="volume-off" size={22} color="#fff" />
+                <Text style={warningStyles.alarmButtonText}>{tx.silenciar_alarma}</Text>
+              </TouchableOpacity>
+              <Text style={[warningStyles.alarmHint, { color: theme.text }]}>{tx.alarma_ayuda}</Text>
+            </View>
+          )}
+
           {/* What changed while it goes on: shown first, it is what the contact must act on */}
           {!!vm.warning && (
             <View style={[warningStyles.box, { borderColor: theme.icon, backgroundColor: theme.icon + "18" }]}>
@@ -585,4 +601,8 @@ export default function ContactAlertScreen() {
 const warningStyles = StyleSheet.create({
   box: { flexDirection: "row", gap: 10, alignItems: "flex-start", borderWidth: 1.5, borderRadius: 14, padding: 12, marginTop: 12 },
   text: { flex: 1, fontSize: 14, fontWeight: "700", lineHeight: 20 },
+  alarm: { marginTop: 12, alignItems: "center", gap: 6 },
+  alarmButton: { flexDirection: "row", alignItems: "center", gap: 8, borderRadius: 24, paddingVertical: 12, paddingHorizontal: 22 },
+  alarmButtonText: { color: "#fff", fontSize: 16, fontWeight: "800" },
+  alarmHint: { fontSize: 12, textAlign: "center", opacity: 0.8 },
 });

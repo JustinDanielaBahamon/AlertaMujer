@@ -951,7 +951,9 @@
     "grabacion_audio": "Audio",
     "parte": "partie",
     "partes": "parties",
-    "llamar_numero": "Appeler le {numero}"
+    "llamar_numero": "Appeler le {numero}",
+    "silenciar_alarma": "Couper l'alarme",
+    "alarma_ayuda": "Appuie sur une touche de volume ou balaie la notification pour la couper."
   },
   "notificaciones": {
     "titulo_header": "Notifications",

@@ -13,6 +13,11 @@ import { addToInbox } from "./inbox";
  * Alarm an emergency contact receives when a user activates an alert. It arrives as a
  * data-only, high-priority FCM message; here it becomes an incoming-call-like
  * notification: full screen over the lock screen, looping alarm sound and vibration.
+ *
+ * It keeps ringing even when the alert screen opens by itself (the phone may be far away, in the
+ * kitchen or the bathroom). It is silenced like a call: a volume key (useAlarmSilencer), pulling down
+ * the notification bar or swiping the notification away, or "Silenciar alarma" on the alert screen.
+ * It stops by itself after 10 minutes.
  */
 
 export const SOS_CHANNEL = "alertas_sos";
@@ -116,7 +121,8 @@ export async function showSosAlarm(data: SosAlertData): Promise<void> {
       visibility: AndroidVisibility.PUBLIC,
       sound: SOUND,
       loopSound: true,
-      ongoing: true,
+      // Not fixed: swiping it away silences it
+      ongoing: false,
       autoCancel: false,
       timeoutAfter: 10 * 60 * 1000, // the alarm stops by itself after 10 minutes
       // Full screen over the lock screen (Android 14 requires the full-screen permission)
@@ -127,9 +133,19 @@ export async function showSosAlarm(data: SosAlertData): Promise<void> {
   });
 }
 
-/** Stops the alarm (when the alert screen opens). */
+/** Silences the alarm (volume key, "Silenciar alarma" or the alert ended). */
 export async function stopSosAlarm(alertId: string | number): Promise<void> {
   await notifee.cancelNotification(notificationId(String(alertId)));
+}
+
+/** Whether that alert's alarm is still on screen (and ringing). */
+export async function isSosAlarmRinging(alertId: string | number): Promise<boolean> {
+  try {
+    const shown = await notifee.getDisplayedNotifications();
+    return shown.some((n) => n.id === notificationId(String(alertId)));
+  } catch {
+    return false;
+  }
 }
 
 export function notificationData(n: Notification | undefined): SosAlertData | null {

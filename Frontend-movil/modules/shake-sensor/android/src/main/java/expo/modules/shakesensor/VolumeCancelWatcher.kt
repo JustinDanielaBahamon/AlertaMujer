@@ -28,8 +28,16 @@ import android.view.Window
  * To not cancel a real alert by accident:
  *  - a key held down (pocket, struggle) repeats very fast: only the first event of a fast series counts;
  *  - during a call the keys are the call's volume and do not count.
+ *
+ * It also silences the alarm of a contact's alert: one press of either volume key (pressesNeeded = 1,
+ * anyKey = true), like silencing an incoming call.
  */
-class VolumeCancelWatcher(private val context: Context, private val onCancel: () -> Unit) {
+class VolumeCancelWatcher(
+  private val context: Context,
+  private val pressesNeeded: Int = PRESSES,
+  private val anyKey: Boolean = false,
+  private val onCancel: () -> Unit,
+) {
 
   private var session: MediaSession? = null
   private var receiver: BroadcastReceiver? = null
@@ -66,7 +74,8 @@ class VolumeCancelWatcher(private val context: Context, private val onCancel: ()
     val original = win.callback ?: return
     val wrapper = object : Window.Callback by original {
       override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        if (event.keyCode != KeyEvent.KEYCODE_VOLUME_DOWN) return original.dispatchKeyEvent(event)
+        val counts = event.keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || (anyKey && event.keyCode == KeyEvent.KEYCODE_VOLUME_UP)
+        if (!counts) return original.dispatchKeyEvent(event)
         if (event.action == KeyEvent.ACTION_DOWN) {
           onPress(SystemClock.elapsedRealtime(), held = event.repeatCount > 0)
         }
@@ -93,7 +102,7 @@ class VolumeCancelWatcher(private val context: Context, private val onCancel: ()
     try {
       val provider = object : VolumeProvider(VOLUME_CONTROL_RELATIVE, 100, 50) {
         override fun onAdjustVolume(direction: Int) {
-          if (direction < 0) onPress(SystemClock.elapsedRealtime())
+          if (direction < 0 || (anyKey && direction > 0)) onPress(SystemClock.elapsedRealtime())
         }
       }
       session = MediaSession(context, "AlertaMujerCancel").apply {
@@ -115,7 +124,7 @@ class VolumeCancelWatcher(private val context: Context, private val onCancel: ()
       override fun onReceive(c: Context, intent: Intent) {
         val now = intent.getIntExtra(EXTRA_VOLUME, -1)
         val before = intent.getIntExtra(EXTRA_PREV_VOLUME, -1)
-        if (now >= 0 && before >= 0 && now < before) onPress(SystemClock.elapsedRealtime())
+        if (now >= 0 && before >= 0 && (now < before || (anyKey && now > before))) onPress(SystemClock.elapsedRealtime())
       }
     }
     try {
@@ -142,7 +151,7 @@ class VolumeCancelWatcher(private val context: Context, private val onCancel: ()
     Log.d(TAG, "volume down")
     presses.addLast(now)
     while (presses.isNotEmpty() && now - presses.first() > WINDOW_MS) presses.removeFirst()
-    if (presses.size >= PRESSES) {
+    if (presses.size >= pressesNeeded) {
       presses.clear()
       Log.i(TAG, "cancel")
       onCancel()

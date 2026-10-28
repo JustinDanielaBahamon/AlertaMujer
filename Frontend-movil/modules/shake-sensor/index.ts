@@ -42,6 +42,8 @@ type Events = {
   onScreenChange: (change: { screenOn: boolean }) => void;
   /** 4 presses of "volume down" within 2 s while the countdown runs (startVolumeCancel). */
   onVolumeCancel: () => void;
+  /** One press of either volume key while a contact's alert alarm rings (startAlarmSilencer). */
+  onAlarmSilence: () => void;
   /** The trip service got a 401: it needs a renewed session token (updateTripToken). */
   onTripAuthExpired: () => void;
   /** The trip ended from the service (arrival confirmed in the notification, or ended on the server). */
@@ -98,6 +100,9 @@ declare class ShakeSensorModule extends NativeModule<Events> {
   /** Listens to "volume down" (onVolumeCancel) while the countdown runs. */
   startVolumeCancel(): void;
   stopVolumeCancel(): void;
+  /** Listens to the volume keys (onAlarmSilence) while a contact's alert alarm rings. */
+  startAlarmSilencer(): void;
+  stopAlarmSilencer(): void;
   /** Neutral texts in the persistent notifications (protection, recording, trip). */
   setDiscreet(on: boolean): void;
   /**

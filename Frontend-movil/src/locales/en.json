@@ -952,7 +952,9 @@
     "grabacion_audio": "Audio",
     "parte": "part",
     "partes": "parts",
-    "llamar_numero": "Call {numero}"
+    "llamar_numero": "Call {numero}",
+    "silenciar_alarma": "Silence alarm",
+    "alarma_ayuda": "Press a volume key or swipe the notification away to silence it."
   },
   "notificaciones": {
     "titulo_header": "Notifications",

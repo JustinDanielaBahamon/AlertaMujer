@@ -35,6 +35,7 @@ class ShakeSensorModule : Module() {
   private var wakeLock: PowerManager.WakeLock? = null
   private var screenReceiver: BroadcastReceiver? = null
   private var volumeWatcher: VolumeCancelWatcher? = null
+  private var alarmWatcher: VolumeCancelWatcher? = null
 
   private val androidContext: Context
     get() = requireNotNull(appContext.reactContext) { "No Android context" }
@@ -46,7 +47,7 @@ class ShakeSensorModule : Module() {
     Name("ShakeSensor")
     Events(
       "onShake", "onAudioChunk", "onRecordingError", "onScreenChange", "onTripAuthExpired", "onTripEnded",
-      "onVolumeCancel",
+      "onVolumeCancel", "onAlarmSilence",
     )
 
     OnCreate {
@@ -251,6 +252,22 @@ class ShakeSensorModule : Module() {
       Unit
     }
 
+    // While a contact's alert alarm rings: one press of either volume key emits onAlarmSilence
+    Function("startAlarmSilencer") {
+      mainHandler.post {
+        alarmWatcher = alarmWatcher ?: VolumeCancelWatcher(androidContext, pressesNeeded = 1, anyKey = true) {
+          sendEvent("onAlarmSilence", emptyMap<String, Any>())
+        }
+        alarmWatcher?.start(appContext.currentActivity)
+      }
+      Unit
+    }
+
+    Function("stopAlarmSilencer") {
+      mainHandler.post { alarmWatcher?.stop() }
+      Unit
+    }
+
     Function("setDiscreet") { on: Boolean -> DiscreetMode.set(androidContext, on) }
 
     Function("pauseAudioRecording") { sendToRecorder(AudioRecorderService.ACTION_PAUSE) }
@@ -369,6 +386,7 @@ class ShakeSensorModule : Module() {
 
     OnDestroy {
       volumeWatcher?.stop()
+      alarmWatcher?.stop()
       stopSensor()
       stopPowerButton()
       AudioRecorderService.chunkListener = null
