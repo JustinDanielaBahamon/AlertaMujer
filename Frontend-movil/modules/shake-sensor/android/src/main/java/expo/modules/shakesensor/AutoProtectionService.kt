@@ -14,6 +14,7 @@ import android.content.pm.ServiceInfo
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
+import android.net.Uri
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
@@ -37,11 +38,15 @@ import java.util.TimeZone
  * (GeofenceReceiver) and sends a signal of life with her position every 2 minutes. The server alerts her
  * contacts if those signals stop (phone off, taken away, no battery).
  *
- * To avoid false alarms nothing here alerts by itself, except one case:
- *  - she stays still for 20 min somewhere: she arrived somewhere, the protection ends quietly;
- *  - but if that place is inside a risk zone, she is asked "¿Todo bien?" and, without an answer in
- *    5 minutes, her contacts are alerted.
- * It also ends when she arrives at another frequent place, after 4 hours (server) or when she taps "Detener".
+ * When she stays still for 20 min somewhere:
+ *  - in a normal place she is asked, silently, "¿Llegaste bien?" (at 20 and 35 min). "Sí, llegué bien" ends
+ *    the protection; without an answer, at 45 min her contacts are told with her last location;
+ *  - inside a risk zone she is asked "¿Todo bien?" and, without an answer in 5 minutes, her contacts are alerted.
+ * Moving again restarts the count. It also ends when she arrives at another frequent place, after 4 hours
+ * (server) or when she taps "Detener".
+ *
+ * Nobody else can stop it: the answers need the phone unlocked (Android 12+) and, if she has a cancel PIN,
+ * "Detener" opens the app to ask for it. Her duress PIN looks like a normal stop but alerts her contacts.
  */
 class AutoProtectionService : Service() {
   private var thread: HandlerThread? = null
@@ -57,6 +62,8 @@ class AutoProtectionService : Service() {
   private var anchor: Location? = null
   private var anchorAt = 0L
   private var askedAt = 0L
+  private var arrivalAsks = 0
+  private var arrivalAskedAt = 0L
   private var riskZones: List<TripService.RiskZone> = emptyList()
   private val zoneNoticeAt = mutableMapOf<String, Long>()
 
@@ -66,7 +73,9 @@ class AutoProtectionService : Service() {
     when (intent?.action) {
       ACTION_START -> start(intent)
       ACTION_OK -> worker?.post { imOk() }
-      ACTION_STOP, ACTION_ARRIVED -> worker?.post { finish() } ?: shutDown()
+      ACTION_STOP, ACTION_ARRIVED, ACTION_ARRIVED_OK -> worker?.post { finish() } ?: shutDown()
+      ACTION_DURESS -> worker?.post { duress() } ?: shutDown()
+      ACTION_REFRESH -> worker?.post { updateNotice() }
       ACTION_DISABLED -> shutDown()
       else -> if (worker == null) shutDown()
     }
@@ -137,9 +146,16 @@ class AutoProtectionService : Service() {
     }
   }
 
-  /** She arrived at a frequent place or tapped "Detener". */
+  /** She arrived at a frequent place, answered "Sí, llegué bien" or stopped it. */
   private fun finish() {
     if (tripId != 0L) post("/api/public/auto-protection/$tripId/end", JSONObject())
+    shutDown()
+  }
+
+  /** Duress PIN: on her phone it looks stopped, but the server alerts her contacts silently. */
+  private fun duress() {
+    if (tripId != 0L) post("/api/public/auto-protection/$tripId/duress", JSONObject())
+    // Without connection her signal of life stops anyway, so the server alerts by lost signal
     shutDown()
   }
 
@@ -173,8 +189,35 @@ class AutoProtectionService : Service() {
       askedAt = now
       askIfOk(zoneAt(here)!!.name)
     } else {
-      // Still for a while outside any risk zone: she arrived somewhere
-      finish()
+      askIfArrived(now)
+    }
+  }
+
+  /**
+   * Still in a normal place: "¿Llegaste bien?" at 20 and 35 min (silent, so it does not give her away)
+   * and, without an answer, her contacts are told at 45 min.
+   */
+  private fun askIfArrived(now: Long) {
+    when {
+      arrivalAsks == 0 -> {
+        arrivalAsks = 1
+        arrivalAskedAt = now
+        askArrived()
+      }
+      arrivalAsks == 1 && now - arrivalAskedAt >= SECOND_ASK_MS -> {
+        arrivalAsks = 2
+        arrivalAskedAt = now
+        askArrived()
+      }
+      arrivalAsks == 2 && now - arrivalAskedAt >= NOTIFY_AFTER_MS && tripId != 0L -> {
+        val response = post("/api/public/auto-protection/$tripId/unconfirmed", JSONObject())
+        if (response != null && response.first in 200..299) {
+          cancelNotice(ARRIVED_ID)
+          showNotice("Avisamos a tus contactos", "No confirmaste que llegaste bien. Abre la app para verlo o terminar la alerta.")
+          shutDown()
+        }
+        // Without connection it is tried again on the next tick; if her signal stops, the server alerts
+      }
     }
   }
 
@@ -194,10 +237,27 @@ class AutoProtectionService : Service() {
       .setSmallIcon(applicationInfo.icon)
       .setAutoCancel(false)
       .setContentIntent(openApp())
-      .addAction(Notification.Action.Builder(null, "Estoy bien", serviceIntent(ACTION_OK, 1)).build())
+      .addAction(secureAction("Estoy bien", serviceIntent(ACTION_OK, 1)))
       .addAction(Notification.Action.Builder(null, "Abrir la app", openApp()).build())
       .build()
     notifications().notify(CHECK_ID, notice)
+  }
+
+  private fun askArrived() {
+    val discreet = DiscreetMode.isOn(this)
+    val title = if (discreet) DiscreetMode.TITLE else "¿Llegaste bien?"
+    val text = if (discreet) DiscreetMode.TEXT
+      else "Toca \"Sí, llegué bien\" para terminar la protección."
+    val notice = Notification.Builder(this, QUIET_CHANNEL)
+      .setContentTitle(title)
+      .setContentText(text)
+      .setStyle(Notification.BigTextStyle().bigText(text))
+      .setSmallIcon(applicationInfo.icon)
+      .setAutoCancel(false)
+      .setContentIntent(openApp())
+      .addAction(secureAction("Sí, llegué bien", serviceIntent(ACTION_ARRIVED_OK, 4)))
+      .build()
+    notifications().notify(ARRIVED_ID, notice)
   }
 
   // ── Location and risk zones ────────────────────────────────────────────────────────
@@ -233,7 +293,9 @@ class AutoProtectionService : Service() {
     if (still == null || location.distanceTo(still) > MOVED_M) {
       anchor = location
       anchorAt = System.currentTimeMillis()
-      // Moving again: the question no longer applies
+      // Moving again: the questions no longer apply and the count starts over
+      if (arrivalAsks > 0) cancelNotice(ARRIVED_ID)
+      arrivalAsks = 0
       if (askedAt > 0) imOk()
     }
     zoneAt(location)?.let { announceZone(it, location) }
@@ -342,7 +404,7 @@ class AutoProtectionService : Service() {
       .setOngoing(true)
       .setOnlyAlertOnce(true)
       .setContentIntent(openApp())
-      .addAction(Notification.Action.Builder(null, "Detener", serviceIntent(ACTION_STOP, 2)).build())
+      .addAction(stopAction())
       .build()
   }
 
@@ -384,6 +446,16 @@ class AutoProtectionService : Service() {
         },
       )
     }
+    if (manager.getNotificationChannel(QUIET_CHANNEL) == null) {
+      // Without sound or vibration: a question must never give her away
+      manager.createNotificationChannel(
+        NotificationChannel(QUIET_CHANNEL, "Preguntas de la protección automática", NotificationManager.IMPORTANCE_DEFAULT).apply {
+          description = "¿Llegaste bien?, en silencio"
+          setSound(null, null)
+          enableVibration(false)
+        },
+      )
+    }
   }
 
   private fun openApp(): PendingIntent? =
@@ -397,6 +469,21 @@ class AutoProtectionService : Service() {
       PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
     )
 
+  /** A button that, with the phone locked, first asks for its PIN, pattern or fingerprint (Android 12+). */
+  private fun secureAction(title: String, intent: PendingIntent): Notification.Action =
+    Notification.Action.Builder(null, title, intent).apply {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) setAuthenticationRequired(true)
+    }.build()
+
+  /** "Detener": with a cancel PIN it opens the app to ask for it (her duress PIN also works there). */
+  private fun stopAction(): Notification.Action {
+    if (!AutoProtection.pinRequired(this)) return secureAction("Detener", serviceIntent(ACTION_STOP, 2))
+    val askPin = Intent(Intent.ACTION_VIEW, Uri.parse(STOP_LINK)).setPackage(packageName)
+      .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+    val open = PendingIntent.getActivity(this, 105, askPin, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+    return Notification.Action.Builder(null, "Detener", open).build()
+  }
+
   // ── Life cycle ─────────────────────────────────────────────────────────────────────
 
   private fun shutDown() {
@@ -409,9 +496,12 @@ class AutoProtectionService : Service() {
     thread = null
     releaseWakeLock()
     cancelNotice(CHECK_ID)
+    cancelNotice(ARRIVED_ID)
     tripId = 0L
     anchor = null
     askedAt = 0L
+    arrivalAsks = 0
+    arrivalAskedAt = 0L
     status = Status()
     stopForeground(STOP_FOREGROUND_REMOVE)
     stopSelf()
@@ -446,10 +536,12 @@ class AutoProtectionService : Service() {
     private const val TAG = "AutoProtection"
     private const val SERVICE_CHANNEL = "proteccion_automatica"
     private const val ALERTS_CHANNEL = "proteccion_automatica_avisos"
+    private const val QUIET_CHANNEL = "proteccion_automatica_preguntas"
     private const val SERVICE_ID = 7511
     private const val CHECK_ID = 7512
     private const val RESULT_ID = 7513
     private const val ZONE_ID = 7514
+    private const val ARRIVED_ID = 7515
     private const val HEARTBEAT_MS = 2 * 60_000L
     private const val LOCATION_INTERVAL_MS = 30_000L
     private const val FRESH_FIX_MS = 5 * 60_000L
@@ -460,6 +552,9 @@ class AutoProtectionService : Service() {
     private const val STILL_MS = 20 * 60_000L
     private const val ANSWER_MS = 5 * 60_000L
     private const val ZONE_NOTICE_MS = 30 * 60_000L
+    /** "¿Llegaste bien?": first at STILL_MS (20 min), again 15 min later, contacts told 10 min after that. */
+    private const val SECOND_ASK_MS = 15 * 60_000L
+    private const val NOTIFY_AFTER_MS = 10 * 60_000L
     private const val LOW_BATTERY_PERCENT = 10
     // The server ends it after 4 h; the wake lock never outlives that by much
     private const val MAX_RUN_MS = 5 * 60 * 60_000L
@@ -468,7 +563,12 @@ class AutoProtectionService : Service() {
     const val ACTION_STOP = "alertamujer.auto.STOP"
     const val ACTION_ARRIVED = "alertamujer.auto.ARRIVED"
     const val ACTION_OK = "alertamujer.auto.OK"
+    const val ACTION_ARRIVED_OK = "alertamujer.auto.ARRIVED_OK"
     const val ACTION_DISABLED = "alertamujer.auto.DISABLED"
+    const val ACTION_DURESS = "alertamujer.auto.DURESS"
+    const val ACTION_REFRESH = "alertamujer.auto.REFRESH"
+    /** Opened by "Detener" when she has a cancel PIN (handled by the app). */
+    const val STOP_LINK = "alertamujer://auto-protection/stop"
     const val EXTRA_LATITUDE = "latitude"
     const val EXTRA_LONGITUDE = "longitude"
 

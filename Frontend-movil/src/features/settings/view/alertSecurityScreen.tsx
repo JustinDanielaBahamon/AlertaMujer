@@ -14,6 +14,7 @@ import {
   validPin,
 } from "../../security/cancelPin";
 import { isDiscreet, setDiscreet } from "../discreetMode";
+import { syncAutoProtectionPin } from "../../security/autoProtection";
 import { useAutoProtection } from "../viewModel/useAutoProtection";
 import { createSettingsScreenStyles } from "../styles/settingsScreen.styles";
 
@@ -74,6 +75,7 @@ export default function AlertSecurityScreen() {
     if (duress && !validPin(duress)) return setError(s.error_largo);
     if (duress && duress === pin) return setError(s.error_igual);
     await saveCancelPins(pin, duress || null);
+    void syncAutoProtectionPin();
     setEditing(false);
     await load();
     Alert.alert(s.titulo, s.guardado);
@@ -82,6 +84,7 @@ export default function AlertSecurityScreen() {
   const remove = async () => {
     if ((await checkCancelPin(current)) !== "ok") return setError(s.error_actual);
     await removeCancelPins();
+    void syncAutoProtectionPin();
     setEditing(false);
     await load();
   };

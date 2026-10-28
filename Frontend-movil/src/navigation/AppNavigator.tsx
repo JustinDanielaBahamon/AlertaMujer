@@ -12,6 +12,7 @@ import { useSosAlerts } from "../notifications/useSosAlerts";
 import { useShakeProtection } from "../features/shake/useShakeProtection";
 import { useProtectionReminder } from "../features/permissions/useProtectionReminder";
 import { syncAutoProtection } from "../features/security/autoProtection";
+import AutoProtectionStop from "../features/security/AutoProtectionStop";
 import { useResumeAlert } from "../features/activeAlert/useResumeAlert";
 import { useSosLink } from "../features/widget/useSosLink";
 
@@ -78,17 +79,21 @@ export default function AppNavigator() {
   }
 
   return (
-    <NavigationContainer ref={navigation}>
-      {user && missingData ? (
-        <CompleteSignUpScreen onDone={() => setMissingData(false)} />
-      ) : user ? (
-        <MainNavigator
-          key={user.correo}
-          initialRouteName={mainEntryRef.current ?? "DrawerHome"}
-        />
-      ) : (
-        <AuthNavigator />
-      )}
-    </NavigationContainer>
+    <>
+      <NavigationContainer ref={navigation}>
+        {user && missingData ? (
+          <CompleteSignUpScreen onDone={() => setMissingData(false)} />
+        ) : user ? (
+          <MainNavigator
+            key={user.correo}
+            initialRouteName={mainEntryRef.current ?? "DrawerHome"}
+          />
+        ) : (
+          <AuthNavigator />
+        )}
+      </NavigationContainer>
+      {/* "Detener" of the automatic protection with her cancel PIN */}
+      <AutoProtectionStop withSession={!!user && user.id !== 0} />
+    </>
   );
 }

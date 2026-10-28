@@ -12,8 +12,14 @@ jest.mock("expo-location", () => ({
 }));
 jest.mock("../../../../modules/shake-sensor", () => ({
   __esModule: true,
-  default: { configureAutoProtection: jest.fn(() => true), autoProtectionStatus: jest.fn(), disableAutoProtection: jest.fn() },
+  default: {
+    configureAutoProtection: jest.fn(() => true),
+    autoProtectionStatus: jest.fn(),
+    disableAutoProtection: jest.fn(),
+    setAutoProtectionPin: jest.fn(),
+  },
 }));
+jest.mock("../cancelPin", () => ({ hasCancelPin: jest.fn(async () => true) }));
 jest.mock("../../../services/api", () => ({
   __esModule: true,
   default: { post: jest.fn() },
@@ -64,5 +70,7 @@ describe("protección automática", () => {
     expect(options.key).toBe("llave");
     expect(JSON.parse(options.places).map((p: { id: string }) => p.id)).toEqual(["1"]);
     expect(JSON.parse(options.riskZones)).toHaveLength(1);
+    // With a cancel PIN, "Detener" in the notice will ask for it
+    expect(ShakeSensor.setAutoProtectionPin).toHaveBeenCalledWith(true);
   });
 });

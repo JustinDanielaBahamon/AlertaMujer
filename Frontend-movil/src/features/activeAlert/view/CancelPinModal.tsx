@@ -5,13 +5,22 @@ import { useLocale } from "../../../contexts/LocaleContext";
 import { useTheme, type AppTheme } from "../../../contexts/ThemeContext";
 import { PIN_LENGTH_MAX } from "../../security/cancelPin";
 
-type Props = { visible: boolean; error: string | null; onSubmit: (pin: string) => void; onClose: () => void };
+type Props = {
+  visible: boolean;
+  error: string | null;
+  onSubmit: (pin: string) => void;
+  onClose: () => void;
+  // Other uses (stopping the automatic protection) change the texts; the alert ones by default
+  title?: string;
+  description?: string;
+  confirmLabel?: string;
+};
 
 /**
  * PIN to cancel an alert. It looks the same for the normal PIN and the duress PIN: whoever forces her
  * cannot tell which one she typed.
  */
-export default function CancelPinModal({ visible, error, onSubmit, onClose }: Props) {
+export default function CancelPinModal({ visible, error, onSubmit, onClose, title, description, confirmLabel }: Props) {
   const { theme } = useTheme();
   const { t } = useLocale();
   const s = useMemo(() => createStyles(theme), [theme]);
@@ -26,8 +35,8 @@ export default function CancelPinModal({ visible, error, onSubmit, onClose }: Pr
       <View style={s.overlay}>
         <View style={s.card}>
           <MaterialIcons name="lock" size={30} color={theme.icon} />
-          <Text style={s.title}>{t.alertaActiva.pin_titulo}</Text>
-          <Text style={s.text}>{t.alertaActiva.pin_descripcion}</Text>
+          <Text style={s.title}>{title ?? t.alertaActiva.pin_titulo}</Text>
+          <Text style={s.text}>{description ?? t.alertaActiva.pin_descripcion}</Text>
           <TextInput
             value={pin}
             onChangeText={(v) => setPin(v.replace(/\D/g, "").slice(0, PIN_LENGTH_MAX))}
@@ -36,7 +45,7 @@ export default function CancelPinModal({ visible, error, onSubmit, onClose }: Pr
             autoFocus
             maxLength={PIN_LENGTH_MAX}
             style={s.input}
-            accessibilityLabel={t.alertaActiva.pin_titulo}
+            accessibilityLabel={title ?? t.alertaActiva.pin_titulo}
           />
           {!!error && <Text style={s.error}>{error}</Text>}
           <TouchableOpacity
@@ -44,7 +53,7 @@ export default function CancelPinModal({ visible, error, onSubmit, onClose }: Pr
             disabled={pin.length < 4}
             onPress={() => onSubmit(pin)}
           >
-            <Text style={s.primaryText}>{t.alertaActiva.pin_confirmar}</Text>
+            <Text style={s.primaryText}>{confirmLabel ?? t.alertaActiva.pin_confirmar}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={s.secondary} onPress={onClose}>
             <Text style={[s.secondaryText, { color: theme.icon }]}>{t.alertaActiva.pin_volver}</Text>

@@ -5,6 +5,7 @@ import api, { baseUrlFor } from "../../services/api";
 import { getOrCreateDevice } from "../../services/devices.service";
 import { frequentLocationsService, type FrequentLocationApi } from "../../services/frequent-locations.service";
 import { getRiskZones, ownRiskZones, riskZonesJson } from "../../services/riskZones";
+import { hasCancelPin } from "./cancelPin";
 
 /**
  * Automatic protection: when she leaves one of her frequent places the phone starts, by itself, a
@@ -71,6 +72,7 @@ export async function enableAutoProtection(userId: number | string): Promise<Aut
       places: JSON.stringify(places),
       riskZones: zones,
     });
+    if (configured) await syncAutoProtectionPin();
     return configured ? "ok" : "no_permission";
   } catch {
     return "error";
@@ -100,7 +102,14 @@ export async function syncAutoProtection(userId: number | string): Promise<void>
       places: JSON.stringify(places),
       riskZones: zones,
     });
+    await syncAutoProtectionPin();
   } catch {
     // Offline: the previous places keep working
   }
+}
+
+/** With a cancel PIN, "Detener" in the notice asks for it in the app (and the duress PIN works there). */
+export async function syncAutoProtectionPin(): Promise<void> {
+  if (!autoProtectionSupported() || typeof ShakeSensor.setAutoProtectionPin !== "function") return;
+  ShakeSensor.setAutoProtectionPin(await hasCancelPin());
 }

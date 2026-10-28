@@ -1163,5 +1163,13 @@
   "borrar_todo": "Clear all",
   "borrar_pregunta": "Clear all the notifications in this list? Your alerts and history are not affected.",
   "abrir": "Notifications"
-}
+},
+  "proteccionAutomatica": {
+    "detener_titulo": "Enter your PIN to stop the protection",
+    "detener_descripcion": "Without the right PIN the automatic protection stays on.",
+    "detener_confirmar": "Stop protection",
+    "pin_incorrecto": "Wrong PIN. The protection is still on.",
+    "detenida_titulo": "Protection stopped",
+    "detenida_texto": "The automatic protection was stopped."
+  }
 }

@@ -29,6 +29,7 @@ object AutoProtection {
   private const val KEY_KEY = "key"
   private const val KEY_PLACES = "places"
   private const val KEY_ZONES = "riskZones"
+  private const val KEY_PIN = "pinRequired"
   /** Android allows 100 geofences per app; a person does not have that many frequent places. */
   private const val MAX_PLACES = 90
   /** Smaller circles fire with the GPS drift of a phone standing still at home. */
@@ -43,6 +44,10 @@ object AutoProtection {
   fun baseUrl(context: Context) = prefs(context).getString(KEY_BASE_URL, "").orEmpty()
   fun key(context: Context) = prefs(context).getString(KEY_KEY, "").orEmpty()
   fun riskZonesJson(context: Context) = prefs(context).getString(KEY_ZONES, "[]").orEmpty()
+
+  /** She has a cancel PIN: "Detener" opens the app to ask for it instead of stopping right away. */
+  fun pinRequired(context: Context) = prefs(context).getBoolean(KEY_PIN, false)
+  fun setPinRequired(context: Context, required: Boolean) = prefs(context).edit().putBoolean(KEY_PIN, required).apply()
 
   fun places(context: Context): List<Place> =
     runCatching {

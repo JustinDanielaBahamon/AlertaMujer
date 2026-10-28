@@ -1163,5 +1163,13 @@
   "borrar_todo": "Apagar tudo",
   "borrar_pregunta": "Apagar todas as notificações desta lista? Seus alertas e histórico não são afetados.",
   "abrir": "Notificações"
-}
+},
+  "proteccionAutomatica": {
+    "detener_titulo": "Digite seu PIN para parar a proteção",
+    "detener_descripcion": "Sem o PIN correto a proteção automática continua ativa.",
+    "detener_confirmar": "Parar proteção",
+    "pin_incorrecto": "PIN incorreto. A proteção continua ativa.",
+    "detenida_titulo": "Proteção parada",
+    "detenida_texto": "A proteção automática foi parada."
+  }
 }

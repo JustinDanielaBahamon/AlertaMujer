@@ -116,6 +116,12 @@ declare class ShakeSensorModule extends NativeModule<Events> {
    */
   configureAutoProtection(options: AutoProtectionOptions): boolean;
   disableAutoProtection(): void;
+  /** "Detener" with her PIN: stops the running automatic protection. */
+  stopAutoProtection(): void;
+  /** Duress PIN: looks stopped on her phone, but her contacts are alerted silently. */
+  duressAutoProtection(): void;
+  /** With a cancel PIN, "Detener" opens the app to ask for it instead of stopping right away. */
+  setAutoProtectionPin(required: boolean): void;
   /** "Mostrar sobre otras apps": lets a contact's alert bring the app to the front while the phone is in use. */
   canShowOverApps(): boolean;
   requestShowOverApps(): boolean;

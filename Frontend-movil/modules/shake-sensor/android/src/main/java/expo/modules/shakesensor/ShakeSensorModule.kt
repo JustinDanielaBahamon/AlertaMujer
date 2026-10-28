@@ -349,6 +349,16 @@ class ShakeSensorModule : Module() {
 
     Function("disableAutoProtection") { AutoProtection.disable(androidContext) }
 
+    // After "Detener" she typed her PIN in the app: the normal one stops it, the duress one alerts silently
+    Function("stopAutoProtection") { autoProtectionCommand(AutoProtectionService.ACTION_STOP) }
+    Function("duressAutoProtection") { autoProtectionCommand(AutoProtectionService.ACTION_DURESS) }
+
+    // With a cancel PIN, "Detener" opens the app to ask for it
+    Function("setAutoProtectionPin") { required: Boolean ->
+      AutoProtection.setPinRequired(androidContext, required)
+      autoProtectionCommand(AutoProtectionService.ACTION_REFRESH)
+    }
+
     Function("autoProtectionStatus") {
       mapOf(
         "enabled" to AutoProtection.isEnabled(androidContext),
@@ -407,6 +417,12 @@ class ShakeSensorModule : Module() {
   private fun sendToRecorder(action: String) {
     if (!AudioRecorderService.active) return
     androidContext.startService(Intent(androidContext, AudioRecorderService::class.java).setAction(action))
+  }
+
+  /** Only reaches a protection that is running (the app is in front when it calls this). */
+  private fun autoProtectionCommand(action: String) {
+    if (!AutoProtectionService.status.running) return
+    androidContext.startService(Intent(androidContext, AutoProtectionService::class.java).setAction(action))
   }
 
   // false if Android did not let it open (it does not exist, is not exported or the brand blocks it)

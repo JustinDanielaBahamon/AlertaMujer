@@ -1162,5 +1162,13 @@
   "borrar_todo": "Tout effacer",
   "borrar_pregunta": "Effacer toutes les notifications de cette liste ? Tes alertes et ton historique ne changent pas.",
   "abrir": "Notifications"
-}
+},
+  "proteccionAutomatica": {
+    "detener_titulo": "Saisis ton code PIN pour arrêter la protection",
+    "detener_descripcion": "Sans le bon code PIN, la protection automatique reste active.",
+    "detener_confirmar": "Arrêter la protection",
+    "pin_incorrecto": "Code PIN incorrect. La protection reste active.",
+    "detenida_titulo": "Protection arrêtée",
+    "detenida_texto": "La protection automatique a été arrêtée."
+  }
 }
