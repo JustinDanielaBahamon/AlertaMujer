@@ -1,50 +1,83 @@
-# Welcome to your Expo app 👋
+# Alerta Mujer — App móvil
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicación Android de seguridad personal para mujeres. Permite activar una alerta SOS con la ubicación, gestionar contactos de confianza, ver zonas seguras y de riesgo, guardar ubicaciones y recorridos frecuentes y llamar a líneas de ayuda.
 
-## Get started
+Comparte backend (Spring Boot + PostgreSQL) con el panel web, por lo que los datos están sincronizados entre ambas aplicaciones.
 
-1. Install dependencies
+## Tecnologías
 
-   ```bash
-   npm install
-   ```
+| Componente | Versión |
+|---|---|
+| Expo SDK (Nueva Arquitectura activada) | 54 |
+| React Native / React | 0.81 / 19.1 |
+| TypeScript (modo estricto) | 5.9 |
+| React Navigation (stack, tabs, drawer) | 7 |
+| Axios | 1.x |
+| MapLibre React Native (teselas OpenFreeMap / OpenStreetMap) | 11.5 |
+| expo-location | 19 |
+| Jest + jest-expo + React Native Testing Library | 29 / 54 / 13 |
+| EAS Build | — |
 
-2. Start the app
+## Requisitos
 
-   ```bash
-   npx expo start
-   ```
+- Node.js 20 o superior y npm (EAS CLI recomienda Node 22).
+- `npm install -g eas-cli` e iniciar sesión con `eas login` para compilar APK.
+- El backend corriendo y accesible desde el celular (ver `Backend-ALERTA-MUJER`).
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Desarrollo
 
 ```bash
-npm run reset-project
+npm install
+npm start            # expo start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+`npm start` ejecuta antes `scripts/update-env.js`, que escribe en `.env` la IP de este computador (`EXPO_PUBLIC_API_URL=http://<ip>:8080`) para que el celular llegue al backend. Para forzar una IP: `node ./scripts/update-env.js 192.168.1.50`. El archivo `.env` no se sube a git.
 
-## Learn more
+La URL del backend se resuelve en `src/services/api.ts` en este orden: `EXPO_PUBLIC_API_URL`, la IP detectada por Expo y, por último, `http://localhost:8080`.
 
-To learn more about developing your project with Expo, look at the following resources:
+## Pruebas
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npm test             # jest
+npm run test:watch
+```
 
-## Join the community
+Las pruebas están en carpetas `__tests__/` junto al código (`*.test.ts` / `*.test.tsx`). Los mocks globales están en `jest.setup.js`.
 
-Join our community of developers creating universal apps.
+## Generar el APK (EAS Build)
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```bash
+eas build -p android --profile preview
+```
+
+| Perfil | Uso | `EXPO_PUBLIC_API_URL` |
+|---|---|---|
+| `development` | APK con dev client (`npx expo start --dev-client`) | — |
+| `preview` | APK para probar en celulares | backend en la red local |
+| `production` | AAB para Play Store | backend desplegado |
+
+Los mapas usan **MapLibre** con el estilo gratuito de [OpenFreeMap](https://openfreemap.org) (datos de OpenStreetMap): no necesitan clave de API ni cuenta de facturación. El componente `src/components/mapa/MapaLibre.tsx` ofrece `MapView`, `Marker`, `Polyline` y `Circle` con la misma forma de uso que tenía `react-native-maps`. Como MapLibre es un módulo nativo, los cambios en el mapa requieren generar un APK nuevo (no funcionan en Expo Go).
+
+Para probar el APK contra el backend local, el celular y el computador deben estar en la misma Wi-Fi; `app.json` permite tráfico HTTP (`expo-build-properties` → `usesCleartextTraffic`) para ese caso.
+
+## Ver los registros del APK
+
+```bash
+adb logcat -v time ReactNativeJS:V AndroidRuntime:E *:S
+```
+
+`ReactNativeJS` muestra los `console.log` y errores de JavaScript; `AndroidRuntime` los cierres de la app.
+
+## Estructura
+
+```
+App.tsx                 # proveedores globales, navegación y animación de apertura
+src/
+├── features/           # pantallas por funcionalidad (view / viewModel / styles)
+├── contexts/           # estado global (auth, contactos, recorridos, tema, idioma…)
+├── services/           # clientes HTTP del backend y servicios del dispositivo
+├── navigation/         # stack, pestañas y drawer
+├── components/         # componentes compartidos
+├── hooks/              # hooks compartidos
+└── locales/            # textos en es, en, fr, pt
+```

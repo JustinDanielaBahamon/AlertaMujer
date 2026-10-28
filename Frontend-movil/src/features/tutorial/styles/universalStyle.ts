@@ -24,7 +24,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  // Card — versión estándar (otras pantallas)
+  // Card — standard version (other screens)
   card: {
     marginHorizontal: 16,
     marginTop: 4,
@@ -41,7 +41,7 @@ export const styles = StyleSheet.create({
     overflow: 'hidden',
   },
 
-  // Card — versión grande (Bienvenida y pantallas con más contenido)
+  // Card — large version (Welcome and screens with more content)
   cardLarge: {
     marginHorizontal: 20,
     marginTop: 24,
@@ -60,7 +60,7 @@ export const styles = StyleSheet.create({
     overflow: 'hidden',
   },
 
-  // Acento superior de card (funciona para ambas variantes)
+  // Top accent of the card (works for both variants)
   cardAccent: {
     position: 'absolute',
     top: 0, left: 0, right: 0,
@@ -70,7 +70,7 @@ export const styles = StyleSheet.create({
     borderTopRightRadius: 28,
   },
 
-  // Títulos
+  // Titles
   cardTitle: {
     fontSize: 24,
     fontWeight: '700',
@@ -91,7 +91,7 @@ export const styles = StyleSheet.create({
     marginBottom: 12,
   },
 
-  // Bloques de descripción simples
+  // Simple description blocks
   descBlock: {
     flexDirection: 'row',
     marginBottom: 8,
@@ -109,7 +109,7 @@ export const styles = StyleSheet.create({
     color: COLORS.purpleDark,
   },
 
-  // Filas con icono (reutilizable en cualquier pantalla)
+  // Rows with an icon (reusable on any screen)
   row: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -152,7 +152,7 @@ export const styles = StyleSheet.create({
     color: COLORS.purpleDark,
   },
 
-  // Botón primario
+  // Primary button
   buttonPrimary: {
     backgroundColor: COLORS.purpleMain,
     paddingVertical: 14,
@@ -171,7 +171,7 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
-  // Botón secundario
+  // Secondary button
   buttonSecondary: {
     borderWidth: 2,
     borderColor: COLORS.purpleMain,
@@ -186,7 +186,7 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // Botón SOS
+  // SOS button
   buttonSOS: {
     backgroundColor: COLORS.sosPrimary,
     paddingVertical: 18,

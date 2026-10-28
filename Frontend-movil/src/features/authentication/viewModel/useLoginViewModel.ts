@@ -1,14 +1,25 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { AuthStackParamList } from "../../../navigation/types";
 import { useAuth } from "../../../contexts/AuthContext";
-import { loginWithEmail } from "../services/login.service";
-import * as Google from "expo-auth-session/providers/google";
-import * as WebBrowser from "expo-web-browser";
-import { makeRedirectUri } from "expo-auth-session";
+import { loginWithEmail, loginWithGoogleIdToken } from "../services/login.service";
+import {
+  GoogleSignin,
+  isErrorWithCode,
+  isSuccessResponse,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
 
-WebBrowser.maybeCompleteAuthSession();
+// Native Google sign-in (Android Credential Manager): no browser or redirect.
+// webClientId is the web client (type 3) of the alerta-mujer-b4fae Firebase project, the same as the
+// Android client in google-services.json: if they belong to different projects Google returns DEVELOPER_ERROR.
+// The ID token comes with that "aud", which the backend accepts (google.client-ids).
+// Google only responds if the APK SHA-1 is registered in Firebase (Android app
+// com.alertamujer.app); otherwise it returns DEVELOPER_ERROR.
+GoogleSignin.configure({
+  webClientId: "656563018279-blo6edqva74tbsdce0mau3n6rv007fvi.apps.googleusercontent.com",
+});
 
 type LoginNavigation = NativeStackNavigationProp<AuthStackParamList, "Login">;
 
@@ -16,66 +27,44 @@ export function useLoginViewModel() {
   const navigation = useNavigation<LoginNavigation>();
   const { signIn } = useAuth();
 
-  const [correo, setCorreo]                   = useState("");
+  const [email, setEmail]                   = useState("");
   const [password, setPassword]               = useState("");
-  const [mostrarPassword, setMostrarPassword] = useState(false);
-  const [cargando, setCargando]               = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading]               = useState(false);
 
-  const [errorCorreo, setErrorCorreo]     = useState("");
+  const [emailError, setEmailError]     = useState("");
   const [errorPassword, setErrorPassword] = useState("");
-  const [errorGeneral, setErrorGeneral]   = useState("");
+  const [generalError, setGeneralError]   = useState("");
 
-  // Google OAuth con redirectUri correcto
-   const [, response, promptAsync] = Google.useAuthRequest({
-  clientId:        "266164512214-a48icf7ct4140gor9pq64iq04ebvp4ta.apps.googleusercontent.com",
-  androidClientId: "266164512214-u4jqsko28es0lns9ubpes0vrnr3hgjqv.apps.googleusercontent.com",
-  redirectUri: makeRedirectUri({
-    scheme: "frontedmovil",
-    native: "frontedmovil://",
-  }),
-});
-
-  useEffect(() => {
-    if (response?.type === "success") {
-      const token = response.authentication?.accessToken;
-      if (token) {
-        console.log("Token Google:", token);
-        // signInWithGoogleToken(token) cuando tengas el endpoint
-      }
-    } else if (response?.type === "error") {
-      setErrorGeneral("No se pudo iniciar sesión con Google. Intenta de nuevo.");
-    }
-  }, [response]);
-
-  const toggleMostrarPassword = useCallback(() => {
-    setMostrarPassword((v) => !v);
+  const toggleShowPassword = useCallback(() => {
+    setShowPassword((v) => !v);
   }, []);
 
-  const irARecuperarContrasena = useCallback(() => {
-    navigation.navigate("RecuperarContrasena");
+  const goToRecoverPassword = useCallback(() => {
+    navigation.navigate("RecoverPassword");
   }, [navigation]);
 
-  const irARegistro = useCallback(() => {
-    navigation.navigate("Registro");
+  const goToSignUp = useCallback(() => {
+    navigation.navigate("SignUp");
   }, [navigation]);
 
-  const limpiarErrores = () => {
-    setErrorCorreo("");
+  const clearErrors = () => {
+    setEmailError("");
     setErrorPassword("");
-    setErrorGeneral("");
+    setGeneralError("");
   };
 
-  const iniciarSesion = useCallback(async () => {
-    limpiarErrores();
+  const signInWithEmail = useCallback(async () => {
+    clearErrors();
     let hayError = false;
 
-    if (!correo.trim()) {
-      setErrorCorreo("Ingresa tu correo");
+    if (!email.trim()) {
+      setEmailError("Ingresa tu correo");
       hayError = true;
     } else {
-      const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo.trim());
-      if (!emailValido) {
-        setErrorCorreo("El correo no tiene un formato válido");
+      const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+      if (!validEmail) {
+        setEmailError("El correo no tiene un formato válido");
         hayError = true;
       }
     }
@@ -87,12 +76,10 @@ export function useLoginViewModel() {
 
     if (hayError) return;
 
-    setCargando(true);
-    console.log('Intentando login móvil con:', correo.trim());
+    setLoading(true);
     try {
-      const { usuario, token } = await loginWithEmail(correo.trim(), password);
-      console.log('Login móvil exitoso:', usuario);
-      signIn(usuario, token);
+      const { user, token, refreshToken } = await loginWithEmail(email.trim(), password);
+      signIn(user, token, { refreshToken });
     } catch (e: any) {
       const msg = e?.message ?? "";
       if (
@@ -102,36 +89,64 @@ export function useLoginViewModel() {
         msg.includes("EMAIL_NOT_FOUND") ||
         msg.includes("Invalid credentials")
       ) {
-        setErrorCorreo("Este correo no está registrado.");
-        setErrorGeneral("¿Eres nueva? Regístrate para continuar.");
-        setTimeout(() => navigation.navigate("Registro"), 2000);
+        setEmailError("Este correo no está registrado.");
+        setGeneralError("¿Eres nueva? Regístrate para continuar.");
+        setTimeout(() => navigation.navigate("SignUp"), 2000);
       } else {
-        setErrorGeneral("Correo o contraseña incorrectos");
+        setGeneralError("Correo o contraseña incorrectos");
       }
     } finally {
-      setCargando(false);
+      setLoading(false);
     }
-  }, [correo, password, signIn, navigation]);
+  }, [email, password, signIn, navigation]);
 
-  const continuarConGoogle = useCallback(() => {
-    limpiarErrores();
-    void promptAsync();
-  }, [promptAsync]);
+  // Google: request the ID token (verifiable identity) and send it to the backend.
+  const continueWithGoogle = useCallback(async () => {
+    clearErrors();
+    try {
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+      // Google remembers the last account and signs in with it directly; after forgetting it, it always shows the
+      // picker with every account on the phone (and the option to add another)
+      await GoogleSignin.signOut().catch(() => {});
+      const response = await GoogleSignin.signIn();
+      if (!isSuccessResponse(response)) return; // the user closed the Google window
+      const idToken = response.data.idToken;
+      if (!idToken) {
+        setGeneralError("Google no devolvió la identidad. Intenta de nuevo.");
+        return;
+      }
+      setLoading(true);
+      const { user, token, refreshToken } = await loginWithGoogleIdToken(idToken);
+      signIn(user, token, { refreshToken });
+    } catch (e: unknown) {
+      if (isErrorWithCode(e) && e.code === statusCodes.IN_PROGRESS) return;
+      if (isErrorWithCode(e) && e.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        setGeneralError("Este teléfono no tiene Google Play Services actualizado.");
+      } else if (e instanceof Error && !isErrorWithCode(e)) {
+        setGeneralError(e.message); // backend errors (account blocked, etc.)
+      } else {
+        console.warn("Google Sign-In falló:", isErrorWithCode(e) ? e.code : e);
+        setGeneralError("No se pudo iniciar sesión con Google. Intenta de nuevo.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [signIn]);
 
   return {
-    correo,
-    setCorreo,
+    email: email,
+    setEmail: setEmail,
     password,
     setPassword,
-    mostrarPassword,
-    toggleMostrarPassword,
-    irARecuperarContrasena,
-    irARegistro,
-    iniciarSesion,
-    continuarConGoogle,
-    cargando,
-    errorCorreo,
+    showPassword: showPassword,
+    toggleShowPassword: toggleShowPassword,
+    goToRecoverPassword: goToRecoverPassword,
+    goToSignUp: goToSignUp,
+    signIn: signInWithEmail,
+    continueWithGoogle: continueWithGoogle,
+    loading: loading,
+    emailError: emailError,
     errorPassword,
-    errorGeneral,
+    generalError: generalError,
   };
 }

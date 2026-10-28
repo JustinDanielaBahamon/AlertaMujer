@@ -1,0 +1,61 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <!-- Keep the CPU awake while shake protection is on -->
+  <uses-permission android:name="android.permission.WAKE_LOCK" />
+  <!-- Ask the system not to put the app to sleep (Android and brand battery savers) -->
+  <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+  <!-- Record the microphone and keep reading the location during an alert, also with the screen off -->
+  <uses-permission android:name="android.permission.RECORD_AUDIO" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+  <!-- Automatic protection: geofences of her frequent places, also after a reboot -->
+  <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+  <!-- A contact's emergency opens the app by itself even while the phone is in use -->
+  <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+  <!-- Android 11+: to open each brand's "auto start" screen its apps must be declared -->
+  <queries>
+    <package android:name="com.transsion.phonemaster" />
+    <package android:name="com.miui.securitycenter" />
+    <package android:name="com.coloros.safecenter" />
+    <package android:name="com.oppo.safe" />
+    <package android:name="com.vivo.permissionmanager" />
+    <package android:name="com.iqoo.secure" />
+    <package android:name="com.huawei.systemmanager" />
+    <package android:name="com.samsung.android.lool" />
+    <package android:name="com.asus.mobilemanager" />
+  </queries>
+  <application>
+    <service
+      android:name="expo.modules.shakesensor.AudioRecorderService"
+      android:exported="false"
+      android:foregroundServiceType="microphone|location" />
+    <!-- "Avísame si no llego": signal of life with the location during the trip -->
+    <service
+      android:name="expo.modules.shakesensor.TripService"
+      android:exported="false"
+      android:foregroundServiceType="location" />
+    <!-- Automatic protection: watches over her on the way after she leaves a frequent place -->
+    <service
+      android:name="expo.modules.shakesensor.AutoProtectionService"
+      android:exported="false"
+      android:foregroundServiceType="location" />
+    <receiver android:name="expo.modules.shakesensor.GeofenceReceiver" android:exported="false" />
+    <receiver android:name="expo.modules.shakesensor.BootReceiver" android:exported="false">
+      <intent-filter>
+        <action android:name="android.intent.action.BOOT_COMPLETED" />
+        <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+      </intent-filter>
+    </receiver>
+    <!-- Shares the evidence copy (files/evidencias) with the app she chooses -->
+    <provider
+      android:name="androidx.core.content.FileProvider"
+      android:authorities="${applicationId}.evidence"
+      android:exported="false"
+      android:grantUriPermissions="true">
+      <meta-data
+        android:name="android.support.FILE_PROVIDER_PATHS"
+        android:resource="@xml/evidence_paths" />
+    </provider>
+  </application>
+</manifest>

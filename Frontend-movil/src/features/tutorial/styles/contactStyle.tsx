@@ -1,19 +1,19 @@
 import { StyleSheet } from "react-native";
 import { TUTORIAL_PALETTE } from "./tutorialTheme";
 
-// ─── Paleta del módulo Contactos — familia & confianza ────────────────────────
+// ─── Contacts module palette — family & trust ─────────────────────────────────
 export const CONTACT_COLORS = {
   ...TUTORIAL_PALETTE,
 };
 
 export const contactStyle = StyleSheet.create({
-  // ── Fondo ──────────────────────────────────────────────────────────────────
+  // ── Background ─────────────────────────────────────────────────────────────
   screenBg: {
     flex: 1,
     backgroundColor: CONTACT_COLORS.screenBg,
   },
 
-  // ── Círculos de fondo ──────────────────────────────────────────────────────
+  // ── Background circles ─────────────────────────────────────────────────────
   bgCircleBase: {
     position: "absolute",
   },
@@ -45,7 +45,7 @@ export const contactStyle = StyleSheet.create({
     paddingBottom: 8,
   },
 
-  // ── Etiqueta de sección ────────────────────────────────────────────────────
+  // ── Section label ──────────────────────────────────────────────────────────
   sectionRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -64,7 +64,7 @@ export const contactStyle = StyleSheet.create({
     backgroundColor: CONTACT_COLORS.sectionLine,
   },
 
-  // ── Fila de característica ─────────────────────────────────────────────────
+  // ── Feature row ────────────────────────────────────────────────────────────
   featureRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -89,7 +89,7 @@ export const contactStyle = StyleSheet.create({
     borderTopRightRadius: 18,
   },
 
-  // ── Ícono ──────────────────────────────────────────────────────────────────
+  // ── Icon ───────────────────────────────────────────────────────────────────
   rowIconWrap: {
     width: 46,
     height: 46,
@@ -102,7 +102,7 @@ export const contactStyle = StyleSheet.create({
     fontSize: 24,
   },
 
-  // ── Texto de fila ──────────────────────────────────────────────────────────
+  // ── Row text ───────────────────────────────────────────────────────────────
   rowTextContainer: {
     flex: 1,
     justifyContent: "center",
@@ -139,7 +139,7 @@ export const contactStyle = StyleSheet.create({
     marginVertical: 14,
   },
 
-  // ── Descripción detallada ──────────────────────────────────────────────────
+  // ── Detailed description ───────────────────────────────────────────────────
   descRow: {
     flexDirection: "row",
     alignItems: "flex-start",
@@ -172,8 +172,8 @@ export const contactStyle = StyleSheet.create({
     lineHeight: 19,
   },
 
-  // ── Card de permisos ───────────────────────────────────────────────────────
-  permisosCard: {
+  // ── Permissions card ───────────────────────────────────────────────────────
+  permissionsCard: {
     borderRadius: 18,
     padding: 16,
     gap: 10,
@@ -181,20 +181,20 @@ export const contactStyle = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: CONTACT_COLORS.row1Border,
   },
-  permisosRow: {
+  permissionsRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
   },
-  permisosEmoji: {
+  permissionsEmoji: {
     fontSize: 22,
   },
-  permisosTitle: {
+  permissionsTitle: {
     fontSize: 13,
     fontWeight: "700",
     color: "#9c0aa1",
   },
-  permisosDesc: {
+  permissionsDesc: {
     fontSize: 12,
     color: "#6B7280",
     lineHeight: 18,
@@ -222,7 +222,7 @@ export const contactStyle = StyleSheet.create({
     letterSpacing: 0.2,
   },
 
-  // ── Overlay advertencia ────────────────────────────────────────────────────
+  // ── Warning overlay ────────────────────────────────────────────────────────
   overlayBg: {
     position: "absolute",
     top: 0, left: 0, right: 0, bottom: 0,

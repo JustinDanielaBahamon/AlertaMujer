@@ -2,7 +2,7 @@ import { StyleSheet } from "react-native";
 import { COLORS } from "../../../features/tutorial/styles/universalStyle";
 
 export const styles = StyleSheet.create({
-  // Solo para texto dentro del contenido de la card
+  // Only for text inside the card content
   description: {
     fontSize: 14,
     color: COLORS.textBody,

@@ -8,7 +8,7 @@ interface Props {
   titleHighlight?: string;
   children?: React.ReactNode;
   style?: any;
-  // ← opcional: colores personalizados por pantalla
+  // ← optional: custom colors per screen
   gradientColors?: readonly [string, string, ...string[]];
 }
 
@@ -17,7 +17,7 @@ export default function CardBase({
   titleHighlight,
   children,
   style,
-  gradientColors = ["#ffffff", "#f8f8f8", "#e3aee7"], // ← default igual que bienvenida
+  gradientColors = ["#ffffff", "#f8f8f8", "#e3aee7"], // ← default same as welcome
 }: Props) {
   return (
     <View style={[localStyles.cardWrapper, style]}>
@@ -27,10 +27,10 @@ export default function CardBase({
         end={{ x: 1, y: 1 }}
         style={localStyles.gradient}
       >
-        {/* Acento superior morado */}
+        {/* Purple top accent */}
         <View style={localStyles.cardAccent} />
 
-        {/* Título */}
+        {/* Title */}
         {title && (
           <Text style={localStyles.cardTitle}>
             {title}
@@ -43,7 +43,7 @@ export default function CardBase({
         {/* Divisor */}
         {title && <View style={localStyles.divider} />}
 
-        {/* Contenido */}
+        {/* Content */}
         {children}
       </LinearGradient>
     </View>
@@ -65,7 +65,7 @@ const localStyles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.purpleLight,
     overflow: 'hidden',
-    // ← sin backgroundColor, el gradiente lo reemplaza
+    // ← no backgroundColor, the gradient replaces it
   },
   gradient: {
     flex: 1,

@@ -7,4 +7,13 @@ module.exports = defineConfig([
   {
     ignores: ['dist/*'],
   },
+  // Files that run on Node (Expo config, scripts) and the Jest setup
+  {
+    files: ['app.config.js', 'scripts/**/*.js', 'plugins/**/*.js'],
+    languageOptions: { globals: { __dirname: 'readonly', require: 'readonly', module: 'writable', process: 'readonly' } },
+  },
+  {
+    files: ['jest.setup.js'],
+    languageOptions: { globals: { jest: 'readonly' } },
+  },
 ]);

@@ -5,9 +5,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Picker } from "@react-native-picker/picker";
 import { MaterialIcons } from "@expo/vector-icons";
 import Card from "../../../components/ui/card/card";
-import ModalConfirmacion from "@/components/ui/modalConfirmacion/confirmacion";
+import ConfirmationModal from "@/components/ui/confirmationModal/confirmation";
 import { useLocationTutorialViewModel, PLACEHOLDER_MUNICIPALITY } from "../viewModel/useLocationTutorialViewModel";
-import { locationStyle, UBIC_COLORS } from "../styles/locationStyle";
+import { locationStyle, LOCATION_COLORS } from "../styles/locationStyle";
 import { useLocale } from "../../../contexts/LocaleContext";
 
 interface LocationScreenProps {
@@ -19,7 +19,7 @@ export default function LocationScreen({ externalVm }: LocationScreenProps) {
   const internalVM = useLocationTutorialViewModel();
   const vm = externalVm ?? internalVM;
 
-  // ── Animación de entrada de la tarjeta ────────────────────────────────────
+  // ── Card entrance animation ───────────────────────────────────────────────
   const cardAnim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.spring(cardAnim, {
@@ -37,7 +37,7 @@ export default function LocationScreen({ externalVm }: LocationScreenProps) {
     }],
   };
 
-  // ── Animación de sacudida en error ────────────────────────────────────────
+  // ── Shake animation on error ──────────────────────────────────────────────
   const shakeAnim = useRef(new Animated.Value(0)).current;
   const triggerShake = () => {
     shakeAnim.setValue(0);
@@ -70,7 +70,7 @@ export default function LocationScreen({ externalVm }: LocationScreenProps) {
           />
         </View>
 
-        {/* Tarjeta */}
+        {/* Card */}
         <Animated.View style={[{ flex: 1 }, cardAnimStyle]}>
           <Card title={`${t.tutorial.ubicacion_titulo_1}\n`} titleHighlight={t.tutorial.ubicacion_titulo_2}>
             <ScrollView
@@ -79,31 +79,31 @@ export default function LocationScreen({ externalVm }: LocationScreenProps) {
               showsVerticalScrollIndicator={false}
               nestedScrollEnabled
             >
-              {/* Ícono circular + info card */}
+              {/* Circular icon + info card */}
               <View style={locationStyle.headerIconWrap}>
-                <MaterialIcons name="map" size={28} color={UBIC_COLORS.accent} />
+                <MaterialIcons name="map" size={28} color={LOCATION_COLORS.accent} />
               </View>
 
               <View style={locationStyle.infoCard}>
-                <MaterialIcons name="info-outline" size={20} color={UBIC_COLORS.accent} />
+                <MaterialIcons name="info-outline" size={20} color={LOCATION_COLORS.accent} />
                 <Text style={locationStyle.infoDesc}>
                   {t.tutorial.ubicacion_ayuda_desc}
                 </Text>
               </View>
 
-              {/* Banner de validación */}
+              {/* Validation banner */}
               {vm.showValidationBanner && (
                 <Animated.View
                   style={[locationStyle.validationBanner, { transform: [{ translateX: shakeAnim }] }]}
                 >
-                  <MaterialIcons name="warning-amber" size={18} color={UBIC_COLORS.warningText} />
+                  <MaterialIcons name="warning-amber" size={18} color={LOCATION_COLORS.warningText} />
                   <Text style={locationStyle.validationBannerText}>
                     {t.tutorial.ubicacion_validacion_banner}
                   </Text>
                 </Animated.View>
               )}
 
-              {/* Departamento — fijo, ya NO es un selector interactivo */}
+              {/* Department — fixed, it is NO longer an interactive picker */}
               <View style={locationStyle.fieldLabelRow}>
                 <View style={locationStyle.fieldLabelDot} />
                 <Text style={locationStyle.fieldLabel}>
@@ -112,13 +112,13 @@ export default function LocationScreen({ externalVm }: LocationScreenProps) {
               </View>
               <View style={locationStyle.fixedField}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                  <MaterialIcons name="place" size={16} color={UBIC_COLORS.accent} />
+                  <MaterialIcons name="place" size={16} color={LOCATION_COLORS.accent} />
                   <Text style={locationStyle.fixedFieldValue}>{vm.department}</Text>
                 </View>
                 <Text style={locationStyle.fixedBadge}>{t.tutorial.ubicacion_fijo_badge}</Text>
               </View>
 
-              {/* Municipio — sigue siendo el único selector real */}
+              {/* Municipality — still the only real picker */}
               <View style={locationStyle.fieldLabelRow}>
                 <View style={locationStyle.fieldLabelDot} />
                 <Text style={locationStyle.fieldLabel}>
@@ -137,23 +137,23 @@ export default function LocationScreen({ externalVm }: LocationScreenProps) {
                   <Picker.Item
                     label={t.tutorial.ubicacion_municipio_placeholder}
                     value={PLACEHOLDER_MUNICIPALITY}
-                    color={UBIC_COLORS.placeholder}
+                    color={LOCATION_COLORS.placeholder}
                   />
-                  {vm.municipalitiesHuila.map((muni) => (
-                    <Picker.Item key={muni} label={muni} value={muni} />
+                  {vm.municipalitiesHuila.map((municipalityName) => (
+                    <Picker.Item key={municipalityName} label={municipalityName} value={municipalityName} />
                   ))}
                 </Picker>
               </View>
               {vm.errors.municipality && (
                 <View style={locationStyle.errorRow}>
-                  <MaterialIcons name="error-outline" size={13} color={UBIC_COLORS.errorColor} />
+                  <MaterialIcons name="error-outline" size={13} color={LOCATION_COLORS.errorColor} />
                   <Text style={locationStyle.errorText}>{vm.errors.municipality}</Text>
                 </View>
               )}
 
               <View style={locationStyle.divider} />
 
-              {/* Resumen de selección */}
+              {/* Selection summary */}
               <View style={locationStyle.fieldLabelRow}>
                 <View style={locationStyle.fieldLabelDot} />
                 <Text style={locationStyle.fieldLabel}>
@@ -161,48 +161,48 @@ export default function LocationScreen({ externalVm }: LocationScreenProps) {
                 </Text>
               </View>
 
-              <View style={locationStyle.seleccionCard}>
-                <View style={locationStyle.seleccionRow}>
-                  <MaterialIcons name="map" size={16} color={UBIC_COLORS.accent} />
-                  <Text style={locationStyle.seleccionLabel}>
+              <View style={locationStyle.selectionCard}>
+                <View style={locationStyle.selectionRow}>
+                  <MaterialIcons name="map" size={16} color={LOCATION_COLORS.accent} />
+                  <Text style={locationStyle.selectionLabel}>
                     {t.tutorial.ubicacion_departamento_texto}
                   </Text>
-                  <Text style={locationStyle.seleccionValue}>{vm.department}</Text>
+                  <Text style={locationStyle.selectionValue}>{vm.department}</Text>
                 </View>
 
-                <View style={locationStyle.seleccionRowDivider} />
+                <View style={locationStyle.selectionRowDivider} />
 
-                <View style={locationStyle.seleccionRow}>
+                <View style={locationStyle.selectionRow}>
                   <MaterialIcons
                     name="place"
                     size={16}
-                    color={municipalityNotSelected ? UBIC_COLORS.border : UBIC_COLORS.accent}
+                    color={municipalityNotSelected ? LOCATION_COLORS.border : LOCATION_COLORS.accent}
                   />
-                  <Text style={locationStyle.seleccionLabel}>
+                  <Text style={locationStyle.selectionLabel}>
                     {t.tutorial.ubicacion_municipio_texto}
                   </Text>
                   <Text style={[
-                    locationStyle.seleccionValue,
-                    municipalityNotSelected && { color: UBIC_COLORS.placeholder, fontStyle: "italic", fontWeight: "400" },
+                    locationStyle.selectionValue,
+                    municipalityNotSelected && { color: LOCATION_COLORS.placeholder, fontStyle: "italic", fontWeight: "400" },
                   ]}>
                     {municipalityNotSelected ? t.tutorial.ubicacion_sin_seleccionar : vm.municipality}
                   </Text>
                 </View>
               </View>
 
-              {/* Botón guardar */}
+              {/* Save button */}
               <TouchableOpacity
                 onPress={vm.openConfirmation}
-                style={locationStyle.btnGuardar}
+                style={locationStyle.saveBtn}
                 activeOpacity={0.85}
               >
                 <MaterialIcons name="save" size={18} color="#FFFFFF" />
-                <Text style={locationStyle.btnGuardarText}>{t.tutorial.ubicacion_guardar_boton}</Text>
+                <Text style={locationStyle.saveBtnText}>{t.tutorial.ubicacion_guardar_boton}</Text>
               </TouchableOpacity>
 
               {/* Insignia inferior */}
               <View style={locationStyle.bottomBadge}>
-                <MaterialIcons name="verified-user" size={14} color={UBIC_COLORS.accent} />
+                <MaterialIcons name="verified-user" size={14} color={LOCATION_COLORS.accent} />
                 <Text style={locationStyle.bottomBadgeText}>{t.tutorial.ubicacion_datos_protegidos}</Text>
               </View>
 
@@ -212,13 +212,13 @@ export default function LocationScreen({ externalVm }: LocationScreenProps) {
 
       </SafeAreaView>
 
-      <ModalConfirmacion
+      <ConfirmationModal
         visible={vm.confirmationModalVisible}
-        departamento={vm.department}
-        municipio={vm.municipality}
-        onConfirmar={vm.confirmLocation}
-        onRegresar={vm.closeConfirmation}
-        soloConfirmar={vm.alreadyConfirmed}
+        department={vm.department}
+        municipality={vm.municipality}
+        onConfirm={vm.confirmLocation}
+        onBack={vm.closeConfirmation}
+        confirmOnly={vm.alreadyConfirmed}
       />
     </View>
   );

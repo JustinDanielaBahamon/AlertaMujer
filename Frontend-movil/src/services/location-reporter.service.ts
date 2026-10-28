@@ -1,37 +1,40 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "./api";
+import { currentDeviceId } from "./devices.service";
 
-// Envía la ubicación del celular al backend para que la usuaria (y solo ella) la vea en la web.
-// Si no hay conexión, los puntos quedan en una cola corta y se suben en el siguiente envío.
+// Sends the phone location to the backend so the user (and only she) sees it on the web.
+// If there is no connection, the points stay in a short queue and are uploaded on the next send.
 
-export type PuntoReporte = {
+export type ReportPoint = {
   latitude: number;
   longitude: number;
   accuracy?: number | null;
-  alertId?: number | null;
+  alertaId?: number | null;
 };
 
-type PuntoEnCola = PuntoReporte & { recordedAt: string };
+type QueuedPoint = ReportPoint & { recordedAt: string };
 
 const COLA_KEY = "@alerta-mujer:location-queue";
 const MAX_EN_COLA = 100;
 
-// El backend guarda LocalDateTime en UTC sin zona
-const ahoraUtc = () => new Date().toISOString().slice(0, 23);
+// The backend stores LocalDateTime in UTC without a zone
+const nowUtc = () => new Date().toISOString().slice(0, 23);
 
-const redondear = (n: number | null | undefined, decimales: number) =>
-  n == null ? null : Math.round(n * 10 ** decimales) / 10 ** decimales;
+const round = (n: number | null | undefined, decimals: number) =>
+  n == null ? null : Math.round(n * 10 ** decimals) / 10 ** decimals;
 
-const enviar = (p: PuntoReporte & { recordedAt?: string }) =>
+const send = (p: ReportPoint & { recordedAt?: string }) =>
   api.post("/api/location-logs", {
-    latitude: redondear(p.latitude, 6),
-    longitude: redondear(p.longitude, 6),
-    accuracy: redondear(p.accuracy, 2),
-    alertId: p.alertId ?? null,
+    latitude: round(p.latitude, 6),
+    longitude: round(p.longitude, 6),
+    accuracy: round(p.accuracy, 2),
+    alertId: p.alertaId ?? null,
     recordedAt: p.recordedAt,
+    // With the account on several phones, the backend stores the daily location only from the most recent one
+    deviceId: currentDeviceId(),
   });
 
-async function leerCola(): Promise<PuntoEnCola[]> {
+async function leerCola(): Promise<QueuedPoint[]> {
   try {
     const raw = await AsyncStorage.getItem(COLA_KEY);
     return raw ? JSON.parse(raw) : [];
@@ -40,37 +43,37 @@ async function leerCola(): Promise<PuntoEnCola[]> {
   }
 }
 
-async function guardarEnCola(punto: PuntoEnCola): Promise<void> {
+async function saveToQueue(point: QueuedPoint): Promise<void> {
   const cola = await leerCola();
-  const nueva = [...cola, punto].slice(-MAX_EN_COLA);
-  await AsyncStorage.setItem(COLA_KEY, JSON.stringify(nueva));
+  const newOne = [...cola, point].slice(-MAX_EN_COLA);
+  await AsyncStorage.setItem(COLA_KEY, JSON.stringify(newOne));
 }
 
-async function vaciarCola(): Promise<void> {
+async function emptyQueue(): Promise<void> {
   const cola = await leerCola();
   if (cola.length === 0) return;
-  const pendientes: PuntoEnCola[] = [];
-  for (const punto of cola) {
+  const pendingItems: QueuedPoint[] = [];
+  for (const point of cola) {
     try {
-      await enviar(punto);
+      await send(point);
     } catch (error: any) {
-      // Sin conexión: se deja para el próximo intento. Rechazo del servidor (4xx): se descarta.
-      if (!error?.response) pendientes.push(punto);
+      // Offline: left for the next attempt. Server rejection (4xx): discarded.
+      if (!error?.response) pendingItems.push(point);
     }
   }
-  await AsyncStorage.setItem(COLA_KEY, JSON.stringify(pendientes));
+  await AsyncStorage.setItem(COLA_KEY, JSON.stringify(pendingItems));
 }
 
-export async function reportarUbicacion(punto: PuntoReporte): Promise<void> {
-  const recordedAt = ahoraUtc();
+export async function reportLocation(point: ReportPoint): Promise<void> {
+  const recordedAt = nowUtc();
   try {
-    await enviar({ ...punto, recordedAt });
-    await vaciarCola();
+    await send({ ...point, recordedAt });
+    await emptyQueue();
   } catch (error: any) {
-    if (!error?.response) await guardarEnCola({ ...punto, recordedAt });
+    if (!error?.response) await saveToQueue({ ...point, recordedAt });
   }
 }
 
-export async function limpiarColaUbicaciones(): Promise<void> {
+export async function clearLocationQueue(): Promise<void> {
   await AsyncStorage.removeItem(COLA_KEY);
 }

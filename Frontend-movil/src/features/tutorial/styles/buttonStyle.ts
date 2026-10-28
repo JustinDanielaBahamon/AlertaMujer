@@ -2,7 +2,7 @@ import { StyleSheet } from "react-native";
 import { TUTORIAL_PALETTE } from "./tutorialTheme";
 
 
-// ─── Paleta mejorada: rojo · morado · verde ───────────────────────────────────
+// ─── Improved palette: red · purple · green ───────────────────────────────────
 export const BUTTON_COLORS = {
   ...TUTORIAL_PALETTE,
   circle5: "#a010f3",
@@ -13,13 +13,13 @@ export const BUTTON_COLORS = {
 };
 
 export const buttonStyle = StyleSheet.create({
-  // ── Fondo ────────────────────────────────────────────────────────────────────
+  // ── Background ────────────────────────────────────────────────────────────────
   screenBg: {
     flex: 1,
     backgroundColor: "#ffffff",
   },
 
-  // ── Círculos de fondo — base genérica usada en BackgroundCircles ─────────────
+  // ── Background circles — generic base used by BackgroundCircles ──────────────
   bgCircleBase: {
     position: "absolute",
   },
@@ -43,7 +43,7 @@ export const buttonStyle = StyleSheet.create({
     height: 200,
   },
 
-  // ── ScrollView dentro de la card ─────────────────────────────────────────────
+  // ── ScrollView inside the card ───────────────────────────────────────────────
   cardScroll: {
     flex: 1,
   },
@@ -51,7 +51,7 @@ export const buttonStyle = StyleSheet.create({
     paddingBottom: 8,
   },
 
-  // ── Etiqueta de sección ──────────────────────────────────────────────────────
+  // ── Section label ────────────────────────────────────────────────────────────
   sectionRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -70,7 +70,7 @@ export const buttonStyle = StyleSheet.create({
     backgroundColor: BUTTON_COLORS.sectionLine,
   },
 
-  // ── Fila tipo "tap" ──────────────────────────────────────────────────────────
+  // ── "Tap" row ───────────────────────────────────────────────────────────────
   tapRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -97,7 +97,7 @@ export const buttonStyle = StyleSheet.create({
     borderTopRightRadius: 18,
   },
 
-  // ── Ícono de la fila ─────────────────────────────────────────────────────────
+  // ── Row icon ─────────────────────────────────────────────────────────────────
   rowIconWrap: {
     width: 46,
     height: 46,
@@ -110,7 +110,7 @@ export const buttonStyle = StyleSheet.create({
     fontSize: 24,
   },
 
-  // ── Texto de la fila ─────────────────────────────────────────────────────────
+  // ── Row text ─────────────────────────────────────────────────────────────────
   rowTextContainer: {
     flex: 1,
     justifyContent: "center",
@@ -127,7 +127,7 @@ export const buttonStyle = StyleSheet.create({
     lineHeight: 18,
   },
 
-  // ── Badge de nivel ───────────────────────────────────────────────────────────
+  // ── Level badge ───────────────────────────────────────────────────────────────
   badge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -148,7 +148,7 @@ export const buttonStyle = StyleSheet.create({
     marginVertical: 14,
   },
 
-  // ── Descripción detallada ────────────────────────────────────────────────────
+  // ── Detailed description ─────────────────────────────────────────────────────
   descRow: {
     flexDirection: "row",
     alignItems: "flex-start",
@@ -181,7 +181,7 @@ export const buttonStyle = StyleSheet.create({
     lineHeight: 19,
   },
 
-  // ── Sección demo ─────────────────────────────────────────────────────────────
+  // ── Demo section ─────────────────────────────────────────────────────────────
   demoContainer: {
     alignItems: "center",
     paddingVertical: 8,
@@ -227,7 +227,7 @@ export const buttonStyle = StyleSheet.create({
     letterSpacing: 0.2,
   },
 
-  // ── Botón SOS ────────────────────────────────────────────────────────────────
+  // ── SOS button ───────────────────────────────────────────────────────────────
   sosWrapper: {
     width: 100,
     height: 100,

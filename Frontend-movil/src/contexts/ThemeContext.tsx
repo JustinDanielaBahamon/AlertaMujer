@@ -1,7 +1,8 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ImageSourcePropType } from "react-native";
 
-// ─── Tipos ────────────────────────────────────────────────────────────────────
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 export type AppMode = "light" | "dark" | "rosa" | "vino" | "Azul" | "magenta";
 
@@ -17,16 +18,16 @@ export type AppTheme = {
   tabActiveColor: string;
   tabInactiveColor: string;
   logo: ImageSourcePropType;
-  imagenBoton: ImageSourcePropType;
-  imagenActivacion: ImageSourcePropType; // ← nuevo
-  icono: string;
+  buttonImage: ImageSourcePropType;
+  activationImage: ImageSourcePropType; // ← new
+  icon: string;
   headercolor1: string;
   headercolor2: string;
 
-  // ─── Contactos ───────────────────────────────────────────────
+  // ─── Contacts ───────────────────────────────────────────────
   contactCardBg: string;
   contactCardBorder: string;
-  contactNombre: string;
+  contactName: string;
   contactSubtext: string;
   contactAccent: string;
   contactBadgeBg: string;
@@ -39,29 +40,29 @@ export type AppTheme = {
   contactIconLocBg: string;
   contactIconCallColor: string;
   contactIconLocColor: string;
-  contactBotonEditar: string;
-  contactBotonEditarIcon: string;
-  contactSugerenciaBg: string;
-  contactSugerenciaBorder: string;
-  contactSugerenciaIcon: string;
-  contactBotonAgregarBg: string;
-  contactFlotanteBg: string;
-  contactCousserBg: string;
-  contactCousserIcon: string;
-  contactBuscadorBg: string;
-  contactBuscadorText: string;
+  contactEditButton: string;
+  contactEditButtonIcon: string;
+  contactSuggestionBg: string;
+  contactSuggestionBorder: string;
+  contactSuggestionIcon: string;
+  contactAddButtonBg: string;
+  contactFloatingBg: string;
+  contactCounterBg: string;
+  contactCounterIcon: string;
+  contactSearchBg: string;
+  contactSearchText: string;
 
-  // ─── Asistencia ──────────────────────────────────────────────
-  asistenciaEmergenciaGradiente: [string, string];
-  asistenciaViolenciaGradiente: [string, string];
-  asistenciaMentalGradiente: [string, string];
-  asistenciaIconoUserBg: string;
-  asistenciaIconoBombilloBg: string;
-  asistenciaIconoBombilloColor: string;
-  asistenciaIconoEstrellaBg: string;
+  // ─── Assistance ─────────────────────────────────────────────
+  assistanceEmergencyGradient: [string, string];
+  assistanceViolenceGradient: [string, string];
+  assistanceMentalGradient: [string, string];
+  assistanceUserIconBg: string;
+  assistanceBulbIconBg: string;
+  assistanceBulbIconColor: string;
+  assistanceStarIconBg: string;
 };
 
-// ─── Contraste automático ─────────────────────────────────────────────────────
+// ─── Automatic contrast ──────────────────────────────────────────────────────
 
 function hexToRgb(color: string): { r: number; g: number; b: number } | null {
   const hex = color.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
@@ -80,38 +81,38 @@ function getContrastText(bg: string): string {
 
 // ─── Assets logos ─────────────────────────────────────────────────────────────
 
-const logoActual = require("../../assets/imagesAlertaMujer/logos/logoAlertaMujer.png");
-const logoMorado = require("../../assets/imagesAlertaMujer/logos/logo-morado.png");
-const logoAzul   = require("../../assets/imagesAlertaMujer/logos/logo-Azul.png");
-const logorosa   = require("../../assets/imagesAlertaMujer/logos/logo-rosa.png");
-const logovino   = require("../../assets/imagesAlertaMujer/logos/logo-vino.png");
-const logonegro  = require("../../assets/imagesAlertaMujer/logos/logo-negro.png");
+const currentLogo = require("../../assets/imagesAlertaMujer/logos/logoAlertaMujer.png");
+const purpleLogo = require("../../assets/imagesAlertaMujer/logos/logo-morado.png");
+const blueLogo   = require("../../assets/imagesAlertaMujer/logos/logo-Azul.png");
+const pinkLogo   = require("../../assets/imagesAlertaMujer/logos/logo-rosa.png");
+const wineLogo   = require("../../assets/imagesAlertaMujer/logos/logo-vino.png");
+const blackLogo  = require("../../assets/imagesAlertaMujer/logos/logo-negro.png");
 
-// ─── Assets botones ───────────────────────────────────────────────────────────
+// ─── Button assets ───────────────────────────────────────────────────────────
 
-const botonmorado = require("../../assets/imagesAlertaMujer/ScInicio/boton-morado.png");
-const botonAzul   = require("../../assets/imagesAlertaMujer/ScInicio/boton-azul.png");
-const botonrosa   = require("../../assets/imagesAlertaMujer/ScInicio/boton-rosa.png");
-const botonvino   = require("../../assets/imagesAlertaMujer/ScInicio/boton-vino.png");
-const botondorado = require("../../assets/imagesAlertaMujer/ScInicio/boton-dorado.png");
+const purpleButton = require("../../assets/imagesAlertaMujer/ScInicio/boton-morado.png");
+const blueButton   = require("../../assets/imagesAlertaMujer/ScInicio/boton-azul.png");
+const pinkButton   = require("../../assets/imagesAlertaMujer/ScInicio/boton-rosa.png");
+const wineButton   = require("../../assets/imagesAlertaMujer/ScInicio/boton-vino.png");
+const goldButton = require("../../assets/imagesAlertaMujer/ScInicio/boton-dorado.png");
 
 // ─── Assets activacion ────────────────────────────────────────────────────────
 
-const activacionMorado = require("../../assets/imagesAlertaMujer/ScActivacion/morado.png");
-const activacionRosa   = require("../../assets/imagesAlertaMujer/ScActivacion/rosa.png");
-const activacionAzul   = require("../../assets/imagesAlertaMujer/ScActivacion/Azul.png");
-const activacionVino   = require("../../assets/imagesAlertaMujer/ScActivacion/vino.png");
-const activacionLogo   = require("../../assets/imagesAlertaMujer/ScActivacion/LOGO.png");
+const activationPurple = require("../../assets/imagesAlertaMujer/ScActivacion/morado.png");
+const activationPink   = require("../../assets/imagesAlertaMujer/ScActivacion/rosa.png");
+const activationBlue   = require("../../assets/imagesAlertaMujer/ScActivacion/Azul.png");
+const activationWine   = require("../../assets/imagesAlertaMujer/ScActivacion/vino.png");
+const activationLogo   = require("../../assets/imagesAlertaMujer/ScActivacion/LOGO.png");
 
-// ─── Imágenes que se precargan al abrir la app (evita la demora al cambiar de tema) ───
+// ─── Images preloaded when the app opens (avoids the delay when changing theme) ───
 
-export const IMAGENES_PRECARGA: ImageSourcePropType[] = [
-  logoActual, logoMorado, logoAzul, logorosa, logovino, logonegro,
-  botonmorado, botonAzul, botonrosa, botonvino, botondorado,
-  activacionMorado, activacionRosa, activacionAzul, activacionVino, activacionLogo,
+export const PRELOAD_IMAGES: ImageSourcePropType[] = [
+  currentLogo, purpleLogo, blueLogo, pinkLogo, wineLogo, blackLogo,
+  purpleButton, blueButton, pinkButton, wineButton, goldButton,
+  activationPurple, activationPink, activationBlue, activationWine, activationLogo,
 ];
 
-// ─── Temas ────────────────────────────────────────────────────────────────────
+// ─── Themes ──────────────────────────────────────────────────────────────────
 
 const THEMES: Record<AppMode, AppTheme> = {
 
@@ -127,15 +128,15 @@ const THEMES: Record<AppMode, AppTheme> = {
     tabBackground: "rgb(202,171,222)",
     tabActiveColor: "#45046b",
     tabInactiveColor: "rgb(255, 255, 255)",
-    logo: logoActual,
-    imagenBoton: botonmorado,
-    imagenActivacion: activacionMorado,
-    icono: "#9b009b",
+    logo: currentLogo,
+    buttonImage: purpleButton,
+    activationImage: activationPurple,
+    icon: "#9b009b",
     headercolor1: "#c4a8d6",
     headercolor2: "#7b1db2",
     contactCardBg: "#ffffff",
     contactCardBorder: "#e0d0f0",
-    contactNombre: "#2a0045",
+    contactName: "#2a0045",
     contactSubtext: "#7a6090",
     contactAccent: "#7B1FA2",
     contactBadgeBg: "#F3E5F5",
@@ -148,24 +149,24 @@ const THEMES: Record<AppMode, AppTheme> = {
     contactIconWaBg: "#E8F5E9",
     contactIconLocBg: "#E8EAF6",
     contactIconLocColor: "#3949AB",
-    contactBotonEditar: "#F3E5F5",
-    contactBotonEditarIcon: "#7B1FA2",
-    contactSugerenciaBg: "#FAF7FF",
-    contactSugerenciaBorder: "#CE93D8",
-    contactSugerenciaIcon: "#AB47BC",
-    contactBotonAgregarBg: "#7B1FA2",
-    contactFlotanteBg: "#7B1FA2",
-    contactCousserBg: "#F3E5F5",
-    contactCousserIcon: "#7B1FA2",
-    contactBuscadorBg: "#F3EEF8",
-    contactBuscadorText: "#2a0045",
-    asistenciaEmergenciaGradiente: ["#c4a8d6", "#7b1db2"],
-    asistenciaViolenciaGradiente: ["#b891d0", "#6a14a6"],
-    asistenciaMentalGradiente:    ["#c4a8d6", "#9a2fcf"],
-    asistenciaIconoUserBg:        "purple",
-    asistenciaIconoBombilloBg:    "rgba(205, 117, 230, 0.29)",
-    asistenciaIconoBombilloColor: "#1E1228",
-    asistenciaIconoEstrellaBg:    "purple",
+    contactEditButton: "#F3E5F5",
+    contactEditButtonIcon: "#7B1FA2",
+    contactSuggestionBg: "#FAF7FF",
+    contactSuggestionBorder: "#CE93D8",
+    contactSuggestionIcon: "#AB47BC",
+    contactAddButtonBg: "#7B1FA2",
+    contactFloatingBg: "#7B1FA2",
+    contactCounterBg: "#F3E5F5",
+    contactCounterIcon: "#7B1FA2",
+    contactSearchBg: "#F3EEF8",
+    contactSearchText: "#2a0045",
+    assistanceEmergencyGradient: ["#c4a8d6", "#7b1db2"],
+    assistanceViolenceGradient: ["#b891d0", "#6a14a6"],
+    assistanceMentalGradient:    ["#c4a8d6", "#9a2fcf"],
+    assistanceUserIconBg:        "purple",
+    assistanceBulbIconBg:    "rgba(205, 117, 230, 0.29)",
+    assistanceBulbIconColor: "#1E1228",
+    assistanceStarIconBg:    "purple",
   },
 
   // ── DARK ──────────────────────────────────────────────────────────────────
@@ -180,15 +181,15 @@ const THEMES: Record<AppMode, AppTheme> = {
     tabBackground: "#000000",
     tabActiveColor: "#9718ff",
     tabInactiveColor: "rgba(230, 217, 247, 0.89)",
-    logo: logonegro,
-    imagenBoton: botondorado,
-    imagenActivacion: activacionLogo,
-    icono: "#c084fc",
+    logo: blackLogo,
+    buttonImage: goldButton,
+    activationImage: activationLogo,
+    icon: "#c084fc",
     headercolor1: "#030303",
     headercolor2: "#200138",
     contactCardBg: "#28282f",
     contactCardBorder: "#3d3d50",
-    contactNombre: "#e8d5ff",
+    contactName: "#e8d5ff",
     contactSubtext: "#9e8fbb",
     contactAccent: "#c084fc",
     contactBadgeBg: "#3a2d55",
@@ -201,24 +202,24 @@ const THEMES: Record<AppMode, AppTheme> = {
     contactIconWaBg: "#1a2e22",
     contactIconLocBg: "#1a233a",
     contactIconLocColor: "#60a5fa",
-    contactBotonEditar: "#2d2040",
-    contactBotonEditarIcon: "#c084fc",
-    contactSugerenciaBg: "#22202e",
-    contactSugerenciaBorder: "#5b21b6",
-    contactSugerenciaIcon: "#a78bfa",
-    contactBotonAgregarBg: "#7c3aed",
-    contactFlotanteBg: "#7c3aed",
-    contactCousserBg: "#2d2040",
-    contactCousserIcon: "#c084fc",
-    contactBuscadorBg: "#232330",
-    contactBuscadorText: "#e8d5ff",
-    asistenciaEmergenciaGradiente: ["#3a035c", "#0b022c"],
-    asistenciaViolenciaGradiente: ["#350249", "#33012b"],
-    asistenciaMentalGradiente:    ["#042f63", "#090111"],
-    asistenciaIconoUserBg:        "#010e33",
-    asistenciaIconoBombilloBg:    "#3a2d55",
-    asistenciaIconoBombilloColor: "#c084fc",
-    asistenciaIconoEstrellaBg:    "#010e33",
+    contactEditButton: "#2d2040",
+    contactEditButtonIcon: "#c084fc",
+    contactSuggestionBg: "#22202e",
+    contactSuggestionBorder: "#5b21b6",
+    contactSuggestionIcon: "#a78bfa",
+    contactAddButtonBg: "#7c3aed",
+    contactFloatingBg: "#7c3aed",
+    contactCounterBg: "#2d2040",
+    contactCounterIcon: "#c084fc",
+    contactSearchBg: "#232330",
+    contactSearchText: "#e8d5ff",
+    assistanceEmergencyGradient: ["#3a035c", "#0b022c"],
+    assistanceViolenceGradient: ["#350249", "#33012b"],
+    assistanceMentalGradient:    ["#4c1d95", "#1e0b3a"],
+    assistanceUserIconBg:        "#3b0764",
+    assistanceBulbIconBg:    "#3a2d55",
+    assistanceBulbIconColor: "#c084fc",
+    assistanceStarIconBg:    "#3b0764",
   },
 
   // ── ROSA ──────────────────────────────────────────────────────────────────
@@ -233,15 +234,15 @@ const THEMES: Record<AppMode, AppTheme> = {
     tabBackground: "#cf3389",
     tabActiveColor: getContrastText("#3d033d"),
     tabInactiveColor: "rgb(255, 255, 255)",
-    logo: logorosa,
-    imagenBoton: botonrosa,
-    imagenActivacion: activacionRosa,
-    icono: "#eb0a86",
+    logo: pinkLogo,
+    buttonImage: pinkButton,
+    activationImage: activationPink,
+    icon: "#eb0a86",
     headercolor1: "#cf3389",
     headercolor2: "#860e52",
     contactCardBg: "#fff5fa",
     contactCardBorder: "#f8b4d4",
-    contactNombre: "#3a0020",
+    contactName: "#3a0020",
     contactSubtext: "#9c3060",
     contactAccent: "#c2185b",
     contactBadgeBg: "#fce4f0",
@@ -254,27 +255,27 @@ const THEMES: Record<AppMode, AppTheme> = {
     contactIconWaBg: "#E8F5E9",
     contactIconLocBg: "#fde8f4",
     contactIconLocColor: "#ad1457",
-    contactBotonEditar: "#fce4f0",
-    contactBotonEditarIcon: "#c2185b",
-    contactSugerenciaBg: "#fff5fa",
-    contactSugerenciaBorder: "#f48fb1",
-    contactSugerenciaIcon: "#e91e8c",
-    contactBotonAgregarBg: "#c2185b",
-    contactFlotanteBg: "#c2185b",
-    contactCousserBg: "#fce4f0",
-    contactCousserIcon: "#c2185b",
-    contactBuscadorBg: "#fde8f4",
-    contactBuscadorText: "#3a0020",
-    asistenciaEmergenciaGradiente: ["#aa0069", "#8f45b9"],
-    asistenciaViolenciaGradiente: ["#e70059", "#8000a7"],
-    asistenciaMentalGradiente:    ["#a80a81", "#f58ef5"],
-    asistenciaIconoUserBg:        "#a0005a",
-    asistenciaIconoBombilloBg:    "#fce4f0",
-    asistenciaIconoBombilloColor: "#c2185b",
-    asistenciaIconoEstrellaBg:    "#a0005a",
+    contactEditButton: "#fce4f0",
+    contactEditButtonIcon: "#c2185b",
+    contactSuggestionBg: "#fff5fa",
+    contactSuggestionBorder: "#f48fb1",
+    contactSuggestionIcon: "#e91e8c",
+    contactAddButtonBg: "#c2185b",
+    contactFloatingBg: "#c2185b",
+    contactCounterBg: "#fce4f0",
+    contactCounterIcon: "#c2185b",
+    contactSearchBg: "#fde8f4",
+    contactSearchText: "#3a0020",
+    assistanceEmergencyGradient: ["#aa0069", "#8f45b9"],
+    assistanceViolenceGradient: ["#e70059", "#8000a7"],
+    assistanceMentalGradient:    ["#a80a81", "#f58ef5"],
+    assistanceUserIconBg:        "#a0005a",
+    assistanceBulbIconBg:    "#fce4f0",
+    assistanceBulbIconColor: "#c2185b",
+    assistanceStarIconBg:    "#a0005a",
   },
 
-  // ── VINO ──────────────────────────────────────────────────────────────────
+  // ── WINE ──────────────────────────────────────────────────────────────────
   vino: {
     mode: "vino",
     headerBackground: "#770736",
@@ -286,15 +287,15 @@ const THEMES: Record<AppMode, AppTheme> = {
     tabBackground: "#770736",
     tabActiveColor: getContrastText("#920505"),
     tabInactiveColor: "rgb(255, 247, 247)",
-    logo: logovino,
-    imagenBoton: botonvino,
-    imagenActivacion: activacionVino,
-    icono: "#770736",
+    logo: wineLogo,
+    buttonImage: wineButton,
+    activationImage: activationWine,
+    icon: "#770736",
     headercolor1: "#770736",
     headercolor2: "#4a0020",
     contactCardBg: "#fff8f8",
     contactCardBorder: "#f5c6c6",
-    contactNombre: "#2a0000",
+    contactName: "#2a0000",
     contactSubtext: "#7a3535",
     contactAccent: "#b71c1c",
     contactBadgeBg: "#FFEBEE",
@@ -307,27 +308,27 @@ const THEMES: Record<AppMode, AppTheme> = {
     contactIconWaBg: "#E8F5E9",
     contactIconLocBg: "#FFF3E0",
     contactIconLocColor: "#e65100",
-    contactBotonEditar: "#FFEBEE",
-    contactBotonEditarIcon: "#b71c1c",
-    contactSugerenciaBg: "#fff8f8",
-    contactSugerenciaBorder: "#EF9A9A",
-    contactSugerenciaIcon: "#c62828",
-    contactBotonAgregarBg: "#b71c1c",
-    contactFlotanteBg: "#b71c1c",
-    contactCousserBg: "#FFEBEE",
-    contactCousserIcon: "#b71c1c",
-    contactBuscadorBg: "#fff0f0",
-    contactBuscadorText: "#2a0000",
-    asistenciaEmergenciaGradiente: ["#470238", "#83044a"],
-    asistenciaViolenciaGradiente: ["#28033a", "#942010"],
-    asistenciaMentalGradiente:    ["#680c2f", "#62026b"],
-    asistenciaIconoUserBg:        "#4a0020",
-    asistenciaIconoBombilloBg:    "#FFEBEE",
-    asistenciaIconoBombilloColor: "#b71c1c",
-    asistenciaIconoEstrellaBg:    "#4a0020",
+    contactEditButton: "#FFEBEE",
+    contactEditButtonIcon: "#b71c1c",
+    contactSuggestionBg: "#fff8f8",
+    contactSuggestionBorder: "#EF9A9A",
+    contactSuggestionIcon: "#c62828",
+    contactAddButtonBg: "#b71c1c",
+    contactFloatingBg: "#b71c1c",
+    contactCounterBg: "#FFEBEE",
+    contactCounterIcon: "#b71c1c",
+    contactSearchBg: "#fff0f0",
+    contactSearchText: "#2a0000",
+    assistanceEmergencyGradient: ["#470238", "#83044a"],
+    assistanceViolenceGradient: ["#28033a", "#942010"],
+    assistanceMentalGradient:    ["#680c2f", "#62026b"],
+    assistanceUserIconBg:        "#4a0020",
+    assistanceBulbIconBg:    "#FFEBEE",
+    assistanceBulbIconColor: "#b71c1c",
+    assistanceStarIconBg:    "#4a0020",
   },
 
-  // ── AZUL ──────────────────────────────────────────────────────────────────
+  // ── BLUE ──────────────────────────────────────────────────────────────────
   Azul: {
     mode: "Azul",
     headerBackground: "#0b013b",
@@ -339,15 +340,15 @@ const THEMES: Record<AppMode, AppTheme> = {
     tabBackground: "#0b013b",
     tabActiveColor: getContrastText("#0b013b"),
     tabInactiveColor: "rgba(255,255,255,0.4)",
-    logo: logoAzul,
-    imagenBoton: botonAzul,
-    imagenActivacion: activacionAzul,
-    icono: "#1565C0",
+    logo: blueLogo,
+    buttonImage: blueButton,
+    activationImage: activationBlue,
+    icon: "#1565C0",
     headercolor1: "#0b013b",
     headercolor2: "#1a237e",
     contactCardBg: "#f8faff",
     contactCardBorder: "#c5cae9",
-    contactNombre: "#0b013b",
+    contactName: "#0b013b",
     contactSubtext: "#3949ab",
     contactAccent: "#1565C0",
     contactBadgeBg: "#E8EAF6",
@@ -360,24 +361,24 @@ const THEMES: Record<AppMode, AppTheme> = {
     contactIconWaBg: "#E8F5E9",
     contactIconLocBg: "#E8EAF6",
     contactIconLocColor: "#283593",
-    contactBotonEditar: "#E3F2FD",
-    contactBotonEditarIcon: "#1565C0",
-    contactSugerenciaBg: "#f0f4ff",
-    contactSugerenciaBorder: "#9FA8DA",
-    contactSugerenciaIcon: "#3949AB",
-    contactBotonAgregarBg: "#1565C0",
-    contactFlotanteBg: "#1565C0",
-    contactCousserBg: "#E3F2FD",
-    contactCousserIcon: "#1565C0",
-    contactBuscadorBg: "#eef2ff",
-    contactBuscadorText: "#0b013b",
-    asistenciaEmergenciaGradiente: ["#1d0479", "#7a3fbe"],
-    asistenciaViolenciaGradiente: ["#2c5d96", "#4f07a1"],
-    asistenciaMentalGradiente:    ["#3c48a5", "#02021a"],
-    asistenciaIconoUserBg:        "#1a237e",
-    asistenciaIconoBombilloBg:    "#E8EAF6",
-    asistenciaIconoBombilloColor: "#1565C0",
-    asistenciaIconoEstrellaBg:    "#1a237e",
+    contactEditButton: "#E3F2FD",
+    contactEditButtonIcon: "#1565C0",
+    contactSuggestionBg: "#f0f4ff",
+    contactSuggestionBorder: "#9FA8DA",
+    contactSuggestionIcon: "#3949AB",
+    contactAddButtonBg: "#1565C0",
+    contactFloatingBg: "#1565C0",
+    contactCounterBg: "#E3F2FD",
+    contactCounterIcon: "#1565C0",
+    contactSearchBg: "#eef2ff",
+    contactSearchText: "#0b013b",
+    assistanceEmergencyGradient: ["#1d0479", "#7a3fbe"],
+    assistanceViolenceGradient: ["#2c5d96", "#4f07a1"],
+    assistanceMentalGradient:    ["#3c48a5", "#02021a"],
+    assistanceUserIconBg:        "#1a237e",
+    assistanceBulbIconBg:    "#E8EAF6",
+    assistanceBulbIconColor: "#1565C0",
+    assistanceStarIconBg:    "#1a237e",
   },
 
   // ── MAGENTA ───────────────────────────────────────────────────────────────
@@ -392,15 +393,15 @@ const THEMES: Record<AppMode, AppTheme> = {
     tabBackground: "#490449",
     tabActiveColor: getContrastText("#490449"),
     tabInactiveColor: "rgba(255,255,255,0.5)",
-    logo: logoMorado,
-    imagenBoton: botonmorado,
-    imagenActivacion: activacionMorado,
-    icono: "#6a0572",
+    logo: purpleLogo,
+    buttonImage: purpleButton,
+    activationImage: activationPurple,
+    icon: "#6a0572",
     headercolor1: "#490449",
     headercolor2: "#860386",
     contactCardBg: "#fdf4fd",
     contactCardBorder: "#e1bee7",
-    contactNombre: "#2a002a",
+    contactName: "#2a002a",
     contactSubtext: "#7b2d7b",
     contactAccent: "#6a0572",
     contactBadgeBg: "#F3E5F5",
@@ -413,24 +414,24 @@ const THEMES: Record<AppMode, AppTheme> = {
     contactIconWaBg: "#E8F5E9",
     contactIconLocBg: "#EDE7F6",
     contactIconLocColor: "#4527A0",
-    contactBotonEditar: "#F3E5F5",
-    contactBotonEditarIcon: "#6a0572",
-    contactSugerenciaBg: "#fdf4fd",
-    contactSugerenciaBorder: "#CE93D8",
-    contactSugerenciaIcon: "#8E24AA",
-    contactBotonAgregarBg: "#6a0572",
-    contactFlotanteBg: "#6a0572",
-    contactCousserBg: "#F3E5F5",
-    contactCousserIcon: "#6a0572",
-    contactBuscadorBg: "#fce8fc",
-    contactBuscadorText: "#2a002a",
-    asistenciaEmergenciaGradiente: ["#4f1970", "#821bbd"],
-    asistenciaViolenciaGradiente: ["#6a0572", "#2d002d"],
-    asistenciaMentalGradiente:    ["#8361e9", "#38023b"],
-    asistenciaIconoUserBg:        "#2d002d",
-    asistenciaIconoBombilloBg:    "#F3E5F5",
-    asistenciaIconoBombilloColor: "#6a0572",
-    asistenciaIconoEstrellaBg:    "#2d002d",
+    contactEditButton: "#F3E5F5",
+    contactEditButtonIcon: "#6a0572",
+    contactSuggestionBg: "#fdf4fd",
+    contactSuggestionBorder: "#CE93D8",
+    contactSuggestionIcon: "#8E24AA",
+    contactAddButtonBg: "#6a0572",
+    contactFloatingBg: "#6a0572",
+    contactCounterBg: "#F3E5F5",
+    contactCounterIcon: "#6a0572",
+    contactSearchBg: "#fce8fc",
+    contactSearchText: "#2a002a",
+    assistanceEmergencyGradient: ["#4f1970", "#821bbd"],
+    assistanceViolenceGradient: ["#6a0572", "#2d002d"],
+    assistanceMentalGradient:    ["#8361e9", "#38023b"],
+    assistanceUserIconBg:        "#2d002d",
+    assistanceBulbIconBg:    "#F3E5F5",
+    assistanceBulbIconColor: "#6a0572",
+    assistanceStarIconBg:    "#2d002d",
   },
 };
 
@@ -444,20 +445,40 @@ type ThemeContextValue = {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
+// The theme belongs to the phone, not the account: it is kept after signing out and restarting the app
+const THEME_KEY = "@alerta_mujer:tema";
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [mode, setMode] = useState<AppMode>("light");
+  const [mode, setModeState] = useState<AppMode>("light");
+  // Nothing is painted until the saved theme is read, so the light theme never flashes
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    AsyncStorage.getItem(THEME_KEY)
+      .then((savedItem) => {
+        if (savedItem && savedItem in THEMES) setModeState(savedItem as AppMode);
+      })
+      .catch(() => {})
+      .finally(() => setLoaded(true));
+  }, []);
+
+  const setMode = useCallback((m: AppMode) => {
+    setModeState(m);
+    AsyncStorage.setItem(THEME_KEY, m).catch(() => {});
+  }, []);
 
   const theme = useMemo(() => THEMES[mode], [mode]);
 
   const toggleTheme = useCallback(() => {
-    setMode((m) => (m === "dark" ? "light" : "dark"));
-  }, []);
+    setMode(mode === "dark" ? "light" : "dark");
+  }, [mode, setMode]);
 
   const value = useMemo(
     () => ({ theme, toggleTheme, setMode }),
     [theme, toggleTheme, setMode]
   );
 
+  if (!loaded) return null;
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 

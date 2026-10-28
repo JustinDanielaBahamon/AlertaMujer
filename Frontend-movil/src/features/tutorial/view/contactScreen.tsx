@@ -5,13 +5,15 @@ import React, { useEffect, useRef } from "react";
 import { Animated, ScrollView, Text, TouchableOpacity, View, } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Card from "../../../components/ui/card/card";
-import PermissionsModal from "../../../components/ui/modalMesanje/permisosMLL";
+import PermissionsModal from "../../../components/ui/permissionsModal/PermissionsModal";
 import { CONTACT_COLORS, contactStyle } from "../styles/contactStyle";
 import { useContactTutorialViewModel, type ContactFeatureItem, } from "../viewModel/useContactTutorialViewModel";
 import { useLocale } from "../../../contexts/LocaleContext";
+import { useTutorialPage } from "../component/TutorialPager";
 
-// ─── Círculos decorativos de fondo ───────────────────────────────────────────
+// ─── Decorative background circles ───────────────────────────────────────────
 function BackgroundCircles() {
+  const { isActive } = useTutorialPage();
   const f1 = useRef(new Animated.Value(0)).current;
   const f2 = useRef(new Animated.Value(0)).current;
   const f3 = useRef(new Animated.Value(0)).current;
@@ -24,10 +26,16 @@ function BackgroundCircles() {
           Animated.timing(anim, { toValue: 0,   duration: dur,         useNativeDriver: true }),
         ])
       );
-    float(f1, 3200, 0).start();
-    float(f2, 2800, 600).start();
-    float(f3, 3600, 1200).start();
-  }, []);
+    // Only the circles of the visible page are animated (before, every page's ran)
+    if (!isActive) return;
+    const loops = [
+      float(f1, 3200, 0),
+      float(f2, 2800, 600),
+      float(f3, 3600, 1200),
+    ];
+    loops.forEach((l) => l.start());
+    return () => loops.forEach((l) => l.stop());
+  }, [isActive]);
 
   return (
     <>
@@ -53,7 +61,7 @@ function BackgroundCircles() {
   );
 }
 
-// ─── Fila de característica animada ──────────────────────────────────────────
+// ─── Animated feature row ────────────────────────────────────────────────────
 function FeatureRow({ item, enterDelay }: { item: ContactFeatureItem; enterDelay: number }) {
   const slideAnim   = useRef(new Animated.Value(28)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -95,17 +103,17 @@ function FeatureRow({ item, enterDelay }: { item: ContactFeatureItem; enterDelay
   );
 }
 
-// ─── Pantalla principal ───────────────────────────────────────────────────────
+// ─── Main screen ─────────────────────────────────────────────────────────────
 interface Props {
    externalVm?: ReturnType<typeof useContactTutorialViewModel>;
 }
 
-export default function ContactosScreen({  externalVm }: Props) {
+export default function ContactsScreen({  externalVm }: Props) {
   const { t } = useLocale();
   const internalVm = useContactTutorialViewModel();
   const vm =  externalVm ?? internalVm;
 
-  // ── Animación card spring ────────────────────────────────────────────────
+  // ── Card spring animation ────────────────────────────────────────────────
   const cardAnim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.spring(cardAnim, {
@@ -145,7 +153,7 @@ export default function ContactosScreen({  externalVm }: Props) {
           />
         </View>
 
-        {/* Card animada */}
+        {/* Animated card */}
         <Animated.View style={[{ flex: 1 }, cardAnimStyle]}>
           <Card title={`${t.tutorial.contacto_titulo_1}\n`} titleHighlight={t.tutorial.contacto_titulo_2}>
             <ScrollView
@@ -155,7 +163,7 @@ export default function ContactosScreen({  externalVm }: Props) {
               scrollEventThrottle={16}
               nestedScrollEnabled={true}
             >
-              {/* Sección principal */}
+              {/* Main section */}
               <View style={contactStyle.sectionRow}>
                 <Text style={contactStyle.sectionLabel}>{t.tutorial.contacto_red_familia_titulo}</Text>
                 <View style={contactStyle.sectionLine} />
@@ -171,7 +179,7 @@ export default function ContactosScreen({  externalVm }: Props) {
 
               <View style={contactStyle.divider} />
 
-              {/* Detalle descriptivo */}
+              {/* Descriptive detail */}
               <View style={{ gap: 4 }}>
                 {vm.featureRows.map((item) => (
                   <View key={`desc-${item.id}`} style={contactStyle.descRow}>
@@ -191,18 +199,18 @@ export default function ContactosScreen({  externalVm }: Props) {
 
               <View style={contactStyle.divider} />
 
-              {/* Sección permisos */}
+              {/* Permissions section */}
               <View style={contactStyle.sectionRow}>
                 <Text style={contactStyle.sectionLabel}>{t.tutorial.contacto_permisos_titulo}</Text>
                 <View style={contactStyle.sectionLine} />
               </View>
 
-              <View style={contactStyle.permisosCard}>
-                <View style={contactStyle.permisosRow}>
-                  <Text style={contactStyle.permisosEmoji}>👥</Text>
+              <View style={contactStyle.permissionsCard}>
+                <View style={contactStyle.permissionsRow}>
+                  <Text style={contactStyle.permissionsEmoji}>👥</Text>
                   <View style={{ flex: 1 }}>
-                    <Text style={contactStyle.permisosTitle}>{t.tutorial.contacto_permisos_acceso_titulo}</Text>
-                    <Text style={contactStyle.permisosDesc}>
+                    <Text style={contactStyle.permissionsTitle}>{t.tutorial.contacto_permisos_acceso_titulo}</Text>
+                    <Text style={contactStyle.permissionsDesc}>
                       {t.tutorial.contacto_permisos_acceso_desc}
                     </Text>
                   </View>
@@ -221,7 +229,7 @@ export default function ContactosScreen({  externalVm }: Props) {
 
       </SafeAreaView>
 
-      {/* Overlay advertencia — lógica original intacta */}
+      {/* Warning overlay — original logic untouched */}
       {vm.showWarning && (
         <View style={contactStyle.overlayBg}>
           <View style={contactStyle.warningBox}>
@@ -240,9 +248,9 @@ export default function ContactosScreen({  externalVm }: Props) {
 
       <PermissionsModal
         visible={vm.modalVisible}
-        tipo="contacto"
-        onConfirmar={vm.confirmModal}
-        onCancelar={vm.cancelModal}
+        type="contacto"
+        onConfirm={vm.confirmModal}
+        onCancel={vm.cancelModal}
       />
       </LinearGradient>
     </View>

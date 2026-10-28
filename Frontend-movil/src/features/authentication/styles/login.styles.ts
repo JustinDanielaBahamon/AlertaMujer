@@ -1,46 +1,45 @@
 import {StyleSheet } from 'react-native';
-import { black } from 'react-native-paper/lib/typescript/styles/themes/v2/colors';
 import { rgbaColor } from 'react-native-reanimated/lib/typescript/Colors';
 
 export const styles = StyleSheet.create({
-    ContenedorPrincipal : {
+    MainContainer : {
         flex : 1,
         backgroundColor : 'rgb(202 ,171, 222)',
         paddingTop : 13
     },
 
-    ContenedorLogo:{
+    LogoContainer:{
         justifyContent : 'center',
         alignItems:'center',
-        marginTop : 10, // baja esto un poco
-        marginBottom: 10, //  agrega separación con el form
+        marginTop : 10, // moves this down a bit
+        marginBottom: 10, // adds spacing with the form
     },
-     ImagenLogo :{
+     LogoImage :{
         width: 155,
         height: 155,
         maxWidth: '90%',
         resizeMode: 'contain',
     },
 
-    //Comienzo contenedor Formulario
+    // Start of the form container
 
-   ContenedorFormulario:{
+   FormContainer:{
         backgroundColor: '#FFF',
-        marginHorizontal: 20, // separación de los lados
-        padding: 20, // espacio interno
+        marginHorizontal: 20, // side spacing
+        padding: 20, // inner spacing
         borderRadius: 20,
         gap :1,
-        // Sombra (opcional pero muy pro)
+        // Shadow (optional but very pro)
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
         shadowRadius: 4,
 
-        elevation: 5, // para Android
+        elevation: 5, // for Android
     },
-    ContenedorTituloFormu:{
+    FormTitleContainer:{
     },
-    TituloFormu :{
+    FormTitle :{
         color: 'black',
         fontSize: 23,
         fontWeight: 'bold',
@@ -53,8 +52,8 @@ export const styles = StyleSheet.create({
 
     
 
-    //Comienzo Diseño del contenedor del correo
-    contenedorInput: {
+    // Start of the email container design
+    inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         borderWidth: 1,
@@ -69,41 +68,41 @@ export const styles = StyleSheet.create({
         backgroundColor:'#F3E8FF',
         
     },
-    IconoCorreo: {
+    EmailIcon: {
         width: 20,
         height: 20,
         marginRight: 10,
         tintColor: '#000000',
         resizeMode: 'contain', 
     },
-    inputCorreo: {
+    emailInput: {
         flex: 1,
         height: '100%',
         fontSize: 16,
         color: '#000'
         
     },
-    //Fin Diseño del contenedor del correo
+    // End of the email container design
 
-    //Comienzo diseño del contenedor de la contraseña
+    // Start of the password container design
 
-    inputContraseña:{
+    passwordInput:{
         flex: 1,
         height: '100%',
         fontSize: 16,
         color: '#000',
     },
-    // Fin Contenedor contraseña
+    // End of the password container
 
-    textoOlivarContra :{
+    forgotPasswordText :{
         color :'rgb(0, 174, 255)',
         textAlign: 'center',
         marginTop:10,
         fontSize:14.5
     },
 
-    //inicio de diseño boton sesion
-    botonSession:{
+    // start of the sign-in button design
+    sessionButton:{
          backgroundColor: 'rgba(164, 7, 255, 0.67)',
         borderRadius : 25,
         margin : 10,
@@ -118,7 +117,7 @@ export const styles = StyleSheet.create({
         shadowRadius: 3,
     },
     
-    textoSession:{
+    sessionText:{
         color : 'white',
         fontSize  : 22,
         fontWeight : 'bold',
@@ -126,8 +125,8 @@ export const styles = StyleSheet.create({
         textShadowRadius: 9,
         textShadowColor: '#000',
     },
-    //Comienzo diseño de boton google
-    BotonGoogle: {
+    // Start of the Google button design
+    GoogleButton: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center', 
@@ -136,9 +135,9 @@ export const styles = StyleSheet.create({
         borderRadius: 30,
         marginVertical: 25,
         marginHorizontal: 30,
-        position: 'relative', // Importante para que el icono se mueva respecto al botón
+        position: 'relative', // Important so the icon moves relative to the button
         
-        // Sombras
+        // Shadows
         elevation: 5,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
@@ -150,29 +149,29 @@ export const styles = StyleSheet.create({
         width: 25,
         height: 25,
         resizeMode: 'contain',
-        // --- AQUÍ ESTÁ EL TRUCO ---
-        position: 'absolute', // Lo sacamos del flujo normal
-        left: 20,             // Lo pegamos a la izquierda con un margen fijo
+        // --- HERE IS THE TRICK ---
+        position: 'absolute', // We take it out of the normal flow
+        left: 20,             // We stick it to the left with a fixed margin
     },
 
-    textoGoogle: {
+    googleText: {
         fontSize: 16,
         color: '#A89486',
         fontWeight: '700',
     },
 
-    //Fin diseño de boton google
+    // End of the Google button design
 
-    //Contenedor de registro 
+    // Sign-up container
 
-    ContenedorRegistrarse:{
+    SignUpContainer:{
         alignItems: 'center'
     },
-    TextoTienesCuenta:{
+    HaveAccountText:{
         marginTop:-2,
         fontSize : 16
     },
-    BotonRegistrar:{
+    RegisterButton:{
         backgroundColor: '#7953e2',
         borderColor : 'black',
         borderWidth:1,
@@ -183,22 +182,22 @@ export const styles = StyleSheet.create({
         alignItems : 'center',
         justifyContent: 'center',
     },
-    textoRegistro:{
+    signUpText:{
         color : 'white',
         fontSize  : 19.5,
         fontWeight : 'bold',
         textShadowOffset: { width: 4, height: 1 },
         textShadowRadius: 5
     },
-    ContenedorTermCondi:{
+    TermsContainer:{
        marginLeft:20,
        marginRight:20,
        marginBottom:20
     },
-    textoTerminosCondiciones:{
+    termsText:{
        textAlign:'center'
     }
-    //Fin registro
+    // End of sign-up
     
-    //Fin contenedor formulario
+    // End of the form container
 });

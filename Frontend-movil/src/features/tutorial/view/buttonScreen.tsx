@@ -8,9 +8,11 @@ import { useButtonTutorialViewModel, type TapOption, } from "../viewModel/useBut
 import { LinearGradient } from 'expo-linear-gradient';
 import { TUTORIAL_GRADIENT } from "../styles/tutorialTheme";
 import { useLocale } from "../../../contexts/LocaleContext";
+import { useTutorialPage } from "../component/TutorialPager";
 
 // ─── Decorative background circles ───────────────────────────────────────────
 function BackgroundCircles() {
+  const { isActive } = useTutorialPage();
   const floatAnim1 = useRef(new Animated.Value(0)).current;
   const floatAnim2 = useRef(new Animated.Value(0)).current;
   const floatAnim3 = useRef(new Animated.Value(0)).current;
@@ -23,10 +25,16 @@ function BackgroundCircles() {
           Animated.timing(anim, { toValue: 0, duration, useNativeDriver: true }),
         ])
       );
-    makeFloat(floatAnim1, 3200, 0).start();
-    makeFloat(floatAnim2, 2800, 600).start();
-    makeFloat(floatAnim3, 3600, 1200).start();
-  }, []);
+    // Only the circles of the visible page are animated (before, every page's ran)
+    if (!isActive) return;
+    const loops = [
+      makeFloat(floatAnim1, 3200, 0),
+      makeFloat(floatAnim2, 2800, 600),
+      makeFloat(floatAnim3, 3600, 1200),
+    ];
+    loops.forEach((l) => l.start());
+    return () => loops.forEach((l) => l.stop());
+  }, [isActive]);
 
   return (
     <>
@@ -128,12 +136,13 @@ function TapRow({ item, isActive, onPress, enterDelay }: {
 }
 
 // ─── Animated SOS button ──────────────────────────────────────────────────────
-function SOSButton({ onTap, sosLabel, tocaAquiLabel }: { onTap: (msg: string) => void; sosLabel: string; tocaAquiLabel: string }) {
+function SOSButton({ onTap, sosLabel, tapHereLabel }: { onTap: (msg: string) => void; sosLabel: string; tapHereLabel: string }) {
   const scaleAnim    = useRef(new Animated.Value(1)).current;
   const ring1Anim    = useRef(new Animated.Value(1)).current;
   const ring1Opacity = useRef(new Animated.Value(0.5)).current;
   const ring2Anim    = useRef(new Animated.Value(1)).current;
   const ring2Opacity = useRef(new Animated.Value(0.3)).current;
+  const { isActive } = useTutorialPage();
 
   useEffect(() => {
     const makePulse = (scale: Animated.Value, opacity: Animated.Value, initOpacity: number, delay = 0) =>
@@ -148,12 +157,13 @@ function SOSButton({ onTap, sosLabel, tocaAquiLabel }: { onTap: (msg: string) =>
           Animated.timing(opacity, { toValue: initOpacity,  duration: 0, useNativeDriver: true }),
         ]),
       ]));
+    if (!isActive) return;
     const loop1 = makePulse(ring1Anim, ring1Opacity, 0.5);
     const loop2 = makePulse(ring2Anim, ring2Opacity, 0.3, 500);
     loop1.start();
     loop2.start();
     return () => { loop1.stop(); loop2.stop(); };
-  }, []);
+  }, [isActive]);
 
   const handlePress = () => {
     Animated.sequence([
@@ -170,7 +180,7 @@ function SOSButton({ onTap, sosLabel, tocaAquiLabel }: { onTap: (msg: string) =>
       <TouchableOpacity onPress={handlePress} activeOpacity={0.9}>
         <Animated.View style={[buttonStyle.sosBtn, { transform: [{ scale: scaleAnim }] }]}>
           <Text style={buttonStyle.sosBtnText}>SOS</Text>
-          <Text style={buttonStyle.sosBtnSub}>{tocaAquiLabel}</Text>
+          <Text style={buttonStyle.sosBtnSub}>{tapHereLabel}</Text>
         </Animated.View>
       </TouchableOpacity>
     </View>
@@ -266,7 +276,7 @@ export default function ActivationTutorial() {
 
                 <View style={buttonStyle.demoContainer}>
                   <Text style={buttonStyle.demoHint}>{t.tutorial.boton_prueba_hint}</Text>
-                  <SOSButton onTap={handleSOSTap} sosLabel={t.tutorial.boton_sos_activado} tocaAquiLabel={t.tutorial.boton_toca_aqui} />
+                  <SOSButton onTap={handleSOSTap} sosLabel={t.tutorial.boton_sos_activado} tapHereLabel={t.tutorial.boton_toca_aqui} />
                   <Animated.View style={[buttonStyle.feedbackPill, { opacity: feedbackOpacity }]}>
                     <Text style={buttonStyle.feedbackText}>{feedback}</Text>
                   </Animated.View>

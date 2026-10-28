@@ -1,0 +1,85 @@
+import { StyleSheet } from "react-native";
+
+export const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(46, 16, 101, 0.55)", // translucent dark purple
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  card: {
+    width: "85%",
+    backgroundColor: "#FFF",
+    borderRadius: 30,
+    paddingHorizontal: 25,
+    paddingVertical: 30,
+    alignItems: "center",
+    borderWidth: 1.5,
+    borderColor: "#BC27BE",
+    elevation: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  iconCircle: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    borderWidth: 2,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 18,
+  },
+  title: {
+    fontSize: 21,
+    fontWeight: "bold",
+    color: "#2E1065",
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  message: {
+    fontSize: 15,
+    color: "#666",
+    textAlign: "center",
+    lineHeight: 22,
+    marginBottom: 26,
+  },
+  buttons: {
+    width: "100%",
+    gap: 12,
+  },
+  button: {
+    width: "100%",
+    height: 52,
+    borderRadius: 25,
+    backgroundColor: "#6B3FA0",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#6B3FA0",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 4,
+  },
+  dangerButton: {
+    backgroundColor: "#D32F2F",
+    shadowColor: "#D32F2F",
+  },
+  cancelButton: {
+    backgroundColor: "#FFF",
+    borderWidth: 1.5,
+    borderColor: "#BC27BE",
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  buttonText: {
+    color: "#FFF",
+    fontSize: 17,
+    fontWeight: "bold",
+    letterSpacing: 0.5,
+  },
+  cancelButtonText: {
+    color: "#6B3FA0",
+  },
+});

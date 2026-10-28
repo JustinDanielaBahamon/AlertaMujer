@@ -14,7 +14,7 @@ export function useIndexViewModel() {
     navigation.navigate("Login");
   }, [navigation]);
 
-  const entrarComoDemo = useCallback(() => {
+  const enterAsDemo = useCallback(() => {
     signIn(
       { id: 0, nombre: "Demo", correo: "demo@alertamujer.app" },
       "demo-token",
@@ -22,5 +22,5 @@ export function useIndexViewModel() {
     );
   }, [signIn]);
 
-  return { irAlLogin, entrarComoDemo };
+  return { irAlLogin, enterAsDemo: enterAsDemo };
 }

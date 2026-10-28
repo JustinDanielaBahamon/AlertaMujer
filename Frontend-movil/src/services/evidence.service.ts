@@ -1,89 +1,52 @@
-import api from './api';
+import api, { sourceWithToken } from "./api";
+import { toDate } from "./alert-tracking.service";
 
-/**
- * Evidence entity structure from backend
- */
-export interface EvidenceApi {
+export type RecordingType = "video" | "audio";
+
+const MIME: Record<RecordingType, string> = { video: "video/mp4", audio: "audio/mp4" };
+const EXTENSION: Record<RecordingType, string> = { video: "mp4", audio: "m4a" };
+
+// A 30 s chunk can weigh several MB and the network during an emergency is usually bad
+const UPLOAD_TIME_MS = 120000;
+
+/** Uploads a file recorded as alert evidence (her contacts see it in the tracking). */
+export async function uploadEvidence(alertId: number, uri: string, type: RecordingType): Promise<void> {
+  const name = `${type}_${Date.now()}.${EXTENSION[type]}`;
+  const form = new FormData();
+  // React Native uploads the file from its path with { uri, name, type }
+  form.append("file", { uri, name: name, type: MIME[type] } as any);
+  form.append("alertId", String(alertId));
+  await api.post("/api/evidences/upload", form, {
+    headers: { "Content-Type": "multipart/form-data" },
+    timeout: UPLOAD_TIME_MS,
+  });
+}
+
+/** Saved evidence of one of the user's alerts. */
+export interface SavedEvidence {
   id: number;
-  alertId: number;
-  mediaType: string; // 'photo', 'video', 'audio'
-  fileUrl: string;
-  createdAt: string;
+  type: "photo" | "video" | "audio" | "document";
+  name: string;
+  sizeBytes: number | null;
+  date: Date;
+  hasFile: boolean;
 }
 
-/**
- * Data structure for creating new evidence
- */
-export interface CreateEvidenceData {
-  alertId: number;
-  mediaType: string;
-  fileUrl: string;
+/** Evidence of one of her own alerts, from oldest to newest (the backend returns them all together). */
+export async function getAlertEvidence(alertId: number): Promise<SavedEvidence[]> {
+  const { data } = await api.get<any[]>("/api/evidences/me");
+  return (data ?? [])
+    .filter((e) => Number(e.alertId) === alertId)
+    .map((e) => ({
+      id: Number(e.id),
+      type: e.mediaType,
+      name: e.fileName ?? `evidencia-${e.id}`,
+      sizeBytes: e.sizeBytes ?? null,
+      date: toDate(e.createdAt),
+      hasFile: !!e.hasFile,
+    }))
+    .sort((a, b) => a.date.getTime() - b.date.getTime());
 }
 
-/**
- * Evidence Service for managing alert evidence (photos, videos, audio)
- * Connects to Spring Boot backend endpoint /api/evidences
- */
-export const evidenceService = {
-  /**
-   * Get all evidence records for a specific user
-   * Note: Backend uses user_profile_id, but endpoint might need adjustment
-   */
-  async getByUser(userProfileId: number): Promise<EvidenceApi[]> {
-    console.log('[evidence.service] getByUser INICIADO');
-    console.log('[evidence.service] userProfileId:', userProfileId);
-
-    // TODO: Confirm with backend if endpoint is /user/{id} or /user-profile/{id}
-    // Assuming /api/evidences returns all and backend filters by user
-    const response = await api.get<EvidenceApi[]>('/api/evidences');
-    console.log('✅ [evidence.service] Respuesta del servidor:', response.data);
-    
-    return response.data;
-  },
-
-  /**
-   * Get all evidence for a specific alert
-   */
-  async getByAlert(alertId: number): Promise<EvidenceApi[]> {
-    console.log('[evidence.service] getByAlert INICIADO');
-    console.log('[evidence.service] alertId:', alertId);
-
-    const response = await api.get<EvidenceApi[]>(`/api/evidences/alert/${alertId}`);
-    console.log('✅ [evidence.service] Respuesta del servidor:', response.data);
-    
-    return response.data;
-  },
-
-  /**
-   * Create new evidence record
-   * Important: File upload should happen separately to a file storage service
-   * This endpoint just saves the metadata with the file URL
-   */
-  async create(data: CreateEvidenceData): Promise<EvidenceApi> {
-    console.log('[evidence.service] create INICIADO');
-    console.log('[evidence.service] data:', data);
-
-    const evidencePayload = {
-      alertId: data.alertId,
-      mediaType: data.mediaType,
-      fileUrl: data.fileUrl,
-    };
-    console.log('[evidence.service] payload a enviar:', evidencePayload);
-
-    const response = await api.post<EvidenceApi>('/api/evidences', evidencePayload);
-    console.log('✅ [evidence.service] Respuesta POST:', response.data);
-    
-    return response.data;
-  },
-
-  /**
-   * Delete evidence record
-   */
-  async delete(id: number): Promise<void> {
-    console.log('[evidence.service] delete INICIADO');
-    console.log('[evidence.service] id:', id);
-
-    await api.delete(`/api/evidences/${id}`);
-    console.log('✅ [evidence.service] Evidencia eliminada');
-  },
-};
+/** Source to play an evidence file (only the owner can open it). */
+export const evidenceSource = (id: number) => sourceWithToken(`/api/evidences/${id}/file`);
