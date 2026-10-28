@@ -2,10 +2,11 @@ import api from './api';
 
 export interface LoginResponse {
   token: string;
-  user: Usuario;
+  refreshToken?: string;
+  user: User;
 }
 
-export interface Usuario {
+export interface User {
   id: number;
   firstName: string;
   lastName: string;
@@ -19,14 +20,20 @@ export interface Usuario {
 }
 
 export interface RegisterData {
-  nombre: string;
-  correo: string;
-  email?: string;
+  name: string;
+  email: string;
   password: string;
-  telefono?: string;
-  fechaNacimiento?: string;
-  municipio?: string;
+  phoneNumber?: string;
+  documentType?: string;
+  documentNumber?: string;
+  birthDate?: string;
+  municipality?: string;
+  /** She ticked the terms and privacy boxes (the backend stores the record). */
+  acceptsTerms?: boolean;
 }
+
+/** Fields already used by another account, with the notice to show below each one. */
+export type DuplicateFields = Partial<Record<"email" | "telefono" | "numeroDocumento", string>>;
 
 export interface RegisterError {
   message: string;
@@ -34,23 +41,33 @@ export interface RegisterError {
 }
 
 export const authService = {
-  async login(correo: string, password: string): Promise<LoginResponse> {
-    console.log('🔐 [auth.service] login INICIADO');
-    console.log('🔐 [auth.service] correo:', correo);
+  /** Password recovery: the backend sends a 6-digit code to the email. */
+  async requestRecoveryCode(email: string): Promise<void> {
+    await api.post('/api/auth/forgot-password', { email });
+  },
 
-    // Conectar al backend Spring Boot
+  async verifyRecoveryCode(email: string, code: string): Promise<void> {
+    await api.post('/api/auth/verify-reset-code', { email, code });
+  },
+
+  async resetPassword(email: string, code: string, newPassword: string): Promise<void> {
+    await api.post('/api/auth/reset-password', { email, code, newPassword });
+  },
+
+  async login(email: string, password: string): Promise<LoginResponse> {
+
+    // Connect to the Spring Boot backend
     const response = await api.post<LoginResponse>('/api/auth/login', {
-      email: correo,
+      email: email,
       password: password
     });
 
-    console.log('✅ [auth.service] Login exitoso:', response.data);
     return response.data;
   },
 
   /**
-   * Inicio de sesión con Google: el backend valida el ID token de Google y devuelve el JWT de la app.
-   * Si el correo no está registrado, el backend crea la cuenta.
+   * Google sign-in: the backend validates the Google ID token and returns the app JWT.
+   * If the email is not registered, the backend creates the account.
    */
   async loginWithGoogle(idToken: string): Promise<LoginResponse> {
     const response = await api.post<LoginResponse>('/api/auth/google', { idToken });
@@ -58,51 +75,55 @@ export const authService = {
   },
 
   /**
-   * Registro de nuevo usuario con manejo de errores mejorado
-   * Muestra mensajes amigables en lugar de "API error"
+   * New user sign-up with improved error handling
+   * Shows friendly messages instead of "API error"
    */
-  async register(data: RegisterData): Promise<LoginResponse | { error: string }> {
-    console.log('🔐 [auth.service] register INICIADO');
-    console.log('🔐 [auth.service] data:', data);
+  async register(data: RegisterData): Promise<LoginResponse | { error: string; campos?: DuplicateFields }> {
 
     try {
-      // Conectar al backend Spring Boot
-      // El backend espera: nombre, email, password, telefono
       const response = await api.post<LoginResponse>('/api/auth/register', {
-        nombre: data.nombre,
-        email: data.correo || data.email,
+        nombre: data.name,
+        email: data.email,
         password: data.password,
-        telefono: data.telefono
+        telefono: data.phoneNumber,
+        tipoDocumento: data.documentType,
+        numeroDocumento: data.documentNumber,
+        fechaNacimiento: data.birthDate,
+        aceptaTerminos: data.acceptsTerms,
       });
 
-      console.log('✅ [auth.service] Registro exitoso:', response.data);
       return response.data;
     } catch (error: any) {
-      // Manejo mejorado de errores
-      console.error('❌ [auth.service] Error en registro:', error);
+      // Improved error handling
+      // Status only: the axios error includes the body sent, with the password
+      if (__DEV__) console.warn('❌ [auth.service] Error en registro:', error?.response?.status ?? error?.message);
       
-      // Verificar si el error es por correo duplicado (código 409 Conflict)
+      // Check whether the error is a duplicate email (409 Conflict)
       if (error.response) {
         const status = error.response.status;
         const errorMessage = error.response.data?.message || error.response.data?.error || error.message;
         
-        // El backend lanza ConflictException("Email already exists") que retorna status 409
+        // 409 with fieldErrors: email, phone or document already used by another account
+        const campos: DuplicateFields | undefined = error.response.data?.fieldErrors;
+        if (status === 409 && campos && Object.keys(campos).length > 0) {
+          return { error: 'Algunos datos ya están registrados en otra cuenta.', campos };
+        }
         if (status === 409 || errorMessage?.toLowerCase().includes('email') || errorMessage?.toLowerCase().includes('ya existe')) {
           return { error: 'El correo electrónico ya está registrado. Por favor, usa otro correo o inicia sesión.' };
         }
         
-        // Otros errores del backend
+        // Other backend errors
         if (status === 400) {
           return { error: errorMessage || 'Solicitud incorrecta. Verifica los datos e intenta nuevamente.' };
         }
         
-        // Error de servidor interno
+        // Internal server error
         if (status === 500) {
           return { error: 'Error interno del servidor. Por favor, inténtalo de nuevo más tarde.' };
         }
       }
       
-      // Error de red o sin respuesta del servidor
+      // Network error or no response from the server
       return { error: 'No se pudo conectar con el servidor. Verifica tu conexión a internet e intenta nuevamente.' };
     }
   },

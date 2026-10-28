@@ -1,110 +1,120 @@
-import type { Contacto } from "../features/contactos/models/Contacto";
-import type { Alerta } from "../features/historial/models/Alerta";
+import type { Contact } from "../features/contacts/models/Contact";
+import type { AlertRecord } from "../features/history/models/AlertRecord";
 
 export type AuthStackParamList = {
   Index: undefined;
   Login: undefined;
-  Registro: undefined;
-  RecuperarContrasena: undefined;
-  PoliticaTerminos: undefined;
-  PoliticaPrivacidad: undefined;
+  SignUp: undefined;
+  RecoverPassword: undefined;
+  TermsPolicy: undefined;
+  PrivacyPolicy: undefined;
 };
 
 export type MainStackParamList = {
-  DrawerHome: undefined;
-  Perfil: undefined;
+  // Optionally opens a tab: { screen: "Home", params: { screen: "History" } }
+  DrawerHome: { screen: "Home"; params?: { screen: string } } | undefined;
+  Profile: undefined;
 
-  Activacion:
+  Activation:
     | {
-        contacto?: Contacto; // si viene, la alerta es solo para este contacto
+        contact?: Contact; // if it comes, the alert is only for this contact
+        method?: "agitar" | "encendido" | "widget"; // shake, 4 power button presses or widget (by default, SOS button)
       }
     | undefined;
-  AlertaActiva:
+  ActiveAlert:
     | {
-        contacto?: Contacto; // si viene, la alerta es solo para este contacto
+        contact?: Contact; // if it comes, the alert is only for this contact
+        method?: "agitar" | "encendido" | "widget";
+        alertId?: number; // alert already created in the background: another one is not created
       }
     | undefined;
-  AlertaContacto: {
-    alertaId: number;
-    nombreUsuaria?: string;
+  ReceivedAlerts: undefined;
+  Trip: undefined;
+  ContactAlert: {
+    alertId: number;
+    userName?: string;
     latitude?: number;
     longitude?: number;
-    demo?: boolean; // TEMPORAL: modo de prueba con puntos simulados
+    demo?: boolean; // TEMPORARY: test mode with simulated points
+    code?: string; // public tracking code (arrives in the push to the contacts)
+    delivery?: string; // push delivery id: opening the screen marks it seen in the user's history
   };
 
-  TutorialBienvenida: undefined;
-  TutorialBoton: undefined;
-  TutorialMensaje: undefined;
-  TutorialUbicacion: undefined;
-  TutorialContacto: undefined;
-  TutorialSeguridad: undefined;
-  TutorialNotificacion: undefined;
+  WelcomeTutorial: undefined;
+  ButtonTutorial: undefined;
+  MessageTutorial: undefined;
+  LocationTutorial: undefined;
+  ContactTutorial: undefined;
+  SecurityTutorial: undefined;
+  NotificationTutorial: undefined;
 
-  MetodosActivacion: undefined;
+  ActivationMethods: undefined;
+  Permissions: undefined;
+  Inbox: undefined;
 
-  Notificaciones: undefined;
-  PrivacidadApp: undefined;
-  RetencionDatos: undefined;
+  Notifications: undefined;
+  DataRetention: undefined;
+  AlertSecurity: undefined;
 
-  AcercaDe: undefined;
-  PoliticaTerminos: undefined;
-  PoliticaPrivacidad: undefined;
+  About: undefined;
+  TermsPolicy: undefined;
+  PrivacyPolicy: undefined;
 
-  AgregarContacto:
+  AddContact:
     | {
-        contacto?: Contacto;
+        contact?: Contact;
       }
     | undefined;
 
-  DetalleAlerta: {
-    alerta: Alerta;
+  AlertDetail: {
+    alert: AlertRecord;
   };
 
-  historialMapa: {
-    ubicacion: {
+  HistoryMap: {
+    location: {
       id: string;
-      nombre?: string; // Modificado a opcional
+      name?: string; // Changed to optional
       latitude: number;
       longitude: number;
-      direccion: string;
-      barrio: string;
-      municipio: string;
-      ciudad: string;
-      departamento: string;
-      pais: string;
-      fecha: string;
-      estado: "Activo" | "Inactivo";
+      address: string;
+      neighborhood: string;
+      municipality: string;
+      city: string;
+      department: string;
+      country: string;
+      date: string;
+      status: "Activo" | "Inactivo";
       precision: string;
-      notas?: string;
+      notes?: string;
     };
   };
 
-  guardarUbi: {
+  SaveLocation: {
     latitude: number;
     longitude: number;
   };
 
-  ClasificarZona:
+  ClassifyZone:
     | {
         latitude?: number;
         longitude?: number;
-        editarUbicacion?: {
+        locationToEdit?: {
           id: string;
-          nombre: string;
-          notas?: string;
-          nivelRiesgo: "muy_segura" | "moderada" | "muy_insegura";
-          descripcion: string;
+          name: string;
+          notes?: string;
+          riskLevel: "muy_segura" | "moderada" | "muy_insegura";
+          description: string;
         };
       }
-    | undefined; // Permite ir a ClasificarZona sin pasar parámetros
+    | undefined; // Allows going to ClassifyZone without params
 
-  UbicacionesGuardadas: undefined;
+  SavedLocations: undefined;
 
-  ZonasAuxiliares: undefined;
+  HelpZones: undefined;
 
-  HistorialRecorridos: undefined;
+  RouteHistory: undefined;
 
-  GuardarRecorrido: undefined;
+  SaveRoute: undefined;
 };
 
 /** @deprecated */

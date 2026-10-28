@@ -4,15 +4,16 @@ import { useEffect, useRef } from "react";
 import { Animated, StatusBar, StyleSheet, Text, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { TutorialPager } from "../component/TutorialPager";
-import ActivationTutorial from "../view/buttonScreen";
-import ContactsScreen from "../view/contactScreen";
+import ActivationTutorial from "./buttonScreen";
+import ContactsScreen from "./contactScreen";
 import { useContactTutorialViewModel } from "../viewModel/useContactTutorialViewModel";
-import LocationScreen from "../view/locationScreen";
-import MessagesScreen from "../view/messageScreen";
-import { useMessagesTutorialViewModel } from "../viewModel/useMessagesTutorialViewModel";
-import NotificationScreen from "../view/notificationScreen";
+import LocationScreen from "./locationScreen";
+import MessagesScreen from "./messageScreen";
+import NotificationScreen from "./notificationScreen";
+import ProtectionScreen from "./protectionScreen";
+import TripPrivacyScreen from "./tripPrivacyScreen";
 import { useNotificationTutorialViewModel } from "../viewModel/useNotificationTutorialViewModel";
-import SecurityScreen from "../view/securityScreen";
+import SecurityScreen from "./securityScreen";
 import { useSecurityTutorialViewModel } from "../viewModel/useSecurityTutorialViewModel";
 import { COLORS, styles as universalStyles } from "../styles/universalStyle";
 import { useLocationTutorialViewModel } from "../viewModel/useLocationTutorialViewModel";
@@ -21,7 +22,6 @@ import { useLocale } from "../../../contexts/LocaleContext";
 
 export default function Welcome() {
   const { t } = useLocale();
-  const messagesVM     = useMessagesTutorialViewModel();
   const contactsVM     = useContactTutorialViewModel();
   const locationVM     = useLocationTutorialViewModel();
   const securityVM     = useSecurityTutorialViewModel();
@@ -47,8 +47,7 @@ export default function Welcome() {
       >
         <SafeAreaView style={localStyles.safeArea} edges={['top', 'bottom']}>
           <TutorialPager
-            paginasConBloqueo={{
-              2: messagesVM.requestPermissions,
+            lockedPages={{
               3: locationVM.requestLocationConfirmation,
               4: contactsVM.requestPermissions,
               5: securityVM.requestPermissions,
@@ -133,13 +132,15 @@ export default function Welcome() {
 
             </View>
 
-            {/* ── Otras paginas ── */}
+            {/* ── Other pages ── */}
             <ActivationTutorial />
-            <MessagesScreen externalVm={messagesVM} />
+            <MessagesScreen />
             <LocationScreen externalVm={locationVM} />
             <ContactsScreen externalVm={contactsVM} />
             <SecurityScreen externalVm={securityVM} />
             <NotificationScreen externalVm={notificationVM} />
+            <TripPrivacyScreen />
+            <ProtectionScreen />
 
           </TutorialPager>
         </SafeAreaView>

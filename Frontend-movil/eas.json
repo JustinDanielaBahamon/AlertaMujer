@@ -15,14 +15,18 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://alerta-mujer-backend.onrender.com"
+        "EXPO_PUBLIC_API_URL": "https://alerta-mujer-auth.onrender.com",
+        "EXPO_PUBLIC_ALERT_API_URL": "https://alerta-mujer-alert.onrender.com",
+        "EXPO_PUBLIC_EVIDENCE_API_URL": "https://alerta-mujer-evidence.onrender.com"
       }
     },
     "production": {
       "autoIncrement": true,
       "environment": "production",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://alerta-mujer-backend.onrender.com"
+        "EXPO_PUBLIC_API_URL": "https://alerta-mujer-auth.onrender.com",
+        "EXPO_PUBLIC_ALERT_API_URL": "https://alerta-mujer-alert.onrender.com",
+        "EXPO_PUBLIC_EVIDENCE_API_URL": "https://alerta-mujer-evidence.onrender.com"
       }
     }
   },

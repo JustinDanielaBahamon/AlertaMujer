@@ -1,17 +1,18 @@
 import TutorialLottie from "../component/TutorialLottie";
 import React, { useEffect, useRef } from "react";
-import { Animated, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Animated, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Card from "../../../components/ui/card/card";
-import CustomePermisos from "../../../components/ui/modalMesanje/permisosMLL";
 import { messageStyle, MSG_COLORS } from "../styles/messageStyle";
 import { useMessagesTutorialViewModel, type FeatureItem } from "../viewModel/useMessagesTutorialViewModel";
 import { LinearGradient } from 'expo-linear-gradient';
 import { TUTORIAL_GRADIENT } from "../styles/tutorialTheme";
 import { useLocale } from "../../../contexts/LocaleContext";
+import { useTutorialPage } from "../component/TutorialPager";
 
-// ─── Círculos de fondo decorativos ───────────────────────────────────────────
+// ─── Decorative background circles ───────────────────────────────────────────
 function BackgroundCircles() {
+  const { isActive } = useTutorialPage();
   const f1 = useRef(new Animated.Value(0)).current;
   const f2 = useRef(new Animated.Value(0)).current;
   const f3 = useRef(new Animated.Value(0)).current;
@@ -24,10 +25,16 @@ function BackgroundCircles() {
           Animated.timing(anim, { toValue: 0,   duration: dur,         useNativeDriver: true }),
         ])
       );
-    float(f1, 3200, 0).start();
-    float(f2, 2800, 600).start();
-    float(f3, 3600, 1200).start();
-  }, []);
+    // Only the circles of the visible page are animated (before, every page's ran)
+    if (!isActive) return;
+    const loops = [
+      float(f1, 3200, 0),
+      float(f2, 2800, 600),
+      float(f3, 3600, 1200),
+    ];
+    loops.forEach((l) => l.start());
+    return () => loops.forEach((l) => l.stop());
+  }, [isActive]);
 
   return (
     <>
@@ -53,7 +60,7 @@ function BackgroundCircles() {
   );
 }
 
-// ─── fila de animacion ──────────────────────────────────────────────────────
+// ─── animation row ──────────────────────────────────────────────────────────
 function FeatureRow({ item, enterDelay }: { item: FeatureItem; enterDelay: number }) {
   const slideAnim   = useRef(new Animated.Value(28)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -92,7 +99,7 @@ function FeatureRow({ item, enterDelay }: { item: FeatureItem; enterDelay: numbe
   );
 }
 
-// ─── Pantalla principal ───────────────────────────────────────────────────────────────
+// ─── Main screen ─────────────────────────────────────────────────────────────────────
 interface Props {
   externalVm?: ReturnType<typeof useMessagesTutorialViewModel>;
 }
@@ -102,7 +109,7 @@ export default function MessagesScreen({ externalVm }: Props) {
   const internalVm = useMessagesTutorialViewModel();
   const vm = externalVm ?? internalVm;
 
-  // ── Animación de entrada de tarjeta de primavera ────────────────────────────────────────
+  // ── Card spring entrance animation ──────────────────────────────────────────────────────
   const cardAnim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.spring(cardAnim, {
@@ -121,17 +128,17 @@ export default function MessagesScreen({ externalVm }: Props) {
   };
 
   return (
-   // 1️ Vista exterior — igual que antes
+   // 1️ Outer view — same as before
     <View style={messageStyle.screenBg}>
 
-      {/* 2️⃣ LinearGradient cubre todo el interior */}
+      {/* 2️⃣ LinearGradient covers the whole inside */}
       <LinearGradient
         colors={[...TUTORIAL_GRADIENT]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={{ flex: 1 }}
       >
-        {/* 3️⃣ Los círculos van DENTRO del degradado */}
+        {/* 3️⃣ The circles go INSIDE the gradient */}
         <BackgroundCircles />
 
         <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
@@ -194,12 +201,12 @@ export default function MessagesScreen({ externalVm }: Props) {
                   <View style={messageStyle.sectionLine} />
                 </View>
 
-                <View style={messageStyle.permisosCard}>
-                  <View style={messageStyle.permisosRow}>
-                    <Text style={messageStyle.permisosEmoji}>🔐</Text>
+                <View style={messageStyle.permissionsCard}>
+                  <View style={messageStyle.permissionsRow}>
+                    <Text style={messageStyle.permissionsEmoji}>✨</Text>
                     <View style={{ flex: 1 }}>
-                      <Text style={messageStyle.permisosTitle}>{t.tutorial.mensaje_permisos_activa_titulo}</Text>
-                      <Text style={messageStyle.permisosDesc}>
+                      <Text style={messageStyle.permissionsTitle}>{t.tutorial.mensaje_permisos_activa_titulo}</Text>
+                      <Text style={messageStyle.permissionsDesc}>
                         {t.tutorial.mensaje_permisos_activa_desc}
                       </Text>
                     </View>
@@ -217,34 +224,10 @@ export default function MessagesScreen({ externalVm }: Props) {
 
         </SafeAreaView>
 
-        {/* 4️⃣ La superposición de advertencia también va DENTRO del degradado */}
-        {vm.showWarning && (
-          <View style={messageStyle.overlayBg}>
-            <View style={messageStyle.warningBox}>
-              <Text style={messageStyle.warningText}>
-                {t.tutorial.mensaje_warning_texto}
-              </Text>
-              <TouchableOpacity onPress={vm.retryPermissions} style={messageStyle.btnPrimary}>
-                <Text style={messageStyle.btnPrimaryText}>{t.tutorial.mensaje_btn_activar_permisos}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={vm.continueWithoutPermissions} style={messageStyle.btnSecondary}>
-                <Text style={messageStyle.btnSecondaryText}>{t.tutorial.mensaje_btn_continuar_sin_permisos}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-
-        <CustomePermisos
-          visible={vm.modalVisible}
-          tipo={vm.permissionType}
-          onConfirmar={vm.confirmModal}
-          onCancelar={vm.cancelModal}
-        />
-
-      {/* 5️⃣ Cerrar LinearGradient */}
+      {/* 5️⃣ Close LinearGradient */}
       </LinearGradient>
 
-    {/* 6️⃣ Cerrar vista externa */}
+    {/* 6️⃣ Close the outer view */}
     </View>
   );
 }

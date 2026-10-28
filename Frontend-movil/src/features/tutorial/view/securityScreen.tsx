@@ -5,13 +5,15 @@ import React, { useEffect, useRef } from "react";
 import { Animated, ScrollView, Text, TouchableOpacity, View, } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Card from "../../../components/ui/card/card";
-import PermissionsModal from "../../../components/ui/modalMesanje/permisosMLL";
+import PermissionsModal from "../../../components/ui/permissionsModal/PermissionsModal";
 import { SECURITY_COLORS, securityStyle } from "../styles/securityStyle";
 import { useSecurityTutorialViewModel, type SecurityFeatureItem, } from "../viewModel/useSecurityTutorialViewModel";
 import { useLocale } from "../../../contexts/LocaleContext";
+import { useTutorialPage } from "../component/TutorialPager";
 
-// ─── Círculos decorativos de fondo ───────────────────────────────────────────
+// ─── Decorative background circles ───────────────────────────────────────────
 function BackgroundCircles() {
+  const { isActive } = useTutorialPage();
   const f1 = useRef(new Animated.Value(0)).current;
   const f2 = useRef(new Animated.Value(0)).current;
   const f3 = useRef(new Animated.Value(0)).current;
@@ -24,10 +26,16 @@ function BackgroundCircles() {
           Animated.timing(anim, { toValue: 0,   duration: dur,         useNativeDriver: true }),
         ])
       );
-    float(f1, 3200, 0).start();
-    float(f2, 2800, 600).start();
-    float(f3, 3600, 1200).start();
-  }, []);
+    // Only the circles of the visible page are animated (before, every page's ran)
+    if (!isActive) return;
+    const loops = [
+      float(f1, 3200, 0),
+      float(f2, 2800, 600),
+      float(f3, 3600, 1200),
+    ];
+    loops.forEach((l) => l.start());
+    return () => loops.forEach((l) => l.stop());
+  }, [isActive]);
 
   return (
     <>
@@ -52,7 +60,7 @@ function BackgroundCircles() {
     </>
   );
 }
-// ─── Fila de característica animada ──────────────────────────────────────────
+// ─── Animated feature row ────────────────────────────────────────────────────
 function FeatureRow({ item, enterDelay }: { item: SecurityFeatureItem; enterDelay: number }) {
   const slideAnim   = useRef(new Animated.Value(28)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -94,7 +102,7 @@ function FeatureRow({ item, enterDelay }: { item: SecurityFeatureItem; enterDela
   );
 }
 
-// ─── Pantalla principal ───────────────────────────────────────────────────────
+// ─── Main screen ─────────────────────────────────────────────────────────────
 interface Props {
   externalVm?: ReturnType<typeof useSecurityTutorialViewModel>;
 }
@@ -104,7 +112,7 @@ export default function CameraAndMicrophoneTutorial({ externalVm }: Props) {
   const internalVm = useSecurityTutorialViewModel();
   const vm = externalVm ?? internalVm;
 
-  // ── Animación card spring ────────────────────────────────────────────────
+  // ── Card spring animation ────────────────────────────────────────────────
   const cardAnim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.spring(cardAnim, {
@@ -141,7 +149,7 @@ export default function CameraAndMicrophoneTutorial({ externalVm }: Props) {
           />
         </View>
 
-        {/* Card animada */}
+        {/* Animated card */}
         <Animated.View style={[{ flex: 1 }, cardAnimStyle]}>
           <Card title={`${t.tutorial.seguridad_titulo_1}\n`} titleHighlight={t.tutorial.seguridad_titulo_2}>
             <ScrollView
@@ -151,7 +159,7 @@ export default function CameraAndMicrophoneTutorial({ externalVm }: Props) {
               scrollEventThrottle={16}
               nestedScrollEnabled={true}
             >
-              {/* Sección principal */}
+              {/* Main section */}
               <View style={securityStyle.sectionRow}>
                 <Text style={securityStyle.sectionLabel}>{t.tutorial.seguridad_evidencia_titulo}</Text>
                 <View style={securityStyle.sectionLine} />
@@ -167,7 +175,7 @@ export default function CameraAndMicrophoneTutorial({ externalVm }: Props) {
 
               <View style={securityStyle.divider} />
 
-              {/* Detalle descriptivo */}
+              {/* Descriptive detail */}
               <View style={{ gap: 4 }}>
                 {vm.featureRows.map((item) => (
                   <View key={`desc-${item.id}`} style={securityStyle.descRow}>
@@ -187,32 +195,58 @@ export default function CameraAndMicrophoneTutorial({ externalVm }: Props) {
 
               <View style={securityStyle.divider} />
 
-              {/* Sección permisos — muestra los dos (cámara y audio) */}
+              {/* Alert protection: cancel PIN, duress PIN, volume, discreet mode, check-in */}
+              <View style={securityStyle.sectionRow}>
+                <Text style={securityStyle.sectionLabel}>{t.tutorial.seguridad_proteger_titulo}</Text>
+                <View style={securityStyle.sectionLine} />
+              </View>
+
+              <View style={{ gap: 4 }}>
+                {[
+                  { emoji: "🔉", text: t.tutorial.seguridad_proteger_volumen },
+                  { emoji: "🔑", text: t.tutorial.seguridad_proteger_pin },
+                  { emoji: "🆘", text: t.tutorial.seguridad_proteger_coaccion },
+                  { emoji: "🔕", text: t.tutorial.seguridad_proteger_discreto },
+                  { emoji: "⏱️", text: t.tutorial.seguridad_proteger_pregunta },
+                ].map((row) => (
+                  <View key={row.emoji} style={securityStyle.descRow}>
+                    <Text style={{ fontSize: 15 }}>{row.emoji}</Text>
+                    <View style={securityStyle.descTextWrap}>
+                      <Text style={securityStyle.descNormal}>{row.text}</Text>
+                    </View>
+                  </View>
+                ))}
+                <Text style={securityStyle.descBold}>{t.tutorial.seguridad_proteger_ajustes}</Text>
+              </View>
+
+              <View style={securityStyle.divider} />
+
+              {/* Permissions section — shows both (camera and audio) */}
               <View style={securityStyle.sectionRow}>
                 <Text style={securityStyle.sectionLabel}>{t.tutorial.seguridad_permisos_titulo}</Text>
                 <View style={securityStyle.sectionLine} />
               </View>
 
-              <View style={securityStyle.permisosCard}>
-                {/* Cámara */}
-                <View style={securityStyle.permisosRow}>
-                  <Text style={securityStyle.permisosEmoji}>📷</Text>
-                  <View style={securityStyle.permisosTitleWrap}>
-                    <Text style={securityStyle.permisosTitle}>{t.tutorial.seguridad_permisos_camara_titulo}</Text>
-                    <Text style={securityStyle.permisosDesc}>
+              <View style={securityStyle.permissionsCard}>
+                {/* Camera */}
+                <View style={securityStyle.permissionsRow}>
+                  <Text style={securityStyle.permissionsEmoji}>📷</Text>
+                  <View style={securityStyle.permissionsTitleWrap}>
+                    <Text style={securityStyle.permissionsTitle}>{t.tutorial.seguridad_permisos_camara_titulo}</Text>
+                    <Text style={securityStyle.permissionsDesc}>
                       {t.tutorial.seguridad_permisos_camara_desc}
                     </Text>
                   </View>
                 </View>
 
-                <View style={securityStyle.permisosSeparator} />
+                <View style={securityStyle.permissionsSeparator} />
 
-                {/* Micrófono */}
-                <View style={securityStyle.permisosRow}>
-                  <Text style={securityStyle.permisosEmoji}>🎙️</Text>
-                  <View style={securityStyle.permisosTitleWrap}>
-                    <Text style={securityStyle.permisosTitle}>{t.tutorial.seguridad_permisos_microfono_titulo}</Text>
-                    <Text style={securityStyle.permisosDesc}>
+                {/* Microphone */}
+                <View style={securityStyle.permissionsRow}>
+                  <Text style={securityStyle.permissionsEmoji}>🎙️</Text>
+                  <View style={securityStyle.permissionsTitleWrap}>
+                    <Text style={securityStyle.permissionsTitle}>{t.tutorial.seguridad_permisos_microfono_titulo}</Text>
+                    <Text style={securityStyle.permissionsDesc}>
                       {t.tutorial.seguridad_permisos_microfono_desc}
                     </Text>
                   </View>
@@ -231,7 +265,7 @@ export default function CameraAndMicrophoneTutorial({ externalVm }: Props) {
 
       </SafeAreaView>
 
-      {/* Overlay advertencia — lógica original intacta */}
+      {/* Warning overlay — original logic untouched */}
       {vm.showWarning && (
         <View style={securityStyle.overlayBg}>
           <View style={securityStyle.warningBox}>
@@ -249,9 +283,9 @@ export default function CameraAndMicrophoneTutorial({ externalVm }: Props) {
       )}
       <PermissionsModal
         visible={vm.modalVisible}
-        tipo={vm.permissionType}
-        onConfirmar={vm.confirmModal}
-        onCancelar={vm.cancelModal}
+        type={vm.permissionType}
+        onConfirm={vm.confirmModal}
+        onCancel={vm.cancelModal}
       />
       </LinearGradient>
     </View>

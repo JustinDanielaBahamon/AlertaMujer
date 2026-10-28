@@ -1,22 +1,24 @@
 import * as Location from "expo-location";
+import { getPlace } from "./geocoding.service";
+import { locationPermission } from "./safePermissions";
 
-// Interface para datos de ubicación mejorados
-export interface UbicacionDetallada {
-  direccionCompleta: string;
-  calle: string;
-  numero: string;
-  barrio: string;
-  ciudad: string;
-  municipio: string;
-  departamento: string;
-  pais: string;
-  codigoPostal: string;
-  latitud: number;
-  longitud: number;
+// Interface for improved location data
+export interface DetailedLocation {
+  fullAddress: string;
+  street: string;
+  number: string;
+  neighborhood: string;
+  city: string;
+  municipality: string;
+  department: string;
+  country: string;
+  postalCode: string;
+  latitudeValue: number;
+  longitudeValue: number;
   precision: number;
 }
 
-// Errores tipados para distinguir la causa del fallo de ubicación
+// Typed errors to tell the cause of a location failure
 export class LocationServicesDisabledError extends Error {
   constructor() {
     super("Los servicios de ubicación del dispositivo están desactivados");
@@ -31,25 +33,27 @@ export class LocationPermissionDeniedError extends Error {
   }
 }
 
-// Configuración de alta precisión para GPS
+const MAX_GPS_TIME_MS = 15 * 1000;
+const MAX_AGE_MS = 15 * 60 * 1000;
+
+// High-accuracy GPS settings
 const HIGH_ACCURACY_CONFIG = {
-  accuracy: Location.Accuracy.BestForNavigation, // Máxima precisión para navegación
+  accuracy: Location.Accuracy.BestForNavigation, // Maximum accuracy for navigation
   enableHighAccuracy: true,
   timeout: 15000,
   maximumAge: 10000,
 };
 
 /**
- * Servicio centralizado para manejo de ubicación con alta precisión
+ * Central service for high-accuracy location handling
  */
 export class LocationService {
   /**
-   * Solicita permisos de ubicación
+   * Requests location permissions
    */
-  static async requestPermissions(): Promise<boolean> {
+  static async requestPermissions(ask = true): Promise<boolean> {
     try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      return status === "granted";
+      return await locationPermission(ask);
     } catch (error) {
       console.error("Error al solicitar permisos de ubicación:", error);
       return false;
@@ -57,7 +61,7 @@ export class LocationService {
   }
 
   /**
-   * Verifica si los servicios de ubicación del dispositivo están activos
+   * Checks whether the device location services are on
    */
   static async hasServicesEnabled(): Promise<boolean> {
     try {
@@ -68,29 +72,33 @@ export class LocationService {
   }
 
   /**
-   * Obtiene la ubicación actual con máxima precisión.
-   * Verifica servicios del sistema antes de pedir permisos.
-   * Lanza errores tipados para que el llamador pueda distinguir la causa.
+   * Gets the current location with maximum accuracy.
+   * Checks system services before asking for permissions.
+   * Throws typed errors so the caller can tell the cause.
    */
-  static async getCurrentPosition(): Promise<Location.LocationObject | null> {
+  static async getCurrentPosition(requestPermission = true): Promise<Location.LocationObject | null> {
     try {
-      // 1) Servicios de ubicación del dispositivo (GPS/red) habilitados?
-      const serviciosActivos = await Location.hasServicesEnabledAsync();
-      if (!serviciosActivos) {
+      // 1) Device location services (GPS/network) enabled?
+      const activeServices = await Location.hasServicesEnabledAsync();
+      if (!activeServices) {
         throw new LocationServicesDisabledError();
       }
 
-      // 2) La app tiene permiso?
-      const hasPermission = await this.requestPermissions();
+      // 2) Does the app have permission?
+      const hasPermission = await this.requestPermissions(requestPermission);
       if (!hasPermission) {
         throw new LocationPermissionDeniedError();
       }
 
-      const location = await Location.getCurrentPositionAsync(HIGH_ACCURACY_CONFIG);
-      console.log("Ubicación GPS obtenida con precisión:", location.coords.accuracy, "metros");
-      return location;
+      // expo-location has no "timeout": without GPS signal (indoors) the reading never ends.
+      // We wait for a while and, if it does not arrive, the last location the phone knows is used.
+      const location = await Promise.race([
+        Location.getCurrentPositionAsync(HIGH_ACCURACY_CONFIG),
+        new Promise<null>((resolver) => setTimeout(() => resolver(null), MAX_GPS_TIME_MS)),
+      ]);
+      return location ?? (await Location.getLastKnownPositionAsync({ maxAge: MAX_AGE_MS }));
     } catch (error) {
-      // Re-lanzar errores tipados para que el ViewModel los clasifique
+      // Rethrow typed errors so the ViewModel classifies them
       if (
         error instanceof LocationServicesDisabledError ||
         error instanceof LocationPermissionDeniedError
@@ -103,54 +111,55 @@ export class LocationService {
   }
 
   /**
-   * Realiza geocoding inverso mejorado para obtener dirección detallada
+   * Improved reverse geocoding to get a detailed address
    */
   static async reverseGeocode(
     latitude: number,
     longitude: number
-  ): Promise<UbicacionDetallada | null> {
+  ): Promise<DetailedLocation | null> {
     try {
-      const reverse = await Location.reverseGeocodeAsync({
-        latitude,
-        longitude,
-      });
+      // The phone geocoder gives city and region, but on some phones its neighborhood is wrong
+      // (e.g. a Vietnamese district for a point in Neiva): OpenStreetMap gives the neighborhood
+      const [reverse, osm] = await Promise.all([
+        Location.reverseGeocodeAsync({ latitude, longitude }),
+        getPlace(latitude, longitude).catch(() => null),
+      ]);
 
       if (reverse.length > 0) {
         const info = reverse[0];
 
-        // Extracción mejorada de datos con múltiples fallbacks (solo propiedades válidas)
-        const calle = info.street || info.name || "Calle desconocida";
-        const numero = info.streetNumber || "";
-        const barrio = info.district || info.subregion || "Sector desconocido";
-        const ciudad = info.city || "Ciudad desconocida";
-        const municipio = info.subregion || info.city || "Municipio desconocido";
-        const departamento = info.region || "Departamento desconocido";
-        const pais = info.country || "País desconocido";
-        const codigoPostal = info.postalCode || "";
+        // Improved data extraction with several fallbacks (valid properties only)
+        const street = info.street || info.name || "Calle desconocida";
+        const number = info.streetNumber || "";
+        const neighborhood = osm?.neighborhood || info.district || info.subregion || "Sector desconocido";
+        const city = info.city || "Ciudad desconocida";
+        const municipality = info.subregion || info.city || "Municipio desconocido";
+        const department = info.region || "Departamento desconocido";
+        const country = info.country || "País desconocido";
+        const postalCode = info.postalCode || "";
 
-        // Construcción de dirección más completa
-        const direccionCompleta = `${calle} ${numero}`.trim();
-        const ciudadCompleta = ciudad !== "Ciudad desconocida"
-          ? `${ciudad}, ${departamento}`
-          : ciudad;
+        // Builds a more complete address
+        const fullAddress = `${street} ${number}`.trim();
+        const fullCity = city !== "Ciudad desconocida"
+          ? `${city}, ${department}`
+          : city;
 
-        const ubicacionDetallada: UbicacionDetallada = {
-          direccionCompleta,
-          calle,
-          numero,
-          barrio,
-          ciudad: ciudadCompleta,
-          municipio,
-          departamento,
-          pais,
-          codigoPostal,
-          latitud: latitude,
-          longitud: longitude,
-          precision: 0, // Se actualiza cuando se obtiene del GPS
+        const detailedLocation: DetailedLocation = {
+          fullAddress,
+          street,
+          number,
+          neighborhood,
+          city: fullCity,
+          municipality,
+          department,
+          country,
+          postalCode,
+          latitudeValue: latitude,
+          longitudeValue: longitude,
+          precision: 0, // Updated when it comes from the GPS
         };
 
-        console.log("Geocoding inverso mejorado:", ubicacionDetallada);
-        return ubicacionDetallada;
+        return detailedLocation;
       }
 
       return null;
@@ -161,13 +170,32 @@ export class LocationService {
   }
 
   /**
-   * Obtiene ubicación completa (GPS + geocoding) con máxima precisión.
-   * Propaga LocationServicesDisabledError y LocationPermissionDeniedError
-   * para que el llamador muestre el mensaje apropiado.
+   * Gets the full location (GPS + geocoding) with maximum accuracy.
+   * Propagates LocationServicesDisabledError and LocationPermissionDeniedError
+   * so the caller shows the right message.
    */
-  static async getFullLocation(): Promise<UbicacionDetallada | null> {
-    // No capturamos errores tipados — los dejamos subir al ViewModel
-    const location = await this.getCurrentPosition();
+  /** askPermission = false when a screen opens: it only checks and shows no system prompts. */
+  /**
+   * The position the phone already knows (no GPS wait), or null. For a first answer in milliseconds
+   * that is refined later with getFullLocation.
+   */
+  static async getQuickLocation(): Promise<DetailedLocation | null> {
+    try {
+      const { granted } = await Location.getForegroundPermissionsAsync();
+      if (!granted) return null;
+      const last = await Location.getLastKnownPositionAsync({ maxAge: MAX_AGE_MS });
+      if (!last) return null;
+      const geocoding = await this.reverseGeocode(last.coords.latitude, last.coords.longitude);
+      if (geocoding) geocoding.precision = last.coords.accuracy || 0;
+      return geocoding;
+    } catch {
+      return null;
+    }
+  }
+
+  static async getFullLocation(requestPermission = true): Promise<DetailedLocation | null> {
+    // We do not catch typed errors — we let them bubble up to the ViewModel
+    const location = await this.getCurrentPosition(requestPermission);
     if (!location) return null;
 
     const { latitude, longitude, accuracy } = location.coords;
@@ -175,14 +203,14 @@ export class LocationService {
     const geocoding = await this.reverseGeocode(latitude, longitude);
     if (!geocoding) return null;
 
-    // Actualizar precisión con valor real del GPS (manejar null)
+    // Update the accuracy with the real GPS value (handle null)
     geocoding.precision = accuracy || 0;
 
     return geocoding;
   }
 
   /**
-   * Calcula distancia entre dos coordenadas en metros (fórmula Haversine)
+   * Computes the distance between two coordinates in meters (Haversine formula)
    */
   static calculateDistance(
     lat1: number,
@@ -190,7 +218,7 @@ export class LocationService {
     lat2: number,
     lon2: number
   ): number {
-    const R = 6371e3; // Radio de la Tierra en metros
+    const R = 6371e3; // Earth radius in meters
     const φ1 = (lat1 * Math.PI) / 180;
     const φ2 = (lat2 * Math.PI) / 180;
     const Δφ = ((lat2 - lat1) * Math.PI) / 180;
@@ -205,29 +233,29 @@ export class LocationService {
   }
 
   /**
-   * Obtiene dirección formateada para mostrar en UI
+   * Gets a formatted address to show in the UI
    */
-  static formatAddress(ubicacion: UbicacionDetallada): string {
-    const partes = [];
-    if (ubicacion.barrio && ubicacion.barrio !== "Sector desconocido") {
-      partes.push(ubicacion.barrio);
+  static formatAddress(location: DetailedLocation): string {
+    const parts = [];
+    if (location.neighborhood && location.neighborhood !== "Sector desconocido") {
+      parts.push(location.neighborhood);
     }
-    if (ubicacion.ciudad && ubicacion.ciudad !== "Ciudad desconocida") {
-      partes.push(ubicacion.ciudad);
+    if (location.city && location.city !== "Ciudad desconocida") {
+      parts.push(location.city);
     }
-    return partes.length > 0 ? partes.join(", ") : ubicacion.direccionCompleta;
+    return parts.length > 0 ? parts.join(", ") : location.fullAddress;
   }
 
   /**
-   * Obtiene dirección corta para títulos y encabezados
+   * Gets a short address for titles and headers
    */
-  static formatShortAddress(ubicacion: UbicacionDetallada): string {
-    if (ubicacion.barrio && ubicacion.barrio !== "Sector desconocido") {
-      return ubicacion.barrio;
+  static formatShortAddress(location: DetailedLocation): string {
+    if (location.neighborhood && location.neighborhood !== "Sector desconocido") {
+      return location.neighborhood;
     }
-    if (ubicacion.calle && ubicacion.calle !== "Calle desconocida") {
-      return ubicacion.calle;
+    if (location.street && location.street !== "Calle desconocida") {
+      return location.street;
     }
-    return ubicacion.ciudad || "Ubicación desconocida";
+    return location.city || "Ubicación desconocida";
   }
 }

@@ -1,12 +1,8 @@
-import { useNavigation } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { PermissionsAndroid, Platform } from "react-native";
-import type { MainStackParamList } from "../../../navigation/types";
+import { registrarPush } from "../../../services/push.service";
 import { NOTIF_COLORS } from "../styles/notificationStyle";
 import { useLocale } from "../../../contexts/LocaleContext";
-
-type Nav = NativeStackNavigationProp<MainStackParamList>;
 
 export interface NotifFeatureItem {
   id: string;
@@ -24,7 +20,7 @@ export interface NotifFeatureItem {
 
 type LocaleT = ReturnType<typeof useLocale>["t"];
 
-// ─── Datos (ahora dependen del idioma activo) ─────────────────────────────────
+// ─── Data (now depends on the active language) ───────────────────────────────
 const getNotifFeatureRows = (t: LocaleT): NotifFeatureItem[] => [
   {
     id: "sos",
@@ -71,14 +67,13 @@ export function useNotificationTutorialViewModel() {
   const { t } = useLocale();
   const featureRows = useMemo(() => getNotifFeatureRows(t), [t]);
 
-  const navigation = useNavigation<Nav>();
   const [modalVisible, setModalVisible]   = useState(false);
   const [showWarning, setShowWarning]     = useState(false);
 
   const resolvePermission = useRef<(value: boolean) => void>(() => {});
 
-  // Android 12 o menor no pide permiso de notificaciones; en Android 13+ se revisa si ya está concedido
-  const yaTienePermiso = async (): Promise<boolean> => {
+  // Android 12 or lower does not ask for the notifications permission; on Android 13+ we check whether it is granted
+  const alreadyHasPermission = async (): Promise<boolean> => {
     if (Platform.OS !== "android") return false;
     if (Platform.Version < 33) return true;
     try {
@@ -89,7 +84,7 @@ export function useNotificationTutorialViewModel() {
   };
 
   const requestPermissions = useCallback(async (): Promise<boolean> => {
-    if (await yaTienePermiso()) return true;
+    if (await alreadyHasPermission()) return true;
 
     return new Promise((resolve) => {
       resolvePermission.current = resolve;
@@ -98,30 +93,16 @@ export function useNotificationTutorialViewModel() {
     });
   }, []);
 
-  // Si ya tiene el permiso, entra directo a la app sin mostrar el aviso
-  const openModal = useCallback(async () => {
-    setShowWarning(false);
-    if (await yaTienePermiso()) {
-      navigation.replace("DrawerHome");
-      return;
-    }
-    setModalVisible(true);
-  }, [navigation]);
-
+  // On accept the system permission is requested and the phone is registered to receive alarms.
+  // With or without the permission the tutorial goes on to the protection page.
   const confirmModal = useCallback(async () => {
     setModalVisible(false);
-
-    // ✅ Request native permissions without using expo-notifications
     if (Platform.OS === "android" && Platform.Version >= 33) {
-      await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
-      );
+      await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS).catch(() => null);
     }
-    // On iOS, notification permissions are handled when registering the device
-    // No extra call needed here
-
-    navigation.replace("DrawerHome");
-  }, [navigation]);
+    if (await alreadyHasPermission()) registrarPush().catch(() => {});
+    resolvePermission.current(true);
+  }, []);
 
   const cancelModal = useCallback(() => {
     setModalVisible(false);
@@ -135,15 +116,14 @@ export function useNotificationTutorialViewModel() {
 
   const continueWithoutPermissions = useCallback(() => {
     setShowWarning(false);
-    navigation.replace("DrawerHome");
-  }, [navigation]);
+    resolvePermission.current(true);
+  }, []);
 
   return {
     featureRows,
     modalVisible,
     showWarning,
     requestPermissions,
-    openModal,
     confirmModal,
     cancelModal,
     retryPermissions,

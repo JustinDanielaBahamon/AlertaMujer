@@ -3,8 +3,8 @@ import { Animated } from "react-native";
 import { BUTTON_COLORS } from "../styles/buttonStyle";
 import { useLocale } from "../../../contexts/LocaleContext";
 
-// ─── Tipos públicos ───────────────────────────────────────────────────────────
-export type TapType = "widget" | "acelerometro" | "pantalla" | null;
+// ─── Public types ─────────────────────────────────────────────────────────────
+export type TapType = "contacto" | "acelerometro" | "pantalla" | null;
 
 export interface TapOption {
   id: TapType;
@@ -22,11 +22,11 @@ export interface TapOption {
 
 type LocaleT = ReturnType<typeof useLocale>["t"];
 
-// ─── Datos de métodos de activación (dependen del idioma activo) ──────────────
+// ─── Activation methods data (depends on the active language) ─────────────────
 const getTapOptions = (t: LocaleT): TapOption[] => [
   {
-    id: "widget",
-    emoji: "🧩",
+    id: "contacto",
+    emoji: "👤",
     title: t.tutorial.boton_toque_corto_titulo,
     badge: t.tutorial.boton_toque_corto_badge,
     highlightLabel: t.tutorial.boton_toque_corto_highlight,
@@ -70,16 +70,16 @@ export function useButtonTutorialViewModel() {
   const { t } = useLocale();
   const tapOptions = useMemo(() => getTapOptions(t), [t]);
 
-  // ── Estado ──────────────────────────────────────────────────────────────────
+  // ── State ───────────────────────────────────────────────────────────────────
   const [activeRow, setActiveRow]   = useState<TapType>(null);
   const [tapCount, setTapCount]     = useState(0);
   const [feedback, setFeedback]     = useState("");
 
-  // ── Animaciones de la pantalla principal ────────────────────────────────────
+  // ── Main screen animations ──────────────────────────────────────────────────
   const cardAnim        = useRef(new Animated.Value(0)).current;
   const feedbackOpacity = useRef(new Animated.Value(0)).current;
 
-  // Entrada de card con spring al montar
+  // Card spring entrance on mount
   useEffect(() => {
     Animated.spring(cardAnim, {
       toValue: 1,
@@ -90,7 +90,7 @@ export function useButtonTutorialViewModel() {
     }).start();
   }, []);
 
-  // ── Animación interpolada de la card (lista para usar en JSX) ───────────────
+  // ── Interpolated card animation (ready to use in JSX) ───────────────────────
   const cardAnimStyle = {
     opacity: cardAnim,
     transform: [
@@ -105,7 +105,7 @@ export function useButtonTutorialViewModel() {
 
   // ── Handlers ─────────────────────────────────────────────────────────────────
 
-  /** Muestra un mensaje de feedback con fade in/out */
+  /** Shows a feedback message with fade in/out */
   const showFeedback = (msg: string) => {
     setFeedback(msg);
     feedbackOpacity.setValue(0);
@@ -116,15 +116,15 @@ export function useButtonTutorialViewModel() {
     ]).start();
   };
 
-  /** Activa / desactiva una fila al tocarla */
+  /** Toggles a row when it is tapped */
   const handleTapRow = (id: TapType) => {
     setActiveRow((prev) => (id === prev ? null : id));
   };
 
-  /** Cicla entre los 3 métodos al presionar el botón SOS demo */
+  /** Cycles through the 3 methods when the demo SOS button is pressed */
   const handleSOSTap = (msg: string) => {
     const next = tapCount + 1;
-    const types: TapType[] = ["widget", "acelerometro", "pantalla"];
+    const types: TapType[] = ["contacto", "acelerometro", "pantalla"];
     const type = types[(next - 1) % 3];
     setActiveRow(type);
     showFeedback(msg);
@@ -132,13 +132,13 @@ export function useButtonTutorialViewModel() {
   };
 
   return {
-    // estado
+    // state
     activeRow,
     feedback,
     // animaciones
     cardAnimStyle,
     feedbackOpacity,
-    // datos
+    // data
     tapOptions,
     // handlers
     handleTapRow,

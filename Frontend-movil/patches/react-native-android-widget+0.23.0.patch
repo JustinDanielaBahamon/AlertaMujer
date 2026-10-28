@@ -1,0 +1,25 @@
+diff --git a/node_modules/react-native-android-widget/android/src/main/java/com/reactnativeandroidwidget/RNWidgetUtil.java b/node_modules/react-native-android-widget/android/src/main/java/com/reactnativeandroidwidget/RNWidgetUtil.java
+index a057c09..d29a704 100644
+--- a/node_modules/react-native-android-widget/android/src/main/java/com/reactnativeandroidwidget/RNWidgetUtil.java
++++ b/node_modules/react-native-android-widget/android/src/main/java/com/reactnativeandroidwidget/RNWidgetUtil.java
+@@ -45,7 +45,19 @@ public class RNWidgetUtil {
+     }
+ 
+     private static int getWidgetSizeInDp(Context context, int widgetId, String key) {
+-        return AppWidgetManager.getInstance(context).getAppWidgetOptions(widgetId).getInt(key, 0);
++        AppWidgetManager manager = AppWidgetManager.getInstance(context);
++        int size = manager.getAppWidgetOptions(widgetId).getInt(key, 0);
++        if (size > 0) {
++            return size;
++        }
++        // Some launchers (e.g. Infinix XOS) do not report the widget size. With 0 the bitmap cannot be
++        // created, the widget stays transparent and a tap only opens the app: use the declared minimum size.
++        boolean isWidth = AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH.equals(key)
++            || AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH.equals(key);
++        AppWidgetProviderInfo info = manager.getAppWidgetInfo(widgetId);
++        int declaredPx = info == null ? 0 : (isWidth ? info.minWidth : info.minHeight);
++        int declaredDp = (int) Math.round(pxToDp(context, declaredPx));
++        return declaredDp > 0 ? declaredDp : 110;
+     }
+ 
+     public static WritableArray getWidgetInfo(ReactApplicationContext context, String widgetName) {

@@ -1,7 +1,7 @@
 import { StyleSheet } from "react-native";
 import { TUTORIAL_PALETTE } from "./tutorialTheme";
 
-// ─── Paleta del módulo Notificación — alerta & atención ──────────────────────
+// ─── Notification module palette — alert & attention ──────────────────────────
 export const NOTIF_COLORS = {
   ...TUTORIAL_PALETTE,
 };
@@ -161,8 +161,8 @@ export const notificationStyle = StyleSheet.create({
     lineHeight: 19,
   },
 
-  // ── Card de permisos ───────────────────────────────────────────────────────
-  permisosCard: {
+  // ── Permissions card ───────────────────────────────────────────────────────
+  permissionsCard: {
     borderRadius: 18,
     padding: 16,
     gap: 10,
@@ -170,31 +170,31 @@ export const notificationStyle = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: NOTIF_COLORS.row2Border,
   },
-  permisosRow: {
+  permissionsRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
   },
-  permisosEmoji: {
+  permissionsEmoji: {
     fontSize: 22,
   },
-  permisosTitleWrap: {
+  permissionsTitleWrap: {
     flex: 1,
   },
-  permisosTitle: {
+  permissionsTitle: {
     fontSize: 13,
     fontWeight: "700",
     color: "#990cb6",
   },
-  permisosDesc: {
+  permissionsDesc: {
     fontSize: 12,
     color: "#6B7280",
     lineHeight: 18,
     marginTop: 2,
   },
 
-  // ── Botón finalizar ────────────────────────────────────────────────────────
-  btnFinalizar: {
+  // ── Finish button ──────────────────────────────────────────────────────────
+  finishBtn: {
     marginTop: 16,
     borderRadius: 20,
     paddingVertical: 15,
@@ -210,7 +210,7 @@ export const notificationStyle = StyleSheet.create({
     flexDirection: "row",
     gap: 8,
   },
-  btnFinalizarText: {
+  finishBtnText: {
     fontSize: 15,
     fontWeight: "800",
     color: "#FFFFFF",
@@ -238,7 +238,7 @@ export const notificationStyle = StyleSheet.create({
     letterSpacing: 0.2,
   },
 
-  // ── Overlay advertencia ────────────────────────────────────────────────────
+  // ── Warning overlay ────────────────────────────────────────────────────────
   overlayBg: {
     position: "absolute",
     top: 0, left: 0, right: 0, bottom: 0,

@@ -10,7 +10,7 @@ import { useLocale } from "../../../contexts/LocaleContext";
 export default function Login() {
   const vm = useLoginViewModel();
   const { t } = useLocale();
-  const insets = useSafeAreaInsets(); // detecta los espacios del teléfono
+  const insets = useSafeAreaInsets(); // detects the phone's insets
 
   useEffect(() => {
     async function setNavBar() {
@@ -24,71 +24,73 @@ export default function Login() {
     <View style={{
       flex: 1,
       backgroundColor: "#460447",
-      paddingTop: insets.top,       // espacio arriba según el teléfono
-      paddingBottom: insets.bottom, // espacio abajo según el teléfono
+      paddingTop: insets.top,       // top spacing for the phone
+      paddingBottom: insets.bottom, // bottom spacing for the phone
     }}>
       <StatusBar style="light" backgroundColor="#460447" />
 
       <ScrollView
-        style={styles.ContenedorPrincipal}
+        style={styles.MainContainer}
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.ContenedorLogo}>
+        <View style={styles.LogoContainer}>
           <Image
             source={require('../../../../assets/imagesAlertaMujer/logos/logoAlertaMujer.png')}
-            style={styles.ImagenLogo}
+            style={styles.LogoImage}
           />
         </View>
 
-        <View style={styles.ContenedorFormulario}>
-          <Text style={styles.TituloFormu}>{t.login.titulo}</Text>
+        <View style={styles.FormContainer}>
+          <Text style={styles.FormTitle}>{t.login.titulo}</Text>
 
-          {/* Input Correo */}
+          {/* Email input */}
           <View style={[
-            styles.contenedorInput,
-            vm.errorCorreo ? { borderColor: "#e74c3c" } : {},
+            styles.inputContainer,
+            vm.emailError ? { borderColor: "#e74c3c" } : {},
           ]}>
             <Image
-              style={styles.IconoCorreo}
+              style={styles.EmailIcon}
               source={require('../../../../assets/imagesAlertaMujer/ScLogin/correo.png')}
             />
             <TextInput
-              style={styles.inputCorreo}
+              style={styles.emailInput}
               placeholder={t.login.correo}
+                maxLength={254}
               placeholderTextColor={'#666'}
-              value={vm.correo}
-              onChangeText={(v) => { vm.setCorreo(v); }}
+              value={vm.email}
+              onChangeText={(v) => { vm.setEmail(v); }}
               autoCapitalize="none"
               keyboardType="email-address"
               selectionColor="#4f0250"
               cursorColor="#4a024b"
             />
           </View>
-          {vm.errorCorreo ? (
+          {vm.emailError ? (
             <Text style={{ color: "#e74c3c", fontSize: 12, marginLeft: 14, marginTop: 3 }}>
-              {vm.errorCorreo}
+              {vm.emailError}
             </Text>
           ) : null}
 
-          {/* Input Contraseña */}
+          {/* Password input */}
           <View style={[
-            styles.contenedorInput,
+            styles.inputContainer,
             vm.errorPassword ? { borderColor: "#e74c3c" } : {},
           ]}>
             <TextInput
-              style={styles.inputContraseña}
-              secureTextEntry={!vm.mostrarPassword}
+              style={styles.passwordInput}
+              secureTextEntry={!vm.showPassword}
               placeholder={t.login.contrasena}
+                maxLength={100}
               placeholderTextColor={'#666'}
               value={vm.password}
               onChangeText={(v) => { vm.setPassword(v); }}
               selectionColor="#480349"
               cursorColor="#450346"
             />
-            <TouchableOpacity onPress={vm.toggleMostrarPassword}>
+            <TouchableOpacity onPress={vm.toggleShowPassword}>
               <Image
-                style={styles.IconoCorreo}
+                style={styles.EmailIcon}
                 source={require('../../../../assets/imagesAlertaMujer/ScLogin/ojoPriv.png')}
               />
             </TouchableOpacity>
@@ -99,11 +101,11 @@ export default function Login() {
             </Text>
           ) : null}
 
-          <TouchableOpacity onPress={vm.irARecuperarContrasena}>
-            <Text style={styles.textoOlivarContra}>{t.login.olvidaste}</Text>
+          <TouchableOpacity onPress={vm.goToRecoverPassword}>
+            <Text style={styles.forgotPasswordText}>{t.login.olvidaste}</Text>
           </TouchableOpacity>
 
-          {vm.errorGeneral ? (
+          {vm.generalError ? (
             <Text style={{
               color: "#e74c3c",
               fontSize: 13,
@@ -111,41 +113,41 @@ export default function Login() {
               marginHorizontal: 10,
               marginBottom: 6,
             }}>
-              {vm.errorGeneral}
+              {vm.generalError}
             </Text>
           ) : null}
 
           <TouchableOpacity
-            style={styles.botonSession}
-            onPress={() => void vm.iniciarSesion()}
-            disabled={vm.cargando}
+            style={styles.sessionButton}
+            onPress={() => void vm.signIn()}
+            disabled={vm.loading}
           >
-            {vm.cargando ? (
+            {vm.loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.textoSession}>{t.login.ingresar}</Text>
+              <Text style={styles.sessionText}>{t.login.ingresar}</Text>
             )}
           </TouchableOpacity>
         </View>
 
-        {/* Botón Google */}
-        <TouchableOpacity style={styles.BotonGoogle} onPress={vm.continuarConGoogle}>
+        {/* Google button */}
+        <TouchableOpacity style={styles.GoogleButton} onPress={vm.continueWithGoogle}>
           <Image
             style={styles.logoGoogle}
             source={require('@assets/imagesAlertaMujer/ScLogin/google.png')}
           />
-          <Text style={styles.textoGoogle}>{t.login.continuar_google}</Text>
+          <Text style={styles.googleText}>{t.login.continuar_google}</Text>
         </TouchableOpacity>
 
-        <View style={styles.ContenedorRegistrarse}>
-          <Text style={styles.TextoTienesCuenta}>{t.login.no_cuenta}</Text>
-          <TouchableOpacity style={styles.BotonRegistrar} onPress={vm.irARegistro}>
-            <Text style={styles.textoRegistro}>{t.login.registrate}</Text>
+        <View style={styles.SignUpContainer}>
+          <Text style={styles.HaveAccountText}>{t.login.no_cuenta}</Text>
+          <TouchableOpacity style={styles.RegisterButton} onPress={vm.goToSignUp}>
+            <Text style={styles.signUpText}>{t.login.registrate}</Text>
           </TouchableOpacity>
         </View>
 
-        <View style={styles.ContenedorTermCondi}>
-          <Text style={styles.textoTerminosCondiciones}>{t.login.terminos}</Text>
+        <View style={styles.TermsContainer}>
+          <Text style={styles.termsText}>{t.login.terminos}</Text>
         </View>
       </ScrollView>
     </View>

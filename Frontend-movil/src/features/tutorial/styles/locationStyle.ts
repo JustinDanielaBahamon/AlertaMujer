@@ -1,7 +1,7 @@
 import { StyleSheet } from "react-native";
 
-// ─── Paleta del módulo Ubicación (alineada con el resto de la app) ───────────
-export const UBIC_COLORS = {
+// ─── Location module palette (in line with the rest of the app) ───────────────
+export const LOCATION_COLORS = {
   accent:      "#6A1B9A",
   accentDark:  "#4A148C",
   accentLight: "#F3EEFB",
@@ -21,7 +21,7 @@ export const UBIC_COLORS = {
 export const locationStyle = StyleSheet.create({
   screenBg: {
     flex: 1,
-    backgroundColor: UBIC_COLORS.screenBg,
+    backgroundColor: LOCATION_COLORS.screenBg,
   },
 
   lottieSection: {
@@ -44,15 +44,15 @@ export const locationStyle = StyleSheet.create({
     paddingBottom: 12,
   },
 
-  // ── Encabezado del ícono circular ─────────────────────────────────────────
+  // ── Circular icon header ──────────────────────────────────────────────────
   headerIconWrap: {
     alignSelf: "center",
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: UBIC_COLORS.accentLight,
+    backgroundColor: LOCATION_COLORS.accentLight,
     borderWidth: 2,
-    borderColor: UBIC_COLORS.border,
+    borderColor: LOCATION_COLORS.border,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 10,
@@ -67,17 +67,17 @@ export const locationStyle = StyleSheet.create({
     gap: 10,
     marginBottom: 16,
     borderWidth: 1.5,
-    borderColor: UBIC_COLORS.border,
+    borderColor: LOCATION_COLORS.border,
     backgroundColor: "#FFFFFF",
   },
   infoDesc: {
     flex: 1,
     fontSize: 11.5,
-    color: UBIC_COLORS.textMuted,
+    color: LOCATION_COLORS.textMuted,
     lineHeight: 16,
   },
 
-  // ── Etiqueta de sección ("DEPARTAMENTO" / "MUNICIPIO") ─────────────────────
+  // ── Section label ("DEPARTAMENTO" / "MUNICIPIO") ───────────────────────────
   fieldLabelRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -88,20 +88,20 @@ export const locationStyle = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: UBIC_COLORS.accent,
+    backgroundColor: LOCATION_COLORS.accent,
   },
   fieldLabel: {
     fontSize: 12,
     fontWeight: "500",
-    color: UBIC_COLORS.accentDark,
+    color: LOCATION_COLORS.accentDark,
     letterSpacing: 0.3,
   },
 
-  // ── Departamento (fijo, no interactivo) ────────────────────────────────────
+  // ── Department (fixed, not interactive) ────────────────────────────────────
   fixedField: {
-    backgroundColor: UBIC_COLORS.accentLight,
+    backgroundColor: LOCATION_COLORS.accentLight,
     borderWidth: 1.5,
-    borderColor: UBIC_COLORS.border,
+    borderColor: LOCATION_COLORS.border,
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 14,
@@ -113,35 +113,35 @@ export const locationStyle = StyleSheet.create({
   fixedFieldValue: {
     fontSize: 14,
     fontWeight: "500",
-    color: UBIC_COLORS.text,
+    color: LOCATION_COLORS.text,
   },
   fixedBadge: {
     fontSize: 10,
     fontWeight: "600",
-    color: UBIC_COLORS.accent,
-    backgroundColor: UBIC_COLORS.badgeBg,
+    color: LOCATION_COLORS.accent,
+    backgroundColor: LOCATION_COLORS.badgeBg,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 10,
     overflow: "hidden",
   },
 
-  // ── Picker de municipio ─────────────────────────────────────────────────────
+  // ── Municipality picker ──────────────────────────────────────────────────────
   pickerWrap: {
     backgroundColor: "#FFFFFF",
     borderRadius: 12,
     borderWidth: 1.5,
-    borderColor: UBIC_COLORS.accent,
+    borderColor: LOCATION_COLORS.accent,
     overflow: "hidden",
     marginBottom: 6,
   },
   pickerWrapError: {
-    borderColor: UBIC_COLORS.errorColor,
+    borderColor: LOCATION_COLORS.errorColor,
   },
   picker: {
     height: 50,
     width: "100%",
-    color: UBIC_COLORS.text,
+    color: LOCATION_COLORS.text,
   },
 
   errorRow: {
@@ -154,10 +154,10 @@ export const locationStyle = StyleSheet.create({
   errorText: {
     fontSize: 11,
     fontWeight: "500",
-    color: UBIC_COLORS.errorColor,
+    color: LOCATION_COLORS.errorColor,
   },
 
-  // ── Banner de validación ────────────────────────────────────────────────────
+  // ── Validation banner ───────────────────────────────────────────────────────
   validationBanner: {
     flexDirection: "row",
     alignItems: "center",
@@ -166,65 +166,65 @@ export const locationStyle = StyleSheet.create({
     padding: 12,
     marginBottom: 14,
     borderWidth: 1.5,
-    borderColor: UBIC_COLORS.warningBorder,
-    backgroundColor: UBIC_COLORS.warningBg,
+    borderColor: LOCATION_COLORS.warningBorder,
+    backgroundColor: LOCATION_COLORS.warningBg,
   },
   validationBannerText: {
     flex: 1,
     fontSize: 12.5,
     fontWeight: "500",
-    color: UBIC_COLORS.warningText,
+    color: LOCATION_COLORS.warningText,
     lineHeight: 17,
   },
 
   divider: {
     height: 1,
-    backgroundColor: UBIC_COLORS.border,
+    backgroundColor: LOCATION_COLORS.border,
     marginVertical: 16,
   },
 
-  // ── Tarjeta de resumen ("TU SELECCIÓN") ─────────────────────────────────────
-  seleccionCard: {
+  // ── Summary card ("TU SELECCIÓN") ───────────────────────────────────────────
+  selectionCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: UBIC_COLORS.border,
+    borderColor: LOCATION_COLORS.border,
     padding: 12,
     gap: 10,
     marginBottom: 18,
   },
-  seleccionRow: {
+  selectionRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
   },
-  seleccionRowDivider: {
+  selectionRowDivider: {
     height: 1,
-    backgroundColor: UBIC_COLORS.screenBg,
+    backgroundColor: LOCATION_COLORS.screenBg,
   },
-  seleccionLabel: {
+  selectionLabel: {
     fontSize: 12,
-    color: UBIC_COLORS.textMuted,
+    color: LOCATION_COLORS.textMuted,
     flex: 1,
   },
-  seleccionValue: {
+  selectionValue: {
     fontSize: 13,
     fontWeight: "500",
-    color: UBIC_COLORS.text,
+    color: LOCATION_COLORS.text,
   },
 
-  // ── Botón guardar ───────────────────────────────────────────────────────────
-  btnGuardar: {
+  // ── Save button ─────────────────────────────────────────────────────────────
+  saveBtn: {
     flexDirection: "row",
     gap: 8,
     borderRadius: 14,
     paddingVertical: 14,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: UBIC_COLORS.accent,
+    backgroundColor: LOCATION_COLORS.accent,
     marginBottom: 12,
   },
-  btnGuardarText: {
+  saveBtnText: {
     fontSize: 14,
     fontWeight: "500",
     color: "#FFFFFF",
@@ -239,6 +239,6 @@ export const locationStyle = StyleSheet.create({
   },
   bottomBadgeText: {
     fontSize: 11,
-    color: UBIC_COLORS.textMuted,
+    color: LOCATION_COLORS.textMuted,
   },
 });

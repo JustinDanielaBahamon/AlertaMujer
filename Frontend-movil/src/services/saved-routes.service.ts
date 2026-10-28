@@ -1,6 +1,6 @@
 import api from './api';
 
-// Recorridos guardados en el backend (compartidos con la web)
+// Routes saved in the backend (shared with the web)
 export interface SavedRoutePoint {
   latitude: number;
   longitude: number;
@@ -42,7 +42,7 @@ export const savedRoutesService = {
     return response.data;
   },
 
-  // El backend decide la estrella (es estrella mientras haya cupo) y valida el máximo de 4
+  // The backend decides the star (starred while there is room) and validates the maximum of 4
   async create(data: CreateSavedRouteData): Promise<SavedRouteApi> {
     const response = await api.post<SavedRouteApi>('/api/saved-routes', data);
     return response.data;

@@ -3,27 +3,27 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import React, { useRef } from "react";
 import { Animated, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { getTabScreenOptions } from "../components/ui/Tabs/TabsNavegationStyle";
+import { getTabScreenOptions } from "../components/ui/Tabs/TabsNavigationStyle";
 import { useTheme } from "../contexts/ThemeContext";
 import { useLocale } from "../contexts/LocaleContext";
 
-import Asistencia from "../features/Asistencia/view/Asistencia";
-import Contactos from "../features/contactos/view/contactos";
-import Historial from "../features/historial/view/historial";
-import Inicio from "../features/inicio/view/index";
-import Mapa from "../features/mapa/view/MapaView";
+import Assistance from "../features/assistance/view/Assistance";
+import ContactsTab from "../features/contacts/view/contacts";
+import HistoryTab from "../features/history/view/history";
+import Home from "../features/home/view/index";
+import Mapa from "../features/map/view/MapScreen";
 
 const Tab = createBottomTabNavigator();
 
 const TABS = [
-  { name: "Inicio",    icono: "home",    iconoOff: "home-outline"    },
-  { name: "Mapa",      icono: "map",     iconoOff: "map-outline"     },
-  { name: "Asistencia",    icono: "medical", iconoOff: "medical-outline" },
-  { name: "Contactos", icono: "people",  iconoOff: "people-outline"  },
-  { name: "Historial", icono: "time",    iconoOff: "time-outline"    },
+  { name: "Home",    icon: "home",    offIcon: "home-outline"    },
+  { name: "Map",      icon: "map",     offIcon: "map-outline"     },
+  { name: "Assistance",    icon: "medical", offIcon: "medical-outline" },
+  { name: "Contacts", icon: "people",  offIcon: "people-outline"  },
+  { name: "History", icon: "time",    offIcon: "time-outline"    },
 ];
 
-function TabBoton({ routeName, label, isFocused, onPress, color }: {
+function TabButton({ routeName, label, isFocused, onPress, color }: {
   routeName: string;
   label: string;
   isFocused: boolean;
@@ -42,10 +42,10 @@ function TabBoton({ routeName, label, isFocused, onPress, color }: {
   };
 
   return (
-    <TouchableOpacity style={tabStyles.boton} onPress={handlePress} activeOpacity={0.8}>
-      <Animated.View style={[tabStyles.contenido, { transform: [{ scale }] }]}>
+    <TouchableOpacity style={tabStyles.button} onPress={handlePress} activeOpacity={0.8}>
+      <Animated.View style={[tabStyles.content, { transform: [{ scale }] }]}>
         <Ionicons
-          name={(isFocused ? tab.icono : tab.iconoOff) as React.ComponentProps<typeof Ionicons>["name"]}
+          name={(isFocused ? tab.icon : tab.offIcon) as React.ComponentProps<typeof Ionicons>["name"]}
           size={isFocused ? 26 : 22}
           color={color}
         />
@@ -58,13 +58,13 @@ function TabBoton({ routeName, label, isFocused, onPress, color }: {
 }
 
 const tabStyles = StyleSheet.create({
-  boton: {
+  button: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 6,
   },
-  contenido: {
+  content: {
     alignItems: 'center',
     justifyContent: 'center',
     gap: 2,
@@ -79,15 +79,15 @@ const tabStyles = StyleSheet.create({
 export default function TabNavigator() {
   const { theme } = useTheme();
   const { t } = useLocale();
-  const insets = useSafeAreaInsets(); // ← detecta el espacio de los botones Android/iOS automáticamente
+  const insets = useSafeAreaInsets(); // ← detects the space of the Android/iOS buttons automatically
 
-  // Traduce cada nombre de ruta a su texto visible en el idioma activo
-  const etiquetasTabs: Record<string, string> = {
-    Inicio: t.menu.inicio,
-    Mapa: t.menu.mapa,
-    Asistencia: t.menu.asistencia,
-    Contactos: t.menu.contactos,
-    Historial: t.menu.historial,
+  // Translates each route name to its visible text in the active language
+  const tabLabels: Record<string, string> = {
+    Home: t.menu.inicio,
+    Map: t.menu.mapa,
+    Assistance: t.menu.asistencia,
+    Contacts: t.menu.contactos,
+    History: t.menu.historial,
   };
 
   return (
@@ -96,7 +96,7 @@ export default function TabNavigator() {
         <View style={{
           flexDirection: 'row',
           backgroundColor: theme.tabBackground,
-          paddingBottom: insets.bottom > 4 ? insets.bottom : 8, // ← se adapta solo
+          paddingBottom: insets.bottom > 4 ? insets.bottom : 8, // ← adapts on its own
           paddingTop: 6,
           elevation: 10,
           shadowColor: "#7B2CBF",
@@ -108,10 +108,10 @@ export default function TabNavigator() {
             const isFocused = state.index === index;
             const color = isFocused ? theme.tabActiveColor : theme.tabInactiveColor;
             return (
-              <TabBoton
+              <TabButton
                 key={route.key}
                 routeName={route.name}
-                label={etiquetasTabs[route.name] ?? route.name}
+                label={tabLabels[route.name] ?? route.name}
                 isFocused={isFocused}
                 color={color}
                 onPress={() => navigation.navigate(route.name)}
@@ -122,11 +122,11 @@ export default function TabNavigator() {
       )}
       screenOptions={getTabScreenOptions(theme)}
     >
-      <Tab.Screen name="Inicio"    component={Inicio} />
-      <Tab.Screen name="Mapa"      component={Mapa} />
-      <Tab.Screen name="Asistencia"    component={Asistencia} />
-      <Tab.Screen name="Contactos" component={Contactos} />
-      <Tab.Screen name="Historial" component={Historial} />
+      <Tab.Screen name="Home"    component={Home} />
+      <Tab.Screen name="Map"      component={Mapa} />
+      <Tab.Screen name="Assistance"    component={Assistance} />
+      <Tab.Screen name="Contacts" component={ContactsTab} />
+      <Tab.Screen name="History" component={HistoryTab} />
     </Tab.Navigator>
   );
 }

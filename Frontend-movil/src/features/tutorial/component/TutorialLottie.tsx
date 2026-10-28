@@ -1,6 +1,7 @@
 import LottieView from "lottie-react-native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { StyleProp, ViewStyle } from "react-native";
+import { useAnimationsAllowed } from "./animationSupport";
 import { useTutorialPage } from "./TutorialPager";
 
 interface Props {
@@ -9,43 +10,27 @@ interface Props {
   resizeMode?: "cover" | "contain" | "center";
 }
 
+// Frame shown when the phone does not play animations: the middle of the animation is the most complete
+const STILL_PROGRESS = 0.5;
+
 /**
- * Reemplaza a <LottieView autoPlay loop /> en el tutorial.
- * El progreso de la animación lo mueve el propio JS (no el reloj de animaciones del sistema),
- * así se ve igual en celulares con animaciones desactivadas o con ahorro de batería.
- * Solo se anima la pantalla que se está viendo.
+ * Tutorial animation. It plays natively (on the animation thread, without re-rendering React) and only
+ * on the visible page; on phones that cannot afford it, or with "reduce motion" on, a still frame is
+ * shown. Nothing of this runs outside the tutorial: the component only exists inside it.
  */
 export default function TutorialLottie({ source, style, resizeMode = "contain" }: Props) {
   const { isActive } = useTutorialPage();
-  const [progress, setProgress] = useState(0);
-  const transcurrido = useRef(0);
-
-  // Duración real de la animación (frames / fps)
-  const duracion = Math.max(500, ((source.op - source.ip) / source.fr) * 1000);
+  const animate = useAnimationsAllowed();
+  const ref = useRef<LottieView>(null);
 
   useEffect(() => {
-    if (!isActive) return;
+    if (!animate) return;
+    if (isActive) ref.current?.play();
+    else ref.current?.pause();
+  }, [isActive, animate]);
 
-    let frame = 0;
-    let ultimo = Date.now();
-    let ultimoRender = 0;
-
-    const tick = () => {
-      const ahora = Date.now();
-      transcurrido.current = (transcurrido.current + (ahora - ultimo)) % duracion;
-      ultimo = ahora;
-
-      // ~30 actualizaciones por segundo es suficiente y cuida la batería
-      if (ahora - ultimoRender >= 33) {
-        ultimoRender = ahora;
-        setProgress(transcurrido.current / duracion);
-      }
-      frame = requestAnimationFrame(tick);
-    };
-
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [isActive, duracion]);
-
-  return <LottieView source={source} progress={progress} resizeMode={resizeMode} style={style} />;
+  if (!animate) {
+    return <LottieView source={source} progress={STILL_PROGRESS} resizeMode={resizeMode} style={style} />;
+  }
+  return <LottieView ref={ref} source={source} autoPlay={isActive} loop resizeMode={resizeMode} style={style} />;
 }
