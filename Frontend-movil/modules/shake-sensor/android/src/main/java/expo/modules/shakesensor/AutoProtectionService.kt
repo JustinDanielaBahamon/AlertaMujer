@@ -38,9 +38,9 @@ import java.util.TimeZone
  * (GeofenceReceiver) and sends a signal of life with her position every 2 minutes. The server alerts her
  * contacts if those signals stop (phone off, taken away, no battery).
  *
- * When she stays still for 20 min somewhere:
- *  - in a normal place she is asked, silently, "¿Llegaste bien?" (at 20 and 35 min). "Sí, llegué bien" ends
- *    the protection; without an answer, at 45 min her contacts are told with her last location;
+ * When she stays still for 15 min somewhere:
+ *  - in a normal place she is asked, silently, "¿Llegaste bien?" (at 15 and 25 min). "Sí, llegué bien" ends
+ *    the protection; without an answer, at 35 min her contacts are told with her last location;
  *  - inside a risk zone she is asked "¿Todo bien?" and, without an answer in 5 minutes, her contacts are alerted.
  * Moving again restarts the count. It also ends when she arrives at another frequent place, after 4 hours
  * (server) or when she taps "Detener".
@@ -194,8 +194,8 @@ class AutoProtectionService : Service() {
   }
 
   /**
-   * Still in a normal place: "¿Llegaste bien?" at 20 and 35 min (silent, so it does not give her away)
-   * and, without an answer, her contacts are told at 45 min.
+   * Still in a normal place: "¿Llegaste bien?" at 15 and 25 min (silent, so it does not give her away)
+   * and, without an answer, her contacts are told at 35 min.
    */
   private fun askIfArrived(now: Long) {
     when {
@@ -549,11 +549,11 @@ class AutoProtectionService : Service() {
     private const val MAX_ACCURACY_M = 80f
     /** Moving less than this counts as standing in the same place. */
     private const val MOVED_M = 120f
-    private const val STILL_MS = 20 * 60_000L
+    private const val STILL_MS = 15 * 60_000L
     private const val ANSWER_MS = 5 * 60_000L
     private const val ZONE_NOTICE_MS = 30 * 60_000L
-    /** "¿Llegaste bien?": first at STILL_MS (20 min), again 15 min later, contacts told 10 min after that. */
-    private const val SECOND_ASK_MS = 15 * 60_000L
+    /** "¿Llegaste bien?": first at STILL_MS (15 min), again 10 min later, contacts told 10 min after that. */
+    private const val SECOND_ASK_MS = 10 * 60_000L
     private const val NOTIFY_AFTER_MS = 10 * 60_000L
     private const val LOW_BATTERY_PERCENT = 10
     // The server ends it after 4 h; the wake lock never outlives that by much
