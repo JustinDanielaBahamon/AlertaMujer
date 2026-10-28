@@ -1,0 +1,528 @@
+package expo.modules.shakesensor
+
+import android.annotation.SuppressLint
+import android.app.ActivityManager
+import android.app.NotificationManager
+import android.content.BroadcastReceiver
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.media.AudioManager
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import android.net.Uri
+import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.os.PowerManager
+import android.provider.Settings
+import expo.modules.kotlin.Promise
+import expo.modules.kotlin.modules.Module
+import expo.modules.kotlin.modules.ModuleDefinition
+
+/**
+ * Accelerometer for "shake the phone" that keeps reading with the app minimized or the screen off.
+ * expo-sensors stops reading as soon as the app goes to the background, even while the "Active
+ * protection" service is running; this module does not depend on the app screen and keeps the CPU
+ * awake (partial wake lock) while protection is on.
+ */
+class ShakeSensorModule : Module() {
+  private val mainHandler = Handler(Looper.getMainLooper())
+  private var listener: SensorEventListener? = null
+  private var wakeLock: PowerManager.WakeLock? = null
+  private var screenReceiver: BroadcastReceiver? = null
+  private var volumeWatcher: VolumeCancelWatcher? = null
+  private var alarmWatcher: VolumeCancelWatcher? = null
+
+  private val androidContext: Context
+    get() = requireNotNull(appContext.reactContext) { "No Android context" }
+
+  private val sensors: SensorManager
+    get() = androidContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+
+  override fun definition() = ModuleDefinition {
+    Name("ShakeSensor")
+    Events(
+      "onShake", "onAudioChunk", "onRecordingError", "onScreenChange", "onTripAuthExpired", "onTripEnded",
+      "onVolumeCancel", "onAlarmSilence",
+    )
+
+    OnCreate {
+      AudioRecorderService.chunkListener = { file, durationMs ->
+        sendEvent("onAudioChunk", mapOf("uri" to Uri.fromFile(file).toString(), "durationMs" to durationMs.toDouble()))
+      }
+      AudioRecorderService.errorListener = { message -> sendEvent("onRecordingError", mapOf("message" to message)) }
+      TripService.authExpiredListener = { sendEvent("onTripAuthExpired", emptyMap<String, Any>()) }
+      TripService.tripEndedListener = { status -> sendEvent("onTripEnded", mapOf("status" to status)) }
+    }
+
+    Function("available") {
+      sensors.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null
+    }
+
+    // Readings in g (like expo-sensors) for the JS detector
+    Function("start") { intervalMs: Int ->
+      startSensor(intervalMs)
+    }
+
+    Function("stop") {
+      stopSensor()
+    }
+
+    // Power button: the app does not receive the key, but it does get every screen on/off change
+    // (also with the phone locked). Each press is a screen change.
+    Function("startPowerButton") {
+      startPowerButton()
+    }
+
+    Function("stopPowerButton") {
+      stopPowerButton()
+    }
+
+    // Wait with an Android timer: JS timers may not advance with the screen off
+    AsyncFunction("wait") { ms: Int, promise: Promise ->
+      mainHandler.postDelayed({ promise.resolve(null) }, ms.toLong())
+    }
+
+    Function("ignoresBatteryOptimization") {
+      val power = androidContext.getSystemService(Context.POWER_SERVICE) as PowerManager
+      power.isIgnoringBatteryOptimizations(androidContext.packageName)
+    }
+
+    // Opens the system dialog "Let the app always run in the background?". If the app already has
+    // the permission the dialog does not show (the button seemed to do nothing): the app's page in
+    // Settings opens instead, where Samsung and other brands have "Battery → Unrestricted".
+    Function("requestIgnoreBatteryOptimization") {
+      val power = androidContext.getSystemService(Context.POWER_SERVICE) as PowerManager
+      @SuppressLint("BatteryLife")
+      val dialog = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+        .setData(Uri.parse("package:" + androidContext.packageName))
+      val opened = !power.isIgnoringBatteryOptimizations(androidContext.packageName) && openIntent(dialog)
+      if (!opened) openAppDetails()
+      opened
+    }
+
+    // ── Protection health ("Permissions and protection" screen) ─────────────────────────────
+
+    Function("manufacturer") {
+      Build.MANUFACTURER ?: ""
+    }
+
+    // Why the app was closed since sinceMs (Android 11+): Android records it even if the user does
+    // not notice. Importance 125 = protection (foreground service) was running.
+    Function("exitReasons") { sinceMs: Double ->
+      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return@Function emptyList<Map<String, Any>>()
+      val activity = androidContext.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+      activity.getHistoricalProcessExitReasons(androidContext.packageName, 0, 20)
+        .filter { it.timestamp > sinceMs.toLong() }
+        .map {
+          mapOf(
+            "timestamp" to it.timestamp.toDouble(),
+            "reason" to it.reason,
+            "importance" to it.importance,
+            "description" to (it.description ?: ""),
+          )
+        }
+    }
+
+    // Android 14: a contact's emergency alarm needs the full-screen permission
+    Function("canUseFullScreen") {
+      if (Build.VERSION.SDK_INT < 34) return@Function true
+      val notifications = androidContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+      notifications.canUseFullScreenIntent()
+    }
+
+    Function("requestFullScreen") {
+      if (Build.VERSION.SDK_INT >= 34) {
+        openIntent(Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT, Uri.parse("package:" + androidContext.packageName)))
+      }
+    }
+
+    // "Mostrar sobre otras apps": the only way Android lets an app come to the front by itself while
+    // the phone is in use (alarm and emergency apps use it). Without it the alert arrives as a notification.
+    Function("canShowOverApps") { Settings.canDrawOverlays(androidContext) }
+
+    Function("requestShowOverApps") {
+      openIntent(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + androidContext.packageName)))
+    }
+
+    // A contact's alert arrived: the app comes to the front (if allowed) and opens its screen
+    Function("bringToFront") {
+      if (!Settings.canDrawOverlays(androidContext)) return@Function false
+      val launch = androidContext.packageManager.getLaunchIntentForPackage(androidContext.packageName)
+        ?: return@Function false
+      openIntent(launch.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP))
+    }
+
+    // Screen on and unlocked: she is using the phone. Only then the alert screen may come to the front
+    // (to record video); with the phone locked or in a pocket it stays discreet and records audio.
+    Function("isPhoneInUse") {
+      val power = androidContext.getSystemService(Context.POWER_SERVICE) as PowerManager
+      val keyguard = androidContext.getSystemService(Context.KEYGUARD_SERVICE) as android.app.KeyguardManager
+      power.isInteractive && !keyguard.isKeyguardLocked
+    }
+
+    // "Auto start" is not an Android setting but each brand's: its screen opens if it exists
+    Function("hasAutoStartSetting") {
+      autoStartScreen() != null
+    }
+
+    // true if the brand's auto-start screen opened; false if the app's page in Settings opened
+    // instead. Each screen is tried: some exist but cannot be opened from another app (that is why
+    // the button did nothing on Samsung).
+    Function("openAutoStart") {
+      val opened = AUTO_START_SCREENS
+        .map { Intent().setComponent(ComponentName(it.first, it.second)) }
+        .any { intent -> canOpen(intent) && openIntent(intent) }
+      if (!opened) openAppDetails()
+      opened
+    }
+
+    // ── Evidence recording during an alert ──────────────────────────────────────────────────
+
+    // Starts the microphone service. record=false leaves it ready without using the microphone, while
+    // the camera records video with audio. The first chunk lasts firstSeconds (shorter, so something
+    // reaches the contacts within seconds). background=true: alert by shaking without the app on
+    // screen; it runs under the protection service, which holds the microphone permission.
+    // firstSeconds and background are optional: without them every chunk lasts secondsPerChunk, in the foreground
+    Function("startAudioRecording") { secondsPerChunk: Int, record: Boolean, firstSeconds: Int?, background: Boolean? ->
+      val first = firstSeconds ?: secondsPerChunk
+      val inBackground = background ?: false
+      val permission = androidContext.checkSelfPermission(android.Manifest.permission.RECORD_AUDIO)
+      if (permission != android.content.pm.PackageManager.PERMISSION_GRANTED) return@Function false
+      val intent = Intent(androidContext, AudioRecorderService::class.java)
+        .setAction(AudioRecorderService.ACTION_START)
+        .putExtra(AudioRecorderService.EXTRA_SECONDS, secondsPerChunk)
+        .putExtra(AudioRecorderService.EXTRA_FIRST_SECONDS, first)
+        .putExtra(AudioRecorderService.EXTRA_RECORD, record)
+        .putExtra(AudioRecorderService.EXTRA_BACKGROUND, inBackground)
+      try {
+        if (inBackground) androidContext.startService(intent) else androidContext.startForegroundService(intent)
+        true
+      } catch (e: Exception) {
+        false
+      }
+    }
+
+    // ── Evidence copy inside the app ───────────────────────────────────────────────────────
+
+    // Moves an uploaded chunk into files/evidencias/<alert>; the new uri, or null
+    Function("keepEvidence") { uri: String, alertId: Int ->
+      EvidenceFiles.keep(androidContext, uri, alertId)?.let { Uri.fromFile(it).toString() }
+    }
+
+    Function("localEvidence") { alertId: Int ->
+      EvidenceFiles.list(androidContext, alertId).map {
+        mapOf(
+          "uri" to Uri.fromFile(it).toString(),
+          "name" to it.name,
+          "sizeBytes" to it.length().toDouble(),
+          "modifiedMs" to it.lastModified().toDouble(),
+        )
+      }
+    }
+
+    Function("deleteLocalEvidence") { alertId: Int -> EvidenceFiles.deleteAlert(androidContext, alertId) }
+
+    Function("deleteAllLocalEvidence") { EvidenceFiles.deleteAll(androidContext) }
+
+    // Copies it to Descargas/AlertaMujer; the visible path, or null
+    Function("exportEvidence") { uri: String -> EvidenceFiles.export(androidContext, uri) }
+
+    Function("shareEvidence") { uri: String -> EvidenceFiles.share(androidContext, uri) }
+
+    // ── Quick cancel and discreet mode ─────────────────────────────────────────────────────
+
+    // While the countdown runs: 4 x "volume down" within 2 s emits onVolumeCancel
+    Function("startVolumeCancel") {
+      mainHandler.post {
+        volumeWatcher = volumeWatcher ?: VolumeCancelWatcher(androidContext) {
+          sendEvent("onVolumeCancel", emptyMap<String, Any>())
+        }
+        volumeWatcher?.start(appContext.currentActivity)
+      }
+      Unit
+    }
+
+    Function("stopVolumeCancel") {
+      mainHandler.post { volumeWatcher?.stop() }
+      Unit
+    }
+
+    // While a contact's alert alarm rings: one press of either volume key emits onAlarmSilence
+    Function("startAlarmSilencer") {
+      mainHandler.post {
+        alarmWatcher = alarmWatcher ?: VolumeCancelWatcher(androidContext, pressesNeeded = 1, anyKey = true) {
+          sendEvent("onAlarmSilence", emptyMap<String, Any>())
+        }
+        alarmWatcher?.start(appContext.currentActivity)
+      }
+      Unit
+    }
+
+    Function("stopAlarmSilencer") {
+      mainHandler.post { alarmWatcher?.stop() }
+      Unit
+    }
+
+    Function("setDiscreet") { on: Boolean -> DiscreetMode.set(androidContext, on) }
+
+    Function("pauseAudioRecording") { sendToRecorder(AudioRecorderService.ACTION_PAUSE) }
+    Function("resumeAudioRecording") { sendToRecorder(AudioRecorderService.ACTION_RESUME) }
+    Function("stopAudioRecording") { sendToRecorder(AudioRecorderService.ACTION_STOP) }
+
+    Function("isAudioRecording") { AudioRecorderService.active }
+
+    // Audio chunks that were not uploaded (e.g. the app was closed in the middle of the alert)
+    Function("pendingAudios") {
+      val inProgress = AudioRecorderService.currentPath
+      AudioRecorderService.audioFolder(androidContext).listFiles().orEmpty()
+        .filter { it.isFile && it.length() > 0 && it.absolutePath != inProgress }
+        .sortedBy { it.lastModified() }
+        .map { Uri.fromFile(it).toString() }
+    }
+
+    // Deletes an already uploaded evidence file (only inside the app cache)
+    Function("deleteFile") { uri: String ->
+      val path = Uri.parse(uri).path ?: return@Function false
+      val file = java.io.File(path).canonicalFile
+      if (!file.path.startsWith(androidContext.cacheDir.canonicalPath)) return@Function false
+      file.delete()
+    }
+
+    // ── "Avísame si no llego" ───────────────────────────────────────────────────────────────
+
+    // Starts (or updates) the trip service; it must be called with the app open. false if the
+    // location permission is missing.
+    Function("startTrip") { options: Map<String, Any?> ->
+      val context = androidContext
+      val fine = context.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION)
+      val coarse = context.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION)
+      if (fine != android.content.pm.PackageManager.PERMISSION_GRANTED &&
+        coarse != android.content.pm.PackageManager.PERMISSION_GRANTED
+      ) return@Function false
+      val intent = Intent(context, TripService::class.java)
+        .setAction(TripService.ACTION_START)
+        .putExtra(TripService.EXTRA_TRIP_ID, (options["tripId"] as? Number)?.toLong() ?: 0L)
+        .putExtra(TripService.EXTRA_BASE_URL, options["baseUrl"] as? String ?: "")
+        .putExtra(TripService.EXTRA_TOKEN, options["token"] as? String ?: "")
+        .putExtra(TripService.EXTRA_DESTINATION, options["destination"] as? String ?: "")
+        .putExtra(TripService.EXTRA_DEST_LATITUDE, (options["destLatitude"] as? Number)?.toDouble() ?: Double.NaN)
+        .putExtra(TripService.EXTRA_DEST_LONGITUDE, (options["destLongitude"] as? Number)?.toDouble() ?: Double.NaN)
+        .putExtra(TripService.EXTRA_ARRIVAL_MS, (options["arrivalMs"] as? Number)?.toLong() ?: 0L)
+        .putExtra(TripService.EXTRA_RISK_ZONES, options["riskZones"] as? String ?: "[]")
+      try {
+        context.startForegroundService(intent)
+        true
+      } catch (e: Exception) {
+        false
+      }
+    }
+
+    Function("updateTripToken") { token: String ->
+      if (TripService.status.running) {
+        androidContext.startService(
+          Intent(androidContext, TripService::class.java).setAction(TripService.ACTION_TOKEN).putExtra(TripService.EXTRA_TOKEN, token),
+        )
+      }
+      Unit
+    }
+
+    Function("stopTrip") {
+      if (TripService.status.running) {
+        androidContext.startService(Intent(androidContext, TripService::class.java).setAction(TripService.ACTION_STOP))
+      }
+      Unit
+    }
+
+    Function("tripStatus") {
+      val s = TripService.status
+      mapOf(
+        "running" to s.running,
+        "tripId" to s.tripId.toDouble(),
+        "lastSentAt" to s.lastSentAt.toDouble(),
+        "lastFixAt" to s.lastFixAt.toDouble(),
+        "queued" to s.queued,
+        "error" to s.error,
+      )
+    }
+
+    // ── Automatic protection ────────────────────────────────────────────────────────────
+
+    // places / riskZones: JSON arrays. key = null keeps the one already stored (refreshing the places).
+    // false if the background location ("Permitir todo el tiempo") is missing.
+    Function("configureAutoProtection") { options: Map<String, Any?> ->
+      AutoProtection.configure(
+        androidContext,
+        options["baseUrl"] as? String ?: "",
+        options["key"] as? String,
+        options["places"] as? String ?: "[]",
+        options["riskZones"] as? String ?: "[]",
+      )
+    }
+
+    Function("disableAutoProtection") { AutoProtection.disable(androidContext) }
+
+    // After "Detener" she typed her PIN in the app: the normal one stops it, the duress one alerts silently
+    Function("stopAutoProtection") { autoProtectionCommand(AutoProtectionService.ACTION_STOP) }
+    Function("duressAutoProtection") { autoProtectionCommand(AutoProtectionService.ACTION_DURESS) }
+
+    // With a cancel PIN, "Detener" opens the app to ask for it
+    Function("setAutoProtectionPin") { required: Boolean ->
+      AutoProtection.setPinRequired(androidContext, required)
+      autoProtectionCommand(AutoProtectionService.ACTION_REFRESH)
+    }
+
+    Function("autoProtectionStatus") {
+      mapOf(
+        "enabled" to AutoProtection.isEnabled(androidContext),
+        "permissions" to AutoProtection.hasPermissions(androidContext),
+        "running" to AutoProtectionService.status.running,
+      )
+    }
+
+    OnDestroy {
+      volumeWatcher?.stop()
+      alarmWatcher?.stop()
+      stopSensor()
+      stopPowerButton()
+      AudioRecorderService.chunkListener = null
+      AudioRecorderService.errorListener = null
+      TripService.authExpiredListener = null
+      TripService.tripEndedListener = null
+    }
+  }
+
+  private fun startPowerButton() {
+    stopPowerButton()
+    val audio = androidContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+    val receiver = object : BroadcastReceiver() {
+      override fun onReceive(ctx: Context, intent: Intent) {
+        // During a call the proximity sensor turns the screen on and off when the phone gets close
+        // to the face: those are not presses
+        val inCall = audio.mode == AudioManager.MODE_IN_CALL || audio.mode == AudioManager.MODE_IN_COMMUNICATION
+        if (inCall) return
+        sendEvent("onScreenChange", mapOf("screenOn" to (intent.action == Intent.ACTION_SCREEN_ON)))
+      }
+    }
+    val filter = IntentFilter().apply {
+      addAction(Intent.ACTION_SCREEN_ON)
+      addAction(Intent.ACTION_SCREEN_OFF)
+    }
+    // These are system broadcasts: they arrive even if the receiver is not exported
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+      androidContext.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
+    } else {
+      androidContext.registerReceiver(receiver, filter)
+    }
+    screenReceiver = receiver
+  }
+
+  private fun stopPowerButton() {
+    screenReceiver?.let {
+      try {
+        androidContext.unregisterReceiver(it)
+      } catch (e: IllegalArgumentException) {
+        // already removed
+      }
+    }
+    screenReceiver = null
+  }
+
+  private fun sendToRecorder(action: String) {
+    if (!AudioRecorderService.active) return
+    androidContext.startService(Intent(androidContext, AudioRecorderService::class.java).setAction(action))
+  }
+
+  /** Only reaches a protection that is running (the app is in front when it calls this). */
+  private fun autoProtectionCommand(action: String) {
+    if (!AutoProtectionService.status.running) return
+    androidContext.startService(Intent(androidContext, AutoProtectionService::class.java).setAction(action))
+  }
+
+  // false if Android did not let it open (it does not exist, is not exported or the brand blocks it)
+  private fun openIntent(intent: Intent): Boolean =
+    try {
+      androidContext.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+      true
+    } catch (e: Exception) {
+      false
+    }
+
+  private fun openAppDetails(): Boolean =
+    openIntent(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + androidContext.packageName)))
+
+  private fun autoStartScreen(): ComponentName? =
+    AUTO_START_SCREENS
+      .map { ComponentName(it.first, it.second) }
+      .firstOrNull { canOpen(Intent().setComponent(it)) }
+
+  private fun canOpen(intent: Intent): Boolean {
+    val activity = androidContext.packageManager.resolveActivity(intent, 0)?.activityInfo ?: return false
+    return activity.exported
+  }
+
+  private fun startSensor(intervalMs: Int): Boolean {
+    stopSensor()
+    val accelerometer = sensors.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) ?: return false
+    val detector = ShakeDetector.forRange(accelerometer.maximumRange / SensorManager.GRAVITY_EARTH)
+    val newListener = object : SensorEventListener {
+      override fun onSensorChanged(event: SensorEvent) {
+        val g = SensorManager.GRAVITY_EARTH
+        val detected = detector.add(
+          (event.values[0] / g).toDouble(),
+          (event.values[1] / g).toDouble(),
+          (event.values[2] / g).toDouble(),
+          event.timestamp / 1_000_000,
+        )
+        // Only a detection crosses to JavaScript, never the readings
+        if (detected) sendEvent("onShake", emptyMap<String, Any>())
+      }
+
+      override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) = Unit
+    }
+    sensors.registerListener(newListener, accelerometer, intervalMs * 1000, mainHandler)
+    listener = newListener
+
+    val power = androidContext.getSystemService(Context.POWER_SERVICE) as PowerManager
+    wakeLock = power.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "AlertaMujer:proteccion").apply {
+      setReferenceCounted(false)
+      acquire()
+    }
+    return true
+  }
+
+  private fun stopSensor() {
+    listener?.let { sensors.unregisterListener(it) }
+    listener = null
+    wakeLock?.takeIf { it.isHeld }?.release()
+    wakeLock = null
+  }
+
+  companion object {
+    // Each brand's "auto start" / "protected apps" screens (the brands that kill apps)
+    private val AUTO_START_SCREENS = listOf(
+      // Infinix, Tecno, itel (Transsion: Phone Master)
+      "com.transsion.phonemaster" to "com.cyin.himgr.autostart.AutoStartActivity",
+      // Xiaomi, Redmi, POCO
+      "com.miui.securitycenter" to "com.miui.permcenter.autostart.AutoStartManagementActivity",
+      // Oppo, Realme, OnePlus (ColorOS)
+      "com.coloros.safecenter" to "com.coloros.safecenter.permission.startup.StartupAppListActivity",
+      "com.coloros.safecenter" to "com.coloros.safecenter.startupapp.StartupAppListActivity",
+      "com.oppo.safe" to "com.oppo.safe.permission.startup.StartupAppListActivity",
+      // Vivo, iQOO
+      "com.vivo.permissionmanager" to "com.vivo.permissionmanager.activity.BgStartUpManagerActivity",
+      "com.iqoo.secure" to "com.iqoo.secure.ui.phoneoptimize.AddWhiteListActivity",
+      // Huawei, Honor
+      "com.huawei.systemmanager" to "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity",
+      "com.huawei.systemmanager" to "com.huawei.systemmanager.optimize.process.ProtectActivity",
+      // Samsung has no auto-start screen that can be opened: the app's page is used instead
+      // (Battery → Unrestricted)
+      // Asus
+      "com.asus.mobilemanager" to "com.asus.mobilemanager.MainActivity",
+    )
+  }
+}

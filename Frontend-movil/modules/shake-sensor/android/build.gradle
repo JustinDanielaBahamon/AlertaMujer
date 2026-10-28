@@ -1,0 +1,22 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'com.alertamujer'
+version = '1.0.0'
+
+dependencies {
+  // FileProvider: share the evidence copy without exposing the app's files
+  implementation "androidx.core:core-ktx:1.13.1"
+  // Geofences of the automatic protection (the same version expo-location brings)
+  implementation "com.google.android.gms:play-services-location:21.0.1"
+}
+
+android {
+  namespace "expo.modules.shakesensor"
+  defaultConfig {
+    versionCode 1
+    versionName '1.0.0'
+  }
+}

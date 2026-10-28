@@ -1,0 +1,306 @@
+import { StyleSheet } from "react-native";
+import { AppTheme } from "../../../contexts/ThemeContext";
+
+// Receives the active theme and returns the styles with the right colors
+export const createStyles = (theme: AppTheme) =>
+  StyleSheet.create({
+
+    // --- MAIN CONTAINERS ---
+
+    mainContainer: {
+      flex: 1,
+      backgroundColor: theme.background,
+    },
+
+    header: {
+      marginBottom: 0,
+    },
+
+    gradient: {
+      paddingTop: 0.1,
+      paddingHorizontal: 25,
+      paddingBottom: 25,
+      borderBottomLeftRadius: 45,
+      borderBottomRightRadius: 45,
+    },
+
+    headerContent: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+
+    headerTitle: {
+      fontSize: 22,
+      fontWeight: "bold",
+      color: "#FFFFFF",
+      width: 220,
+    },
+
+    headerSubtitle: {
+      fontSize: 14,
+      color: "rgba(255, 255, 255, 0.8)",
+      marginTop: 8,
+      lineHeight: 20,
+      width: 220,
+    },
+
+    // --- COUNT ROW (Your contacts) ---
+
+    countRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 10,
+      marginLeft: 20,
+      marginTop: 10,
+    },
+
+    countIcon: {
+      backgroundColor: theme.contactCounterBg,
+      borderRadius: 12,
+      padding: 8,
+      marginRight: 10,
+    },
+
+    countText: {
+      fontSize: 17,
+      fontWeight: "800",
+    },
+
+    // --- SEARCH ---
+
+    searchContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: theme.contactSearchBg,
+      borderRadius: 12,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      marginHorizontal: 15,
+      marginTop: 0,
+      marginBottom: 7,
+      gap: 8,
+    },
+
+    searchInput: {
+      flex: 1,
+      fontSize: 14,
+      color: theme.contactSearchText,
+      padding: 0, // resets the default padding on Android
+    },
+
+    // --- CONTACT CARD ---
+
+    cardWrapper: {
+      marginBottom: 16,
+      marginLeft: 8,
+      marginRight: 8,
+    },
+
+    contactCard: {
+      backgroundColor: theme.contactCardBg,
+      borderRadius: 25,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: theme.contactCardBorder,
+      // Shadows
+      elevation: 4,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.08,
+      shadowRadius: 10,
+      marginBottom: 20,
+    },
+
+    // TOP SECTION: Photo, Info and Edit
+
+    topSection: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+      marginBottom: 15,
+    },
+
+    photoContainer: {
+      position: "relative",
+    },
+
+    profilePhoto: {
+      width: 80,
+      height: 80,
+      borderRadius: 40,
+      borderWidth: 2,
+      borderColor: theme.contactAvatarBorder,
+    },
+
+    statusDot: {
+      position: "absolute",
+      bottom: 5,
+      right: 2,
+      width: 18,
+      height: 18,
+      borderRadius: 9,
+      backgroundColor: "#BDBDBD", // Replaced by the contact's real status
+      borderWidth: 3,
+      borderColor: theme.contactCardBg,
+    },
+
+    contactInfo: {
+      flex: 1,
+      paddingLeft: 15,
+    },
+
+    contactName: {
+      fontSize: 19,
+      fontWeight: "bold",
+      color: theme.contactName,
+    },
+
+    relationBadge: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: 12,
+      borderWidth: 1,
+      marginVertical: 5,
+      alignSelf: "flex-start",
+    },
+
+    badgeText: {
+      fontSize: 12,
+      fontWeight: "bold",
+      marginLeft: 4,
+    },
+
+    phoneRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginTop: 2,
+    },
+
+    phoneText: {
+      fontSize: 14,
+    },
+
+    topIcons: {
+      flexDirection: "row",
+    },
+
+    smallIconButton: {
+      padding: 8,
+      borderRadius: 10,
+      marginLeft: 8,
+    },
+
+    // ACTIONS SECTION: Call, WhatsApp, Location
+
+    actionsSection: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      borderTopWidth: 1,
+      paddingTop: 15,
+      paddingHorizontal: 10,
+    },
+
+    actionItem: {
+      alignItems: "center",
+      flex: 1,
+    },
+
+    actionCircle: {
+      width: 46,
+      height: 46,
+      borderRadius: 23,
+      justifyContent: "center",
+      alignItems: "center",
+      marginBottom: 5,
+    },
+
+    actionText: {
+      fontSize: 11,
+      color: theme.contactSubtext,
+      fontWeight: "500",
+    },
+
+    // --- FOOTER: WANT TO ADD MORE? ---
+
+    suggestionCard: {
+      borderRadius: 20,
+      padding: 20,
+      flexDirection: "row",
+      alignItems: "center",
+      borderStyle: "dashed", // Dotted border
+      borderWidth: 1.5,
+      marginTop: 10,
+      marginBottom: 100, // Room so the floating button does not cover anything
+      margin: 10,
+    },
+
+    dashedCircle: {
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+      borderWidth: 1.5,
+      borderStyle: "dashed",
+      justifyContent: "center",
+      alignItems: "center",
+      marginRight: 15,
+    },
+
+    addSmallButton: {
+      paddingHorizontal: 15,
+      paddingVertical: 10,
+      borderRadius: 12,
+      elevation: 2,
+    },
+
+    // --- FLOATING BUTTON AND SWIPE ---
+
+    floatingButton: {
+      position: "absolute",
+      bottom: 30,
+      right: 13,
+      height: 52,
+      paddingHorizontal: 18,
+      borderRadius: 26,
+      flexDirection: "row",
+      gap: 8,
+      justifyContent: "center",
+      alignItems: "center",
+      elevation: 8,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.4,
+      shadowRadius: 8,
+    },
+
+    floatingButtonText: { color: "white", fontSize: 15, fontWeight: "700" },
+
+    swipeBack: {
+      alignItems: "center",
+      backgroundColor: "#FF5252",
+      flex: 1,
+      flexDirection: "row",
+      justifyContent: "flex-end",
+      paddingRight: 20,
+      borderRadius: 25,
+      marginBottom: 40,
+      marginLeft: 8,
+      marginRight: 8,
+    },
+
+    deleteSwipeButton: {
+      alignItems: "center",
+      justifyContent: "center",
+      width: 80,
+      height: "100%",
+    },
+
+    deleteSwipeText: {
+      color: "#FFF",
+      fontSize: 12,
+      fontWeight: "bold",
+      marginTop: 4,
+    },
+  });

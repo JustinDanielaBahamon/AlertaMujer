@@ -1,0 +1,225 @@
+import TutorialLottie from "../component/TutorialLottie";
+import React, { useEffect, useRef } from "react";
+import { Animated, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Picker } from "@react-native-picker/picker";
+import { MaterialIcons } from "@expo/vector-icons";
+import Card from "../../../components/ui/card/card";
+import ConfirmationModal from "@/components/ui/confirmationModal/confirmation";
+import { useLocationTutorialViewModel, PLACEHOLDER_MUNICIPALITY } from "../viewModel/useLocationTutorialViewModel";
+import { locationStyle, LOCATION_COLORS } from "../styles/locationStyle";
+import { useLocale } from "../../../contexts/LocaleContext";
+
+interface LocationScreenProps {
+  externalVm?: ReturnType<typeof useLocationTutorialViewModel>;
+}
+
+export default function LocationScreen({ externalVm }: LocationScreenProps) {
+  const { t } = useLocale();
+  const internalVM = useLocationTutorialViewModel();
+  const vm = externalVm ?? internalVM;
+
+  // ── Card entrance animation ───────────────────────────────────────────────
+  const cardAnim = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.spring(cardAnim, {
+      toValue: 1,
+      delay: 200,
+      tension: 60,
+      friction: 8,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+  const cardAnimStyle = {
+    opacity: cardAnim,
+    transform: [{
+      translateY: cardAnim.interpolate({ inputRange: [0, 1], outputRange: [40, 0] }),
+    }],
+  };
+
+  // ── Shake animation on error ──────────────────────────────────────────────
+  const shakeAnim = useRef(new Animated.Value(0)).current;
+  const triggerShake = () => {
+    shakeAnim.setValue(0);
+    Animated.sequence([
+      Animated.timing(shakeAnim, { toValue: 8, duration: 60, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: -8, duration: 60, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: 6, duration: 60, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: -6, duration: 60, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: 0, duration: 60, useNativeDriver: true }),
+    ]).start();
+  };
+
+  useEffect(() => {
+    if (vm.showValidationBanner) triggerShake();
+  }, [vm.showValidationBanner]);
+
+  const municipalityNotSelected =
+    !vm.municipality || vm.municipality === PLACEHOLDER_MUNICIPALITY;
+
+  return (
+    <View style={locationStyle.screenBg}>
+      <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
+
+        {/* Lottie */}
+        <View style={locationStyle.lottieSection}>
+          <TutorialLottie
+            source={require("@assets/imagesAlertaMujer/ScTutorial/ubicacion.json")}
+            resizeMode="contain"
+            style={locationStyle.lottie}
+          />
+        </View>
+
+        {/* Card */}
+        <Animated.View style={[{ flex: 1 }, cardAnimStyle]}>
+          <Card title={`${t.tutorial.ubicacion_titulo_1}\n`} titleHighlight={t.tutorial.ubicacion_titulo_2}>
+            <ScrollView
+              style={locationStyle.cardScroll}
+              contentContainerStyle={locationStyle.cardScrollContent}
+              showsVerticalScrollIndicator={false}
+              nestedScrollEnabled
+            >
+              {/* Circular icon + info card */}
+              <View style={locationStyle.headerIconWrap}>
+                <MaterialIcons name="map" size={28} color={LOCATION_COLORS.accent} />
+              </View>
+
+              <View style={locationStyle.infoCard}>
+                <MaterialIcons name="info-outline" size={20} color={LOCATION_COLORS.accent} />
+                <Text style={locationStyle.infoDesc}>
+                  {t.tutorial.ubicacion_ayuda_desc}
+                </Text>
+              </View>
+
+              {/* Validation banner */}
+              {vm.showValidationBanner && (
+                <Animated.View
+                  style={[locationStyle.validationBanner, { transform: [{ translateX: shakeAnim }] }]}
+                >
+                  <MaterialIcons name="warning-amber" size={18} color={LOCATION_COLORS.warningText} />
+                  <Text style={locationStyle.validationBannerText}>
+                    {t.tutorial.ubicacion_validacion_banner}
+                  </Text>
+                </Animated.View>
+              )}
+
+              {/* Department — fixed, it is NO longer an interactive picker */}
+              <View style={locationStyle.fieldLabelRow}>
+                <View style={locationStyle.fieldLabelDot} />
+                <Text style={locationStyle.fieldLabel}>
+                  {t.tutorial.ubicacion_departamento_label.toUpperCase()}
+                </Text>
+              </View>
+              <View style={locationStyle.fixedField}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                  <MaterialIcons name="place" size={16} color={LOCATION_COLORS.accent} />
+                  <Text style={locationStyle.fixedFieldValue}>{vm.department}</Text>
+                </View>
+                <Text style={locationStyle.fixedBadge}>{t.tutorial.ubicacion_fijo_badge}</Text>
+              </View>
+
+              {/* Municipality — still the only real picker */}
+              <View style={locationStyle.fieldLabelRow}>
+                <View style={locationStyle.fieldLabelDot} />
+                <Text style={locationStyle.fieldLabel}>
+                  {t.tutorial.ubicacion_municipio_label.toUpperCase()}
+                </Text>
+              </View>
+              <View style={[
+                locationStyle.pickerWrap,
+                vm.errors.municipality ? locationStyle.pickerWrapError : null,
+              ]}>
+                <Picker
+                  selectedValue={vm.municipality}
+                  onValueChange={vm.setMunicipality}
+                  style={locationStyle.picker}
+                >
+                  <Picker.Item
+                    label={t.tutorial.ubicacion_municipio_placeholder}
+                    value={PLACEHOLDER_MUNICIPALITY}
+                    color={LOCATION_COLORS.placeholder}
+                  />
+                  {vm.municipalitiesHuila.map((municipalityName) => (
+                    <Picker.Item key={municipalityName} label={municipalityName} value={municipalityName} />
+                  ))}
+                </Picker>
+              </View>
+              {vm.errors.municipality && (
+                <View style={locationStyle.errorRow}>
+                  <MaterialIcons name="error-outline" size={13} color={LOCATION_COLORS.errorColor} />
+                  <Text style={locationStyle.errorText}>{vm.errors.municipality}</Text>
+                </View>
+              )}
+
+              <View style={locationStyle.divider} />
+
+              {/* Selection summary */}
+              <View style={locationStyle.fieldLabelRow}>
+                <View style={locationStyle.fieldLabelDot} />
+                <Text style={locationStyle.fieldLabel}>
+                  {t.tutorial.ubicacion_seleccion_titulo.toUpperCase()}
+                </Text>
+              </View>
+
+              <View style={locationStyle.selectionCard}>
+                <View style={locationStyle.selectionRow}>
+                  <MaterialIcons name="map" size={16} color={LOCATION_COLORS.accent} />
+                  <Text style={locationStyle.selectionLabel}>
+                    {t.tutorial.ubicacion_departamento_texto}
+                  </Text>
+                  <Text style={locationStyle.selectionValue}>{vm.department}</Text>
+                </View>
+
+                <View style={locationStyle.selectionRowDivider} />
+
+                <View style={locationStyle.selectionRow}>
+                  <MaterialIcons
+                    name="place"
+                    size={16}
+                    color={municipalityNotSelected ? LOCATION_COLORS.border : LOCATION_COLORS.accent}
+                  />
+                  <Text style={locationStyle.selectionLabel}>
+                    {t.tutorial.ubicacion_municipio_texto}
+                  </Text>
+                  <Text style={[
+                    locationStyle.selectionValue,
+                    municipalityNotSelected && { color: LOCATION_COLORS.placeholder, fontStyle: "italic", fontWeight: "400" },
+                  ]}>
+                    {municipalityNotSelected ? t.tutorial.ubicacion_sin_seleccionar : vm.municipality}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Save button */}
+              <TouchableOpacity
+                onPress={vm.openConfirmation}
+                style={locationStyle.saveBtn}
+                activeOpacity={0.85}
+              >
+                <MaterialIcons name="save" size={18} color="#FFFFFF" />
+                <Text style={locationStyle.saveBtnText}>{t.tutorial.ubicacion_guardar_boton}</Text>
+              </TouchableOpacity>
+
+              {/* Insignia inferior */}
+              <View style={locationStyle.bottomBadge}>
+                <MaterialIcons name="verified-user" size={14} color={LOCATION_COLORS.accent} />
+                <Text style={locationStyle.bottomBadgeText}>{t.tutorial.ubicacion_datos_protegidos}</Text>
+              </View>
+
+            </ScrollView>
+          </Card>
+        </Animated.View>
+
+      </SafeAreaView>
+
+      <ConfirmationModal
+        visible={vm.confirmationModalVisible}
+        department={vm.department}
+        municipality={vm.municipality}
+        onConfirm={vm.confirmLocation}
+        onBack={vm.closeConfirmation}
+        confirmOnly={vm.alreadyConfirmed}
+      />
+    </View>
+  );
+}

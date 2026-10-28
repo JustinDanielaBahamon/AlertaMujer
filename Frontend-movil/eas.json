@@ -1,0 +1,36 @@
+{
+  "cli": {
+    "version": ">= 24.12.1",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal",
+      "environment": "preview",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://alerta-mujer-auth.onrender.com",
+        "EXPO_PUBLIC_ALERT_API_URL": "https://alerta-mujer-alert.onrender.com",
+        "EXPO_PUBLIC_EVIDENCE_API_URL": "https://alerta-mujer-evidence.onrender.com"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "environment": "production",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://alerta-mujer-auth.onrender.com",
+        "EXPO_PUBLIC_ALERT_API_URL": "https://alerta-mujer-alert.onrender.com",
+        "EXPO_PUBLIC_EVIDENCE_API_URL": "https://alerta-mujer-evidence.onrender.com"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

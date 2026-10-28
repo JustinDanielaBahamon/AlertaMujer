@@ -1,0 +1,84 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import api from "../api";
+import { clearLocationQueue, reportLocation } from "../location-reporter.service";
+
+jest.mock("../api", () => ({ __esModule: true, default: { post: jest.fn() } }));
+jest.mock("../devices.service", () => ({ currentDeviceId: () => 4 }));
+
+const post = api.post as jest.Mock;
+const COLA_KEY = "@alerta-mujer:location-queue";
+const leerCola = async () => JSON.parse((await AsyncStorage.getItem(COLA_KEY)) ?? "[]");
+const offline = () => Object.assign(new Error("Network Error"), { response: undefined });
+const rejection = (status: number) => Object.assign(new Error("HTTP"), { response: { status } });
+
+describe("location-reporter.service", () => {
+  beforeEach(async () => {
+    post.mockReset();
+    await AsyncStorage.clear();
+  });
+
+  it("envía la ubicación al backend con coordenadas redondeadas", async () => {
+    post.mockResolvedValue({ data: {} });
+
+    await reportLocation({ latitude: 2.93012345678, longitude: -75.28111111, accuracy: 12.3456, alertaId: 7 });
+
+    expect(post).toHaveBeenCalledTimes(1);
+    const [url, body] = post.mock.calls[0];
+    expect(url).toBe("/api/location-logs");
+    expect(body).toMatchObject({ latitude: 2.930123, longitude: -75.281111, accuracy: 12.35, alertId: 7, deviceId: 4 });
+    expect(body.recordedAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}$/); // UTC without a zone
+  });
+
+  it("guarda el punto en cola si no hay conexión", async () => {
+    post.mockRejectedValue(offline());
+
+    await reportLocation({ latitude: 1, longitude: 2 });
+
+    const cola = await leerCola();
+    expect(cola).toHaveLength(1);
+    expect(cola[0]).toMatchObject({ latitude: 1, longitude: 2 });
+  });
+
+  it("no encola los puntos que el servidor rechaza (4xx)", async () => {
+    post.mockRejectedValue(rejection(400));
+
+    await reportLocation({ latitude: 1, longitude: 2 });
+
+    expect(await leerCola()).toHaveLength(0);
+  });
+
+  it("al volver la conexión reenvía la cola con la hora original y la vacía", async () => {
+    post.mockRejectedValueOnce(offline());
+    await reportLocation({ latitude: 1, longitude: 1 });
+    const originalTime = (await leerCola())[0].recordedAt;
+
+    post.mockResolvedValue({ data: {} });
+    await reportLocation({ latitude: 2, longitude: 2 });
+
+    // Calls: 1) point 1 fails, 2) point 2 is sent, 3) point 1 is resent from the queue
+    const deliveriesPoint1 = post.mock.calls.filter(([, body]) => body.latitude === 1);
+    expect(deliveriesPoint1).toHaveLength(2);
+    expect(post.mock.calls.at(-1)?.[1]).toMatchObject({ latitude: 1, recordedAt: originalTime });
+    expect(await leerCola()).toHaveLength(0);
+  });
+
+  it("limita la cola a los 100 puntos más recientes", async () => {
+    post.mockRejectedValue(offline());
+
+    for (let i = 0; i < 105; i++) await reportLocation({ latitude: i, longitude: 0 });
+
+    const cola = await leerCola();
+    expect(cola).toHaveLength(100);
+    expect(cola[0].latitude).toBe(5);
+    expect(cola.at(-1).latitude).toBe(104);
+  });
+
+  it("limpiarColaUbicaciones borra la cola (cierre de sesión)", async () => {
+    post.mockRejectedValue(offline());
+    await reportLocation({ latitude: 1, longitude: 1 });
+
+    await clearLocationQueue();
+
+    expect(await leerCola()).toHaveLength(0);
+  });
+});
